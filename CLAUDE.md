@@ -223,19 +223,26 @@ Known planned (not yet implemented — not regressions):
 
 | What | Where |
 |---|---|
-| Mac source | `~/Documents/Codex/2026-06-02/files-mentioned-by-the-user-pasted/work/fridgeproof/` |
-| Server source (original) | `/var/www/fridgeproof` (physical dir — do not rename) |
+| **Canonical local source** | `~/projects/franchisetech/` ← work here |
+| Local backup (live release) | `~/franchisetech-backups/franchisetech-live-20260617_143856/` |
+| Server source (legacy path) | `/var/www/fridgeproof` (physical dir — do not rename) |
 | Live releases | `/var/www/fp-releases/releases/YYYYMMDD_HHMMSS/` |
 | Current live symlink | `/var/www/fp-releases/current` |
-| Good known release | `20260617_122603` |
+| Accepted live release | `20260617_143856` |
 | Deploy script (server) | `/var/www/fp-releases/build.sh` |
 | Rollback script (server) | `/var/www/fp-releases/rollback.sh` |
 | Env file | `/var/www/fridgeproof/.env.local` (symlinked into each release) |
 
-When the Mac source is stale, pull from server:
+**All future work must happen in `~/projects/franchisetech/` (proper git repo).**
+The server is the deployment target only — not an editing environment.
+
+If the server has a hotfix not yet in local repo, pull it back before next deploy:
 ```bash
-rsync -av do-server:/var/www/fridgeproof/<path>/ <local-path>/
+rsync -av do-server:/var/www/fp-releases/current/<path> ~/projects/franchisetech/<path>
+cd ~/projects/franchisetech && git add <path> && git commit -m "pull: hotfix from server"
 ```
+
+No remote configured yet. Push to GitHub/GitLab to complete off-site backup.
 
 ---
 
