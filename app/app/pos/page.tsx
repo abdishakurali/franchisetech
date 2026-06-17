@@ -258,7 +258,7 @@ export default async function PosPage() {
             <p className="mt-1 text-blue-700">Opening cash is the cash float in the drawer before selling.</p>
           </PageHint>
 
-          <OpenTillForm currencySymbol={currencySymbol} currency={currency} orgName={orgName} userName={userName} fiscalNet={fiscalNet} isRO={isRO} />
+          <OpenTillForm currencySymbol={currencySymbol} currency={currency} orgName={orgName} userName={userName} fiscalNet={fiscalNet} isRO={isRO} defaultCash={Number(lastClosed?.counted_cash ?? lastClosed?.expected_cash ?? 0) || undefined} />
 
           {/* Last closed session summary */}
           {lastClosed && (

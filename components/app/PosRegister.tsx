@@ -116,15 +116,15 @@ function ProductImageCompact({ src, alt, cfg }: { src: string | null | undefined
   if (!src || failed) {
     return (
       <div
-        className={`flex h-16 w-full shrink-0 items-center justify-center ${cfg.bg} ${cfg.text}`}
+        className={`flex h-20 w-full shrink-0 items-center justify-center ${cfg.bg} ${cfg.text}`}
         style={cfg.style}
       >
-        <PlaceholderIcon icon={cfg.icon} className="h-6 w-6 opacity-40" />
+        <PlaceholderIcon icon={cfg.icon} className="h-7 w-7 opacity-40" />
       </div>
     );
   }
   return (
-    <div className="h-16 w-full shrink-0 overflow-hidden bg-slate-100">
+    <div className="h-20 w-full shrink-0 overflow-hidden bg-slate-100">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} className="h-full w-full object-cover" onError={() => setFailed(true)} />
     </div>
@@ -558,23 +558,22 @@ export function PosRegister({
     <div className="flex-1 lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
       {/* Left: Products column */}
       <div className="min-w-0 lg:flex-1 lg:flex lg:flex-col lg:overflow-hidden" style={{display: "flex", flexDirection: "column", overflow: "hidden", flex: "1 1 auto", minWidth: 0}}>
-        {/* Products toolbar: title, categories, search */}
-        <div className="space-y-3 p-3 sm:p-4 lg:px-4 lg:pt-4 lg:pb-3 lg:flex-none" style={{flexShrink: 0}}>
-        <h1 className="text-2xl font-semibold text-slate-950">POS</h1>
-        <div className="-mx-3 flex gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+        {/* Products toolbar: categories, search */}
+        <div className="space-y-2 p-2 sm:p-3 lg:px-4 lg:pt-3 lg:pb-2 lg:flex-none" style={{flexShrink: 0}}>
+        <div className="-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
           <button onClick={() => setActiveCategory("all")}
-            className={`min-h-10 shrink-0 rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${activeCategory === "all" ? "bg-blue-600 text-white border-blue-600" : "bg-white hover:bg-slate-50"}`}>
+            className={`min-h-11 shrink-0 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${activeCategory === "all" ? "bg-blue-600 text-white border-blue-600" : "bg-white hover:bg-slate-50"}`}>
             All
           </button>
           {visibleCategories.map((c) => (
             <button key={c.id} onClick={() => setActiveCategory(c.id)}
-              className={`min-h-10 shrink-0 rounded-lg border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${activeCategory === c.id ? "text-white border-transparent" : "bg-white hover:bg-slate-50"}`}
+              className={`min-h-11 shrink-0 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${activeCategory === c.id ? "text-white border-transparent" : "bg-white hover:bg-slate-50"}`}
               style={activeCategory === c.id ? { backgroundColor: c.color ?? "#2563eb" } : undefined}>
               {c.name}
             </button>
           ))}
         </div>
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products…" className="max-w-md" aria-label="Search products" />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products…" className="max-w-none" aria-label="Search products" />
         </div>
         {/* Scrollable products area */}
         <div className="p-3 sm:p-4 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:px-4 lg:py-4" style={{WebkitOverflowScrolling: "touch", flex: "1 1 auto", minHeight: 0, overflowY: "auto"}}>
@@ -838,9 +837,9 @@ export function PosRegister({
                 <p className="text-sm font-medium text-slate-900 truncate">{item.product_name}</p>
               </div>
               <div className="flex items-center gap-1">
-                <button type="button" onClick={() => setQty(item.product_id, item.quantity - 1)} aria-label="Decrease quantity" className="flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">−</button>
+                <button type="button" onClick={() => setQty(item.product_id, item.quantity - 1)} aria-label="Decrease quantity" className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">−</button>
                 <span className="w-7 text-center text-sm font-semibold tabular-nums">{item.quantity}</span>
-                <button type="button" onClick={() => setQty(item.product_id, item.quantity + 1)} aria-label="Increase quantity" className="flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">+</button>
+                <button type="button" onClick={() => setQty(item.product_id, item.quantity + 1)} aria-label="Increase quantity" className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">+</button>
               </div>
               <input
                 type="number"
@@ -895,7 +894,7 @@ export function PosRegister({
           {safeTipAmount > 0 && <div className="flex justify-between text-xs text-green-700"><span>Tip</span><span>{money(safeTipAmount)}</span></div>}
           <div className="flex justify-between items-baseline">
             <span className="text-base font-semibold text-slate-700">Total</span>
-            <span className="text-2xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</span>
+            <span className="text-3xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</span>
           </div>
           {/* Payment methods — simple picker or split summary */}
           <input type="hidden" name="payment_method_id" value={paymentMethodId} />
@@ -907,7 +906,7 @@ export function PosRegister({
                   key={m.id}
                   type="button"
                   onClick={() => setPaymentMethodId(m.id)}
-                  className={`min-h-11 rounded-lg border px-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${selected ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                  className={`min-h-12 rounded-lg border px-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${selected ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
                 >
                   {paymentLabel(m.type, m.name)}
                 </button>
@@ -1150,7 +1149,7 @@ export function PosRegister({
             </div>
           )}
           <Button ref={chargeRef} type="submit" disabled={!cart.length || !paymentMethods.length || salePending || cashUnderPaid || (features.splitPayments && activeSplitPayments.length > 0 && splitPaid + 0.0001 < totalDue)}
-            className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed">
+            className="h-16 w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed">
             {salePending ? "Processing…" : cashUnderPaid ? (isRO ? "Sumă insuficientă" : "Insufficient cash") : !paymentMethods.length ? "Set up payment methods in Settings" : cart.length === 0 ? "Add items to charge" : `Charge ${money(totalDue)}`}
           </Button>
         </div>

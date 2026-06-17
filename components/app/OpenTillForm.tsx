@@ -18,11 +18,13 @@ interface Props {
   fiscalNet?: BrowserFiscalConfig | null;
   /** True when the organisation's country is Romania — enables txt slip download */
   isRO?: boolean;
+  /** Pre-fill with last session's counted cash (or expected cash) */
+  defaultCash?: number | null;
 }
 
-export function OpenTillForm({ currencySymbol, currency, orgName, userName, fiscalNet, isRO = false }: Props) {
+export function OpenTillForm({ currencySymbol, currency, orgName, userName, fiscalNet, isRO = false, defaultCash }: Props) {
   const router = useRouter();
-  const [openingCash, setOpeningCash] = useState("");
+  const [openingCash, setOpeningCash] = useState(defaultCash != null && defaultCash > 0 ? defaultCash.toFixed(2) : "");
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [lastTxt, setLastTxt] = useState<{ filename: string; content: string } | null>(null);

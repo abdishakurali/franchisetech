@@ -1,14 +1,11 @@
 import Link from "next/link";
 import { startOfDay, startOfMonth, startOfWeek, subDays, subWeeks, subMonths } from "date-fns";
-import { ArrowRight, Banknote, BarChart3, Calculator, FileText, Package, Receipt, ShoppingBag, ShoppingCart, TrendingUp, HeartPulse } from "lucide-react";
+import { ArrowRight, Banknote, BarChart3, Calculator, FileText, Package, Receipt, ShoppingBag, ShoppingCart, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
-import { PageHint } from "@/components/app/PageHint";
 import { DateFilter } from "@/components/app/DateFilter";
-import { calculateCustomerHealth, getTrialNudge } from "@/lib/customer-success";
-import { getSubscriptionStatus } from "@/lib/billing/subscription";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -55,7 +52,7 @@ export default async function DashboardPage({ searchParams }: Props) {
   }
 
   const { supabase, orgId, currency } = await getKitchenOpsContext();
-  const [currentTx, prevTx, sessionResult, productCount, recipeCount, lowStockResult, topItems, paymentMethods, totalSales, lastSale, org, subStatus] = await Promise.all([
+  const [currentTx, prevTx, sessionResult, productCount, recipeCount, lowStockResult, topItems] = await Promise.all([
     supabase
       .from("pos_transactions")
       .select("total,tip_amount,payment_methods(type)")
@@ -74,11 +71,6 @@ export default async function DashboardPage({ searchParams }: Props) {
     supabase.from("recipes").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
     supabase.from("products").select("id,name,current_stock_qty,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true"),
     supabase.from("pos_transaction_items").select("product_name,gross_amount,pos_transactions!inner(organisation_id,status)").eq("pos_transactions.organisation_id", orgId).eq("pos_transactions.status", "completed"),
-    supabase.from("payment_methods").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-    supabase.from("pos_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "completed"),
-    supabase.from("pos_transactions").select("created_at").eq("organisation_id", orgId).eq("status", "completed").order("created_at", { ascending: false }).limit(1).maybeSingle(),
-    supabase.from("organisations").select("created_at,trial_ends_at").eq("id", orgId).maybeSingle(),
-    getSubscriptionStatus(orgId).catch(() => null),
   ]);
 
   const currentTotal = (currentTx.data ?? []).reduce((s, t) => s + Number(t.total ?? 0), 0);
@@ -100,29 +92,6 @@ export default async function DashboardPage({ searchParams }: Props) {
   const topProduct = [...productTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "No sales yet";
   const lowStock = (lowStockResult.data ?? []).filter((p) => Number(p.reorder_level ?? 0) > 0 && Number(p.current_stock_qty ?? 0) <= Number(p.reorder_level ?? 0));
   const setupDone = (productCount.count ?? 0) > 0 && (recipeCount.count ?? 0) > 0;
-  const health = calculateCustomerHealth({
-    productCount: productCount.count ?? 0,
-    paymentMethodCount: paymentMethods.count ?? 0,
-    hasOpenTill: Boolean(sessionResult.data),
-    totalSalesCount: totalSales.count ?? 0,
-    lastSaleAt: lastSale.data?.created_at ?? null,
-    reportViewed: null,
-    trialEndsAt: org.data?.trial_ends_at ?? null,
-    subscriptionState: subStatus?.state ?? null,
-    signupAt: org.data?.created_at ?? null,
-  });
-  const trialNudge = getTrialNudge({
-    productCount: productCount.count ?? 0,
-    paymentMethodCount: paymentMethods.count ?? 0,
-    hasOpenTill: Boolean(sessionResult.data),
-    totalSalesCount: totalSales.count ?? 0,
-    lastSaleAt: lastSale.data?.created_at ?? null,
-    reportViewed: null,
-    trialEndsAt: org.data?.trial_ends_at ?? null,
-    subscriptionState: subStatus?.state ?? null,
-    signupAt: org.data?.created_at ?? null,
-  });
-  const healthTone = health.status === "Green" ? "border-green-200 bg-green-50 text-green-700" : health.status === "Red" ? "border-red-200 bg-red-50 text-red-700" : "border-amber-200 bg-amber-50 text-amber-700";
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -137,23 +106,6 @@ export default async function DashboardPage({ searchParams }: Props) {
           <Link href="/app/pos"><Button className="bg-blue-600 hover:bg-blue-700 text-white">Open POS</Button></Link>
         </div>
       </div>
-
-      <Card className={`border ${healthTone}`}>
-        <CardContent className="flex flex-col gap-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <HeartPulse className="mt-0.5 h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-semibold">Customer health: {health.status} · {health.setupPercent}% set up</p>
-              <p className="mt-1 text-sm opacity-80">{trialNudge}</p>
-              <p className="mt-1 text-xs opacity-70">Next action: {health.recommendedAction}</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link href="/app/setup-checklist"><Button size="sm" variant="outline">Setup guide</Button></Link>
-            <Link href="/help/first-15-minutes-checklist"><Button size="sm" variant="outline">Help checklist</Button></Link>
-          </div>
-        </CardContent>
-      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Card>
