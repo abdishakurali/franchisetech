@@ -58,6 +58,196 @@ const EN_TAX_RATES = [
   { label: "23% VAT", value: "23" },
 ];
 
+// ── Supplier searchable combobox ──────────────────────────────────────────────
+function SupplierCombobox({ suppliers, isRO }: { suppliers: Supplier[]; isRO: boolean }) {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState("");
+
+  const filtered = suppliers
+    .filter((s) => s.name.toLowerCase().includes(query.toLowerCase()))
+    .slice(0, 10);
+
+  function handleSelect(s: Supplier) {
+    setSelectedId(s.id);
+    setQuery(s.name);
+    setOpen(false);
+  }
+  function handleClear() {
+    setSelectedId("");
+    setQuery("");
+    setOpen(false);
+  }
+
+  return (
+    <div className="relative mt-1">
+      <input type="hidden" name="supplier_id" value={selectedId} />
+      <div className="relative">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (selectedId) setSelectedId("");
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 150)}
+          placeholder={isRO ? "Caută furnizor…" : "Search supplier…"}
+          autoComplete="off"
+          className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 pr-8 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+            aria-label={isRO ? "Șterge furnizor" : "Clear supplier"}
+          >✕</button>
+        )}
+      </div>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+          <button
+            type="button"
+            onMouseDown={handleClear}
+            className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-slate-100 italic text-slate-400"
+          >
+            {isRO ? "— fără furnizor —" : "— no supplier —"}
+          </button>
+          {filtered.length > 0 ? (
+            filtered.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onMouseDown={() => handleSelect(s)}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-slate-50 last:border-0 ${s.id === selectedId ? "text-blue-700 font-medium bg-blue-50" : "text-slate-800"}`}
+              >
+                {s.name}
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-3 text-xs text-slate-500">
+              {query && <span>{isRO ? "Niciun furnizor găsit. " : "No supplier found. "}</span>}
+              <Link href="/app/suppliers/new" className="text-blue-600 hover:underline">
+                {isRO ? "Adaugă furnizorul din pagina Furnizori →" : "Add suppliers from the Suppliers page →"}
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Per-line purchase item searchable combobox ────────────────────────────────
+function PurchaseItemCombobox({
+  products,
+  productId,
+  isRO,
+  itemTypeLabels,
+  onSelect,
+}: {
+  products: Product[];
+  productId: string;
+  isRO: boolean;
+  itemTypeLabels: Record<string, string>;
+  onSelect: (id: string) => void;
+}) {
+  const [query, setQuery] = useState(() => products.find((p) => p.id === productId)?.name ?? "");
+  const [open, setOpen] = useState(false);
+
+  const filtered = products
+    .filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
+    .slice(0, 12);
+
+  function getTypeLabel(p: Product) {
+    if (p.item_type && itemTypeLabels[p.item_type]) return itemTypeLabels[p.item_type];
+    if (p.is_ingredient) return itemTypeLabels["ingredient"];
+    return "";
+  }
+
+  function handleSelect(p: Product) {
+    onSelect(p.id);
+    setQuery(p.name);
+    setOpen(false);
+  }
+  function handleClear() {
+    onSelect("");
+    setQuery("");
+    setOpen(false);
+  }
+
+  return (
+    <div className="relative">
+      <input type="hidden" name="product_id" value={productId} />
+      <div className="relative">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (productId) onSelect("");
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onBlur={() =>
+            setTimeout(() => {
+              setOpen(false);
+              if (!productId) setQuery("");
+            }, 150)
+          }
+          placeholder={isRO ? "Caută articol…" : "Search item…"}
+          autoComplete="off"
+          className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 pr-7 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+            aria-label={isRO ? "Șterge articol" : "Clear item"}
+          >✕</button>
+        )}
+      </div>
+      {open && (
+        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-60 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+          {filtered.length > 0 ? (
+            filtered.map((p) => {
+              const typeLabel = getTypeLabel(p);
+              const isSelected = p.id === productId;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onMouseDown={() => handleSelect(p)}
+                  className={`w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-slate-50 last:border-0 ${isSelected ? "bg-blue-50" : ""}`}
+                >
+                  <p className={`text-sm font-medium ${isSelected ? "text-blue-700" : "text-slate-900"}`}>{p.name}</p>
+                  {(typeLabel || p.unit_of_measure) && (
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {[typeLabel, p.unit_of_measure].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </button>
+              );
+            })
+          ) : (
+            <div className="px-3 py-3 text-xs text-slate-500">
+              {isRO ? "Niciun articol găsit. " : "No item found. "}
+              <Link href="/app/products/new" className="text-blue-600 hover:underline">
+                {isRO
+                  ? "Adaugă ingredient, marfă sau consumabil din Produse →"
+                  : "Add an ingredient, goods item, or supply from Products →"}
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function PurchaseForm({
   suppliers,
   products,
@@ -115,12 +305,6 @@ export function PurchaseForm({
     return new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" }).format(v);
   };
 
-  const getItemTypeLabel = (p: Product) => {
-    if (p.item_type && itemTypeLabels[p.item_type]) return itemTypeLabels[p.item_type];
-    if (p.is_ingredient) return itemTypeLabels["ingredient"];
-    return "";
-  };
-
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       <div className="flex items-center gap-3">
@@ -152,15 +336,7 @@ export function PurchaseForm({
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
                 <Label>{isRO ? "Furnizor" : "Supplier"}</Label>
-                <select name="supplier_id" className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
-                  <option value="">{isRO ? "— fără furnizor —" : "— no supplier —"}</option>
-                  {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-                {suppliers.length === 0 && (
-                  <Link href="/app/suppliers/new" className="mt-1 block text-xs text-blue-600 hover:underline">
-                    {isRO ? "Adaugă furnizor →" : "Add a supplier first →"}
-                  </Link>
-                )}
+                <SupplierCombobox suppliers={suppliers} isRO={isRO} />
               </div>
               <div>
                 <Label>{isRO ? "Data cumpărăturii" : "Purchase date"}</Label>
@@ -194,19 +370,13 @@ export function PurchaseForm({
                 const selectedProduct = products.find((p) => p.id === line.product_id);
                 return (
                   <div key={line.id} className="grid grid-cols-[1fr_80px_90px_90px_80px_80px_36px] gap-2 items-center">
-                    <select
-                      name="product_id"
-                      value={line.product_id}
-                      onChange={(e) => onProductChange(line.id, e.target.value)}
-                      className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm"
-                    >
-                      <option value="">{isRO ? "— selectează —" : "— select item —"}</option>
-                      {products.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}{getItemTypeLabel(p) ? ` [${getItemTypeLabel(p)}]` : ""}
-                        </option>
-                      ))}
-                    </select>
+                    <PurchaseItemCombobox
+                      products={products}
+                      productId={line.product_id}
+                      isRO={isRO}
+                      itemTypeLabels={itemTypeLabels}
+                      onSelect={(id) => onProductChange(line.id, id)}
+                    />
                     <select
                       name="unit_of_measure"
                       value={line.unit_of_measure}
