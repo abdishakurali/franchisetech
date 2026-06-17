@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 90" fill="none">
+  <!-- Network/hub icon -->
+  <!-- Bottom-left large circle -->
+  <circle cx="30" cy="62" r="13" fill="#1a3ab8"/>
+  <!-- Line from big circle up to central node -->
+  <line x1="30" y1="49" x2="47" y2="30" stroke="#1a3ab8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Central small square (rotated = diamond) -->
+  <rect x="41" y="22" width="13" height="13" rx="1" fill="#1a3ab8" transform="rotate(45 47.5 28.5)"/>
+  <!-- Line from central diamond right to right node -->
+  <line x1="56" y1="28" x2="76" y2="28" stroke="#1a3ab8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Right small square -->
+  <rect x="70" y="22" width="13" height="13" rx="1" fill="#1a3ab8"/>
+  <!-- Line from central diamond down-right to bottom node -->
+  <line x1="52" y1="35" x2="64" y2="52" stroke="#1a3ab8" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Bottom-right small square -->
+  <rect x="58" y="50" width="13" height="13" rx="1" fill="#1a3ab8"/>
+
+  <!-- "Franchise Tech" text -->
+  <text x="102" y="57" font-family="'Arial Black', 'Arial Bold', Arial, sans-serif" font-weight="900" font-size="34" letter-spacing="0.5" fill="#1a3ab8">Franchise  Tech</text>
+</svg>

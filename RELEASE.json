@@ -1,0 +1,6 @@
+{
+  "release": "20260617_143856",
+  "git_sha": "cba9ec9e38df6b2368942f83bce8e4e74b3a149c",
+  "git_message": "ops: add Claude Code operating framework, deploy guardrails, and scripts",
+  "deployed_at": "2026-06-17T13:38:59Z"
+}
