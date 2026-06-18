@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { addCustomerFromPos, closePosSession, completeSaleReturn, posCashMovement, voidTransaction } from "@/app/actions/kitchenops";
 import { runZReport } from "@/app/actions/fiscalnet";
 import { fiscalBrowserReceipt, fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
@@ -12,6 +12,25 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Banknote, Coffee, Droplets, LockKeyhole, Package, ReceiptText, RefreshCcw, UserPlus, Users, Utensils } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
 import { downloadSlipAsTxt, cashInTxt, cashOutTxt } from "@/lib/pos-print";
+import { PosCashKeypad } from "@/components/app/PosCashKeypad";
+import { friendlySaleError, paymentTypeLabel, posLocale, posText } from "@/lib/pos-i18n";
+import {
+  readCartBackupFromStorage,
+  writeCartBackupToStorage,
+  clearCartBackupFromStorage,
+} from "@/lib/pos-cart-backup";
+import { holdCurrentSale, listHeldSales, resumeHeldSale, type HeldSale } from "@/lib/pos-held-sales";
+import {
+  dismissPendingFiscal,
+  enqueueOfflineSale,
+  formDataToPayload,
+  isBrowserOnline,
+  listOfflineQueue,
+  listPendingSync,
+  markOfflineSaleSynced,
+  payloadToFormData,
+  type QueuedSale,
+} from "@/lib/pos-offline-queue";
 
 type Product = {
   id: string; name: string; sale_price: number | string; vat_rate?: number | string | null;
@@ -29,7 +48,7 @@ type Customer = { id: string; name: string; phone: string | null; email: string 
 type Transaction = { id: string; transaction_number: string; customer_name: string | null; sold_at: string | null; total: number | string; status: string; payment_methods?: { name?: string | null; type?: string | null } | null };
 type PosSummary = { openingCash: number; cashSales: number; cardSales: number; expectedCash: number; txCount: number; topProduct: string | null };
 type FiscalDownloadPayload = { ok: boolean; message: string; filename?: string; content?: string; status?: string; mode?: string };
-
+type CheckoutStep = "order" | "payment";
 type PlaceholderCfg = { bg: string; text: string; icon: "coffee" | "drink" | "food" | "package"; style?: React.CSSProperties };
 
 const PLACEHOLDERS: Record<string, PlaceholderCfg> = {
@@ -56,14 +75,6 @@ async function downloadFiscalPayload(result: FiscalDownloadPayload, label: strin
 }
 
 function money(v: number, cur = "EUR") { if (cur === "RON") return `${v.toFixed(2)} lei`; return new Intl.NumberFormat("en-IE",{style:"currency",currency: cur || "EUR"}).format(v); }
-
-function paymentLabel(type: string, name: string) {
-  if (type === "cash") return "Cash";
-  if (type === "card") return "Card";
-  if (type === "online") return "Online";
-  if (type === "other") return "Other";
-  return name || "Payment";
-}
 
 function getPhCfg(p: Product): PlaceholderCfg {
   if (p.placeholder_type && PLACEHOLDERS[p.placeholder_type]) return PLACEHOLDERS[p.placeholder_type];
@@ -421,21 +432,9 @@ export function PosRegister({
 }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
-  // Lazy initializer: restore cart from sessionStorage if the page was reloaded mid-payment
-  // (e.g. after a server-action build mismatch). Runs once before first render — no effect needed.
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    if (!sessionId) return [];
-    try {
-      const raw = sessionStorage.getItem("pos_cart_backup");
-      if (!raw) return [];
-      const backup = JSON.parse(raw) as { cart: CartItem[]; sessionId: string };
-      if (backup.sessionId === sessionId && Array.isArray(backup.cart) && backup.cart.length > 0) {
-        sessionStorage.removeItem("pos_cart_backup");
-        return backup.cart;
-      }
-    } catch {}
-    return [];
-  });
+  const initialBackup = useMemo(() => readCartBackupFromStorage(sessionId), [sessionId]);
+  const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("order");
+  const [cart, setCart] = useState<CartItem[]>(() => initialBackup?.cart ?? []);
   const [paymentMethodId, setPaymentMethodId] = useState(paymentMethods[0]?.id ?? "");
   const router = useRouter();
   // Currency-aware formatter (RON for Romania, EUR for Ireland)
@@ -445,7 +444,9 @@ export function PosRegister({
       currency: currency || "EUR",
     }).format(v);
   const chargeRef = useRef<HTMLButtonElement>(null);
-  const [discountPct, setDiscountPct] = useState(0);
+  const locale = posLocale(isRO);
+  const t = posText[locale];
+  const [discountPct, setDiscountPct] = useState(() => initialBackup?.discountPct ?? 0);
   const [saleStatus, setSaleStatus] = useState<{ ok: boolean; msg: string; transactionId?: string } | null>(null);
   const [lastFiscalTxt, setLastFiscalTxt] = useState<{ filename: string; content: string } | null>(null);
   const [salePending, setSalePending] = useState(false);
@@ -467,6 +468,64 @@ export function PosRegister({
   const [tipOpen, setTipOpen] = useState(false);
   const [splitOpen, setSplitOpen] = useState(false);
   const [cashReceived, setCashReceived] = useState<number | "">("");
+  const [heldSales, setHeldSales] = useState<HeldSale[]>(() => listHeldSales());
+  const [heldOpen, setHeldOpen] = useState(false);
+  const [offlineQueue, setOfflineQueue] = useState<QueuedSale[]>(() => listOfflineQueue());
+  const syncingOfflineRef = useRef(false);
+
+  const pendingSyncSales = useMemo(
+    () => offlineQueue.filter((q) => q.status === "pending_sync"),
+    [offlineQueue]
+  );
+  const pendingFiscalSales = useMemo(
+    () => offlineQueue.filter((q) => q.status === "pending_fiscal"),
+    [offlineQueue]
+  );
+  const lockLineTotalEdit = Boolean(fiscalNet?.enabled);
+
+  useEffect(() => {
+    async function flushOfflineQueue() {
+      if (!isBrowserOnline() || syncingOfflineRef.current) return;
+      const pending = listPendingSync();
+      if (!pending.length) return;
+      syncingOfflineRef.current = true;
+      setSaleStatus({ ok: true, msg: t.offlineSyncing });
+      let synced = 0;
+      for (const entry of pending) {
+        try {
+          const res = await completeSaleReturn(payloadToFormData(entry.payload));
+          if (res.ok && res.transactionId) {
+            markOfflineSaleSynced(entry.id, res.transactionId);
+            synced++;
+          } else {
+            break;
+          }
+        } catch {
+          break;
+        }
+      }
+      syncingOfflineRef.current = false;
+      setOfflineQueue(listOfflineQueue());
+      if (synced > 0) {
+        setSaleStatus({ ok: true, msg: t.offlineSyncDone(synced) });
+        setTimeout(() => setSaleStatus(null), 4000);
+      }
+    }
+    window.addEventListener("online", flushOfflineQueue);
+    flushOfflineQueue();
+    return () => window.removeEventListener("online", flushOfflineQueue);
+  }, [t.offlineSyncDone, t.offlineSyncing]);
+
+  function resetCartAfterSale() {
+    setCart([]);
+    setDiscountPct(0);
+    setTipAmount(0);
+    setSplitPayments([]);
+    setSelectedCustomer(null);
+    setCashReceived("");
+    setCheckoutStep("order");
+    clearCartBackupFromStorage();
+  }
 
   const posProducts = useMemo(() =>
     products.filter((p) => p.available_in_pos !== false && p.is_ingredient !== true), [products]);
@@ -554,16 +613,37 @@ export function PosRegister({
       }))
     );
 
+  const vatLabel = isRO ? t.inclTva : t.inclVat;
+  const canPay = cart.length > 0 && paymentMethods.length > 0;
+  const chargeDisabled =
+    !cart.length ||
+    !paymentMethods.length ||
+    salePending ||
+    cashUnderPaid ||
+    (features.splitPayments && activeSplitPayments.length > 0 && splitPaid + 0.0001 < totalDue);
+
+  function goToPayment() {
+    if (!canPay) return;
+    setCheckoutStep("payment");
+    if (selectedPaymentType !== "cash") setCashReceived("");
+  }
+
+  function backToOrder() {
+    setCheckoutStep("order");
+    setSaleStatus(null);
+  }
+
   return (
     <div className="flex-1 lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
-      {/* Left: Products column */}
+      {/* Left: Products column — order step only */}
+      {checkoutStep === "order" && (
       <div className="min-w-0 lg:flex-1 lg:flex lg:flex-col lg:overflow-hidden" style={{display: "flex", flexDirection: "column", overflow: "hidden", flex: "1 1 auto", minWidth: 0}}>
         {/* Products toolbar: categories, search */}
         <div className="space-y-2 p-2 sm:p-3 lg:px-4 lg:pt-3 lg:pb-2 lg:flex-none" style={{flexShrink: 0}}>
         <div className="-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
           <button onClick={() => setActiveCategory("all")}
             className={`min-h-11 shrink-0 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${activeCategory === "all" ? "bg-blue-600 text-white border-blue-600" : "bg-white hover:bg-slate-50"}`}>
-            All
+            {t.allCategories}
           </button>
           {visibleCategories.map((c) => (
             <button key={c.id} onClick={() => setActiveCategory(c.id)}
@@ -573,7 +653,7 @@ export function PosRegister({
             </button>
           ))}
         </div>
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search products…" className="max-w-none" aria-label="Search products" />
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.searchProducts} className="max-w-none" aria-label={t.searchProducts} />
         </div>
         {/* Scrollable products area */}
         <div className="p-3 sm:p-4 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:px-4 lg:py-4" style={{WebkitOverflowScrolling: "touch", flex: "1 1 auto", minHeight: 0, overflowY: "auto"}}>
@@ -611,7 +691,7 @@ export function PosRegister({
         {/* pos-utility-bar */}
         <div className="border-t border-slate-200 bg-white px-3 py-2 sm:px-4 overflow-x-auto" style={{WebkitOverflowScrolling: "touch", flexShrink: 0}}>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" className="h-11 px-4 shrink-0" onClick={() => setCart([])}>New sale</Button>
+            <Button type="button" variant="outline" className="h-11 px-4 shrink-0" onClick={() => { setCart([]); setCheckoutStep("order"); }}>New sale</Button>
 
             {/* Customers sheet */}
             <Sheet>
@@ -741,17 +821,16 @@ export function PosRegister({
           </div>
         </div>
       </div>
+      )}
 
-      {/* Right: Cart */}
+      {/* Right: Cart (order) or Payment screen */}
       <form onSubmit={async (e) => {
         e.preventDefault();
-        if (salePending) return;
+        if (checkoutStep !== "payment" || salePending) return;
         setSalePending(true);
         setSaleStatus(null);
         setLastFiscalTxt(null);
           const fd = new FormData(e.currentTarget);
-          // Preserve cart before network call — restored if the page reloads before completion
-          try { sessionStorage.setItem("pos_cart_backup", JSON.stringify({ cart, sessionId })); } catch {}
           if (features.splitPayments) {
             fd.set("split_payments_json", JSON.stringify(activeSplitPayments.map((row) => {
               const method = paymentMethods.find((m) => m.id === row.payment_method_id);
@@ -764,9 +843,28 @@ export function PosRegister({
             })));
           }
           try {
+          if (!isBrowserOnline()) {
+            enqueueOfflineSale(
+              formDataToPayload(fd),
+              t.offlineQueueLabel(cart.length, money(totalDue))
+            );
+            resetCartAfterSale();
+            setOfflineQueue(listOfflineQueue());
+            setSaleStatus({ ok: true, msg: t.offlineQueued });
+            setSalePending(false);
+            return;
+          }
+          writeCartBackupToStorage({
+            cart,
+            sessionId: sessionId ?? "",
+            checkoutStep,
+            paymentMethodId,
+            cashReceived,
+            discountPct,
+          });
           const res = await completeSaleReturn(fd);
           if (!res.ok) {
-            setSaleStatus({ ok: false, msg: res.error });
+            setSaleStatus({ ok: false, msg: friendlySaleError(res.error, isRO) });
             setSalePending(false);
             return;
           }
@@ -775,13 +873,10 @@ export function PosRegister({
             const fnRes = await fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType);
             if (fnRes.filename && fnRes.content) setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
             console.info("[FiscalNet] receipt browser result", { ok: fnRes.ok, message: fnRes.message, mode: fiscalNet.connectionMode });
-            setSaleStatus({ ok: fnRes.ok, msg: fnRes.ok ? `✓ Vândut ${money(res.total)} — ${fnRes.message}` : `✓ Vânzare salvată | ⚠️ FiscalNet: ${fnRes.message}`, transactionId: res.transactionId });
+            setSaleStatus({ ok: fnRes.ok, msg: fnRes.ok ? t.saleSavedFiscal(money(res.total), fnRes.message) : t.saleSavedFiscalWarn(fnRes.message), transactionId: res.transactionId });
           } else {
-            // Show why FiscalNet didn't fire (mock mode, not RO, or disabled)
             const mockActive = fiscalNet?.enabled && fiscalNet?.mockMode;
-            const saleMsg = mockActive
-              ? `✓ Vânzare ${money(res.total)} salvată. ⚠️ Simulare activă — bon fiscal neemis. Dezactivează "Mod simulare" în Setări.`
-              : `✓ Vânzare ${money(res.total)} salvată.`;
+            const saleMsg = mockActive ? t.saleSavedMock(money(res.total)) : t.saleSaved(money(res.total));
             setSaleStatus({ ok: true, msg: saleMsg, transactionId: res.transactionId });
           }
           setCart([]);
@@ -790,8 +885,9 @@ export function PosRegister({
           setSplitPayments([]);
           setSelectedCustomer(null);
           setCashReceived("");
+          setCheckoutStep("order");
           setSalePending(false);
-          try { sessionStorage.removeItem("pos_cart_backup"); } catch {}
+          clearCartBackupFromStorage();
           // Redirect to transaction page after brief success display
           setTimeout(() => {
             setSaleStatus(null);
@@ -801,35 +897,120 @@ export function PosRegister({
           const rawMsg = err instanceof Error ? err.message : "";
           // Detect framework/network errors (build mismatch, dropped connection, etc.)
           const isFrameworkError = /unexpected response|from the server|failed to fetch|networkerror|load failed|fetch/i.test(rawMsg);
-          const safeMsg = isRO
-            ? isFrameworkError
-              ? "Aplicația s-a actualizat în fundal. Comanda ta este intactă — reîncarcă pagina și încearcă din nou."
-              : "Vânzarea nu a fost finalizată. Nicio plată nu a fost înregistrată. Încearcă din nou."
-            : isFrameworkError
-              ? "The POS updated in the background. Your order is kept — reload and try again."
-              : "Sale not completed. No payment recorded. Please try again.";
+          const safeMsg = isFrameworkError ? t.appUpdated : t.saleNotCompleted;
           setSaleStatus({ ok: false, msg: safeMsg });
           setSalePending(false);
         }
-      }} className="flex min-h-[28rem] flex-col rounded-xl border border-slate-200 bg-white shadow-sm lg:rounded-none lg:border-0 lg:border-l lg:shadow-none lg:min-h-0 lg:w-[380px] lg:flex-none lg:overflow-hidden">
+      }} className={`flex min-h-[28rem] flex-col bg-white shadow-sm lg:min-h-0 lg:overflow-hidden ${
+        checkoutStep === "payment"
+          ? "flex-1 rounded-xl border border-slate-200 lg:rounded-none lg:border-0"
+          : "rounded-xl border border-slate-200 lg:w-[380px] lg:flex-none lg:rounded-none lg:border-0 lg:border-l lg:shadow-none"
+      }`}>
+        {checkoutStep === "payment" && (
+          <div className="shrink-0 border-b border-slate-100 px-4 py-3">
+            <button
+              type="button"
+              onClick={backToOrder}
+              className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
+            >
+              ← {t.backToOrder}
+            </button>
+          </div>
+        )}
+        {checkoutStep === "order" ? (
+          <>
         <div className="px-4 pt-4 pb-3 border-b border-slate-100">
           <CustomerCombobox customers={customers} value={selectedCustomer} onChange={setSelectedCustomer} />
-          {/* Compact context pill — only shown when restaurant/order features are on */}
           {(features.kitchenDisplay || features.restaurantOrderFlow || features.orderTypes || features.tableService) && (
             <button type="button" onClick={() => setOrderTypeOpen(true)}
               className="mt-2 flex w-full items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 transition-colors">
               <span className="font-medium capitalize">
-                {features.orderTypes ? orderType : "Order"}
-                {features.tableService && tableLabel ? ` · Table ${tableLabel}` : ""}
+                {features.orderTypes ? orderType : t.orderTypeEdit}
+                {features.tableService && tableLabel ? ` · ${t.tablePrefix} ${tableLabel}` : ""}
               </span>
-              <span className="text-slate-400">Edit ›</span>
+              <span className="text-slate-400">{t.edit} ›</span>
             </button>
           )}
         </div>
         <div className="px-4 pt-3 pb-1 flex items-center justify-between shrink-0">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Order</span>
-          {cart.length > 0 && <button type="button" onClick={() => setCart([])} className="text-xs text-slate-400 hover:text-red-500">Clear all</button>}
+          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.order}</span>
+          {(pendingSyncSales.length > 0 || pendingFiscalSales.length > 0) && (
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+              {pendingSyncSales.length > 0 ? t.offlinePendingSync(pendingSyncSales.length) : t.offlinePendingFiscal(pendingFiscalSales.length)}
+            </span>
+          )}
+          {cart.length > 0 && (
+            <div className="flex items-center gap-2">
+              {heldSales.length > 0 && (
+                <button type="button" onClick={() => setHeldOpen(true)} className="text-xs text-amber-600 hover:text-amber-700 font-medium">
+                  {t.heldOrders} ({heldSales.length})
+                </button>
+              )}
+              {cart.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const held = holdCurrentSale({
+                      cart,
+                      discountPct,
+                      customerName: selectedCustomer?.name,
+                    });
+                    if (held) {
+                      setCart([]);
+                      setDiscountPct(0);
+                      setCheckoutStep("order");
+                      setHeldSales(listHeldSales());
+                      setSaleStatus({ ok: true, msg: t.orderHeld });
+                      setTimeout(() => setSaleStatus(null), 2500);
+                    }
+                  }}
+                  className="text-xs text-slate-500 hover:text-blue-600"
+                >
+                  {t.holdOrder}
+                </button>
+              )}
+              <button type="button" onClick={() => { setCart([]); setCheckoutStep("order"); }} className="text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
+            </div>
+          )}
         </div>
+        {(pendingSyncSales.length > 0 || pendingFiscalSales.length > 0) && (
+          <div className="mx-4 mb-2 space-y-1.5 shrink-0">
+            {pendingSyncSales.map((entry) => (
+              <div key={entry.id} className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                <span className="font-semibold">{t.offlinePendingSyncRow}</span>
+                <span className="text-amber-800"> — {entry.label}</span>
+              </div>
+            ))}
+            {pendingFiscalSales.map((entry) => (
+              <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-xs text-orange-900">
+                <div className="min-w-0">
+                  <span className="font-semibold">{t.offlinePendingFiscalRow}</span>
+                  <span className="text-orange-800"> — {entry.label}</span>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  {entry.transactionId && (
+                    <a
+                      href={`/app/transactions/${entry.transactionId}`}
+                      className="font-medium text-orange-700 underline hover:text-orange-900"
+                    >
+                      {t.offlineViewReceipt}
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      dismissPendingFiscal(entry.id);
+                      setOfflineQueue(listOfflineQueue());
+                    }}
+                    className="rounded-md border border-orange-300 bg-white px-2 py-0.5 font-medium text-orange-800 hover:bg-orange-100"
+                  >
+                    {t.offlineFiscalDismiss}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto space-y-1.5 px-4 pb-2" style={{minHeight: 0, WebkitOverflowScrolling: "touch"}}>
           {cart.map((item) => (
             <div key={item.product_id} className="flex items-center gap-2 rounded-xl border border-transparent bg-white/80 px-2 py-2 transition-colors hover:border-blue-100 hover:bg-blue-50/40">
@@ -845,158 +1026,221 @@ export function PosRegister({
                 type="number"
                 min="0"
                 step="0.01"
+                readOnly={lockLineTotalEdit}
+                title={lockLineTotalEdit ? t.lineTotalLockedHint : undefined}
                 value={Number.isFinite(item.quantity * item.unit_price) ? (item.quantity * item.unit_price).toFixed(2) : "0.00"}
-                onChange={(e) => setLineTotal(item.product_id, Number(e.target.value) || 0)}
+                onChange={lockLineTotalEdit ? undefined : (e) => setLineTotal(item.product_id, Number(e.target.value) || 0)}
                 aria-label={`Line total for ${item.product_name}`}
-                className="h-9 w-20 rounded-lg border border-transparent bg-slate-100 px-2 text-right text-sm font-bold tabular-nums text-slate-950 outline-none transition-colors hover:bg-white focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                className={`h-9 w-20 rounded-lg border px-2 text-right text-sm font-bold tabular-nums text-slate-950 outline-none transition-colors ${
+                  lockLineTotalEdit
+                    ? "cursor-not-allowed border-transparent bg-slate-50 text-slate-600"
+                    : "border-transparent bg-slate-100 hover:bg-white focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                }`}
               />
               <button type="button" onClick={() => setQty(item.product_id, 0)} aria-label="Remove item" className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-sm text-slate-400 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200">×</button>
             </div>
           ))}
-          {!cart.length && <p className="py-10 text-center text-sm text-slate-300">Tap a product to add it.</p>}
+          {!cart.length && <p className="py-10 text-center text-sm text-slate-300">{t.tapToAdd}</p>}
         </div>
         <div className="border-t border-slate-100 px-4 pt-4 pb-4 space-y-3 shrink-0">
-          {/* Smart-action chip row — optional features as compact buttons */}
           {(features.tips || features.splitPayments || features.kitchenDisplay || features.restaurantOrderFlow) && cart.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {(features.kitchenDisplay || features.restaurantOrderFlow) && (
                 <button type="button" onClick={() => setNotesOpen(true)}
                   className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${(kitchenNote || customerNote) ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                  📝 Notes{(kitchenNote || customerNote) ? " ●" : ""}
+                  📝 {t.notes}{(kitchenNote || customerNote) ? " ●" : ""}
                 </button>
               )}
               {features.tips && (
                 <button type="button" onClick={() => setTipOpen(true)}
                   className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${safeTipAmount > 0 ? "border-green-300 bg-green-50 text-green-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                  💰 {safeTipAmount > 0 ? `Tip ${money(safeTipAmount)}` : "Tip"}
+                  💰 {safeTipAmount > 0 ? `${t.tip} ${money(safeTipAmount)}` : t.tip}
                 </button>
               )}
               {features.splitPayments && (
                 <button type="button" onClick={() => setSplitOpen(true)}
                   className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${activeSplitPayments.length > 0 ? "border-purple-300 bg-purple-50 text-purple-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                  ⚡ {activeSplitPayments.length > 0 ? `Split (${activeSplitPayments.length})` : "Split"}
+                  ⚡ {activeSplitPayments.length > 0 ? t.splitLabel(activeSplitPayments.length) : t.split}
                 </button>
               )}
             </div>
           )}
-          {/* Discount row — compact, always available */}
           {cart.length > 0 && (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 shrink-0">Discount %</span>
+              <span className="text-xs text-slate-400 shrink-0">{t.discountPct}</span>
               <input type="number" min="0" max="100" step="1" value={discountPct || ""} onChange={(e) => setDiscountPct(Number(e.target.value) || 0)}
                 placeholder="0" aria-label="Discount percentage" className="h-8 w-16 rounded-lg border border-slate-200 px-2 text-sm text-right" />
               {discountPct > 0 && <span className="text-xs text-blue-600 font-medium">−{money(discountAmount)}</span>}
             </div>
           )}
-          {/* Totals */}
-          {discountPct > 0 && <div className="flex justify-between text-xs text-slate-500"><span>Subtotal</span><span>{money(grossTotal)}</span></div>}
-          {totalVat > 0.01 && <div className="flex justify-between text-xs text-slate-400"><span>Incl. VAT</span><span>{money(totalVat)}</span></div>}
-          {safeTipAmount > 0 && <div className="flex justify-between text-xs text-green-700"><span>Tip</span><span>{money(safeTipAmount)}</span></div>}
+          {discountPct > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span>{money(grossTotal)}</span></div>}
+          {totalVat > 0.01 && <div className="flex justify-between text-xs text-slate-400"><span>{vatLabel}</span><span>{money(totalVat)}</span></div>}
+          {safeTipAmount > 0 && <div className="flex justify-between text-xs text-green-700"><span>{t.tip}</span><span>{money(safeTipAmount)}</span></div>}
           <div className="flex justify-between items-baseline">
-            <span className="text-base font-semibold text-slate-700">Total</span>
+            <span className="text-base font-semibold text-slate-700">{t.total}</span>
             <span className="text-3xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</span>
           </div>
-          {/* Payment methods — simple picker or split summary */}
-          <input type="hidden" name="payment_method_id" value={paymentMethodId} />
-          {(!features.splitPayments || activeSplitPayments.length === 0) && <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {paymentMethods.map((m) => {
-              const selected = paymentMethodId === m.id;
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setPaymentMethodId(m.id)}
-                  className={`min-h-12 rounded-lg border px-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${selected ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
-                >
-                  {paymentLabel(m.type, m.name)}
-                </button>
-              );
-            })}
-          </div>}
-          {features.splitPayments && activeSplitPayments.length > 0 && (
-            <button type="button" onClick={() => setSplitOpen(true)}
-              className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}>
-              <span className="font-semibold">Split payment</span>
-              {" · "}Paid {money(splitPaid)}
-              {splitRemaining > 0.01 ? ` · Remaining ${money(splitRemaining)}` : " · Fully paid ✓"}
-              <span className="float-right text-slate-500">Edit ›</span>
-            </button>
-          )}
-          {features.splitPayments && activeSplitPayments.length === 0 && (
-            <button type="button" onClick={() => setSplitOpen(true)}
-              className="w-full rounded-lg border border-dashed border-slate-200 px-3 py-2 text-xs text-slate-400 hover:bg-slate-50 transition-colors">
-              + Add split payment
-            </button>
-          )}
-          {/* ── Cash received / change due (cash payment only, non-split) ── */}
-          {isCashSingle && (
-            <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div className="flex items-center gap-2">
-                <label htmlFor="cash-received-input" className="shrink-0 text-sm font-medium text-slate-700">
-                  {isRO ? "Clientul a dat" : "Cash received"}
-                </label>
-                <input
-                  id="cash-received-input"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={cashReceived}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setCashReceived(v === "" ? "" : Math.max(0, parseFloat(v) || 0));
-                  }}
-                  placeholder={totalDue.toFixed(2)}
-                  className="ml-auto h-9 w-28 rounded-lg border border-slate-200 bg-white px-2 text-right text-base font-bold tabular-nums text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                />
+          <Button
+            type="button"
+            disabled={!canPay}
+            onClick={goToPayment}
+            className="h-16 w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {!paymentMethods.length ? t.setupPaymentMethods : cart.length === 0 ? t.addItems : `${t.pay} ${money(totalDue)}`}
+          </Button>
+        </div>
+          </>
+        ) : (
+          <div className="flex flex-1 flex-col overflow-hidden" style={{ minHeight: 0 }}>
+            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6" style={{ WebkitOverflowScrolling: "touch" }}>
+              <div className="text-center">
+                <p className="text-sm font-medium text-slate-500">{t.payItems(cart.reduce((s, i) => s + i.quantity, 0))}</p>
+                <p className="mt-2 text-5xl font-bold tabular-nums text-slate-950 sm:text-6xl">{money(totalDue)}</p>
+                {discountPct > 0 && <p className="mt-1 text-sm text-slate-400">{t.subtotal} {money(grossTotal)} · −{money(discountAmount)}</p>}
               </div>
-              <div className="flex flex-wrap gap-1">
-                {([
-                  { label: isRO ? "Exact" : "Exact", v: Number(totalDue.toFixed(2)) },
-                  { label: currency === "RON" ? "1 leu" : "€1",  v: Math.ceil(totalDue)                    },
-                  { label: currency === "RON" ? "5 lei" : "€5",  v: Math.ceil(totalDue / 5)  * 5           },
-                  { label: currency === "RON" ? "10 lei" : "€10", v: Math.ceil(totalDue / 10) * 10          },
-                  { label: currency === "RON" ? "20 lei" : "€20", v: Math.ceil(totalDue / 20) * 20          },
-                  { label: currency === "RON" ? "50 lei" : "€50", v: Math.ceil(totalDue / 50) * 50          },
-                ] as { label: string; v: number }[])
-                  .filter((btn, i) => i === 0 || btn.v !== Number(totalDue.toFixed(2)))
-                  .filter((btn, i, arr) => arr.findIndex((b) => b.v === btn.v) === i)
-                  .map(({ label, v }) => (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => setCashReceived(v)}
-                      className={`rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors ${
-                        cashReceived === v
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
+
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{t.paymentMethod}</p>
+                {(!features.splitPayments || activeSplitPayments.length === 0) && (
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {paymentMethods.map((m) => {
+                      const selected = paymentMethodId === m.id;
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => {
+                            setPaymentMethodId(m.id);
+                            if (m.type !== "cash") setCashReceived("");
+                          }}
+                          className={`min-h-14 rounded-xl border px-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${selected ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                        >
+                          {paymentTypeLabel(m.type, m.name, locale)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {features.splitPayments && activeSplitPayments.length > 0 && (
+                  <button type="button" onClick={() => setSplitOpen(true)}
+                    className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}>
+                    <span className="font-semibold">{t.splitPayment}</span>
+                    {" · "}{t.splitPaid(money(splitPaid))}
+                    {splitRemaining > 0.01 ? ` · ${t.splitRemaining(money(splitRemaining))}` : ` · ${t.splitFullyPaid}`}
+                    <span className="float-right text-slate-500">{t.edit} ›</span>
+                  </button>
+                )}
+                {features.splitPayments && activeSplitPayments.length === 0 && (
+                  <button type="button" onClick={() => setSplitOpen(true)}
+                    className="w-full rounded-lg border border-dashed border-slate-200 px-3 py-2 text-xs text-slate-400 hover:bg-slate-50 transition-colors">
+                    {t.addSplitPayment}
+                  </button>
+                )}
               </div>
-              {changeDue !== null && (
-                <div className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                  cashUnderPaid ? "border border-red-200 bg-red-50" : "border border-green-200 bg-green-50"
-                }`}>
-                  <span className={`text-sm font-semibold ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
-                    {isRO ? "Rest de dat" : "Change due"}
-                  </span>
-                  <span className={`text-xl font-bold tabular-nums ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
-                    {cashUnderPaid
-                      ? `−${money(Math.abs(changeDue))}`
-                      : money(changeDue)}
-                  </span>
+
+              {isCashSingle && (
+                <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <label htmlFor="cash-received-input" className="text-sm font-semibold text-slate-700">
+                      {t.cashReceived}
+                    </label>
+                    <input
+                      id="cash-received-input"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={cashReceived}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setCashReceived(v === "" ? "" : Math.max(0, parseFloat(v) || 0));
+                      }}
+                      placeholder={totalDue.toFixed(2)}
+                      readOnly={false}
+                      className="h-11 w-32 rounded-lg border border-slate-200 bg-white px-3 text-right text-xl font-bold tabular-nums text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    />
+                  </div>
+                  <PosCashKeypad value={cashReceived} onChange={setCashReceived} disabled={salePending} />
+                  <div className="flex flex-wrap gap-1.5">
+                    {([
+                      { label: t.exact, v: Number(totalDue.toFixed(2)) },
+                      { label: currency === "RON" ? "1 leu" : "€1", v: Math.ceil(totalDue) },
+                      { label: currency === "RON" ? "5 lei" : "€5", v: Math.ceil(totalDue / 5) * 5 },
+                      { label: currency === "RON" ? "10 lei" : "€10", v: Math.ceil(totalDue / 10) * 10 },
+                      { label: currency === "RON" ? "20 lei" : "€20", v: Math.ceil(totalDue / 20) * 20 },
+                      { label: currency === "RON" ? "50 lei" : "€50", v: Math.ceil(totalDue / 50) * 50 },
+                    ] as { label: string; v: number }[])
+                      .filter((btn, i) => i === 0 || btn.v !== Number(totalDue.toFixed(2)))
+                      .filter((btn, i, arr) => arr.findIndex((b) => b.v === btn.v) === i)
+                      .map(({ label, v }) => (
+                        <button
+                          key={label}
+                          type="button"
+                          onClick={() => setCashReceived(v)}
+                          className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${
+                            cashReceived === v
+                              ? "border-blue-600 bg-blue-600 text-white"
+                              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                  </div>
+                  {changeDue !== null && (
+                    <div className={`flex items-center justify-between rounded-lg px-4 py-3 ${
+                      cashUnderPaid ? "border border-red-200 bg-red-50" : "border border-green-200 bg-green-50"
+                    }`}>
+                      <span className={`text-sm font-semibold ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
+                        {t.changeDue}
+                      </span>
+                      <span className={`text-2xl font-bold tabular-nums ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
+                        {cashUnderPaid ? `−${money(Math.abs(changeDue))}` : money(changeDue)}
+                      </span>
+                    </div>
+                  )}
+                  {cashUnderPaid && (
+                    <p className="text-sm text-red-600">{t.cashUnderpaidMsg}</p>
+                  )}
                 </div>
               )}
-              {cashUnderPaid && (
-                <p className="text-xs text-red-600">
-                  {isRO ? "Suma primită este insuficientă." : "Amount received is less than the total due."}
-                </p>
-              )}
             </div>
-          )}
-          {/* ── Hidden form fields (state → server action) ── */}
+
+            <div className="shrink-0 border-t border-slate-100 px-4 py-4 space-y-3">
+              {saleStatus && (
+                <div className={`rounded-lg p-3 text-sm font-medium ${saleStatus.ok ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-700"}`}>
+                  <p>{saleStatus.msg}</p>
+                  {lastFiscalTxt && (
+                    <button
+                      type="button"
+                      onClick={() => downloadFiscalNetTxt(lastFiscalTxt.filename, lastFiscalTxt.content)}
+                      className="mt-2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                    >
+                      {t.downloadTxtAgain}
+                    </button>
+                  )}
+                </div>
+              )}
+              <Button
+                ref={chargeRef}
+                type="submit"
+                disabled={chargeDisabled}
+                className="h-16 w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {salePending
+                  ? t.processing
+                  : cashUnderPaid
+                    ? t.insufficientCash
+                    : !paymentMethods.length
+                      ? t.setupPaymentMethods
+                      : cart.length === 0
+                        ? t.addItems
+                        : `${t.validateCharge} ${money(totalDue)}`}
+              </Button>
+            </div>
+          </div>
+        )}
+
+          <input type="hidden" name="payment_method_id" value={paymentMethodId} />
           <input type="hidden" name="cash_received" value={isCashSingle && typeof cashReceived === "number" && cashReceived > 0 ? cashReceived.toFixed(2) : ""} />
           <input type="hidden" name="change_due" value={isCashSingle && changeDue !== null && changeDue >= 0 ? changeDue.toFixed(2) : ""} />
           <input type="hidden" name="cart_json" value={JSON.stringify(cart)} />
@@ -1113,7 +1357,7 @@ export function PosRegister({
                   <div key={row.id} className="grid grid-cols-[1fr_100px_32px] gap-2">
                     <select value={row.payment_method_id} onChange={(e) => setSplitPayments((rows) => rows.map((r) => r.id === row.id ? { ...r, payment_method_id: e.target.value } : r))}
                       className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm">
-                      {paymentMethods.map((m) => <option key={m.id} value={m.id}>{paymentLabel(m.type, m.name)}</option>)}
+                      {paymentMethods.map((m) => <option key={m.id} value={m.id}>{paymentTypeLabel(m.type, m.name, locale)}</option>)}
                     </select>
                     <Input type="number" min="0" step="0.01" value={row.amount || ""} onChange={(e) => setSplitPayments((rows) => rows.map((r) => r.id === row.id ? { ...r, amount: Number(e.target.value) || 0 } : r))} className="h-9" />
                     <button type="button" onClick={() => setSplitPayments((rows) => rows.filter((r) => r.id !== row.id))} className="flex h-9 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-500">×</button>
@@ -1134,43 +1378,78 @@ export function PosRegister({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          {saleStatus && (
-            <div className={`rounded-lg p-2 text-sm font-medium ${saleStatus.ok ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-700"}`}>
-              <p>{saleStatus.msg}</p>
-              {lastFiscalTxt && (
-                <button
-                  type="button"
-                  onClick={() => downloadFiscalNetTxt(lastFiscalTxt.filename, lastFiscalTxt.content)}
-                  className="mt-2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
-                >
-                  Download TXT again
-                </button>
+
+          {/* ── Held orders ── */}
+          <Dialog open={heldOpen} onOpenChange={setHeldOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader><DialogTitle>{t.heldOrders}</DialogTitle></DialogHeader>
+              <div className="space-y-2 max-h-72 overflow-y-auto">
+                {heldSales.length === 0 && (
+                  <p className="text-sm text-slate-400 py-4 text-center">{t.noHeldOrders}</p>
+                )}
+                {heldSales.map((held) => (
+                  <div key={held.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-slate-900 truncate">{held.label}</p>
+                      <p className="text-xs text-slate-500">
+                        {t.payItems(held.cart.reduce((s, i) => s + i.quantity, 0))}
+                        {held.discountPct > 0 ? ` · −${held.discountPct}%` : ""}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        const resumed = resumeHeldSale(held.id);
+                        if (resumed) {
+                          setCart(resumed.cart);
+                          setDiscountPct(resumed.discountPct);
+                          setCheckoutStep("order");
+                          setHeldSales(listHeldSales());
+                          setHeldOpen(false);
+                        }
+                      }}
+                    >
+                      {t.resumeOrder}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              {(pendingSyncSales.length > 0 || pendingFiscalSales.length > 0) && (
+                <div className="mt-2 space-y-1.5 border-t pt-3">
+                  {pendingSyncSales.map((entry) => (
+                    <p key={entry.id} className="rounded bg-amber-50 p-2 text-xs text-amber-800">
+                      {t.offlinePendingSyncRow}: {entry.label}
+                    </p>
+                  ))}
+                  {pendingFiscalSales.map((entry) => (
+                    <p key={entry.id} className="rounded bg-orange-50 p-2 text-xs text-orange-800">
+                      {t.offlinePendingFiscalRow}: {entry.label}
+                    </p>
+                  ))}
+                </div>
               )}
-            </div>
-          )}
-          <Button ref={chargeRef} type="submit" disabled={!cart.length || !paymentMethods.length || salePending || cashUnderPaid || (features.splitPayments && activeSplitPayments.length > 0 && splitPaid + 0.0001 < totalDue)}
-            className="h-16 w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed">
-            {salePending ? "Processing…" : cashUnderPaid ? (isRO ? "Sumă insuficientă" : "Insufficient cash") : !paymentMethods.length ? "Set up payment methods in Settings" : cart.length === 0 ? "Add items to charge" : `Charge ${money(totalDue)}`}
-          </Button>
-        </div>
+            </DialogContent>
+          </Dialog>
       </form>
 
-      {/* Mobile cart summary bar — visible only on small screens when cart has items */}
-      {cart.length > 0 && (
+      {/* Mobile cart summary bar — order step only */}
+      {checkoutStep === "order" && cart.length > 0 && (
         <div className="fixed inset-x-0 bottom-4 z-30 flex justify-center px-3 lg:hidden">
           <div className="flex w-full max-w-sm items-center gap-3 rounded-2xl bg-blue-600 px-4 py-3 shadow-xl">
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-blue-200">
-                {cart.reduce((s, i) => s + i.quantity, 0)} item{cart.reduce((s, i) => s + i.quantity, 0) !== 1 ? "s" : ""}
+                {t.payItems(cart.reduce((s, i) => s + i.quantity, 0))}
               </p>
               <p className="text-lg font-bold text-white tabular-nums leading-tight">{money(totalDue)}</p>
             </div>
             <button
               type="button"
-              onClick={() => chargeRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
-              className="shrink-0 rounded-xl bg-white px-4 py-2 text-sm font-bold text-blue-600 shadow-sm active:scale-95"
+              onClick={goToPayment}
+              disabled={!canPay}
+              className="shrink-0 rounded-xl bg-white px-4 py-2 text-sm font-bold text-blue-600 shadow-sm active:scale-95 disabled:opacity-50"
             >
-              Charge →
+              {t.pay} →
             </button>
           </div>
         </div>

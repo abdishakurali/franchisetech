@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Script from "next/script";
-
+import { usePathname } from "next/navigation";
 
 interface SupportChatProps {
   userId?: string;
@@ -11,13 +11,17 @@ interface SupportChatProps {
 }
 
 export function SupportChat({ userId, userName, userEmail }: SupportChatProps) {
+  const pathname = usePathname();
+  const hiddenOnPos = pathname.startsWith("/app/pos");
+
   useEffect(() => {
+    if (hiddenOnPos) return;
     window.chatwootSettings = {
       position: "right",
       type: "standard",
       hideMessageBubble: false,
     };
-  }, []);
+  }, [hiddenOnPos]);
 
   function onLoad() {
     window.chatwootSDK?.run({
@@ -39,6 +43,8 @@ export function SupportChat({ userId, userName, userEmail }: SupportChatProps) {
       trySet();
     }
   }
+
+  if (hiddenOnPos) return null;
 
   return (
     <Script

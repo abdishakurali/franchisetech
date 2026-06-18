@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "typecheck:app": "tsc --noEmit"
+    "typecheck:app": "tsc --noEmit",
+    "verify-pos-cart-restore": "node scripts/verify-pos-cart-restore.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

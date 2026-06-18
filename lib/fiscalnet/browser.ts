@@ -39,6 +39,10 @@ export interface BrowserFiscalItem {
   /** FiscalNet VAT group code 1–5, read directly from vat_rates.fiscalnet_vat_group.
    *  When set, this takes precedence over vatRate-based lookup. */
   fiscalNetGroup?: number | null;
+  /** Item-level percentage discount (0–100). Emits DP^ immediately after S^. */
+  discountPercent?: number;
+  /** Item-level value discount in RON. Emits DV^ immediately after S^. */
+  discountValue?: number;
 }
 
 export type BrowserFiscalResult = {
@@ -155,7 +159,8 @@ export function buildFiscalNetReceiptLines(
     );
   }
 
-  const lines = items.map((item) => {
+  const lines: string[] = [];
+  for (const item of items) {
     // VAT group: read directly from vat_rates.fiscalnet_vat_group (via fiscalNetGroup).
     // Fall back to rate-based lookup only when fiscalNetGroup was not supplied.
     let vatCode: number;
@@ -182,12 +187,23 @@ export function buildFiscalNetReceiptLines(
       resolvedVatCode: vatCode,
       priceBani,
       qtyMillis,
+      discountPercent: item.discountPercent,
+      discountValue: item.discountValue,
       paymentType,
       payCode,
     });
 
-    return `S^${sanitiseName(item.productName)}^${priceBani}^${qtyMillis}^Buc^${vatCode}^${opCode}`;
-  });
+    lines.push(`S^${sanitiseName(item.productName)}^${priceBani}^${qtyMillis}^Buc^${vatCode}^${opCode}`);
+
+    // P1.7: FiscalNet requires DP^/DV^ immediately below the S^ line — not only a reduced P^ amount.
+    const pct = item.discountPercent ?? 0;
+    const val = item.discountValue ?? 0;
+    if (pct > 0 && pct <= 100) {
+      lines.push(`DP^${Math.round(pct * 100)}`);
+    } else if (val > 0) {
+      lines.push(`DV^${encodeMoney(val)}`);
+    }
+  }
 
   const subtotalBani = total !== undefined
     ? encodeMoney(total)

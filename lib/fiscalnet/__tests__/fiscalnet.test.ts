@@ -154,7 +154,28 @@ describe("FiscalNet TXT command payloads", () => {
       },
       10,
     );
-    expect(lines).toEqual(["S^Test Product^1000^1000^buc^7^42", "ST^1000", "P^5^1000"]);
+    expect(lines).toEqual(["S^Test Product^1000^1000^buc^7^42", "ST^0", "P^5^1000"]);
+  });
+
+  it("emits DP^ immediately after S^ when item has discountPercent", () => {
+    const lines = buildFiscalNetReceiptLines(
+      [{ productName: "Croissant", quantity: 1, unitPrice: 3.2, vatRate: 9, fiscalNetGroup: 1, discountPercent: 32 }],
+      "cash",
+      {
+        enabled: true,
+        mockMode: false,
+        connectionMode: "file",
+        apiHost: "http://localhost:65400",
+        vatGroups: [{ code: 1, rate: 9, label: "TVA 9" }],
+        paymentTypeMap: { cash: 1 },
+        operatorCode: "1",
+      },
+      2.18,
+    );
+    expect(lines[0]).toBe("S^Croissant^320^1000^Buc^1^1");
+    expect(lines[1]).toBe("DP^3200");
+    expect(lines[2]).toBe("ST^0");
+    expect(lines[3]).toBe("P^1^218");
   });
 });
 

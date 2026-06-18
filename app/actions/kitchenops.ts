@@ -559,6 +559,7 @@ export async function completeSale(formData: FormData) {
     total_gross: Number(totalGross.toFixed(2)),
     subtotal_gross_before_discount: Number((totalGross + discountTotal).toFixed(2)),
     discount_total: Number(discountTotal.toFixed(2)),
+    discount_pct: Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)),
     status: "completed",
   }).select("id").single();
 
@@ -582,7 +583,8 @@ export async function completeSale(formData: FormData) {
       vat_amount: item.vat_amount,
       gross_amount: item.gross_amount,
       line_total: item.line_total,
-      discount_amount: 0,
+      discount_amount: item.discount_amount,
+      discount_pct: discountPct > 0 ? Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)) : 0,
     }))
   );
 
@@ -1343,7 +1345,7 @@ export type CompleteSaleResult =
       total: number;
       paymentType: string;
       cashSale: boolean;
-      items: Array<{ productName: string; quantity: number; unitPrice: number; vatRate: number; fiscalNetGroup: number | null }>;
+      items: Array<{ productName: string; quantity: number; unitPrice: number; vatRate: number; fiscalNetGroup: number | null; discountPercent?: number; discountValue?: number }>;
       fiscalApiPending: boolean;
       changeDue?: number;
     };
@@ -1460,6 +1462,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     tip_amount: tipAmount,
     subtotal_gross_before_discount: Number((totalGross + discountTotal).toFixed(2)),
     discount_total: Number(discountTotal.toFixed(2)),
+    discount_pct: Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)),
     status: "completed",
   }).select("id").single();
 
@@ -1482,6 +1485,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
       gross_amount:     item.gross_amount,
       line_total:       item.line_total,
       discount_amount:  item.discount_amount,
+      discount_pct:     discountPct > 0 ? Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)) : 0,
     }))
   );
 
@@ -1587,7 +1591,14 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     total: saleTotal,
     paymentType,
     cashSale: hasCashPayment,
-    items: itemCalcs.map((i) => ({ productName: i.product_name, quantity: i.quantity, unitPrice: i.unit_price, vatRate: i.vat_rate, fiscalNetGroup: (i as CartItem).fiscalnet_vat_group ?? null })),
+    items: itemCalcs.map((i) => ({
+      productName: i.product_name,
+      quantity: i.quantity,
+      unitPrice: i.unit_price,
+      vatRate: i.vat_rate,
+      fiscalNetGroup: (i as CartItem).fiscalnet_vat_group ?? null,
+      ...(discountPct > 0 ? { discountPercent: Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)) } : {}),
+    })),
     fiscalApiPending,
     changeDue: cashOverpay,
   };
