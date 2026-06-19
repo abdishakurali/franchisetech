@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createElement } from "react";
+import type { MarketingLocale } from "@/lib/marketing/locale";
 import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
 
 export const SITE_URL = "https://franchisetech.ro";
@@ -116,7 +117,7 @@ export const featurePages: SeoPage[] = [
       { question: "Does this replace my accountant?", answer: "No. franchisetech helps keep organised sales and till records. Professional tax and accounting advice remains your responsibility." },
     ],
     related: [{ label: "Z-report explained", href: "/resources/z-report-explained" }, { label: "POS feature", href: "/features/pos" }, { label: "Cash-up guide", href: "/resources/cash-up-at-end-of-day" }],
-    image: "/showcase/reports-dashboard.png",
+    image: "/showcase/z-report.png",
   },
   {
     slug: "food-safety-records",
@@ -780,12 +781,15 @@ export const publicPaths = [
   "/legal-disclaimer",
 ];
 
-export function pageMetadata(page: {
-  metaTitle: string;
-  description: string;
-  path: string;
-  image?: string;
-}): Metadata {
+export function pageMetadata(
+  page: {
+    metaTitle: string;
+    description: string;
+    path: string;
+    image?: string;
+  },
+  locale: MarketingLocale = "en",
+): Metadata {
   const image = page.image ?? "/showcase/pos-cart.png";
   return {
     title: page.metaTitle,
@@ -796,7 +800,7 @@ export function pageMetadata(page: {
       title: page.metaTitle,
       description: page.description,
       url: page.path,
-      locale: "en",
+      locale: locale === "ro" ? "ro_RO" : "en",
       images: [{ url: image, width: 1200, height: 750, alt: page.metaTitle }],
     },
     twitter: {

@@ -5,6 +5,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from "@/lib/marketing/seo";
 import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
+import { getMarketingLocale } from "@/lib/marketing/locale-server";
+import { marketingHtmlLang } from "@/lib/marketing/locale";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -63,14 +65,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getMarketingLocale();
+  const htmlLang = marketingHtmlLang(locale);
+
   return (
     <html
-      lang="en"
+      lang={htmlLang}
       className={`${outfit.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-[family-name:var(--font-outfit)]">

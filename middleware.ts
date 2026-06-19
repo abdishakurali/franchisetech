@@ -1,8 +1,20 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { MARKETING_LOCALE_COOKIE, isMarketingLocale } from '@/lib/marketing/locale'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  const lang = request.nextUrl.searchParams.get('lang')
+  let response = await updateSession(request)
+
+  if (isMarketingLocale(lang)) {
+    response.cookies.set(MARKETING_LOCALE_COOKIE, lang, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+    })
+  }
+
+  return response
 }
 
 export const config = {

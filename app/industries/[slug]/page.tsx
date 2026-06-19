@@ -6,28 +6,40 @@ import { CTASection, MarketingShell } from "@/components/marketing/MarketingShel
 import { BrowserFrame } from "@/components/marketing/DeviceFrames";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqJsonLd, findPage, industryPages, pageMetadata, SITE_URL } from "@/lib/marketing/seo";
+import { getMarketingLocale } from "@/lib/marketing/locale-server";
+import { getMarketingMessages, localizeSeoPage } from "@/lib/marketing/i18n";
 
 export function generateStaticParams() {
   return industryPages.map((page) => ({ slug: page.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const page = findPage(industryPages, (await params).slug);
-  if (!page) return {};
-  return pageMetadata(page);
+  const locale = await getMarketingLocale();
+  const raw = findPage(industryPages, (await params).slug);
+  if (!raw) return {};
+  return pageMetadata(localizeSeoPage(raw, locale), locale);
 }
 
 export default async function IndustryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const page = findPage(industryPages, (await params).slug);
-  if (!page) notFound();
+  const locale = await getMarketingLocale();
+  const t = getMarketingMessages(locale);
+  const raw = findPage(industryPages, (await params).slug);
+  if (!raw) notFound();
+  const page = localizeSeoPage(raw, locale);
 
   return (
     <MarketingShell>
       <JsonLd data={faqJsonLd(page.faqs)} />
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Industries", item: `${SITE_URL}/industries` },
-        { "@type": "ListItem", position: 2, name: page.title, item: `${SITE_URL}${page.path}` },
-      ] }} />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: t.seoPage.industriesBreadcrumb, item: `${SITE_URL}/industries` },
+            { "@type": "ListItem", position: 2, name: page.title, item: `${SITE_URL}${page.path}` },
+          ],
+        }}
+      />
 
       {page.image && (
         <div className="relative h-56 w-full overflow-hidden sm:h-72 lg:h-80">
@@ -52,8 +64,12 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
           )}
           <p className={`max-w-2xl text-lg text-slate-600 ${page.image ? "" : "mt-5"}`}>{page.intro}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/signup" className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">Start 15-day assisted trial</Link>
-            <Link href="/pricing" className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">See pricing</Link>
+            <Link href="/signup" className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
+              {t.seoPage.startTrial}
+            </Link>
+            <Link href="/pricing" className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              {t.cta.seePricing}
+            </Link>
           </div>
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             {page.bullets.map((bullet) => (
@@ -76,17 +92,14 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
               </div>
             ))}
           </div>
-          <BrowserFrame
-            src="/showcase/pos-register.png"
-            alt={`franchisetech POS for ${page.eyebrow}`}
-          />
+          <BrowserFrame src="/showcase/pos-cart.png" alt={`franchisetech POS — ${page.eyebrow}`} path="/app/pos" fit="contain" />
         </div>
       </section>
 
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_320px]">
           <div>
-            <h2 className="text-2xl font-bold text-slate-950">FAQ</h2>
+            <h2 className="text-2xl font-bold text-slate-950">{t.seoPage.faq}</h2>
             <div className="mt-6 space-y-5">
               {page.faqs.map((faq) => (
                 <div key={faq.question} className="border-b border-slate-100 pb-5">
@@ -97,11 +110,12 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
             </div>
           </div>
           <aside className="h-fit rounded-xl border border-slate-200 p-5">
-            <h2 className="font-bold text-slate-950">Relevant features</h2>
+            <h2 className="font-bold text-slate-950">{t.seoPage.relevantFeatures}</h2>
             <div className="mt-4 space-y-3">
               {page.related.map((link) => (
                 <Link key={link.href} href={link.href} className="flex items-center justify-between text-sm font-medium text-blue-600 hover:underline">
-                  {link.label}<ArrowRight className="h-4 w-4" />
+                  {link.label}
+                  <ArrowRight className="h-4 w-4" />
                 </Link>
               ))}
             </div>

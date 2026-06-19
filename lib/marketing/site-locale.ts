@@ -9,6 +9,7 @@ export function localeAlternates(path: string): Metadata["alternates"] {
     canonical: path,
     languages: {
       en: url,
+      ro: url,
       "x-default": url,
     },
   };
@@ -25,4 +26,6 @@ export const MARKETING_KEYWORDS = [
   "till close report",
   "Z-report POS",
   "multi-location restaurant software",
+  "POS restaurant România",
+  "software cafenea",
 ] as const;
