@@ -9,10 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Coffee, Droplets, LockKeyhole, MoreHorizontal, Package, Percent, RefreshCcw, Utensils } from "lucide-react";
+import { Banknote, Coffee, Droplets, LockKeyhole, Package, ReceiptText, RefreshCcw, UserPlus, Users, Utensils } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
 import { downloadSlipAsTxt, cashInTxt, cashOutTxt } from "@/lib/pos-print";
-import { PosCashKeypad } from "@/components/app/PosCashKeypad";
 import { friendlySaleError, paymentTypeLabel } from "@/lib/pos-i18n";
 import { PosI18nProvider, usePosI18n, posIntlLocale } from "@/lib/pos-i18n-context";
 import {
@@ -61,7 +60,6 @@ type Customer = { id: string; name: string; phone: string | null; email: string 
 type Transaction = { id: string; transaction_number: string; customer_name: string | null; sold_at: string | null; total: number | string; status: string; payment_methods?: { name?: string | null; type?: string | null } | null };
 type PosSummary = { openingCash: number; cashSales: number; cardSales: number; expectedCash: number; txCount: number; topProduct: string | null };
 type FiscalDownloadPayload = { ok: boolean; message: string; filename?: string; content?: string; status?: string; mode?: string };
-type CheckoutStep = "order" | "payment";
 type PlaceholderCfg = { bg: string; text: string; icon: "coffee" | "drink" | "food" | "package"; style?: React.CSSProperties };
 
 const PLACEHOLDERS: Record<string, PlaceholderCfg> = {
@@ -150,67 +148,6 @@ function ProductImageCompact({ src, alt, cfg }: { src: string | null | undefined
     <div className="h-20 w-full shrink-0 overflow-hidden bg-slate-100">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} className="h-full w-full object-cover" onError={() => setFailed(true)} />
-    </div>
-  );
-}
-
-// ── Customer combobox (search saved + add new) ────────────────────────────
-function CustomerCombobox({ customers, value, onChange }: {
-  customers: Customer[];
-  value: Customer | null;
-  onChange: (c: Customer | null) => void;
-}) {
-  const { t } = usePosI18n();
-  const [query, setQuery] = useState(value?.name ?? "");
-  const [open, setOpen] = useState(false);
-
-  const filtered = customers.filter((c) => {
-    const q = query.toLowerCase();
-    return c.name.toLowerCase().includes(q) || (c.phone ?? "").includes(q) || (c.email ?? "").toLowerCase().includes(q);
-  }).slice(0, 6);
-
-  function handleSelect(c: Customer) { onChange(c); setQuery(c.name); setOpen(false); }
-  function handleClear() { onChange(null); setQuery(""); setOpen(false); }
-
-  return (
-    <div className="relative">
-      <div className="relative">
-        <input
-          name="customer_name"
-          type="text"
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); onChange(null); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setTimeout(() => setOpen(false), 200)}
-          placeholder={t.searchCustomer}
-          className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 pr-7 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
-          autoComplete="off"
-          aria-label={t.searchCustomer}
-        />
-        {query && (
-          <button type="button" onClick={handleClear} className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 text-xs">✕</button>
-        )}
-      </div>
-      {open && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-lg border border-slate-200 bg-white shadow-lg overflow-hidden">
-          {filtered.map((c) => (
-            <button key={c.id} type="button" onMouseDown={() => handleSelect(c)}
-              className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm border-b border-slate-50 last:border-0">
-              <p className="font-medium text-slate-900">{c.name}</p>
-              <p className="text-xs text-slate-400">{[c.phone, c.email].filter(Boolean).join(" · ") || t.noContact}</p>
-            </button>
-          ))}
-          {filtered.length === 0 && query && (
-            <button type="button" onMouseDown={() => handleSelect({ id: "", name: query, phone: null, email: null })}
-              className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm text-blue-600">
-              {t.useWalkInName(query)}
-            </button>
-          )}
-          {filtered.length === 0 && !query && (
-            <p className="px-3 py-2 text-xs text-slate-400">{t.typeToSearchCustomers}</p>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -459,7 +396,6 @@ function PosRegisterInner({
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
   const initialBackup = useMemo(() => readCartBackupFromStorage(sessionId), [sessionId]);
-  const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("order");
   const [cart, setCart] = useState<CartItem[]>(() =>
     normalizeCartLines(initialBackup?.cart ?? [], initialBackup?.discountPct ?? 0)
   );
@@ -470,14 +406,13 @@ function PosRegisterInner({
   const money = (v: number) =>
     new Intl.NumberFormat(intlLocale, { style: "currency", currency: currency || "EUR" }).format(v);
   const chargeRef = useRef<HTMLButtonElement>(null);
-  const [applyToAllValue, setApplyToAllValue] = useState<number | "">("");
   const [discountEditId, setDiscountEditId] = useState<string | null>(null);
   const [discountEditValue, setDiscountEditValue] = useState<number | "">("");
-  const [moreOpen, setMoreOpen] = useState(false);
   const [saleStatus, setSaleStatus] = useState<{ ok: boolean; msg: string; transactionId?: string } | null>(null);
   const [lastFiscalTxt, setLastFiscalTxt] = useState<{ filename: string; content: string } | null>(null);
   const [salePending, setSalePending] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [customerSearch, setCustomerSearch] = useState("");
   const [txSearch, setTxSearch] = useState("");
   const [zReportDone, setZReportDone] = useState(initialZReportDone);
   const [zReportPending, setZReportPending] = useState(false);
@@ -543,12 +478,10 @@ function PosRegisterInner({
 
   function resetCartAfterSale() {
     setCart([]);
-    setApplyToAllValue("");
     setTipAmount(0);
     setSplitPayments([]);
     setSelectedCustomer(null);
     setCashReceived("");
-    setCheckoutStep("order");
     clearCartBackupFromStorage();
   }
 
@@ -584,6 +517,15 @@ function PosRegisterInner({
   const shownTransactions = recentTransactions.filter((tx) =>
     [tx.transaction_number, tx.customer_name, tx.payment_methods?.name].filter(Boolean).join(" ").toLowerCase().includes(txSearch.toLowerCase())
   ).slice(0, 12);
+  const shownCustomers = customers.filter((c) => {
+    const q = customerSearch.toLowerCase();
+    return c.name.toLowerCase().includes(q) || (c.phone ?? "").includes(q) || (c.email ?? "").toLowerCase().includes(q);
+  }).slice(0, 12);
+  const uniformCartDiscount = useMemo(() => {
+    if (!cart.length) return 0;
+    const pcts = cart.map((i) => i.discount_pct ?? 0);
+    return pcts.every((p) => p === pcts[0]) ? pcts[0] : null;
+  }, [cart]);
 
   function setItemDiscountPct(productId: string, pct: number) {
     setCart((items) =>
@@ -593,12 +535,16 @@ function PosRegisterInner({
     );
   }
 
-  function applyDiscountToAllCurrentItems() {
-    const pct = Number(applyToAllValue) || 0;
-    if (pct <= 0) return;
+  function applyDiscountToAllCurrentItems(pct: number) {
     const clamped = clampDiscountPct(pct);
     setCart((items) => syncSgr(items.map((i) => ({ ...i, discount_pct: clamped }))));
-    setApplyToAllValue("");
+  }
+
+  function openItemOptions(productId: string) {
+    const item = cart.find((i) => i.product_id === productId);
+    if (!item) return;
+    setDiscountEditId(productId);
+    setDiscountEditValue(item.discount_pct && item.discount_pct > 0 ? item.discount_pct : "");
   }
 
   /** Recalculates the SGR deposit line so its qty always equals sum of has_sgr product qtys */
@@ -639,7 +585,6 @@ function PosRegisterInner({
     });
 
   const vatLabel = isRO ? t.inclTva : t.inclVat;
-  const canPay = cart.length > 0 && paymentMethods.length > 0;
   const chargeDisabled =
     !cart.length ||
     !paymentMethods.length ||
@@ -647,21 +592,9 @@ function PosRegisterInner({
     cashUnderPaid ||
     (features.splitPayments && activeSplitPayments.length > 0 && splitPaid + 0.0001 < totalDue);
 
-  function goToPayment() {
-    if (!canPay) return;
-    setCheckoutStep("payment");
-    if (selectedPaymentType !== "cash") setCashReceived("");
-  }
-
-  function backToOrder() {
-    setCheckoutStep("order");
-    setSaleStatus(null);
-  }
-
   return (
     <div className="flex-1 lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
-      {/* Left: Products column — order step only */}
-      {checkoutStep === "order" && (
+      {/* Left: Products column */}
       <div className="min-w-0 lg:flex-1 lg:flex lg:flex-col lg:overflow-hidden" style={{display: "flex", flexDirection: "column", overflow: "hidden", flex: "1 1 auto", minWidth: 0}}>
         {/* Products toolbar: categories, search */}
         <div className="space-y-2 p-2 sm:p-3 lg:px-4 lg:pt-3 lg:pb-2 lg:flex-none" style={{flexShrink: 0}}>
@@ -713,9 +646,79 @@ function PosRegisterInner({
           )}
         </div>
         </div>
-        {/* pos-utility-bar — secondary actions moved to More menu in cart */}
-        {isRO && fiscalNet?.enabled && checkoutStep === "order" && (
-        <div className="border-t border-slate-200 bg-white px-3 py-2 sm:px-4" style={{ flexShrink: 0 }}>
+        {/* pos-utility-bar */}
+        <div className="border-t border-slate-200 bg-white px-3 py-2 sm:px-4 overflow-x-auto" style={{WebkitOverflowScrolling: "touch", flexShrink: 0}}>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" className="h-11 px-4 shrink-0" onClick={() => setCart([])}>{t.newSale}</Button>
+            <Sheet>
+              <SheetTrigger render={<Button type="button" variant="outline" className="h-11 px-4 shrink-0" />}>
+                <Users className="h-4 w-4" />{t.customers}
+              </SheetTrigger>
+              <SheetContent className="w-full sm:max-w-lg">
+                <SheetHeader><SheetTitle>{t.customers}</SheetTitle></SheetHeader>
+                <div className="space-y-4 overflow-y-auto px-4 pb-4">
+                  <Input value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder={t.searchCustomer} aria-label={t.searchCustomer} />
+                  <div className="space-y-2">
+                    {shownCustomers.map((c) => (
+                      <button key={c.id} type="button" onClick={() => setSelectedCustomer(c)} className="w-full rounded-lg border p-3 text-left hover:bg-slate-50">
+                        <p className="font-medium">{c.name}</p>
+                        <p className="text-xs text-slate-500">{[c.phone, c.email].filter(Boolean).join(" · ") || t.noContact}</p>
+                      </button>
+                    ))}
+                  </div>
+                  <form action={addCustomerFromPos as unknown as (fd: FormData) => Promise<void>} className="space-y-3 rounded-lg border p-3">
+                    <p className="text-sm font-medium">{t.quickAddCustomer}</p>
+                    <Input name="name" required placeholder={t.searchCustomer} />
+                    <Input name="phone" placeholder="Phone" />
+                    <Input name="email" type="email" placeholder="Email" />
+                    <Button type="submit" size="sm"><UserPlus className="h-4 w-4" />{t.addCustomer}</Button>
+                  </form>
+                </div>
+              </SheetContent>
+            </Sheet>
+            <Sheet>
+              <SheetTrigger render={<Button type="button" variant="outline" className="h-11 px-4 shrink-0" />}>
+                <ReceiptText className="h-4 w-4" />{t.orders}
+              </SheetTrigger>
+              <SheetContent className="w-full sm:max-w-2xl">
+                <SheetHeader><SheetTitle>{t.ordersTransactions}</SheetTitle></SheetHeader>
+                <div className="space-y-3 overflow-y-auto px-4 pb-4">
+                  <Input value={txSearch} onChange={(e) => setTxSearch(e.target.value)} placeholder={t.searchTransaction} aria-label={t.searchTransaction} />
+                  {shownTransactions.map((tx) => (
+                    <div key={tx.id} className="rounded-lg border p-3 text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <strong>{tx.transaction_number}</strong>
+                        <span className="font-medium">{money(Number(tx.total ?? 0))}</span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">{tx.customer_name || t.walkIn} · {tx.payment_methods?.name ? paymentTypeLabel(tx.payment_methods.type ?? "other", tx.payment_methods.name, locale) : t.paymentGeneric}</p>
+                      <a className="text-blue-600 hover:underline text-xs mt-2 inline-block" href={`/app/transactions/${tx.id}`}>{t.viewReceipt}</a>
+                    </div>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
+            <RefundDialog recentTransactions={recentTransactions} currency={currency} />
+            <TillDialog sessionId={sessionId} cashDrawerSettings={cashDrawerSettings} fiscalNet={fiscalNet} isRO={isRO} currency={currency} orgName={orgName} userName={userName}/>
+            <CloseTillDialog sessionId={sessionId} summary={summary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName}/>
+            {cart.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                className="h-11 px-4 shrink-0"
+                onClick={() => {
+                  const held = holdCurrentSale({ cart, customerName: selectedCustomer?.name });
+                  if (held) { setCart([]); setHeldSales(listHeldSales()); }
+                }}
+              >
+                {t.holdOrder}
+              </Button>
+            )}
+            {heldSales.length > 0 && (
+              <Button type="button" variant="outline" className="h-11 px-4 shrink-0" onClick={() => setHeldOpen(true)}>
+                {t.heldOrders} ({heldSales.length})
+              </Button>
+            )}
+            {isRO && fiscalNet?.enabled && (
           <Dialog open={zReportOpen} onOpenChange={setZReportOpen}>
             <DialogTrigger render={
               <Button type="button" variant="outline" className={`h-10 px-4 ${zReportDone ? "border-green-300 text-green-700" : ""}`} disabled={zReportDone || zReportPending} />
@@ -758,15 +761,15 @@ function PosRegisterInner({
               </DialogFooter>
             </DialogContent>
           </Dialog>
+            )}
+          </div>
         </div>
-        )}
       </div>
-      )}
 
-      {/* Right: Cart (order) or Payment screen */}
+      {/* Right: Cart + payment (one screen) */}
       <form onSubmit={async (e) => {
         e.preventDefault();
-        if (checkoutStep !== "payment" || salePending) return;
+        if (salePending || !cart.length) return;
         setSalePending(true);
         setSaleStatus(null);
         setLastFiscalTxt(null);
@@ -797,7 +800,6 @@ function PosRegisterInner({
           writeCartBackupToStorage({
             cart,
             sessionId: sessionId ?? "",
-            checkoutStep,
             paymentMethodId,
             cashReceived,
             discountPct: txDiscountPct,
@@ -820,12 +822,10 @@ function PosRegisterInner({
             setSaleStatus({ ok: true, msg: saleMsg, transactionId: res.transactionId });
           }
           setCart([]);
-          setApplyToAllValue("");
           setTipAmount(0);
           setSplitPayments([]);
           setSelectedCustomer(null);
           setCashReceived("");
-          setCheckoutStep("order");
           setSalePending(false);
           clearCartBackupFromStorage();
           // Redirect to transaction page after brief success display
@@ -841,24 +841,7 @@ function PosRegisterInner({
           setSaleStatus({ ok: false, msg: safeMsg });
           setSalePending(false);
         }
-      }} className={`flex min-h-[28rem] flex-col bg-white shadow-sm lg:min-h-0 lg:overflow-hidden ${
-        checkoutStep === "payment"
-          ? "flex-1 rounded-xl border border-slate-200 lg:rounded-none lg:border-0"
-          : "rounded-xl border border-slate-200 lg:w-[380px] lg:flex-none lg:rounded-none lg:border-0 lg:border-l lg:shadow-none"
-      }`}>
-        {checkoutStep === "payment" && (
-          <div className="shrink-0 border-b border-slate-100 px-4 py-3">
-            <button
-              type="button"
-              onClick={backToOrder}
-              className="flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
-            >
-              ← {t.backToOrder}
-            </button>
-          </div>
-        )}
-        {checkoutStep === "order" ? (
-          <>
+      }} className="flex min-h-[28rem] flex-col rounded-xl border border-slate-200 bg-white shadow-sm lg:min-h-0 lg:w-[380px] lg:flex-none lg:overflow-hidden lg:rounded-none lg:border-0 lg:border-l lg:shadow-none">
         <div className="px-4 pt-3 pb-1 flex items-center justify-between shrink-0 gap-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.order}</span>
           <div className="flex items-center gap-2 flex-wrap justify-end">
@@ -867,68 +850,8 @@ function PosRegisterInner({
               {pendingSyncSales.length > 0 ? t.offlinePendingSync(pendingSyncSales.length) : t.offlinePendingFiscal(pendingFiscalSales.length)}
             </span>
           )}
-          <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
-            <SheetTrigger render={
-              <Button type="button" variant="outline" size="sm" className="h-8 gap-1 text-xs" aria-label={t.moreMenuAria}>
-                <MoreHorizontal className="h-4 w-4" />{t.moreMenu}
-              </Button>
-            } />
-            <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-              <SheetHeader><SheetTitle>{t.moreMenu}</SheetTitle></SheetHeader>
-              <div className="flex flex-col gap-2 px-4 pb-6 pt-2">
-                <Button type="button" variant="outline" className="justify-start" onClick={() => { setCart([]); setCheckoutStep("order"); setMoreOpen(false); }}>{t.newSale}</Button>
-                {cart.length > 0 && (
-                  <Button type="button" variant="outline" className="justify-start" onClick={() => {
-                    const held = holdCurrentSale({ cart, customerName: selectedCustomer?.name });
-                    if (held) { setCart([]); setApplyToAllValue(""); setCheckoutStep("order"); setHeldSales(listHeldSales()); setMoreOpen(false); }
-                  }}>{t.holdOrder}</Button>
-                )}
-                {heldSales.length > 0 && (
-                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setHeldOpen(true); setMoreOpen(false); }}>{t.heldOrders} ({heldSales.length})</Button>
-                )}
-                <div className="rounded-lg border p-3 space-y-2">
-                  <p className="text-xs font-semibold text-slate-500">{t.customers}</p>
-                  <CustomerCombobox customers={customers} value={selectedCustomer} onChange={setSelectedCustomer} />
-                </div>
-                {(features.kitchenDisplay || features.restaurantOrderFlow) && (
-                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setNotesOpen(true); setMoreOpen(false); }}>{t.notes}</Button>
-                )}
-                {features.orderTypes && (
-                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setOrderTypeOpen(true); setMoreOpen(false); }}>{t.orderType}</Button>
-                )}
-                {features.tips && (
-                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setTipOpen(true); setMoreOpen(false); }}>{t.tip}</Button>
-                )}
-                {features.splitPayments && (
-                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setSplitOpen(true); setMoreOpen(false); }}>{t.splitPayment}</Button>
-                )}
-                <Sheet>
-                  <SheetTrigger render={<Button type="button" variant="outline" className="w-full justify-start" />}>{t.orders}</SheetTrigger>
-                  <SheetContent className="w-full sm:max-w-2xl">
-                    <SheetHeader><SheetTitle>{t.ordersTransactions}</SheetTitle></SheetHeader>
-                    <div className="space-y-3 overflow-y-auto px-4 pb-4">
-                      <Input value={txSearch} onChange={(e) => setTxSearch(e.target.value)} placeholder={t.searchTransaction} aria-label={t.searchTransaction} />
-                      {shownTransactions.map((tx) => (
-                        <div key={tx.id} className="rounded-lg border p-3 text-sm">
-                          <div className="flex items-center justify-between gap-3">
-                            <strong>{tx.transaction_number}</strong>
-                            <span className="font-medium">{money(Number(tx.total ?? 0))}</span>
-                          </div>
-                          <p className="text-xs text-slate-500 mt-0.5">{tx.customer_name || t.walkIn} · {tx.payment_methods?.name ? paymentTypeLabel(tx.payment_methods.type ?? "other", tx.payment_methods.name, locale) : t.paymentGeneric}</p>
-                          <a className="text-blue-600 hover:underline text-xs mt-2 inline-block" href={`/app/transactions/${tx.id}`}>{t.viewReceipt}</a>
-                        </div>
-                      ))}
-                    </div>
-                  </SheetContent>
-                </Sheet>
-                <RefundDialog recentTransactions={recentTransactions} currency={currency} />
-                <TillDialog sessionId={sessionId} cashDrawerSettings={cashDrawerSettings} fiscalNet={fiscalNet} isRO={isRO} currency={currency} orgName={orgName} userName={userName}/>
-                <CloseTillDialog sessionId={sessionId} summary={summary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName}/>
-              </div>
-            </SheetContent>
-          </Sheet>
           {cart.length > 0 && (
-              <button type="button" onClick={() => { setCart([]); setCheckoutStep("order"); }} className="text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
+              <button type="button" onClick={() => setCart([])} className="text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
           )}
           </div>
         </div>
@@ -978,226 +901,205 @@ function PosRegisterInner({
             return (
             <div key={item.product_id} className="flex flex-col gap-1 rounded-xl border border-transparent bg-white/80 px-2 py-2 transition-colors hover:border-blue-100 hover:bg-blue-50/40">
               <div className="flex items-center gap-2">
-              <div className="flex-1 min-w-0">
+              <button type="button" onClick={() => openItemOptions(item.product_id)} className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-medium text-slate-900 truncate">{item.product_name}</p>
                 {linePct > 0 && (
                   <span className="inline-block mt-0.5 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">{t.discountBadge(linePct)}</span>
                 )}
-              </div>
-              <div className="flex items-center gap-1">
-                <button type="button" onClick={() => setQty(item.product_id, item.quantity - 1)} aria-label={t.decreaseQty} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">−</button>
-                <span className="w-7 text-center text-sm font-semibold tabular-nums">{item.quantity}</span>
-                <button type="button" onClick={() => setQty(item.product_id, item.quantity + 1)} aria-label={t.increaseQty} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">+</button>
-              </div>
-              <button
-                type="button"
-                onClick={() => { setDiscountEditId(item.product_id); setDiscountEditValue(linePct || ""); }}
-                className="flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-2 text-xs font-medium text-slate-600 hover:bg-white"
-                aria-label={t.itemDiscount}
-              >
-                <Percent className="h-3.5 w-3.5" />
               </button>
+              <div className="flex items-center gap-1">
+                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity - 1); }} aria-label={t.decreaseQty} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">−</button>
+                <span className="w-7 text-center text-sm font-semibold tabular-nums">{item.quantity}</span>
+                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity + 1); }} aria-label={t.increaseQty} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">+</button>
+              </div>
               <div className="text-right min-w-[4.5rem]">
                 {linePct > 0 && <p className="text-[10px] text-slate-400 line-through tabular-nums">{money(lineList)}</p>}
                 <p className="text-sm font-bold tabular-nums text-slate-950">{money(lineTotal)}</p>
               </div>
-              <button type="button" onClick={() => setQty(item.product_id, 0)} aria-label={t.removeItem} className="flex h-9 w-9 items-center justify-center rounded-lg text-sm text-slate-400 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200">×</button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, 0); }} aria-label={t.removeItem} className="flex h-9 w-9 items-center justify-center rounded-lg text-sm text-slate-400 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200">×</button>
               </div>
             </div>
           );})}
           {!cart.length && <p className="py-10 text-center text-sm text-slate-300">{t.tapToAdd}</p>}
         </div>
         <div className="border-t border-slate-100 px-4 pt-4 pb-4 space-y-3 shrink-0">
+          {(features.tips || features.splitPayments || features.kitchenDisplay || features.restaurantOrderFlow) && cart.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {(features.kitchenDisplay || features.restaurantOrderFlow) && (
+                <button type="button" onClick={() => setNotesOpen(true)}
+                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${(kitchenNote || customerNote) ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
+                  📝 {t.notes}{(kitchenNote || customerNote) ? " ●" : ""}
+                </button>
+              )}
+              {features.tips && (
+                <button type="button" onClick={() => setTipOpen(true)}
+                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${safeTipAmount > 0 ? "border-green-300 bg-green-50 text-green-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
+                  💰 {safeTipAmount > 0 ? `${t.tip} ${money(safeTipAmount)}` : t.tip}
+                </button>
+              )}
+              {features.splitPayments && (
+                <button type="button" onClick={() => setSplitOpen(true)}
+                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${activeSplitPayments.length > 0 ? "border-purple-300 bg-purple-50 text-purple-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
+                  ⚡ {activeSplitPayments.length > 0 ? `${t.splitPayment} (${activeSplitPayments.length})` : t.splitPayment}
+                </button>
+              )}
+            </div>
+          )}
           {cart.length > 0 && (
-            <div className="space-y-2 rounded-lg border border-dashed border-slate-200 bg-slate-50/50 p-2.5">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">{t.applyToAllItems}</p>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={applyToAllValue}
-                  onChange={(e) => setApplyToAllValue(e.target.value === "" ? "" : Number(e.target.value) || 0)}
-                  placeholder="0"
-                  aria-label={t.discountPctAria}
-                  className="h-8 w-16 rounded-lg border border-slate-200 bg-white px-2 text-sm text-right"
-                />
-                <Button type="button" size="sm" variant="outline" onClick={applyDiscountToAllCurrentItems} disabled={!applyToAllValue}>
-                  {t.apply}
-                </Button>
-              </div>
-              <p className="text-[10px] text-slate-400 leading-snug">{t.applyToAllHint}</p>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400 shrink-0">{t.discountPct}</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                value={uniformCartDiscount === null ? "" : uniformCartDiscount || ""}
+                onChange={(e) => applyDiscountToAllCurrentItems(Number(e.target.value) || 0)}
+                placeholder="0"
+                aria-label={t.discountPctAria}
+                className="h-8 w-16 rounded-lg border border-slate-200 px-2 text-sm text-right"
+              />
+              {discountAmount > 0 && <span className="text-xs text-blue-600 font-medium">−{money(discountAmount)}</span>}
+              {uniformCartDiscount === null && cart.some((i) => (i.discount_pct ?? 0) > 0) && (
+                <span className="text-[10px] text-slate-400">Mixed</span>
+              )}
             </div>
           )}
           {discountAmount > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span>{money(grossTotal)}</span></div>}
-          {discountAmount > 0 && <div className="flex justify-between text-xs text-blue-600"><span>{t.discount}</span><span>−{money(discountAmount)}</span></div>}
           {totalVat > 0.01 && <div className="flex justify-between text-xs text-slate-400"><span>{vatLabel}</span><span>{money(totalVat)}</span></div>}
           {safeTipAmount > 0 && <div className="flex justify-between text-xs text-green-700"><span>{t.tip}</span><span>{money(safeTipAmount)}</span></div>}
           <div className="flex justify-between items-baseline">
             <span className="text-base font-semibold text-slate-700">{t.total}</span>
             <span className="text-3xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</span>
           </div>
+          {(!features.splitPayments || activeSplitPayments.length === 0) && cart.length > 0 && (
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {paymentMethods.map((m) => {
+                const selected = paymentMethodId === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => {
+                      setPaymentMethodId(m.id);
+                      if (m.type !== "cash") setCashReceived("");
+                    }}
+                    className={`min-h-12 rounded-lg border px-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${selected ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                  >
+                    {paymentTypeLabel(m.type, m.name, locale)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {features.splitPayments && activeSplitPayments.length > 0 && (
+            <button type="button" onClick={() => setSplitOpen(true)}
+              className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}>
+              <span className="font-semibold">{t.splitPayment}</span>
+              {" · "}{t.splitPaid(money(splitPaid))}
+              {splitRemaining > 0.01 ? ` · ${t.splitRemaining(money(splitRemaining))}` : ` · ${t.splitFullyPaid}`}
+              <span className="float-right text-slate-500">{t.edit} ›</span>
+            </button>
+          )}
+          {features.splitPayments && activeSplitPayments.length === 0 && cart.length > 0 && (
+            <button type="button" onClick={() => setSplitOpen(true)}
+              className="w-full rounded-lg border border-dashed border-slate-200 px-3 py-2 text-xs text-slate-400 hover:bg-slate-50 transition-colors">
+              {t.addSplitPayment}
+            </button>
+          )}
+          {isCashSingle && (
+            <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div className="flex items-center gap-2">
+                <label htmlFor="cash-received-input" className="shrink-0 text-sm font-medium text-slate-700">
+                  {t.cashReceived}
+                </label>
+                <input
+                  id="cash-received-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={cashReceived}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setCashReceived(v === "" ? "" : Math.max(0, parseFloat(v) || 0));
+                  }}
+                  placeholder={totalDue.toFixed(2)}
+                  className="ml-auto h-9 w-28 rounded-lg border border-slate-200 bg-white px-2 text-right text-base font-bold tabular-nums text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                />
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {([
+                  { label: t.exact, v: Number(totalDue.toFixed(2)) },
+                  { label: t.quickCashAmount(5, currency), v: Math.ceil(totalDue / 5) * 5 },
+                  { label: t.quickCashAmount(10, currency), v: Math.ceil(totalDue / 10) * 10 },
+                  { label: t.quickCashAmount(20, currency), v: Math.ceil(totalDue / 20) * 20 },
+                ] as { label: string; v: number }[])
+                  .filter((btn, i, arr) => arr.findIndex((b) => b.v === btn.v) === i)
+                  .map(({ label, v }) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setCashReceived(v)}
+                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                        cashReceived === v
+                          ? "border-blue-600 bg-blue-600 text-white"
+                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+              </div>
+              {changeDue !== null && (
+                <div className={`flex items-center justify-between rounded-lg px-3 py-2 ${
+                  cashUnderPaid ? "border border-red-200 bg-red-50" : "border border-green-200 bg-green-50"
+                }`}>
+                  <span className={`text-sm font-semibold ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
+                    {t.changeDue}
+                  </span>
+                  <span className={`text-lg font-bold tabular-nums ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
+                    {cashUnderPaid ? `−${money(Math.abs(changeDue))}` : money(changeDue)}
+                  </span>
+                </div>
+              )}
+              {cashUnderPaid && (
+                <p className="text-xs text-red-600">{t.cashUnderpaidMsg}</p>
+              )}
+            </div>
+          )}
+          {saleStatus && (
+            <div className={`rounded-lg p-3 text-sm font-medium ${saleStatus.ok ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-700"}`}>
+              <p>{saleStatus.msg}</p>
+              {lastFiscalTxt && (
+                <button
+                  type="button"
+                  onClick={() => downloadFiscalNetTxt(lastFiscalTxt.filename, lastFiscalTxt.content)}
+                  className="mt-2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                >
+                  {t.downloadTxtAgain}
+                </button>
+              )}
+            </div>
+          )}
           <Button
-            type="button"
-            disabled={!canPay}
-            onClick={goToPayment}
-            className="h-16 w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
+            ref={chargeRef}
+            type="submit"
+            disabled={chargeDisabled}
+            className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {!paymentMethods.length ? t.setupPaymentMethods : cart.length === 0 ? t.addItems : `${t.pay} ${money(totalDue)}`}
+            {salePending
+              ? t.processing
+              : cashUnderPaid
+                ? t.insufficientCash
+                : !paymentMethods.length
+                  ? t.setupPaymentMethods
+                  : cart.length === 0
+                    ? t.addItems
+                    : `${t.validateCharge} ${money(totalDue)}`}
           </Button>
         </div>
-          </>
-        ) : (
-          <div className="flex flex-1 flex-col overflow-hidden" style={{ minHeight: 0 }}>
-            <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6" style={{ WebkitOverflowScrolling: "touch" }}>
-              <div className="text-center">
-                <p className="text-sm font-medium text-slate-500">{t.payItems(cart.reduce((s, i) => s + i.quantity, 0))}</p>
-                <p className="mt-2 text-5xl font-bold tabular-nums text-slate-950 sm:text-6xl">{money(totalDue)}</p>
-                {discountAmount > 0 && <p className="mt-1 text-sm text-slate-400">{t.subtotal} {money(grossTotal)} · −{money(discountAmount)}</p>}
-              </div>
 
-              <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{t.paymentMethod}</p>
-                {(!features.splitPayments || activeSplitPayments.length === 0) && (
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    {paymentMethods.map((m) => {
-                      const selected = paymentMethodId === m.id;
-                      return (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => {
-                            setPaymentMethodId(m.id);
-                            if (m.type !== "cash") setCashReceived("");
-                          }}
-                          className={`min-h-14 rounded-xl border px-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${selected ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
-                        >
-                          {paymentTypeLabel(m.type, m.name, locale)}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-                {features.splitPayments && activeSplitPayments.length > 0 && (
-                  <button type="button" onClick={() => setSplitOpen(true)}
-                    className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}>
-                    <span className="font-semibold">{t.splitPayment}</span>
-                    {" · "}{t.splitPaid(money(splitPaid))}
-                    {splitRemaining > 0.01 ? ` · ${t.splitRemaining(money(splitRemaining))}` : ` · ${t.splitFullyPaid}`}
-                    <span className="float-right text-slate-500">{t.edit} ›</span>
-                  </button>
-                )}
-                {features.splitPayments && activeSplitPayments.length === 0 && (
-                  <button type="button" onClick={() => setSplitOpen(true)}
-                    className="w-full rounded-lg border border-dashed border-slate-200 px-3 py-2 text-xs text-slate-400 hover:bg-slate-50 transition-colors">
-                    {t.addSplitPayment}
-                  </button>
-                )}
-              </div>
-
-              {isCashSingle && (
-                <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <label htmlFor="cash-received-input" className="text-sm font-semibold text-slate-700">
-                      {t.cashReceived}
-                    </label>
-                    <input
-                      id="cash-received-input"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={cashReceived}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        setCashReceived(v === "" ? "" : Math.max(0, parseFloat(v) || 0));
-                      }}
-                      placeholder={totalDue.toFixed(2)}
-                      readOnly={false}
-                      className="h-11 w-32 rounded-lg border border-slate-200 bg-white px-3 text-right text-xl font-bold tabular-nums text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                    />
-                  </div>
-                  <PosCashKeypad value={cashReceived} onChange={setCashReceived} disabled={salePending} clearLabel={t.clear} keypadAria={t.keypadAria} />
-                  <div className="flex flex-wrap gap-1.5">
-                    {([
-                      { label: t.exact, v: Number(totalDue.toFixed(2)) },
-                      { label: t.quickCashAmount(1, currency), v: Math.ceil(totalDue) },
-                      { label: t.quickCashAmount(5, currency), v: Math.ceil(totalDue / 5) * 5 },
-                      { label: t.quickCashAmount(10, currency), v: Math.ceil(totalDue / 10) * 10 },
-                      { label: t.quickCashAmount(20, currency), v: Math.ceil(totalDue / 20) * 20 },
-                      { label: t.quickCashAmount(50, currency), v: Math.ceil(totalDue / 50) * 50 },
-                    ] as { label: string; v: number }[])
-                      .filter((btn, i) => i === 0 || btn.v !== Number(totalDue.toFixed(2)))
-                      .filter((btn, i, arr) => arr.findIndex((b) => b.v === btn.v) === i)
-                      .map(({ label, v }) => (
-                        <button
-                          key={label}
-                          type="button"
-                          onClick={() => setCashReceived(v)}
-                          className={`rounded-lg border px-3 py-2 text-xs font-semibold transition-colors ${
-                            cashReceived === v
-                              ? "border-blue-600 bg-blue-600 text-white"
-                              : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                  </div>
-                  {changeDue !== null && (
-                    <div className={`flex items-center justify-between rounded-lg px-4 py-3 ${
-                      cashUnderPaid ? "border border-red-200 bg-red-50" : "border border-green-200 bg-green-50"
-                    }`}>
-                      <span className={`text-sm font-semibold ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
-                        {t.changeDue}
-                      </span>
-                      <span className={`text-2xl font-bold tabular-nums ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
-                        {cashUnderPaid ? `−${money(Math.abs(changeDue))}` : money(changeDue)}
-                      </span>
-                    </div>
-                  )}
-                  {cashUnderPaid && (
-                    <p className="text-sm text-red-600">{t.cashUnderpaidMsg}</p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="shrink-0 border-t border-slate-100 px-4 py-4 space-y-3">
-              {saleStatus && (
-                <div className={`rounded-lg p-3 text-sm font-medium ${saleStatus.ok ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-700"}`}>
-                  <p>{saleStatus.msg}</p>
-                  {lastFiscalTxt && (
-                    <button
-                      type="button"
-                      onClick={() => downloadFiscalNetTxt(lastFiscalTxt.filename, lastFiscalTxt.content)}
-                      className="mt-2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
-                    >
-                      {t.downloadTxtAgain}
-                    </button>
-                  )}
-                </div>
-              )}
-              <Button
-                ref={chargeRef}
-                type="submit"
-                disabled={chargeDisabled}
-                className="h-16 w-full bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {salePending
-                  ? t.processing
-                  : cashUnderPaid
-                    ? t.insufficientCash
-                    : !paymentMethods.length
-                      ? t.setupPaymentMethods
-                      : cart.length === 0
-                        ? t.addItems
-                        : `${t.validateCharge} ${money(totalDue)}`}
-              </Button>
-            </div>
-          </div>
-        )}
-
+          <input type="hidden" name="customer_name" value={selectedCustomer?.name ?? ""} />
           <input type="hidden" name="payment_method_id" value={paymentMethodId} />
           <input type="hidden" name="cash_received" value={isCashSingle && typeof cashReceived === "number" && cashReceived > 0 ? cashReceived.toFixed(2) : ""} />
           <input type="hidden" name="change_due" value={isCashSingle && changeDue !== null && changeDue >= 0 ? changeDue.toFixed(2) : ""} />
@@ -1337,35 +1239,49 @@ function PosRegisterInner({
             </DialogContent>
           </Dialog>
 
-          {/* ── Item discount ── */}
+          {/* ── Item options (qty + discount) ── */}
           <Dialog open={discountEditId !== null} onOpenChange={(open) => { if (!open) setDiscountEditId(null); }}>
             <DialogContent className="sm:max-w-xs">
-              <DialogHeader><DialogTitle>{t.itemDiscount}</DialogTitle></DialogHeader>
-              <div className="space-y-3">
-                <Label htmlFor="item-discount-pct">{t.discountPct}</Label>
-                <Input
-                  id="item-discount-pct"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value={discountEditValue}
-                  onChange={(e) => setDiscountEditValue(e.target.value === "" ? "" : Number(e.target.value) || 0)}
-                  className="text-right text-lg font-bold"
-                />
-                {discountEditId && (() => {
-                  const item = cart.find((i) => i.product_id === discountEditId);
-                  if (!item) return null;
-                  const preview = lineGrossAfter({ ...item, discount_pct: Number(discountEditValue) || 0 });
-                  return <p className="text-sm text-slate-500">{t.lineAfterDiscount}: {money(preview)}</p>;
-                })()}
+              <DialogHeader><DialogTitle>{discountEditId ? cart.find((i) => i.product_id === discountEditId)?.product_name ?? t.itemDiscount : t.itemDiscount}</DialogTitle></DialogHeader>
+              {discountEditId && (() => {
+                const item = cart.find((i) => i.product_id === discountEditId);
+                if (!item) return null;
+                const preview = lineGrossAfter({ ...item, discount_pct: Number(discountEditValue) || 0 });
+                return (
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-xs text-slate-500">Qty</Label>
+                  <div className="mt-1 flex items-center gap-2">
+                    <button type="button" onClick={() => setQty(item.product_id, item.quantity - 1)} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold">−</button>
+                    <span className="w-10 text-center text-lg font-bold tabular-nums">{item.quantity}</span>
+                    <button type="button" onClick={() => setQty(item.product_id, item.quantity + 1)} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold">+</button>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="item-discount-pct">{t.discountPct}</Label>
+                  <Input
+                    id="item-discount-pct"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={discountEditValue}
+                    onChange={(e) => {
+                      const v = e.target.value === "" ? "" : Number(e.target.value) || 0;
+                      setDiscountEditValue(v);
+                      setItemDiscountPct(item.product_id, Number(v) || 0);
+                    }}
+                    className="mt-1 text-right text-lg font-bold"
+                  />
+                  <p className="mt-1 text-sm text-slate-500">{t.lineAfterDiscount}: {money(preview)}</p>
+                </div>
               </div>
+                );
+              })()}
               <DialogFooter className="gap-2 sm:gap-0">
                 <Button type="button" variant="outline" onClick={() => { if (discountEditId) setItemDiscountPct(discountEditId, 0); setDiscountEditId(null); }}>{t.clearDiscount}</Button>
-                <Button type="button" onClick={() => {
-                  if (discountEditId) setItemDiscountPct(discountEditId, Number(discountEditValue) || 0);
-                  setDiscountEditId(null);
-                }}>{t.applyToItem}</Button>
+                <Button type="button" variant="destructive" onClick={() => { if (discountEditId) setQty(discountEditId, 0); setDiscountEditId(null); }}>{t.removeItem}</Button>
+                <Button type="button" onClick={() => setDiscountEditId(null)}>{t.done}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -1398,8 +1314,6 @@ function PosRegisterInner({
                         const resumed = resumeHeldSale(held.id);
                         if (resumed) {
                           setCart(resumed.cart);
-                          setApplyToAllValue("");
-                          setCheckoutStep("order");
                           setHeldSales(listHeldSales());
                           setHeldOpen(false);
                         }
@@ -1427,28 +1341,6 @@ function PosRegisterInner({
             </DialogContent>
           </Dialog>
       </form>
-
-      {/* Mobile cart summary bar — order step only */}
-      {checkoutStep === "order" && cart.length > 0 && (
-        <div className="fixed inset-x-0 bottom-4 z-30 flex justify-center px-3 lg:hidden">
-          <div className="flex w-full max-w-sm items-center gap-3 rounded-2xl bg-blue-600 px-4 py-3 shadow-xl">
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-blue-200">
-                {t.payItems(cart.reduce((s, i) => s + i.quantity, 0))}
-              </p>
-              <p className="text-lg font-bold text-white tabular-nums leading-tight">{money(totalDue)}</p>
-            </div>
-            <button
-              type="button"
-              onClick={goToPayment}
-              disabled={!canPay}
-              className="shrink-0 rounded-xl bg-white px-4 py-2 text-sm font-bold text-blue-600 shadow-sm active:scale-95 disabled:opacity-50"
-            >
-              {t.pay} →
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
