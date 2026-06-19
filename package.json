@@ -12,7 +12,9 @@
     "verify-pos-cart-restore": "node scripts/verify-pos-cart-restore.mjs",
     "verify-pos-line-discount": "node scripts/verify-pos-line-discount.mjs",
     "verify-nir-purchase-flow": "node scripts/verify-nir-purchase-flow.mjs",
-    "verify-nir-staging-schema": "node scripts/verify-staging-nir-schema.mjs"
+    "verify-nir-staging-schema": "node scripts/verify-staging-nir-schema.mjs",
+    "check-prod-nir-schema": "node scripts/check-prod-nir-schema.mjs",
+    "apply-prod-migration-037": "node scripts/apply-migration-037-production.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
@@ -47,6 +49,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
+    "pg": "^8.16.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
