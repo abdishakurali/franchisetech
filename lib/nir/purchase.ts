@@ -1,3 +1,16 @@
+/** Official Romanian finance-accounting document title (Cod 14-3-1A). */
+export const NIR_RO_TITLE = "NOTĂ DE RECEPȚIE ȘI CONSTATARE DE DIFERENȚE";
+export const NIR_RO_CODE = "14-3-1A";
+
+export function formatDateDisplay(value: string | null | undefined, isRO: boolean): string {
+  if (!value) return "—";
+  const s = String(value).slice(0, 10);
+  if (!isRO) return s;
+  const [y, m, d] = s.split("-");
+  if (!y || !m || !d) return s;
+  return `${d}.${m}.${y}`;
+}
+
 export type PurchaseLineInput = {
   product_id: string;
   quantity: number;

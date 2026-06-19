@@ -409,7 +409,7 @@ export function PurchaseForm({
                 />
               </div>
               <div>
-                <Label>{isRO ? "Data factură" : "Invoice date"}</Label>
+                <Label>{isRO ? "Data factură furnizor" : "Supplier invoice date"}</Label>
                 <Input
                   name="supplier_invoice_date"
                   type="date"
@@ -437,7 +437,7 @@ export function PurchaseForm({
               </div>
               {sites.length > 0 && (
                 <div>
-                  <Label>{isRO ? "Locație" : "Location"}</Label>
+                  <Label>{isRO ? "Gestiune / Locație" : "Location / warehouse"}</Label>
                   <select
                     name="site_id"
                     defaultValue={initialDraft?.site_id ?? ""}
@@ -565,11 +565,11 @@ export function PurchaseForm({
             </div>
 
             <div>
-              <Label>{isRO ? "Notițe" : "Notes"}</Label>
+              <Label>{isRO ? "Observații / diferențe" : "Observations / differences"}</Label>
               <Input
                 name="notes"
                 defaultValue={initialDraft?.notes ?? ""}
-                placeholder={isRO ? "Observații despre această livrare" : "Any notes about this delivery"}
+                placeholder={isRO ? "Diferențe față de factură, cantități lipsă, observații recepție…" : "Quantity differences, missing items, receiving notes…"}
                 className="mt-1"
               />
             </div>

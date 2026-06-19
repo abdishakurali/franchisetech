@@ -3,15 +3,11 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PrintButton } from "@/components/app/PrintButton";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { formatDateDisplay, NIR_RO_CODE, NIR_RO_TITLE } from "@/lib/nir/purchase";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: cur || "EUR" }).format(v);
-}
-
-function dateOnly(value: string | null | undefined) {
-  if (!value) return "—";
-  return String(value).slice(0, 10);
 }
 
 export default async function PurchasePrintPage({ params }: { params: Promise<{ id: string }> }) {
@@ -34,11 +30,34 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
   if (!purchase) redirect("/app/purchases");
   if (purchase.status !== "posted" && purchase.status !== "received") redirect(`/app/purchases/${id}`);
 
-  const { data: org } = await supabase.from("organisations").select("name").eq("id", orgId).single();
+  const hasNirNumber = Boolean(purchase.nir_number);
+
+  const { data: org } = await supabase
+    .from("organisations")
+    .select("name, country, country_code, fiscalnet_cif")
+    .eq("id", orgId)
+    .single();
+
   let siteName: string | null = null;
+  let siteAddress: string | null = null;
   if (purchase.site_id) {
-    const { data: site } = await supabase.from("sites").select("name").eq("id", purchase.site_id).single();
+    const { data: site } = await supabase
+      .from("sites")
+      .select("name, address, city")
+      .eq("id", purchase.site_id)
+      .single();
     siteName = site?.name ?? null;
+    siteAddress = [site?.address, site?.city].filter(Boolean).join(", ") || null;
+  }
+
+  let receivedByName: string | null = null;
+  if (purchase.received_by_user_id) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .eq("id", purchase.received_by_user_id)
+      .single();
+    receivedByName = profile?.full_name || profile?.email || null;
   }
 
   type Item = {
@@ -57,63 +76,107 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
   const grossTotal = Number(purchase.total_amount ?? netTotal + taxTotal);
   const supplierName = (purchase.suppliers as { name?: string } | null)?.name ?? "Direct";
   const invoiceNo = purchase.invoice_number ?? purchase.reference;
+  const orgCui = org?.fiscalnet_cif?.trim() || null;
+  const nirDate = formatDateDisplay(purchase.nir_date ?? purchase.purchase_date, isRO);
+  const invoiceDate = formatDateDisplay(purchase.supplier_invoice_date, isRO);
+
+  const docTitle = isRO
+    ? hasNirNumber
+      ? NIR_RO_TITLE
+      : "NOTĂ DE RECEPȚIE MARFĂ (cumpărare veche)"
+    : hasNirNumber
+      ? "Goods Receiving Note"
+      : "Legacy purchase receipt";
 
   return (
-    <div className="mx-auto max-w-3xl p-8 print:p-4 text-slate-900">
+    <div className="mx-auto max-w-4xl p-8 print:p-4 text-slate-900">
       <div className="mb-6 flex items-center justify-between print:hidden">
         <Link href={`/app/purchases/${id}`}>
           <Button variant="outline">{isRO ? "← Înapoi" : "← Back"}</Button>
         </Link>
-        <PrintButton label={isRO ? "Tipărește" : "Print"} />
+        <PrintButton label={isRO ? "Tipărește NIR" : "Print"} />
       </div>
 
-      <header className="border-b-2 border-slate-900 pb-4 mb-6">
-        <p className="text-xs uppercase tracking-wide text-slate-500">{org?.name ?? ""}</p>
-        <h1 className="text-2xl font-bold mt-1">{isRO ? "Notă de Intrare Recepție" : "Goods Receiving Note"}</h1>
-        {purchase.nir_number ? (
-          <p className="text-xl font-semibold mt-2">{purchase.nir_number}</p>
+      <header className="border-b-2 border-slate-900 pb-4 mb-6 text-center sm:text-left">
+        <h1 className="text-lg font-bold uppercase tracking-wide leading-tight">{docTitle}</h1>
+        {isRO && hasNirNumber && (
+          <p className="text-sm text-slate-600 mt-1">{isRO ? "Cod document" : "Document code"}: {NIR_RO_CODE}</p>
+        )}
+        {hasNirNumber ? (
+          <div className="mt-3 grid gap-1 text-sm sm:grid-cols-2">
+            <p>
+              <span className="text-slate-500">{isRO ? "Nr. NIR:" : "NIR no.:"} </span>
+              <span className="font-semibold">{purchase.nir_number}</span>
+            </p>
+            <p>
+              <span className="text-slate-500">{isRO ? "Data NIR:" : "NIR date:"} </span>
+              <span className="font-medium">{nirDate}</span>
+            </p>
+          </div>
         ) : (
-          <p className="text-sm text-slate-500 mt-2">{isRO ? "Cumpărare veche (fără număr NIR)" : "Legacy purchase (no NIR number)"}</p>
+          <p className="text-sm text-slate-500 mt-2">
+            {isRO
+              ? "Cumpărare veche (fără număr NIR). Document informativ — nu înlocuiește NIR oficial."
+              : "Legacy purchase (no NIR number). Informational receipt only."}
+          </p>
         )}
       </header>
 
-      <section className="grid grid-cols-2 gap-4 text-sm mb-6">
-        <div>
-          <p className="text-slate-500">{isRO ? "Furnizor" : "Supplier"}</p>
+      <section className="grid gap-4 sm:grid-cols-2 text-sm mb-6">
+        <div className="rounded border border-slate-200 p-3">
+          <p className="text-xs font-semibold uppercase text-slate-500 mb-2">
+            {isRO ? "Societate / Entitate" : "Business entity"}
+          </p>
+          <p className="font-medium">{org?.name ?? "—"}</p>
+          {orgCui && (
+            <p className="mt-1">
+              <span className="text-slate-500">{isRO ? "CUI:" : "Tax ID:"} </span>
+              {orgCui}
+            </p>
+          )}
+          {org?.country && (
+            <p className="mt-1 text-slate-600">{org.country}</p>
+          )}
+          {(siteName || siteAddress) && (
+            <p className="mt-2">
+              <span className="text-slate-500">{isRO ? "Gestiune / Locație:" : "Location:"} </span>
+              {[siteName, siteAddress].filter(Boolean).join(" — ")}
+            </p>
+          )}
+        </div>
+        <div className="rounded border border-slate-200 p-3">
+          <p className="text-xs font-semibold uppercase text-slate-500 mb-2">
+            {isRO ? "Furnizor" : "Supplier"}
+          </p>
           <p className="font-medium">{supplierName}</p>
+          {invoiceNo && (
+            <p className="mt-2">
+              <span className="text-slate-500">{isRO ? "Nr. factură furnizor:" : "Supplier invoice no.:"} </span>
+              {invoiceNo}
+            </p>
+          )}
+          {purchase.supplier_invoice_date && (
+            <p className="mt-1">
+              <span className="text-slate-500">{isRO ? "Data factură:" : "Invoice date:"} </span>
+              {invoiceDate}
+            </p>
+          )}
         </div>
-        <div>
-          <p className="text-slate-500">{isRO ? "Data NIR" : "NIR date"}</p>
-          <p className="font-medium">{dateOnly(purchase.nir_date ?? purchase.purchase_date)}</p>
-        </div>
-        {invoiceNo && (
-          <div>
-            <p className="text-slate-500">{isRO ? "Nr. factură furnizor" : "Supplier invoice no."}</p>
-            <p className="font-medium">{invoiceNo}</p>
-          </div>
-        )}
-        {purchase.supplier_invoice_date && (
-          <div>
-            <p className="text-slate-500">{isRO ? "Data factură" : "Invoice date"}</p>
-            <p className="font-medium">{dateOnly(purchase.supplier_invoice_date)}</p>
-          </div>
-        )}
-        {siteName && (
-          <div>
-            <p className="text-slate-500">{isRO ? "Locație" : "Location"}</p>
-            <p className="font-medium">{siteName}</p>
-          </div>
-        )}
       </section>
 
-      <table className="w-full text-sm border-collapse mb-6">
+      <table className="w-full text-xs sm:text-sm border-collapse mb-4">
         <thead>
-          <tr className="border-b border-slate-300">
-            <th className="text-left py-2">{isRO ? "Articol" : "Item"}</th>
-            <th className="text-right py-2">{isRO ? "Cant." : "Qty"}</th>
-            <th className="text-right py-2">{isRO ? "Cost net" : "Net"}</th>
-            <th className="text-right py-2">{taxLabel}</th>
-            <th className="text-right py-2">{isRO ? "Brut" : "Gross"}</th>
+          <tr className="border-b-2 border-slate-900 bg-slate-50">
+            <th className="text-left py-2 px-1 w-8">{isRO ? "Nr. crt." : "No."}</th>
+            <th className="text-left py-2 px-1">{isRO ? "Denumire articol" : "Item"}</th>
+            <th className="text-center py-2 px-1">{isRO ? "UM" : "UoM"}</th>
+            <th className="text-right py-2 px-1">{isRO ? "Cantitate" : "Qty"}</th>
+            <th className="text-right py-2 px-1">{isRO ? "Preț unitar net" : "Net unit"}</th>
+            <th className="text-right py-2 px-1">{isRO ? "Valoare netă" : "Net"}</th>
+            <th className="text-right py-2 px-1">{taxLabel} %</th>
+            <th className="text-right py-2 px-1">{taxLabel}</th>
+            <th className="text-right py-2 px-1">{isRO ? "Valoare brută" : "Gross"}</th>
+            <th className="text-left py-2 px-1">{isRO ? "Diferențe / Observații" : "Notes"}</th>
           </tr>
         </thead>
         <tbody>
@@ -121,33 +184,75 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
             const name = item.product_name ?? item.item_name ?? "—";
             const lineNet = Number(item.total_cost ?? 0);
             const lineTax = Number(item.tax_amount ?? 0);
+            const lineGross = lineNet + lineTax;
             return (
               <tr key={i} className="border-b border-slate-100">
-                <td className="py-2">{name}</td>
-                <td className="text-right py-2">{item.quantity} {item.unit_of_measure ?? ""}</td>
-                <td className="text-right py-2">{money(Number(item.unit_cost ?? 0), currency)}</td>
-                <td className="text-right py-2">{money(lineTax, currency)}</td>
-                <td className="text-right py-2">{money(lineNet + lineTax, currency)}</td>
+                <td className="py-2 px-1 text-slate-500">{i + 1}</td>
+                <td className="py-2 px-1">{name}</td>
+                <td className="text-center py-2 px-1">{item.unit_of_measure ?? "—"}</td>
+                <td className="text-right py-2 px-1">{item.quantity}</td>
+                <td className="text-right py-2 px-1">{money(Number(item.unit_cost ?? 0), currency)}</td>
+                <td className="text-right py-2 px-1">{money(lineNet, currency)}</td>
+                <td className="text-right py-2 px-1">{Number(item.tax_rate ?? 0)}%</td>
+                <td className="text-right py-2 px-1">{money(lineTax, currency)}</td>
+                <td className="text-right py-2 px-1 font-medium">{money(lineGross, currency)}</td>
+                <td className="py-2 px-1 text-slate-500">—</td>
               </tr>
             );
           })}
         </tbody>
         <tfoot>
           <tr className="border-t-2 border-slate-900 font-semibold">
-            <td colSpan={2} className="py-2 text-right">{isRO ? "Total net" : "Net total"}</td>
-            <td className="text-right py-2">{money(netTotal, currency)}</td>
-            <td className="text-right py-2">{money(taxTotal, currency)}</td>
-            <td className="text-right py-2">{money(grossTotal, currency)}</td>
+            <td colSpan={5} className="py-2 px-1 text-right">{isRO ? "Total net" : "Net total"}</td>
+            <td className="text-right py-2 px-1">{money(netTotal, currency)}</td>
+            <td />
+            <td className="text-right py-2 px-1">{money(taxTotal, currency)}</td>
+            <td className="text-right py-2 px-1">{money(grossTotal, currency)}</td>
+            <td />
           </tr>
         </tfoot>
       </table>
 
       {purchase.notes && (
-        <p className="text-sm text-slate-600">
-          <span className="font-medium">{isRO ? "Notițe: " : "Notes: "}</span>
-          {purchase.notes}
-        </p>
+        <section className="mb-6 rounded border border-slate-200 p-3 text-sm">
+          <p className="text-xs font-semibold uppercase text-slate-500 mb-1">
+            {isRO ? "Diferențe / Observații" : "Observations / differences"}
+          </p>
+          <p className="text-slate-800 whitespace-pre-wrap">{purchase.notes}</p>
+        </section>
       )}
+
+      <footer className="mt-8 border-t border-slate-300 pt-6 text-sm">
+        <div className="grid gap-8 sm:grid-cols-3">
+          <div>
+            <p className="text-xs font-semibold uppercase text-slate-500 mb-6">
+              {isRO ? "Recepționat de" : "Received by"}
+            </p>
+            <p className="font-medium min-h-[1.25rem]">{receivedByName ?? ""}</p>
+            <div className="mt-8 border-b border-slate-400 w-full" />
+            <p className="text-xs text-slate-500 mt-1">{isRO ? "Semnătură" : "Signature"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-slate-500 mb-6">
+              {isRO ? "Gestionar / Responsabil" : "Store manager / responsible"}
+            </p>
+            <div className="mt-14 border-b border-slate-400 w-full" />
+            <p className="text-xs text-slate-500 mt-1">{isRO ? "Semnătură" : "Signature"}</p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase text-slate-500 mb-6">
+              {isRO ? "Comisie recepție" : "Receiving committee"}
+            </p>
+            <div className="mt-14 border-b border-slate-400 w-full" />
+            <p className="text-xs text-slate-500 mt-1">{isRO ? "Semnătură" : "Signature"}</p>
+          </div>
+        </div>
+        <p className="mt-8 text-[10px] text-slate-400 leading-relaxed print:text-[9px]">
+          {isRO
+            ? "Document generat de software. Layout-ul este suport operațional — contabilul/proprietarul trebuie să confirme forma finală. Nu constituie certificare legală sau contabilă."
+            : "Software-generated receiving document. Layout is operational support only — owner/accountant should confirm final form. Not a legal or accounting certification."}
+        </p>
+      </footer>
     </div>
   );
 }

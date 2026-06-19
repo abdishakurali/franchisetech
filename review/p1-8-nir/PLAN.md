@@ -34,6 +34,40 @@
 - Reversal/correction workflow deferred to **v1.1**
 - Do **not** use current `cancelPurchase` on posted rows (it does not reverse stock)
 
+- Reversal/correction workflow deferred to **v1.1**
+- Do **not** use current `cancelPurchase` on posted rows (it does not reverse stock)
+
+---
+
+## Romanian NIR content requirements
+
+Document type for Romanian businesses:
+
+```text
+Notă de recepție și constatare de diferențe
+Cod document: 14-3-1A
+```
+
+Print and detail views must include: document title, code, entity (org name, CUI if available), NIR number/date, supplier + invoice details, gestiune/locație, item table with qty/UM/net/TVA/gross, diferențe/observații (`purchases.notes`), receiver name, blank signature lines for gestionar and comisie recepție.
+
+**v1 field decision:** Use `notes` for observații — **no** `reception_notes` column. **No** commission signature storage — print blanks only.
+
+**Disclaimer:** Software-generated layout; accountant/owner confirms final form. Not legal certification.
+
+**Legacy:** `received` without `nir_number` prints as old goods receipt — no fake NIR number.
+
+---
+
+## Purchase Order relationship (future)
+
+```text
+Purchase Order → Receive Goods → NIR
+```
+
+PO = supplier commitment; NIR = actual receipt. v1 allows direct receiving without PO module. Future: NIR from PO with ordered-vs-received diferențe in notes.
+
+---
+
 ### 4. Production schema reconciliation — mandatory (completed)
 
 Reconciliation performed **2026-06-19** via read-only Supabase PostgREST OpenAPI + column probes.
@@ -201,10 +235,12 @@ Gross line = `total_cost + tax_amount` (computed at render/print).
 ```
 Record purchase (PurchaseForm + NIR section)
   → Save draft (no stock)
-  → Preview NIR
+  → Preview / review detail
   → Post NIR (number + stock + posted_at/by)
-  → Detail page + Print / Export
+  → Print (Cod 14-3-1A layout for RON orgs)
 ```
+
+Romanian print header constants: `lib/nir/purchase.ts` → `NIR_RO_TITLE`, `NIR_RO_CODE`.
 
 ### Files to enhance (implementation phase)
 

@@ -7,7 +7,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { cancelPurchase, postNirPurchase } from "@/app/actions/kitchenops";
 import {
+  formatDateDisplay,
   isPurchaseLocked,
+  NIR_RO_CODE,
+  NIR_RO_TITLE,
   purchaseStatusBadge,
 } from "@/lib/nir/purchase";
 
@@ -16,9 +19,8 @@ function money(v: number, cur = "EUR") {
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: cur || "EUR" }).format(v);
 }
 
-function dateOnly(value: string | null | undefined) {
-  if (!value) return "—";
-  return String(value).slice(0, 10);
+function dateOnly(value: string | null | undefined, isRO: boolean) {
+  return formatDateDisplay(value, isRO);
 }
 
 export default async function PurchaseDetailPage({
@@ -69,7 +71,7 @@ export default async function PurchaseDetailPage({
   const isDraft = purchase.status === "draft";
   const locked = isPurchaseLocked(purchase.status, purchase.posted_at);
   const badge = purchaseStatusBadge(purchase.status, purchase.nir_number, isRO);
-  const dateStr = dateOnly(purchase.purchase_date ?? purchase.purchased_at);
+  const dateStr = dateOnly(purchase.purchase_date ?? purchase.purchased_at, isRO);
   const supplierName = (purchase.suppliers as { name?: string } | null)?.name ?? (isRO ? "Direct" : "Direct");
   const invoiceNo = purchase.invoice_number ?? purchase.reference;
 
@@ -108,6 +110,11 @@ export default async function PurchaseDetailPage({
           <h1 className="text-2xl font-semibold text-slate-950 mt-1">
             {purchase.nir_number ?? (isRO ? "Cumpărare" : "Purchase")}
           </h1>
+          {isRO && purchase.nir_number && (
+            <p className="text-xs text-slate-500 mt-1">
+              {NIR_RO_TITLE} · Cod {NIR_RO_CODE}
+            </p>
+          )}
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             <span className="text-sm text-slate-500">{dateStr}</span>
             <Badge variant="secondary" className={`text-xs border ${badge.className}`}>{badge.label}</Badge>
@@ -138,7 +145,15 @@ export default async function PurchaseDetailPage({
 
       <div id="nir-print-area" className="space-y-6">
         <div className="hidden print:block border-b pb-4 mb-2">
-          <h1 className="text-xl font-bold">{isRO ? "Notă de Intrare Recepție (NIR)" : "Goods Receiving Note (NIR)"}</h1>
+          <h1 className="text-xl font-bold">
+            {isRO
+              ? purchase.nir_number
+                ? NIR_RO_TITLE
+                : "Notă de recepție marfă (cumpărare veche)"
+              : purchase.nir_number
+                ? "Goods Receiving Note (NIR)"
+                : "Legacy purchase receipt"}
+          </h1>
           {purchase.nir_number && <p className="text-lg font-semibold mt-1">{purchase.nir_number}</p>}
         </div>
 
@@ -156,7 +171,7 @@ export default async function PurchaseDetailPage({
               )}
               <div>
                 <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Data NIR" : "NIR date"}</p>
-                <p className="font-medium text-slate-900">{dateOnly(purchase.nir_date ?? purchase.purchase_date)}</p>
+                <p className="font-medium text-slate-900">{dateOnly(purchase.nir_date ?? purchase.purchase_date, isRO)}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Furnizor" : "Supplier"}</p>
@@ -171,12 +186,12 @@ export default async function PurchaseDetailPage({
               {purchase.supplier_invoice_date && (
                 <div>
                   <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Data factură" : "Invoice date"}</p>
-                  <p className="font-medium text-slate-900">{dateOnly(purchase.supplier_invoice_date)}</p>
+                  <p className="font-medium text-slate-900">{dateOnly(purchase.supplier_invoice_date, isRO)}</p>
                 </div>
               )}
               {siteName && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Locație" : "Location"}</p>
+                  <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Gestiune / Locație" : "Location"}</p>
                   <p className="font-medium text-slate-900">{siteName}</p>
                 </div>
               )}
@@ -193,12 +208,27 @@ export default async function PurchaseDetailPage({
                 </div>
               )}
             </div>
-            {purchase.notes && (
+            {(purchase.notes || isDraft) && (
               <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
-                <p className="text-xs text-slate-400 mb-1">{isRO ? "Notițe" : "Notes"}</p>
-                <p className="text-slate-700">{purchase.notes}</p>
+                <p className="text-xs text-slate-400 mb-1">{isRO ? "Observații / diferențe" : "Observations / differences"}</p>
+                <p className="text-slate-700">{purchase.notes || (isRO ? "—" : "—")}</p>
               </div>
             )}
+
+            <div className="grid grid-cols-3 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+              <div>
+                <p className="text-xs text-slate-400">{isRO ? "Total net" : "Net total"}</p>
+                <p className="font-semibold text-slate-900">{money(netTotal, currency)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">{isRO ? `Total ${taxLabel}` : `Total ${taxLabel}`}</p>
+                <p className="font-semibold text-slate-900">{money(taxTotal, currency)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">{isRO ? "Total brut" : "Gross total"}</p>
+                <p className="font-semibold text-slate-900">{money(grossTotal, currency)}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -263,10 +293,10 @@ export default async function PurchaseDetailPage({
         <div className="flex flex-wrap gap-3 print:hidden">
           <form action={postNirPurchase as unknown as (fd: FormData) => Promise<void>}>
             <input type="hidden" name="purchase_id" value={id} />
-            <input type="hidden" name="purchase_date" value={dateOnly(purchase.purchase_date) === "—" ? new Date().toISOString().slice(0, 10) : dateOnly(purchase.purchase_date)} />
-            <input type="hidden" name="nir_date" value={dateOnly(purchase.nir_date) === "—" ? dateOnly(purchase.purchase_date) : dateOnly(purchase.nir_date)} />
+            <input type="hidden" name="purchase_date" value={(purchase.purchase_date ?? new Date().toISOString().slice(0, 10)).toString().slice(0, 10)} />
+            <input type="hidden" name="nir_date" value={(purchase.nir_date ?? purchase.purchase_date ?? new Date().toISOString().slice(0, 10)).toString().slice(0, 10)} />
             <input type="hidden" name="invoice_number" value={purchase.invoice_number ?? ""} />
-            <input type="hidden" name="supplier_invoice_date" value={dateOnly(purchase.supplier_invoice_date) === "—" ? "" : dateOnly(purchase.supplier_invoice_date)} />
+            <input type="hidden" name="supplier_invoice_date" value={purchase.supplier_invoice_date ? String(purchase.supplier_invoice_date).slice(0, 10) : ""} />
             {purchase.supplier_id && <input type="hidden" name="supplier_id" value={purchase.supplier_id} />}
             {purchase.site_id && <input type="hidden" name="site_id" value={purchase.site_id} />}
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -289,10 +319,13 @@ export default async function PurchaseDetailPage({
       )}
 
       {locked && purchase.status === "received" && !purchase.nir_number && (
-        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 print:hidden">
-          {isRO
-            ? "Cumpărare înregistrată înainte de NIR. Stocul a fost deja actualizat la momentul înregistrării."
-            : "Purchase recorded before NIR. Stock was already updated when it was recorded."}
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 print:hidden">
+          <p className="font-medium">{isRO ? "Cumpărare veche / fără NIR" : "Legacy purchase / no NIR"}</p>
+          <p className="mt-1 opacity-90">
+            {isRO
+              ? "Înregistrată înainte de NIR. Stocul a fost deja actualizat. Poate fi tipărită ca notă de recepție marfă, fără număr NIR oficial."
+              : "Recorded before NIR workflow. Stock was already updated. Printable as a purchase receipt, not an official NIR number."}
+          </p>
         </div>
       )}
     </div>

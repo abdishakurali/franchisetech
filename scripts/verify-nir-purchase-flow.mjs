@@ -98,6 +98,31 @@ console.log("P1.8 NIR purchase flow verification\n");
   assert("postNirPurchase uses createServiceClient server-side", kitchenops.includes("createServiceClient"));
 }
 
+// ── Romanian document layout (print + detail) ─────────────────
+{
+  const printPage = read("app/app/purchases/[id]/print/page.tsx");
+  const detailPage = read("app/app/purchases/[id]/page.tsx");
+  const purchaseForm = read("components/app/PurchaseForm.tsx");
+  const nirLib = read("lib/nir/purchase.ts");
+  const migration = read("supabase/migrations/037_nir_purchase_fields.sql");
+
+  assert("NIR RO title constant defined", nirLib.includes("NOTĂ DE RECEPȚIE ȘI CONSTATARE DE DIFERENȚE"));
+  assert("NIR RO code 14-3-1A defined", nirLib.includes("14-3-1A"));
+  assert("print page uses RO title constant", printPage.includes("NIR_RO_TITLE"));
+  assert("print page shows document code", printPage.includes("NIR_RO_CODE"));
+  assert("print page has supplier invoice label", printPage.includes("Nr. factură furnizor"));
+  assert("print page has observations label", printPage.includes("Diferențe / Observații"));
+  assert("print page has signature labels", printPage.includes("Recepționat de") && printPage.includes("Comisie recepție"));
+  assert("print page has software disclaimer", printPage.includes("certificare legală") || printPage.includes("legal or accounting certification"));
+  assert("print page legacy without fake NIR", printPage.includes("fără număr NIR") || printPage.includes("no NIR number"));
+  assert("detail page legacy received banner", detailPage.includes("Cumpărare veche / fără NIR") || detailPage.includes("Legacy purchase / no NIR"));
+  assert("detail page observations label", detailPage.includes("Observații / diferențe"));
+  assert("form has supplier invoice date label", purchaseForm.includes("Data factură furnizor"));
+  assert("form has observations label", purchaseForm.includes("Observații / diferențe"));
+  assert("migration 037 avoids reception_notes column", !migration.includes("reception_notes"));
+  assert("POS discount script still present", read("scripts/verify-pos-line-discount.mjs").includes("discount"));
+}
+
 // 1. Draft does not alter stock
 {
   const items = parsePurchaseLinesFromForm([
