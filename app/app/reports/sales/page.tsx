@@ -67,6 +67,7 @@ export default async function SalesReportPage() {
   const totalNet = sumRows(transactions, (tx) => Number(tx.subtotal_net ?? 0));
   const totalVat = sumRows(transactions, (tx) => Number(tx.tax_total ?? 0));
   const totalTips = sumRows(transactions, (tx) => Number(tx.tip_amount ?? 0));
+  const totalDiscounts = sumRows(transactions, (tx) => Number(tx.discount_total ?? 0));
   const grossExTips = totalGross - totalTips;
 
   // Voided count for the month
@@ -122,6 +123,12 @@ export default async function SalesReportPage() {
               <p className="text-xl font-bold text-green-700">{formatMoney(grossExTips, currency)}</p>
             </div>
           </div>
+          {totalDiscounts > 0 && (
+            <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
+              <p className="text-slate-600">Discounts given this month (already reflected in gross revenue above)</p>
+              <p className="text-xl font-bold text-blue-700 mt-1">−{formatMoney(totalDiscounts, currency)}</p>
+            </div>
+          )}
           {vatByRate.size > 0 && (
             <Table>
               <TableHeader>

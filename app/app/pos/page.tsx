@@ -235,7 +235,7 @@ export default async function PosPage() {
   const { data: methods } = await supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at");
   const [{ data: customers }, { data: recentTransactions }] = await Promise.all([
     supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
-    supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
+    supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
   ]);
 
   // ── CLOSED: show open-till form + last session summary + quick links ──

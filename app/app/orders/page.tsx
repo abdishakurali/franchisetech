@@ -13,7 +13,7 @@ export default async function OrdersPage() {
 
   const { data: transactions } = await supabase
     .from("pos_transactions")
-    .select("id,transaction_number,sold_at,total,status,customer_name,payment_methods(name),pos_transaction_items(product_name,quantity)")
+    .select("id,transaction_number,sold_at,total,discount_total,status,customer_name,payment_methods(name),pos_transaction_items(product_name,quantity,discount_pct)")
     .eq("organisation_id", orgId)
     .eq("status", "completed")
     .order("sold_at", { ascending: false })
@@ -56,6 +56,8 @@ export default async function OrdersPage() {
                 {(transactions ?? []).map((tx) => {
                   const method = firstJoined(tx.payment_methods as {name?:string}|{name?:string}[]|null);
                   const items = tx.pos_transaction_items ?? [];
+                  const discountTotal = Number(tx.discount_total ?? 0);
+                  const hasLineDiscount = items.some((i: { discount_pct?: number | null }) => Number(i.discount_pct ?? 0) > 0);
                   const time = tx.sold_at ? new Intl.DateTimeFormat("en-IE", { timeStyle: "short", dateStyle: "short" }).format(new Date(tx.sold_at)) : "—";
                   return (
                     <TableRow key={tx.id}>
@@ -64,12 +66,17 @@ export default async function OrdersPage() {
                       <TableCell>{tx.customer_name ?? "—"}</TableCell>
                       <TableCell>
                         <span className="text-sm text-slate-600">
-                          {items.slice(0, 2).map((i: {product_name:string;quantity:number}) => `${i.product_name} ×${i.quantity}`).join(", ")}
+                          {items.slice(0, 2).map((i: {product_name:string;quantity:number;discount_pct?:number|null}) => `${i.product_name}${Number(i.discount_pct ?? 0) > 0 ? ` (−${i.discount_pct}%)` : ""} ×${i.quantity}`).join(", ")}
                           {items.length > 2 && ` +${items.length - 2} more`}
                         </span>
                       </TableCell>
                       <TableCell><Badge variant="secondary">{method?.name ?? "—"}</Badge></TableCell>
-                      <TableCell className="text-right font-semibold">{formatMoney(tx.total, currency)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="font-semibold">{formatMoney(tx.total, currency)}</div>
+                        {(discountTotal > 0 || hasLineDiscount) && (
+                          <div className="text-xs text-blue-600">−{formatMoney(discountTotal, currency)} disc.</div>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Link href={`/app/transactions/${tx.id}`} className="text-sm text-blue-600 hover:underline">Receipt</Link>
                       </TableCell>

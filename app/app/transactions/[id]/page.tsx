@@ -6,6 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate, formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import {
+  lineDiscountPctStored,
+  lineGrossAfterStored,
+  lineGrossBeforeStored,
+  lineHasDiscount,
+  receiptDiscountSummary,
+} from "@/lib/pos-receipt-display";
 
 function firstJoined<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
@@ -31,6 +38,8 @@ type ReceiptItem = {
   quantity: number | string;
   unit_price: number | string;
   line_total: number | string;
+  discount_pct?: number | string | null;
+  discount_amount?: number | string | null;
   vat_rate?: number | null;
   net_amount?: number | null;
   vat_amount?: number | null;
@@ -137,6 +146,7 @@ export default async function TransactionDetailPage({
   const totalGross = Number(tx.total_gross ?? tx.total ?? 0);
   const totalNet = Number(tx.subtotal_net ?? tx.subtotal ?? 0);
   const totalVat = Number(tx.tax_total ?? 0);
+  const discountSummary = receiptDiscountSummary(items, tx);
 
   return (
     <div className="space-y-6 p-6">
@@ -179,19 +189,33 @@ export default async function TransactionDetailPage({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.length > 0 ? items.map((item) => (
+              {items.length > 0 ? items.map((item) => {
+                const linePct = lineDiscountPctStored(item);
+                const lineBefore = lineGrossBeforeStored(item);
+                const lineAfter = lineGrossAfterStored(item);
+                return (
                 <TableRow key={item.id}>
                   <TableCell>
                     <div>{item.product_name || "Item"}</div>
+                    {lineHasDiscount(item) && (
+                      <Badge variant="secondary" className="mt-1 text-[10px] font-semibold text-blue-700">
+                        −{linePct}%
+                      </Badge>
+                    )}
                     {Number(item.vat_rate ?? 0) > 0 && (
                       <div className="text-xs text-slate-400">VAT {item.vat_rate}%</div>
                     )}
                   </TableCell>
                   <TableCell className="text-right">{Number(item.quantity ?? 0)}</TableCell>
                   <TableCell className="text-right">{money(item.unit_price, currency)}</TableCell>
-                  <TableCell className="text-right font-medium">{money(item.line_total, currency)}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="font-medium">{money(lineAfter, currency)}</div>
+                    {lineHasDiscount(item) && lineBefore > lineAfter + 0.001 && (
+                      <div className="text-xs text-slate-400">{money(lineBefore, currency)} before discount</div>
+                    )}
+                  </TableCell>
                 </TableRow>
-              )) : (
+              );}) : (
                 <TableRow>
                   <TableCell colSpan={4} className="py-6 text-center text-sm text-slate-500">
                     No items saved for this receipt.
@@ -200,6 +224,23 @@ export default async function TransactionDetailPage({
               )}
             </TableBody>
           </Table>
+
+          {discountSummary.hasDiscount && (
+            <div className="space-y-1 border-t pt-3 text-sm">
+              <div className="flex justify-between text-slate-500">
+                <span>Subtotal before discount</span>
+                <span>{money(discountSummary.subtotalBefore, currency)}</span>
+              </div>
+              <div className="flex justify-between text-blue-700 font-medium">
+                <span>Discount total</span>
+                <span>−{money(discountSummary.discountTotal, currency)}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-slate-900">
+                <span>Total after discount</span>
+                <span>{money(discountSummary.totalAfter, currency)}</span>
+              </div>
+            </div>
+          )}
 
           {/* VAT summary */}
           <div className="space-y-1 border-t pt-3 text-sm">

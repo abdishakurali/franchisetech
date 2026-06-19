@@ -27,6 +27,46 @@ function cartGrossAfter(lines, legacyCartPct = 0) {
   return Number(lines.reduce((s, l) => s + lineGrossAfter(l, legacyCartPct), 0).toFixed(2));
 }
 
+function cartGrossBefore(lines) {
+  return Number(lines.reduce((s, l) => s + lineGrossBefore(l), 0).toFixed(2));
+}
+
+function cartDiscountAmount(lines, legacyCartPct = 0) {
+  return Number((cartGrossBefore(lines) - cartGrossAfter(lines, legacyCartPct)).toFixed(2));
+}
+
+function lineVatAmount(line, legacyCartPct = 0) {
+  const gross = lineGrossAfter(line, legacyCartPct);
+  const vatDecimal = line.vat_rate / 100;
+  if (vatDecimal <= 0) return 0;
+  return Number((gross - gross / (1 + vatDecimal)).toFixed(2));
+}
+
+function lineGrossAfterStored(item) {
+  return Number(Number(item.line_total ?? item.gross_amount ?? lineGrossBefore(item)).toFixed(2));
+}
+
+function lineDiscountPctStored(item) {
+  const pct = Number(item.discount_pct ?? 0);
+  if (pct > 0) return clampDiscountPct(pct);
+  const before = lineGrossBefore(item);
+  const disc = Number(item.discount_amount ?? 0);
+  if (disc > 0 && before > 0) return clampDiscountPct((disc / before) * 100);
+  return 0;
+}
+
+function receiptDiscountSummary(items, tx = {}) {
+  const computedBefore = cartGrossBefore(items);
+  const computedAfter = Number(items.reduce((s, i) => s + lineGrossAfterStored(i), 0).toFixed(2));
+  const storedBefore = Number(tx.subtotal_gross_before_discount ?? 0);
+  const storedDiscount = Number(tx.discount_total ?? 0);
+  const subtotalBefore = storedBefore > 0 ? storedBefore : computedBefore;
+  const totalAfter = Number(tx.total_gross ?? tx.total ?? computedAfter);
+  const discountTotal =
+    storedDiscount > 0 ? storedDiscount : Number(Math.max(0, subtotalBefore - totalAfter).toFixed(2));
+  return { subtotalBefore, discountTotal, totalAfter };
+}
+
 function transactionDiscountPct(lines, legacyCartPct = 0) {
   if (!lines.length) return 0;
   const pcts = lines.map((l) => lineDiscountPct(l, legacyCartPct));
@@ -58,6 +98,8 @@ function buildPosItemCalcs(cart, legacyCartPct) {
       ...item,
       applied_discount_pct: appliedPct,
       line_total: Number(grossAmount.toFixed(2)),
+      gross_amount: Number(grossAmount.toFixed(4)),
+      discount_amount: Number((grossBefore - grossAmount).toFixed(4)),
     };
   });
 }
@@ -231,6 +273,82 @@ const fixedCart = applyDiscountToAllLines(uncommittedOldBug, 32);
 const fixedPayload = parseSalePayload(JSON.stringify(fixedCart), transactionDiscountPct(fixedCart));
 const fixedLines = buildFiscalNetReceiptLines(fixedPayload.fiscalItems, fixedPayload.total);
 assert(fixedLines[1] === "DP^3200" && fixedLines.at(-1) === "P^1^218", "immediate apply-to-all fixes live failure path");
+
+// ── Owner case: Banana Oat Smoothie 2% + Blueberry Muffin 7% ──
+const smoothieLine = {
+  product_id: "smoothie",
+  product_name: "Banana Oat Smoothie",
+  quantity: 1,
+  unit_price: 5.2,
+  vat_rate: 9,
+  fiscalnet_vat_group: 1,
+  discount_pct: 2,
+};
+const muffinLine = {
+  product_id: "muffin",
+  product_name: "Blueberry Muffin",
+  quantity: 1,
+  unit_price: 2.8,
+  vat_rate: 13.5,
+  fiscalnet_vat_group: 1,
+  discount_pct: 7,
+};
+const ownerCart = [smoothieLine, muffinLine];
+assert(lineGrossAfter(smoothieLine) === 5.1, "smoothie 2% → 5.10");
+assert(lineGrossAfter(muffinLine) === 2.6, "muffin 7% → 2.60");
+assert(cartGrossBefore(ownerCart) === 8.0, "subtotal before discount 8.00");
+assert(cartDiscountAmount(ownerCart) === 0.3, "discount total 0.30");
+assert(cartGrossAfter(ownerCart) === 7.7, "total after discount 7.70");
+
+const ownerPayload = parseSalePayload(JSON.stringify(ownerCart), transactionDiscountPct(ownerCart));
+assert(ownerPayload.dbItems[0].discount_pct === 2, "smoothie discount_pct persisted as 2");
+assert(ownerPayload.dbItems[1].discount_pct === 7, "muffin discount_pct persisted as 7");
+const ownerFiscal = buildFiscalNetReceiptLines(ownerPayload.fiscalItems, ownerPayload.total);
+assert(ownerFiscal[0] === "S^Banana Oat Smoothie^520^1000^Buc^1^1", "smoothie S line");
+assert(ownerFiscal[1] === "DP^200", "smoothie DP^200");
+assert(ownerFiscal[2] === "S^Blueberry Muffin^280^1000^Buc^1^1", "muffin S line");
+assert(ownerFiscal[3] === "DP^700", "muffin DP^700");
+assert(ownerFiscal[ownerFiscal.length - 1] === "P^1^770", "owner case P^770");
+
+const vat9 = lineVatAmount(smoothieLine);
+const vat135 = lineVatAmount(muffinLine);
+assert(vat9 === 0.42, "VAT 9% amount 0.42");
+assert(vat135 === 0.31, "VAT 13.5% amount 0.31");
+assert(Number((lineGrossAfter(smoothieLine) - vat9).toFixed(2)) === 4.68, "VAT 9% net 4.68");
+assert(Number((lineGrossAfter(muffinLine) - vat135).toFixed(2)) === 2.29, "VAT 13.5% net 2.29");
+
+// Receipt display summary from stored DB rows
+const storedItems = ownerPayload.itemCalcs.map((item) => ({
+  quantity: item.quantity,
+  unit_price: item.unit_price,
+  line_total: item.line_total,
+  gross_amount: item.gross_amount,
+  discount_pct: item.applied_discount_pct,
+  discount_amount: item.discount_amount,
+}));
+const storedTx = {
+  subtotal_gross_before_discount: 8.0,
+  discount_total: 0.3,
+  total_gross: 7.7,
+  total: 7.7,
+};
+const receiptSummary = receiptDiscountSummary(storedItems, storedTx);
+assert(receiptSummary.subtotalBefore === 8.0, "receipt subtotal before discount 8.00");
+assert(receiptSummary.discountTotal === 0.3, "receipt discount total 0.30");
+assert(receiptSummary.totalAfter === 7.7, "receipt total after discount 7.70");
+assert(lineDiscountPctStored(storedItems[0]) === 2, "receipt line shows 2% discount");
+assert(lineDiscountPctStored(storedItems[1]) === 7, "receipt line shows 7% discount");
+
+// Static: transaction receipt page imports discount display helpers
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const receiptPage = readFileSync(resolve(__dirname, "../app/app/transactions/[id]/page.tsx"), "utf8");
+assert(receiptPage.includes("pos-receipt-display"), "transaction detail imports pos-receipt-display");
+assert(receiptPage.includes("Subtotal before discount"), "transaction detail shows subtotal before discount");
+assert(receiptPage.includes("Discount total"), "transaction detail shows discount total");
+assert(receiptPage.includes("lineHasDiscount"), "transaction detail shows line discount badge");
 
 if (failed > 0) {
   console.error(`\n${failed} assertion(s) failed`);

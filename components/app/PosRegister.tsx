@@ -57,7 +57,7 @@ type PaymentMethod = { id: string; name: string; type: string };
 type CartItem = PosCartLine;
 type SplitPayment = { id: string; payment_method_id: string; amount: number; reference?: string };
 type Customer = { id: string; name: string; phone: string | null; email: string | null };
-type Transaction = { id: string; transaction_number: string; customer_name: string | null; sold_at: string | null; total: number | string; status: string; payment_methods?: { name?: string | null; type?: string | null } | null };
+type Transaction = { id: string; transaction_number: string; customer_name: string | null; sold_at: string | null; total: number | string; discount_total?: number | string | null; status: string; payment_methods?: { name?: string | null; type?: string | null } | null };
 type PosSummary = { openingCash: number; cashSales: number; cardSales: number; expectedCash: number; txCount: number; topProduct: string | null };
 type FiscalDownloadPayload = { ok: boolean; message: string; filename?: string; content?: string; status?: string; mode?: string };
 type PlaceholderCfg = { bg: string; text: string; icon: "coffee" | "drink" | "food" | "package"; style?: React.CSSProperties };
@@ -690,6 +690,9 @@ function PosRegisterInner({
                         <strong>{tx.transaction_number}</strong>
                         <span className="font-medium">{money(Number(tx.total ?? 0))}</span>
                       </div>
+                      {Number(tx.discount_total ?? 0) > 0 && (
+                        <p className="text-xs text-blue-600 font-medium mt-0.5">−{money(Number(tx.discount_total ?? 0))} discount</p>
+                      )}
                       <p className="text-xs text-slate-500 mt-0.5">{tx.customer_name || t.walkIn} · {tx.payment_methods?.name ? paymentTypeLabel(tx.payment_methods.type ?? "other", tx.payment_methods.name, locale) : t.paymentGeneric}</p>
                       <a className="text-blue-600 hover:underline text-xs mt-2 inline-block" href={`/app/transactions/${tx.id}`}>{t.viewReceipt}</a>
                     </div>
