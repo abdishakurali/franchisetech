@@ -15,6 +15,7 @@ import { FiscalNetSettingsCard } from "@/components/app/FiscalNetSettingsCard";
 import { SettingsTabNav } from "@/components/app/SettingsTabNav";
 import type { CashDrawerMode } from "@/lib/cash-drawer";
 import { FeatureSettingsCard } from "@/components/app/FeatureSettingsCard";
+import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
 import { INDUSTRY_OPTIONS, RESTAURANT_FEATURE_KEYS, RESTAURANT_FEATURES, getSuggestedFeaturesForIndustry, type RestaurantFeatureKey } from "@/lib/restaurant-features";
 
 const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
@@ -305,6 +306,14 @@ export default async function SettingsPage({
                   <span className="ml-2 text-xs text-slate-400">(contact your account owner to change)</span>
                 </p>
               )}
+
+              <div className="mt-6 border-t border-slate-100 pt-5 space-y-2">
+                <Label>Language</Label>
+                <p className="text-sm text-slate-500">
+                  POS and register interface language for this device.
+                </p>
+                <AppLocaleSwitcher orgIsRO={isRO} />
+              </div>
             </CardContent>
           </Card>
 
