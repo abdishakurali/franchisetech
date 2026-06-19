@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { addPurchase } from "@/app/actions/kitchenops";
+import { savePurchaseDraft, postNirPurchase } from "@/app/actions/kitchenops";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2 } from "lucide-react";
 
 type Supplier = { id: string; name: string };
+type Site = { id: string; name: string };
 type Product = {
   id: string;
   name: string;
@@ -24,6 +25,24 @@ type LineItem = {
   unit_cost: string;
   tax_rate: string;
   unit_of_measure: string;
+};
+
+export type PurchaseDraftInitial = {
+  id: string;
+  supplier_id: string | null;
+  purchase_date: string | null;
+  nir_date: string | null;
+  invoice_number: string | null;
+  supplier_invoice_date: string | null;
+  site_id: string | null;
+  notes: string | null;
+  items: Array<{
+    product_id: string;
+    quantity: number;
+    unit_cost: number;
+    tax_rate: number;
+    unit_of_measure: string | null;
+  }>;
 };
 
 const ITEM_TYPE_LABELS: Record<string, string> = {
@@ -58,11 +77,20 @@ const EN_TAX_RATES = [
   { label: "23% VAT", value: "23" },
 ];
 
-// ── Supplier searchable combobox ──────────────────────────────────────────────
-function SupplierCombobox({ suppliers, isRO }: { suppliers: Supplier[]; isRO: boolean }) {
-  const [query, setQuery] = useState("");
+function SupplierCombobox({
+  suppliers,
+  isRO,
+  initialId,
+  initialName,
+}: {
+  suppliers: Supplier[];
+  isRO: boolean;
+  initialId?: string;
+  initialName?: string;
+}) {
+  const [query, setQuery] = useState(initialName ?? "");
   const [open, setOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState("");
+  const [selectedId, setSelectedId] = useState(initialId ?? "");
 
   const filtered = suppliers
     .filter((s) => s.name.toLowerCase().includes(query.toLowerCase()))
@@ -140,7 +168,6 @@ function SupplierCombobox({ suppliers, isRO }: { suppliers: Supplier[]; isRO: bo
   );
 }
 
-// ── Per-line purchase item searchable combobox ────────────────────────────────
 function PurchaseItemCombobox({
   products,
   productId,
@@ -251,11 +278,17 @@ function PurchaseItemCombobox({
 export function PurchaseForm({
   suppliers,
   products,
+  sites = [],
   currency = "EUR",
+  currentUserId,
+  initialDraft,
 }: {
   suppliers: Supplier[];
   products: Product[];
+  sites?: Site[];
   currency?: string;
+  currentUserId?: string;
+  initialDraft?: PurchaseDraftInitial;
 }) {
   const isRO = currency === "RON";
   const taxLabel = isRO ? "TVA" : "VAT";
@@ -263,14 +296,29 @@ export function PurchaseForm({
   const umOptions = isRO ? RO_UM_OPTIONS : EN_UM_OPTIONS;
   const itemTypeLabels = isRO ? ITEM_TYPE_LABELS : ITEM_TYPE_LABELS_EN;
   const defaultUm = isRO ? "Buc" : "each";
+  const today = new Date().toISOString().slice(0, 10);
   const emptyMsg = isRO
     ? "Nu există articole de cumpărat. Adăugați ingrediente, mărfuri sau consumabile în catalogul de produse, marcând «Poate fi cumpărat»."
     : "No purchase items yet. Add ingredients, goods, or supplies to your product catalogue and mark them as purchaseable.";
 
-  const nextId = useRef(1);
-  const [lines, setLines] = useState<LineItem[]>([
-    { id: 0, product_id: "", quantity: "", unit_cost: "", tax_rate: "0", unit_of_measure: defaultUm },
-  ]);
+  const initialSupplier = initialDraft?.supplier_id
+    ? suppliers.find((s) => s.id === initialDraft.supplier_id)
+    : null;
+
+  const nextId = useRef(initialDraft?.items.length ?? 1);
+  const [lines, setLines] = useState<LineItem[]>(() => {
+    if (initialDraft?.items.length) {
+      return initialDraft.items.map((item, i) => ({
+        id: i,
+        product_id: item.product_id,
+        quantity: String(item.quantity),
+        unit_cost: String(item.unit_cost),
+        tax_rate: String(item.tax_rate),
+        unit_of_measure: item.unit_of_measure || defaultUm,
+      }));
+    }
+    return [{ id: 0, product_id: "", quantity: "", unit_cost: "", tax_rate: "0", unit_of_measure: defaultUm }];
+  });
 
   function addLine() {
     setLines((prev) => [...prev, { id: nextId.current++, product_id: "", quantity: "", unit_cost: "", tax_rate: "0", unit_of_measure: defaultUm }]);
@@ -305,11 +353,15 @@ export function PurchaseForm({
     return new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" }).format(v);
   };
 
+  const title = initialDraft
+    ? (isRO ? "Editează ciorna NIR" : "Edit NIR draft")
+    : (isRO ? "Înregistrează NIR / cumpărare" : "Record NIR / purchase");
+
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       <div className="flex items-center gap-3">
         <Link href="/app/purchases" className="text-sm text-slate-500 hover:text-slate-700">← {isRO ? "Cumpărături" : "Purchases"}</Link>
-        <h1 className="text-2xl font-semibold text-slate-950">{isRO ? "Înregistrează cumpărătură" : "Record purchase"}</h1>
+        <h1 className="text-2xl font-semibold text-slate-950">{title}</h1>
       </div>
 
       {products.length === 0 && (
@@ -324,44 +376,95 @@ export function PurchaseForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>{isRO ? "Detalii cumpărătură" : "Purchase details"}</CardTitle>
+          <CardTitle>{isRO ? "Detalii NIR" : "NIR details"}</CardTitle>
           <p className="text-sm text-slate-500 mt-1">
-            {isRO ? "Înregistrează ce ai cumpărat. Stocul va fi actualizat." : "Record what you bought. This increases your stock and updates cost prices."}
+            {isRO
+              ? "Salvați ciorna fără a modifica stocul. Generarea NIR actualizează stocul o singură dată."
+              : "Save a draft without changing stock. Posting the NIR increases stock once."}
           </p>
         </CardHeader>
         <CardContent>
-          <form action={addPurchase as unknown as (fd: FormData) => Promise<void>} className="space-y-5">
+          <form className="space-y-5">
             <input type="hidden" name="currency" value={currency} />
+            {initialDraft?.id && <input type="hidden" name="purchase_id" value={initialDraft.id} />}
+            {currentUserId && <input type="hidden" name="received_by_user_id" value={currentUserId} />}
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <Label>{isRO ? "Furnizor" : "Supplier"}</Label>
-                <SupplierCombobox suppliers={suppliers} isRO={isRO} />
+                <SupplierCombobox
+                  suppliers={suppliers}
+                  isRO={isRO}
+                  initialId={initialDraft?.supplier_id ?? undefined}
+                  initialName={initialSupplier?.name}
+                />
+              </div>
+              <div>
+                <Label>{isRO ? "Nr. factură furnizor" : "Supplier invoice no."}</Label>
+                <Input
+                  name="invoice_number"
+                  defaultValue={initialDraft?.invoice_number ?? ""}
+                  placeholder={isRO ? "FAC-2026-001" : "INV-2026-001"}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>{isRO ? "Data factură" : "Invoice date"}</Label>
+                <Input
+                  name="supplier_invoice_date"
+                  type="date"
+                  defaultValue={initialDraft?.supplier_invoice_date ?? today}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>{isRO ? "Data NIR" : "NIR date"}</Label>
+                <Input
+                  name="nir_date"
+                  type="date"
+                  defaultValue={initialDraft?.nir_date ?? today}
+                  className="mt-1"
+                />
               </div>
               <div>
                 <Label>{isRO ? "Data cumpărăturii" : "Purchase date"}</Label>
-                <Input name="purchase_date" type="date" defaultValue={new Date().toISOString().slice(0, 10)} className="mt-1" />
+                <Input
+                  name="purchase_date"
+                  type="date"
+                  defaultValue={initialDraft?.purchase_date ?? today}
+                  className="mt-1"
+                />
               </div>
-              <div>
-                <Label>{isRO ? "Referință / Nr. factură" : "Reference / Invoice #"}</Label>
-                <Input name="reference" placeholder={isRO ? "FAC-2024-001" : "INV-2024-001"} className="mt-1" />
-              </div>
+              {sites.length > 0 && (
+                <div>
+                  <Label>{isRO ? "Locație" : "Location"}</Label>
+                  <select
+                    name="site_id"
+                    defaultValue={initialDraft?.site_id ?? ""}
+                    className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+                  >
+                    <option value="">{isRO ? "— fără locație —" : "— no location —"}</option>
+                    {sites.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>{isRO ? "Articole primite" : "Items received"}</Label>
+                <Label>{isRO ? "Articole primite" : "Received items"}</Label>
                 <span className="text-xs text-slate-400">{lines.length} {isRO ? "linie/linii" : `line${lines.length !== 1 ? "s" : ""}`}</span>
               </div>
 
-              {/* Column headers */}
               <div className="grid grid-cols-[1fr_80px_90px_90px_80px_80px_36px] gap-2 px-0.5 text-xs text-slate-400 font-medium">
                 <span>{isRO ? "Articol" : "Item"}</span>
-                <span>UM</span>
+                <span>{isRO ? "UM" : "Unit"}</span>
                 <span>{isRO ? "Cantitate" : "Quantity"}</span>
-                <span>{isRO ? "Cost/UM" : "Cost/unit"}</span>
+                <span>{isRO ? "Cost net" : "Net cost"}</span>
                 <span>{taxLabel} %</span>
-                <span>{isRO ? "Total" : "Line total"}</span>
+                <span>{isRO ? "Total brut" : "Gross"}</span>
                 <span />
               </div>
 
@@ -398,7 +501,7 @@ export function PurchaseForm({
                     <Input
                       name="unit_cost"
                       type="number" step="0.0001" min="0"
-                      placeholder={isRO ? "Cost" : "Cost"}
+                      placeholder={isRO ? "Cost net" : "Net cost"}
                       value={line.unit_cost}
                       onChange={(e) => updateLine(line.id, "unit_cost", e.target.value)}
                     />
@@ -434,44 +537,60 @@ export function PurchaseForm({
                 <Plus className="h-4 w-4" />{isRO ? "Adaugă linie" : "Add line"}
               </button>
 
-              {/* Tax breakdown and totals */}
               {grandTotal > 0 && (
                 <div className="space-y-1 rounded-lg bg-slate-50 px-4 py-3 text-sm">
                   <div className="flex justify-between text-slate-500">
-                    <span>{isRO ? "Subtotal (fără TVA)" : "Subtotal (excl. VAT)"}</span>
+                    <span>{isRO ? "Total net" : "Net total"}</span>
                     <span className="tabular-nums">{fmt(subtotalSum)}</span>
                   </div>
                   <div className="flex justify-between text-slate-500">
-                    <span>{taxLabel}</span>
+                    <span>{isRO ? `Total ${taxLabel}` : `Total ${taxLabel}`}</span>
                     <span className="tabular-nums">{fmt(taxSum)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold text-slate-900 border-t pt-2 mt-1">
-                    <span>{isRO ? "Total" : "Grand total"}</span>
+                    <span>{isRO ? "Total brut" : "Gross total"}</span>
                     <span className="tabular-nums">{fmt(grandTotal)}</span>
                   </div>
                 </div>
               )}
 
-              {/* Hidden computed totals for server */}
               <input type="hidden" name="subtotal_amount" value={subtotalSum.toFixed(4)} />
               <input type="hidden" name="tax_total" value={taxSum.toFixed(4)} />
 
               <p className="text-xs text-slate-500">
                 {isRO
-                  ? "Cantitate = câte unități ai primit. Cost/UM = prețul pe unitate, fără TVA."
-                  : "Quantity is how much you received. Cost/unit is the net cost per unit, excluding VAT."}
+                  ? "Cantitate = câte unități ai primit. Cost net = prețul pe unitate, fără TVA."
+                  : "Quantity is how much you received. Net cost is the unit price excluding VAT."}
               </p>
             </div>
 
             <div>
               <Label>{isRO ? "Notițe" : "Notes"}</Label>
-              <Input name="notes" placeholder={isRO ? "Observații despre această livrare" : "Any notes about this delivery"} className="mt-1" />
+              <Input
+                name="notes"
+                defaultValue={initialDraft?.notes ?? ""}
+                placeholder={isRO ? "Observații despre această livrare" : "Any notes about this delivery"}
+                className="mt-1"
+              />
             </div>
 
-            <div className="flex gap-3 pt-1">
+            <div className="flex flex-wrap gap-3 pt-1">
               <Link href="/app/purchases"><Button variant="outline" type="button">{isRO ? "Anulează" : "Cancel"}</Button></Link>
-              <Button type="submit" disabled={products.length === 0} className="bg-blue-600 hover:bg-blue-700 text-white">
-                {isRO ? "Înregistrează cumpărătura" : "Record purchase"}
+              <Button
+                type="submit"
+                variant="outline"
+                disabled={products.length === 0}
+                formAction={savePurchaseDraft as unknown as (fd: FormData) => Promise<void>}
+              >
+                {isRO ? "Salvează ciornă" : "Save draft"}
+              </Button>
+              <Button
+                type="submit"
+                disabled={products.length === 0}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                formAction={postNirPurchase as unknown as (fd: FormData) => Promise<void>}
+              >
+                {isRO ? "Generează NIR" : "Post NIR"}
               </Button>
             </div>
           </form>

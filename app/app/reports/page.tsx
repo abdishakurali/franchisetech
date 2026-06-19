@@ -87,7 +87,7 @@ export default async function ReportsPage() {
     supabase.from("pos_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "voided").gte("sold_at", monthStart),
     supabase.from("pos_sessions").select("expected_cash,status,opened_at").eq("organisation_id", orgId).eq("status", "open").limit(1).maybeSingle(),
     supabase.from("products").select("id,name,current_stock_qty,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true"),
-    supabase.from("purchases").select("total_amount").eq("organisation_id", orgId).gte("created_at", weekAgo),
+    supabase.from("purchases").select("total_amount,status").eq("organisation_id", orgId).gte("created_at", weekAgo),
   ]);
 
   const todayTotal = (todayTx.data ?? []).reduce((s, t) => s + Number(t.total ?? 0), 0);
@@ -95,7 +95,9 @@ export default async function ReportsPage() {
   const todayCash = (todayTx.data ?? []).filter((t) => (t.payment_methods as { type?: string } | null)?.type === "cash").reduce((s, t) => s + Number(t.total ?? 0), 0);
   const todayCard = todayTotal - todayCash;
   const monthTotal = (monthTx.data ?? []).reduce((s, t) => s + Number(t.total ?? 0), 0);
-  const purchaseSpend = (purchaseWeek.data ?? []).reduce((s, p) => s + Number(p.total_amount ?? 0), 0);
+  const purchaseSpend = (purchaseWeek.data ?? [])
+    .filter((p) => p.status === "posted" || p.status === "received")
+    .reduce((s, p) => s + Number(p.total_amount ?? 0), 0);
 
   const allProducts = lowStockResult.data ?? [];
   const lowStockItems = allProducts.filter((p) => {

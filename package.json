@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "typecheck:app": "tsc --noEmit",
     "verify-pos-cart-restore": "node scripts/verify-pos-cart-restore.mjs",
-    "verify-pos-line-discount": "node scripts/verify-pos-line-discount.mjs"
+    "verify-pos-line-discount": "node scripts/verify-pos-line-discount.mjs",
+    "verify-nir-purchase-flow": "node scripts/verify-nir-purchase-flow.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

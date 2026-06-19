@@ -10,6 +10,15 @@ import { getActiveOrg, numberValue, stringValue } from "@/lib/kitchenops/data";
 import { requireActiveSite } from "@/lib/site-context";
 import { normaliseIndustry, RESTAURANT_FEATURE_KEYS, type RestaurantFeatureKey } from "@/lib/restaurant-features";
 import { lineDiscountPct, transactionDiscountPct, type PosCartLine } from "@/lib/pos-line-discount";
+import {
+  canCancelPurchase,
+  formatNirNumber,
+  isAlreadyPosted,
+  parsePurchaseLinesFromForm,
+  purchaseLineTotals,
+  type PurchaseLineInput,
+} from "@/lib/nir/purchase";
+import { createServiceClient } from "@/lib/supabase/server";
 
 function canTransact(role: string | null) { return ["owner","manager","staff","cashier"].includes(role ?? ""); }
 function canManage(role: string | null) { return ["owner","manager"].includes(role ?? ""); }
@@ -812,74 +821,35 @@ export async function deleteSupplier(formData: FormData) {
   redirect("/app/suppliers");
 }
 
-export async function addPurchase(formData: FormData) {
-  const { supabase, membership, user, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
-  const supplierId = stringValue(formData, "supplier_id");
-  const purchaseDate = stringValue(formData, "purchase_date") || new Date().toISOString().slice(0, 10);
-  const reference = stringValue(formData, "reference") || null;
-  const notes = stringValue(formData, "notes") || null;
-
-  const productIds = formData.getAll("product_id").map((v) => String(v));
-  const quantities = formData.getAll("quantity").map((v) => Number(v));
-  const unitCosts = formData.getAll("unit_cost").map((v) => Number(v));
-  const taxRates = formData.getAll("tax_rate").map((v) => Number(v) || 0);
-  const unitMeasures = formData.getAll("unit_of_measure").map((v) => String(v) || "each");
-
-  const items = productIds.map((pid, i) => {
-    const qty = quantities[i] || 0;
-    const cost = unitCosts[i] || 0;
-    const rate = taxRates[i] || 0;
-    const subtotal = qty * cost;
-    const taxAmount = subtotal * rate / 100;
-    return {
-      product_id: pid || null,
-      quantity: qty,
-      unit_cost: cost,
-      total_cost: subtotal,
-      tax_rate: rate,
-      tax_amount: taxAmount,
-      unit_of_measure: unitMeasures[i] || "each",
-    };
-  }).filter((item) => item.product_id && item.quantity > 0);
-
-  if (!items.length) return;
-
-  const subtotalAmount = items.reduce((s, i) => s + i.total_cost, 0);
-  const taxTotal = items.reduce((s, i) => s + i.tax_amount, 0);
-  const totalAmount = subtotalAmount + taxTotal;
-
-  const { data: purchase } = await supabase.from("purchases").insert({
-    organisation_id: orgId,
-    supplier_id: supplierId || null,
-    supplier: supplierId ? "" : "Direct",
-    purchased_at: new Date(`${purchaseDate}T12:00:00`).toISOString(),
-    purchase_date: purchaseDate,
-    reference, notes,
-    total_amount: totalAmount,
-    subtotal_amount: subtotalAmount,
-    tax_total: taxTotal,
-    invoice_number: reference || null,
-    created_by: user.id,
-  }).select("id").single();
-
-  if (!purchase) return;
-
-  // Get product names for purchase_items
+async function loadProductNameLookup(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  productIds: string[]
+) {
   const productLookup = new Map<string, string>();
-  const pids = items.map((i) => i.product_id).filter(Boolean) as string[];
-  if (pids.length) {
-    const { data: prods } = await supabase.from("products").select("id,name").in("id", pids);
-    for (const p of prods ?? []) productLookup.set(p.id, p.name);
-  }
+  if (!productIds.length) return productLookup;
+  const { data: prods } = await supabase.from("products").select("id,name").in("id", productIds);
+  for (const p of prods ?? []) productLookup.set(p.id, p.name);
+  return productLookup;
+}
 
+async function replacePurchaseItems(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  orgId: string,
+  purchaseId: string,
+  items: PurchaseLineInput[],
+  productLookup: Map<string, string>
+) {
+  await supabase.from("purchase_items").delete().eq("purchase_id", purchaseId).eq("organisation_id", orgId);
+  if (!items.length) return;
   await supabase.from("purchase_items").insert(
     items.map((item) => ({
       organisation_id: orgId,
-      purchase_id: purchase.id,
+      purchase_id: purchaseId,
       product_id: item.product_id,
-      product_name: productLookup.get(item.product_id!) || "Item",
-      item_name: productLookup.get(item.product_id!) || "Item",
+      product_name: productLookup.get(item.product_id) || "Item",
+      item_name: productLookup.get(item.product_id) || "Item",
       quantity: item.quantity,
       unit_cost: item.unit_cost,
       total_cost: item.total_cost,
@@ -888,41 +858,260 @@ export async function addPurchase(formData: FormData) {
       unit_of_measure: item.unit_of_measure,
     }))
   );
+}
 
-  // Update product costs and stock
+async function applyPurchaseStockIncrease(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  orgId: string,
+  userId: string,
+  purchaseId: string,
+  items: PurchaseLineInput[]
+) {
   for (const item of items) {
-    if (item.product_id) {
-      await supabase.from("products")
-        .select("current_stock_qty,cost_price")
-        .eq("id", item.product_id)
-        .single()
-        .then(async ({ data: p }) => {
-          if (!p) return;
-          const newQty = Number(p.current_stock_qty ?? 0) + item.quantity;
-          await supabase.from("products").update({
-            current_stock_qty: newQty,
-            cost_price: item.unit_cost,
-          }).eq("id", item.product_id!);
-        });
+    if (!item.product_id) continue;
+    const { data: p } = await supabase
+      .from("products")
+      .select("current_stock_qty,cost_price")
+      .eq("id", item.product_id)
+      .single();
+    if (!p) continue;
+    const newQty = Number(p.current_stock_qty ?? 0) + item.quantity;
+    await supabase.from("products").update({
+      current_stock_qty: newQty,
+      cost_price: item.unit_cost,
+    }).eq("id", item.product_id);
 
-      // Stock movement — use quantity_change (correct column name)
-      await supabase.from("stock_movements").insert({
-        organisation_id: orgId,
-        product_id: item.product_id,
-        movement_type: "purchase_received",
-        quantity_change: item.quantity,
-        unit_of_measure: "each",
-        reference_id: purchase.id,
-        reference_type: "purchase",
-        performed_by: user.id,
-      }).then(() => null, () => null);
+    await supabase.from("stock_movements").insert({
+      organisation_id: orgId,
+      product_id: item.product_id,
+      movement_type: "purchase_received",
+      quantity_change: item.quantity,
+      unit_of_measure: item.unit_of_measure || "each",
+      reference_id: purchaseId,
+      reference_type: "purchase",
+      performed_by: userId,
+    }).then(() => null, () => null);
+  }
+}
+
+function parsePurchaseHeaderFromForm(formData: FormData) {
+  const purchaseDate = stringValue(formData, "purchase_date") || new Date().toISOString().slice(0, 10);
+  const nirDate = stringValue(formData, "nir_date") || purchaseDate;
+  const invoiceNumber = stringValue(formData, "invoice_number") || null;
+  const supplierInvoiceDate = stringValue(formData, "supplier_invoice_date") || null;
+  const reference = stringValue(formData, "reference") || invoiceNumber || null;
+  const notes = stringValue(formData, "notes") || null;
+  const siteId = stringValue(formData, "site_id") || null;
+  const receivedBy = stringValue(formData, "received_by_user_id") || null;
+  return {
+    supplierId: stringValue(formData, "supplier_id") || null,
+    purchaseDate,
+    nirDate,
+    invoiceNumber,
+    supplierInvoiceDate,
+    reference,
+    notes,
+    siteId,
+    receivedBy,
+  };
+}
+
+async function loadDraftPurchaseItems(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  orgId: string,
+  purchaseId: string
+): Promise<PurchaseLineInput[]> {
+  const { data } = await supabase
+    .from("purchase_items")
+    .select("product_id,quantity,unit_cost,total_cost,tax_rate,tax_amount,unit_of_measure")
+    .eq("purchase_id", purchaseId)
+    .eq("organisation_id", orgId);
+  return (data ?? [])
+    .filter((row: { product_id?: string | null; quantity?: number | null }) => row.product_id && Number(row.quantity) > 0)
+    .map((row: {
+      product_id: string;
+      quantity: number;
+      unit_cost: number;
+      total_cost: number;
+      tax_rate: number;
+      tax_amount: number;
+      unit_of_measure: string | null;
+    }) => ({
+      product_id: row.product_id,
+      quantity: Number(row.quantity),
+      unit_cost: Number(row.unit_cost),
+      total_cost: Number(row.total_cost),
+      tax_rate: Number(row.tax_rate ?? 0),
+      tax_amount: Number(row.tax_amount ?? 0),
+      unit_of_measure: row.unit_of_measure || "each",
+    }));
+}
+
+export async function savePurchaseDraft(formData: FormData) {
+  const { supabase, membership, user, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+
+  const purchaseId = stringValue(formData, "purchase_id") || null;
+  const header = parsePurchaseHeaderFromForm(formData);
+  const items = parsePurchaseLinesFromForm(formData);
+  if (!items.length) return;
+
+  const { subtotalAmount, taxTotal, totalAmount } = purchaseLineTotals(items);
+  const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
+  const purchasedAt = new Date(`${header.purchaseDate}T12:00:00`).toISOString();
+
+  const row = {
+    organisation_id: orgId,
+    supplier_id: header.supplierId || null,
+    supplier: header.supplierId ? "" : "Direct",
+    purchased_at: purchasedAt,
+    purchase_date: header.purchaseDate,
+    nir_date: header.nirDate,
+    supplier_invoice_date: header.supplierInvoiceDate,
+    reference: header.reference,
+    invoice_number: header.invoiceNumber,
+    notes: header.notes,
+    site_id: header.siteId || null,
+    received_by_user_id: header.receivedBy || user.id,
+    total_amount: totalAmount,
+    subtotal_amount: subtotalAmount,
+    tax_total: taxTotal,
+    status: "draft",
+    created_by: user.id,
+  };
+
+  let targetId = purchaseId;
+
+  if (purchaseId) {
+    const { data: existing } = await supabase
+      .from("purchases")
+      .select("id,status,posted_at")
+      .eq("id", purchaseId)
+      .eq("organisation_id", orgId)
+      .single();
+    if (!existing || existing.status !== "draft" || existing.posted_at) return;
+    await supabase.from("purchases").update(row).eq("id", purchaseId).eq("organisation_id", orgId);
+    await replacePurchaseItems(supabase, orgId, purchaseId, items, productLookup);
+  } else {
+    const { data: purchase } = await supabase.from("purchases").insert(row).select("id").single();
+    if (!purchase) return;
+    targetId = purchase.id;
+    await replacePurchaseItems(supabase, orgId, purchase.id, items, productLookup);
+  }
+
+  revalidatePath("/app/purchases");
+  revalidatePath(`/app/purchases/${targetId}`);
+  redirect(`/app/purchases/${targetId}`);
+}
+
+export async function postNirPurchase(formData: FormData) {
+  const { supabase, membership, user, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+
+  const purchaseId = stringValue(formData, "purchase_id") || null;
+  const header = parsePurchaseHeaderFromForm(formData);
+  let items = parsePurchaseLinesFromForm(formData);
+
+  if (purchaseId) {
+    const { data: existing } = await supabase
+      .from("purchases")
+      .select("id,status,posted_at,nir_number")
+      .eq("id", purchaseId)
+      .eq("organisation_id", orgId)
+      .single();
+    if (!existing) return;
+    if (isAlreadyPosted(existing.status, existing.posted_at, existing.nir_number)) {
+      redirect(`/app/purchases/${purchaseId}?error=already_posted`);
+    }
+    if (existing.status !== "draft") {
+      redirect(`/app/purchases/${purchaseId}?error=invalid_status`);
+    }
+    if (!items.length) {
+      items = await loadDraftPurchaseItems(supabase, orgId, purchaseId);
     }
   }
+
+  if (!items.length) return;
+
+  const { subtotalAmount, taxTotal, totalAmount } = purchaseLineTotals(items);
+  const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
+  const purchasedAt = new Date(`${header.purchaseDate}T12:00:00`).toISOString();
+  const nirYear = new Date(`${header.nirDate}T12:00:00`).getFullYear();
+
+  const serviceSupabase = await createServiceClient();
+  const { data: seq, error: seqError } = await serviceSupabase.rpc("next_nir_number", {
+    p_org_id: orgId,
+    p_year: nirYear,
+  });
+  if (seqError || seq == null) {
+    redirect(purchaseId ? `/app/purchases/${purchaseId}?error=nir_number` : "/app/purchases/new?error=nir_number");
+  }
+
+  const nirNumber = formatNirNumber(nirYear, Number(seq));
+  const postedAt = new Date().toISOString();
+
+  const postedRow = {
+    organisation_id: orgId,
+    supplier_id: header.supplierId || null,
+    supplier: header.supplierId ? "" : "Direct",
+    purchased_at: purchasedAt,
+    purchase_date: header.purchaseDate,
+    nir_number: nirNumber,
+    nir_date: header.nirDate,
+    supplier_invoice_date: header.supplierInvoiceDate,
+    reference: header.reference,
+    invoice_number: header.invoiceNumber,
+    notes: header.notes,
+    site_id: header.siteId || null,
+    received_by_user_id: header.receivedBy || user.id,
+    total_amount: totalAmount,
+    subtotal_amount: subtotalAmount,
+    tax_total: taxTotal,
+    status: "posted",
+    posted_at: postedAt,
+    posted_by: user.id,
+    created_by: user.id,
+  };
+
+  let targetId = purchaseId;
+
+  if (purchaseId) {
+    const { data: locked } = await supabase
+      .from("purchases")
+      .select("posted_at,status,nir_number")
+      .eq("id", purchaseId)
+      .eq("organisation_id", orgId)
+      .single();
+    if (locked && isAlreadyPosted(locked.status, locked.posted_at, locked.nir_number)) {
+      redirect(`/app/purchases/${purchaseId}?error=already_posted`);
+    }
+    await supabase.from("purchases").update(postedRow).eq("id", purchaseId).eq("organisation_id", orgId);
+    if (parsePurchaseLinesFromForm(formData).length) {
+      await replacePurchaseItems(supabase, orgId, purchaseId, items, productLookup);
+    }
+  } else {
+    const { data: purchase } = await supabase.from("purchases").insert(postedRow).select("id").single();
+    if (!purchase) return;
+    targetId = purchase.id;
+    await replacePurchaseItems(supabase, orgId, purchase.id, items, productLookup);
+  }
+
+  if (!targetId) return;
+
+  await applyPurchaseStockIncrease(supabase, orgId, user.id, targetId, items);
 
   revalidatePath("/app/purchases");
   revalidatePath("/app/stock");
   revalidatePath("/app/products");
-  redirect("/app/purchases");
+  revalidatePath(`/app/purchases/${targetId}`);
+  redirect(`/app/purchases/${targetId}?posted=1`);
+}
+
+/** @deprecated Use postNirPurchase — kept for import paths that still call addPurchase */
+export async function addPurchase(formData: FormData) {
+  return postNirPurchase(formData);
 }
 
 export async function addRecipe(formData: FormData) {
@@ -1145,6 +1334,15 @@ export async function cancelPurchase(formData: FormData) {
   if (!canManage(membership.role)) return;
   const purchaseId = stringValue(formData, "purchase_id");
   if (!purchaseId) return;
+  const { data: purchase } = await supabase
+    .from("purchases")
+    .select("status,posted_at")
+    .eq("id", purchaseId)
+    .eq("organisation_id", orgId)
+    .single();
+  if (!purchase || !canCancelPurchase(purchase.status)) {
+    redirect(`/app/purchases/${purchaseId}?error=cannot_cancel`);
+  }
   await supabase
     .from("purchases")
     .update({ status: "cancelled" })
@@ -1167,7 +1365,14 @@ export async function deletePurchases(ids: string[]) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
   if (!ids.length) return;
-  await supabase.from("purchases").update({ status: "cancelled" }).in("id", ids).eq("organisation_id", orgId);
+  const { data: rows } = await supabase
+    .from("purchases")
+    .select("id,status")
+    .in("id", ids)
+    .eq("organisation_id", orgId);
+  const draftIds = (rows ?? []).filter((r) => canCancelPurchase(r.status)).map((r) => r.id);
+  if (!draftIds.length) return;
+  await supabase.from("purchases").update({ status: "cancelled" }).in("id", draftIds).eq("organisation_id", orgId);
   revalidatePath("/app/purchases");
 }
 
