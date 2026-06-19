@@ -1,10 +1,24 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { BrowserFrame } from "@/components/marketing/DeviceFrames";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqJsonLd, featurePages, findPage, pageMetadata, SITE_URL } from "@/lib/marketing/seo";
+
+function featurePath(slug: string): string {
+  const paths: Record<string, string> = {
+    pos: "/app/pos",
+    "kitchen-display": "/app/kitchen",
+    "stock-management": "/app/stock",
+    "recipe-costing": "/app/recipes",
+    "z-report": "/app/reports/z-report",
+    "food-safety-records": "/app/food-safety",
+    "purchases-suppliers": "/app/suppliers",
+    "setup-onboarding": "/app/setup-checklist",
+  };
+  return paths[slug] ?? "/app";
+}
 
 export function generateStaticParams() {
   return featurePages.map((page) => ({ slug: page.slug }));
@@ -28,7 +42,6 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
         { "@type": "ListItem", position: 2, name: page.title, item: `${SITE_URL}${page.path}` },
       ] }} />
 
-      {/* Hero */}
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -50,35 +63,48 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
               </div>
             </div>
             {page.image && (
-              <div className="relative overflow-hidden rounded-2xl border border-slate-200 shadow-lg">
-                <Image
-                  src={page.image}
-                  alt={page.h1}
-                  width={1400}
-                  height={900}
-                  className="w-full object-cover"
-                  priority
-                  unoptimized
-                />
-              </div>
+              <BrowserFrame src={page.image} alt={page.h1} priority className="shadow-xl" path={featurePath(page.slug)} fit="contain" />
             )}
           </div>
         </div>
       </section>
 
-      {/* Sections */}
       <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-6xl gap-5 md:grid-cols-3">
-          {page.sections.map((section) => (
-            <div key={section.title} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-bold text-slate-950">{section.title}</h2>
-              <p className="mt-3 text-sm leading-6 text-slate-600">{section.body}</p>
+        <div className="mx-auto max-w-6xl space-y-16">
+          {page.sections.map((section, index) => (
+            <div
+              key={section.title}
+              className={`grid items-center gap-10 lg:grid-cols-2 ${index % 2 === 1 ? "lg:[&>*:first-child]:order-2" : ""}`}
+            >
+              <div>
+                <h2 className="text-2xl font-bold text-slate-950">{section.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">{section.body}</p>
+              </div>
+              {page.image && index === 0 && (
+                <BrowserFrame src={page.image} alt={section.title} path={featurePath(page.slug)} fit="contain" />
+              )}
+              {page.image && index === 1 && (
+                <BrowserFrame
+                  src={page.image === "/showcase/pos-cart.png" ? "/showcase/pos-cart.png" : page.image}
+                  alt={section.title}
+                  path={featurePath(page.slug)}
+                  fit="contain"
+                />
+              )}
+              {index === 2 && (
+                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <h3 className="font-semibold text-slate-950">Ready to try it?</h3>
+                  <p className="mt-2 text-sm text-slate-600">Start a 15-day assisted trial with setup help for products, till, and first sale.</p>
+                  <Link href="/signup" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline">
+                    Start trial <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              )}
             </div>
           ))}
         </div>
       </section>
 
-      {/* FAQ + sidebar */}
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_320px]">
           <div>

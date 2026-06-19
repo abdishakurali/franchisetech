@@ -4,6 +4,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from "@/lib/marketing/seo";
+import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -24,12 +25,12 @@ export const metadata: Metadata = {
     template: "%s | franchisetech",
   },
   description: DEFAULT_DESCRIPTION,
-  keywords: ["POS", "cafe POS", "point of sale", "food business", "stock management", "Ireland", "recipes", "purchase management", "Z-report", "recipe costing"],
+  keywords: [...MARKETING_KEYWORDS],
   authors: [{ name: "franchisetech" }],
   creator: "franchisetech",
   metadataBase: new URL(SITE_URL),
   manifest: "/manifest.webmanifest",
-  alternates: { canonical: "/" },
+  alternates: localeAlternates("/"),
   robots: {
     index: true,
     follow: true,
@@ -40,15 +41,15 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
     siteName: "franchisetech",
     type: "website",
-    locale: "en_IE",
+    locale: "en",
     url: SITE_URL,
-    images: [{ url: "/marketing/pos-hero.png", width: 1200, height: 750, alt: "franchisetech POS register screen" }],
+    images: [{ url: "/showcase/reports-dashboard.png", width: 1200, height: 750, alt: "franchisetech owner dashboard — today at a glance" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "franchisetech",
-    description: "Simple POS and business control for small food businesses.",
-    images: ["/marketing/pos-hero.png"],
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: ["/showcase/reports-dashboard.png"],
   },
   icons: {
     icon: [

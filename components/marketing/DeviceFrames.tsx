@@ -8,22 +8,38 @@ interface FrameProps {
   height?: number;
   priority?: boolean;
   className?: string;
+  /** Path shown in browser chrome — e.g. /app/pos */
+  path?: string;
+  fit?: "cover" | "contain";
 }
 
-/** Laptop/browser chrome frame */
-export function BrowserFrame({ src, alt, width = 1200, height = 750, priority, className }: FrameProps) {
+/** Minimal browser chrome — light shadow, no heavy bezel */
+export function BrowserFrame({
+  src,
+  alt,
+  width = 1200,
+  height = 750,
+  priority,
+  className,
+  path = "",
+  fit = "cover",
+}: FrameProps) {
+  const objectClass = fit === "contain" ? "object-contain object-top" : "object-cover object-top";
   return (
-    <div className={`overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-slate-300/40 ${className ?? ""}`}>
-      {/* Browser chrome */}
-      <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
-        <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-        <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-        <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
-        <div className="mx-3 flex-1 max-w-xs rounded-md bg-white border border-slate-200 px-3 py-0.5 text-[10px] text-slate-400">
-          franchisetech.ro/app/pos
+    <div
+      className={`overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_80px_-24px_rgba(15,23,42,0.18)] ${className ?? ""}`}
+    >
+      <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/80 px-4 py-2">
+        <span className="h-2 w-2 rounded-full bg-slate-300" />
+        <span className="h-2 w-2 rounded-full bg-slate-300" />
+        <span className="h-2 w-2 rounded-full bg-slate-300" />
+        <div className="mx-2 min-w-0 flex-1 truncate rounded-md bg-white px-2.5 py-0.5 text-[10px] text-slate-500 ring-1 ring-slate-200/80">
+          franchisetech.ro{path}
         </div>
       </div>
-      <Image src={src} alt={alt} width={width} height={height} className="w-full object-cover object-top" priority={priority} />
+      <div className={fit === "contain" ? "bg-slate-50" : undefined}>
+        <Image src={src} alt={alt} width={width} height={height} className={`w-full ${objectClass}`} priority={priority} />
+      </div>
     </div>
   );
 }
@@ -32,37 +48,27 @@ export function BrowserFrame({ src, alt, width = 1200, height = 750, priority, c
 export function TabletFrame({ src, alt, width = 1024, height = 768, priority, className }: FrameProps) {
   return (
     <div className={`relative inline-block ${className ?? ""}`}>
-      {/* Outer bezel */}
-      <div className="relative overflow-hidden rounded-[2rem] border-[10px] border-slate-800 bg-slate-800 shadow-2xl shadow-slate-400/50">
-        {/* Home bar */}
+      <div className="relative overflow-hidden rounded-[1.75rem] border-[8px] border-slate-900 bg-slate-900 shadow-[0_24px_80px_-24px_rgba(15,23,42,0.25)]">
         <div className="absolute inset-x-0 top-0 z-10 flex justify-center pt-1.5">
-          <div className="h-1.5 w-12 rounded-full bg-slate-600" />
+          <div className="h-1 w-10 rounded-full bg-slate-700" />
         </div>
-        {/* Screen */}
-        <div className="overflow-hidden rounded-[1.4rem]">
+        <div className="overflow-hidden rounded-[1.25rem]">
           <Image src={src} alt={alt} width={width} height={height} className="block w-full object-cover" priority={priority} />
-        </div>
-        {/* Bottom bar */}
-        <div className="flex justify-center pb-2 pt-1.5">
-          <div className="h-1 w-20 rounded-full bg-slate-600" />
         </div>
       </div>
     </div>
   );
 }
 
-/** Slim laptop/notebook frame */
+/** Slim laptop frame */
 export function LaptopFrame({ src, alt, width = 1280, height = 800, priority, className }: FrameProps) {
   return (
-    <div className={`${className ?? ""}`}>
-      {/* Screen */}
-      <div className="relative overflow-hidden rounded-t-xl border-[10px] border-b-0 border-slate-700 bg-slate-900 shadow-xl">
+    <div className={className ?? ""}>
+      <div className="relative overflow-hidden rounded-t-xl border-[8px] border-b-0 border-slate-800 bg-slate-900 shadow-xl">
         <Image src={src} alt={alt} width={width} height={height} className="w-full object-cover" priority={priority} />
       </div>
-      {/* Base */}
       <div className="relative flex justify-center">
-        <div className="h-3 w-full rounded-b-lg bg-gradient-to-b from-slate-600 to-slate-700 shadow-lg" />
-        <div className="absolute bottom-0 h-1 w-1/3 rounded-b-full bg-slate-500/50" />
+        <div className="h-2.5 w-full rounded-b-lg bg-slate-700" />
       </div>
     </div>
   );

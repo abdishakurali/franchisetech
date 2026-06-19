@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CheckCircle, Receipt } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { ArrowRight, CheckCircle } from "lucide-react";
+import { CTASection, MarketingShell, SectionLabel } from "@/components/marketing/MarketingShell";
 import { JsonLd } from "@/components/marketing/JsonLd";
+import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketing/tokens";
 import { featurePages, SITE_URL } from "@/lib/marketing/seo";
 
 export const metadata: Metadata = {
@@ -17,24 +18,22 @@ export default function FeaturesPage() {
     <MarketingShell>
       <JsonLd data={{ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Features", item: `${SITE_URL}/features` }] }} />
 
-      {/* Hero */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-gradient-to-b from-slate-50/80 to-white px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Features</p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">Everything you need to run your food business</h1>
-          <p className="mt-5 max-w-2xl text-lg text-slate-600">POS, stock, suppliers, purchases, recipes, reports, and records in one workspace. No per-seat pricing.</p>
+          <SectionLabel>Features</SectionLabel>
+          <h1 className={`mt-4 max-w-3xl ${marketingHeading}`}>Everything to run your food business</h1>
+          <p className={`mt-4 max-w-2xl ${marketingSubtext}`}>POS, kitchen, stock, suppliers, recipes, and reports — one workspace. No per-seat pricing.</p>
         </div>
       </section>
 
-      {/* Feature cards with images */}
-      <section className="px-4 pb-20 sm:px-6 lg:px-8">
+      <section className="px-4 pb-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="grid gap-8 md:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             {featurePages.map((page) => (
               <Link
                 key={page.path}
                 href={page.path}
-                className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-blue-200 hover:shadow-md"
+                className={`group overflow-hidden ${marketingCard}`}
               >
                 {page.image && (
                   <div className="aspect-[16/9] overflow-hidden bg-slate-100">
@@ -43,15 +42,15 @@ export default function FeaturesPage() {
                       alt={page.title}
                       width={800}
                       height={450}
-                      className="h-full w-full object-cover transition group-hover:scale-[1.02]"
+                      className="h-full w-full object-cover object-top transition duration-300 group-hover:scale-[1.02]"
                       unoptimized
                     />
                   </div>
                 )}
                 <div className="p-6">
-                  <p className="text-sm font-semibold text-blue-600">{page.eyebrow}</p>
-                  <h2 className="mt-2 text-xl font-bold text-slate-950">{page.title}</h2>
-                  <p className="mt-2 text-sm text-slate-600">{page.description}</p>
+                  <p className="text-xs font-medium uppercase tracking-[0.15em] text-blue-600">{page.eyebrow}</p>
+                  <h2 className="mt-2 text-lg font-medium text-slate-900">{page.title}</h2>
+                  <p className="mt-2 text-sm text-slate-500">{page.description}</p>
                   <ul className="mt-4 space-y-2">
                     {page.bullets.slice(0, 3).map((bullet) => (
                       <li key={bullet} className="flex gap-2 text-sm text-slate-700">
@@ -69,7 +68,7 @@ export default function FeaturesPage() {
         </div>
       </section>
 
-      {/* ── ROMANIA / FISCALNET FEATURE ── */}
+      {/* Optional receipt & tax configuration */}
       <section className="border-t border-slate-100 bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Country-specific workflows</p>
@@ -93,7 +92,7 @@ export default function FeaturesPage() {
           </div>
           <p className="mt-6 text-xs text-slate-500 italic">
             franchisetech supports configurable receipt workflows. Businesses remain responsible for their own legal, fiscal, and accountant review.{" "}
-            <Link href="/help/romania-fiscalnet" className="underline hover:text-slate-700">Receipt setup guide →</Link>
+            <Link href="/help" className="underline hover:text-slate-700">Help centre →</Link>
           </p>
         </div>
       </section>

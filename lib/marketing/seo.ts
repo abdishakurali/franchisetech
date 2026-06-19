@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { createElement } from "react";
+import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
 
 export const SITE_URL = "https://franchisetech.ro";
 export const BRAND = "franchisetech";
-export const DEFAULT_TITLE = "franchisetech — Simple POS and Business Control for Food Businesses";
+export const DEFAULT_TITLE = "franchisetech — POS & Business Control for Food Businesses";
 export const DEFAULT_DESCRIPTION =
-  "franchisetech helps cafes and small food businesses run the till, track cash/card sales, manage products, stock, suppliers, purchases, recipes, and reports.";
+  "Stop guessing after service: run POS, close the till, track stock, see margins, and review daily sales — one platform for cafes and restaurants. No per-seat fees.";
 
 export type SeoPage = {
   slug: string;
@@ -32,7 +33,7 @@ export const featurePages: SeoPage[] = [
     metaTitle: "Simple POS for Cafes and Small Food Businesses",
     description: "Run sales, open and close the till, track cash/card payments, issue receipts, and keep transaction records in franchisetech.",
     h1: "A simple POS register built for small food businesses",
-    intro: "franchisetech keeps the till practical: products, customers, cash/card payments, receipts, refunds, and close-of-day records in one place — including FiscalNet fiscal receipts for Romanian organisations when enabled.",
+    intro: "franchisetech keeps the till practical: products, customers, cash/card payments, receipts, refunds, and close-of-day records in one place.",
     bullets: ["Fast product grid and cart", "Open and close till sessions", "Cash, card, and other payment tracking", "Customers, receipts, transactions, refunds, and voids"],
     sections: [
       { title: "Run the till without clutter", body: "Staff can add products, select a payment method, attach a customer name, and complete a sale without moving through multiple back-office screens." },
@@ -42,12 +43,11 @@ export const featurePages: SeoPage[] = [
     faqs: [
       { question: "Is franchisetech a payment terminal?", answer: "No. franchisetech records POS sales and payment method. Integrated payment hardware is planned but should not be assumed today." },
       { question: "Can I track refunds and voids?", answer: "Yes. franchisetech keeps refunds and voids with a reason so the till record stays clear." },
-      { question: "Does it work for Irish cafes?", answer: "Yes. franchisetech is built with Irish food businesses in mind, including VAT-ready records and cash/card tracking." },
-      { question: "Does franchisetech support Romanian fiscal receipts?", answer: "Yes. Romanian organisations can use lei/RON, Romanian TVA rates, and FiscalNet fiscal receipts when FiscalNet is configured. This supports the fiscal receipt workflow Romanian businesses need — your accountant or fiscal provider should verify the final setup before go-live." },
-      { question: "Is FiscalNet included in every account?", answer: "FiscalNet fiscal receipt support is available for Romanian organisations. It is not shown by default for Ireland or other countries." },
+      { question: "Can I use it on a tablet at the counter?", answer: "Yes. franchisetech runs in the browser — laptop, tablet, or till screen." },
+      { question: "How many staff can use the register?", answer: "Unlimited. Add cashiers, managers, and kitchen roles at no extra per-user cost." },
     ],
     related: [{ label: "Z-report", href: "/features/z-report" }, { label: "Cafes", href: "/industries/cafes" }, { label: "What cafes need from POS", href: "/resources/pos-system-for-small-cafes" }],
-    image: "/marketing/pos-hero.png",
+    image: "/showcase/pos-cart.png",
   },
   {
     slug: "stock-management",
@@ -70,7 +70,7 @@ export const featurePages: SeoPage[] = [
       { question: "Can POS sales reduce ingredient stock?", answer: "Yes, when recipes are configured, sales can reduce the stock of recipe ingredients." },
     ],
     related: [{ label: "Recipe costing", href: "/features/recipe-costing" }, { label: "Stock control article", href: "/resources/food-business-stock-control" }, { label: "Restaurants", href: "/industries/restaurants" }],
-    image: "/marketing/stock-report.png",
+    image: "/showcase/stock-levels.png",
   },
   {
     slug: "recipe-costing",
@@ -93,7 +93,7 @@ export const featurePages: SeoPage[] = [
       { question: "Can recipes connect to POS?", answer: "Yes. Recipe products can be sold through POS and used for stock calculations." },
     ],
     related: [{ label: "Recipe costing guide", href: "/resources/recipe-costing-for-cafes" }, { label: "Stock management", href: "/features/stock-management" }, { label: "Health bars", href: "/industries/health-bars" }],
-    image: "/marketing/recipe-costing-hero.png",
+    image: "/showcase/recipe-costing.png",
   },
   {
     slug: "z-report",
@@ -113,11 +113,10 @@ export const featurePages: SeoPage[] = [
     faqs: [
       { question: "What is a Z-report?", answer: "A Z-report is a close-of-day till summary showing sales and cash reconciliation for a register session or day." },
       { question: "Can I record cash in and cash out?", answer: "Yes. Cash movements can be recorded with reasons so expected cash stays clear." },
-      { question: "Is this Revenue-certified?", answer: "No certification claim is made. franchisetech helps keep VAT-ready records, but professional tax advice remains your responsibility." },
-      { question: "Is the Z-report valid for Romania?", answer: "The Z-report supports daily reconciliation and owner review. For Romania, FiscalNet handles the fiscal receipt workflow when configured. franchisetech does not replace advice from a Romanian accountant, fiscal printer provider, or tax advisor." },
+      { question: "Does this replace my accountant?", answer: "No. franchisetech helps keep organised sales and till records. Professional tax and accounting advice remains your responsibility." },
     ],
     related: [{ label: "Z-report explained", href: "/resources/z-report-explained" }, { label: "POS feature", href: "/features/pos" }, { label: "Cash-up guide", href: "/resources/cash-up-at-end-of-day" }],
-    image: "/marketing/reports-zreport.png",
+    image: "/showcase/reports-dashboard.png",
   },
   {
     slug: "food-safety-records",
@@ -142,6 +141,72 @@ export const featurePages: SeoPage[] = [
     related: [{ label: "Food trucks", href: "/industries/food-trucks" }, { label: "Stock management", href: "/features/stock-management" }, { label: "Legal disclaimer", href: "/legal-disclaimer" }],
     image: "/marketing/sc-reports.png",
   },
+  {
+    slug: "kitchen-display",
+    path: "/features/kitchen-display",
+    eyebrow: "Kitchen display",
+    title: "Kitchen Display System for Restaurants and Cafes",
+    metaTitle: "Kitchen Display (KDS) for Cafes and Restaurants",
+    description: "Send paid POS orders to a clear kitchen board — new, preparing, ready, and done — with franchisetech Kitchen Display.",
+    h1: "Kitchen display that keeps service moving",
+    intro: "When Kitchen Display is enabled, paid POS orders appear on a prep board so kitchen and front-of-house stay aligned without paper tickets.",
+    bullets: ["Orders from POS appear automatically", "New → Preparing → Ready → Done workflow", "Takeaway and dine-in labels", "Optional prep stations"],
+    sections: [
+      { title: "Clear order queue", body: "Staff see order lines, quantities, and timestamps on a large screen instead of shouting across the counter." },
+      { title: "Status at a glance", body: "Move orders through preparing and ready so front-of-house knows when to hand off or pack." },
+      { title: "Optional feature", body: "Kitchen Display is toggled per business in Settings — enable it only when your team is ready." },
+    ],
+    faqs: [
+      { question: "Does Kitchen Display need extra hardware?", answer: "A tablet or monitor with a browser is enough. Many teams use a wall-mounted screen in the kitchen." },
+      { question: "Which orders appear?", answer: "Paid POS orders created after Kitchen Display is enabled for your organisation." },
+    ],
+    related: [{ label: "POS", href: "/features/pos" }, { label: "Restaurants", href: "/industries/restaurants" }, { label: "Takeaways", href: "/industries/takeaways" }],
+    image: "/showcase/kitchen-display.png",
+  },
+  {
+    slug: "purchases-suppliers",
+    path: "/features/purchases-suppliers",
+    eyebrow: "Purchases & suppliers",
+    title: "Supplier Purchases and Stock Receiving",
+    metaTitle: "Purchases, Suppliers, and Stock Receiving for Food Businesses",
+    description: "Record supplier purchases, track spend by vendor, and keep stock levels aligned with what you buy and sell.",
+    h1: "Purchases and suppliers in the same workspace as POS",
+    intro: "franchisetech connects suppliers, purchase records, and stock so owners can see what was bought, from whom, and how it affects inventory.",
+    bullets: ["Supplier directory with contact details", "Purchase records and spend by vendor", "Stock increases from received goods", "Import purchases from CSV"],
+    sections: [
+      { title: "Know supplier spend", body: "See total spend per supplier and purchase history without a separate spreadsheet." },
+      { title: "Stock follows purchases", body: "Received purchases can increase product stock so on-hand quantities stay current." },
+      { title: "Works with recipes", body: "Ingredient purchases feed recipe costing and can-make calculations." },
+    ],
+    faqs: [
+      { question: "Can I import old purchase data?", answer: "Yes. CSV import is available for purchases when you are migrating from another system." },
+      { question: "Is this a full ERP?", answer: "No. It is practical purchase tracking for small food operators, not enterprise procurement." },
+    ],
+    related: [{ label: "Stock management", href: "/features/stock-management" }, { label: "Recipe costing", href: "/features/recipe-costing" }],
+    image: "/showcase/suppliers.png",
+  },
+  {
+    slug: "setup-onboarding",
+    path: "/features/setup-onboarding",
+    eyebrow: "Setup guide",
+    title: "Guided Setup for New Businesses",
+    metaTitle: "Guided Setup — Products, Till, First Sale, Reports",
+    description: "A built-in setup guide walks new owners through products, payment methods, opening the till, first sale, and reports.",
+    h1: "Get live faster with a step-by-step setup guide",
+    intro: "The in-app setup guide tracks progress from business details through first sale so new teams are not guessing what to configure next.",
+    bullets: ["Business, currency, and receipt settings", "Products and payment methods", "Open till and first test sale", "Review daily reports"],
+    sections: [
+      { title: "Clear milestones", body: "Each step links to the right screen — settings, POS, or reports — so setup stays focused." },
+      { title: "Assisted trial support", body: "The 15-day trial includes help setting up products, staff, and a first sale walkthrough." },
+      { title: "Owner visibility", body: "Progress is visible in the dashboard so managers know what is still outstanding." },
+    ],
+    faqs: [
+      { question: "How long does setup take?", answer: "Many cafes complete core setup in one session — products, till, and a test sale." },
+      { question: "Can I skip steps?", answer: "Yes. The guide is a checklist, not a blocker. You can return to any step later." },
+    ],
+    related: [{ label: "POS", href: "/features/pos" }, { label: "Pricing", href: "/pricing" }],
+    image: "/showcase/setup-guide.png",
+  },
 ];
 
 export const industryPages: SeoPage[] = [
@@ -149,18 +214,18 @@ export const industryPages: SeoPage[] = [
     slug: "cafes",
     path: "/industries/cafes",
     eyebrow: "Cafés & Coffee Shops",
-    title: "POS System for Cafes — Ireland & Romania",
-    metaTitle: "POS System for Cafes, Coffee Shops | Ireland & Romania | franchisetech",
-    description: "franchisetech helps cafes and coffee shops in Ireland and Romania run POS sales, track cash/card totals, manage products, stock, recipes, and staff. EUR and lei supported.",
+    title: "POS System for Cafes and Coffee Shops",
+    metaTitle: "POS System for Cafes and Coffee Shops | franchisetech",
+    description: "franchisetech helps cafes run POS sales, track cash and card totals, manage products, stock, recipes, and staff — without per-seat fees.",
     h1: "POS and business control for cafes and coffee shops",
-    intro: "Cafes need quick sales, clean cash-up, recipe margins, and simple team management — without a complicated system. franchisetech works in Ireland (EUR) and Romania (lei) with country-specific VAT and FiscalNet support.",
+    intro: "Cafes need quick sales, clean cash-up, recipe margins, and simple team management — without a complicated system or locked-in POS contracts.",
     bullets: [
       "Fast POS for counter service",
       "Coffee, food, and retail products",
       "Recipe costing for menu items",
       "Stock, suppliers, purchases, and daily reports",
       "Unlimited staff — no per-user fees",
-      "EUR (Ireland) and lei/RON (Romania) supported",
+      "Browser-based — laptop, tablet, or till device",
     ],
     sections: [
       {
@@ -168,74 +233,71 @@ export const industryPages: SeoPage[] = [
         body: "Busy service, cash/card reconciliation, changing prices, ingredient waste, unclear margins, and managing a growing team without per-user software costs can all make small cafes harder to run.",
       },
       {
-        title: "Country-specific setup",
-        body: "Irish cafés get Euro currency and pre-loaded VAT rates (23%/13.5%/9%). Romanian cafés (cafenele) get lei display, TVA rates (19%/9%/5%), and FiscalNet integration for fiscal receipts — all configurable in Settings.",
+        title: "One workspace for service and back office",
+        body: "POS, stock, purchases, recipes, and reports connect so owners see sales and costs together — not in separate spreadsheets after close.",
       },
       {
         title: "Reports owners get",
-        body: "Sales, VAT-ready records, Z-report, stock alerts, recipe margins, transactions, refunds, staff audit trail, and export — all accessible from any device.",
+        body: "Sales, till close, stock alerts, recipe margins, transactions, refunds, staff audit trail, and export — all accessible from any device.",
       },
     ],
     faqs: [
-      { question: "Is franchisetech suitable for Irish cafes?", answer: "Yes. It displays Euro, has Irish VAT rates pre-loaded, and includes HACCP food-safety records — designed around the needs of Irish food businesses." },
-      { question: "Does it work for Romanian cafenele?", answer: "Yes. Romanian cafenele can use FiscalNet fiscal receipts, Romanian TVA rates (19%/9%/5%), and lei/RON — configured in Settings. Confirm setup with your accountant or fiscal provider before go-live." },
       { question: "Can I add unlimited baristas and staff?", answer: "Yes. You can add as many team members as you need at no extra cost. Each gets a role — cashier, manager, kitchen, etc." },
       { question: "Can I cost coffee and food recipes?", answer: "Yes. Recipes can be built from ingredients to calculate cost per portion, gross margin, and can-make counts." },
+      { question: "Do I need special hardware?", answer: "No. franchisetech runs in the browser. Use a laptop, tablet, or existing till screen to start." },
+      { question: "Can I track daily cash-up?", answer: "Yes. Opening cash, cash/card sales, counted cash, and difference are recorded at till close." },
     ],
     related: [
       { label: "POS", href: "/features/pos" },
       { label: "Recipe costing", href: "/features/recipe-costing" },
-      { label: "🇮🇪 Ireland", href: "/industries/ireland" },
-      { label: "🇷🇴 Romania", href: "/industries/romania" },
       { label: "Cafe POS guide", href: "/resources/pos-system-for-small-cafes" },
     ],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/industry-cafe.png",
   },
   {
     slug: "restaurants",
     path: "/industries/restaurants",
     eyebrow: "Restaurants",
-    title: "Restaurant POS System — Ireland & Romania | Stock, Recipes, Staff",
-    metaTitle: "Restaurant POS Ireland & Romania | Recipe Costing, Staff, FiscalNet",
-    description: "franchisetech helps small restaurants in Ireland and Romania manage POS sales, products, stock, suppliers, purchases, recipes, staff, and reports. EUR and lei supported. FiscalNet integrated for Romanian organisations.",
+    title: "Restaurant POS System — Stock, Recipes, Staff",
+    metaTitle: "Restaurant POS | Recipe Costing, Staff, Kitchen Display | franchisetech",
+    description: "franchisetech helps small restaurants manage POS sales, stock, suppliers, purchases, recipes, staff, and daily reports in one workspace.",
     h1: "POS, stock, and recipe control for small restaurants",
-    intro: "Restaurants need clear sales records, ingredient stock, supplier purchases, food cost visibility, and reliable team management — without enterprise complexity. franchisetech works in Ireland (EUR) and Romania (lei/RON with FiscalNet fiscal receipts when configured).",
+    intro: "Restaurants need clear sales records, ingredient stock, supplier purchases, food cost visibility, and reliable team management — without enterprise complexity or per-seat pricing.",
     bullets: [
       "POS sales and receipts",
       "Supplier and purchase records",
       "Recipe cost per portion and margin",
-      "Z-report and VAT-ready records",
+      "Till close and daily sales reports",
       "Unlimited staff with role-based access",
-      "EUR (Ireland) and lei/RON (Romania) — FiscalNet fiscal receipts for Romanian organisations",
+      "Kitchen display for prep teams",
     ],
     sections: [
       {
-        title: "Country-ready from day one",
-        body: "Irish restaurants get Euro currency and 23%/13.5%/9% VAT pre-loaded. Romanian restaurants (restaurante) get lei display, TVA rates 19%/9%/5%, and FiscalNet fiscal receipts for Romanian businesses — when FiscalNet is configured in Settings.",
+        title: "Pain points owners face",
+        body: "Food cost drift, unclear margins, stock-outs during service, and till discrepancies at close — without a single system tying sales to ingredients and cash.",
       },
       {
         title: "Food cost and recipe control",
-        body: "Connect ingredients to recipes, record supplier purchases, and see cost per portion, gross margin, and can-make counts update as stock changes — helping owners understand real product profitability.",
+        body: "Connect ingredients to recipes, record supplier purchases, and see cost per portion, gross margin, and can-make counts update as stock changes.",
       },
       {
         title: "Team management for restaurant staff",
-        body: "Add unlimited staff — waiters, cashiers, kitchen, managers — each with the right role and access level. Invite by email, disable instantly, reset passwords, and review a full audit trail of all actions.",
+        body: "Add unlimited staff — waiters, cashiers, kitchen, managers — each with the right role and access level. Invite by email and review a full audit trail.",
       },
     ],
     faqs: [
-      { question: "Does it work for Irish restaurants?", answer: "Yes. Euro currency, Irish VAT rates, HACCP food-safety records, and cash/card daily close — all ready for Irish food operators." },
-      { question: "Does it work for Romanian restaurants?", answer: "Yes. Romanian restaurants use lei/RON, Romanian TVA rates (19%/9%/5%), and FiscalNet fiscal receipts for daily owner reconciliation — confirm final setup with your accountant or fiscal provider." },
       { question: "Can it calculate recipe margins?", answer: "Yes. Recipe costing compares ingredient cost per portion with the sale price and shows gross margin." },
-      { question: "How many staff can I add?", answer: "Unlimited. You can add every team member — kitchen, cashier, manager — at no extra per-user cost." },
+      { question: "How many staff can I add?", answer: "Unlimited. Every team member — kitchen, cashier, manager — at no extra per-user cost." },
+      { question: "Is there a kitchen display?", answer: "Yes. Paid POS orders can flow to a prep board — new, preparing, ready, done — when enabled in settings." },
+      { question: "Can I track supplier spend?", answer: "Yes. Purchases and supplier records show spend by vendor alongside stock levels." },
     ],
     related: [
       { label: "Stock management", href: "/features/stock-management" },
       { label: "Recipe costing", href: "/features/recipe-costing" },
       { label: "Z-report", href: "/features/z-report" },
-      { label: "🇮🇪 Ireland", href: "/industries/ireland" },
-      { label: "🇷🇴 Romania", href: "/industries/romania" },
+      { label: "Kitchen display", href: "/features/kitchen-display" },
     ],
-    image: "/marketing/sc-kitchen.png",
+    image: "/marketing/industry-restaurant.png",
   },
   {
     slug: "takeaways",
@@ -246,7 +308,7 @@ export const industryPages: SeoPage[] = [
     description: "franchisetech helps takeaways sell quickly, track payments, manage products, ingredients, stock, purchases, and daily reports.",
     h1: "A simple POS and stock system for takeaways",
     intro: "Takeaways need speed at the till, clear product prices, cash/card totals, and stock records that are easy to maintain.",
-    bullets: ["Fast product grid", "Refunds and voids with reason", "Ingredient and stock tracking", "Daily cash-up and reports", "EUR or RON — FiscalNet fiscal receipts for Romanian organisations when configured"],
+    bullets: ["Fast product grid", "Refunds and voids with reason", "Ingredient and stock tracking", "Daily cash-up and reports", "Unlimited staff — no per-seat fees"],
     sections: [
       { title: "Pain points", body: "Fast service can lead to missed records, unclear voids, and stock surprises during busy evenings." },
       { title: "How franchisetech helps", body: "franchisetech keeps sales, voids, customers, products, and stock in one system that owners can review later." },
@@ -256,10 +318,9 @@ export const industryPages: SeoPage[] = [
       { question: "Can I use franchisetech without payment hardware?", answer: "Yes. It records the payment method, but hardware/payment terminal integration is not claimed as live." },
       { question: "Can I void a mistaken order?", answer: "Yes. Voids can be recorded with a reason." },
       { question: "Can I track stock for ingredients?", answer: "Yes. Ingredients can be stock-tracked products." },
-      { question: "Does franchisetech work for Romanian takeaways?", answer: "Yes. Romanian organisations can enable lei/RON currency, Romanian TVA rates, and FiscalNet fiscal receipts. Payment types mapped for FiscalNet (codes 1–8). Confirm setup with your accountant or fiscal provider before go-live." },
     ],
     related: [{ label: "POS", href: "/features/pos" }, { label: "Stock management", href: "/features/stock-management" }, { label: "Z-report", href: "/features/z-report" }],
-    image: "/marketing/pos-hero.png",
+    image: "/showcase/pos-cart.png",
   },
   {
     slug: "food-trucks",
@@ -270,7 +331,7 @@ export const industryPages: SeoPage[] = [
     description: "franchisetech helps food trucks and mobile food businesses run sales, track cash/card totals, manage products, stock, recipes, and food records.",
     h1: "POS and business control for food trucks",
     intro: "Food trucks need a simple register, clear cash/card totals, portable product control, and records owners can review after service.",
-    bullets: ["Simple register for service", "Cash/card and daily close", "Products, recipes, and stock", "Food-safety record support", "EUR or RON — FiscalNet fiscal receipts for Romanian organisations when configured"],
+    bullets: ["Simple register for service", "Cash/card and daily close", "Products, recipes, and stock", "Food-safety record support", "Browser-based — works on mobile devices"],
     sections: [
       { title: "Pain points", body: "Mobile service has limited time and space. Owners need simple tools that keep records organised without slowing the queue." },
       { title: "How franchisetech helps", body: "franchisetech brings POS, products, stock, recipes, suppliers, and reports into one browser-based workspace." },
@@ -280,10 +341,9 @@ export const industryPages: SeoPage[] = [
       { question: "Does franchisetech work offline?", answer: "franchisetech is a cloud web app and should be treated as requiring internet access." },
       { question: "Can it support food-safety records?", answer: "Yes. It can support record keeping, without replacing professional food-safety advice." },
       { question: "Can I see end-of-day cash?", answer: "Yes. The till close and Z-report help review expected cash and differences." },
-      { question: "Does franchisetech work for food trucks in Romania?", answer: "Yes. Romanian organisations can enable lei/RON, Romanian TVA rates, and FiscalNet fiscal receipts. Payment types mapped for FiscalNet (codes 1–8). Confirm setup with your accountant or fiscal provider before go-live." },
     ],
     related: [{ label: "POS", href: "/features/pos" }, { label: "Food-safety records", href: "/features/food-safety-records" }, { label: "Cash-up guide", href: "/resources/cash-up-at-end-of-day" }],
-    image: "/marketing/sc-dashboard.png",
+    image: "/marketing/industry-food-truck.png",
   },
   {
     slug: "health-bars",
@@ -294,7 +354,7 @@ export const industryPages: SeoPage[] = [
     description: "franchisetech helps health bars and smoothie bars sell products, manage ingredients, cost recipes, track stock, and review margins.",
     h1: "POS, stock, and recipe costing for health bars",
     intro: "Health bars depend on fresh ingredients, recipe consistency, and clear margins for smoothies, bowls, snacks, and drinks.",
-    bullets: ["Smoothie and bowl recipes", "Ingredient stock tracking", "Margin visibility", "POS sales and cash/card records", "EUR or RON — FiscalNet fiscal receipts for Romanian organisations when configured"],
+    bullets: ["Smoothie and bowl recipes", "Ingredient stock tracking", "Margin visibility", "POS sales and cash/card records", "Unlimited staff — no per-seat fees"],
     sections: [
       { title: "Pain points", body: "Fresh ingredients expire quickly, recipes use small quantities, and product margins can be difficult to see without costing." },
       { title: "How franchisetech helps", body: "Ingredients, products, purchases, recipes, and POS sales connect so owners can review cost and stock together." },
@@ -304,10 +364,9 @@ export const industryPages: SeoPage[] = [
       { question: "Can I cost smoothies?", answer: "Yes. Add fruit, milk, powders, packaging, and quantities to calculate recipe cost." },
       { question: "Can I track can-make counts?", answer: "Yes. Recipe and stock data can show how many portions can be made." },
       { question: "Can I import product lists?", answer: "Yes. Product import and export are supported by CSV." },
-      { question: "Does franchisetech work for health bars in Romania?", answer: "Yes. Romanian organisations can enable lei/RON, Romanian TVA rates, and FiscalNet fiscal receipts. Payment types mapped for FiscalNet (codes 1–8). Confirm setup with your accountant or fiscal provider before go-live." },
     ],
     related: [{ label: "Recipe costing", href: "/features/recipe-costing" }, { label: "Stock management", href: "/features/stock-management" }, { label: "Recipe costing guide", href: "/resources/recipe-costing-for-cafes" }],
-    image: "/marketing/recipe-costing-hero.png",
+    image: "/marketing/industry-cafe.png",
   },
   {
     slug: "ireland",
@@ -721,22 +780,30 @@ export const publicPaths = [
   "/legal-disclaimer",
 ];
 
-export function pageMetadata(page: { metaTitle: string; description: string; path: string }): Metadata {
+export function pageMetadata(page: {
+  metaTitle: string;
+  description: string;
+  path: string;
+  image?: string;
+}): Metadata {
+  const image = page.image ?? "/showcase/pos-cart.png";
   return {
     title: page.metaTitle,
     description: page.description,
-    alternates: { canonical: page.path },
+    keywords: [...MARKETING_KEYWORDS],
+    alternates: localeAlternates(page.path),
     openGraph: {
       title: page.metaTitle,
       description: page.description,
       url: page.path,
-      images: [{ url: "/marketing/pos-hero.png", width: 1200, height: 750, alt: "franchisetech POS screen" }],
+      locale: "en",
+      images: [{ url: image, width: 1200, height: 750, alt: page.metaTitle }],
     },
     twitter: {
       card: "summary_large_image",
       title: page.metaTitle,
       description: page.description,
-      images: ["/marketing/pos-hero.png"],
+      images: [image],
     },
   };
 }
@@ -764,11 +831,15 @@ export function jsonLd(data: Record<string, unknown>) {
   });
 }
 
+export const PARTNERS_TITLE = "Partner with franchisetech — Grow your food-business network";
+export const PARTNERS_DESCRIPTION =
+  "Resellers, consultants, and multi-site operators: offer a modern POS and operations platform your clients can run day to day. We run the product; you grow the network.";
+
 export function seoMeta({
   title,
   description,
   path,
-  image = "/marketing/pos-hero.png",
+  image = "/showcase/pos-cart.png",
 }: {
   title: string;
   description: string;
@@ -778,12 +849,14 @@ export function seoMeta({
   return {
     title,
     description,
-    alternates: { canonical: path },
+    keywords: [...MARKETING_KEYWORDS],
+    alternates: localeAlternates(path),
     openGraph: {
       title,
       description,
       url: path,
-      images: [{ url: image, width: 1200, height: 750, alt: "franchisetech product screen" }],
+      locale: "en",
+      images: [{ url: image, width: 1200, height: 750, alt: title }],
     },
     twitter: {
       card: "summary_large_image",

@@ -1,47 +1,91 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { ArrowRight } from "lucide-react";
+import {
+  CtaRow,
+  Faq,
+  FinalCta,
+  MarketingShell,
+  Section,
+  SectionLabel,
+} from "@/components/marketing/MarketingShell";
+import { BrowserFrame } from "@/components/marketing/DeviceFrames";
+import { ProductScreenshot } from "@/components/marketing/ProductScreenshot";
 import { JsonLd } from "@/components/marketing/JsonLd";
-import { SITE_URL } from "@/lib/marketing/seo";
+import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketing/tokens";
+import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, faqJsonLd, SITE_URL } from "@/lib/marketing/seo";
+import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
 
 export const metadata: Metadata = {
-  title: "franchisetech — Simple POS and Business Control",
-  description:
-    "A simple cloud POS and business dashboard for cafes, takeaways, convenience shops, and small retail businesses.",
-  alternates: { canonical: "/" },
+  title: DEFAULT_TITLE,
+  description: DEFAULT_DESCRIPTION,
+  keywords: [...MARKETING_KEYWORDS],
+  alternates: localeAlternates("/"),
   openGraph: {
-    title: "franchisetech — Simple POS and Business Control",
-    description:
-      "Sell products, manage staff, track daily sales, and understand your shop without expensive POS lock-in.",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
     url: SITE_URL,
-    images: [
-      { url: "/marketing/pos-hero.png", width: 1200, height: 750, alt: "franchisetech POS register" },
-    ],
+    locale: "en",
+    images: [{ url: "/showcase/reports-dashboard.png", width: 1200, height: 750, alt: "franchisetech owner dashboard" }],
   },
 };
 
-const ownerOutcomes = [
-  "Sell products from a simple cloud POS",
-  "Set up products, categories, customers, and staff",
-  "See daily sales, cash/card totals, and basic reports",
-  "Start with a 15-day assisted trial before paying monthly",
+const painPoints = [
+  {
+    title: "Till doesn't match the drawer",
+    text: "See expected cash, card totals, and difference at close — not a guess after service.",
+  },
+  {
+    title: "Margins stay hidden",
+    text: "Recipe costing shows cost per portion and gross margin before you change the menu.",
+  },
+  {
+    title: "Stock surprises mid-shift",
+    text: "Low-stock alerts and purchases in the same place as POS — fewer emergency runs.",
+  },
+  {
+    title: "Locked-in POS contracts",
+    text: "Browser-based POS with unlimited staff. Start on devices you already own.",
+  },
 ];
 
-const dailyControl = [
-  ["Run the till", "Staff can sell products and take payment without a complicated system."],
-  ["Manage products", "Keep products, categories, prices, and customers clear in one place."],
-  ["See daily numbers", "Check sales, payment totals, and activity without waiting for end-of-month reports."],
-  ["Stay independent", "Start on a browser, laptop, tablet, or existing device. Hardware can be reviewed later."],
+const featureHighlights = [
+  { title: "POS register", text: "Sell fast. Track cash and card. Close the till.", href: "/features/pos", image: "/showcase/pos-cart.png", path: "/app/pos" },
+  { title: "Kitchen display", text: "Paid orders on a prep board — new to done.", href: "/features/kitchen-display", image: "/showcase/kitchen-display.png", path: "/app/kitchen" },
+  { title: "Stock & purchases", text: "Suppliers, purchases, and levels together.", href: "/features/purchases-suppliers", image: "/showcase/stock-levels.png", path: "/app/stock" },
+  { title: "Recipes & margins", text: "Cost per portion and gross margin.", href: "/features/recipe-costing", image: "/showcase/recipe-costing.png", path: "/app/recipes" },
+  { title: "Daily reports", text: "Sales, till close, and tax-ready totals.", href: "/features/z-report", image: "/showcase/reports-dashboard.png", path: "/app" },
+  { title: "Guided setup", text: "Checklist from first product to first sale.", href: "/features/setup-onboarding", image: "/showcase/setup-guide.png", path: "/app/setup-checklist" },
 ];
 
-const fit = [
-  "Cafes",
-  "Takeaways",
-  "Small retail shops",
-  "Convenience shops",
-  "Owner-operated multi-location businesses",
+const industries = [
+  { title: "Cafes", text: "Counter service and recipe margins.", href: "/industries/cafes", image: "/marketing/industry-cafe.png" },
+  { title: "Restaurants", text: "Table service, kitchen, and staff.", href: "/industries/restaurants", image: "/marketing/industry-restaurant.png" },
+  { title: "Takeaways", text: "Speed at the till, clear end-of-day.", href: "/industries/takeaways", image: "/showcase/pos-cart.png" },
+  { title: "Food trucks", text: "Mobile POS after service.", href: "/industries/food-trucks", image: "/marketing/industry-food-truck.png" },
+  { title: "Kitchen ops", text: "Wall-mounted display for prep teams.", href: "/features/kitchen-display", image: "/marketing/industry-kitchen.png" },
+];
+
+const steps = [
+  { title: "Set up", text: "Products, payments, and staff — guided in-app." },
+  { title: "Open till", text: "Start a session and sell from any device." },
+  { title: "Sell & report", text: "Close the day with clear sales and stock." },
+];
+
+const faqs = [
+  { question: "How does the 15-day trial work?", answer: "Full access with setup help — products, staff, payment methods, a test sale, and a dashboard walkthrough. No credit card to start." },
+  { question: "Do I need special POS hardware?", answer: "No. Runs in the browser on laptop, tablet, or existing hardware. Receipt printers when you are ready." },
+  { question: "Can I see margins on menu items?", answer: "Yes. Recipe costing links ingredients to sale price so you see cost per portion and gross margin before you change the menu." },
+  { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
+  { question: "Can I manage stock from the same system as POS?", answer: "Yes. Purchases, suppliers, and stock levels sit beside sales so owners see what is low before the next service." },
+];
+
+const dashboardBullets = [
+  "Sales today and vs yesterday",
+  "Till open / close and expected cash",
+  "Top products and low-stock alerts",
+  "Reports: VAT, margins, purchases",
 ];
 
 export default function HomePage() {
@@ -54,105 +98,197 @@ export default function HomePage() {
           name: "franchisetech",
           applicationCategory: "BusinessApplication",
           operatingSystem: "Web",
-          description: "Simple cloud POS and business dashboard for independent shops",
+          inLanguage: "en",
+          description: DEFAULT_DESCRIPTION,
           url: SITE_URL,
           offers: { "@type": "Offer", price: "39", priceCurrency: "EUR" },
         }}
       />
+      <JsonLd data={faqJsonLd(faqs)} />
 
-      <section className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white px-4 pb-20 pt-16 sm:px-6 sm:pb-24 sm:pt-20 lg:px-8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.08),transparent)]" />
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
           <div className="max-w-xl">
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">Simple cloud POS</p>
-            <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-              Simple POS and business control for independent shops.
+            <SectionLabel>Cloud POS for food businesses</SectionLabel>
+            <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-[3.35rem] lg:leading-[1.08]">
+              Know what happened in your cafe today — not next month.
             </h1>
-            <p className="mt-5 text-lg leading-8 text-slate-600">
-              Sell products, manage staff, track daily sales, and understand your shop without expensive POS lock-in.
+            <p className={`mt-5 ${marketingSubtext}`}>
+              POS, kitchen display, stock, and daily reports in one workspace. No per-seat fees. No POS lock-in.
             </p>
-            <ul className="mt-6 space-y-2">
-              {ownerOutcomes.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-slate-700">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-blue-600" />
+            <CtaRow secondaryHref="/features" secondaryLabel="See features" />
+            <p className="mt-5 text-sm text-slate-400">15-day assisted trial · Unlimited staff</p>
+          </div>
+          <div className="relative">
+            <BrowserFrame
+              src="/showcase/pos-cart.png"
+              alt="franchisetech POS — product grid, cart, and charge"
+              path="/app/pos"
+              priority
+            />
+            <div className="absolute -bottom-6 -left-4 hidden w-[42%] overflow-hidden rounded-2xl border border-white/80 shadow-xl sm:block lg:-left-8">
+              <Image
+                src="/marketing/hero-cafe-pos.png"
+                alt="Cafe owner using franchisetech on tablet"
+                width={400}
+                height={500}
+                className="aspect-[4/5] w-full object-cover"
+                unoptimized
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Section tone="slate">
+        <div className="max-w-2xl">
+          <SectionLabel>Owner pain points</SectionLabel>
+          <h2 className={`mt-3 ${marketingHeading}`}>Built around what keeps you up at night.</h2>
+        </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          {painPoints.map((item) => (
+            <div key={item.title} className={`p-6 ${marketingCard}`}>
+              <h3 className="font-medium text-slate-900">{item.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-500">{item.text}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section>
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          <div>
+            <SectionLabel>Owner dashboard</SectionLabel>
+            <h2 className={`mt-3 ${marketingHeading}`}>Today at a glance.</h2>
+            <p className={`mt-4 ${marketingSubtext}`}>
+              The same screen owners open after service — sales, till, stock alerts, and reports in one place.
+            </p>
+            <ul className="mt-6 space-y-2.5">
+              {dashboardBullets.map((item) => (
+                <li key={item} className="flex items-start gap-2 text-sm text-slate-600">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
                   {item}
                 </li>
               ))}
             </ul>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/signup" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white hover:bg-blue-700">
-                Start 15-day assisted trial <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href="/pricing" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-6 py-3 text-base font-medium text-slate-700 hover:bg-slate-50">
-                See pricing
-              </Link>
-            </div>
-            <p className="mt-3 text-sm text-slate-500">Setup help available. No hardware required to start.</p>
           </div>
-          <div className="relative">
-            <div className="rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-              <Image src="/marketing/pos-hero.png" alt="franchisetech POS register" width={1200} height={750} className="aspect-[16/10] w-full rounded-lg object-cover" priority />
-            </div>
-            <div className="absolute -bottom-5 -left-5 hidden w-3/5 rounded-xl border border-slate-200 bg-white p-2 shadow-xl sm:block">
-              <Image src="/marketing/dashboard-hero.png" alt="franchisetech daily dashboard" width={600} height={375} className="rounded-lg" />
-            </div>
-          </div>
+          <ProductScreenshot
+            src="/showcase/reports-dashboard.png"
+            alt="franchisetech owner dashboard showing Today at a glance, sales, till, and business reports"
+            path="/app"
+            caption="Dashboard — sales, till status, stock watch, and reports"
+          />
         </div>
-      </section>
+      </Section>
 
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">What it solves</p>
-            <h2 className="mt-2 text-3xl font-bold text-slate-950">Know what happened in your shop today.</h2>
-            <p className="mt-3 text-slate-600">
-              franchisetech is for owners who want a simple till, clear product setup, daily sales visibility, and less dependence on locked-in POS contracts.
-            </p>
-          </div>
-          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
-            {dailyControl.map(([title, body]) => (
-              <div key={title} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="font-semibold text-slate-950">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
+      <Section tone="slate">
+        <div className="max-w-2xl">
+          <SectionLabel>Features</SectionLabel>
+          <h2 className={`mt-3 ${marketingHeading}`}>One workspace. Every workflow.</h2>
+        </div>
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {featureHighlights.map((item) => (
+            <Link key={item.href} href={item.href} className={`group overflow-hidden ${marketingCard}`}>
+              <div className="aspect-[16/10] overflow-hidden bg-slate-100">
+                <Image
+                  src={item.image}
+                  alt={`${item.title} — franchisetech${item.path}`}
+                  width={640}
+                  height={400}
+                  className="h-full w-full object-contain object-top transition duration-300 group-hover:scale-[1.01]"
+                  unoptimized
+                />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-blue-700">Who it is for</p>
-            <h2 className="mt-2 text-3xl font-bold text-slate-950">Built for local independent businesses.</h2>
-            <p className="mt-3 text-slate-600">
-              Start with the core system: POS, products, customers, staff, sales tracking, and reports. Extra modules can wait until customers ask for them.
-            </p>
-            <Link href="/pricing" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-blue-700 hover:underline">
-              See pricing <ArrowRight className="h-4 w-4" />
+              <div className="p-5">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400">{item.path}</p>
+                <h3 className="mt-1 font-medium text-slate-900">{item.title}</h3>
+                <p className="mt-1 text-sm text-slate-500">{item.text}</p>
+                <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-blue-600">
+                  Learn more <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </div>
             </Link>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {fit.map((item) => (
-              <div key={item} className="rounded-xl border border-slate-200 bg-white p-5 text-sm font-semibold text-slate-800 shadow-sm">
-                {item}
+          ))}
+        </div>
+      </Section>
+
+      <Section>
+        <div className="max-w-2xl">
+          <SectionLabel>Industries</SectionLabel>
+          <h2 className={`mt-3 ${marketingHeading}`}>Built for how you serve food.</h2>
+        </div>
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {industries.map((item) => (
+            <Link key={item.href} href={item.href} className={`group overflow-hidden ${marketingCard}`}>
+              <div className="aspect-[16/10] overflow-hidden">
+                <Image
+                  src={item.image}
+                  alt={`${item.title} — franchisetech`}
+                  width={640}
+                  height={400}
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                  unoptimized
+                />
               </div>
-            ))}
+              <div className="flex items-center justify-between p-5">
+                <div>
+                  <h3 className="font-medium text-slate-900">{item.title}</h3>
+                  <p className="mt-0.5 text-sm text-slate-500">{item.text}</p>
+                </div>
+                <ArrowRight className="h-4 w-4 shrink-0 text-slate-300 transition group-hover:text-blue-600" />
+              </div>
+            </Link>
+          ))}
+        </div>
+      </Section>
+
+      <Section tone="slate">
+        <div className="max-w-xl">
+          <SectionLabel>How it works</SectionLabel>
+          <h2 className={`mt-3 ${marketingHeading}`}>Live in three steps.</h2>
+        </div>
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
+          {steps.map((step, i) => (
+            <div key={step.title} className="relative pl-12">
+              <span className="absolute left-0 top-0 flex h-9 w-9 items-center justify-center rounded-full bg-blue-600 text-sm font-medium text-white">
+                {i + 1}
+              </span>
+              <h3 className="font-medium text-slate-900">{step.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-500">{step.text}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <section className="border-y border-slate-200/60 bg-white px-4 py-14 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          <div className="max-w-lg">
+            <SectionLabel>Partners</SectionLabel>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900">
+              Reseller or consultant? Grow with our network.
+            </h2>
+            <p className="mt-2 text-slate-500">We run the platform. You bring local sales and onboarding.</p>
           </div>
+          <Link
+            href="/partners"
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-800 transition hover:border-slate-300"
+          >
+            Partner with us <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
-      <section className="border-y border-blue-100 bg-blue-50 px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl font-bold text-slate-950">Start with one assisted trial.</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-slate-600">
-            We set up your products, categories, payment methods, staff, first sale test, and owner dashboard walkthrough.
-          </p>
-          <div className="mt-8 flex justify-center gap-3">
-            <Link href="/signup" className="rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700">Start 15-day trial</Link>
-            <Link href="/pricing" className="rounded-lg border border-blue-200 bg-white px-6 py-3 text-sm font-semibold text-blue-700 hover:bg-blue-100">See pricing</Link>
-          </div>
+      <Section>
+        <div className="max-w-xl">
+          <h2 className={marketingHeading}>Questions from owners</h2>
         </div>
-      </section>
+        <div className="mt-10 max-w-3xl">
+          <Faq items={faqs} />
+        </div>
+      </Section>
+
+      <FinalCta />
     </MarketingShell>
   );
 }

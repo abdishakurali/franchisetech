@@ -1,16 +1,19 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { jsonLd, SITE_URL } from "@/lib/marketing/seo";
 import { createClient } from "@/lib/supabase/server";
+import { MarketingHeader } from "@/components/marketing/MarketingHeader";
+import { BrowserFrame } from "@/components/marketing/DeviceFrames";
+import { marketingCard, marketingEyebrow, marketingSectionY } from "@/lib/marketing/tokens";
 
 export const featureLinks = [
   ["/features/pos", "POS register"],
+  ["/features/kitchen-display", "Kitchen display"],
   ["/features/stock-management", "Stock management"],
   ["/features/recipe-costing", "Recipe costing"],
   ["/features/z-report", "Z-report"],
-  ["/features/food-safety-records", "Food safety records"],
+  ["/features/purchases-suppliers", "Purchases & suppliers"],
 ] as const;
 
 export const industryLinks = [
@@ -32,7 +35,10 @@ export const resourceLinks = [
 export async function MarketingNav() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  const displayName = user?.user_metadata?.full_name || user?.email || "User";
+  if (!user) {
+    return <MarketingHeader user={null} />;
+  }
+  const displayName = user.user_metadata?.full_name || user.email || "User";
   const initials = displayName
     .split(/[ @._-]/)
     .filter(Boolean)
@@ -40,39 +46,7 @@ export async function MarketingNav() {
     .join("")
     .toUpperCase()
     .slice(0, 2);
-
-  return (
-    <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/90 backdrop-blur-sm">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/franchise-tech-logo.png" alt="franchisetech" className="h-8 w-auto max-w-[180px] object-contain" />
-        </Link>
-        <nav className="hidden items-center gap-5 text-sm font-medium text-slate-600 md:flex">
-          <Link href="/features" className="hover:text-slate-950">Features</Link>
-          <Link href="/industries/cafes" className="hover:text-slate-950">Industries</Link>
-          <Link href="/resources" className="hover:text-slate-950">Resources</Link>
-          <Link href="/pricing" className="hover:text-slate-950">Pricing</Link>
-        </nav>
-        <div className="flex items-center gap-3">
-          {user ? (
-            <>
-              <Link href="/app" className="hidden text-sm font-medium text-slate-600 hover:text-slate-950 sm:inline">Dashboard</Link>
-              <Link href="/app/profile" className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">{initials || "U"}</span>
-                <span className="hidden max-w-32 truncate sm:inline">{displayName}</span>
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-950">Login</Link>
-              <Link href="/signup" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Start 15-day trial</Link>
-            </>
-          )}
-        </div>
-      </div>
-    </header>
-  );
+  return <MarketingHeader user={{ displayName, initials }} />;
 }
 
 export const socialLinks = [
@@ -85,12 +59,15 @@ export function MarketingFooter() {
     <footer className="bg-slate-950 px-4 py-12 text-slate-400 sm:px-6">
       <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-5">
         <div className="md:col-span-2">
-          <div className="mb-3 flex items-center gap-2 text-white">
+          <div className="mb-4">
+          <Link href="/" className="inline-flex items-center gap-2.5 text-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/franchise-tech-logo.png" alt="franchisetech" className="h-8 w-auto max-w-[180px] object-contain brightness-0 invert" />
-          </div>
-          <p className="max-w-sm text-sm">Simple POS and business control for independent shops.</p>
-          <p className="mt-4 max-w-sm text-xs">franchisetech helps owners sell products, manage staff, and see daily sales clearly. Hardware and specialist integrations can be reviewed later.</p>
+            <img src="/icon.svg" alt="" className="h-9 w-9 shrink-0 rounded-lg" />
+            <span className="text-lg font-semibold tracking-tight">franchisetech</span>
+          </Link>
+        </div>
+          <p className="max-w-sm text-sm">Cloud POS and business control for cafes, restaurants, and food businesses.</p>
+          <p className="mt-4 max-w-sm text-xs">Sell, track stock, close the till, and see real numbers — without POS lock-in or per-seat fees.</p>
           <div className="mt-5 flex items-center gap-3">
             {socialLinks.map(([href, label, Icon]) => (
               <a
@@ -99,7 +76,7 @@ export function MarketingFooter() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={`franchisetech on ${label}`}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-700 text-slate-400 transition-colors hover:border-slate-500 hover:text-white"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-600 text-slate-300 transition-colors hover:border-slate-400 hover:bg-slate-800 hover:text-white"
               >
                 <Icon className="h-4 w-4" />
               </a>
@@ -108,7 +85,7 @@ export function MarketingFooter() {
         </div>
         <FooterColumn title="Features" links={featureLinks} />
         <FooterColumn title="Industries" links={industryLinks} />
-        <FooterColumn title="Resources" links={[["/resources", "Resources"], ...resourceLinks.slice(0, 3), ["/pricing", "Pricing"], ["/privacy", "Privacy"], ["/terms", "Terms"]]} />
+        <FooterColumn title="Company" links={[["/partners", "Partners"], ["/pricing", "Pricing"], ["/resources", "Resources"], ["/help", "Help centre"], ["/privacy", "Privacy"], ["/terms", "Terms"]]} />
       </div>
     </footer>
   );
@@ -143,12 +120,12 @@ function FooterColumn({ title, links }: { title: string; links: readonly (readon
 
 export function Hero({ eyebrow, title, description, image = true }: { eyebrow?: string; title: string; description: string; image?: boolean }) {
   return (
-    <section className="overflow-hidden bg-white px-4 pb-14 pt-16 sm:px-6 lg:px-8">
-      <div className={`mx-auto grid max-w-6xl items-center gap-10 ${image ? "lg:grid-cols-[0.85fr_1.15fr]" : ""}`}>
+    <section className={`overflow-hidden bg-gradient-to-b from-slate-50/80 to-white px-4 pb-16 pt-20 sm:px-6 lg:px-8 ${marketingSectionY}`}>
+      <div className={`mx-auto grid max-w-6xl items-center gap-12 ${image ? "lg:grid-cols-2" : ""}`}>
         <div>
-          {eyebrow && <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-blue-700">{eyebrow}</p>}
-          <h1 className="text-4xl font-bold leading-tight text-slate-950 sm:text-5xl">{title}</h1>
-          <p className="mt-5 text-lg text-slate-600">{description}</p>
+          {eyebrow && <p className={`mb-4 ${marketingEyebrow}`}>{eyebrow}</p>}
+          <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">{title}</h1>
+          <p className="mt-5 text-lg leading-relaxed text-slate-500">{description}</p>
           <CtaRow />
         </div>
         {image && <HeroScreenshots />}
@@ -159,47 +136,59 @@ export function Hero({ eyebrow, title, description, image = true }: { eyebrow?: 
 
 export function HeroScreenshots() {
   return (
-    <div className="relative min-h-[360px]">
-      <div className="rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-        <Image src="/marketing/pos-hero.png" alt="franchisetech POS register with cart and till controls" width={1200} height={750} className="aspect-[16/10] w-full rounded-lg object-cover" priority />
-      </div>
-      <div className="absolute -bottom-8 right-4 w-2/3 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-        <Image src="/marketing/dashboard-hero.png" alt="franchisetech dashboard showing sales today and expected cash" width={1200} height={750} className="aspect-[16/10] w-full rounded-lg object-cover" />
-      </div>
+    <BrowserFrame
+      src="/showcase/pos-cart.png"
+      alt="franchisetech POS register with product grid and checkout"
+      path="/app/pos"
+      priority
+      className="shadow-2xl"
+    />
+  );
+}
+
+export function CtaRow({ secondaryHref = "/pricing", secondaryLabel = "See pricing" }: { secondaryHref?: string; secondaryLabel?: string }) {
+  return (
+    <div className="mt-8 flex flex-wrap gap-3">
+      <Link href="/signup" className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-blue-700">
+        Start 15-day trial <ArrowRight className="h-4 w-4" />
+      </Link>
+      <Link href={secondaryHref} className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
+        {secondaryLabel}
+      </Link>
     </div>
   );
 }
 
-export function CtaRow() {
-  return (
-    <div className="mt-8 flex flex-wrap gap-3">
-      <Link href="/signup" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white hover:bg-blue-700">
-        Start 15-day trial <ArrowRight className="h-4 w-4" />
-      </Link>
-      <Link href="/pricing" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-6 py-3 text-base font-medium text-slate-700 hover:bg-slate-50">
-        See pricing
-      </Link>
-    </div>
-  );
+export function SectionLabel({ children }: { children: ReactNode }) {
+  return <p className={marketingEyebrow}>{children}</p>;
 }
 
 export function Section({ children, tone = "white" }: { children: ReactNode; tone?: "white" | "slate" | "blue" }) {
-  const bg = tone === "slate" ? "bg-slate-50" : tone === "blue" ? "bg-blue-50 border-y border-blue-100" : "bg-white";
-  return <section className={`${bg} px-4 py-16 sm:px-6 lg:px-8`}><div className="mx-auto max-w-6xl">{children}</div></section>;
+  const bg =
+    tone === "slate"
+      ? "bg-slate-50/70"
+      : tone === "blue"
+        ? "bg-blue-600/[0.04]"
+        : "bg-white";
+  return (
+    <section className={`${bg} px-4 ${marketingSectionY} sm:px-6 lg:px-8`}>
+      <div className="mx-auto max-w-6xl">{children}</div>
+    </section>
+  );
 }
 
 export function CardGrid({ items }: { items: Array<{ title: string; text: string; href?: string }> }) {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => {
         const body = (
-          <div className="h-full rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className={`h-full p-6 ${marketingCard}`}>
             <CheckCircle2 className="mb-3 h-5 w-5 text-blue-600" />
-            <h3 className="font-semibold text-slate-950">{item.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
+            <h3 className="font-medium text-slate-900">{item.title}</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-500">{item.text}</p>
           </div>
         );
-        return item.href ? <Link key={item.title} href={item.href}>{body}</Link> : <div key={item.title}>{body}</div>;
+        return item.href ? <Link key={item.title} href={item.href} className="block">{body}</Link> : <div key={item.title}>{body}</div>;
       })}
     </div>
   );
@@ -207,11 +196,11 @@ export function CardGrid({ items }: { items: Array<{ title: string; text: string
 
 export function Faq({ items }: { items: Array<{ question: string; answer: string }> }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="divide-y divide-slate-200/80 rounded-2xl border border-slate-200/70 bg-white">
       {items.map((item) => (
-        <div key={item.question} className="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 className="font-semibold text-slate-950">{item.question}</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{item.answer}</p>
+        <div key={item.question} className="px-6 py-5 sm:px-8 sm:py-6">
+          <h3 className="font-medium text-slate-900">{item.question}</h3>
+          <p className="mt-2 text-sm leading-7 text-slate-500">{item.answer}</p>
         </div>
       ))}
     </div>
@@ -220,10 +209,10 @@ export function Faq({ items }: { items: Array<{ question: string; answer: string
 
 export function FinalCta({ title = "Start with a 15-day assisted trial." }: { title?: string }) {
   return (
-    <Section tone="blue">
-      <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-3xl font-bold text-slate-950">{title}</h2>
-        <p className="mt-3 text-slate-600">We help set up products, staff, payment methods, a first sale test, and the owner dashboard walkthrough.</p>
+    <Section tone="slate">
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="text-3xl font-semibold tracking-tight text-slate-900">{title}</h2>
+        <p className="mt-3 text-slate-500">Setup help for products, staff, payment methods, and your first sale.</p>
         <CtaRow />
       </div>
     </Section>

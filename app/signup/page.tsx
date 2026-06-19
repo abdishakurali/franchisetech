@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Thermometer } from "lucide-react";
+import { AuthBrand } from "@/components/marketing/AuthBrand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,15 +55,12 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Thermometer className="h-7 w-7 text-blue-600" />
-          <span className="font-bold text-slate-900 text-xl">FridgeProof</span>
-        </div>
+        <AuthBrand />
 
         <Card>
           <CardHeader className="text-center">
             <CardTitle>Start your free account</CardTitle>
-            <CardDescription>Built for Irish food businesses. No credit card needed.</CardDescription>
+            <CardDescription>Built for cafes, restaurants, and food businesses. No credit card needed.</CardDescription>
           </CardHeader>
           <CardContent>
             {googleAuthEnabled && (
@@ -124,7 +121,7 @@ export default function SignupPage() {
               </Button>
             </form>
             <p className="text-center text-xs text-slate-400 mt-4">
-              By signing up you agree that FridgeProof supports your records — it does not replace your legal obligations as a food business operator.
+              By signing up you agree that franchisetech supports your records — it does not replace your legal obligations as a food business operator.
             </p>
             <p className="text-center text-sm text-slate-500 mt-3">
               Already have an account?{" "}

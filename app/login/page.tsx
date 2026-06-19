@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Thermometer } from "lucide-react";
+import { AuthBrand } from "@/components/marketing/AuthBrand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,10 +44,7 @@ function LoginForm() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Thermometer className="h-7 w-7 text-blue-600" />
-          <span className="font-bold text-slate-900 text-xl">FridgeProof</span>
-        </div>
+        <AuthBrand />
 
         <Card>
           <CardHeader className="text-center">
