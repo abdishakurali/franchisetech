@@ -4,11 +4,13 @@ type PosCashKeypadProps = {
   value: number | "";
   onChange: (value: number | "") => void;
   disabled?: boolean;
+  clearLabel?: string;
+  keypadAria?: string;
 };
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "⌫"] as const;
 
-export function PosCashKeypad({ value, onChange, disabled }: PosCashKeypadProps) {
+export function PosCashKeypad({ value, onChange, disabled, clearLabel = "Clear", keypadAria = "Cash amount keypad" }: PosCashKeypadProps) {
   const str = value === "" ? "" : String(value);
 
   function append(key: string) {
@@ -30,7 +32,7 @@ export function PosCashKeypad({ value, onChange, disabled }: PosCashKeypadProps)
   }
 
   return (
-    <div className="grid grid-cols-3 gap-2" role="group" aria-label="Cash amount keypad">
+    <div className="grid grid-cols-3 gap-2" role="group" aria-label={keypadAria}>
       {KEYS.map((key) => (
         <button
           key={key}
@@ -52,7 +54,7 @@ export function PosCashKeypad({ value, onChange, disabled }: PosCashKeypadProps)
         onClick={() => onChange("")}
         className="col-span-3 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
       >
-        Clear
+        {clearLabel}
       </button>
     </div>
   );

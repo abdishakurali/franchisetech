@@ -1,3 +1,5 @@
+import { normalizeCartLines } from "@/lib/pos-line-discount";
+
 export type CartItemBackup = {
   product_id: string;
   product_name: string;
@@ -5,6 +7,8 @@ export type CartItemBackup = {
   unit_price: number;
   vat_rate: number;
   fiscalnet_vat_group?: number | null;
+  /** Per-line discount % (P1.7b). */
+  discount_pct?: number;
 };
 
 export type CheckoutStep = "order" | "payment";
@@ -37,7 +41,7 @@ export function parseCartBackupRestore(
     const backup = JSON.parse(raw) as CartBackupWrite;
     if (backup.sessionId === sessionId && Array.isArray(backup.cart) && backup.cart.length > 0) {
       return {
-        cart: backup.cart,
+        cart: normalizeCartLines(backup.cart, backup.discountPct ?? 0),
         sessionId: backup.sessionId,
         discountPct: backup.discountPct,
       };

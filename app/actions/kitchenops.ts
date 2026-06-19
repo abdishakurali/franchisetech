@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 import { getActiveOrg, numberValue, stringValue } from "@/lib/kitchenops/data";
 import { requireActiveSite } from "@/lib/site-context";
 import { normaliseIndustry, RESTAURANT_FEATURE_KEYS, type RestaurantFeatureKey } from "@/lib/restaurant-features";
+import { lineDiscountPct, transactionDiscountPct, type PosCartLine } from "@/lib/pos-line-discount";
 
 function canTransact(role: string | null) { return ["owner","manager","staff","cashier"].includes(role ?? ""); }
 function canManage(role: string | null) { return ["owner","manager"].includes(role ?? ""); }
@@ -16,6 +17,30 @@ function canUpdateKitchen(role: string | null) { return ["owner","manager","kitc
 function nullableNum(fd: FormData, key: string) {
   const v = Number(String(fd.get(key) ?? "").trim());
   return Number.isFinite(v) && String(fd.get(key) ?? "").trim() !== "" ? v : null;
+}
+
+type PosSaleCartItem = PosCartLine & { fiscalnet_vat_group?: number | null };
+
+function buildPosItemCalcs(cart: PosSaleCartItem[], legacyCartPct: number) {
+  return cart.map((item) => {
+    const appliedPct = lineDiscountPct(item, legacyCartPct);
+    const discountMultiplier = 1 - appliedPct / 100;
+    const grossBefore = item.quantity * item.unit_price;
+    const grossAmount = grossBefore * discountMultiplier;
+    const vatDecimal = item.vat_rate / 100;
+    const netAmount = vatDecimal > 0 ? grossAmount / (1 + vatDecimal) : grossAmount;
+    const vatAmount = grossAmount - netAmount;
+    return {
+      ...item,
+      applied_discount_pct: appliedPct,
+      unit_price_gross: item.unit_price,
+      net_amount: Number(netAmount.toFixed(4)),
+      vat_amount: Number(vatAmount.toFixed(4)),
+      gross_amount: Number(grossAmount.toFixed(4)),
+      line_total: Number(grossAmount.toFixed(2)),
+      discount_amount: Number((grossBefore - grossAmount).toFixed(4)),
+    };
+  });
 }
 
 type KitchenCartItem = {
@@ -508,7 +533,7 @@ export async function completeSale(formData: FormData) {
   // Resolve active site server-side — client cannot spoof site_id
   const { siteId } = await requireActiveSite(supabase, orgId, membership.id, membership.role);
 
-  type CartItem = { product_id: string; product_name: string; quantity: number; unit_price: number; vat_rate: number };
+  type CartItem = PosSaleCartItem;
   const rawCart = stringValue(formData, "cart_json");
   const cart: CartItem[] = rawCart ? JSON.parse(rawCart) : [];
   if (!cart.length) return;
@@ -517,26 +542,10 @@ export async function completeSale(formData: FormData) {
   const paymentMethodId = stringValue(formData, "payment_method_id") || null;
   const paymentType = stringValue(formData, "payment_type") || "other"; // cash|card|online|other
   const customerName = stringValue(formData, "customer_name") || null;
-  const discountPct = numberValue(formData, "discount_pct", 0);
-  const discountMultiplier = 1 - Math.min(Math.max(discountPct, 0), 100) / 100;
+  const legacyCartPct = numberValue(formData, "discount_pct", 0);
 
-  // VAT calc: sale_price is gross-inclusive
-  const itemCalcs = cart.map((item) => {
-    const grossBefore  = item.quantity * item.unit_price;
-    const grossAmount = grossBefore * discountMultiplier;
-    const vatDecimal = item.vat_rate / 100;
-    const netAmount = vatDecimal > 0 ? grossAmount / (1 + vatDecimal) : grossAmount;
-    const vatAmount = grossAmount - netAmount;
-    return {
-      ...item,
-      unit_price_gross: item.unit_price,
-      net_amount: Number(netAmount.toFixed(4)),
-      vat_amount: Number(vatAmount.toFixed(4)),
-      gross_amount: Number(grossAmount.toFixed(4)),
-      line_total: Number(grossAmount.toFixed(2)),
-      discount_amount: Number((grossBefore - grossAmount).toFixed(4)),
-    };
-  });
+  const itemCalcs = buildPosItemCalcs(cart, legacyCartPct);
+  const txDiscountPct = transactionDiscountPct(cart, legacyCartPct);
 
   const subtotalNet = itemCalcs.reduce((s, i) => s + i.net_amount, 0);
   const taxTotal = itemCalcs.reduce((s, i) => s + i.vat_amount, 0);
@@ -559,7 +568,7 @@ export async function completeSale(formData: FormData) {
     total_gross: Number(totalGross.toFixed(2)),
     subtotal_gross_before_discount: Number((totalGross + discountTotal).toFixed(2)),
     discount_total: Number(discountTotal.toFixed(2)),
-    discount_pct: Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)),
+    discount_pct: txDiscountPct,
     status: "completed",
   }).select("id").single();
 
@@ -584,7 +593,7 @@ export async function completeSale(formData: FormData) {
       gross_amount: item.gross_amount,
       line_total: item.line_total,
       discount_amount: item.discount_amount,
-      discount_pct: discountPct > 0 ? Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)) : 0,
+      discount_pct: item.applied_discount_pct > 0 ? item.applied_discount_pct : 0,
     }))
   );
 
@@ -698,7 +707,7 @@ export async function completeSale(formData: FormData) {
           quantity:        Number(item.quantity),
           unitPrice:       Number(item.unit_price),
           vatRate:         Number((item as Record<string, unknown>).vat_rate ?? 0),
-          discountPercent: discountPct,
+          ...(item.applied_discount_pct > 0 ? { discountPercent: item.applied_discount_pct } : {}),
         }));
 
         await printFiscalReceipt({
@@ -1356,7 +1365,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   // Resolve active site server-side — client cannot spoof site_id
   const { siteId } = await requireActiveSite(supabase, orgId, membership.id, membership.role);
 
-  type CartItem = { product_id: string; product_name: string; quantity: number; unit_price: number; vat_rate: number; fiscalnet_vat_group?: number | null };
+  type CartItem = PosSaleCartItem;
   const rawCart = stringValue(formData, "cart_json");
   const cart: CartItem[] = rawCart ? JSON.parse(rawCart) : [];
   if (!cart.length) return { ok: false, error: "Cart is empty." };
@@ -1365,7 +1374,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const paymentMethodId  = stringValue(formData, "payment_method_id") || null;
   const paymentType      = stringValue(formData, "payment_type") || "other";
   const customerName     = stringValue(formData, "customer_name") || null;
-  const discountPct      = numberValue(formData, "discount_pct", 0);
+  const legacyCartPct    = numberValue(formData, "discount_pct", 0);
   const cashReceivedRaw  = stringValue(formData, "cash_received");
   const cashReceivedNum  = cashReceivedRaw ? parseFloat(cashReceivedRaw) : null;
   const cashReceivedStored = (cashReceivedNum !== null && Number.isFinite(cashReceivedNum) && cashReceivedNum > 0)
@@ -1382,24 +1391,9 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const tableLabel = tableServiceEnabled ? stringValue(formData, "table_label") : "";
   const kitchenNote = (kitchenEnabled || restaurantFlowEnabled) ? stringValue(formData, "kitchen_note") : "";
   const customerNote = restaurantFlowEnabled ? stringValue(formData, "customer_note") : "";
-  const discountMultiplier = 1 - Math.min(Math.max(discountPct, 0), 100) / 100;
+  const txDiscountPct = transactionDiscountPct(cart, legacyCartPct);
 
-  const itemCalcs = cart.map((item) => {
-    const grossBefore  = item.quantity * item.unit_price;
-    const grossAmount  = grossBefore * discountMultiplier;
-    const vatDecimal   = item.vat_rate / 100;
-    const netAmount    = vatDecimal > 0 ? grossAmount / (1 + vatDecimal) : grossAmount;
-    const vatAmount    = grossAmount - netAmount;
-    return {
-      ...item,
-      unit_price_gross: item.unit_price,
-      net_amount:   Number(netAmount.toFixed(4)),
-      vat_amount:   Number(vatAmount.toFixed(4)),
-      gross_amount: Number(grossAmount.toFixed(4)),
-      line_total:   Number(grossAmount.toFixed(2)),
-      discount_amount: Number((grossBefore - grossAmount).toFixed(4)),
-    };
-  });
+  const itemCalcs = buildPosItemCalcs(cart, legacyCartPct);
 
   const subtotalNet = itemCalcs.reduce((s, i) => s + i.net_amount, 0);
   const taxTotal    = itemCalcs.reduce((s, i) => s + i.vat_amount, 0);
@@ -1462,7 +1456,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     tip_amount: tipAmount,
     subtotal_gross_before_discount: Number((totalGross + discountTotal).toFixed(2)),
     discount_total: Number(discountTotal.toFixed(2)),
-    discount_pct: Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)),
+    discount_pct: txDiscountPct,
     status: "completed",
   }).select("id").single();
 
@@ -1485,7 +1479,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
       gross_amount:     item.gross_amount,
       line_total:       item.line_total,
       discount_amount:  item.discount_amount,
-      discount_pct:     discountPct > 0 ? Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)) : 0,
+      discount_pct:     item.applied_discount_pct > 0 ? item.applied_discount_pct : 0,
     }))
   );
 
@@ -1597,7 +1591,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
       unitPrice: i.unit_price,
       vatRate: i.vat_rate,
       fiscalNetGroup: (i as CartItem).fiscalnet_vat_group ?? null,
-      ...(discountPct > 0 ? { discountPercent: Number(Math.min(Math.max(discountPct, 0), 100).toFixed(2)) } : {}),
+      ...(i.applied_discount_pct > 0 ? { discountPercent: i.applied_discount_pct } : {}),
     })),
     fiscalApiPending,
     changeDue: cashOverpay,

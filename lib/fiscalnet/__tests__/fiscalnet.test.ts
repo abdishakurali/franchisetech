@@ -177,6 +177,79 @@ describe("FiscalNet TXT command payloads", () => {
     expect(lines[2]).toBe("ST^0");
     expect(lines[3]).toBe("P^1^218");
   });
+
+  it("P1.7b: two items — DP^ only under discounted line", () => {
+    const lines = buildFiscalNetReceiptLines(
+      [
+        { productName: "Chocolate Croissant", quantity: 1, unitPrice: 3.2, vatRate: 9, fiscalNetGroup: 1, discountPercent: 32 },
+        { productName: "Apple Danish", quantity: 1, unitPrice: 3.1, vatRate: 9, fiscalNetGroup: 1 },
+      ],
+      "cash",
+      {
+        enabled: true,
+        mockMode: false,
+        connectionMode: "file",
+        apiHost: "http://localhost:65400",
+        vatGroups: [{ code: 1, rate: 9, label: "TVA 9" }],
+        paymentTypeMap: { cash: 1 },
+        operatorCode: "1",
+      },
+      5.28,
+    );
+    expect(lines).toEqual([
+      "S^Chocolate Croissant^320^1000^Buc^1^1",
+      "DP^3200",
+      "S^Apple Danish^310^1000^Buc^1^1",
+      "ST^0",
+      "P^1^528",
+    ]);
+  });
+
+  it("P1.7b: mixed per-line discounts", () => {
+    const lines = buildFiscalNetReceiptLines(
+      [
+        { productName: "Chocolate Croissant", quantity: 1, unitPrice: 3.2, vatRate: 9, fiscalNetGroup: 1, discountPercent: 32 },
+        { productName: "Apple Danish", quantity: 1, unitPrice: 3.1, vatRate: 9, fiscalNetGroup: 1 },
+        { productName: "Coffee", quantity: 1, unitPrice: 2.5, vatRate: 9, fiscalNetGroup: 1, discountPercent: 10 },
+      ],
+      "cash",
+      {
+        enabled: true,
+        mockMode: false,
+        connectionMode: "file",
+        apiHost: "http://localhost:65400",
+        vatGroups: [{ code: 1, rate: 9, label: "TVA 9" }],
+        paymentTypeMap: { cash: 1 },
+        operatorCode: "1",
+      },
+      7.53,
+    );
+    expect(lines[1]).toBe("DP^3200");
+    expect(lines[2]).toBe("S^Apple Danish^310^1000^Buc^1^1");
+    expect(lines[3]).toBe("S^Coffee^250^1000^Buc^1^1");
+    expect(lines[4]).toBe("DP^1000");
+    expect(lines[5]).toBe("ST^0");
+    expect(lines[6]).toBe("P^1^753");
+  });
+
+  it("P1.7b: no discount — no DP^ lines", () => {
+    const lines = buildFiscalNetReceiptLines(
+      [{ productName: "Apple Danish", quantity: 1, unitPrice: 3.1, vatRate: 9, fiscalNetGroup: 1 }],
+      "cash",
+      {
+        enabled: true,
+        mockMode: false,
+        connectionMode: "file",
+        apiHost: "http://localhost:65400",
+        vatGroups: [{ code: 1, rate: 9, label: "TVA 9" }],
+        paymentTypeMap: { cash: 1 },
+        operatorCode: "1",
+      },
+      3.1,
+    );
+    expect(lines).toEqual(["S^Apple Danish^310^1000^Buc^1^1", "ST^0", "P^1^310"]);
+    expect(lines.some((l) => l.startsWith("DP^"))).toBe(false);
+  });
 });
 
 // ── parseResponse ──────────────────────────────────────────────────────────

@@ -9,17 +9,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Coffee, Droplets, LockKeyhole, Package, ReceiptText, RefreshCcw, UserPlus, Users, Utensils } from "lucide-react";
+import { Banknote, Coffee, Droplets, LockKeyhole, MoreHorizontal, Package, Percent, RefreshCcw, Utensils } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
 import { downloadSlipAsTxt, cashInTxt, cashOutTxt } from "@/lib/pos-print";
 import { PosCashKeypad } from "@/components/app/PosCashKeypad";
-import { friendlySaleError, paymentTypeLabel, posLocale, posText } from "@/lib/pos-i18n";
+import { friendlySaleError, paymentTypeLabel } from "@/lib/pos-i18n";
+import { PosI18nProvider, usePosI18n, posIntlLocale } from "@/lib/pos-i18n-context";
 import {
   readCartBackupFromStorage,
   writeCartBackupToStorage,
   clearCartBackupFromStorage,
 } from "@/lib/pos-cart-backup";
 import { holdCurrentSale, listHeldSales, resumeHeldSale, type HeldSale } from "@/lib/pos-held-sales";
+import {
+  clampDiscountPct,
+  cartDiscountAmount,
+  cartGrossAfter,
+  cartGrossBefore,
+  lineGrossAfter,
+  lineGrossBefore,
+  lineVatAmount,
+  normalizeCartLines,
+  transactionDiscountPct,
+  type PosCartLine,
+} from "@/lib/pos-line-discount";
 import {
   dismissPendingFiscal,
   enqueueOfflineSale,
@@ -42,7 +55,7 @@ type Product = {
 };
 type Category = { id: string; name: string; color: string | null };
 type PaymentMethod = { id: string; name: string; type: string };
-type CartItem = { product_id: string; product_name: string; quantity: number; unit_price: number; vat_rate: number; fiscalnet_vat_group?: number | null };
+type CartItem = PosCartLine;
 type SplitPayment = { id: string; payment_method_id: string; amount: number; reference?: string };
 type Customer = { id: string; name: string; phone: string | null; email: string | null };
 type Transaction = { id: string; transaction_number: string; customer_name: string | null; sold_at: string | null; total: number | string; status: string; payment_methods?: { name?: string | null; type?: string | null } | null };
@@ -95,7 +108,6 @@ function PlaceholderIcon({ icon, className }: { icon: PlaceholderCfg["icon"]; cl
   return <Package className={cls} />;
 }
 
-// ── Cash movement dialog ────────────────────────────────────────────────────
 // ── Product image with polished fallback ─────────────────────────────────────────
 function ProductImage({ src, alt, cfg }: { src: string | null | undefined; alt: string; cfg: PlaceholderCfg }) {
   const [failed, setFailed] = useState(false);
@@ -148,6 +160,7 @@ function CustomerCombobox({ customers, value, onChange }: {
   value: Customer | null;
   onChange: (c: Customer | null) => void;
 }) {
+  const { t } = usePosI18n();
   const [query, setQuery] = useState(value?.name ?? "");
   const [open, setOpen] = useState(false);
 
@@ -169,9 +182,10 @@ function CustomerCombobox({ customers, value, onChange }: {
           onChange={(e) => { setQuery(e.target.value); onChange(null); setOpen(true); }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 200)}
-          placeholder="Search customer…"
+          placeholder={t.searchCustomer}
           className="h-9 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 pr-7 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
           autoComplete="off"
+          aria-label={t.searchCustomer}
         />
         {query && (
           <button type="button" onClick={handleClear} className="absolute right-2 top-2 text-slate-400 hover:text-slate-600 text-xs">✕</button>
@@ -183,17 +197,17 @@ function CustomerCombobox({ customers, value, onChange }: {
             <button key={c.id} type="button" onMouseDown={() => handleSelect(c)}
               className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm border-b border-slate-50 last:border-0">
               <p className="font-medium text-slate-900">{c.name}</p>
-              <p className="text-xs text-slate-400">{[c.phone, c.email].filter(Boolean).join(" · ") || "No contact details"}</p>
+              <p className="text-xs text-slate-400">{[c.phone, c.email].filter(Boolean).join(" · ") || t.noContact}</p>
             </button>
           ))}
           {filtered.length === 0 && query && (
             <button type="button" onMouseDown={() => handleSelect({ id: "", name: query, phone: null, email: null })}
               className="w-full text-left px-3 py-2 hover:bg-blue-50 text-sm text-blue-600">
-              + Use &ldquo;{query}&rdquo; as walk-in name
+              {t.useWalkInName(query)}
             </button>
           )}
           {filtered.length === 0 && !query && (
-            <p className="px-3 py-2 text-xs text-slate-400">Type to search saved customers</p>
+            <p className="px-3 py-2 text-xs text-slate-400">{t.typeToSearchCustomers}</p>
           )}
         </div>
       )}
@@ -202,6 +216,8 @@ function CustomerCombobox({ customers, value, onChange }: {
 }
 
 function TillDialog({ sessionId, cashDrawerSettings, fiscalNet, isRO = false, currency = "EUR", orgName = "", userName = "" }: { sessionId?: string | null; cashDrawerSettings?: CashDrawerSettings; fiscalNet?: BrowserFiscalConfig | null; isRO?: boolean; currency?: string; orgName?: string; userName?: string }) {
+  const { t } = usePosI18n();
+  const currencySymbol = currency === "RON" ? "lei" : "€";
   const [open, setOpen] = useState(false);
   const [movementType, setMovementType] = useState<"cash_in" | "cash_out">("cash_in");
   const [message, setMessage] = useState<string | null>(null);
@@ -223,9 +239,9 @@ function TillDialog({ sessionId, cashDrawerSettings, fiscalNet, isRO = false, cu
         if (fnRes.filename && fnRes.content) setLastTxt({ filename: fnRes.filename, content: fnRes.content });
         console.info("[FiscalNet] cash movement browser result", { type: movementType, ok: fnRes.ok, message: fnRes.message, mode: fiscalNet.connectionMode });
         const fnMsg = fnRes.ok ? ` | FiscalNet: ${fnRes.message}` : ` | ⚠️ FiscalNet: ${fnRes.message}`;
-        setMessage((result.cashierMessage ? `✓ ${result.cashierMessage}` : "✓ Cash movement saved.") + fnMsg);
+        setMessage((result.cashierMessage ? `✓ ${result.cashierMessage}` : t.cashMovementSaved) + fnMsg);
       } else {
-        setMessage(result.cashierMessage ? `✓ ${result.cashierMessage}` : "✓ Cash movement saved.");
+        setMessage(result.cashierMessage ? `✓ ${result.cashierMessage}` : t.cashMovementSaved);
       }
       // Download TXT slip only when FiscalNet is not active. When FiscalNet is active,
       // avoid a second automatic download because browsers may block it.
@@ -242,7 +258,7 @@ function TillDialog({ sessionId, cashDrawerSettings, fiscalNet, isRO = false, cu
       }
       setTimeout(() => { setOpen(false); setMessage(null); setPending(false); }, 2000);
     } catch {
-      setMessage("Something went wrong. Please try again.");
+      setMessage(t.somethingWrong);
       setPending(false);
     }
   }
@@ -250,29 +266,29 @@ function TillDialog({ sessionId, cashDrawerSettings, fiscalNet, isRO = false, cu
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!pending) { setOpen(v); if (!v) setMessage(null); } }}>
       <DialogTrigger render={<Button type="button" variant="outline" className="h-11 px-4" />}>
-        <Banknote className="h-4 w-4" />Cash
+        <Banknote className="h-4 w-4" />{t.cashBtn}
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Cash movement</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t.cashMovement}</DialogTitle></DialogHeader>
         <form action={handleCashMovement} className="space-y-3">
           <input type="hidden" name="session_id" value={sessionId ?? ""} />
           <input type="hidden" name="movement_type" value={movementType} />
           <div className="grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1">
             <button type="button" onClick={() => setMovementType("cash_in")}
               className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${movementType === "cash_in" ? "bg-white text-blue-700 shadow-sm" : "text-slate-500"}`}>
-              Cash in
+              {t.cashIn}
             </button>
             <button type="button" onClick={() => setMovementType("cash_out")}
               className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${movementType === "cash_out" ? "bg-white text-blue-700 shadow-sm" : "text-slate-500"}`}>
-              Cash out
+              {t.cashOut}
             </button>
           </div>
           <div>
-            <Label>Amount ({currency === "RON" ? "lei" : "€"})</Label>
+            <Label>{t.amount} ({currencySymbol})</Label>
             <Input name="amount" type="number" step="0.01" min="0.01" required />
-            <p className="mt-1 text-xs text-slate-500">{movementType === "cash_in" ? "Cash added to the drawer." : "Cash removed from the drawer."}</p>
+            <p className="mt-1 text-xs text-slate-500">{movementType === "cash_in" ? t.cashInHint : t.cashOutHint}</p>
           </div>
-          <div><Label>Reason</Label><Input name="reason" required placeholder={movementType === "cash_in" ? "Extra float" : "Supplier payment"} /></div>
+          <div><Label>{t.reason}</Label><Input name="reason" required placeholder={movementType === "cash_in" ? t.extraFloatPlaceholder : t.supplierPaymentPlaceholder} /></div>
           {message && (
             <div className={`rounded-lg p-3 text-sm ${message.startsWith("✓") ? "border border-green-200 bg-green-50 text-green-800" : "border border-red-200 bg-red-50 text-red-700"}`}>
               <p>{message}</p>
@@ -282,15 +298,15 @@ function TillDialog({ sessionId, cashDrawerSettings, fiscalNet, isRO = false, cu
                   onClick={() => downloadFiscalNetTxt(lastTxt.filename, lastTxt.content)}
                   className="mt-2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
                 >
-                  Download TXT again
+                  {t.downloadTxtAgain}
                 </button>
               )}
             </div>
           )}
           <DialogFooter>
-            <DialogClose render={<Button type="button" variant="outline" />}>Cancel</DialogClose>
+            <DialogClose render={<Button type="button" variant="outline" />}>{t.cancel}</DialogClose>
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={pending}>
-              {pending ? "Recording…" : "Confirm"}
+              {pending ? t.recording : t.confirm}
             </Button>
           </DialogFooter>
         </form>
@@ -301,6 +317,7 @@ function TillDialog({ sessionId, cashDrawerSettings, fiscalNet, isRO = false, cu
 
 // ── Refund dialog ────────────────────────────────────────────────────────────
 function RefundDialog({ recentTransactions, currency = "EUR" }: { recentTransactions: Transaction[]; currency?: string }) {
+  const { t } = usePosI18n();
   const [open, setOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
@@ -323,29 +340,29 @@ function RefundDialog({ recentTransactions, currency = "EUR" }: { recentTransact
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!pending) setOpen(v); }}>
       <DialogTrigger render={<Button type="button" variant="outline" className="h-11 px-4" />}>
-        <RefreshCcw className="h-4 w-4" />Refund
+        <RefreshCcw className="h-4 w-4" />{t.refund}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
-        <DialogHeader><DialogTitle>Refund / void</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t.refundVoid}</DialogTitle></DialogHeader>
         {done ? (
           <div className="py-6 text-center space-y-2">
             <div className="text-3xl">✅</div>
-            <p className="font-semibold text-slate-900">Transaction voided</p>
+            <p className="font-semibold text-slate-900">{t.transactionVoided}</p>
           </div>
         ) : (
           <form action={handleVoid} className="space-y-3">
             <select name="transaction_id" required className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
-              <option value="">Select recent transaction</option>
-              {recentTransactions.filter((t) => t.status === "completed").map((tx) => (
+              <option value="">{t.selectRecentTransaction}</option>
+              {recentTransactions.filter((tx) => tx.status === "completed").map((tx) => (
                 <option key={tx.id} value={tx.id}>{tx.transaction_number} · {money(Number(tx.total ?? 0), currency)}</option>
               ))}
             </select>
-            <Input name="reason" required placeholder="Reason required" />
-            <p className="text-xs text-slate-500">Full refund/void only. Partial refund coming soon.</p>
+            <Input name="reason" required placeholder={t.reasonRequired} />
+            <p className="text-xs text-slate-500">{t.fullRefundOnly}</p>
             <DialogFooter>
-              <DialogClose render={<Button type="button" variant="outline" />}>Cancel</DialogClose>
+              <DialogClose render={<Button type="button" variant="outline" />}>{t.cancel}</DialogClose>
               <Button type="submit" variant="outline" className="border-red-300 text-red-700" disabled={pending}>
-                {pending ? "Processing…" : "Refund / void"}
+                {pending ? t.processing : t.refundVoid}
               </Button>
             </DialogFooter>
           </form>
@@ -357,34 +374,36 @@ function RefundDialog({ recentTransactions, currency = "EUR" }: { recentTransact
 
 // ── Close till dialog ────────────────────────────────────────────────────────
 function CloseTillDialog({ sessionId, summary, fiscalNet, currency = "EUR", orgName = "", userName = "" }: { sessionId?: string | null; summary: PosSummary; fiscalNet?: BrowserFiscalConfig | null; currency?: string; orgName?: string; userName?: string }) {
+  const { t } = usePosI18n();
+  const currencySymbol = currency === "RON" ? "lei" : "€";
   const [open, setOpen] = useState(false);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button type="button" variant="outline" className="h-11 px-4" />}>
-        <LockKeyhole className="h-4 w-4" />Close till
+        <LockKeyhole className="h-4 w-4" />{t.closeTill}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
-        <DialogHeader><DialogTitle>Close till</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t.closeTill}</DialogTitle></DialogHeader>
         <form action={async (fd: FormData) => {
           await (closePosSession as unknown as (fd: FormData) => Promise<void>)(fd);
         }} className="space-y-3">
           <input type="hidden" name="session_id" value={sessionId ?? ""} />
           <div className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm">
-            <div className="flex justify-between"><span>Opening cash</span><strong>{money(summary.openingCash, currency)}</strong></div>
-            <div className="flex justify-between"><span>Cash sales</span><strong>{money(summary.cashSales, currency)}</strong></div>
-            <div className="flex justify-between"><span>Card sales</span><strong>{money(summary.cardSales, currency)}</strong></div>
-            <div className="flex justify-between border-t pt-2"><span className="font-medium">Expected cash</span><strong className="text-blue-700">{money(summary.expectedCash, currency)}</strong></div>
+            <div className="flex justify-between"><span>{t.openingCash}</span><strong>{money(summary.openingCash, currency)}</strong></div>
+            <div className="flex justify-between"><span>{t.cashSales}</span><strong>{money(summary.cashSales, currency)}</strong></div>
+            <div className="flex justify-between"><span>{t.cardSales}</span><strong>{money(summary.cardSales, currency)}</strong></div>
+            <div className="flex justify-between border-t pt-2"><span className="font-medium">{t.expectedCash}</span><strong className="text-blue-700">{money(summary.expectedCash, currency)}</strong></div>
           </div>
           <div>
-            <Label>Counted cash ({currency === "RON" ? "lei" : "€"})</Label>
+            <Label>{t.countedCashLabel} ({currencySymbol})</Label>
             <Input name="counted_cash" type="number" step="0.01" min="0" required />
-            <p className="mt-1 text-xs text-slate-500">How much cash is actually in the drawer.</p>
+            <p className="mt-1 text-xs text-slate-500">{t.howMuchInDrawer}</p>
           </div>
-          <div><Label>Notes</Label><Input name="notes" /></div>
+          <div><Label>{t.notes}</Label><Input name="notes" /></div>
           <DialogFooter>
-            <DialogClose render={<Button type="button" variant="outline" />}>Cancel</DialogClose>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Close till</Button>
+            <DialogClose render={<Button type="button" variant="outline" />}>{t.cancel}</DialogClose>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">{t.closeTill}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -392,8 +411,15 @@ function CloseTillDialog({ sessionId, summary, fiscalNet, currency = "EUR", orgN
   );
 }
 
+function orderTypeLabel(type: string, t: ReturnType<typeof usePosI18n>["t"]): string {
+  if (type === "dine-in") return t.dineIn;
+  if (type === "takeaway") return t.takeaway;
+  if (type === "delivery") return t.delivery;
+  return type;
+}
+
 // ── Main PosRegister ─────────────────────────────────────────────────────────
-export function PosRegister({
+function PosRegisterInner({
   products, categories, paymentMethods, sessionId, customers = [], recentTransactions = [], summary, cashDrawerSettings, fiscalNet = null, currency = "EUR", orgName = "", userName = "", sgrEnabled = false, sgrProduct = null,
   isRO = false, fiscalZReportDone: initialZReportDone = false,
   vatRateGroupMap = {},
@@ -434,24 +460,24 @@ export function PosRegister({
   const [search, setSearch] = useState("");
   const initialBackup = useMemo(() => readCartBackupFromStorage(sessionId), [sessionId]);
   const [checkoutStep, setCheckoutStep] = useState<CheckoutStep>("order");
-  const [cart, setCart] = useState<CartItem[]>(() => initialBackup?.cart ?? []);
+  const [cart, setCart] = useState<CartItem[]>(() =>
+    normalizeCartLines(initialBackup?.cart ?? [], initialBackup?.discountPct ?? 0)
+  );
   const [paymentMethodId, setPaymentMethodId] = useState(paymentMethods[0]?.id ?? "");
   const router = useRouter();
-  // Currency-aware formatter (RON for Romania, EUR for Ireland)
+  const { locale, t } = usePosI18n();
+  const intlLocale = posIntlLocale(locale);
   const money = (v: number) =>
-    new Intl.NumberFormat(currency === "RON" ? "ro-RO" : "en-IE", {
-      style: "currency",
-      currency: currency || "EUR",
-    }).format(v);
+    new Intl.NumberFormat(intlLocale, { style: "currency", currency: currency || "EUR" }).format(v);
   const chargeRef = useRef<HTMLButtonElement>(null);
-  const locale = posLocale(isRO);
-  const t = posText[locale];
-  const [discountPct, setDiscountPct] = useState(() => initialBackup?.discountPct ?? 0);
+  const [applyToAllValue, setApplyToAllValue] = useState<number | "">("");
+  const [discountEditId, setDiscountEditId] = useState<string | null>(null);
+  const [discountEditValue, setDiscountEditValue] = useState<number | "">("");
+  const [moreOpen, setMoreOpen] = useState(false);
   const [saleStatus, setSaleStatus] = useState<{ ok: boolean; msg: string; transactionId?: string } | null>(null);
   const [lastFiscalTxt, setLastFiscalTxt] = useState<{ filename: string; content: string } | null>(null);
   const [salePending, setSalePending] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [customerSearch, setCustomerSearch] = useState("");
   const [txSearch, setTxSearch] = useState("");
   const [zReportDone, setZReportDone] = useState(initialZReportDone);
   const [zReportPending, setZReportPending] = useState(false);
@@ -481,7 +507,6 @@ export function PosRegister({
     () => offlineQueue.filter((q) => q.status === "pending_fiscal"),
     [offlineQueue]
   );
-  const lockLineTotalEdit = Boolean(fiscalNet?.enabled);
 
   useEffect(() => {
     async function flushOfflineQueue() {
@@ -518,7 +543,7 @@ export function PosRegister({
 
   function resetCartAfterSale() {
     setCart([]);
-    setDiscountPct(0);
+    setApplyToAllValue("");
     setTipAmount(0);
     setSplitPayments([]);
     setSelectedCustomer(null);
@@ -527,30 +552,9 @@ export function PosRegister({
     clearCartBackupFromStorage();
   }
 
-  const posProducts = useMemo(() =>
-    products.filter((p) => p.available_in_pos !== false && p.is_ingredient !== true), [products]);
-
-  const filtered = useMemo(() =>
-    posProducts.filter((p) => {
-      // When search is active, ignore category so users find products across all categories
-      const matchCat = search.trim() ? true : activeCategory === "all" || p.product_categories?.id === activeCategory;
-      const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
-      return matchCat && matchSearch;
-    }), [posProducts, activeCategory, search]);
-
-  const activeCategoryIds = useMemo(() => new Set(posProducts.map((p) => p.product_categories?.id).filter(Boolean)), [posProducts]);
-  const visibleCategories = categories.filter((c) => activeCategoryIds.has(c.id));
-  const hasCategories = visibleCategories.length > 0;
-  const shownCustomers = customers.filter((c) =>
-    [c.name, c.phone, c.email].filter(Boolean).join(" ").toLowerCase().includes(customerSearch.toLowerCase())
-  ).slice(0, 8);
-  const shownTransactions = recentTransactions.filter((t) =>
-    [t.transaction_number, t.customer_name, t.payment_methods?.name].filter(Boolean).join(" ").toLowerCase().includes(txSearch.toLowerCase())
-  ).slice(0, 12);
-
-  const grossTotal = useMemo(() => cart.reduce((s, i) => s + i.quantity * i.unit_price, 0), [cart]);
-  const discountAmount = grossTotal * (discountPct / 100);
-  const afterDiscount = grossTotal - discountAmount;
+  const grossTotal = useMemo(() => cartGrossBefore(cart), [cart]);
+  const discountAmount = useMemo(() => cartDiscountAmount(cart), [cart]);
+  const afterDiscount = useMemo(() => cartGrossAfter(cart), [cart]);
   const safeTipAmount = features.tips ? Math.max(0, tipAmount) : 0;
   const totalDue = afterDiscount + safeTipAmount;
   const activeSplitPayments = splitPayments.filter((row) => row.amount > 0 && row.payment_method_id);
@@ -562,11 +566,40 @@ export function PosRegister({
     ? Number((cashReceived - totalDue).toFixed(2))
     : null;
   const cashUnderPaid = isCashSingle && typeof cashReceived === "number" && cashReceived > 0 && cashReceived < totalDue - 0.005;
-  const totalVat = useMemo(() => cart.reduce((s, i) => {
-    const gross = i.quantity * i.unit_price * (1 - discountPct / 100);
-    const vat = gross - gross / (1 + i.vat_rate / 100);
-    return s + vat;
-  }, 0), [cart, discountPct]);
+  const totalVat = useMemo(() => cart.reduce((s, i) => s + lineVatAmount(i), 0), [cart]);
+  const txDiscountPct = useMemo(() => transactionDiscountPct(cart), [cart]);
+
+  const posProducts = useMemo(() =>
+    products.filter((p) => p.available_in_pos !== false && p.is_ingredient !== true), [products]);
+
+  const filtered = useMemo(() =>
+    posProducts.filter((p) => {
+      const matchCat = search.trim() ? true : activeCategory === "all" || p.product_categories?.id === activeCategory;
+      const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+      return matchCat && matchSearch;
+    }), [posProducts, activeCategory, search]);
+
+  const activeCategoryIds = useMemo(() => new Set(posProducts.map((p) => p.product_categories?.id).filter(Boolean)), [posProducts]);
+  const visibleCategories = categories.filter((c) => activeCategoryIds.has(c.id));
+  const shownTransactions = recentTransactions.filter((tx) =>
+    [tx.transaction_number, tx.customer_name, tx.payment_methods?.name].filter(Boolean).join(" ").toLowerCase().includes(txSearch.toLowerCase())
+  ).slice(0, 12);
+
+  function setItemDiscountPct(productId: string, pct: number) {
+    setCart((items) =>
+      syncSgr(items.map((i) =>
+        i.product_id === productId ? { ...i, discount_pct: clampDiscountPct(pct) } : i
+      ))
+    );
+  }
+
+  function applyDiscountToAllCurrentItems() {
+    const pct = Number(applyToAllValue) || 0;
+    if (pct <= 0) return;
+    const clamped = clampDiscountPct(pct);
+    setCart((items) => syncSgr(items.map((i) => ({ ...i, discount_pct: clamped }))));
+    setApplyToAllValue("");
+  }
 
   /** Recalculates the SGR deposit line so its qty always equals sum of has_sgr product qtys */
   const syncSgr = (items: CartItem[]): CartItem[] => {
@@ -585,6 +618,7 @@ export function PosRegister({
       unit_price:           Number(sgrProduct.sale_price),
       vat_rate:             sgrRate,
       fiscalnet_vat_group:  vatRateGroupMap[sgrRate] ?? null,
+      discount_pct:         0,
     }];
   };
 
@@ -594,7 +628,7 @@ export function PosRegister({
       const vatRate = Number(p.vat_rate ?? 0);
       const updated = ex
         ? items.map((i) => i.product_id === p.id ? { ...i, quantity: i.quantity + 1 } : i)
-        : [...items, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: Number(p.sale_price), vat_rate: vatRate, fiscalnet_vat_group: vatRateGroupMap[vatRate] ?? null }];
+        : [...items, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: Number(p.sale_price), vat_rate: vatRate, fiscalnet_vat_group: vatRateGroupMap[vatRate] ?? null, discount_pct: 0 }];
       return syncSgr(updated);
     });
 
@@ -603,15 +637,6 @@ export function PosRegister({
       const updated = items.flatMap((i) => i.product_id === id ? qty <= 0 ? [] : [{ ...i, quantity: qty }] : [i]);
       return syncSgr(updated);
     });
-
-  const setLineTotal = (id: string, total: number) =>
-    setCart((items) =>
-      syncSgr(items.map((i) => {
-        if (i.product_id !== id) return i;
-        const safeQty = Math.max(1, i.quantity);
-        return { ...i, unit_price: Math.max(0, total) / safeQty };
-      }))
-    );
 
   const vatLabel = isRO ? t.inclTva : t.inclVat;
   const canPay = cart.length > 0 && paymentMethods.length > 0;
@@ -683,143 +708,58 @@ export function PosRegister({
           })}
           {!filtered.length && (
             <div className="col-span-full rounded-xl border border-dashed p-8 text-center text-sm text-slate-400">
-              {posProducts.length === 0 ? "No products yet — add products in the Products menu." : "No products match the filter."}
+              {posProducts.length === 0 ? t.noProductsYet : t.noProductsMatch}
             </div>
           )}
         </div>
         </div>
-        {/* pos-utility-bar */}
-        <div className="border-t border-slate-200 bg-white px-3 py-2 sm:px-4 overflow-x-auto" style={{WebkitOverflowScrolling: "touch", flexShrink: 0}}>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" className="h-11 px-4 shrink-0" onClick={() => { setCart([]); setCheckoutStep("order"); }}>New sale</Button>
-
-            {/* Customers sheet */}
-            <Sheet>
-              <SheetTrigger render={<Button type="button" variant="outline" className="h-11 px-4 shrink-0" />}>
-                <Users className="h-4 w-4" />Customers
-              </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-lg">
-                <SheetHeader><SheetTitle>Customers</SheetTitle></SheetHeader>
-                <div className="space-y-4 overflow-y-auto px-4 pb-4">
-                  <Input value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder="Search customer" />
-                  <div className="space-y-2">
-                    {shownCustomers.map((c) => (
-                      <button key={c.id} type="button" onClick={() => setSelectedCustomer(c)} className="w-full rounded-lg border p-3 text-left hover:bg-slate-50">
-                        <p className="font-medium">{c.name}</p>
-                        <p className="text-xs text-slate-500">{[c.phone, c.email].filter(Boolean).join(" · ") || "No contact details"}</p>
-                      </button>
-                    ))}
-                  </div>
-                  <form action={addCustomerFromPos as unknown as (fd: FormData) => Promise<void>} className="space-y-3 rounded-lg border p-3">
-                    <p className="text-sm font-medium">Quick add customer</p>
-                    <Input name="name" required placeholder="Name" />
-                    <Input name="phone" placeholder="Phone" />
-                    <Input name="email" type="email" placeholder="Email" />
-                    <Button type="submit" size="sm"><UserPlus className="h-4 w-4" />Add customer</Button>
-                  </form>
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Orders / Transactions sheet */}
-            <Sheet>
-              <SheetTrigger render={<Button type="button" variant="outline" className="h-11 px-4 shrink-0" />}>
-                <ReceiptText className="h-4 w-4" />Orders
-              </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-2xl">
-                <SheetHeader><SheetTitle>Orders / Transactions</SheetTitle></SheetHeader>
-                <div className="space-y-3 overflow-y-auto px-4 pb-4">
-                  <Input value={txSearch} onChange={(e) => setTxSearch(e.target.value)} placeholder="Search transaction" />
-                  {shownTransactions.map((tx) => (
-                    <div key={tx.id} className="rounded-lg border p-3 text-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <strong>{tx.transaction_number}</strong>
-                        <span className="font-medium">{money(Number(tx.total ?? 0))}</span>
-                      </div>
-                      <p className="text-xs text-slate-500 mt-0.5">{tx.customer_name || "Walk-in"} · {tx.payment_methods?.name ?? "Payment"} · {tx.sold_at ? new Date(tx.sold_at).toLocaleString("en-IE") : ""}</p>
-                      <div className="mt-2 flex gap-3">
-                        <a className="text-blue-600 hover:underline text-xs" href={`/app/transactions/${tx.id}`}>View receipt</a>
-                        <a className="text-red-600 hover:underline text-xs" href={`/app/transactions/${tx.id}`}>Refund / void</a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Refund dialog (auto-closes) */}
-            <RefundDialog recentTransactions={recentTransactions}  currency={currency}/>
-
-            {/* Cash in/out dialog (auto-closes) */}
-            <TillDialog sessionId={sessionId} cashDrawerSettings={cashDrawerSettings} fiscalNet={fiscalNet} isRO={isRO} currency={currency} orgName={orgName} userName={userName}/>
-
-            {/* Z Report button — Romania FiscalNet only, explicit admin action, once per session */}
-            {isRO && fiscalNet?.enabled && (
-              <Dialog open={zReportOpen} onOpenChange={setZReportOpen}>
-                <DialogTrigger render={
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className={`h-11 px-4 shrink-0 ${zReportDone ? "border-green-300 text-green-700" : ""}`}
-                    disabled={zReportDone || zReportPending}
-                  />
-                }>
-                  {zReportPending ? "Procesare Z..." : zReportDone ? "✓ Raport Z" : "Raport Z"}
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-sm">
-                  <DialogHeader><DialogTitle>Confirmare Raport Z</DialogTitle></DialogHeader>
-                  <p className="text-sm text-slate-600">
-                    Raportul Z <strong>închide ziua fiscală</strong> pe casa fiscală. Această operațiune este
-                    ireversibilă şi poate fi efectuată o singură dată pe sesiune.
-                  </p>
-                  {fiscalNet.mockMode && (
-                    <p className="text-xs text-amber-700 bg-amber-50 rounded p-2">
-                      Mod simulare activ — comanda nu va fi trimisă la casa fiscală.
-                    </p>
-                  )}
-                  <DialogFooter>
-                    <DialogClose render={<Button type="button" variant="outline" />}>Anulează</DialogClose>
-                    <Button
-                      type="button"
-                      className="bg-red-600 hover:bg-red-700 text-white"
-                      onClick={async () => {
-                        setZReportPending(true);
-                        setZReportOpen(false);
-                        try {
-                          const fd = new FormData();
-                          if (sessionId) fd.set("session_id", sessionId);
-                          const res = await (runZReport as unknown as (fd: FormData) => Promise<FiscalDownloadPayload>)(fd);
-                          if (res.status === "browser_api_pending" && fiscalNet) {
-                            // API mode: FiscalNet is on this device — call it directly from the browser
-                            const fnRes = await fiscalBrowserZReport(fiscalNet);
-                            setZReportDone(true);
-                            setSaleStatus({ ok: fnRes.ok, msg: fnRes.ok ? "Raport Z trimis: " + fnRes.message : "FiscalNet: " + fnRes.message });
-                          } else {
-                            const downloaded = res.ok ? await downloadFiscalPayload(res, "z_report") : false;
-                            if (res.filename && res.content) setLastFiscalTxt({ filename: res.filename, content: res.content });
-                            if (res.ok) setZReportDone(true);
-                            setSaleStatus({ ok: res.ok, msg: downloaded ? "Z report TXT downloaded. Place it in FiscalNet Bonuri folder if needed." : res.message });
-                          }
-                          setTimeout(() => setSaleStatus(null), 4000);
-                        } catch (e) {
-                          setSaleStatus({ ok: false, msg: e instanceof Error ? e.message : "Eroare raport Z" });
-                          setTimeout(() => setSaleStatus(null), 4000);
-                        } finally {
-                          setZReportPending(false);
-                        }
-                      }}
-                    >
-                      Confirmă Raport Z
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            )}
-
-            {/* Close till dialog */}
-            <CloseTillDialog sessionId={sessionId} summary={summary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName}/>
-          </div>
+        {/* pos-utility-bar — secondary actions moved to More menu in cart */}
+        {isRO && fiscalNet?.enabled && checkoutStep === "order" && (
+        <div className="border-t border-slate-200 bg-white px-3 py-2 sm:px-4" style={{ flexShrink: 0 }}>
+          <Dialog open={zReportOpen} onOpenChange={setZReportOpen}>
+            <DialogTrigger render={
+              <Button type="button" variant="outline" className={`h-10 px-4 ${zReportDone ? "border-green-300 text-green-700" : ""}`} disabled={zReportDone || zReportPending} />
+            }>
+              {zReportPending ? t.zReportProcessing : zReportDone ? t.zReportDone : t.zReport}
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-sm">
+              <DialogHeader><DialogTitle>{t.zReportConfirmTitle}</DialogTitle></DialogHeader>
+              <p className="text-sm text-slate-600">{t.zReportConfirmBody}</p>
+              {fiscalNet.mockMode && (
+                <p className="text-xs text-amber-700 bg-amber-50 rounded p-2">{t.zReportMockMode}</p>
+              )}
+              <DialogFooter>
+                <DialogClose render={<Button type="button" variant="outline" />}>{t.cancel}</DialogClose>
+                <Button type="button" className="bg-red-600 hover:bg-red-700 text-white" disabled={zReportPending} onClick={async () => {
+                  setZReportPending(true);
+                  setZReportOpen(false);
+                  try {
+                    const fd = new FormData();
+                    if (sessionId) fd.set("session_id", sessionId);
+                    const res = await (runZReport as unknown as (fd: FormData) => Promise<FiscalDownloadPayload>)(fd);
+                    if (res.status === "browser_api_pending" && fiscalNet) {
+                      const fnRes = await fiscalBrowserZReport(fiscalNet);
+                      setZReportDone(true);
+                      setSaleStatus({ ok: fnRes.ok, msg: fnRes.ok ? t.zReportSent(fnRes.message) : `FiscalNet: ${fnRes.message}` });
+                    } else {
+                      const downloaded = res.ok ? await downloadFiscalPayload(res, "z_report") : false;
+                      if (res.filename && res.content) setLastFiscalTxt({ filename: res.filename, content: res.content });
+                      if (res.ok) setZReportDone(true);
+                      setSaleStatus({ ok: res.ok, msg: downloaded ? t.zReportDownloaded : res.message });
+                    }
+                    setTimeout(() => setSaleStatus(null), 4000);
+                  } catch (e) {
+                    setSaleStatus({ ok: false, msg: e instanceof Error ? e.message : t.zReportError });
+                    setTimeout(() => setSaleStatus(null), 4000);
+                  } finally {
+                    setZReportPending(false);
+                  }
+                }}>{t.zReportConfirmBtn}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
+        )}
       </div>
       )}
 
@@ -860,11 +800,11 @@ export function PosRegister({
             checkoutStep,
             paymentMethodId,
             cashReceived,
-            discountPct,
+            discountPct: txDiscountPct,
           });
           const res = await completeSaleReturn(fd);
           if (!res.ok) {
-            setSaleStatus({ ok: false, msg: friendlySaleError(res.error, isRO) });
+            setSaleStatus({ ok: false, msg: friendlySaleError(res.error, locale) });
             setSalePending(false);
             return;
           }
@@ -880,7 +820,7 @@ export function PosRegister({
             setSaleStatus({ ok: true, msg: saleMsg, transactionId: res.transactionId });
           }
           setCart([]);
-          setDiscountPct(0);
+          setApplyToAllValue("");
           setTipAmount(0);
           setSplitPayments([]);
           setSelectedCustomer(null);
@@ -919,59 +859,78 @@ export function PosRegister({
         )}
         {checkoutStep === "order" ? (
           <>
-        <div className="px-4 pt-4 pb-3 border-b border-slate-100">
-          <CustomerCombobox customers={customers} value={selectedCustomer} onChange={setSelectedCustomer} />
-          {(features.kitchenDisplay || features.restaurantOrderFlow || features.orderTypes || features.tableService) && (
-            <button type="button" onClick={() => setOrderTypeOpen(true)}
-              className="mt-2 flex w-full items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-100 transition-colors">
-              <span className="font-medium capitalize">
-                {features.orderTypes ? orderType : t.orderTypeEdit}
-                {features.tableService && tableLabel ? ` · ${t.tablePrefix} ${tableLabel}` : ""}
-              </span>
-              <span className="text-slate-400">{t.edit} ›</span>
-            </button>
-          )}
-        </div>
-        <div className="px-4 pt-3 pb-1 flex items-center justify-between shrink-0">
+        <div className="px-4 pt-3 pb-1 flex items-center justify-between shrink-0 gap-2">
           <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.order}</span>
+          <div className="flex items-center gap-2 flex-wrap justify-end">
           {(pendingSyncSales.length > 0 || pendingFiscalSales.length > 0) && (
             <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">
               {pendingSyncSales.length > 0 ? t.offlinePendingSync(pendingSyncSales.length) : t.offlinePendingFiscal(pendingFiscalSales.length)}
             </span>
           )}
+          <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+            <SheetTrigger render={
+              <Button type="button" variant="outline" size="sm" className="h-8 gap-1 text-xs" aria-label={t.moreMenuAria}>
+                <MoreHorizontal className="h-4 w-4" />{t.moreMenu}
+              </Button>
+            } />
+            <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+              <SheetHeader><SheetTitle>{t.moreMenu}</SheetTitle></SheetHeader>
+              <div className="flex flex-col gap-2 px-4 pb-6 pt-2">
+                <Button type="button" variant="outline" className="justify-start" onClick={() => { setCart([]); setCheckoutStep("order"); setMoreOpen(false); }}>{t.newSale}</Button>
+                {cart.length > 0 && (
+                  <Button type="button" variant="outline" className="justify-start" onClick={() => {
+                    const held = holdCurrentSale({ cart, customerName: selectedCustomer?.name });
+                    if (held) { setCart([]); setApplyToAllValue(""); setCheckoutStep("order"); setHeldSales(listHeldSales()); setMoreOpen(false); }
+                  }}>{t.holdOrder}</Button>
+                )}
+                {heldSales.length > 0 && (
+                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setHeldOpen(true); setMoreOpen(false); }}>{t.heldOrders} ({heldSales.length})</Button>
+                )}
+                <div className="rounded-lg border p-3 space-y-2">
+                  <p className="text-xs font-semibold text-slate-500">{t.customers}</p>
+                  <CustomerCombobox customers={customers} value={selectedCustomer} onChange={setSelectedCustomer} />
+                </div>
+                {(features.kitchenDisplay || features.restaurantOrderFlow) && (
+                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setNotesOpen(true); setMoreOpen(false); }}>{t.notes}</Button>
+                )}
+                {features.orderTypes && (
+                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setOrderTypeOpen(true); setMoreOpen(false); }}>{t.orderType}</Button>
+                )}
+                {features.tips && (
+                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setTipOpen(true); setMoreOpen(false); }}>{t.tip}</Button>
+                )}
+                {features.splitPayments && (
+                  <Button type="button" variant="outline" className="justify-start" onClick={() => { setSplitOpen(true); setMoreOpen(false); }}>{t.splitPayment}</Button>
+                )}
+                <Sheet>
+                  <SheetTrigger render={<Button type="button" variant="outline" className="w-full justify-start" />}>{t.orders}</SheetTrigger>
+                  <SheetContent className="w-full sm:max-w-2xl">
+                    <SheetHeader><SheetTitle>{t.ordersTransactions}</SheetTitle></SheetHeader>
+                    <div className="space-y-3 overflow-y-auto px-4 pb-4">
+                      <Input value={txSearch} onChange={(e) => setTxSearch(e.target.value)} placeholder={t.searchTransaction} aria-label={t.searchTransaction} />
+                      {shownTransactions.map((tx) => (
+                        <div key={tx.id} className="rounded-lg border p-3 text-sm">
+                          <div className="flex items-center justify-between gap-3">
+                            <strong>{tx.transaction_number}</strong>
+                            <span className="font-medium">{money(Number(tx.total ?? 0))}</span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-0.5">{tx.customer_name || t.walkIn} · {tx.payment_methods?.name ? paymentTypeLabel(tx.payment_methods.type ?? "other", tx.payment_methods.name, locale) : t.paymentGeneric}</p>
+                          <a className="text-blue-600 hover:underline text-xs mt-2 inline-block" href={`/app/transactions/${tx.id}`}>{t.viewReceipt}</a>
+                        </div>
+                      ))}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+                <RefundDialog recentTransactions={recentTransactions} currency={currency} />
+                <TillDialog sessionId={sessionId} cashDrawerSettings={cashDrawerSettings} fiscalNet={fiscalNet} isRO={isRO} currency={currency} orgName={orgName} userName={userName}/>
+                <CloseTillDialog sessionId={sessionId} summary={summary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName}/>
+              </div>
+            </SheetContent>
+          </Sheet>
           {cart.length > 0 && (
-            <div className="flex items-center gap-2">
-              {heldSales.length > 0 && (
-                <button type="button" onClick={() => setHeldOpen(true)} className="text-xs text-amber-600 hover:text-amber-700 font-medium">
-                  {t.heldOrders} ({heldSales.length})
-                </button>
-              )}
-              {cart.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const held = holdCurrentSale({
-                      cart,
-                      discountPct,
-                      customerName: selectedCustomer?.name,
-                    });
-                    if (held) {
-                      setCart([]);
-                      setDiscountPct(0);
-                      setCheckoutStep("order");
-                      setHeldSales(listHeldSales());
-                      setSaleStatus({ ok: true, msg: t.orderHeld });
-                      setTimeout(() => setSaleStatus(null), 2500);
-                    }
-                  }}
-                  className="text-xs text-slate-500 hover:text-blue-600"
-                >
-                  {t.holdOrder}
-                </button>
-              )}
               <button type="button" onClick={() => { setCart([]); setCheckoutStep("order"); }} className="text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
-            </div>
           )}
+          </div>
         </div>
         {(pendingSyncSales.length > 0 || pendingFiscalSales.length > 0) && (
           <div className="mx-4 mb-2 space-y-1.5 shrink-0">
@@ -1012,68 +971,67 @@ export function PosRegister({
           </div>
         )}
         <div className="flex-1 overflow-y-auto space-y-1.5 px-4 pb-2" style={{minHeight: 0, WebkitOverflowScrolling: "touch"}}>
-          {cart.map((item) => (
-            <div key={item.product_id} className="flex items-center gap-2 rounded-xl border border-transparent bg-white/80 px-2 py-2 transition-colors hover:border-blue-100 hover:bg-blue-50/40">
+          {cart.map((item) => {
+            const linePct = item.discount_pct ?? 0;
+            const lineTotal = lineGrossAfter(item);
+            const lineList = lineGrossBefore(item);
+            return (
+            <div key={item.product_id} className="flex flex-col gap-1 rounded-xl border border-transparent bg-white/80 px-2 py-2 transition-colors hover:border-blue-100 hover:bg-blue-50/40">
+              <div className="flex items-center gap-2">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-slate-900 truncate">{item.product_name}</p>
+                {linePct > 0 && (
+                  <span className="inline-block mt-0.5 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">{t.discountBadge(linePct)}</span>
+                )}
               </div>
               <div className="flex items-center gap-1">
-                <button type="button" onClick={() => setQty(item.product_id, item.quantity - 1)} aria-label="Decrease quantity" className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">−</button>
+                <button type="button" onClick={() => setQty(item.product_id, item.quantity - 1)} aria-label={t.decreaseQty} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">−</button>
                 <span className="w-7 text-center text-sm font-semibold tabular-nums">{item.quantity}</span>
-                <button type="button" onClick={() => setQty(item.product_id, item.quantity + 1)} aria-label="Increase quantity" className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">+</button>
+                <button type="button" onClick={() => setQty(item.product_id, item.quantity + 1)} aria-label={t.increaseQty} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">+</button>
               </div>
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                readOnly={lockLineTotalEdit}
-                title={lockLineTotalEdit ? t.lineTotalLockedHint : undefined}
-                value={Number.isFinite(item.quantity * item.unit_price) ? (item.quantity * item.unit_price).toFixed(2) : "0.00"}
-                onChange={lockLineTotalEdit ? undefined : (e) => setLineTotal(item.product_id, Number(e.target.value) || 0)}
-                aria-label={`Line total for ${item.product_name}`}
-                className={`h-9 w-20 rounded-lg border px-2 text-right text-sm font-bold tabular-nums text-slate-950 outline-none transition-colors ${
-                  lockLineTotalEdit
-                    ? "cursor-not-allowed border-transparent bg-slate-50 text-slate-600"
-                    : "border-transparent bg-slate-100 hover:bg-white focus:border-blue-300 focus:bg-white focus:ring-2 focus:ring-blue-100"
-                }`}
-              />
-              <button type="button" onClick={() => setQty(item.product_id, 0)} aria-label="Remove item" className="ml-1 flex h-9 w-9 items-center justify-center rounded-lg text-sm text-slate-400 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200">×</button>
+              <button
+                type="button"
+                onClick={() => { setDiscountEditId(item.product_id); setDiscountEditValue(linePct || ""); }}
+                className="flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-2 text-xs font-medium text-slate-600 hover:bg-white"
+                aria-label={t.itemDiscount}
+              >
+                <Percent className="h-3.5 w-3.5" />
+              </button>
+              <div className="text-right min-w-[4.5rem]">
+                {linePct > 0 && <p className="text-[10px] text-slate-400 line-through tabular-nums">{money(lineList)}</p>}
+                <p className="text-sm font-bold tabular-nums text-slate-950">{money(lineTotal)}</p>
+              </div>
+              <button type="button" onClick={() => setQty(item.product_id, 0)} aria-label={t.removeItem} className="flex h-9 w-9 items-center justify-center rounded-lg text-sm text-slate-400 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200">×</button>
+              </div>
             </div>
-          ))}
+          );})}
           {!cart.length && <p className="py-10 text-center text-sm text-slate-300">{t.tapToAdd}</p>}
         </div>
         <div className="border-t border-slate-100 px-4 pt-4 pb-4 space-y-3 shrink-0">
-          {(features.tips || features.splitPayments || features.kitchenDisplay || features.restaurantOrderFlow) && cart.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {(features.kitchenDisplay || features.restaurantOrderFlow) && (
-                <button type="button" onClick={() => setNotesOpen(true)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${(kitchenNote || customerNote) ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                  📝 {t.notes}{(kitchenNote || customerNote) ? " ●" : ""}
-                </button>
-              )}
-              {features.tips && (
-                <button type="button" onClick={() => setTipOpen(true)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${safeTipAmount > 0 ? "border-green-300 bg-green-50 text-green-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                  💰 {safeTipAmount > 0 ? `${t.tip} ${money(safeTipAmount)}` : t.tip}
-                </button>
-              )}
-              {features.splitPayments && (
-                <button type="button" onClick={() => setSplitOpen(true)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${activeSplitPayments.length > 0 ? "border-purple-300 bg-purple-50 text-purple-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                  ⚡ {activeSplitPayments.length > 0 ? t.splitLabel(activeSplitPayments.length) : t.split}
-                </button>
-              )}
-            </div>
-          )}
           {cart.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 shrink-0">{t.discountPct}</span>
-              <input type="number" min="0" max="100" step="1" value={discountPct || ""} onChange={(e) => setDiscountPct(Number(e.target.value) || 0)}
-                placeholder="0" aria-label="Discount percentage" className="h-8 w-16 rounded-lg border border-slate-200 px-2 text-sm text-right" />
-              {discountPct > 0 && <span className="text-xs text-blue-600 font-medium">−{money(discountAmount)}</span>}
+            <div className="space-y-2 rounded-lg border border-dashed border-slate-200 bg-slate-50/50 p-2.5">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">{t.applyToAllItems}</p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={applyToAllValue}
+                  onChange={(e) => setApplyToAllValue(e.target.value === "" ? "" : Number(e.target.value) || 0)}
+                  placeholder="0"
+                  aria-label={t.discountPctAria}
+                  className="h-8 w-16 rounded-lg border border-slate-200 bg-white px-2 text-sm text-right"
+                />
+                <Button type="button" size="sm" variant="outline" onClick={applyDiscountToAllCurrentItems} disabled={!applyToAllValue}>
+                  {t.apply}
+                </Button>
+              </div>
+              <p className="text-[10px] text-slate-400 leading-snug">{t.applyToAllHint}</p>
             </div>
           )}
-          {discountPct > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span>{money(grossTotal)}</span></div>}
+          {discountAmount > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span>{money(grossTotal)}</span></div>}
+          {discountAmount > 0 && <div className="flex justify-between text-xs text-blue-600"><span>{t.discount}</span><span>−{money(discountAmount)}</span></div>}
           {totalVat > 0.01 && <div className="flex justify-between text-xs text-slate-400"><span>{vatLabel}</span><span>{money(totalVat)}</span></div>}
           {safeTipAmount > 0 && <div className="flex justify-between text-xs text-green-700"><span>{t.tip}</span><span>{money(safeTipAmount)}</span></div>}
           <div className="flex justify-between items-baseline">
@@ -1096,7 +1054,7 @@ export function PosRegister({
               <div className="text-center">
                 <p className="text-sm font-medium text-slate-500">{t.payItems(cart.reduce((s, i) => s + i.quantity, 0))}</p>
                 <p className="mt-2 text-5xl font-bold tabular-nums text-slate-950 sm:text-6xl">{money(totalDue)}</p>
-                {discountPct > 0 && <p className="mt-1 text-sm text-slate-400">{t.subtotal} {money(grossTotal)} · −{money(discountAmount)}</p>}
+                {discountAmount > 0 && <p className="mt-1 text-sm text-slate-400">{t.subtotal} {money(grossTotal)} · −{money(discountAmount)}</p>}
               </div>
 
               <div>
@@ -1159,15 +1117,15 @@ export function PosRegister({
                       className="h-11 w-32 rounded-lg border border-slate-200 bg-white px-3 text-right text-xl font-bold tabular-nums text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-200"
                     />
                   </div>
-                  <PosCashKeypad value={cashReceived} onChange={setCashReceived} disabled={salePending} />
+                  <PosCashKeypad value={cashReceived} onChange={setCashReceived} disabled={salePending} clearLabel={t.clear} keypadAria={t.keypadAria} />
                   <div className="flex flex-wrap gap-1.5">
                     {([
                       { label: t.exact, v: Number(totalDue.toFixed(2)) },
-                      { label: currency === "RON" ? "1 leu" : "€1", v: Math.ceil(totalDue) },
-                      { label: currency === "RON" ? "5 lei" : "€5", v: Math.ceil(totalDue / 5) * 5 },
-                      { label: currency === "RON" ? "10 lei" : "€10", v: Math.ceil(totalDue / 10) * 10 },
-                      { label: currency === "RON" ? "20 lei" : "€20", v: Math.ceil(totalDue / 20) * 20 },
-                      { label: currency === "RON" ? "50 lei" : "€50", v: Math.ceil(totalDue / 50) * 50 },
+                      { label: t.quickCashAmount(1, currency), v: Math.ceil(totalDue) },
+                      { label: t.quickCashAmount(5, currency), v: Math.ceil(totalDue / 5) * 5 },
+                      { label: t.quickCashAmount(10, currency), v: Math.ceil(totalDue / 10) * 10 },
+                      { label: t.quickCashAmount(20, currency), v: Math.ceil(totalDue / 20) * 20 },
+                      { label: t.quickCashAmount(50, currency), v: Math.ceil(totalDue / 50) * 50 },
                     ] as { label: string; v: number }[])
                       .filter((btn, i) => i === 0 || btn.v !== Number(totalDue.toFixed(2)))
                       .filter((btn, i, arr) => arr.findIndex((b) => b.v === btn.v) === i)
@@ -1246,7 +1204,7 @@ export function PosRegister({
           <input type="hidden" name="cart_json" value={JSON.stringify(cart)} />
           <input type="hidden" name="session_id" value={sessionId ?? ""} />
           <input type="hidden" name="payment_type" value={selectedPaymentType} />
-          <input type="hidden" name="discount_pct" value={discountPct} />
+          <input type="hidden" name="discount_pct" value={txDiscountPct} />
           <input type="hidden" name="tip_amount" value={safeTipAmount} />
           <input type="hidden" name="order_type" value={features.orderTypes ? orderType : ""} />
           <input type="hidden" name="table_label" value={features.tableService ? tableLabel : ""} />
@@ -1256,15 +1214,15 @@ export function PosRegister({
           {/* ── Notes modal ── */}
           <Dialog open={notesOpen} onOpenChange={setNotesOpen}>
             <DialogContent className="sm:max-w-sm">
-              <DialogHeader><DialogTitle>Order notes</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{t.orderNotes}</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 {(features.kitchenDisplay || features.restaurantOrderFlow) && (
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-600">Kitchen note</label>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">{t.kitchenNote}</label>
                     <textarea
                       value={kitchenNote}
                       onChange={(e) => setKitchenNote(e.target.value)}
-                      placeholder="e.g. no nuts, extra shot…"
+                      placeholder={t.kitchenNotePlaceholder}
                       rows={2}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none"
                     />
@@ -1272,11 +1230,11 @@ export function PosRegister({
                 )}
                 {features.restaurantOrderFlow && (
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-600">Customer note</label>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">{t.customerNote}</label>
                     <textarea
                       value={customerNote}
                       onChange={(e) => setCustomerNote(e.target.value)}
-                      placeholder="e.g. birthday, VIP…"
+                      placeholder={t.customerNotePlaceholder}
                       rows={2}
                       className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none"
                     />
@@ -1284,8 +1242,8 @@ export function PosRegister({
                 )}
               </div>
               <DialogFooter>
-                <DialogClose render={<Button type="button" variant="outline">Cancel</Button>} />
-                <Button type="button" onClick={() => setNotesOpen(false)}>Save notes</Button>
+                <DialogClose render={<Button type="button" variant="outline">{t.cancel}</Button>} />
+                <Button type="button" onClick={() => setNotesOpen(false)}>{t.saveNotes}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -1293,28 +1251,28 @@ export function PosRegister({
           {/* ── Order type modal ── */}
           <Dialog open={orderTypeOpen} onOpenChange={setOrderTypeOpen}>
             <DialogContent className="sm:max-w-xs">
-              <DialogHeader><DialogTitle>Order type</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{t.orderType}</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 {features.orderTypes && (
                   <div className="grid grid-cols-3 gap-1 rounded-lg bg-slate-50 p-1">
-                    {["dine-in", "takeaway", "delivery"].map((type) => (
+                    {(["dine-in", "takeaway", "delivery"] as const).map((type) => (
                       <button key={type} type="button" onClick={() => setOrderType(type)}
-                        className={`rounded-md px-2 py-2 text-xs font-semibold capitalize transition-colors ${orderType === type ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-white"}`}>
-                        {type}
+                        className={`rounded-md px-2 py-2 text-xs font-semibold transition-colors ${orderType === type ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-white"}`}>
+                        {orderTypeLabel(type, t)}
                       </button>
                     ))}
                   </div>
                 )}
                 {features.tableService && (
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-600">Table / Seat</label>
-                    <Input value={tableLabel} onChange={(e) => setTableLabel(e.target.value)} placeholder="e.g. Table 4, Counter 2" className="h-9" />
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">{t.tableSeat}</label>
+                    <Input value={tableLabel} onChange={(e) => setTableLabel(e.target.value)} placeholder={t.tablePlaceholder} className="h-9" />
                   </div>
                 )}
               </div>
               <DialogFooter>
-                <DialogClose render={<Button type="button" variant="outline">Cancel</Button>} />
-                <Button type="button" onClick={() => setOrderTypeOpen(false)}>Confirm</Button>
+                <DialogClose render={<Button type="button" variant="outline">{t.cancel}</Button>} />
+                <Button type="button" onClick={() => setOrderTypeOpen(false)}>{t.confirm}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -1322,28 +1280,28 @@ export function PosRegister({
           {/* ── Tip modal ── */}
           <Dialog open={tipOpen} onOpenChange={setTipOpen}>
             <DialogContent className="sm:max-w-xs">
-              <DialogHeader><DialogTitle>Add a tip</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{t.addTip}</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 <div className="grid grid-cols-4 gap-1.5">
                   {[0, 5, 10, 15].map((pct) => (
                     <button key={pct} type="button"
                       onClick={() => setTipAmount(pct === 0 ? 0 : Number((afterDiscount * pct / 100).toFixed(2)))}
                       className={`rounded-lg border py-2 text-xs font-semibold transition-colors ${(pct === 0 && safeTipAmount === 0) || (pct > 0 && Math.abs(safeTipAmount - afterDiscount * pct / 100) < 0.02) ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
-                      {pct === 0 ? "No tip" : `${pct}%`}
+                      {pct === 0 ? t.noTip : `${pct}%`}
                     </button>
                   ))}
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">Custom amount</label>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">{t.customAmount}</label>
                   <Input type="number" min="0" step="0.01" value={tipAmount || ""} onChange={(e) => setTipAmount(Number(e.target.value) || 0)} placeholder="0.00" className="h-9" />
                 </div>
                 {safeTipAmount > 0 && (
-                  <p className="text-center text-sm font-semibold text-green-700">Tip: {money(safeTipAmount)}</p>
+                  <p className="text-center text-sm font-semibold text-green-700">{t.tipAmountLabel(money(safeTipAmount))}</p>
                 )}
               </div>
               <DialogFooter>
-                <DialogClose render={<Button type="button" variant="outline">Cancel</Button>} />
-                <Button type="button" onClick={() => setTipOpen(false)}>Apply</Button>
+                <DialogClose render={<Button type="button" variant="outline">{t.cancel}</Button>} />
+                <Button type="button" onClick={() => setTipOpen(false)}>{t.apply}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -1351,7 +1309,7 @@ export function PosRegister({
           {/* ── Split payment sheet ── */}
           <Dialog open={splitOpen} onOpenChange={setSplitOpen}>
             <DialogContent className="sm:max-w-md">
-              <DialogHeader><DialogTitle>Split payment</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>{t.splitPayment}</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 {splitPayments.map((row) => (
                   <div key={row.id} className="grid grid-cols-[1fr_100px_32px] gap-2">
@@ -1366,15 +1324,48 @@ export function PosRegister({
                 <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
                   const first = paymentMethods[0]?.id ?? "";
                   setSplitPayments((rows) => [...rows, { id: (crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now().toString(36)), payment_method_id: first, amount: Math.max(0, Number(splitRemaining.toFixed(2))) }]);
-                }}>+ Add payment row</Button>
+                }}>{t.addPaymentRow}</Button>
                 <div className={`rounded-lg p-2.5 text-xs font-medium ${splitRemaining > 0.01 ? "bg-amber-50 text-amber-700" : "bg-green-50 text-green-700"}`}>
-                  Total due: {money(totalDue)} · Paid: {money(splitPaid)} ·{" "}
-                  {splitRemaining > 0.01 ? `Remaining ${money(splitRemaining)}` : splitRemaining < -0.01 ? `Change ${money(Math.abs(splitRemaining))}` : "Fully paid ✓"}
+                  {t.totalDueLabel}: {money(totalDue)} · {t.paidLabel}: {money(splitPaid)} ·{" "}
+                  {splitRemaining > 0.01 ? t.splitRemaining(money(splitRemaining)) : splitRemaining < -0.01 ? `${t.changeLabel} ${money(Math.abs(splitRemaining))}` : t.splitFullyPaid}
                 </div>
               </div>
               <DialogFooter>
-                <DialogClose render={<Button type="button" variant="outline">Cancel</Button>} />
-                <Button type="button" onClick={() => setSplitOpen(false)}>Done</Button>
+                <DialogClose render={<Button type="button" variant="outline">{t.cancel}</Button>} />
+                <Button type="button" onClick={() => setSplitOpen(false)}>{t.done}</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* ── Item discount ── */}
+          <Dialog open={discountEditId !== null} onOpenChange={(open) => { if (!open) setDiscountEditId(null); }}>
+            <DialogContent className="sm:max-w-xs">
+              <DialogHeader><DialogTitle>{t.itemDiscount}</DialogTitle></DialogHeader>
+              <div className="space-y-3">
+                <Label htmlFor="item-discount-pct">{t.discountPct}</Label>
+                <Input
+                  id="item-discount-pct"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={discountEditValue}
+                  onChange={(e) => setDiscountEditValue(e.target.value === "" ? "" : Number(e.target.value) || 0)}
+                  className="text-right text-lg font-bold"
+                />
+                {discountEditId && (() => {
+                  const item = cart.find((i) => i.product_id === discountEditId);
+                  if (!item) return null;
+                  const preview = lineGrossAfter({ ...item, discount_pct: Number(discountEditValue) || 0 });
+                  return <p className="text-sm text-slate-500">{t.lineAfterDiscount}: {money(preview)}</p>;
+                })()}
+              </div>
+              <DialogFooter className="gap-2 sm:gap-0">
+                <Button type="button" variant="outline" onClick={() => { if (discountEditId) setItemDiscountPct(discountEditId, 0); setDiscountEditId(null); }}>{t.clearDiscount}</Button>
+                <Button type="button" onClick={() => {
+                  if (discountEditId) setItemDiscountPct(discountEditId, Number(discountEditValue) || 0);
+                  setDiscountEditId(null);
+                }}>{t.applyToItem}</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -1393,7 +1384,11 @@ export function PosRegister({
                       <p className="font-medium text-slate-900 truncate">{held.label}</p>
                       <p className="text-xs text-slate-500">
                         {t.payItems(held.cart.reduce((s, i) => s + i.quantity, 0))}
-                        {held.discountPct > 0 ? ` · −${held.discountPct}%` : ""}
+                        {held.cart.some((i) => (i.discount_pct ?? 0) > 0)
+                          ? ` · ${t.discountBadge(Math.max(...held.cart.map((i) => i.discount_pct ?? 0)))}`
+                          : held.discountPct && held.discountPct > 0
+                            ? ` · −${held.discountPct}%`
+                            : ""}
                       </p>
                     </div>
                     <Button
@@ -1403,7 +1398,7 @@ export function PosRegister({
                         const resumed = resumeHeldSale(held.id);
                         if (resumed) {
                           setCart(resumed.cart);
-                          setDiscountPct(resumed.discountPct);
+                          setApplyToAllValue("");
                           setCheckoutStep("order");
                           setHeldSales(listHeldSales());
                           setHeldOpen(false);
@@ -1455,5 +1450,13 @@ export function PosRegister({
         </div>
       )}
     </div>
+  );
+}
+
+export function PosRegister(props: Parameters<typeof PosRegisterInner>[0]) {
+  return (
+    <PosI18nProvider orgIsRO={props.isRO ?? false}>
+      <PosRegisterInner {...props} />
+    </PosI18nProvider>
   );
 }

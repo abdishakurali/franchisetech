@@ -1,10 +1,12 @@
 import type { CartItemBackup } from "@/lib/pos-cart-backup";
+import { normalizeCartLines } from "@/lib/pos-line-discount";
 
 export type HeldSale = {
   id: string;
   label: string;
   cart: CartItemBackup[];
-  discountPct: number;
+  /** @deprecated P1.7 cart-wide — migrated to line discount_pct on resume */
+  discountPct?: number;
   customerName?: string;
   heldAt: string;
 };
@@ -38,7 +40,7 @@ export function listHeldSales(): HeldSale[] {
 
 export function holdCurrentSale(input: {
   cart: CartItemBackup[];
-  discountPct: number;
+  discountPct?: number;
   customerName?: string;
   label?: string;
 }): HeldSale | null {
@@ -55,12 +57,15 @@ export function holdCurrentSale(input: {
   return sale;
 }
 
-export function resumeHeldSale(id: string): HeldSale | null {
+export function resumeHeldSale(id: string): (HeldSale & { cart: CartItemBackup[] }) | null {
   const sales = readAll();
   const found = sales.find((s) => s.id === id) ?? null;
   if (!found) return null;
   writeAll(sales.filter((s) => s.id !== id));
-  return found;
+  return {
+    ...found,
+    cart: normalizeCartLines(found.cart, found.discountPct ?? 0),
+  };
 }
 
 export function removeHeldSale(id: string) {

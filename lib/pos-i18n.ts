@@ -7,6 +7,17 @@ export const posText = {
     clearAll: "Clear all",
     tapToAdd: "Tap a product to add it.",
     discountPct: "Discount %",
+    discount: "Discount",
+    itemDiscount: "Item discount",
+    applyToItem: "Apply to item",
+    applyToAllItems: "Apply to all items",
+    applyToAllHint: "Sets the same % on every item currently in the cart. New items are not discounted until you set them.",
+    clearDiscount: "Clear discount",
+    discountBadge: (pct: number) => `−${pct}%`,
+    lineAfterDiscount: "Line total",
+    moreMenu: "More",
+    moreMenuAria: "More actions",
+    discountPctAria: "Discount percentage",
     subtotal: "Subtotal",
     inclVat: "Incl. VAT",
     inclTva: "Incl. VAT",
@@ -57,7 +68,7 @@ export const posText = {
     offlinePendingSyncRow: "Waiting for connection",
     offlineFiscalDismiss: "Fiscal done",
     offlineViewReceipt: "View receipt",
-    lineTotalLockedHint: "Use Discount % for fiscal receipts",
+    lineTotalLockedHint: "Use item discount for fiscal receipts",
     offlineQueueLabel: (items: number, total: string) =>
       `${items} item${items !== 1 ? "s" : ""} · ${total}`,
     holdOrder: "Hold order",
@@ -76,6 +87,116 @@ export const posText = {
     edit: "Edit",
     orderTypeEdit: "Order",
     tablePrefix: "Table",
+    cancel: "Cancel",
+    confirm: "Confirm",
+    apply: "Apply",
+    done: "Done",
+    save: "Save",
+    clear: "Clear",
+    posLanguageAria: "POS language",
+    walkIn: "Walk-in",
+    useWalkInName: (name: string) => `+ Use "${name}" as walk-in name`,
+    namePlaceholder: "Name",
+    phonePlaceholder: "Phone",
+    emailPlaceholder: "Email",
+    addCustomer: "Add customer",
+    quickAddCustomer: "Quick add customer",
+    newSale: "New sale",
+    customers: "Customers",
+    orders: "Orders",
+    ordersTransactions: "Orders / Transactions",
+    searchTransaction: "Search transaction",
+    viewReceipt: "View receipt",
+    refundLink: "Refund / void",
+    noProductsYet: "No products yet — add products in the Products menu.",
+    noProductsMatch: "No products match the filter.",
+    cashBtn: "Cash",
+    cashMovement: "Cash movement",
+    cashIn: "Cash in",
+    cashOut: "Cash out",
+    amount: "Amount",
+    reason: "Reason",
+    cashInHint: "Cash added to the drawer.",
+    cashOutHint: "Cash removed from the drawer.",
+    extraFloatPlaceholder: "Extra float",
+    supplierPaymentPlaceholder: "Supplier payment",
+    recording: "Recording…",
+    cashMovementSaved: "✓ Cash movement saved.",
+    somethingWrong: "Something went wrong. Please try again.",
+    refund: "Refund",
+    refundVoid: "Refund / void",
+    transactionVoided: "Transaction voided",
+    selectRecentTransaction: "Select recent transaction",
+    reasonRequired: "Reason required",
+    fullRefundOnly: "Full refund/void only. Partial refund coming soon.",
+    closeTill: "Close till",
+    openingCash: "Opening cash",
+    cashSales: "Cash sales",
+    cardSales: "Card sales",
+    expectedCash: "Expected cash",
+    countedCashLabel: "Counted cash",
+    howMuchInDrawer: "How much cash is actually in the drawer.",
+    decreaseQty: "Decrease quantity",
+    increaseQty: "Increase quantity",
+    removeItem: "Remove item",
+    lineTotalFor: (name: string) => `Line total for ${name}`,
+    keypadAria: "Cash amount keypad",
+    orderNotes: "Order notes",
+    kitchenNote: "Kitchen note",
+    kitchenNotePlaceholder: "e.g. no nuts, extra shot…",
+    customerNote: "Customer note",
+    customerNotePlaceholder: "e.g. birthday, VIP…",
+    saveNotes: "Save notes",
+    orderType: "Order type",
+    dineIn: "Dine-in",
+    takeaway: "Takeaway",
+    delivery: "Delivery",
+    tableSeat: "Table / Seat",
+    tablePlaceholder: "e.g. Table 4, Counter 2",
+    addTip: "Add a tip",
+    noTip: "No tip",
+    customAmount: "Custom amount",
+    addPaymentRow: "+ Add payment row",
+    totalDueLabel: "Total due",
+    paidLabel: "Paid",
+    changeLabel: "Change",
+    zReport: "Z report",
+    zReportDone: "✓ Z report",
+    zReportProcessing: "Processing Z…",
+    zReportConfirmTitle: "Confirm Z report",
+    zReportConfirmBody: "The Z report closes the fiscal day on the cash register. This operation is irreversible and can only be run once per session.",
+    zReportMockMode: "Simulation mode active — the command will not be sent to the fiscal printer.",
+    zReportConfirmBtn: "Confirm Z report",
+    zReportSent: (msg: string) => `Z report sent: ${msg}`,
+    zReportError: "Z report error",
+    zReportDownloaded: "Z report TXT downloaded. Place it in the FiscalNet Bonuri folder if needed.",
+    tillClosed: "Till is closed",
+    enterOpeningFloat: "Enter your opening float to start selling.",
+    openTillBeforeSale: "Open the till before your first sale.",
+    openingCashHint: "Opening cash is the cash float in the drawer before selling.",
+    openingFloat: (symbol: string) => `Opening float (${symbol})`,
+    openingFloatHelp: "How much cash is in the drawer before selling.",
+    openTill: "Open till",
+    openingTill: "Opening till…",
+    couldNotOpenTill: "Could not open till.",
+    openingSlipDownloaded: (filename: string) => `Opening slip downloaded: ${filename}`,
+    lastSessionClosed: "Last session closed",
+    closedAtBy: (time: string, by: string) => `${time} by ${by}`,
+    lastCountedCash: "Last counted cash",
+    closedAtByShort: (time: string, by: string) => `Closed ${time} by ${by}`,
+    totalSales: "Total sales",
+    transactionsCount: (n: number) => `${n} transaction${n !== 1 ? "s" : ""}`,
+    cashCardSplit: "Cash / Card split",
+    cardLabel: (amount: string) => `Card: ${amount}`,
+    difference: "Difference",
+    notePrefix: "Note",
+    quickAccess: "Quick access",
+    transactionsLink: "Transactions",
+    refundsLink: "Refunds",
+    dashboardLink: "Dashboard",
+    tipAmountLabel: (amount: string) => `Tip: ${amount}`,
+    quickCashAmount: (amount: number, currency: string) =>
+      currency === "RON" ? (amount === 1 ? "1 leu" : `${amount} lei`) : `€${amount}`,
   },
   ro: {
     order: "Comandă",
@@ -83,6 +204,17 @@ export const posText = {
     clearAll: "Golește tot",
     tapToAdd: "Atinge un produs pentru a-l adăuga.",
     discountPct: "Reducere %",
+    discount: "Reducere",
+    itemDiscount: "Reducere produs",
+    applyToItem: "Aplică produsului",
+    applyToAllItems: "Aplică tuturor produselor",
+    applyToAllHint: "Setează același procent pentru fiecare produs din coș. Produsele noi nu primesc reducere automat.",
+    clearDiscount: "Șterge reducerea",
+    discountBadge: (pct: number) => `−${pct}%`,
+    lineAfterDiscount: "Total linie",
+    moreMenu: "Mai mult",
+    moreMenuAria: "Acțiuni suplimentare",
+    discountPctAria: "Procent reducere",
     subtotal: "Subtotal",
     inclVat: "Incl. TVA",
     inclTva: "Incl. TVA",
@@ -133,7 +265,7 @@ export const posText = {
     offlinePendingSyncRow: "Așteaptă conexiunea",
     offlineFiscalDismiss: "Bon emis",
     offlineViewReceipt: "Vezi bonul",
-    lineTotalLockedHint: "Folosește Reducere % pentru bon fiscal",
+    lineTotalLockedHint: "Folosește reducerea pe produs pentru bon fiscal",
     offlineQueueLabel: (items: number, total: string) =>
       `${items} produs${items !== 1 ? "e" : ""} · ${total}`,
     holdOrder: "Pune în așteptare",
@@ -152,11 +284,148 @@ export const posText = {
     edit: "Editează",
     orderTypeEdit: "Comandă",
     tablePrefix: "Masă",
+    cancel: "Anulează",
+    confirm: "Confirmă",
+    apply: "Aplică",
+    done: "Gata",
+    save: "Salvează",
+    clear: "Șterge",
+    posLanguageAria: "Limba POS",
+    walkIn: "Client ocazional",
+    useWalkInName: (name: string) => `+ Folosește „${name}” ca nume walk-in`,
+    namePlaceholder: "Nume",
+    phonePlaceholder: "Telefon",
+    emailPlaceholder: "Email",
+    addCustomer: "Adaugă client",
+    quickAddCustomer: "Adaugă client rapid",
+    newSale: "Vânzare nouă",
+    customers: "Clienți",
+    orders: "Comenzi",
+    ordersTransactions: "Comenzi / Tranzacții",
+    searchTransaction: "Caută tranzacție",
+    viewReceipt: "Vezi bonul",
+    refundLink: "Rambursare / anulare",
+    noProductsYet: "Niciun produs — adaugă produse din meniul Produse.",
+    noProductsMatch: "Niciun produs nu corespunde filtrului.",
+    cashBtn: "Numerar",
+    cashMovement: "Mișcare numerar",
+    cashIn: "Intrare numerar",
+    cashOut: "Ieșire numerar",
+    amount: "Sumă",
+    reason: "Motiv",
+    cashInHint: "Numerar adăugat în sertar.",
+    cashOutHint: "Numerar scos din sertar.",
+    extraFloatPlaceholder: "Fond suplimentar",
+    supplierPaymentPlaceholder: "Plată furnizor",
+    recording: "Se înregistrează…",
+    cashMovementSaved: "✓ Mișcare numerar salvată.",
+    somethingWrong: "Ceva nu a mers bine. Încearcă din nou.",
+    refund: "Rambursare",
+    refundVoid: "Rambursare / anulare",
+    transactionVoided: "Tranzacție anulată",
+    selectRecentTransaction: "Selectează tranzacție recentă",
+    reasonRequired: "Motiv obligatoriu",
+    fullRefundOnly: "Doar rambursare/anulare completă. Rambursare parțială în curând.",
+    closeTill: "Închide casa",
+    openingCash: "Numerar deschidere",
+    cashSales: "Vânzări numerar",
+    cardSales: "Vânzări card",
+    expectedCash: "Numerar așteptat",
+    countedCashLabel: "Numerar numărat",
+    howMuchInDrawer: "Cât numerar este efectiv în sertar.",
+    decreaseQty: "Scade cantitatea",
+    increaseQty: "Crește cantitatea",
+    removeItem: "Elimină produsul",
+    lineTotalFor: (name: string) => `Total linie pentru ${name}`,
+    keypadAria: "Tastatură sumă numerar",
+    orderNotes: "Note comandă",
+    kitchenNote: "Notă bucătărie",
+    kitchenNotePlaceholder: "ex. fără nuci, extra shot…",
+    customerNote: "Notă client",
+    customerNotePlaceholder: "ex. zi de naștere, VIP…",
+    saveNotes: "Salvează note",
+    orderType: "Tip comandă",
+    dineIn: "La masă",
+    takeaway: "La pachet",
+    delivery: "Livrare",
+    tableSeat: "Masă / Loc",
+    tablePlaceholder: "ex. Masa 4, Counter 2",
+    addTip: "Adaugă bacșiș",
+    noTip: "Fără bacșiș",
+    customAmount: "Sumă personalizată",
+    addPaymentRow: "+ Adaugă linie plată",
+    totalDueLabel: "Total de plată",
+    paidLabel: "Încasat",
+    changeLabel: "Rest",
+    zReport: "Raport Z",
+    zReportDone: "✓ Raport Z",
+    zReportProcessing: "Procesare Z…",
+    zReportConfirmTitle: "Confirmare Raport Z",
+    zReportConfirmBody: "Raportul Z închide ziua fiscală pe casa de marcat. Această operațiune este ireversibilă și poate fi efectuată o singură dată pe sesiune.",
+    zReportMockMode: "Mod simulare activ — comanda nu va fi trimisă la casa fiscală.",
+    zReportConfirmBtn: "Confirmă Raport Z",
+    zReportSent: (msg: string) => `Raport Z trimis: ${msg}`,
+    zReportError: "Eroare raport Z",
+    zReportDownloaded: "Raport Z TXT descărcat. Plasează-l în folderul FiscalNet Bonuri dacă e necesar.",
+    tillClosed: "Casa este închisă",
+    enterOpeningFloat: "Introdu fondul de deschidere pentru a începe vânzarea.",
+    openTillBeforeSale: "Deschide casa înainte de prima vânzare.",
+    openingCashHint: "Numerarul de deschidere este fondul din sertar înainte de vânzare.",
+    openingFloat: (symbol: string) => `Fond deschidere (${symbol})`,
+    openingFloatHelp: "Cât numerar este în sertar înainte de vânzare.",
+    openTill: "Deschide casa",
+    openingTill: "Se deschide casa…",
+    couldNotOpenTill: "Casa nu a putut fi deschisă.",
+    openingSlipDownloaded: (filename: string) => `Bon deschidere descărcat: ${filename}`,
+    lastSessionClosed: "Ultima sesiune închisă",
+    closedAtBy: (time: string, by: string) => `${time}, de ${by}`,
+    lastCountedCash: "Ultimul numerar numărat",
+    closedAtByShort: (time: string, by: string) => `Închis ${time}, de ${by}`,
+    totalSales: "Total vânzări",
+    transactionsCount: (n: number) => `${n} tranzacți${n !== 1 ? "i" : "e"}`,
+    cashCardSplit: "Numerar / Card",
+    cardLabel: (amount: string) => `Card: ${amount}`,
+    difference: "Diferență",
+    notePrefix: "Notă",
+    quickAccess: "Acces rapid",
+    transactionsLink: "Tranzacții",
+    refundsLink: "Rambursări",
+    dashboardLink: "Panou",
+    tipAmountLabel: (amount: string) => `Bacșiș: ${amount}`,
+    quickCashAmount: (amount: number, currency: string) =>
+      currency === "RON" ? (amount === 1 ? "1 leu" : `${amount} lei`) : `€${amount}`,
   },
 } as const;
 
+export const POS_LOCALE_STORAGE_KEY = "franchisetech:posLocale";
+export const APP_LOCALE_CHANGE_EVENT = "franchisetech:localechange";
+
+export function defaultPosLocale(orgIsRO: boolean): PosLocale {
+  return orgIsRO ? "ro" : "en";
+}
+
 export function posLocale(isRO: boolean): PosLocale {
-  return isRO ? "ro" : "en";
+  return defaultPosLocale(isRO);
+}
+
+export function readPosLocalePreference(fallback: PosLocale): PosLocale {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const raw = localStorage.getItem(POS_LOCALE_STORAGE_KEY);
+    if (raw === "en" || raw === "ro") return raw;
+  } catch {
+    /* ignore */
+  }
+  return fallback;
+}
+
+export function writePosLocalePreference(locale: PosLocale): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(POS_LOCALE_STORAGE_KEY, locale);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function paymentTypeLabel(type: string, name: string, locale: PosLocale): string {
@@ -168,21 +437,22 @@ export function paymentTypeLabel(type: string, name: string, locale: PosLocale):
   return name || t.paymentGeneric;
 }
 
-export function friendlySaleError(error: string, isRO: boolean): string {
+export function friendlySaleError(error: string, locale: PosLocale): string {
+  const ro = locale === "ro";
   const lower = error.toLowerCase();
   if (lower.includes("cash received") || lower.includes("less than")) {
-    return isRO ? "Suma primită este insuficientă." : "Amount received is less than the total due.";
+    return ro ? "Suma primită este insuficientă." : "Amount received is less than the total due.";
   }
   if (lower.includes("payment method")) {
-    return isRO ? "Selectează o metodă de plată validă." : "Select a valid payment method.";
+    return ro ? "Selectează o metodă de plată validă." : "Select a valid payment method.";
   }
   if (lower.includes("cart") || lower.includes("empty")) {
-    return isRO ? "Coșul este gol." : "Cart is empty.";
+    return ro ? "Coșul este gol." : "Cart is empty.";
   }
   if (lower.includes("session") || lower.includes("till")) {
-    return isRO ? "Sesiunea de casă nu este deschisă. Deschide casa înainte de vânzare." : "Till session is not open. Open the till before selling.";
+    return ro ? "Sesiunea de casă nu este deschisă. Deschide casa înainte de vânzare." : "Till session is not open. Open the till before selling.";
   }
-  return isRO
+  return ro
     ? "Plata nu a putut fi finalizată. Încearcă din nou sau contactează suportul."
     : "Payment could not be completed. Please try again or contact support.";
 }
