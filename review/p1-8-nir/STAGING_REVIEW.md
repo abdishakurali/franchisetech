@@ -1,10 +1,35 @@
 # P1.8 NIR — Staging Review Package
 
 **Branch:** `p1-8-nir`
-**Commit:** `205ec0e` — Add Romanian NIR purchase workflow
+**Commits:** `205ec0e` (workflow), `7773eb9` (atomic post)
 **Date:** 2026-06-19
 **Production deploy:** NOT performed
-**Migration 037 on production:** NOT applied
+**Migration 037 on production:** NOT applied (forbidden)
+
+---
+
+## Staging verification safety (hard-block)
+
+P1.8 NIR staging schema checks **require dedicated `STAGING_*` environment variables**. The verifier does **not** read repo `.env` (which may point at production).
+
+| Variable | Purpose |
+|----------|---------|
+| `STAGING_SUPABASE_URL` | Staging project URL |
+| `STAGING_SUPABASE_ANON_KEY` | Staging anon key |
+| `STAGING_SUPABASE_SERVICE_ROLE_KEY` | Staging service role key |
+| `STAGING_PROJECT_REF` | Staging project ref |
+
+Run:
+
+```bash
+npm run verify-nir-staging-schema
+```
+
+**Production hard-block:** If `STAGING_PROJECT_REF` or `STAGING_SUPABASE_URL` matches production ref `ycqzxlahhfqwuteistvf`, the script exits non-zero immediately and does **not** probe Supabase.
+
+**Current blocker:** No staging credentials configured. Validation stops before any Supabase contact until owner provides a separate non-production project.
+
+**Production migration remains forbidden** on `ycqzxlahhfqwuteistvf`.
 
 ---
 
@@ -60,9 +85,9 @@ File: `supabase/migrations/037_nir_purchase_fields.sql` (81 lines)
 
 Apply via Supabase SQL Editor on **staging project only**, after backup/snapshot.
 
-### Read-only pre-apply verification (production/staging target)
+### Read-only pre-apply verification (staging target only)
 
-Script: `node scripts/verify-staging-nir-schema.mjs`
+Script: `npm run verify-nir-staging-schema` (requires `STAGING_*` vars; hard-blocks production ref)
 
 | Object | Status |
 |--------|--------|
@@ -162,18 +187,19 @@ Local UI capture attempted against `npm run dev` (migration not required for for
 
 ## 7. Known issues
 
-1. **No staging Supabase project** in repo — only production ref configured
-2. **Migration 037 not applied** anywhere yet
-3. **Draft upsert + RPC are two round trips** — if RPC fails, draft remains (no stock change); acceptable
-4. **CSV import** still creates legacy `received` with immediate stock (unchanged)
-5. **RPC lacks org membership check** inside SQL (relies on server action + service_role)
-6. **No unique index on stock_movements** — RPC uses `NOT EXISTS` only
+1. **No staging Supabase project** configured — `STAGING_*` vars not set
+2. **Staging verifier hardened** — refuses production ref `ycqzxlahhfqwuteistvf`; does not read `.env`
+3. **Migration 037 not applied** anywhere yet
+4. **Draft upsert + RPC are two round trips** — if RPC fails, draft remains (no stock change); acceptable
+5. **CSV import** still creates legacy `received` with immediate stock (unchanged)
+6. **RPC lacks org membership check** inside SQL (relies on server action + service_role)
+7. **No unique index on stock_movements** — RPC uses `NOT EXISTS` only
 
 ---
 
 ## 8. Final status
 
-### **`P1.8 NIR atomic post fix ready for staging`**
+### **`P1.8 NIR staging verifier hardened — waiting for dedicated staging Supabase credentials`**
 
 **Blockers for production approval:**
 
