@@ -3,6 +3,16 @@
  * P1.8 NIR purchase flow — static verification (no DB required).
  * Run: node scripts/verify-nir-purchase-flow.mjs
  */
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const root = resolve(__dirname, "..");
+
+function read(relPath) {
+  return readFileSync(resolve(root, relPath), "utf8");
+}
 
 function parsePurchaseLinesFromForm(entries) {
   return entries
@@ -69,6 +79,25 @@ function assert(name, cond) {
 
 console.log("P1.8 NIR purchase flow verification\n");
 
+// ── Source / migration static checks (atomic post) ─────────────
+{
+  const migration = read("supabase/migrations/037_nir_purchase_fields.sql");
+  const kitchenops = read("app/actions/kitchenops.ts");
+
+  assert("migration defines post_nir_purchase RPC", /function public\.post_nir_purchase/.test(migration));
+  assert("post RPC uses FOR UPDATE row lock", /for update/i.test(migration));
+  assert("post RPC checks ALREADY_POSTED", migration.includes("ALREADY_POSTED"));
+  assert("post RPC uses quantity_change on stock_movements", migration.includes("quantity_change"));
+  assert("post RPC has NOT EXISTS movement guard", /if exists\s*\(\s*select 1\s*from public\.stock_movements/i.test(migration));
+  assert("post RPC grants execute to service_role only", /grant execute on function public\.post_nir_purchase/.test(migration));
+  assert("next_nir_number not granted to service_role", !/grant execute on function public\.next_nir_number.*service_role/s.test(migration));
+
+  assert("server action calls post_nir_purchase RPC", kitchenops.includes('rpc("post_nir_purchase"'));
+  assert("server action does not call next_nir_number", !kitchenops.includes('rpc("next_nir_number"'));
+  assert("applyPurchaseStockIncrease removed from server action", !kitchenops.includes("applyPurchaseStockIncrease"));
+  assert("postNirPurchase uses createServiceClient server-side", kitchenops.includes("createServiceClient"));
+}
+
 // 1. Draft does not alter stock
 {
   const items = parsePurchaseLinesFromForm([
@@ -76,7 +105,6 @@ console.log("P1.8 NIR purchase flow verification\n");
   ]);
   const stock = { p1: 10 };
   assert("draft path parses line items", items.length === 1);
-  // Draft save must not invoke stock apply — stock stays at initial value
   assert("draft purchase leaves stock unchanged", stock.p1 === 10);
 }
 

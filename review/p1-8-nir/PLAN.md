@@ -365,8 +365,8 @@ Add `review/p1-8-nir/SCHEMA_DRIFT.md` or amend migration comments so future devs
 | Risk | Mitigation |
 |------|------------|
 | Legal NIR layout | Owner/accountant sign-off on print template |
-| Number race | `next_nir_number` in same transaction as post |
-| Stock double-increase | Guard `posted_at IS NULL`; draft path skips stock |
+| Number race | `post_nir_purchase` locks purchase + sequence in one transaction |
+| Stock double-increase | RPC `NOT EXISTS` movement guard per purchase/product |
 | Legacy `received` vs new `posted` | App treats both as posted for stock already applied |
 | Posted cancel attempted | Block in UI + server; v1.1 reversal later |
 | Mixed EN/RO labels | RO-first when `currency_code = RON` |
@@ -379,7 +379,7 @@ Add `review/p1-8-nir/SCHEMA_DRIFT.md` or amend migration comments so future devs
 
 ## Implementation readiness verdict
 
-**P1.8 NIR schema ready for implementation**
+**P1.8 NIR atomic post fix ready for staging**
 
 Reconciliation is complete enough to proceed:
 

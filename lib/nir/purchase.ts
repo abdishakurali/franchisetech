@@ -74,6 +74,41 @@ export function countsTowardPurchaseSpend(status: PurchaseStatus): boolean {
   return status === "posted" || status === "received";
 }
 
+/** Postgres RPC post_nir_purchase error codes surfaced to the UI */
+export function nirPostErrorRedirect(
+  purchaseId: string | null,
+  code: string | undefined
+): string {
+  const base = purchaseId ? `/app/purchases/${purchaseId}` : "/app/purchases/new";
+  switch (code) {
+    case "ALREADY_POSTED":
+      return `${base}?error=already_posted`;
+    case "PURCHASE_CANCELLED":
+      return `${base}?error=cancelled`;
+    case "INVALID_STATUS":
+    case "PURCHASE_NOT_FOUND":
+      return `${base}?error=invalid_status`;
+    case "NO_ITEMS":
+      return `${base}?error=no_items`;
+    default:
+      return `${base}?error=post_failed`;
+  }
+}
+
+export function mapNirPostRpcError(message: string | undefined): string | undefined {
+  if (!message) return undefined;
+  for (const code of [
+    "ALREADY_POSTED",
+    "PURCHASE_CANCELLED",
+    "INVALID_STATUS",
+    "PURCHASE_NOT_FOUND",
+    "NO_ITEMS",
+  ]) {
+    if (message.includes(code)) return code;
+  }
+  return undefined;
+}
+
 export function purchaseStatusBadge(
   status: PurchaseStatus,
   nirNumber: string | null | undefined,

@@ -12,8 +12,9 @@ import { normaliseIndustry, RESTAURANT_FEATURE_KEYS, type RestaurantFeatureKey }
 import { lineDiscountPct, transactionDiscountPct, type PosCartLine } from "@/lib/pos-line-discount";
 import {
   canCancelPurchase,
-  formatNirNumber,
   isAlreadyPosted,
+  mapNirPostRpcError,
+  nirPostErrorRedirect,
   parsePurchaseLinesFromForm,
   purchaseLineTotals,
   type PurchaseLineInput,
@@ -860,39 +861,91 @@ async function replacePurchaseItems(
   );
 }
 
-async function applyPurchaseStockIncrease(
+function buildDraftPurchaseRow(
+  orgId: string,
+  userId: string,
+  header: ReturnType<typeof parsePurchaseHeaderFromForm>,
+  totals: { subtotalAmount: number; taxTotal: number; totalAmount: number }
+) {
+  const purchasedAt = new Date(`${header.purchaseDate}T12:00:00`).toISOString();
+  return {
+    organisation_id: orgId,
+    supplier_id: header.supplierId || null,
+    supplier: header.supplierId ? "" : "Direct",
+    purchased_at: purchasedAt,
+    purchase_date: header.purchaseDate,
+    nir_date: header.nirDate,
+    supplier_invoice_date: header.supplierInvoiceDate,
+    reference: header.reference,
+    invoice_number: header.invoiceNumber,
+    notes: header.notes,
+    site_id: header.siteId || null,
+    received_by_user_id: header.receivedBy || userId,
+    total_amount: totals.totalAmount,
+    subtotal_amount: totals.subtotalAmount,
+    tax_total: totals.taxTotal,
+    status: "draft",
+    created_by: userId,
+  };
+}
+
+async function ensureDraftPurchaseForPost(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
   orgId: string,
   userId: string,
-  purchaseId: string,
-  items: PurchaseLineInput[]
-) {
-  for (const item of items) {
-    if (!item.product_id) continue;
-    const { data: p } = await supabase
-      .from("products")
-      .select("current_stock_qty,cost_price")
-      .eq("id", item.product_id)
-      .single();
-    if (!p) continue;
-    const newQty = Number(p.current_stock_qty ?? 0) + item.quantity;
-    await supabase.from("products").update({
-      current_stock_qty: newQty,
-      cost_price: item.unit_cost,
-    }).eq("id", item.product_id);
+  formData: FormData
+): Promise<string | null> {
+  const purchaseId = stringValue(formData, "purchase_id") || null;
+  const header = parsePurchaseHeaderFromForm(formData);
+  let items = parsePurchaseLinesFromForm(formData);
 
-    await supabase.from("stock_movements").insert({
-      organisation_id: orgId,
-      product_id: item.product_id,
-      movement_type: "purchase_received",
-      quantity_change: item.quantity,
-      unit_of_measure: item.unit_of_measure || "each",
-      reference_id: purchaseId,
-      reference_type: "purchase",
-      performed_by: userId,
-    }).then(() => null, () => null);
+  if (purchaseId) {
+    const { data: existing } = await supabase
+      .from("purchases")
+      .select("id,status,posted_at,nir_number")
+      .eq("id", purchaseId)
+      .eq("organisation_id", orgId)
+      .single();
+    if (!existing) return null;
+    if (isAlreadyPosted(existing.status, existing.posted_at, existing.nir_number)) {
+      redirect(`/app/purchases/${purchaseId}?error=already_posted`);
+    }
+    if (existing.status === "cancelled") {
+      redirect(`/app/purchases/${purchaseId}?error=cancelled`);
+    }
+    if (existing.status !== "draft") {
+      redirect(`/app/purchases/${purchaseId}?error=invalid_status`);
+    }
+
+    if (!items.length) {
+      items = await loadDraftPurchaseItems(supabase, orgId, purchaseId);
+    }
+    if (!items.length) return null;
+
+    const totals = purchaseLineTotals(items);
+    const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
+    await supabase
+      .from("purchases")
+      .update(buildDraftPurchaseRow(orgId, userId, header, totals))
+      .eq("id", purchaseId)
+      .eq("organisation_id", orgId);
+    await replacePurchaseItems(supabase, orgId, purchaseId, items, productLookup);
+    return purchaseId;
   }
+
+  if (!items.length) return null;
+
+  const totals = purchaseLineTotals(items);
+  const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
+  const { data: purchase } = await supabase
+    .from("purchases")
+    .insert(buildDraftPurchaseRow(orgId, userId, header, totals))
+    .select("id")
+    .single();
+  if (!purchase) return null;
+  await replacePurchaseItems(supabase, orgId, purchase.id, items, productLookup);
+  return purchase.id;
 }
 
 function parsePurchaseHeaderFromForm(formData: FormData) {
@@ -960,27 +1013,8 @@ export async function savePurchaseDraft(formData: FormData) {
 
   const { subtotalAmount, taxTotal, totalAmount } = purchaseLineTotals(items);
   const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
-  const purchasedAt = new Date(`${header.purchaseDate}T12:00:00`).toISOString();
 
-  const row = {
-    organisation_id: orgId,
-    supplier_id: header.supplierId || null,
-    supplier: header.supplierId ? "" : "Direct",
-    purchased_at: purchasedAt,
-    purchase_date: header.purchaseDate,
-    nir_date: header.nirDate,
-    supplier_invoice_date: header.supplierInvoiceDate,
-    reference: header.reference,
-    invoice_number: header.invoiceNumber,
-    notes: header.notes,
-    site_id: header.siteId || null,
-    received_by_user_id: header.receivedBy || user.id,
-    total_amount: totalAmount,
-    subtotal_amount: subtotalAmount,
-    tax_total: taxTotal,
-    status: "draft",
-    created_by: user.id,
-  };
+  const row = buildDraftPurchaseRow(orgId, user.id, header, { subtotalAmount, taxTotal, totalAmount });
 
   let targetId = purchaseId;
 
@@ -1010,103 +1044,28 @@ export async function postNirPurchase(formData: FormData) {
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
 
-  const purchaseId = stringValue(formData, "purchase_id") || null;
-  const header = parsePurchaseHeaderFromForm(formData);
-  let items = parsePurchaseLinesFromForm(formData);
-
-  if (purchaseId) {
-    const { data: existing } = await supabase
-      .from("purchases")
-      .select("id,status,posted_at,nir_number")
-      .eq("id", purchaseId)
-      .eq("organisation_id", orgId)
-      .single();
-    if (!existing) return;
-    if (isAlreadyPosted(existing.status, existing.posted_at, existing.nir_number)) {
-      redirect(`/app/purchases/${purchaseId}?error=already_posted`);
-    }
-    if (existing.status !== "draft") {
-      redirect(`/app/purchases/${purchaseId}?error=invalid_status`);
-    }
-    if (!items.length) {
-      items = await loadDraftPurchaseItems(supabase, orgId, purchaseId);
-    }
+  const draftId = await ensureDraftPurchaseForPost(supabase, orgId, user.id, formData);
+  if (!draftId) {
+    redirect("/app/purchases/new?error=no_items");
   }
-
-  if (!items.length) return;
-
-  const { subtotalAmount, taxTotal, totalAmount } = purchaseLineTotals(items);
-  const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
-  const purchasedAt = new Date(`${header.purchaseDate}T12:00:00`).toISOString();
-  const nirYear = new Date(`${header.nirDate}T12:00:00`).getFullYear();
 
   const serviceSupabase = await createServiceClient();
-  const { data: seq, error: seqError } = await serviceSupabase.rpc("next_nir_number", {
+  const { error } = await serviceSupabase.rpc("post_nir_purchase", {
+    p_purchase_id: draftId,
     p_org_id: orgId,
-    p_year: nirYear,
+    p_actor_id: user.id,
   });
-  if (seqError || seq == null) {
-    redirect(purchaseId ? `/app/purchases/${purchaseId}?error=nir_number` : "/app/purchases/new?error=nir_number");
+
+  if (error) {
+    const code = mapNirPostRpcError(error.message);
+    redirect(nirPostErrorRedirect(draftId, code));
   }
-
-  const nirNumber = formatNirNumber(nirYear, Number(seq));
-  const postedAt = new Date().toISOString();
-
-  const postedRow = {
-    organisation_id: orgId,
-    supplier_id: header.supplierId || null,
-    supplier: header.supplierId ? "" : "Direct",
-    purchased_at: purchasedAt,
-    purchase_date: header.purchaseDate,
-    nir_number: nirNumber,
-    nir_date: header.nirDate,
-    supplier_invoice_date: header.supplierInvoiceDate,
-    reference: header.reference,
-    invoice_number: header.invoiceNumber,
-    notes: header.notes,
-    site_id: header.siteId || null,
-    received_by_user_id: header.receivedBy || user.id,
-    total_amount: totalAmount,
-    subtotal_amount: subtotalAmount,
-    tax_total: taxTotal,
-    status: "posted",
-    posted_at: postedAt,
-    posted_by: user.id,
-    created_by: user.id,
-  };
-
-  let targetId = purchaseId;
-
-  if (purchaseId) {
-    const { data: locked } = await supabase
-      .from("purchases")
-      .select("posted_at,status,nir_number")
-      .eq("id", purchaseId)
-      .eq("organisation_id", orgId)
-      .single();
-    if (locked && isAlreadyPosted(locked.status, locked.posted_at, locked.nir_number)) {
-      redirect(`/app/purchases/${purchaseId}?error=already_posted`);
-    }
-    await supabase.from("purchases").update(postedRow).eq("id", purchaseId).eq("organisation_id", orgId);
-    if (parsePurchaseLinesFromForm(formData).length) {
-      await replacePurchaseItems(supabase, orgId, purchaseId, items, productLookup);
-    }
-  } else {
-    const { data: purchase } = await supabase.from("purchases").insert(postedRow).select("id").single();
-    if (!purchase) return;
-    targetId = purchase.id;
-    await replacePurchaseItems(supabase, orgId, purchase.id, items, productLookup);
-  }
-
-  if (!targetId) return;
-
-  await applyPurchaseStockIncrease(supabase, orgId, user.id, targetId, items);
 
   revalidatePath("/app/purchases");
   revalidatePath("/app/stock");
   revalidatePath("/app/products");
-  revalidatePath(`/app/purchases/${targetId}`);
-  redirect(`/app/purchases/${targetId}?posted=1`);
+  revalidatePath(`/app/purchases/${draftId}`);
+  redirect(`/app/purchases/${draftId}?posted=1`);
 }
 
 /** @deprecated Use postNirPurchase — kept for import paths that still call addPurchase */
