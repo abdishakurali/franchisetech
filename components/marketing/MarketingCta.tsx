@@ -29,11 +29,10 @@ export function CtaRow({
   secondaryHref?: string;
   secondaryLabel?: string;
 }) {
-  const [locale, setLocale] = useState<PosLocale>("en");
+  const [locale, setLocale] = useState<PosLocale>(readLocale);
   const t = getMarketingMessages(locale);
 
   useEffect(() => {
-    setLocale(readLocale());
     const sync = () => setLocale(readLocale());
     window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
     return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);
@@ -60,11 +59,10 @@ export function CtaRow({
 }
 
 export function FinalCta({ title }: { title?: string }) {
-  const [locale, setLocale] = useState<PosLocale>("en");
+  const [locale, setLocale] = useState<PosLocale>(readLocale);
   const t = getMarketingMessages(locale);
 
   useEffect(() => {
-    setLocale(readLocale());
     const sync = () => setLocale(readLocale());
     window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
     return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);

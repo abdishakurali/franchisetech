@@ -22,11 +22,10 @@ function readLocale(): PosLocale {
 }
 
 export function MarketingFooterClient() {
-  const [locale, setLocale] = useState<PosLocale>("en");
+  const [locale, setLocale] = useState<PosLocale>(readLocale);
   const t = getMarketingMessages(locale);
 
   useEffect(() => {
-    setLocale(readLocale());
     const sync = () => setLocale(readLocale());
     window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
     return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);

@@ -40,14 +40,13 @@ function readLocale(): PosLocale {
 }
 
 export function PartnerContactForm() {
-  const [locale, setLocale] = useState<PosLocale>("en");
+  const [locale, setLocale] = useState<PosLocale>(readLocale);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState("");
   const t = getMarketingMessages(locale);
   const partnerTypes = locale === "ro" ? PARTNER_TYPES_RO : PARTNER_TYPES_EN;
 
   useEffect(() => {
-    setLocale(readLocale());
     const sync = () => setLocale(readLocale());
     window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
     return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);

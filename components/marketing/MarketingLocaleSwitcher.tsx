@@ -51,13 +51,16 @@ export function MarketingLocaleSwitcher() {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
 
+  useEffect(() => {
+    document.documentElement.lang = locale === "ro" ? "ro" : "en";
+  }, [locale]);
+
   function select(next: PosLocale) {
     writePosLocalePreference(next);
     setLocaleCookie(next);
     setLocale(next);
     setOpen(false);
     window.dispatchEvent(new Event(APP_LOCALE_CHANGE_EVENT));
-    document.documentElement.lang = next === "ro" ? "ro" : "en";
     router.refresh();
   }
 
