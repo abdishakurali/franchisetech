@@ -7,6 +7,20 @@ import type { BillingMarket } from "@/lib/billing/market";
 
 export type BillingPlan = "starter" | "pro" | "multi_location";
 
+/** Stripe lookup keys — canonical live prices (EUR/month). Env vars must point to these. */
+export const STRIPE_LOOKUP_KEYS: Record<BillingPlan, string> = {
+  starter: "franchisetech_starter_monthly",
+  pro: "franchisetech_pro_monthly",
+  multi_location: "franchisetech_multi_location_monthly",
+};
+
+/** Live Stripe price IDs aligned with pricingPlans (2026-06-19). */
+export const STRIPE_CANONICAL_PRICE_IDS: Record<BillingPlan, string> = {
+  starter: "price_1TkNjMQSKBSEqRxEnsWqWy2Y",
+  pro: "price_1TkNjPQSKBSEqRxEtqTSm45R",
+  multi_location: "price_1TgahZQSKBSEqRxEEtIUQ0pU",
+};
+
 export type PlanDefinition = {
   readonly id: BillingPlan;
   readonly name: string;

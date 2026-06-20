@@ -284,7 +284,7 @@ export default async function PosPage() {
   // ── CLOSED: show open-till form + last session summary + quick links ──
   if (!openSession) {
     return (
-      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6">
+      <div className="min-h-0 p-4 sm:p-6">
         <PosTillStateSync sessionOpen={false} />
         <div className="mx-auto max-w-lg space-y-6 pb-8">
 

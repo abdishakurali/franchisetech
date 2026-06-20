@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { type BillingPlan, getPriceId, isBillingConfigured } from "@/lib/billing/plans";
+import { type BillingPlan, getPlan, getPriceId, isBillingConfigured } from "@/lib/billing/plans";
 import { canManageBilling } from "@/lib/access-control";
 
 export const dynamic = "force-dynamic";
@@ -86,6 +86,21 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+  const stripePrice = await stripe.prices.retrieve(priceId);
+  const expected = getPlan(plan);
+  if (stripePrice.unit_amount !== expected.amountCents) {
+    console.error("[billing] Stripe price mismatch", {
+      plan,
+      priceId,
+      stripeAmount: stripePrice.unit_amount,
+      expectedAmount: expected.amountCents,
+    });
+    return NextResponse.json(
+      { error: "Billing price mismatch. Contact support — checkout is temporarily unavailable." },
+      { status: 503 }
+    );
+  }
 
   // Get or create Stripe customer
   let customerId = existingSub?.stripe_customer_id ?? null;
