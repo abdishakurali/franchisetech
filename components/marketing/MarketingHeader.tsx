@@ -20,10 +20,8 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
 
   const navLinks = [
     { href: "/features", label: t.nav.features },
-    { href: "/industries", label: t.nav.industries },
-    { href: "/partners", label: t.nav.partners },
     { href: "/pricing", label: t.nav.pricing },
-    { href: "/resources", label: t.nav.resources },
+    { href: "/partners", label: t.nav.partners },
   ];
 
   return (
@@ -66,7 +64,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
                 href="/signup"
                 className="rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 sm:px-5"
               >
-                {t.header.startTrial}
+                {t.header.getStarted}
               </Link>
             </>
           )}

@@ -1,9 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import { jsonLd, SITE_URL } from "@/lib/marketing/seo";
 import { createClient } from "@/lib/supabase/server";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooterClient } from "@/components/marketing/MarketingFooter";
+import { MobileStickyCta } from "@/components/marketing/MobileStickyCta";
 import { BrowserFrame } from "@/components/marketing/DeviceFrames";
 import { marketingSectionY } from "@/lib/marketing/tokens";
 import { socialLinks } from "@/components/marketing/social";
@@ -61,8 +63,11 @@ export function PageShell({ children, schema }: { children: ReactNode; schema?: 
     <div className="min-h-screen bg-white">
       {schema?.map((item, index) => <div key={index}>{jsonLd(item)}</div>)}
       <MarketingNav />
-      {children}
+      <div className="pb-24 md:pb-0">{children}</div>
       <MarketingFooterClient />
+      <Suspense fallback={null}>
+        <MobileStickyCta />
+      </Suspense>
     </div>
   );
 }

@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { comparisonPages, findPage, SITE_URL } from "@/lib/marketing/seo";
+import { getMarketingLocale } from "@/lib/marketing/locale-server";
+import { getMarketingMessages } from "@/lib/marketing/i18n";
 
 const rows = [
   ["POS", "Simple food-business POS register", "Available depending on product setup"],
@@ -31,6 +33,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function ComparePage({ params }: { params: Promise<{ slug: string }> }) {
+  const locale = await getMarketingLocale();
+  const t = getMarketingMessages(locale);
   const page = findPage(comparisonPages, (await params).slug);
   if (!page) notFound();
 
@@ -46,7 +50,7 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
           <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">franchisetech vs {page.competitor} for small food businesses</h1>
           <p className="mt-5 max-w-3xl text-lg text-slate-600">{page.intro}</p>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">{page.betterFor}</p>
-          <div className="mt-8 flex flex-wrap gap-3"><Link href="/signup" className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">Start 15-day trial</Link><Link href="/pricing" className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">View pricing</Link></div>
+          <div className="mt-8 flex flex-wrap gap-3"><Link href="/signup" className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">{t.cta.getStarted}</Link><Link href="/pricing" className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">{t.cta.seePricing}</Link></div>
         </div>
       </section>
       <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">

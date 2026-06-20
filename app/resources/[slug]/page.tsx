@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqJsonLd, findPage, resourcePages, SITE_URL } from "@/lib/marketing/seo";
+import { getMarketingLocale } from "@/lib/marketing/locale-server";
+import { getMarketingMessages } from "@/lib/marketing/i18n";
 
 export function generateStaticParams() {
   return resourcePages.map((page) => ({ slug: page.slug }));
@@ -21,6 +23,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function ResourcePage({ params }: { params: Promise<{ slug: string }> }) {
+  const locale = await getMarketingLocale();
+  const t = getMarketingMessages(locale);
   const page = findPage(resourcePages, (await params).slug);
   if (!page) notFound();
 
@@ -33,12 +37,12 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
           <Link href="/resources" className="text-sm font-medium text-blue-600 hover:underline">Resources</Link>
           <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">{page.title}</h1>
           <p className="mt-5 text-lg leading-8 text-slate-600">{page.intro}</p>
-          <div className="mt-8 flex flex-wrap gap-3"><Link href="/signup" className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">Start 15-day trial</Link><Link href="/features" className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">See features</Link></div>
+          <div className="mt-8 flex flex-wrap gap-3"><Link href="/signup" className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">{t.cta.getStarted}</Link><Link href="/features" className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">{t.cta.seeFeatures}</Link></div>
           <div className="mt-12 space-y-9">
             {page.sections.map((section) => <section key={section.title}><h2 className="text-2xl font-bold text-slate-950">{section.title}</h2><p className="mt-3 leading-8 text-slate-600">{section.body}</p></section>)}
           </div>
           <div className="mt-12 rounded-xl border border-blue-100 bg-blue-50 p-5 text-sm leading-6 text-blue-900">
-            
+
           </div>
           <section className="mt-12">
             <h2 className="text-2xl font-bold text-slate-950">FAQ</h2>

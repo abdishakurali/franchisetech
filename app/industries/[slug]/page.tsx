@@ -65,7 +65,7 @@ export default async function IndustryPage({ params }: { params: Promise<{ slug:
           <p className={`max-w-2xl text-lg text-slate-600 ${page.image ? "" : "mt-5"}`}>{page.intro}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link href="/signup" className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-              {t.seoPage.startTrial}
+              {t.seoPage.getStarted}
             </Link>
             <Link href="/pricing" className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
               {t.cta.seePricing}

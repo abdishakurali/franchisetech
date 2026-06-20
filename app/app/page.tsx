@@ -6,10 +6,7 @@ import {
   BarChart3,
   CreditCard,
   Package,
-  ShoppingBag,
-  ShoppingCart,
   TrendingUp,
-  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,7 +68,6 @@ export default async function DashboardPage({ searchParams }: Props) {
     sessionResult,
     monthTxResult,
     voidedCountResult,
-    topItemsResult,
     lowStockResult,
     purchaseWeekResult,
   ] = await Promise.all([
@@ -91,7 +87,6 @@ export default async function DashboardPage({ searchParams }: Props) {
     supabase.from("pos_sessions").select("expected_cash,status").eq("organisation_id", orgId).eq("status", "open").limit(1).maybeSingle(),
     supabase.from("pos_transactions").select("total").eq("organisation_id", orgId).eq("status", "completed").gte("sold_at", monthStart),
     supabase.from("pos_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "voided").gte("sold_at", monthStart),
-    supabase.from("pos_transaction_items").select("product_name,gross_amount,pos_transactions!inner(organisation_id,status)").eq("pos_transactions.organisation_id", orgId).eq("pos_transactions.status", "completed"),
     inventoryVisible
       ? supabase.from("products").select("id,name,current_stock_qty,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true")
       : Promise.resolve({ data: [], error: null }),
@@ -105,7 +100,6 @@ export default async function DashboardPage({ searchParams }: Props) {
   const sessionData = sessionResult.data;
   const monthTx = monthTxResult.data ?? [];
   const voidedCount = voidedCountResult.count ?? 0;
-  const topItems = topItemsResult.data ?? [];
   const lowStockResultData = lowStockResult.data ?? [];
   const purchaseWeek = purchaseWeekResult.data ?? [];
 
@@ -128,10 +122,6 @@ export default async function DashboardPage({ searchParams }: Props) {
     .filter((p) => p.status === "posted" || p.status === "received")
     .reduce((s, p) => s + Number(p.total_amount ?? 0), 0);
 
-  const productTotals = new Map<string, number>();
-  for (const item of topItems) productTotals.set(item.product_name, (productTotals.get(item.product_name) ?? 0) + Number(item.gross_amount ?? 0));
-  const topProduct = [...productTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "No sales yet";
-
   const lowStock = lowStockResultData.filter((p) => Number(p.reorder_level ?? 0) > 0 && Number(p.current_stock_qty ?? 0) <= Number(p.reorder_level ?? 0));
 
   const attentionCols = 1 + (inventoryVisible ? 1 : 0) + (recipeVisible ? 1 : 0);
@@ -141,8 +131,8 @@ export default async function DashboardPage({ searchParams }: Props) {
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Dashboard &amp; reports</h1>
-          <p className="text-sm text-slate-500">Sales, cash, and reports in one place.</p>
+          <h1 className="text-2xl font-semibold text-slate-950">Dashboard</h1>
+          <p className="text-sm text-slate-500">Sales, cash, and reports.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {sessionData ? (
@@ -157,7 +147,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <div className={`grid gap-4 sm:grid-cols-2 ${inventoryVisible ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Suspense fallback={
           <Card>
             <CardHeader className="pb-1">
@@ -192,7 +182,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <Banknote className="h-4 w-4" />Expected cash
+              <Banknote className="h-4 w-4" />Cash in till
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -203,44 +193,17 @@ export default async function DashboardPage({ searchParams }: Props) {
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <ShoppingCart className="h-4 w-4" />Cash / card
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg font-bold">Cash {money(currentCash, currency)}</p>
-            <p className="text-xs text-slate-400">Card {money(currentCard, currency)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
               <CreditCard className="h-4 w-4" />This month
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{money(monthTotal, currency)}</p>
-            <p className="text-xs text-slate-400">Voided: {voidedCount}</p>
+            <p className="text-xs text-slate-400">
+              Cash {money(currentCash, currency)} · Card {money(currentCard, currency)}
+              {voidedCount > 0 ? ` · Voided: ${voidedCount}` : ""}
+            </p>
           </CardContent>
         </Card>
-        {inventoryVisible ? (
-          <Card>
-            <CardHeader className="pb-1">
-              <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-                <ShoppingBag className="h-4 w-4" />Purchases (7 days)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{money(purchaseSpend, currency)}</p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                {lowStock.length > 0 ? (
-                  <span className="text-amber-600 flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" />{lowStock.length} low stock
-                  </span>
-                ) : "Stock levels OK"}
-              </p>
-            </CardContent>
-          </Card>
-        ) : null}
       </div>
 
       {showAttentionRow ? (
@@ -290,18 +253,20 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       ) : null}
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Top product</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-lg font-bold">{topProduct}</p>
-          <p className="text-xs text-slate-400">Best seller in selected period</p>
-        </CardContent>
-      </Card>
-
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">All reports</h2>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-sm font-semibold text-slate-700">Reports</h2>
+          {inventoryVisible ? (
+            <p className="text-xs text-slate-500">
+              Purchases (7 days): {money(purchaseSpend, currency)}
+              {lowStock.length > 0 ? (
+                <span className="ml-2 text-amber-600">
+                  · {lowStock.length} low stock
+                </span>
+              ) : null}
+            </p>
+          ) : null}
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {visibleReports.map((r) => (
             <Link

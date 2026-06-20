@@ -26,7 +26,7 @@ export function CtaRow({
         href={signupHref}
         className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
       >
-        {t.cta.startTrial} <ArrowRight className="h-4 w-4" />
+        {t.cta.getStarted} <ArrowRight className="h-4 w-4" />
       </Link>
       <Link
         href={secondaryHref}

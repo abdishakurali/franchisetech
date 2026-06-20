@@ -72,7 +72,7 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
               </ul>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link href="/signup" className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
-                  {t.seoPage.startTrial}
+                  {t.seoPage.getStarted}
                 </Link>
                 <Link href="/features" className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                   {t.seoPage.allFeatures}
@@ -108,7 +108,7 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
                   <h3 className="font-semibold text-slate-950">{t.seoPage.readyTitle}</h3>
                   <p className="mt-2 text-sm text-slate-600">{t.seoPage.readyText}</p>
                   <Link href="/signup" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline">
-                    {t.seoPage.startTrialLink} <ArrowRight className="h-4 w-4" />
+                    {t.seoPage.getStarted} <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               )}

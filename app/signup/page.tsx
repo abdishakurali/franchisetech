@@ -32,6 +32,13 @@ export default function SignupPage() {
     }
   }, [planParam]);
 
+  useEffect(() => {
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setForm((prev) => (prev.email ? prev : { ...prev, email: emailParam }));
+    }
+  }, [searchParams]);
+
   const selectedPlan = isPreferredBillingPlan(planParam) ? getPlan(planParam) : null;
 
   const handleSignup = async (e: React.FormEvent) => {
