@@ -6,6 +6,7 @@ import { buildFiscalNetConfig } from "@/lib/fiscalnet/config";
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { getActiveOrg, numberValue, stringValue } from "@/lib/kitchenops/data";
 import { requireActiveSite } from "@/lib/site-context";
 import { normaliseIndustry, RESTAURANT_FEATURE_KEYS, type RestaurantFeatureKey } from "@/lib/restaurant-features";
@@ -503,6 +504,8 @@ export async function openPosSession(formData: FormData) {
     console.error("openPosSession:", error.message);
     return;
   }
+  const cookieStore = await cookies();
+  cookieStore.set("pos_till_open", "1", { path: "/app", maxAge: 60 * 60 * 24 });
   revalidatePath("/app/pos");
 }
 
@@ -557,6 +560,9 @@ export async function closePosSession(formData: FormData) {
     notes,
     updated_at: new Date().toISOString(),
   }).eq("id", sessionId).eq("organisation_id", orgId);
+
+  const cookieStore = await cookies();
+  cookieStore.delete("pos_till_open");
 
   // Save to pos_daily_close
   const today = new Date().toISOString().slice(0, 10);

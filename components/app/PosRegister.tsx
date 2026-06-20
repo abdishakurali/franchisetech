@@ -807,7 +807,7 @@ function PosRegisterInner({
   const fiscalActive = isFiscalNetClientActive(isRO, fiscalNet);
 
   return (
-    <div className="relative flex-1 lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
+    <div className="relative mx-auto flex w-full max-w-6xl flex-1 lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
       {/* Left: Products column — order step only */}
       {checkoutStep === "order" && (
       <div className="min-w-0 lg:flex-1 lg:flex lg:flex-col lg:overflow-hidden" style={{display: "flex", flexDirection: "column", overflow: "hidden", flex: "1 1 auto", minWidth: 0}}>
@@ -867,7 +867,7 @@ function PosRegisterInner({
         </div>
         {/* Scrollable products area */}
         <div className="p-3 sm:p-4 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:px-4 lg:py-4" style={{WebkitOverflowScrolling: "touch", flex: "1 1 auto", minHeight: 0, overflowY: "auto"}}>
-        <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" data-tour="pos-product">
+        <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5" data-tour="pos-product">
           {filtered.map((p) => {
             const cfg = getPhCfg(p);
             const inCart = cart.find((i) => i.product_id === p.id);
@@ -1110,8 +1110,8 @@ function PosRegisterInner({
           setSalePending(false);
           setCheckoutStep("payment");
         }
-      }} className={`flex flex-col bg-white ${focusedCheckout ? "absolute inset-0 z-20 min-h-0" : "min-h-[28rem] rounded-xl border border-slate-200 shadow-sm lg:min-h-0 lg:w-[400px] lg:flex-none lg:overflow-hidden lg:rounded-none lg:border-0 lg:border-l lg:shadow-none"}`} data-tour="pos-cart">
-        <div className={`flex flex-1 flex-col min-h-0 ${focusedCheckout ? "mx-auto w-full max-w-md px-6" : ""}`}>
+      }} className={`flex flex-col bg-white ${focusedCheckout ? "absolute inset-0 z-20 min-h-0" : "min-h-[28rem] rounded-xl border border-slate-200 shadow-sm lg:min-h-0 lg:w-[300px] lg:flex-none lg:overflow-hidden lg:rounded-none lg:border-0 lg:border-l lg:shadow-none"}`} data-tour="pos-cart">
+        <div className={`flex flex-1 flex-col min-h-0 ${focusedCheckout ? "mx-auto w-full max-w-sm px-5" : ""}`}>
         {checkoutStep === "complete" && lastCompletedSale ? (
           <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
             <div className="text-4xl">✓</div>

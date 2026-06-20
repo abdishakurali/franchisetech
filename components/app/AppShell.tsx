@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { SubscriptionStatus } from "@/lib/billing/subscription";
 import { TrialBanner } from "@/components/billing/TrialBanner";
+import { resetPosTillOpen, subscribePosTillOpen, readPosTillOpenCookie } from "@/lib/pos-till-state";
 
 interface AppShellProps {
   user: User;
@@ -65,13 +66,13 @@ function buildMainNav(userRole: string | null): NavItem[] {
   const limited = userRole === "cashier" || userRole === "kitchen";
   if (limited) {
     return [
-      { href: "/app", label: "Dashboard & reports", icon: LayoutDashboard, exact: true },
+      { href: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
       { href: "/app/pos", label: "POS", icon: CreditCard, exact: false },
     ];
   }
 
   const nav: NavItem[] = [
-    { href: "/app", label: "Dashboard & reports", icon: LayoutDashboard, exact: true },
+    { href: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { href: "/app/setup-checklist", label: "Setup guide", icon: ListChecks, exact: false },
     { href: "/app/pos", label: "POS", icon: CreditCard, exact: false },
   ];
@@ -348,6 +349,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   const [mobileOpen, setMobileOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
   const [mobileReferralOpen, setMobileReferralOpen] = useState(false);
+  const [posTillOpen, setPosTillOpenState] = useState(() => readPosTillOpenCookie());
   // Till compact mode: explicit opt-in only, stored in localStorage per device.
   // Lazy initializer runs on mount — no effect needed, no setState-in-effect.
   const [tillCompact] = useState(() => {
@@ -356,11 +358,25 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
     } catch { return false; }
   });
 
-  // POS: full-screen till — no sidebar. Kitchen may still use compact nav.
+  // POS: collapsed sidebar when till closed; hidden when selling.
   const isPosRoute = pathname.startsWith("/app/pos");
   const isWorkstationRoute = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen");
   const isPosMode = isPosRoute || (isWorkstationRoute && Boolean(activeOrg?.compact_workstation_nav_enabled));
-  const isCollapsed = (isWorkstationRoute && !isPosRoute) || tillCompact;
+  const posTillSelling = isPosRoute && posTillOpen;
+  const showSidebar = !posTillSelling;
+  const sidebarCollapsed = posTillSelling
+    ? false
+    : isPosRoute
+      ? true
+      : (isWorkstationRoute && !isPosRoute) || tillCompact;
+
+  useEffect(() => {
+    return subscribePosTillOpen(setPosTillOpenState);
+  }, []);
+
+  useEffect(() => {
+    if (!isPosRoute) resetPosTillOpen();
+  }, [isPosRoute]);
 
   const hideChat = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen") || pathname.startsWith("/app/settings");
   useEffect(() => {
@@ -384,25 +400,25 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
     pathname, activeOrg, userRole, initials, profile, user, setupComplete, moduleVisibility,
     onSettings: () => router.push("/app/settings"),
     onLogout: handleLogout,
-    collapsed: isCollapsed,
+    collapsed: sidebarCollapsed,
     accessibleSites,
     activeSiteId,
   };
 
   return (
     <div className={cn("app-shell-h flex overflow-hidden bg-slate-50", tillCompact && "till-compact-mode")}>
-      {/* Desktop sidebar — hidden on POS for a full-screen till */}
-      {!isPosRoute && (
+      {/* Desktop sidebar — collapsed on POS (till closed); hidden while selling */}
+      {showSidebar && (
       <aside className={cn(
         "hidden lg:flex print:hidden flex-col bg-white border-r border-slate-100 shrink-0 transition-all duration-200 ease-in-out",
-        isCollapsed ? "w-14" : "w-52"
+        sidebarCollapsed ? "w-12" : "w-44"
       )}>
         <AppSidebar {...sidebarProps} />
       </aside>
       )}
 
-      {/* Mobile overlay — not available on POS (full-screen till) */}
-      {mobileOpen && !isPosRoute && (
+      {/* Mobile overlay — POS till closed: icon nav; other routes: full nav */}
+      {mobileOpen && showSidebar && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-slate-900/50" onClick={() => setMobileOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-60 bg-white flex flex-col shadow-xl">
@@ -433,13 +449,20 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           onReferralOpen={() => setReferralOpen(true)}
         />
 
-        {/* POS slim header — logo only; actions live in till quick menu */}
+        {/* POS slim header — logo; menu when till closed on mobile */}
         {isPosRoute && (
           <header className="print:hidden flex items-center justify-between h-11 px-4 bg-white border-b border-slate-100 shrink-0">
             <FranchiseTechLogo className="h-5 w-auto" />
-            {activeOrg?.name ? (
-              <span className="truncate text-xs font-medium text-slate-500 max-w-[50%]">{activeOrg.name}</span>
-            ) : null}
+            <div className="flex items-center gap-2 min-w-0">
+              {activeOrg?.name ? (
+                <span className="truncate text-xs font-medium text-slate-500 max-w-[40vw] sm:max-w-none">{activeOrg.name}</span>
+              ) : null}
+              {!posTillSelling && (
+                <Button variant="ghost" size="icon-sm" className="lg:hidden shrink-0" aria-label="Open navigation" onClick={() => setMobileOpen(true)}>
+                  <Menu className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </header>
         )}
 
@@ -467,9 +490,9 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           </Dialog>
         )}
 
-        {/* Mobile header — hidden on POS route to give full screen to the till */}
-        {!isPosMode && (
-          <header className="lg:hidden print:hidden flex items-center justify-between h-12 px-4 bg-white border-b border-slate-100">
+        {/* Mobile header — non-POS routes */}
+        {!posTillSelling && !isPosRoute && (
+          <header className="lg:hidden print:hidden flex items-center justify-between h-11 px-4 bg-white border-b border-slate-100">
             <FranchiseTechLogo className="h-6 w-auto" />
             <div className="flex items-center gap-1">
               {referral?.link && (
@@ -501,7 +524,10 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           </header>
         )}
 
-        <main className={isPosMode ? "flex-1 flex flex-col overflow-hidden" : "flex-1 overflow-y-auto"}>{children}</main>
+        <main className={cn(
+          posTillSelling ? "flex-1 flex flex-col overflow-hidden" : "flex-1 overflow-y-auto",
+          isPosRoute && !posTillOpen && "lg:max-w-5xl lg:mx-auto lg:w-full"
+        )}>{children}</main>
       </div>
     </div>
   );

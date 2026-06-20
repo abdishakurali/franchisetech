@@ -2,6 +2,7 @@ import type { BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
 import { isFiscalNetActive } from "@/lib/fiscalnet/eligibility";
 import { DEFAULT_VAT_GROUPS, DEFAULT_PAYMENT_TYPE_MAP } from "@/lib/fiscalnet/types";
 import { PosWithTour } from "@/components/app/PosWithTour";
+import { PosTillStateSync } from "@/components/app/PosTillStateSync";
 import { OpenTillForm } from "@/components/app/OpenTillForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -284,7 +285,8 @@ export default async function PosPage() {
   if (!openSession) {
     return (
       <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6">
-        <div className="mx-auto max-w-xl space-y-6 pb-8">
+        <PosTillStateSync sessionOpen={false} />
+        <div className="mx-auto max-w-lg space-y-6 pb-8">
 
           {/* Open till form */}
           <div className="text-center">
@@ -394,6 +396,7 @@ export default async function PosPage() {
   const expectedCash = Number(openSession.expected_cash ?? openSession.opening_cash ?? 0);
   return (
     <div className="flex-1 flex flex-col min-h-0">
+      <PosTillStateSync sessionOpen />
       {/* POS register */}
       <PosWithTour
         products={(products ?? []) as never}
