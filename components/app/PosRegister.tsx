@@ -826,6 +826,8 @@ function PosRegisterInner({
                 {t.moreMenu}
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-[200px]">
+                <DropdownMenuItem render={<a href="/app" />}>{t.leavePos}</DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setCustomersSheetOpen(true)}>{t.customers}</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setOrdersSheetOpen(true)}>{t.orders}</DropdownMenuItem>
                 <DropdownMenuSeparator />

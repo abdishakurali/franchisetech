@@ -356,10 +356,11 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
     } catch { return false; }
   });
 
-  // Collapse sidebar when on POS/kitchen route or when till compact mode is enabled
+  // POS: full-screen till — no sidebar. Kitchen may still use compact nav.
+  const isPosRoute = pathname.startsWith("/app/pos");
   const isWorkstationRoute = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen");
-  const isPosMode = pathname.startsWith("/app/pos") || (isWorkstationRoute && Boolean(activeOrg?.compact_workstation_nav_enabled));
-  const isCollapsed = isPosMode || tillCompact;
+  const isPosMode = isPosRoute || (isWorkstationRoute && Boolean(activeOrg?.compact_workstation_nav_enabled));
+  const isCollapsed = (isWorkstationRoute && !isPosRoute) || tillCompact;
 
   const hideChat = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen") || pathname.startsWith("/app/settings");
   useEffect(() => {
@@ -390,16 +391,18 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
 
   return (
     <div className={cn("app-shell-h flex overflow-hidden bg-slate-50", tillCompact && "till-compact-mode")}>
-      {/* Desktop sidebar — collapses to icon-only strip on POS route */}
+      {/* Desktop sidebar — hidden on POS for a full-screen till */}
+      {!isPosRoute && (
       <aside className={cn(
         "hidden lg:flex print:hidden flex-col bg-white border-r border-slate-100 shrink-0 transition-all duration-200 ease-in-out",
         isCollapsed ? "w-14" : "w-52"
       )}>
         <AppSidebar {...sidebarProps} />
       </aside>
+      )}
 
-      {/* Mobile overlay — only accessible from non-POS routes */}
-      {mobileOpen && (
+      {/* Mobile overlay — not available on POS (full-screen till) */}
+      {mobileOpen && !isPosRoute && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-slate-900/50" onClick={() => setMobileOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-60 bg-white flex flex-col shadow-xl">

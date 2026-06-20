@@ -69,7 +69,11 @@ export function FiscalNetSettingsCard(props: Props) {
           color="blue"
         />
 
-        {/* Simulation toggle removed: FiscalNet always runs in real mode when enabled */}
+        {!enabled && (
+          <p className="text-xs text-slate-500">
+            Sales are still recorded in franchisetech. Fiscal receipts will not be sent to your till device.
+          </p>
+        )}
       </div>
 
       {enabled && (
@@ -119,22 +123,22 @@ export function FiscalNetSettingsCard(props: Props) {
             />
             <p className="text-xs text-slate-500">The cashier/operator code used for receipts. Default is 1.</p>
           </div>
-
-          {/* ── Save ───────────────────────────────────────────── */}
-          <Button
-            type="button"
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full bg-blue-600 text-white hover:bg-blue-700"
-          >
-            {saving ? "Se salvează…" : "Save receipt settings"}
-          </Button>
-          {status && (
-            <div className={`rounded-lg px-3 py-2 text-sm font-medium border ${status.ok ? "bg-green-50 text-green-800 border-green-200" : "bg-red-50 text-red-800 border-red-200"}`}>
-              {status.ok ? "✅" : "❌"} {status.msg}
-            </div>
-          )}
         </>
+      )}
+
+      {/* ── Save (always visible so disabling can be persisted) ── */}
+      <Button
+        type="button"
+        onClick={handleSave}
+        disabled={saving}
+        className="w-full bg-blue-600 text-white hover:bg-blue-700"
+      >
+        {saving ? "Se salvează…" : enabled ? "Save receipt settings" : "Save — receipts disabled"}
+      </Button>
+      {status && (
+        <div className={`rounded-lg px-3 py-2 text-sm font-medium border ${status.ok ? "bg-green-50 text-green-800 border-green-200" : "bg-red-50 text-red-800 border-red-200"}`}>
+          {status.ok ? "✅" : "❌"} {status.msg}
+        </div>
       )}
     </div>
   );
