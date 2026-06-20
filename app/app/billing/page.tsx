@@ -1,24 +1,25 @@
 import { createClient } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { isBillingConfigured } from "@/lib/billing/plans";
-import { PricingCards } from "@/components/app/PricingCards";
+import { PricingPlansSection } from "@/components/billing/PricingPlansSection";
 import { BillingPortalButton } from "@/components/app/BillingPortalButton";
 import { modulesForPlan } from "@/lib/billing/entitlements";
 import { BUSINESS_MODULE_DEFINITIONS } from "@/lib/business-modules";
 import type { BillingPlan } from "@/lib/billing/plans";
+import { marketFromCountryCode } from "@/lib/billing/market";
 import { AlertCircle, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 
 function statusColor(state: string) {
   if (state === "active") return "bg-emerald-50 text-emerald-700 border-emerald-200";
   if (state === "trialing" || state === "soft_trial") return "bg-blue-50 text-blue-700 border-blue-200";
-  if (state === "past_due" || state === "canceled") return "bg-red-50 text-red-700 border-red-200";
+  if (state === "past_due" || state === "past_due_expired" || state === "canceled") return "bg-red-50 text-red-700 border-red-200";
   if (state === "incomplete") return "bg-amber-50 text-amber-700 border-amber-200";
   return "bg-slate-50 text-slate-600 border-slate-200";
 }
 
 function StatusIcon({ state }: { state: string }) {
   if (state === "active") return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
-  if (state === "past_due" || state === "canceled") return <AlertCircle className="h-5 w-5 text-red-600" />;
+  if (state === "past_due" || state === "past_due_expired" || state === "canceled") return <AlertCircle className="h-5 w-5 text-red-600" />;
   if (state === "incomplete") return <AlertTriangle className="h-5 w-5 text-amber-600" />;
   return <Clock className="h-5 w-5 text-blue-600" />;
 }
@@ -36,6 +37,12 @@ export default async function BillingPage({
     ? await supabase.from("organisation_members").select("organisation_id").eq("user_id", user.id).limit(1).maybeSingle()
     : { data: null };
 
+  const { data: orgRow } = membership
+    ? await supabase.from("organisations").select("country_code").eq("id", membership.organisation_id).maybeSingle()
+    : { data: null };
+
+  const billingMarket = marketFromCountryCode(orgRow?.country_code);
+
   const sub = membership ? await getSubscriptionStatus(membership.organisation_id) : null;
   const configured = isBillingConfigured();
 
@@ -49,9 +56,18 @@ export default async function BillingPage({
       {/* Trial-expired gate notice */}
       {params.reason === "trial_expired" && (
         <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-          <p className="font-semibold">Your free trial has ended.</p>
+          <p className="font-semibold">Your assisted trial has ended.</p>
           <p className="mt-0.5 opacity-80">
-            Choose a plan below to continue using FranchiseTech. Your data is safe.
+            Choose a plan below to continue using franchisetech. Your data is safe.
+          </p>
+        </div>
+      )}
+
+      {params.reason === "past_due_expired" && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800">
+          <p className="font-semibold">Payment required to restore access.</p>
+          <p className="mt-0.5 opacity-80">
+            Update your payment method or choose a plan below. Use Manage billing if you already have a subscription on file.
           </p>
         </div>
       )}
@@ -78,7 +94,12 @@ export default async function BillingPage({
               )}
               {sub.state === "soft_trial" && sub.trialDaysLeft != null && (
                 <p className="mt-0.5 text-sm opacity-80">
-                  {sub.trialDaysLeft} day{sub.trialDaysLeft === 1 ? "" : "s"} remaining. Choose a plan below to continue after your trial.
+                  Assisted trial: {sub.trialDaysLeft} day{sub.trialDaysLeft === 1 ? "" : "s"} left with Pro access. Subscribe anytime — no checkout required until you choose a plan.
+                </p>
+              )}
+              {sub.state === "past_due_expired" && (
+                <p className="mt-0.5 text-sm opacity-80">
+                  Your grace period has ended. Update payment or start a new subscription to restore access.
                 </p>
               )}
               {sub.state === "active" && sub.periodEnd && (
@@ -142,7 +163,7 @@ export default async function BillingPage({
               ))}
             </div>
           </div>
-          <PricingCards loggedIn={Boolean(user)} configured={configured} />
+          <PricingPlansSection variant="billing" market={billingMarket} loggedIn={Boolean(user)} configured={configured} />
         </div>
       )}
 

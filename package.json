@@ -14,7 +14,9 @@
     "verify-nir-purchase-flow": "node scripts/verify-nir-purchase-flow.mjs",
     "verify-nir-staging-schema": "node scripts/verify-staging-nir-schema.mjs",
     "check-prod-nir-schema": "node scripts/check-prod-nir-schema.mjs",
-    "apply-prod-migration-037": "node scripts/apply-migration-037-production.mjs"
+    "check-prod-module-flags-schema": "node scripts/check-prod-module-flags-schema.mjs",
+    "apply-prod-migration-037": "node scripts/apply-migration-037-production.mjs",
+    "apply-prod-migration-039": "node scripts/apply-migration-039-production.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",

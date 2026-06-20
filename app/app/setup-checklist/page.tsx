@@ -7,6 +7,8 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { computeSetupProgress } from "@/lib/setup-progress";
 import { normaliseBusinessProfile, BUSINESS_PROFILE_LABELS } from "@/lib/business-profile";
 import { enableInventoryFromSetup } from "@/app/actions/kitchenops";
+import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import { isModuleEnabled } from "@/lib/business-modules";
 
 function Step({ done, num, title, text, href, label, status }: { done: boolean; num: number; title: string; text: string; href: string; label: string; status?: string }) {
   return (
@@ -42,7 +44,7 @@ export default async function SetupChecklistPage() {
     { data: openSession },
     { data: subscription },
   ] = await Promise.all([
-    supabase.from("organisations").select("name,country,currency_code,business_profile,inventory_enabled,recipe_costing_enabled,multi_site_ops_enabled").eq("id", orgId).maybeSingle(),
+    supabase.from("organisations").select("name,country,currency_code").eq("id", orgId).maybeSingle(),
     supabase.from("products").select("*", { count: "exact", head: true }).eq("organisation_id", orgId).eq("active", true).eq("available_in_pos", true),
     supabase.from("payment_methods").select("*", { count: "exact", head: true }).eq("organisation_id", orgId),
     supabase.from("products").select("*", { count: "exact", head: true }).eq("organisation_id", orgId).eq("active", true).eq("is_ingredient", true),
@@ -55,15 +57,16 @@ export default async function SetupChecklistPage() {
     supabase.from("billing_subscriptions").select("id,status,plan").eq("organisation_id", orgId).in("status", ["trialing", "active"]).limit(1).maybeSingle(),
   ]);
 
-  const profile = normaliseBusinessProfile(org?.business_profile);
+  const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
+  const profile = normaliseBusinessProfile(moduleFlags.business_profile);
   const progress = computeSetupProgress({
     orgName: org?.name,
     country: org?.country,
     currencyCode: org?.currency_code,
     businessProfile: profile,
-    inventoryEnabled: org?.inventory_enabled ?? false,
-    recipeCostingEnabled: org?.recipe_costing_enabled ?? false,
-    multiSiteOpsEnabled: org?.multi_site_ops_enabled ?? false,
+    inventoryEnabled: isModuleEnabled(moduleFlags, "inventory"),
+    recipeCostingEnabled: isModuleEnabled(moduleFlags, "recipe_costing"),
+    multiSiteOpsEnabled: isModuleEnabled(moduleFlags, "multi_site"),
     productCount: productCount ?? 0,
     paymentMethodCount: paymentMethodCount ?? 0,
     txCount: txCount ?? 0,
@@ -77,6 +80,7 @@ export default async function SetupChecklistPage() {
   });
 
   const coreSteps = progress.steps.filter((s) => s.section === "core");
+  const billingSteps = progress.steps.filter((s) => s.section === "billing");
   const multiSiteSteps = progress.steps.filter((s) => s.section === "multi_site");
   const advancedSteps = progress.steps.filter((s) => s.section === "advanced");
   const showAdvanced = advancedSteps.length > 0;
@@ -144,6 +148,17 @@ export default async function SetupChecklistPage() {
             </form>
           </CardContent>
         </Card>
+      ) : null}
+      {billingSteps.length > 0 ? (
+        <div className="space-y-3 pt-4">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-950">Billing</h2>
+            <p className="mt-1 text-sm text-slate-500">Optional until your assisted trial ends — subscribe when you are ready.</p>
+          </div>
+          {billingSteps.map((step, index) => (
+            <Step key={step.id} num={index + 1} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />
+          ))}
+        </div>
       ) : null}
     </div>
   );

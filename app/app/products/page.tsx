@@ -4,12 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import { isModuleEnabled } from "@/lib/business-modules";
+import { FormSelect } from "@/components/app/FormSelect";
 import { addCategory, ensurePosDefaults, deleteProducts, updateProductStock } from "@/app/actions/kitchenops";
 import { ProductsBulkTable } from "@/components/app/BulkDeleteTable";
 import { PageHint } from "@/components/app/PageHint";
 
 export default async function ProductsPage({ searchParams }: { searchParams?: Promise<{ q?: string; category?: string; type?: string }> }) {
   const { supabase, orgId, currency } = await getKitchenOpsContext();
+  const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
+  const recipeVisible = isModuleEnabled(moduleFlags, "recipe_costing");
   await ensurePosDefaults();
   const params = await searchParams;
   const q = params?.q ?? "";
@@ -46,9 +51,11 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
         <div className="flex flex-wrap gap-2">
           <a href="/api/products/export"><Button variant="outline" size="sm">Export CSV</Button></a>
           <Link href="/app/products/import"><Button variant="outline" size="sm">Import CSV</Button></Link>
-          <Link href="/app/recipes/new">
-            <Button variant="outline" size="sm">Create recipe</Button>
-          </Link>
+          {recipeVisible ? (
+            <Link href="/app/recipes/new">
+              <Button variant="outline" size="sm">Create recipe</Button>
+            </Link>
+          ) : null}
           <Link href="/app/products/new">
             <Button size="sm">Add product</Button>
           </Link>
@@ -90,12 +97,17 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
             <CardTitle>Product list ({products.length})</CardTitle>
             <form className="flex flex-wrap gap-2">
               <Input name="q" placeholder="Search" defaultValue={q} className="w-36 h-8 text-sm" />
-              <select name="type" defaultValue={typeFilter} className="h-8 rounded-md border border-slate-200 bg-white px-2 text-sm">
-                <option value="all">All</option>
-                <option value="pos">POS items</option>
-                <option value="ingredient">Ingredients</option>
-                <option value="sellable">Sellable</option>
-              </select>
+              <FormSelect
+                name="type"
+                defaultValue={typeFilter}
+                className="w-36"
+                options={[
+                  { value: "all", label: "All" },
+                  { value: "pos", label: "POS items" },
+                  { value: "ingredient", label: "Ingredients" },
+                  { value: "sellable", label: "Sellable" },
+                ]}
+              />
               <Button type="submit" variant="outline" size="sm" className="h-8">Filter</Button>
             </form>
           </div>

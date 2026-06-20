@@ -81,7 +81,7 @@ export async function POST(request: Request) {
 
   const { data: org } = await service
     .from("organisations")
-    .select("name, referral_code, referral_credit_months")
+    .select("name, referral_code, referral_credit_months, trial_ends_at")
     .eq("id", orgId)
     .maybeSingle();
 
@@ -116,12 +116,18 @@ export async function POST(request: Request) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://franchisetech.ro";
 
+  let trialPeriodDays: number | undefined;
+  if (org?.trial_ends_at) {
+    const daysLeft = Math.ceil((new Date(org.trial_ends_at).getTime() - Date.now()) / 86400000);
+    if (daysLeft > 0) trialPeriodDays = daysLeft;
+  }
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
     line_items: [{ price: priceId, quantity: 1 }],
     subscription_data: {
-
+      ...(trialPeriodDays ? { trial_period_days: trialPeriodDays } : {}),
       metadata: {
         organisation_id: orgId,
         user_id: user.id,

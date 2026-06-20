@@ -2,27 +2,34 @@
 // Every pricing page, checkout route, and backend validation MUST read from here.
 // Never hardcode plan prices, amounts, or Stripe price IDs elsewhere.
 
+import { flatPlanFeatures, getPlanFeatureCategories } from "@/lib/billing/plan-features";
+import type { BillingMarket } from "@/lib/billing/market";
+
 export type BillingPlan = "starter" | "pro" | "multi_location";
 
-export interface PlanDefinition {
+export type PlanDefinition = {
   readonly id: BillingPlan;
   readonly name: string;
-  /** Display string shown to users, e.g. "€29" */
   readonly price: string;
-  /** Amount in smallest currency unit (cents for EUR). Must match the Stripe price object. */
   readonly amountCents: number;
   readonly currency: "eur" | "usd" | "gbp";
   readonly interval: "month" | "year";
   readonly cadence: string;
   readonly description: string;
+  /** @deprecated Use getPlanFeatureCategories(market) — kept for JSON-LD / backwards compat */
   readonly features: readonly string[];
-  /** Name of the environment variable holding this plan's Stripe price ID. */
   readonly priceEnv: string;
   readonly highlighted: boolean;
+};
+
+function plan(
+  def: Omit<PlanDefinition, "features"> & { features?: readonly string[] }
+): PlanDefinition {
+  return { ...def, features: def.features ?? flatPlanFeatures(def.id) };
 }
 
 export const pricingPlans: readonly PlanDefinition[] = [
-  {
+  plan({
     id: "starter",
     name: "franchisetech Starter",
     price: "€39",
@@ -30,21 +37,11 @@ export const pricingPlans: readonly PlanDefinition[] = [
     currency: "eur",
     interval: "month",
     cadence: "/month",
-    description: "For one small shop starting with POS sales, products, and daily reports.",
-    features: [
-      "No credit card required",
-      "POS sales",
-      "Products & categories",
-      "Transaction history",
-      "Daily cash control",
-      "Stock overview",
-      "Manual cash drawer mode",
-      "Basic reports",
-    ],
+    description: "For one shop that needs a reliable till, products, and daily sales reports.",
     priceEnv: "STRIPE_STARTER_PRICE_ID",
     highlighted: false,
-  },
-  {
+  }),
+  plan({
     id: "pro",
     name: "franchisetech Pro",
     price: "€79",
@@ -52,24 +49,11 @@ export const pricingPlans: readonly PlanDefinition[] = [
     currency: "eur",
     interval: "month",
     cadence: "/month",
-    description: "The main plan for owners who want stock, recipe costing, staff, and stronger controls.",
-    features: [
-      "No credit card required",
-      "Everything in Starter",
-      "Team roles & permissions",
-      "Cash audit trail",
-      "Recipe costing",
-      "Stock controls",
-      "Reminders & schedules",
-      "Manager review & exports",
-      "Cash drawer connector",
-      "Advanced reports",
-      "Priority support",
-    ],
+    description: "For owners who want stock, recipe costing, kitchen flow, and stronger staff controls.",
     priceEnv: "STRIPE_PRO_PRICE_ID",
     highlighted: true,
-  },
-  {
+  }),
+  plan({
     id: "multi_location",
     name: "franchisetech Multi-location",
     price: "€99",
@@ -77,20 +61,13 @@ export const pricingPlans: readonly PlanDefinition[] = [
     currency: "eur",
     interval: "month",
     cadence: "/month",
-    description: "For franchise or multi-site operations with central reporting.",
-    features: [
-      "No credit card required",
-      "Everything in Pro",
-      "Multiple locations",
-      "Central reporting dashboard",
-      "Franchise management tools",
-      "FiscalNet integration (Romania)",
-      "Dedicated account support",
-    ],
+    description: "For businesses running two or more sites with Romania fiscal support.",
     priceEnv: "STRIPE_MULTI_LOCATION_PRICE_ID",
     highlighted: false,
-  },
+  }),
 ] as const;
+
+export { getPlanFeatureCategories };
 
 export const connectedPlan = {
   name: "Assisted setup",
@@ -160,4 +137,12 @@ export function validatePlansConfig(): { valid: boolean; errors: string[] } {
   }
 
   return { valid: errors.length === 0, errors };
+}
+
+export function planDescriptionForMarket(plan: BillingPlan, market: BillingMarket): string {
+  const base = getPlan(plan);
+  if (plan === "multi_location" && market !== "RO") {
+    return "For businesses running two or more sites with per-site reporting.";
+  }
+  return base.description;
 }

@@ -1,31 +1,31 @@
 import Link from "next/link";
 import { startOfDay, startOfMonth, startOfWeek, subDays, subWeeks, subMonths } from "date-fns";
-import { ArrowRight, Banknote, BarChart3, Calculator, FileText, Package, Receipt, ShoppingBag, ShoppingCart, TrendingUp } from "lucide-react";
+import {
+  ArrowRight,
+  Banknote,
+  BarChart3,
+  CreditCard,
+  Package,
+  ShoppingBag,
+  ShoppingCart,
+  TrendingUp,
+  AlertTriangle,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { DateFilter } from "@/components/app/DateFilter";
-import { DashboardModulePrompts } from "@/components/app/DashboardModulePrompts";
-import { enableInventoryFromDashboard, enableRecipeFromDashboard } from "@/app/actions/dashboard-modules";
-import { canUseModule, type OrgModuleRow } from "@/lib/business-modules";
-import { getSubscriptionStatus } from "@/lib/billing/subscription";
-import type { BillingPlan } from "@/lib/billing/plans";
+import { DashboardSalesHighlight } from "@/components/app/DashboardSalesHighlight";
+import { isModuleEnabled } from "@/lib/business-modules";
+import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import { filterReportLinks } from "@/lib/app-report-links";
+import { Suspense } from "react";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: cur || "EUR" }).format(v);
 }
-
-const reportCards = [
-  { href: "/app/reports/sales", title: "Sales", text: "Totals, transactions, and top products.", icon: BarChart3 },
-  { href: "/app/reports/z-report", title: "Till close", text: "Cash, card, counted cash, and difference.", icon: Receipt },
-  { href: "/app/reports/vat", title: "VAT", text: "Net, VAT, and gross sales by rate.", icon: Calculator },
-  { href: "/app/reports/stock", title: "Stock", text: "Stock levels and reorder alerts.", icon: Package },
-  { href: "/app/reports/purchases", title: "Purchases", text: "Supplier spend and purchase history.", icon: ShoppingBag },
-  { href: "/app/reports/margins", title: "Margins", text: "Product cost and margin.", icon: TrendingUp },
-  { href: "/app/transactions", title: "Transactions", text: "Receipts, refunds, and voids.", icon: FileText },
-];
 
 type Props = { searchParams: Promise<{ period?: string }> };
 
@@ -47,7 +47,7 @@ export default async function DashboardPage({ searchParams }: Props) {
   } else if (period === "month") {
     rangeStart = startOfMonth(now);
     prevEnd = rangeStart;
-    prevStart = startOfMonth(subMonths(now, 1));
+    prevStart = subMonths(now, 1);
     periodLabel = "vs last month";
   } else {
     rangeStart = startOfDay(now);
@@ -56,22 +56,25 @@ export default async function DashboardPage({ searchParams }: Props) {
     periodLabel = "vs yesterday";
   }
 
-  const { supabase, orgId, currency, membership } = await getKitchenOpsContext();
-  const orgRow = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as Record<string, unknown> | null;
-  const sub = await getSubscriptionStatus(orgId).catch(() => null);
-  const subscriptionPlan = (sub?.plan === "starter" || sub?.plan === "pro" || sub?.plan === "multi_location") ? sub.plan as BillingPlan : null;
-  const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
-  const orgModules: OrgModuleRow = {
-    business_profile: (orgRow?.business_profile as string | null) ?? null,
-    inventory_enabled: Boolean(orgRow?.inventory_enabled),
-    recipe_costing_enabled: Boolean(orgRow?.recipe_costing_enabled),
-    team_advanced_enabled: Boolean(orgRow?.team_advanced_enabled),
-    multi_site_ops_enabled: Boolean(orgRow?.multi_site_ops_enabled),
-  };
-  const inventoryVisible = canUseModule({ org: orgModules, module: "inventory", subscriptionPlan, hasTrial });
-  const recipeVisible = canUseModule({ org: orgModules, module: "recipe_costing", subscriptionPlan, hasTrial });
+  const monthStart = startOfMonth(now).toISOString();
+  const weekAgo = subDays(now, 7).toISOString();
 
-  const [currentTx, prevTx, sessionResult, productCount, recipeCount, lowStockResult, topItems, txTotal] = await Promise.all([
+  const { supabase, orgId, currency } = await getKitchenOpsContext();
+  const orgModules = await fetchOrgModuleFlags(supabase, orgId);
+  const inventoryVisible = isModuleEnabled(orgModules, "inventory");
+  const recipeVisible = isModuleEnabled(orgModules, "recipe_costing");
+  const visibleReports = filterReportLinks({ inventoryVisible, recipeVisible });
+
+  const [
+    currentTxResult,
+    prevTxResult,
+    sessionResult,
+    monthTxResult,
+    voidedCountResult,
+    topItemsResult,
+    lowStockResult,
+    purchaseWeekResult,
+  ] = await Promise.all([
     supabase
       .from("pos_transactions")
       .select("total,tip_amount,payment_methods(type)")
@@ -86,76 +89,106 @@ export default async function DashboardPage({ searchParams }: Props) {
       .gte("created_at", prevStart.toISOString())
       .lt("created_at", prevEnd.toISOString()),
     supabase.from("pos_sessions").select("expected_cash,status").eq("organisation_id", orgId).eq("status", "open").limit(1).maybeSingle(),
-    supabase.from("products").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("active", true),
-    supabase.from("recipes").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
-    supabase.from("products").select("id,name,current_stock_qty,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true"),
+    supabase.from("pos_transactions").select("total").eq("organisation_id", orgId).eq("status", "completed").gte("sold_at", monthStart),
+    supabase.from("pos_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "voided").gte("sold_at", monthStart),
     supabase.from("pos_transaction_items").select("product_name,gross_amount,pos_transactions!inner(organisation_id,status)").eq("pos_transactions.organisation_id", orgId).eq("pos_transactions.status", "completed"),
-    supabase.from("pos_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "completed"),
+    inventoryVisible
+      ? supabase.from("products").select("id,name,current_stock_qty,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true")
+      : Promise.resolve({ data: [], error: null }),
+    inventoryVisible
+      ? supabase.from("purchases").select("total_amount,status").eq("organisation_id", orgId).gte("created_at", weekAgo)
+      : Promise.resolve({ data: [], error: null }),
   ]);
 
-  const currentTotal = (currentTx.data ?? []).reduce((s, t) => s + Number(t.total ?? 0), 0);
-  const currentTips = (currentTx.data ?? []).reduce((s, t) => s + Number(t.tip_amount ?? 0), 0);
+  const currentTx = currentTxResult.data ?? [];
+  const prevTx = prevTxResult.data ?? [];
+  const sessionData = sessionResult.data;
+  const monthTx = monthTxResult.data ?? [];
+  const voidedCount = voidedCountResult.count ?? 0;
+  const topItems = topItemsResult.data ?? [];
+  const lowStockResultData = lowStockResult.data ?? [];
+  const purchaseWeek = purchaseWeekResult.data ?? [];
+
+  const currentTotal = currentTx.reduce((s, t) => s + Number(t.total ?? 0), 0);
+  const currentTips = currentTx.reduce((s, t) => s + Number(t.tip_amount ?? 0), 0);
   const currentSalesExTips = currentTotal - currentTips;
-  const currentCount = currentTx.data?.length ?? 0;
-  const prevTotal = (prevTx.data ?? []).reduce((s, t) => s + Number(t.total ?? 0), 0);
+  const currentCount = currentTx.length;
+  const prevTotal = prevTx.reduce((s, t) => s + Number(t.total ?? 0), 0);
 
   const isGrowing = currentSalesExTips >= prevTotal;
   const salesColor = prevTotal === 0 && currentTotal === 0 ? "text-slate-950" : isGrowing ? "text-green-600" : "text-red-600";
   const diffSign = isGrowing ? "+" : "";
   const diffAmount = currentSalesExTips - prevTotal;
 
-  const currentCash = (currentTx.data ?? []).filter((t) => (t.payment_methods as { type?: string } | null)?.type === "cash").reduce((s, t) => s + Number(t.total ?? 0), 0);
+  const currentCash = currentTx.filter((t) => (t.payment_methods as { type?: string } | null)?.type === "cash").reduce((s, t) => s + Number(t.total ?? 0), 0);
   const currentCard = currentTotal - currentCash;
-  const expectedCash = Number(sessionResult.data?.expected_cash ?? 0);
+  const expectedCash = Number(sessionData?.expected_cash ?? 0);
+  const monthTotal = monthTx.reduce((s, t) => s + Number(t.total ?? 0), 0);
+  const purchaseSpend = purchaseWeek
+    .filter((p) => p.status === "posted" || p.status === "received")
+    .reduce((s, p) => s + Number(p.total_amount ?? 0), 0);
+
   const productTotals = new Map<string, number>();
-  for (const item of topItems.data ?? []) productTotals.set(item.product_name, (productTotals.get(item.product_name) ?? 0) + Number(item.gross_amount ?? 0));
+  for (const item of topItems) productTotals.set(item.product_name, (productTotals.get(item.product_name) ?? 0) + Number(item.gross_amount ?? 0));
   const topProduct = [...productTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "No sales yet";
-  const lowStock = (lowStockResult.data ?? []).filter((p) => Number(p.reorder_level ?? 0) > 0 && Number(p.current_stock_qty ?? 0) <= Number(p.reorder_level ?? 0));
-  const setupDone = (productCount.count ?? 0) > 0 && (recipeCount.count ?? 0) > 0;
-  const visibleReports = reportCards.filter((card) => {
-    if (card.href.includes("/stock") || card.href.includes("/purchases")) return inventoryVisible;
-    if (card.href.includes("/margins")) return recipeVisible;
-    return true;
-  });
+
+  const lowStock = lowStockResultData.filter((p) => Number(p.reorder_level ?? 0) > 0 && Number(p.current_stock_qty ?? 0) <= Number(p.reorder_level ?? 0));
+
+  const attentionCols = 1 + (inventoryVisible ? 1 : 0) + (recipeVisible ? 1 : 0);
+  const showAttentionRow = attentionCols > 0 || inventoryVisible;
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
-      <DashboardModulePrompts
-        showInventoryPrompt={!inventoryVisible && !orgModules.inventory_enabled}
-        showRecipePrompt={!recipeVisible && !orgModules.recipe_costing_enabled}
-        showFirstSaleTour={(txTotal.count ?? 0) === 0}
-        enableInventoryAction={enableInventoryFromDashboard}
-        enableRecipeAction={enableRecipeFromDashboard}
-      />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Today at a glance</h1>
-          <p className="text-sm text-slate-500">Sales, cash, stock, and margin in one quick view.</p>
+          <h1 className="text-2xl font-semibold text-slate-950">Dashboard &amp; reports</h1>
+          <p className="text-sm text-slate-500">Sales, cash, and reports in one place.</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {sessionData ? (
+            <div className="flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-800">
+              <span className="inline-flex h-2 w-2 rounded-full bg-green-500" />
+              Till open
+            </div>
+          ) : null}
           <DateFilter current={period} />
-          <Link href="/app/setup-checklist" data-tour="setup-guide"><Button variant="outline">Setup guide</Button></Link>
-          <Link href="/app/pos" data-tour="open-pos"><Button className="bg-blue-600 hover:bg-blue-700 text-white">Open POS</Button></Link>
+          <Link href="/app/setup-checklist"><Button variant="outline">Setup guide</Button></Link>
+          <Link href="/app/pos"><Button className="bg-blue-600 hover:bg-blue-700 text-white">Open POS</Button></Link>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <BarChart3 className="h-4 w-4" />Sales{currentTips > 0 ? " (ex tips)" : ""}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className={`text-2xl font-bold ${salesColor}`}>{money(currentSalesExTips, currency)}</p>
-            <p className="text-xs text-slate-400">{currentCount} transaction{currentCount !== 1 ? "s" : ""}{currentTips > 0 ? ` · +${money(currentTips, currency)} tips` : ""}</p>
-            {prevTotal > 0 || currentTotal > 0 ? (
-              <p className={`text-xs mt-0.5 ${isGrowing ? "text-green-600" : "text-red-600"}`}>
-                {diffSign}{money(diffAmount, currency)} {periodLabel}
-              </p>
-            ) : null}
-          </CardContent>
-        </Card>
+      <div className={`grid gap-4 sm:grid-cols-2 ${inventoryVisible ? "xl:grid-cols-5" : "xl:grid-cols-4"}`}>
+        <Suspense fallback={
+          <Card>
+            <CardHeader className="pb-1">
+              <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                <BarChart3 className="h-4 w-4" />Sales{currentTips > 0 ? " (ex tips)" : ""}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className={`text-2xl font-bold ${salesColor}`}>{money(currentSalesExTips, currency)}</p>
+            </CardContent>
+          </Card>
+        }>
+          <DashboardSalesHighlight>
+            <Card>
+              <CardHeader className="pb-1">
+                <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                  <BarChart3 className="h-4 w-4" />Sales{currentTips > 0 ? " (ex tips)" : ""}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className={`text-2xl font-bold ${salesColor}`}>{money(currentSalesExTips, currency)}</p>
+                <p className="text-xs text-slate-400">{currentCount} transaction{currentCount !== 1 ? "s" : ""}{currentTips > 0 ? ` · +${money(currentTips, currency)} tips` : ""}</p>
+                {prevTotal > 0 || currentTotal > 0 ? (
+                  <p className={`text-xs mt-0.5 ${isGrowing ? "text-green-600" : "text-red-600"}`}>
+                    {diffSign}{money(diffAmount, currency)} {periodLabel}
+                  </p>
+                ) : null}
+              </CardContent>
+            </Card>
+          </DashboardSalesHighlight>
+        </Suspense>
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -164,7 +197,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{money(expectedCash, currency)}</p>
-            <p className="text-xs text-slate-400">{sessionResult.data ? "Till is open" : "Open the till to track cash"}</p>
+            <p className="text-xs text-slate-400">{sessionData ? "Till is open" : "Open the till to track cash"}</p>
           </CardContent>
         </Card>
         <Card>
@@ -181,61 +214,119 @@ export default async function DashboardPage({ searchParams }: Props) {
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <TrendingUp className="h-4 w-4" />Top product
+              <CreditCard className="h-4 w-4" />This month
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-lg font-bold">{topProduct}</p>
-            <p className="text-xs text-slate-400">Best seller overall</p>
+            <p className="text-2xl font-bold">{money(monthTotal, currency)}</p>
+            <p className="text-xs text-slate-400">Voided: {voidedCount}</p>
           </CardContent>
         </Card>
+        {inventoryVisible ? (
+          <Card>
+            <CardHeader className="pb-1">
+              <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                <ShoppingBag className="h-4 w-4" />Purchases (7 days)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{money(purchaseSpend, currency)}</p>
+              <p className="text-xs text-slate-400 mt-0.5">
+                {lowStock.length > 0 ? (
+                  <span className="text-amber-600 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />{lowStock.length} low stock
+                  </span>
+                ) : "Stock levels OK"}
+              </p>
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base">What needs attention</CardTitle></CardHeader>
-          <CardContent className="grid gap-3 sm:grid-cols-3">
-            <Link href="/app/products/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50"><Package className="mb-2 h-5 w-5 text-blue-600" /><p className="font-semibold">Add products</p><p className="text-xs text-slate-500">Add items you sell.</p></Link>
-            {inventoryVisible ? (
-              <Link href="/app/stock" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50"><Package className="mb-2 h-5 w-5 text-blue-600" /><p className="font-semibold">Manage stock</p><p className="text-xs text-slate-500">Track stock and ingredients.</p></Link>
-            ) : null}
-            {recipeVisible ? (
-              <Link href="/app/recipes/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50"><TrendingUp className="mb-2 h-5 w-5 text-blue-600" /><p className="font-semibold">Create recipe</p><p className="text-xs text-slate-500">See margin and can make.</p></Link>
-            ) : null}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle className="text-base">Stock watch</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            {inventoryVisible ? (
-              <>
+      {showAttentionRow ? (
+        <div className={`grid gap-4 ${inventoryVisible ? "lg:grid-cols-3" : ""}`}>
+          <Card className={inventoryVisible ? "lg:col-span-2" : ""}>
+            <CardHeader><CardTitle className="text-base">What needs attention</CardTitle></CardHeader>
+            <CardContent className={`grid gap-3 ${attentionCols >= 3 ? "sm:grid-cols-3" : attentionCols === 2 ? "sm:grid-cols-2" : ""}`}>
+              <Link href="/app/products/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
+                <Package className="mb-2 h-5 w-5 text-blue-600" />
+                <p className="font-semibold">Add products</p>
+                <p className="text-xs text-slate-500">Add items you sell.</p>
+              </Link>
+              {inventoryVisible ? (
+                <Link href="/app/stock" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
+                  <Package className="mb-2 h-5 w-5 text-blue-600" />
+                  <p className="font-semibold">Manage stock</p>
+                  <p className="text-xs text-slate-500">Track stock and ingredients.</p>
+                </Link>
+              ) : null}
+              {recipeVisible ? (
+                <Link href="/app/recipes/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
+                  <TrendingUp className="mb-2 h-5 w-5 text-blue-600" />
+                  <p className="font-semibold">Create recipe</p>
+                  <p className="text-xs text-slate-500">See margin and can make.</p>
+                </Link>
+              ) : null}
+            </CardContent>
+          </Card>
+          {inventoryVisible ? (
+            <Card>
+              <CardHeader><CardTitle className="text-base">Stock watch</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
                 {lowStock.length ? lowStock.slice(0, 5).map((p) => (
-                  <div key={p.id} className="flex items-center justify-between text-sm"><span>{p.name}</span><Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge></div>
-                )) : <p className="text-sm text-slate-500">{setupDone ? "Stock looks okay." : "Create recipes and purchases to start tracking stock."}</p>}
-                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">View stock <ArrowRight className="h-3 w-3" /></Link>
-              </>
-            ) : (
-              <p className="text-sm text-slate-500">Enable stock tracking in Settings when you are ready to manage inventory.</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  <div key={p.id} className="flex items-center justify-between text-sm">
+                    <span>{p.name}</span>
+                    <Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge>
+                  </div>
+                )) : (
+                  <p className="text-sm text-slate-500">Stock looks okay.</p>
+                )}
+                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                  View stock <ArrowRight className="h-3 w-3" />
+                </Link>
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+      ) : null}
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Business reports</CardTitle>
-          <p className="text-sm text-slate-500">Clear numbers for managers and owners.</p>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Top product</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {visibleReports.map(({ href, title, text, icon: Icon }) => (
-            <Link key={href} href={href} className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
-              <Icon className="mb-2 h-5 w-5 text-blue-600" />
-              <p className="font-semibold">{title}</p>
-              <p className="text-xs text-slate-500">{text}</p>
-            </Link>
-          ))}
+        <CardContent>
+          <p className="text-lg font-bold">{topProduct}</p>
+          <p className="text-xs text-slate-400">Best seller in selected period</p>
         </CardContent>
       </Card>
+
+      <div>
+        <h2 className="text-sm font-semibold text-slate-700 mb-3">All reports</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {visibleReports.map((r) => (
+            <Link
+              key={r.href}
+              href={r.href}
+              className="group block rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all"
+            >
+              <div className="flex items-start gap-3">
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${r.color}`}>
+                  <r.icon className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">{r.title}</p>
+                    {r.tag ? (
+                      <span className="text-[10px] rounded-full bg-slate-100 px-2 py-0.5 text-slate-500 font-medium">{r.tag}</span>
+                    ) : null}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{r.desc}</p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

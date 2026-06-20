@@ -8,8 +8,8 @@ import {
   LayoutDashboard, Package, Settings,
   LogOut, Menu, X, ChevronDown, Archive,
   CreditCard, ListChecks, Truck, ShoppingBag,
-  ChevronRight, Gift, BookOpen, HelpCircle, AlertTriangle,
-  ChefHat,
+  ChevronRight, Gift, BookOpen,
+  ChefHat, AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,6 +27,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { SubscriptionStatus } from "@/lib/billing/subscription";
+import { TrialBanner } from "@/components/billing/TrialBanner";
 
 interface AppShellProps {
   user: User;
@@ -53,14 +54,35 @@ interface AppShellProps {
   children: React.ReactNode;
 }
 
-// Top-level nav items
-const mainNav = [
-  { href: "/app",                  label: "Dashboard",    icon: LayoutDashboard, exact: true },
-  { href: "/app/setup-checklist",  label: "Setup guide",  icon: ListChecks,      exact: false },
-  { href: "/app/pos",              label: "POS",          icon: CreditCard,      exact: false },
-  { href: "/app/products",         label: "Products",     icon: Package,         exact: false },
-  { href: "/app/recipes",          label: "Recipes",      icon: BookOpen,        exact: false },
-];
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  exact: boolean;
+};
+
+function buildMainNav(userRole: string | null): NavItem[] {
+  const limited = userRole === "cashier" || userRole === "kitchen";
+  if (limited) {
+    return [
+      { href: "/app", label: "Dashboard & reports", icon: LayoutDashboard, exact: true },
+      { href: "/app/pos", label: "POS", icon: CreditCard, exact: false },
+    ];
+  }
+
+  const nav: NavItem[] = [
+    { href: "/app", label: "Dashboard & reports", icon: LayoutDashboard, exact: true },
+    { href: "/app/setup-checklist", label: "Setup guide", icon: ListChecks, exact: false },
+    { href: "/app/pos", label: "POS", icon: CreditCard, exact: false },
+  ];
+
+  nav.push(
+    { href: "/app/products", label: "Products", icon: Package, exact: false },
+    { href: "/app/recipes", label: "Recipes", icon: BookOpen, exact: false },
+  );
+
+  return nav;
+}
 
 // Stock sub-section
 const stockNav = [
@@ -70,7 +92,6 @@ const stockNav = [
 ];
 
 const bottomNav = [
-  { href: "/help",           label: "Help centre",    icon: HelpCircle,    exact: true  },
   { href: "/app/settings", label: "Settings",    icon: Settings,   exact: false },
 ];
 
@@ -246,10 +267,15 @@ function AppSidebar({
         collapsed ? "px-1 space-y-1" : "px-2 space-y-0.5"
       )}>
         {[
-          ...mainNav.filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
+          ...buildMainNav(userRole).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
           ...(activeOrg?.kitchen_display_enabled ? [{ href: "/app/kitchen", label: "Kitchen", icon: ChefHat, exact: false }] : []),
         ]
-          .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting !== false)
+          .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
+          .filter((item) => {
+            const limited = userRole === "cashier" || userRole === "kitchen";
+            if (!limited) return true;
+            return item.href === "/app" || item.href === "/app/pos" || item.href === "/app/kitchen";
+          })
           .map((item) => (
           <NavLink
             key={item.href}
@@ -260,13 +286,15 @@ function AppSidebar({
           />
         ))}
 
-        {moduleVisibility?.inventory !== false ? (
+        {moduleVisibility?.inventory === true && userRole !== "cashier" && userRole !== "kitchen" ? (
           <StockSection pathname={pathname} onNavigate={onNavigate} collapsed={collapsed} />
         ) : null}
 
         {/* Bottom nav */}
         <div className={cn("mt-1 border-t border-slate-100", collapsed ? "pt-1 space-y-1" : "pt-1")}>
-          {bottomNav.map((item) => (
+          {bottomNav
+            .filter((item) => userRole !== "cashier" && userRole !== "kitchen")
+            .map((item) => (
             <NavLink
               key={item.href}
               {...item}
@@ -309,112 +337,6 @@ function AppSidebar({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </div>
-  );
-}
-
-function TopBanner({
-  subStatus, daysLeft, creditMonths, referral,
-  onReferralOpen,
-}: {
-  subStatus?: SubscriptionStatus;
-  daysLeft: number;
-  creditMonths: number;
-  referral?: { link: string | null; code: string | null } | null;
-  onReferralOpen: () => void;
-}) {
-  const state = subStatus?.state;
-
-  // Active with no cancellation → hide banner entirely
-  if (state === "active" && !subStatus?.cancelAtPeriodEnd) return null;
-
-  // Grace period expired → darkest red
-  if (state === "past_due_expired") {
-    return (
-      <div className="flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-red-300 bg-red-100 px-4 py-2.5 text-sm">
-        <div className="flex items-center gap-2 text-red-800">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="font-medium">Access restricted — payment is required to continue.</span>
-        </div>
-        <Link href="/app/billing">
-          <Button size="sm" variant="destructive" className="shrink-0">Fix billing</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  // Past due within grace period → red with day countdown
-  if (state === "past_due") {
-    const graceDays = subStatus?.graceDaysLeft;
-    return (
-      <div className="flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-2.5 text-sm">
-        <div className="flex items-center gap-2 text-red-700">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="font-medium">
-            {graceDays != null
-              ? `Payment failed — ${graceDays} day${graceDays === 1 ? "" : "s"} left to update your card.`
-              : "Payment failed — update your payment details to continue."}
-          </span>
-        </div>
-        <Link href="/app/billing">
-          <Button size="sm" variant="destructive" className="shrink-0">Fix billing</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  // Canceled → urgent red
-  if (state === "canceled") {
-    return (
-      <div className="flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-2.5 text-sm">
-        <div className="flex items-center gap-2 text-red-700">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="font-medium">Your subscription has ended. Resubscribe to continue.</span>
-        </div>
-        <Link href="/app/billing">
-          <Button size="sm" variant="destructive" className="shrink-0">Fix billing</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  // Active but canceling → amber warning
-  if (state === "active" && subStatus?.cancelAtPeriodEnd) {
-    const cancelDate = subStatus.periodEnd
-      ? new Date(subStatus.periodEnd).toLocaleDateString("en-IE")
-      : "soon";
-    return (
-      <div className="flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-sm">
-        <div className="flex items-center gap-2 text-amber-800">
-          <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="font-medium">Your plan is set to cancel on {cancelDate}.</span>
-        </div>
-        <Link href="/app/billing">
-          <Button size="sm" variant="outline" className="shrink-0 border-amber-300 text-amber-800 hover:bg-amber-100">
-            Reactivate
-          </Button>
-        </Link>
-      </div>
-    );
-  }
-
-  // Trial countdown (Stripe trialing or soft trial)
-  const effectiveDays = subStatus?.trialDaysLeft ?? daysLeft;
-
-  return (
-    <div className="trial-banner flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-blue-50 px-4 py-2.5 text-sm">
-      <div className="flex flex-wrap items-center gap-3 text-slate-700">
-        <span className="font-medium">Trial: {effectiveDays} day{effectiveDays === 1 ? "" : "s"} left</span>
-        <span className="text-slate-300">|</span>
-        <span>Referral credit: {creditMonths} free month{creditMonths === 1 ? "" : "s"}</span>
-        {creditMonths > 0 && <span className="text-blue-700">Will be applied before billing.</span>}
-      </div>
-      {referral?.link && (
-        <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700 shrink-0" onClick={onReferralOpen}>
-          <Gift className="h-4 w-4" />
-          Refer
-        </Button>
-      )}
     </div>
   );
 }
@@ -502,7 +424,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
       <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {/* Top banner — hidden on POS to maximise workspace */}
         {!isPosMode && (
-          <TopBanner
+          <TrialBanner
             subStatus={subStatus}
             daysLeft={daysLeft}
             creditMonths={creditMonths}

@@ -34,16 +34,27 @@ export const BUSINESS_MODULE_DEFINITIONS: readonly {
   {
     key: "inventory",
     label: "Stock & purchases",
-    description: "Stock levels, suppliers, purchases, and NIR receiving.",
+    description: "Stock levels, suppliers, and purchase receiving.",
     settingsKey: "inventory_enabled",
-    routes: ["/app/stock", "/app/purchases", "/app/suppliers"],
+    routes: [
+      "/app/stock",
+      "/app/purchases",
+      "/app/suppliers",
+      "/app/products/import-ingredients",
+      "/app/reports/stock",
+      "/app/reports/purchases",
+      "/app/operations",
+    ],
   },
   {
     key: "recipe_costing",
     label: "Recipe costing",
     description: "Recipes, ingredient costs, and margin reports.",
     settingsKey: "recipe_costing_enabled",
-    routes: ["/app/recipes", "/app/reports/margins"],
+    routes: [
+      "/app/recipes",
+      "/app/reports/margins",
+    ],
   },
   {
     key: "team_advanced",
@@ -77,10 +88,13 @@ const MODULE_COLUMN: Record<Exclude<BusinessModuleKey, "pos_core" | "kitchen_ops
 
 export function isModuleEnabled(org: OrgModuleRow | null | undefined, key: BusinessModuleKey): boolean {
   if (!org) return key === "pos_core";
-  if (key === "pos_core") return true;
-  if (key === "kitchen_ops") return true;
+  if (key === "pos_core" || key === "kitchen_ops") return true;
   const column = MODULE_COLUMN[key as keyof typeof MODULE_COLUMN];
-  return Boolean(org[column]);
+  const value = org[column];
+  if (value === false) return false;
+  if (value === true) return true;
+  // Unset = legacy org or flags not loaded: keep modules available (grandfather default).
+  return true;
 }
 
 export function canUseModule(input: {
@@ -98,12 +112,14 @@ export function canUseModule(input: {
   return planAllowsModuleEffective(effectivePlan, input.module);
 }
 
-export function isModuleVisible(input: {
+export function isModuleNavVisible(input: {
   org: OrgModuleRow | null | undefined;
   module: BusinessModuleKey;
   subscriptionPlan?: BillingPlan | null;
   hasTrial?: boolean;
 }): boolean {
+  if (!isModuleEnabled(input.org, input.module)) return false;
+  if (input.module === "pos_core" || input.module === "kitchen_ops") return true;
   return canUseModule(input);
 }
 
@@ -128,12 +144,18 @@ export function moduleBlockReason(input: {
 }
 
 export function pathnameRequiresModule(pathname: string): BusinessModuleKey | null {
+  let best: { key: BusinessModuleKey; routeLen: number } | null = null;
+
   for (const def of BUSINESS_MODULE_DEFINITIONS) {
-    if (def.routes.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
-      return def.key;
+    for (const route of def.routes) {
+      if (pathname !== route && !pathname.startsWith(`${route}/`)) continue;
+      if (!best || route.length > best.routeLen) {
+        best = { key: def.key, routeLen: route.length };
+      }
     }
   }
-  return null;
+
+  return best?.key ?? null;
 }
 
 export function effectivePlanLabel(plan: EffectiveBillingPlan): string {

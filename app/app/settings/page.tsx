@@ -1,4 +1,4 @@
-import { addCategory, updateCategory, deleteCategory, addUnit, updateUnit, deleteUnit, updateOrgCountry, updateOrgCurrency, updateOrganisationIndustry, updateRestaurantFeatureFlags, addPaymentMethod, updatePaymentMethod, deletePaymentMethod, addVatRate, updateVatRate, deleteVatRate, seedDefaultVatRates, updateBusinessProfileAndModules } from "@/app/actions/kitchenops";
+import { addCategory, updateCategory, deleteCategory, addUnit, updateUnit, deleteUnit, updateOrgCountry, updateOrgCurrency, updateOrganisationIndustry, updateBusinessCapabilities, addPaymentMethod, updatePaymentMethod, deletePaymentMethod, addVatRate, updateVatRate, deleteVatRate, seedDefaultVatRates } from "@/app/actions/kitchenops";
 import { PaymentMethodsCard } from "@/components/app/PaymentMethodsCard";
 import { VatRatesCard } from "@/components/app/VatRatesCard";
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +14,17 @@ import { CashDrawerSettingsCard } from "@/components/app/CashDrawerSettingsCard"
 import { FiscalNetSettingsCard } from "@/components/app/FiscalNetSettingsCard";
 import { SettingsTabNav } from "@/components/app/SettingsTabNav";
 import type { CashDrawerMode } from "@/lib/cash-drawer";
-import { FeatureSettingsCard } from "@/components/app/FeatureSettingsCard";
-import { BusinessModulesCard } from "@/components/app/BusinessModulesCard";
+import { BusinessCapabilitiesCard } from "@/components/app/BusinessCapabilitiesCard";
+import { FormSelect } from "@/components/app/FormSelect";
 import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import type { BillingPlan } from "@/lib/billing/plans";
-import { INDUSTRY_OPTIONS, RESTAURANT_FEATURE_KEYS, RESTAURANT_FEATURES, getSuggestedFeaturesForIndustry, type RestaurantFeatureKey } from "@/lib/restaurant-features";
+import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import {
+  INDUSTRY_OPTIONS,
+  RESTAURANT_FEATURE_KEYS,
+  getSuggestedFeaturesForIndustry,
+} from "@/lib/restaurant-features";
 
 const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
 const DEFAULT_CASH_DRAWER = {
@@ -64,7 +69,8 @@ export default async function SettingsPage({
   searchParams?: Promise<{ tab?: string; locked?: string; msg?: string }>;
 }) {
   const params = await searchParams;
-  const activeTab = params?.tab ?? "business";
+  const rawTab = params?.tab ?? "business";
+  const activeTab = rawTab === "modules" ? "features" : rawTab;
   const lockedModule = params?.locked ?? null;
   const lockedMessage = params?.msg ? decodeURIComponent(params.msg) : null;
 
@@ -140,11 +146,11 @@ export default async function SettingsPage({
     : null;
   const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
   const appLocale = (profile?.locale as string | null) ?? null;
+  const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
 
   // ── Tab list ─────────────────────────────────────────────────────────
   const tabs = [
     { id: "business",  label: "Business"  },
-    { id: "modules",   label: "Modules"   },
     { id: "features",  label: "Features"  },
     { id: "products",  label: "Products"  },
     { id: "hardware",  label: "Hardware"  },
@@ -203,16 +209,12 @@ export default async function SettingsPage({
                 <form action={updateOrganisationIndustry as unknown as (fd: FormData) => Promise<void>} className="flex flex-wrap items-end gap-4">
                   <div>
                     <Label htmlFor="business_type">Industry</Label>
-                    <select
-                      id="business_type"
+                    <FormSelect
                       name="business_type"
                       defaultValue={org?.business_type ?? "other"}
-                      className="mt-1 h-10 w-60 rounded-md border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {INDUSTRY_OPTIONS.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
+                      className="mt-1"
+                      options={INDUSTRY_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+                    />
                   </div>
                   <Button type="submit" variant="outline">Save business type</Button>
                 </form>
@@ -221,8 +223,8 @@ export default async function SettingsPage({
               )}
               <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
                 {getSuggestedFeaturesForIndustry(org?.business_type).length
-                  ? `Suggested features: ${getSuggestedFeaturesForIndustry(org?.business_type).map((key) => RESTAURANT_FEATURES[key].label).join(", ")}. They stay off until you enable them in Features.`
-                  : "No optional feature is enabled by this selection."}
+                  ? `Suggested options for your industry are highlighted in Features. Nothing turns on automatically.`
+                  : "Open Features to choose stock, kitchen, payments, and other options for this business."}
               </div>
             </CardContent>
           </Card>
@@ -244,18 +246,12 @@ export default async function SettingsPage({
                 >
                   <div>
                     <Label htmlFor="country_code">Country</Label>
-                    <select
-                      id="country_code"
+                    <FormSelect
                       name="country_code"
                       defaultValue={countryCode}
-                      className="mt-1 h-10 w-52 rounded-md border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {COUNTRY_OPTIONS.map((opt) => (
-                        <option key={opt.code} value={opt.code}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </select>
+                      className="mt-1"
+                      options={COUNTRY_OPTIONS.map((opt) => ({ value: opt.code, label: opt.label }))}
+                    />
                   </div>
                   <Button type="submit" variant="outline" className="mb-0.5">
                     Save country
@@ -291,24 +287,24 @@ export default async function SettingsPage({
                 >
                   <div>
                     <Label htmlFor="currency_code">Currency</Label>
-                    <select
-                      id="currency_code"
+                    <FormSelect
                       name="currency_code"
                       defaultValue={currencyCode}
-                      className="mt-1 h-10 w-52 rounded-md border border-slate-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="EUR">EUR — Euro (€)</option>
-                      <option value="RON">RON — Romanian Leu (lei)</option>
-                      <option value="GBP">GBP — British Pound (£)</option>
-                      <option value="USD">USD — US Dollar ($)</option>
-                      <option value="DKK">DKK — Danish Krone (kr)</option>
-                      <option value="SEK">SEK — Swedish Krona (kr)</option>
-                      <option value="NOK">NOK — Norwegian Krone (kr)</option>
-                      <option value="CHF">CHF — Swiss Franc (Fr)</option>
-                      <option value="PLN">PLN — Polish Złoty (zł)</option>
-                      <option value="CZK">CZK — Czech Koruna (Kč)</option>
-                      <option value="HUF">HUF — Hungarian Forint (Ft)</option>
-                    </select>
+                      className="mt-1"
+                      options={[
+                        { value: "EUR", label: "EUR — Euro (€)" },
+                        { value: "RON", label: "RON — Romanian Leu (lei)" },
+                        { value: "GBP", label: "GBP — British Pound (£)" },
+                        { value: "USD", label: "USD — US Dollar ($)" },
+                        { value: "DKK", label: "DKK — Danish Krone (kr)" },
+                        { value: "SEK", label: "SEK — Swedish Krona (kr)" },
+                        { value: "NOK", label: "NOK — Norwegian Krone (kr)" },
+                        { value: "CHF", label: "CHF — Swiss Franc (Fr)" },
+                        { value: "PLN", label: "PLN — Polish Złoty (zł)" },
+                        { value: "CZK", label: "CZK — Czech Koruna (Kč)" },
+                        { value: "HUF", label: "HUF — Hungarian Forint (Ft)" },
+                      ]}
+                    />
                   </div>
                   <Button type="submit" variant="outline" className="mb-0.5">
                     Save currency
@@ -373,35 +369,26 @@ export default async function SettingsPage({
         </div>
       )}
 
-      {activeTab === "modules" && (
-        <BusinessModulesCard
+      {(activeTab === "features" || activeTab === "modules") && (
+        <BusinessCapabilitiesCard
+          industry={org?.business_type}
           org={{
-            business_profile: orgRow?.business_profile as string | null,
-            inventory_enabled: Boolean(orgRow?.inventory_enabled),
-            recipe_costing_enabled: Boolean(orgRow?.recipe_costing_enabled),
-            team_advanced_enabled: Boolean(orgRow?.team_advanced_enabled),
-            multi_site_ops_enabled: Boolean(orgRow?.multi_site_ops_enabled),
+            business_profile: moduleFlags.business_profile ?? null,
+            inventory_enabled: moduleFlags.inventory_enabled,
+            recipe_costing_enabled: moduleFlags.recipe_costing_enabled,
+            team_advanced_enabled: moduleFlags.team_advanced_enabled,
+            multi_site_ops_enabled: moduleFlags.multi_site_ops_enabled,
           }}
+          featureValues={Object.fromEntries(
+            RESTAURANT_FEATURE_KEYS.map((key) => [key, Boolean(orgRow?.[key])])
+          )}
           canEdit={canEdit}
           subscriptionPlan={subscriptionPlan}
           hasTrial={hasTrial}
           locale={appLocale}
           lockedModule={lockedModule}
           lockedMessage={lockedMessage}
-          updateAction={updateBusinessProfileAndModules as unknown as (fd: FormData) => Promise<void>}
-        />
-      )}
-
-      {/* ── FEATURES TAB ─────────────────────────────────────────────── */}
-      {activeTab === "features" && (
-        <FeatureSettingsCard
-          industry={org?.business_type}
-          countryCode={countryCode}
-          canEdit={canEdit}
-          values={Object.fromEntries(
-            RESTAURANT_FEATURE_KEYS.map((key) => [key, Boolean(orgRow?.[key])])
-          ) as Partial<Record<RestaurantFeatureKey, boolean>>}
-          action={updateRestaurantFeatureFlags as unknown as (fd: FormData) => Promise<void>}
+          updateAction={updateBusinessCapabilities}
         />
       )}
 
@@ -420,11 +407,15 @@ export default async function SettingsPage({
                 <div><Label>Sort order</Label><Input name="sort_order" type="number" placeholder="1" className="w-20" /></div>
                 <div>
                   <Label>{isRO ? "Tip categorie" : "Category type"}</Label>
-                  <select name="category_type" defaultValue="both" className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm">
-                    <option value="both">{isRO ? "POS și inventar" : "POS & Inventory"}</option>
-                    <option value="pos">{isRO ? "Doar POS" : "POS only"}</option>
-                    <option value="inventory">{isRO ? "Doar inventar" : "Inventory only"}</option>
-                  </select>
+                  <FormSelect
+                    name="category_type"
+                    defaultValue="both"
+                    options={[
+                      { value: "both", label: isRO ? "POS și inventar" : "POS & Inventory" },
+                      { value: "pos", label: isRO ? "Doar POS" : "POS only" },
+                      { value: "inventory", label: isRO ? "Doar inventar" : "Inventory only" },
+                    ]}
+                  />
                 </div>
                 <Button type="submit" variant="outline" size="sm">Add category</Button>
               </form>
@@ -441,11 +432,15 @@ export default async function SettingsPage({
                     <div><Label>Sort</Label><Input name="sort_order" type="number" defaultValue={c.sort_order ?? 0} /></div>
                     <div>
                       <Label>{isRO ? "Tip" : "Type"}</Label>
-                      <select name="category_type" defaultValue={(c as {category_type?: string}).category_type ?? "both"} className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
-                        <option value="both">{isRO ? "POS și inventar" : "POS & Inventory"}</option>
-                        <option value="pos">{isRO ? "Doar POS" : "POS only"}</option>
-                        <option value="inventory">{isRO ? "Doar inventar" : "Inventory only"}</option>
-                      </select>
+                      <FormSelect
+                        name="category_type"
+                        defaultValue={(c as {category_type?: string}).category_type ?? "both"}
+                        options={[
+                          { value: "both", label: isRO ? "POS și inventar" : "POS & Inventory" },
+                          { value: "pos", label: isRO ? "Doar POS" : "POS only" },
+                          { value: "inventory", label: isRO ? "Doar inventar" : "Inventory only" },
+                        ]}
+                      />
                     </div>
                     <Button type="submit" variant="outline" size="sm">Save</Button>
                     <Button formAction={deleteCategory as unknown as (fd: FormData) => Promise<void>} type="submit" variant="outline" size="sm" className="border-red-200 text-red-700 hover:bg-red-50">Delete</Button>

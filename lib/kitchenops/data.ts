@@ -12,15 +12,20 @@ export async function getActiveOrg() {
 
   const { data: memberships, error: memError } = await supabase
     .from("organisation_members")
-    .select("id, organisation_id, role, status, organisations(id, name, business_type, country, country_code, currency_code, currency_symbol, business_profile, inventory_enabled, recipe_costing_enabled, team_advanced_enabled, multi_site_ops_enabled, onboarding_completed_at, kitchen_display_enabled, restaurant_order_flow_enabled, table_service_enabled, order_types_enabled, kitchen_stations_enabled, product_modifiers_enabled, courses_enabled, kitchen_printing_enabled, payment_split_enabled, tips_enabled, compact_workstation_nav_enabled, fiscalnet_enabled, fiscalnet_mock_mode, fiscalnet_connection_mode, fiscalnet_api_host, fiscalnet_bonuri_path, fiscalnet_raspuns_path, fiscalnet_auto_print, fiscalnet_ask_before_print, fiscalnet_manual_only, fiscalnet_timeout_ms, fiscalnet_retry_count, fiscalnet_cif, fiscalnet_operator_code, fiscalnet_vat_groups, fiscalnet_payment_type_map)")
+    .select("id, organisation_id, role, status, organisations(id, name, business_type, country, country_code, currency_code, currency_symbol, kitchen_display_enabled, restaurant_order_flow_enabled, table_service_enabled, order_types_enabled, kitchen_stations_enabled, product_modifiers_enabled, courses_enabled, kitchen_printing_enabled, payment_split_enabled, tips_enabled, compact_workstation_nav_enabled, fiscalnet_enabled, fiscalnet_mock_mode, fiscalnet_connection_mode, fiscalnet_api_host, fiscalnet_bonuri_path, fiscalnet_raspuns_path, fiscalnet_auto_print, fiscalnet_ask_before_print, fiscalnet_manual_only, fiscalnet_timeout_ms, fiscalnet_retry_count, fiscalnet_cif, fiscalnet_operator_code, fiscalnet_vat_groups, fiscalnet_payment_type_map)")
     .eq("user_id", user.id)
     .or("status.is.null,status.eq.active")
     .order("created_at", { ascending: true });
 
-  if (memError) redirect("/onboarding");
-  const membership = selectedOrgId
-    ? memberships?.find((m) => m.organisation_id === selectedOrgId) ?? memberships?.[0]
-    : memberships?.[0];
+  if (memError) {
+    console.error("membership_query_failed", { code: memError.code, message: memError.message });
+  }
+
+  const membership = memberships?.length
+    ? (selectedOrgId
+        ? memberships.find((m) => m.organisation_id === selectedOrgId) ?? memberships[0]
+        : memberships[0])
+    : null;
 
   if (!membership) redirect("/onboarding");
   // Derive currency from org settings (country_code RO -> RON, else EUR)

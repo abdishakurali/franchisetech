@@ -1,7 +1,7 @@
 -- ============================================================
--- 038_business_profile_modules.sql
+-- 039_business_profile_modules.sql
 -- Business profile + progressive module flags on organisations.
--- Additive only. Grandfathers existing orgs with full modules.
+-- Additive only. Idempotent — safe if 038_business_profile was skipped.
 -- ============================================================
 
 alter table public.organisations
@@ -25,8 +25,13 @@ set
   inventory_enabled = true,
   recipe_costing_enabled = true,
   team_advanced_enabled = true,
-  multi_site_ops_enabled = true
-where created_at < timestamptz '2026-06-20 00:00:00+00';
+  multi_site_ops_enabled = true,
+  onboarding_completed_at = coalesce(onboarding_completed_at, now())
+where created_at < timestamptz '2026-06-20 00:00:00+00'
+  and (
+    business_profile is null
+    or inventory_enabled = false and recipe_costing_enabled = false
+  );
 
 -- Any org with existing inventory usage should stay enabled
 update public.organisations o
@@ -34,14 +39,13 @@ set
   business_profile = coalesce(o.business_profile, 'standard'),
   inventory_enabled = true,
   recipe_costing_enabled = true
-where exists (
-  select 1 from public.purchases p where p.organisation_id = o.id
+where (
+  exists (select 1 from public.purchases p where p.organisation_id = o.id)
+  or exists (select 1 from public.recipes r where r.organisation_id = o.id)
+  or exists (
+    select 1 from public.products pr
+    where pr.organisation_id = o.id
+      and (pr.is_ingredient = true or pr.is_stock_tracked = true)
+  )
 )
-or exists (
-  select 1 from public.recipes r where r.organisation_id = o.id
-)
-or exists (
-  select 1 from public.products pr
-  where pr.organisation_id = o.id
-    and (pr.is_ingredient = true or pr.is_stock_tracked = true)
-);
+and (o.inventory_enabled = false or o.recipe_costing_enabled = false);

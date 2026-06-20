@@ -13,6 +13,9 @@ import {
 } from "@/lib/business-profile";
 import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
 import { getDefaultThresholds, type AssetType } from "@/lib/temperature";
+import { demoProductsForCountry } from "@/lib/onboarding/demo-products";
+import { saveOrgModuleFlags } from "@/lib/org-module-flags";
+import type { BillingPlan } from "@/lib/billing/plans";
 
 const COUNTRY_LABELS: Record<string, string> = {
   RO: "Romania",
@@ -28,7 +31,7 @@ export async function completePosOnboarding(input: {
   countryCode: string;
   locationBand: LocationBand;
   ingredientTracking: IngredientTrackingIntent;
-  seedSampleCategory?: boolean;
+  preferredPlan?: BillingPlan;
   referralCode?: string | null;
 }) {
   const supabase = await createClient();
@@ -47,6 +50,19 @@ export async function completePosOnboarding(input: {
       .update({ full_name: input.userName.trim() })
       .eq("id", user.id)
       .then(() => null, () => null);
+  }
+
+  const { data: existingMembership } = await supabase
+    .from("organisation_members")
+    .select("organisation_id")
+    .eq("user_id", user.id)
+    .or("status.is.null,status.eq.active")
+    .limit(1)
+    .maybeSingle();
+
+  if (existingMembership?.organisation_id) {
+    revalidatePath("/app");
+    redirect("/app");
   }
 
   const { data, error } = await supabase.rpc("create_organisation_with_owner", {
@@ -88,16 +104,19 @@ export async function completePosOnboarding(input: {
     country_code: input.countryCode,
     currency_code: currencyCode,
     currency_symbol: currencySymbol,
+    trial_started_at: new Date().toISOString(),
+    trial_ends_at: trialEndsAt,
+    referred_by_code: input.referralCode?.trim() || null,
+  }).eq("id", orgId);
+
+  // Module columns — safe if migration 039 not yet applied.
+  await saveOrgModuleFlags(supabase, orgId, {
     business_profile: profile,
     inventory_enabled: modules.inventory_enabled,
     recipe_costing_enabled: modules.recipe_costing_enabled,
     team_advanced_enabled: modules.team_advanced_enabled,
     multi_site_ops_enabled: modules.multi_site_ops_enabled,
-    onboarding_completed_at: new Date().toISOString(),
-    trial_started_at: new Date().toISOString(),
-    trial_ends_at: trialEndsAt,
-    referred_by_code: input.referralCode?.trim() || null,
-  }).eq("id", orgId);
+  }).then(() => null, () => null);
 
   await ensureReferralCode(orgId);
 
@@ -106,27 +125,69 @@ export async function completePosOnboarding(input: {
     { organisation_id: orgId, name: "Card", type: "card" },
   ]);
 
-  if (input.seedSampleCategory) {
-    const { data: cats } = await supabase
-      .from("product_categories")
-      .select("id")
-      .eq("organisation_id", orgId)
-      .limit(1);
-    if (!cats?.length) {
-      await supabase.from("product_categories").insert({
-        organisation_id: orgId,
-        name: "General",
-        color: "#2563eb",
-        sort_order: 1,
-      });
-    }
-  }
+  const { data: category } = await supabase
+    .from("product_categories")
+    .insert({
+      organisation_id: orgId,
+      name: "Menu",
+      color: "#2563eb",
+      sort_order: 1,
+    })
+    .select("id")
+    .single();
 
   await seedOrgVatRatesIfEmpty(supabase, orgId, input.countryCode);
 
+  const { data: defaultVat } = await supabase
+    .from("vat_rates")
+    .select("rate")
+    .eq("organisation_id", orgId)
+    .eq("is_default", true)
+    .limit(1)
+    .maybeSingle();
+  const vatRate = defaultVat?.rate != null ? Number(defaultVat.rate) : input.countryCode === "RO" ? 19 : 23;
+
+  if (category?.id) {
+    const demos = demoProductsForCountry(input.countryCode);
+    await supabase.from("products").insert(
+      demos.map((item) => ({
+        organisation_id: orgId,
+        category_id: category.id,
+        name: item.name,
+        sale_price: item.sale_price,
+        vat_rate: vatRate,
+        available_in_pos: true,
+        active: true,
+        sort_order: item.sort_order,
+      })),
+    );
+  }
+
+  const siteId = created?.site_id as string | undefined;
+  if (siteId) {
+    await supabase.from("pos_sessions").insert({
+      organisation_id: orgId,
+      site_id: siteId,
+      opened_by: user.id,
+      opening_cash: 0,
+      expected_cash: 0,
+      status: "open",
+    });
+  }
+
+  if (input.preferredPlan) {
+    const { cookies } = await import("next/headers");
+    const { PREFERRED_PLAN_COOKIE } = await import("@/lib/billing/preferred-plan");
+    (await cookies()).set(PREFERRED_PLAN_COOKIE, input.preferredPlan, {
+      path: "/",
+      maxAge: 604800,
+      sameSite: "lax",
+    });
+  }
+
   revalidatePath("/app");
   revalidatePath("/onboarding");
-  redirect("/app/setup-checklist");
+  redirect("/app/pos?tour=first_sale");
 }
 
 

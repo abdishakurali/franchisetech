@@ -30,7 +30,7 @@ export type SetupStep = {
   label: string;
   done: boolean;
   status?: string;
-  section: "core" | "advanced" | "multi_site";
+  section: "core" | "advanced" | "multi_site" | "billing";
 };
 
 function hasBusinessDetails(signals: SetupSignals): boolean {
@@ -39,7 +39,8 @@ function hasBusinessDetails(signals: SetupSignals): boolean {
 
 export function buildSetupSteps(signals: SetupSignals): SetupStep[] {
   const profile = normaliseBusinessProfile(signals.businessProfile);
-  const showInventory = Boolean(signals.inventoryEnabled || signals.recipeCostingEnabled);
+  const showInventory = Boolean(signals.inventoryEnabled);
+  const showRecipes = Boolean(signals.recipeCostingEnabled);
   const showMultiSite = profile === "multi_site" || Boolean(signals.multiSiteOpsEnabled);
 
   const core: SetupStep[] = [
@@ -97,7 +98,7 @@ export function buildSetupSteps(signals: SetupSignals): SetupStep[] {
       id: "daily_report",
       title: "Check daily report",
       text: "Review sales, cash/card totals, and top products after the first sale.",
-      href: "/app/reports",
+      href: "/app",
       label: "View reports",
       done: Boolean(signals.reportViewed) || (signals.txCount ?? 0) > 0,
       section: "core",
@@ -119,50 +120,56 @@ export function buildSetupSteps(signals: SetupSignals): SetupStep[] {
       ]
     : [];
 
-  const advanced: SetupStep[] = showInventory
-    ? [
-        {
-          id: "ingredients",
-          title: "Add ingredients",
-          text: "Add stock items you buy and use in recipes.",
-          href: "/app/products/import-ingredients",
-          label: "Add ingredients",
-          done: (signals.ingredientCount ?? 0) > 0,
-          status: `${signals.ingredientCount ?? 0} ingredients`,
-          section: "advanced",
-        },
-        {
-          id: "suppliers",
-          title: "Add suppliers",
-          text: "Record who you buy stock from.",
-          href: "/app/suppliers/new",
-          label: "Add supplier",
-          done: (signals.supplierCount ?? 0) > 0,
-          status: `${signals.supplierCount ?? 0} suppliers`,
-          section: "advanced",
-        },
-        {
-          id: "purchase",
-          title: "Record purchase",
-          text: "Log a delivery to increase stock and track costs.",
-          href: "/app/purchases/new",
-          label: "Record purchase",
-          done: (signals.purchaseCount ?? 0) > 0,
-          status: `${signals.purchaseCount ?? 0} purchases`,
-          section: "advanced",
-        },
-        {
-          id: "recipes",
-          title: "Create recipes",
-          text: "Connect products to ingredients to see cost, margin, and stock coverage.",
-          href: "/app/recipes/new",
-          label: "Create recipe",
-          done: (signals.recipeCount ?? 0) > 0,
-          status: `${signals.recipeCount ?? 0} recipes`,
-          section: "advanced",
-        },
-      ]
-    : [];
+  const advanced: SetupStep[] = [
+    ...(showInventory
+      ? [
+          {
+            id: "ingredients",
+            title: "Add ingredients",
+            text: "Add stock items you buy and use in recipes.",
+            href: "/app/products/import-ingredients",
+            label: "Add ingredients",
+            done: (signals.ingredientCount ?? 0) > 0,
+            status: `${signals.ingredientCount ?? 0} ingredients`,
+            section: "advanced" as const,
+          },
+          {
+            id: "suppliers",
+            title: "Add suppliers",
+            text: "Record who you buy stock from.",
+            href: "/app/suppliers/new",
+            label: "Add supplier",
+            done: (signals.supplierCount ?? 0) > 0,
+            status: `${signals.supplierCount ?? 0} suppliers`,
+            section: "advanced" as const,
+          },
+          {
+            id: "purchase",
+            title: "Record purchase",
+            text: "Log a delivery to increase stock and track costs.",
+            href: "/app/purchases/new",
+            label: "Record purchase",
+            done: (signals.purchaseCount ?? 0) > 0,
+            status: `${signals.purchaseCount ?? 0} purchases`,
+            section: "advanced" as const,
+          },
+        ]
+      : []),
+    ...(showRecipes
+      ? [
+          {
+            id: "recipes",
+            title: "Create recipes",
+            text: "Connect products to ingredients to see cost, margin, and stock coverage.",
+            href: "/app/recipes/new",
+            label: "Create recipe",
+            done: (signals.recipeCount ?? 0) > 0,
+            status: `${signals.recipeCount ?? 0} recipes`,
+            section: "advanced" as const,
+          },
+        ]
+      : []),
+  ];
 
   const billing: SetupStep = {
     id: "choose_plan",
@@ -172,10 +179,14 @@ export function buildSetupSteps(signals: SetupSignals): SetupStep[] {
     label: "Choose plan",
     done: Boolean(signals.subscription),
     status: signals.subscription ? "Plan active" : "Trial only",
-    section: "core",
+    section: "billing",
   };
 
-  return [...core, ...multiSite, ...advanced, billing];
+  const activationCore = core.filter(
+    (step) => !["business_details", "payments", "open_till"].includes(step.id),
+  );
+
+  return [...activationCore, ...multiSite, ...advanced, billing];
 }
 
 export function computeSetupProgress(signals: SetupSignals): {
@@ -186,9 +197,10 @@ export function computeSetupProgress(signals: SetupSignals): {
   complete: boolean;
 } {
   const steps = buildSetupSteps(signals);
-  const doneCount = steps.filter((step) => step.done).length;
-  const totalCount = steps.length;
+  const activationSteps = steps.filter((step) => step.section !== "billing");
+  const doneCount = activationSteps.filter((step) => step.done).length;
+  const totalCount = activationSteps.length;
   const percent = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
-  const complete = totalCount > 0 && doneCount === totalCount;
+  const complete = (signals.txCount ?? 0) > 0;
   return { steps, doneCount, totalCount, percent, complete };
 }

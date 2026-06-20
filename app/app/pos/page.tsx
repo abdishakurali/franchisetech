@@ -1,6 +1,7 @@
 import type { BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
+import { isFiscalNetActive } from "@/lib/fiscalnet/eligibility";
 import { DEFAULT_VAT_GROUPS, DEFAULT_PAYMENT_TYPE_MAP } from "@/lib/fiscalnet/types";
-import { PosRegister } from "@/components/app/PosRegister";
+import { PosWithTour } from "@/components/app/PosWithTour";
 import { OpenTillForm } from "@/components/app/OpenTillForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -92,7 +93,7 @@ export default async function PosPage() {
     if (fnOrg) {
       // SGR deposit scheme (Romania only)
       if (fnOrg.country_code === "RO") { sgrEnabled = Boolean(fnOrg.sgr_enabled); isRO = true; }
-      if (fnOrg.country_code === "RO" && fnOrg.fiscalnet_enabled) {
+      if (isFiscalNetActive(fnOrg.country_code, fnOrg.fiscalnet_enabled)) {
         // Build vatGroups from vat_rates table — this is the source of truth for FiscalNet groups.
         // Each vat_rates row with fiscalnet_vat_group set provides the authoritative mapping.
         const vatGroupsFromDb = (vatRates ?? [])
@@ -241,8 +242,8 @@ export default async function PosPage() {
   // ── CLOSED: show open-till form + last session summary + quick links ──
   if (!openSession) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] p-6">
-        <div className="mx-auto max-w-xl space-y-6">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6">
+        <div className="mx-auto max-w-xl space-y-6 pb-8">
 
           {/* Open till form */}
           <div className="text-center">
@@ -353,7 +354,7 @@ export default async function PosPage() {
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* POS register */}
-      <PosRegister
+      <PosWithTour
         products={(products ?? []) as never}
         categories={categories ?? []}
         paymentMethods={methods ?? []}

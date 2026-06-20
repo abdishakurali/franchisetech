@@ -8,9 +8,10 @@ import { SupportChat } from "@/components/app/SupportChat";
 import { ensureReferralCode } from "@/lib/referrals";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { listAccessibleSites, getActiveSiteId } from "@/lib/site-context";
-import { computeSetupProgress } from "@/lib/setup-progress";
+import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import { isModuleEnabled } from "@/lib/business-modules";
+import { requireModuleForPathname } from "@/lib/module-guard";
 import type { SubscriptionStatus } from "@/lib/billing/subscription";
-import type { BillingPlan } from "@/lib/billing/plans";
 
 export default async function AppLayout({
   children,
@@ -61,84 +62,37 @@ export default async function AppLayout({
 
   let setupComplete = false;
   let moduleVisibility = {
-    inventory: true,
-    recipeCosting: true,
-    teamAdvanced: true,
-    multiSite: true,
+    inventory: false,
+    recipeCosting: false,
+    teamAdvanced: false,
+    multiSite: false,
   };
-  let subscriptionPlan: BillingPlan | null = null;
-  let hasTrial = false;
 
   if (activeOrg?.id) {
-    const orgRow = activeOrg as Record<string, unknown>;
-    const [
-      { count: productCount },
-      { count: paymentMethodCount },
-      { count: txCount },
-      { count: siteCount },
-      { count: ingredientCount },
-      { count: supplierCount },
-      { count: purchaseCount },
-      { count: recipeCount },
-      { data: openSession },
-      { data: subscription },
-    ] = await Promise.all([
-      supabase.from("products").select("*", { count: "exact", head: true }).eq("organisation_id", activeOrg.id).eq("active", true).eq("available_in_pos", true),
-      supabase.from("payment_methods").select("*", { count: "exact", head: true }).eq("organisation_id", activeOrg.id),
-      supabase.from("pos_transactions").select("*", { count: "exact", head: true }).eq("organisation_id", activeOrg.id).eq("status", "completed"),
-      supabase.from("sites").select("*", { count: "exact", head: true }).eq("organisation_id", activeOrg.id),
-      supabase.from("products").select("*", { count: "exact", head: true }).eq("organisation_id", activeOrg.id).eq("active", true).eq("is_ingredient", true),
-      supabase.from("suppliers").select("*", { count: "exact", head: true }).eq("organisation_id", activeOrg.id),
-      supabase.from("purchases").select("*", { count: "exact", head: true }).eq("organisation_id", activeOrg.id),
-      supabase.from("recipes").select("*", { count: "exact", head: true }).eq("organisation_id", activeOrg.id),
-      supabase.from("pos_sessions").select("id,status").eq("organisation_id", activeOrg.id).eq("status", "open").limit(1).maybeSingle(),
-      supabase.from("billing_subscriptions").select("id,status,plan").eq("organisation_id", activeOrg.id).in("status", ["trialing", "active"]).limit(1).maybeSingle(),
-    ]);
+    const { count: txCount } = await supabase
+      .from("pos_transactions")
+      .select("*", { count: "exact", head: true })
+      .eq("organisation_id", activeOrg.id)
+      .eq("status", "completed");
 
-    const progress = computeSetupProgress({
-      orgName: activeOrg.name,
-      country: (orgRow.country as string) ?? null,
-      currencyCode: (orgRow.currency_code as string) ?? null,
-      businessProfile: (orgRow.business_profile as string) ?? null,
-      inventoryEnabled: Boolean(orgRow.inventory_enabled),
-      recipeCostingEnabled: Boolean(orgRow.recipe_costing_enabled),
-      multiSiteOpsEnabled: Boolean(orgRow.multi_site_ops_enabled),
-      productCount: productCount ?? 0,
-      paymentMethodCount: paymentMethodCount ?? 0,
-      txCount: txCount ?? 0,
-      openSession: Boolean(openSession),
-      subscription: Boolean(subscription),
-      siteCount: siteCount ?? 0,
-      ingredientCount: ingredientCount ?? 0,
-      supplierCount: supplierCount ?? 0,
-      purchaseCount: purchaseCount ?? 0,
-      recipeCount: recipeCount ?? 0,
-    });
-    setupComplete = progress.complete;
+    const moduleFlags = await fetchOrgModuleFlags(supabase, activeOrg.id);
 
-    subscriptionPlan = (subscription?.plan === "starter" || subscription?.plan === "pro" || subscription?.plan === "multi_location")
-      ? subscription.plan
-      : null;
-    hasTrial = subStatus?.state === "trialing" || subStatus?.state === "soft_trial";
+    setupComplete = (txCount ?? 0) > 0;
 
-    const { canUseModule } = await import("@/lib/business-modules");
-    const orgModules = {
-      business_profile: (orgRow.business_profile as string | null) ?? null,
-      inventory_enabled: Boolean(orgRow.inventory_enabled),
-      recipe_costing_enabled: Boolean(orgRow.recipe_costing_enabled),
-      team_advanced_enabled: Boolean(orgRow.team_advanced_enabled),
-      multi_site_ops_enabled: Boolean(orgRow.multi_site_ops_enabled),
-    };
     moduleVisibility = {
-      inventory: canUseModule({ org: orgModules, module: "inventory", subscriptionPlan, hasTrial }),
-      recipeCosting: canUseModule({ org: orgModules, module: "recipe_costing", subscriptionPlan, hasTrial }),
-      teamAdvanced: canUseModule({ org: orgModules, module: "team_advanced", subscriptionPlan, hasTrial }),
-      multiSite: canUseModule({ org: orgModules, module: "multi_site", subscriptionPlan, hasTrial }),
+      inventory: isModuleEnabled(moduleFlags, "inventory"),
+      recipeCosting: isModuleEnabled(moduleFlags, "recipe_costing"),
+      teamAdvanced: isModuleEnabled(moduleFlags, "team_advanced"),
+      multiSite: isModuleEnabled(moduleFlags, "multi_site"),
     };
   }
 
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? "";
+
+  if (activeOrg?.id && pathname.startsWith("/app/") && !pathname.startsWith("/app/settings") && !pathname.startsWith("/app/billing")) {
+    await requireModuleForPathname(pathname);
+  }
 
   const blockedStates = ["none", "past_due_expired"];
   if (subStatus && blockedStates.includes(subStatus.state)) {

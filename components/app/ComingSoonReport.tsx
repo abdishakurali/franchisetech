@@ -9,7 +9,7 @@ export function ComingSoonReport({ title }: { title: string }) {
         <FileText className="h-10 w-10 mx-auto text-slate-300 mb-3" />
         <h1 className="text-2xl font-bold text-slate-900">{title}</h1>
         <p className="text-slate-500 text-sm mt-2">Coming soon. This report is not linked to a complete customer-facing workflow yet.</p>
-        <Link href="/app/reports"><Button variant="outline" className="mt-5">Back to reports</Button></Link>
+        <Link href="/app"><Button variant="outline" className="mt-5">Back to dashboard</Button></Link>
       </div>
     </div>
   );

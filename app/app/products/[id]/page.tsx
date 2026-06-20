@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import { isModuleEnabled } from "@/lib/business-modules";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -33,6 +35,9 @@ type StockMovement = {
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, orgId, currency } = await getKitchenOpsContext();
+  const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
+  const inventoryVisible = isModuleEnabled(moduleFlags, "inventory");
+  const recipeVisible = isModuleEnabled(moduleFlags, "recipe_costing");
 
   // Fetch product WITHOUT supplier join (fetched separately to avoid missing-FK errors)
   const { data: product } = await supabase
@@ -50,12 +55,14 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     : null;
 
   // Fetch recipe if this is a sellable product
-  const { data: recipes } = await supabase
-    .from("recipes")
-    .select("id,name,yield_qty,recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)")
-    .eq("product_id", id)
-    .eq("organisation_id", orgId)
-    .limit(1);
+  const { data: recipes } = recipeVisible
+    ? await supabase
+        .from("recipes")
+        .select("id,name,yield_qty,recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)")
+        .eq("product_id", id)
+        .eq("organisation_id", orgId)
+        .limit(1)
+    : { data: null };
   const recipe = recipes?.[0] ?? null;
 
   // Fetch ingredient product details for recipe items
@@ -106,7 +113,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   // Stock movements (for ingredient products)
   let stockMovements: StockMovement[] = [];
-  if (product.is_ingredient || product.is_stock_tracked) {
+  if (inventoryVisible && (product.is_ingredient || product.is_stock_tracked)) {
     const { data: movements } = await supabase
       .from("stock_movements")
       .select("id,movement_type,quantity_change,unit_of_measure,reason,performed_at")
@@ -132,7 +139,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   // Used in recipes (for ingredient products)
   let usedInRecipes: Array<{ id: string; name: string; products?: { name: string; sale_price: number } | null }> = [];
-  if (product.is_ingredient || product.is_stock_tracked) {
+  if (recipeVisible && (product.is_ingredient || product.is_stock_tracked)) {
     const { data: riRows } = await supabase
       .from("recipe_items")
       .select("recipes(id,name,products(name,sale_price))")
@@ -189,7 +196,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <CardContent className="text-2xl font-bold">{money(salePrice, currency)}</CardContent>
           </Card>
         )}
-        {isIngredient && (
+        {inventoryVisible && isIngredient && (
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">On hand</CardTitle></CardHeader>
             <CardContent className={`text-2xl font-bold ${Number(product.current_stock_qty ?? 0) <= Number(product.reorder_level ?? 0) && Number(product.reorder_level ?? 0) > 0 ? "text-red-600" : "text-green-700"}`}>
@@ -197,7 +204,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             </CardContent>
           </Card>
         )}
-        {recipe && (
+        {recipeVisible && recipe && (
           <>
             <Card>
               <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Recipe cost</CardTitle></CardHeader>
@@ -220,7 +227,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             </Card>
           </>
         )}
-        {!recipe && isSellable && (
+        {recipeVisible && !recipe && isSellable && (
           <Card className="border-dashed">
             <CardContent className="pt-4 text-sm text-slate-400">
               No recipe linked.{" "}
@@ -232,7 +239,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recipe breakdown */}
-        {recipe && recipeItemsWithProducts.length > 0 && (
+        {recipeVisible && recipe && recipeItemsWithProducts.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>Recipe: {recipe.name}</CardTitle>
@@ -306,7 +313,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </Card>
 
         {/* Stock movements */}
-        {isIngredient && (
+        {inventoryVisible && isIngredient && (
           <Card>
             <CardHeader><CardTitle>Stock movements</CardTitle></CardHeader>
             <CardContent>
@@ -344,7 +351,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         )}
 
         {/* Used in recipes */}
-        {isIngredient && usedInRecipes.length > 0 && (
+        {recipeVisible && isIngredient && usedInRecipes.length > 0 && (
           <Card>
             <CardHeader><CardTitle>Used in recipes</CardTitle></CardHeader>
             <CardContent>

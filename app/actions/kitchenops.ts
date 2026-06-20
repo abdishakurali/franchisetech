@@ -21,6 +21,8 @@ import {
 } from "@/lib/nir/purchase";
 import { createServiceClient } from "@/lib/supabase/server";
 import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
+import { formCheckboxEnabled } from "@/lib/form-checkbox";
+import { saveOrgModuleFlags } from "@/lib/org-module-flags";
 import { nearestVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 
 function canTransact(role: string | null) { return ["owner","manager","staff","cashier"].includes(role ?? ""); }
@@ -1924,16 +1926,79 @@ export async function seedDefaultVatRates(formData: FormData): Promise<void> {
 
 // ── Business profile & modules ────────────────────────────────────────────
 
+export async function updateBusinessCapabilities(formData: FormData): Promise<{ ok: boolean; error?: string }> {
+  "use server";
+  const { supabase, membership, user, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) {
+    return { ok: false, error: "You do not have permission to change these settings." };
+  }
+
+  const profile = String(formData.get("business_profile") ?? "").trim();
+
+  const moduleResult = await saveOrgModuleFlags(supabase, orgId, {
+    business_profile: profile,
+    inventory_enabled: formCheckboxEnabled(formData, "inventory_enabled"),
+    recipe_costing_enabled: formCheckboxEnabled(formData, "recipe_costing_enabled"),
+    team_advanced_enabled: formCheckboxEnabled(formData, "team_advanced_enabled"),
+    multi_site_ops_enabled: formCheckboxEnabled(formData, "multi_site_ops_enabled"),
+  });
+  if (!moduleResult.ok) {
+    return { ok: false, error: moduleResult.error };
+  }
+
+  const { data: before } = await supabase
+    .from("organisations")
+    .select(RESTAURANT_FEATURE_KEYS.join(","))
+    .eq("id", orgId)
+    .maybeSingle();
+  const beforeFlags = (before ?? {}) as Partial<Record<RestaurantFeatureKey, boolean | null>>;
+
+  const featureUpdates = Object.fromEntries(
+    RESTAURANT_FEATURE_KEYS.map((key) => [key, formCheckboxEnabled(formData, key)])
+  ) as Record<RestaurantFeatureKey, boolean>;
+
+  const { error: featureError } = await supabase.from("organisations").update(featureUpdates).eq("id", orgId);
+  if (featureError) {
+    console.error("update_business_capabilities_features", featureError);
+    return { ok: false, error: "Module settings saved, but feature toggles could not be updated." };
+  }
+
+  for (const key of RESTAURANT_FEATURE_KEYS) {
+    const oldValue = Boolean(beforeFlags[key]);
+    const newValue = featureUpdates[key];
+    if (oldValue === newValue) continue;
+    await supabase.from("pos_audit_events").insert({
+      organisation_id: orgId,
+      event_type: newValue ? "feature_enabled" : "feature_disabled",
+      before_data: { feature: key, enabled: oldValue },
+      after_data: { feature: key, enabled: newValue },
+      performed_by: user.id,
+    }).then(() => null, () => null);
+  }
+
+  revalidatePath("/app");
+  revalidatePath("/app/settings");
+  revalidatePath("/app/setup-checklist");
+  revalidatePath("/app/reports");
+  revalidatePath("/app/products");
+  revalidatePath("/app/stock");
+  revalidatePath("/app/purchases");
+  revalidatePath("/app/suppliers");
+  revalidatePath("/app/recipes");
+  revalidatePath("/app/operations");
+  return { ok: true };
+}
+
 export async function updateBusinessProfileAndModules(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
 
   const profile = String(formData.get("business_profile") ?? "").trim();
-  const inventory = formData.get("inventory_enabled") === "true";
-  const recipeCosting = formData.get("recipe_costing_enabled") === "true";
-  const teamAdvanced = formData.get("team_advanced_enabled") === "true";
-  const multiSite = formData.get("multi_site_ops_enabled") === "true";
+  const inventory = formCheckboxEnabled(formData, "inventory_enabled");
+  const recipeCosting = formCheckboxEnabled(formData, "recipe_costing_enabled");
+  const teamAdvanced = formCheckboxEnabled(formData, "team_advanced_enabled");
+  const multiSite = formCheckboxEnabled(formData, "multi_site_ops_enabled");
 
   const updates: Record<string, unknown> = {};
   if (profile === "simple" || profile === "standard" || profile === "multi_site") {

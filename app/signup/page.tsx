@@ -2,9 +2,9 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthBrand } from "@/components/marketing/AuthBrand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +13,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { GoogleIcon } from "@/components/ui/google-icon";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { getPlan } from "@/lib/billing/plans";
+import { isPreferredBillingPlan, writePreferredPlanClient } from "@/lib/billing/preferred-plan";
 
 const googleAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "true";
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const planParam = searchParams.get("plan");
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ fullName: "", email: "", password: "" });
+  const [form, setForm] = useState({ fullName: "", businessName: "", email: "", password: "" });
+
+  useEffect(() => {
+    if (isPreferredBillingPlan(planParam)) {
+      writePreferredPlanClient(planParam);
+    }
+  }, [planParam]);
+
+  const selectedPlan = isPreferredBillingPlan(planParam) ? getPlan(planParam) : null;
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,12 +40,19 @@ export default function SignupPage() {
       toast.error("Password must be at least 6 characters");
       return;
     }
+    if (!form.businessName.trim()) {
+      toast.error("Business name is required");
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: {
-        data: { full_name: form.fullName },
+        data: {
+          full_name: form.fullName,
+          business_name: form.businessName.trim(),
+        },
         emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding`,
       },
     });
@@ -41,12 +60,10 @@ export default function SignupPage() {
     if (error) {
       toast.error(error.message);
     } else if (data.session) {
-      // Email confirmation is off — user is immediately signed in
-      toast.success("Account created! Let's set up your organisation.");
+      toast.success("Account created! Let's set up your till.");
       router.push("/onboarding");
       router.refresh();
     } else {
-      // Email confirmation is on — show waiting state
       toast.success("Account created! Check your email to confirm.");
       router.push("/check-email");
     }
@@ -60,12 +77,16 @@ export default function SignupPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle>Start your free account</CardTitle>
-            <CardDescription>Built for cafes, restaurants, and food businesses. No credit card needed.</CardDescription>
+            <CardDescription>
+              {selectedPlan
+                ? `15-day assisted trial · ${selectedPlan.name} recommended after setup`
+                : "Built for cafes, restaurants, and food businesses. No credit card needed."}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             {googleAuthEnabled && (
               <>
-                <Link href="/auth/google">
+                <Link href={planParam ? `/auth/google?plan=${planParam}` : "/auth/google"}>
                   <Button type="button" variant="outline" className="w-full mb-4 gap-2">
                     <GoogleIcon />
                     Continue with Google
@@ -80,12 +101,23 @@ export default function SignupPage() {
             )}
             <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="fullName">Full name</Label>
+                <Label htmlFor="businessName">Business name</Label>
+                <Input
+                  id="businessName"
+                  type="text"
+                  autoComplete="organization"
+                  required
+                  value={form.businessName}
+                  onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+                  placeholder="Café Central"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="fullName">Your name</Label>
                 <Input
                   id="fullName"
                   type="text"
                   autoComplete="name"
-                  required
                   value={form.fullName}
                   onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                   placeholder="Aoife Murphy"

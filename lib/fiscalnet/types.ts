@@ -2,7 +2,10 @@
  * FiscalNet – shared type definitions (v2 — HTTP API mode)
  *
  * Active only when: country_code==="RO" && fiscalnet_enabled===true
+ * See lib/fiscalnet/eligibility.ts
  */
+
+export { isFiscalNetActive, isFiscalNetClientActive } from "@/lib/fiscalnet/eligibility";
 
 // ── VAT group (one row per fiscal VAT code) ──────────────────────────────
 export interface VatGroup {

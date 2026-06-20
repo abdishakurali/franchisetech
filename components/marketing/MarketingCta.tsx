@@ -9,18 +9,21 @@ import { Section } from "@/components/marketing/MarketingShell.primitives";
 export function CtaRow({
   secondaryHref = "/pricing",
   secondaryLabel,
+  plan,
 }: {
   secondaryHref?: string;
   secondaryLabel?: string;
+  plan?: "starter" | "pro" | "multi_location";
 }) {
   const locale = useMarketingLocale();
   const t = getMarketingMessages(locale);
   const secondary = secondaryLabel ?? t.cta.seePricing;
+  const signupHref = plan ? `/signup?plan=${plan}` : "/signup";
 
   return (
     <div className="mt-8 flex flex-wrap gap-3">
       <Link
-        href="/signup"
+        href={signupHref}
         className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
       >
         {t.cta.startTrial} <ArrowRight className="h-4 w-4" />

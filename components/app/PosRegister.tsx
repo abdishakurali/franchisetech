@@ -3,14 +3,21 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { addCustomerFromPos, closePosSession, completeSaleReturn, posCashMovement, voidTransaction } from "@/app/actions/kitchenops";
 import { runZReport } from "@/app/actions/fiscalnet";
 import { fiscalBrowserReceipt, fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
-import { useRouter } from "next/navigation";
+import { isFiscalNetClientActive } from "@/lib/fiscalnet/eligibility";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Coffee, Droplets, LockKeyhole, Package, ReceiptText, RefreshCcw, UserPlus, Users, Utensils } from "lucide-react";
+import { Banknote, Coffee, Droplets, LockKeyhole, MoreHorizontal, Package, RefreshCcw, UserPlus, Utensils } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { downloadSlipAsTxt, cashInTxt, cashOutTxt } from "@/lib/pos-print";
 import { friendlySaleError, paymentTypeLabel } from "@/lib/pos-i18n";
 import { PosI18nProvider, usePosI18n, posIntlLocale } from "@/lib/pos-i18n-context";
@@ -43,6 +50,8 @@ import {
   payloadToFormData,
   type QueuedSale,
 } from "@/lib/pos-offline-queue";
+import { FIRST_SALE_DONE_KEY } from "@/lib/onboarding/demo-products";
+import { FirstSaleCelebration } from "@/components/app/FirstSaleCelebration";
 
 type Product = {
   id: string; name: string; sale_price: number | string; vat_rate?: number | string | null;
@@ -152,10 +161,38 @@ function ProductImageCompact({ src, alt, cfg }: { src: string | null | undefined
   );
 }
 
-function TillDialog({ sessionId, cashDrawerSettings, fiscalNet, isRO = false, currency = "EUR", orgName = "", userName = "" }: { sessionId?: string | null; cashDrawerSettings?: CashDrawerSettings; fiscalNet?: BrowserFiscalConfig | null; isRO?: boolean; currency?: string; orgName?: string; userName?: string }) {
+function pickDefaultPaymentId(methods: PaymentMethod[]) {
+  return methods.find((m) => m.type === "card")?.id ?? methods[0]?.id ?? "";
+}
+
+function TillDialog({
+  sessionId,
+  cashDrawerSettings,
+  fiscalNet,
+  isRO = false,
+  currency = "EUR",
+  orgName = "",
+  userName = "",
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  showTrigger = true,
+}: {
+  sessionId?: string | null;
+  cashDrawerSettings?: CashDrawerSettings;
+  fiscalNet?: BrowserFiscalConfig | null;
+  isRO?: boolean;
+  currency?: string;
+  orgName?: string;
+  userName?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
+}) {
   const { t } = usePosI18n();
   const currencySymbol = currency === "RON" ? "lei" : "€";
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = controlledOnOpenChange ?? setInternalOpen;
   const [movementType, setMovementType] = useState<"cash_in" | "cash_out">("cash_in");
   const [message, setMessage] = useState<string | null>(null);
   const [lastTxt, setLastTxt] = useState<{ filename: string; content: string } | null>(null);
@@ -202,9 +239,11 @@ function TillDialog({ sessionId, cashDrawerSettings, fiscalNet, isRO = false, cu
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!pending) { setOpen(v); if (!v) setMessage(null); } }}>
-      <DialogTrigger render={<Button type="button" variant="outline" className="h-11 px-4" />}>
-        <Banknote className="h-4 w-4" />{t.cashBtn}
-      </DialogTrigger>
+      {showTrigger ? (
+        <DialogTrigger render={<Button type="button" variant="outline" className="h-11 px-4" />}>
+          <Banknote className="h-4 w-4" />{t.cashBtn}
+        </DialogTrigger>
+      ) : null}
       <DialogContent>
         <DialogHeader><DialogTitle>{t.cashMovement}</DialogTitle></DialogHeader>
         <form action={handleCashMovement} className="space-y-3">
@@ -253,9 +292,23 @@ function TillDialog({ sessionId, cashDrawerSettings, fiscalNet, isRO = false, cu
 }
 
 // ── Refund dialog ────────────────────────────────────────────────────────────
-function RefundDialog({ recentTransactions, currency = "EUR" }: { recentTransactions: Transaction[]; currency?: string }) {
+function RefundDialog({
+  recentTransactions,
+  currency = "EUR",
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  showTrigger = true,
+}: {
+  recentTransactions: Transaction[];
+  currency?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
+}) {
   const { t } = usePosI18n();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = controlledOnOpenChange ?? setInternalOpen;
   const [pending, setPending] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -276,9 +329,11 @@ function RefundDialog({ recentTransactions, currency = "EUR" }: { recentTransact
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!pending) setOpen(v); }}>
-      <DialogTrigger render={<Button type="button" variant="outline" className="h-11 px-4" />}>
-        <RefreshCcw className="h-4 w-4" />{t.refund}
-      </DialogTrigger>
+      {showTrigger ? (
+        <DialogTrigger render={<Button type="button" variant="outline" className="h-11 px-4" />}>
+          <RefreshCcw className="h-4 w-4" />{t.refund}
+        </DialogTrigger>
+      ) : null}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader><DialogTitle>{t.refundVoid}</DialogTitle></DialogHeader>
         {done ? (
@@ -310,16 +365,40 @@ function RefundDialog({ recentTransactions, currency = "EUR" }: { recentTransact
 }
 
 // ── Close till dialog ────────────────────────────────────────────────────────
-function CloseTillDialog({ sessionId, summary, fiscalNet, currency = "EUR", orgName = "", userName = "" }: { sessionId?: string | null; summary: PosSummary; fiscalNet?: BrowserFiscalConfig | null; currency?: string; orgName?: string; userName?: string }) {
+function CloseTillDialog({
+  sessionId,
+  summary,
+  fiscalNet,
+  currency = "EUR",
+  orgName = "",
+  userName = "",
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+  showTrigger = true,
+}: {
+  sessionId?: string | null;
+  summary: PosSummary;
+  fiscalNet?: BrowserFiscalConfig | null;
+  currency?: string;
+  orgName?: string;
+  userName?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
+}) {
   const { t } = usePosI18n();
   const currencySymbol = currency === "RON" ? "lei" : "€";
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = controlledOnOpenChange ?? setInternalOpen;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button type="button" variant="outline" className="h-11 px-4" />}>
-        <LockKeyhole className="h-4 w-4" />{t.closeTill}
-      </DialogTrigger>
+      {showTrigger ? (
+        <DialogTrigger render={<Button type="button" variant="outline" className="h-11 px-4" />}>
+          <LockKeyhole className="h-4 w-4" />{t.closeTill}
+        </DialogTrigger>
+      ) : null}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader><DialogTitle>{t.closeTill}</DialogTitle></DialogHeader>
         <form action={async (fd: FormData) => {
@@ -399,16 +478,27 @@ function PosRegisterInner({
   const [cart, setCart] = useState<CartItem[]>(() =>
     normalizeCartLines(initialBackup?.cart ?? [], initialBackup?.discountPct ?? 0)
   );
-  const [paymentMethodId, setPaymentMethodId] = useState(paymentMethods[0]?.id ?? "");
-  const router = useRouter();
+  const [paymentMethodId, setPaymentMethodId] = useState(() => pickDefaultPaymentId(paymentMethods));
   const { locale, t } = usePosI18n();
   const intlLocale = posIntlLocale(locale);
   const money = (v: number) =>
     new Intl.NumberFormat(intlLocale, { style: "currency", currency: currency || "EUR" }).format(v);
   const chargeRef = useRef<HTMLButtonElement>(null);
+  const [checkoutStep, setCheckoutStep] = useState<"order" | "payment" | "complete">("order");
+  const [optionsOpen, setOptionsOpen] = useState(false);
+  const [customersSheetOpen, setCustomersSheetOpen] = useState(false);
+  const [ordersSheetOpen, setOrdersSheetOpen] = useState(false);
+  const [tillDialogOpen, setTillDialogOpen] = useState(false);
+  const [refundDialogOpen, setRefundDialogOpen] = useState(false);
+  const [closeTillDialogOpen, setCloseTillDialogOpen] = useState(false);
+  const [drawerNotice, setDrawerNotice] = useState<string | null>(null);
+  const [lastCompletedSale, setLastCompletedSale] = useState<{ transactionId: string; amountLabel: string } | null>(null);
+  const [pendingFirstSaleCelebration, setPendingFirstSaleCelebration] = useState<{ amountLabel: string } | null>(null);
+  const focusedCheckout = checkoutStep === "payment" || checkoutStep === "complete";
   const [discountEditId, setDiscountEditId] = useState<string | null>(null);
   const [discountEditValue, setDiscountEditValue] = useState<number | "">("");
   const [saleStatus, setSaleStatus] = useState<{ ok: boolean; msg: string; transactionId?: string } | null>(null);
+  const [firstSaleCelebration, setFirstSaleCelebration] = useState<{ amountLabel: string } | null>(null);
   const [lastFiscalTxt, setLastFiscalTxt] = useState<{ filename: string; content: string } | null>(null);
   const [salePending, setSalePending] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -591,10 +681,20 @@ function PosRegisterInner({
     salePending ||
     cashUnderPaid ||
     (features.splitPayments && activeSplitPayments.length > 0 && splitPaid + 0.0001 < totalDue);
+  const cartItemCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
+  const quickCashOptions = useMemo(() => {
+    const exact = Number(totalDue.toFixed(2));
+    const values = [exact, ...[5, 10, 20, 50, 100].map((step) => Math.ceil(totalDue / step) * step)];
+    return [...new Set(values)].filter((v) => v >= exact).slice(0, 5);
+  }, [totalDue]);
+  const hasAdvancedOptions =
+    features.tips || features.splitPayments || features.kitchenDisplay || features.restaurantOrderFlow;
+  const fiscalActive = isFiscalNetClientActive(isRO, fiscalNet);
 
   return (
-    <div className="flex-1 lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
-      {/* Left: Products column */}
+    <div className="relative flex-1 lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
+      {/* Left: Products column — order step only */}
+      {checkoutStep === "order" && (
       <div className="min-w-0 lg:flex-1 lg:flex lg:flex-col lg:overflow-hidden" style={{display: "flex", flexDirection: "column", overflow: "hidden", flex: "1 1 auto", minWidth: 0}}>
         {/* Products toolbar: categories, search */}
         <div className="space-y-2 p-2 sm:p-3 lg:px-4 lg:pt-3 lg:pb-2 lg:flex-none" style={{flexShrink: 0}}>
@@ -615,7 +715,7 @@ function PosRegisterInner({
         </div>
         {/* Scrollable products area */}
         <div className="p-3 sm:p-4 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:px-4 lg:py-4" style={{WebkitOverflowScrolling: "touch", flex: "1 1 auto", minHeight: 0, overflowY: "auto"}}>
-        <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" data-tour="pos-product">
           {filtered.map((p) => {
             const cfg = getPhCfg(p);
             const inCart = cart.find((i) => i.product_id === p.id);
@@ -646,92 +746,120 @@ function PosRegisterInner({
           )}
         </div>
         </div>
-        {/* pos-utility-bar */}
-        <div className="border-t border-slate-200 bg-white px-3 py-2 sm:px-4 overflow-x-auto" style={{WebkitOverflowScrolling: "touch", flexShrink: 0}}>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" className="h-11 px-4 shrink-0" onClick={() => setCart([])}>{t.newSale}</Button>
-            <Sheet>
-              <SheetTrigger render={<Button type="button" variant="outline" className="h-11 px-4 shrink-0" />}>
-                <Users className="h-4 w-4" />{t.customers}
-              </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-lg">
-                <SheetHeader><SheetTitle>{t.customers}</SheetTitle></SheetHeader>
-                <div className="space-y-4 overflow-y-auto px-4 pb-4">
-                  <Input value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder={t.searchCustomer} aria-label={t.searchCustomer} />
-                  <div className="space-y-2">
-                    {shownCustomers.map((c) => (
-                      <button key={c.id} type="button" onClick={() => setSelectedCustomer(c)} className="w-full rounded-lg border p-3 text-left hover:bg-slate-50">
-                        <p className="font-medium">{c.name}</p>
-                        <p className="text-xs text-slate-500">{[c.phone, c.email].filter(Boolean).join(" · ") || t.noContact}</p>
-                      </button>
-                    ))}
+        {/* pos-utility-bar — keep only essentials visible */}
+        <div className="border-t border-slate-200 bg-white px-3 py-2 sm:px-4" style={{ flexShrink: 0 }}>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 px-4 shrink-0"
+              onClick={() => {
+                setCart([]);
+                setCheckoutStep("order");
+                setLastCompletedSale(null);
+                setSaleStatus(null);
+              }}
+            >
+              {t.newSale}
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                <MoreHorizontal className="h-4 w-4" />
+                {t.moreMenu}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-[200px]">
+                <DropdownMenuItem onClick={() => setCustomersSheetOpen(true)}>{t.customers}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setOrdersSheetOpen(true)}>{t.orders}</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setRefundDialogOpen(true)}>{t.refund}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTillDialogOpen(true)}>{t.cashMovement}</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCloseTillDialogOpen(true)}>{t.closeTill}</DropdownMenuItem>
+                {cart.length > 0 && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      const held = holdCurrentSale({ cart, customerName: selectedCustomer?.name });
+                      if (held) {
+                        setCart([]);
+                        setHeldSales(listHeldSales());
+                        setCheckoutStep("order");
+                      }
+                    }}
+                  >
+                    {t.holdOrder}
+                  </DropdownMenuItem>
+                )}
+                {heldSales.length > 0 && (
+                  <DropdownMenuItem onClick={() => setHeldOpen(true)}>
+                    {t.heldOrders} ({heldSales.length})
+                  </DropdownMenuItem>
+                )}
+                {fiscalActive && (
+                  <DropdownMenuItem onClick={() => setZReportOpen(true)} disabled={zReportDone || zReportPending}>
+                    {zReportPending ? t.zReportProcessing : zReportDone ? t.zReportDone : t.zReport}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+        <Sheet open={customersSheetOpen} onOpenChange={setCustomersSheetOpen}>
+          <SheetContent className="w-full sm:max-w-lg">
+            <SheetHeader><SheetTitle>{t.customers}</SheetTitle></SheetHeader>
+            <div className="space-y-4 overflow-y-auto px-4 pb-4">
+              <Input value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} placeholder={t.searchCustomer} aria-label={t.searchCustomer} />
+              <div className="space-y-2">
+                {shownCustomers.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => { setSelectedCustomer(c); setCustomersSheetOpen(false); }}
+                    className="w-full rounded-lg border p-3 text-left hover:bg-slate-50"
+                  >
+                    <p className="font-medium">{c.name}</p>
+                    <p className="text-xs text-slate-500">{[c.phone, c.email].filter(Boolean).join(" · ") || t.noContact}</p>
+                  </button>
+                ))}
+              </div>
+              <form action={addCustomerFromPos as unknown as (fd: FormData) => Promise<void>} className="space-y-3 rounded-lg border p-3">
+                <p className="text-sm font-medium">{t.quickAddCustomer}</p>
+                <Input name="name" required placeholder={t.searchCustomer} />
+                <Input name="phone" placeholder="Phone" />
+                <Input name="email" type="email" placeholder="Email" />
+                <Button type="submit" size="sm"><UserPlus className="h-4 w-4" />{t.addCustomer}</Button>
+              </form>
+            </div>
+          </SheetContent>
+        </Sheet>
+        <Sheet open={ordersSheetOpen} onOpenChange={setOrdersSheetOpen}>
+          <SheetContent className="w-full sm:max-w-2xl">
+            <SheetHeader><SheetTitle>{t.ordersTransactions}</SheetTitle></SheetHeader>
+            <div className="space-y-3 overflow-y-auto px-4 pb-4">
+              <Input value={txSearch} onChange={(e) => setTxSearch(e.target.value)} placeholder={t.searchTransaction} aria-label={t.searchTransaction} />
+              {shownTransactions.map((tx) => (
+                <div key={tx.id} className="rounded-lg border p-3 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <strong>{tx.transaction_number}</strong>
+                    <span className="font-medium">{money(Number(tx.total ?? 0))}</span>
                   </div>
-                  <form action={addCustomerFromPos as unknown as (fd: FormData) => Promise<void>} className="space-y-3 rounded-lg border p-3">
-                    <p className="text-sm font-medium">{t.quickAddCustomer}</p>
-                    <Input name="name" required placeholder={t.searchCustomer} />
-                    <Input name="phone" placeholder="Phone" />
-                    <Input name="email" type="email" placeholder="Email" />
-                    <Button type="submit" size="sm"><UserPlus className="h-4 w-4" />{t.addCustomer}</Button>
-                  </form>
+                  {Number(tx.discount_total ?? 0) > 0 && (
+                    <p className="text-xs text-blue-600 font-medium mt-0.5">−{money(Number(tx.discount_total ?? 0))} discount</p>
+                  )}
+                  <p className="text-xs text-slate-500 mt-0.5">{tx.customer_name || t.walkIn} · {tx.payment_methods?.name ? paymentTypeLabel(tx.payment_methods.type ?? "other", tx.payment_methods.name, locale) : t.paymentGeneric}</p>
+                  <a className="text-blue-600 hover:underline text-xs mt-2 inline-block" href={`/app/transactions/${tx.id}`}>{t.viewReceipt}</a>
                 </div>
-              </SheetContent>
-            </Sheet>
-            <Sheet>
-              <SheetTrigger render={<Button type="button" variant="outline" className="h-11 px-4 shrink-0" />}>
-                <ReceiptText className="h-4 w-4" />{t.orders}
-              </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-2xl">
-                <SheetHeader><SheetTitle>{t.ordersTransactions}</SheetTitle></SheetHeader>
-                <div className="space-y-3 overflow-y-auto px-4 pb-4">
-                  <Input value={txSearch} onChange={(e) => setTxSearch(e.target.value)} placeholder={t.searchTransaction} aria-label={t.searchTransaction} />
-                  {shownTransactions.map((tx) => (
-                    <div key={tx.id} className="rounded-lg border p-3 text-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <strong>{tx.transaction_number}</strong>
-                        <span className="font-medium">{money(Number(tx.total ?? 0))}</span>
-                      </div>
-                      {Number(tx.discount_total ?? 0) > 0 && (
-                        <p className="text-xs text-blue-600 font-medium mt-0.5">−{money(Number(tx.discount_total ?? 0))} discount</p>
-                      )}
-                      <p className="text-xs text-slate-500 mt-0.5">{tx.customer_name || t.walkIn} · {tx.payment_methods?.name ? paymentTypeLabel(tx.payment_methods.type ?? "other", tx.payment_methods.name, locale) : t.paymentGeneric}</p>
-                      <a className="text-blue-600 hover:underline text-xs mt-2 inline-block" href={`/app/transactions/${tx.id}`}>{t.viewReceipt}</a>
-                    </div>
-                  ))}
-                </div>
-              </SheetContent>
-            </Sheet>
-            <RefundDialog recentTransactions={recentTransactions} currency={currency} />
-            <TillDialog sessionId={sessionId} cashDrawerSettings={cashDrawerSettings} fiscalNet={fiscalNet} isRO={isRO} currency={currency} orgName={orgName} userName={userName}/>
-            <CloseTillDialog sessionId={sessionId} summary={summary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName}/>
-            {cart.length > 0 && (
-              <Button
-                type="button"
-                variant="outline"
-                className="h-11 px-4 shrink-0"
-                onClick={() => {
-                  const held = holdCurrentSale({ cart, customerName: selectedCustomer?.name });
-                  if (held) { setCart([]); setHeldSales(listHeldSales()); }
-                }}
-              >
-                {t.holdOrder}
-              </Button>
-            )}
-            {heldSales.length > 0 && (
-              <Button type="button" variant="outline" className="h-11 px-4 shrink-0" onClick={() => setHeldOpen(true)}>
-                {t.heldOrders} ({heldSales.length})
-              </Button>
-            )}
-            {isRO && fiscalNet?.enabled && (
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
+        <RefundDialog recentTransactions={recentTransactions} currency={currency} open={refundDialogOpen} onOpenChange={setRefundDialogOpen} showTrigger={false} />
+        <TillDialog sessionId={sessionId} cashDrawerSettings={cashDrawerSettings} fiscalNet={fiscalNet} isRO={isRO} currency={currency} orgName={orgName} userName={userName} open={tillDialogOpen} onOpenChange={setTillDialogOpen} showTrigger={false} />
+        <CloseTillDialog sessionId={sessionId} summary={summary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName} open={closeTillDialogOpen} onOpenChange={setCloseTillDialogOpen} showTrigger={false} />
+        {fiscalActive && (
           <Dialog open={zReportOpen} onOpenChange={setZReportOpen}>
-            <DialogTrigger render={
-              <Button type="button" variant="outline" className={`h-10 px-4 ${zReportDone ? "border-green-300 text-green-700" : ""}`} disabled={zReportDone || zReportPending} />
-            }>
-              {zReportPending ? t.zReportProcessing : zReportDone ? t.zReportDone : t.zReport}
-            </DialogTrigger>
             <DialogContent className="sm:max-w-sm">
               <DialogHeader><DialogTitle>{t.zReportConfirmTitle}</DialogTitle></DialogHeader>
               <p className="text-sm text-slate-600">{t.zReportConfirmBody}</p>
-              {fiscalNet.mockMode && (
+              {fiscalNet?.mockMode && (
                 <p className="text-xs text-amber-700 bg-amber-50 rounded p-2">{t.zReportMockMode}</p>
               )}
               <DialogFooter>
@@ -764,19 +892,26 @@ function PosRegisterInner({
               </DialogFooter>
             </DialogContent>
           </Dialog>
-            )}
-          </div>
-        </div>
+        )}
       </div>
+      )}
 
-      {/* Right: Cart + payment (one screen) */}
+      {/* Cart / payment / complete */}
       <form onSubmit={async (e) => {
         e.preventDefault();
-        if (salePending || !cart.length) return;
+        if (salePending || !cart.length || checkoutStep !== "payment") return;
         setSalePending(true);
         setSaleStatus(null);
         setLastFiscalTxt(null);
           const fd = new FormData(e.currentTarget);
+          if (isCashSingle) {
+            const received =
+              typeof cashReceived === "number" && cashReceived > 0
+                ? Number(cashReceived.toFixed(2))
+                : Number(totalDue.toFixed(2));
+            fd.set("cash_received", received.toFixed(2));
+            fd.set("change_due", Math.max(0, received - totalDue).toFixed(2));
+          }
           if (features.splitPayments) {
             fd.set("split_payments_json", JSON.stringify(activeSplitPayments.map((row) => {
               const method = paymentMethods.find((m) => m.id === row.payment_method_id);
@@ -813,17 +948,13 @@ function PosRegisterInner({
             setSalePending(false);
             return;
           }
-          // FiscalNet receipt — called from browser → localhost:65400
-          if (res.fiscalApiPending && fiscalNet) {
+          // FiscalNet receipt — Romania + enabled in Settings only (browser → localhost:65400)
+          if (res.fiscalApiPending && fiscalActive && fiscalNet) {
             const fnRes = await fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType);
             if (fnRes.filename && fnRes.content) setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
             console.info("[FiscalNet] receipt browser result", { ok: fnRes.ok, message: fnRes.message, mode: fiscalNet.connectionMode });
-            setSaleStatus({ ok: fnRes.ok, msg: fnRes.ok ? t.saleSavedFiscal(money(res.total), fnRes.message) : t.saleSavedFiscalWarn(fnRes.message), transactionId: res.transactionId });
-          } else {
-            const mockActive = fiscalNet?.enabled && fiscalNet?.mockMode;
-            const saleMsg = mockActive ? t.saleSavedMock(money(res.total)) : t.saleSaved(money(res.total));
-            setSaleStatus({ ok: true, msg: saleMsg, transactionId: res.transactionId });
           }
+          setSaleStatus(null);
           setCart([]);
           setTipAmount(0);
           setSplitPayments([]);
@@ -831,11 +962,18 @@ function PosRegisterInner({
           setCashReceived("");
           setSalePending(false);
           clearCartBackupFromStorage();
-          // Redirect to transaction page after brief success display
-          setTimeout(() => {
-            setSaleStatus(null);
-            router.push(`/app/transactions/${res.transactionId}?recorded=1${res.cashSale ? "&drawer=cash_sale" : ""}`);
-          }, res.fiscalApiPending ? 2500 : 1200);
+          const isFirstSale = typeof window !== "undefined" && !localStorage.getItem(FIRST_SALE_DONE_KEY);
+          if (isFirstSale) {
+            localStorage.setItem(FIRST_SALE_DONE_KEY, "1");
+            setPendingFirstSaleCelebration({ amountLabel: money(res.total) });
+          }
+          if (res.cashSale) {
+            openCashDrawer("cash_sale", cashDrawerSettings).then((drawerResult) => {
+              if (drawerResult.cashierMessage) setDrawerNotice(drawerResult.cashierMessage);
+            });
+          }
+          setLastCompletedSale({ transactionId: res.transactionId!, amountLabel: money(res.total) });
+          setCheckoutStep("complete");
         } catch (err) {
           const rawMsg = err instanceof Error ? err.message : "";
           // Detect framework/network errors (build mismatch, dropped connection, etc.)
@@ -843,16 +981,186 @@ function PosRegisterInner({
           const safeMsg = isFrameworkError ? t.appUpdated : t.saleNotCompleted;
           setSaleStatus({ ok: false, msg: safeMsg });
           setSalePending(false);
+          setCheckoutStep("payment");
         }
-      }} className="flex min-h-[28rem] flex-col rounded-xl border border-slate-200 bg-white shadow-sm lg:min-h-0 lg:w-[380px] lg:flex-none lg:overflow-hidden lg:rounded-none lg:border-0 lg:border-l lg:shadow-none">
+      }} className={`flex flex-col bg-white ${focusedCheckout ? "absolute inset-0 z-20 min-h-0" : "min-h-[28rem] rounded-xl border border-slate-200 shadow-sm lg:min-h-0 lg:w-[400px] lg:flex-none lg:overflow-hidden lg:rounded-none lg:border-0 lg:border-l lg:shadow-none"}`} data-tour="pos-cart">
+        <div className={`flex flex-1 flex-col min-h-0 ${focusedCheckout ? "mx-auto w-full max-w-md px-6" : ""}`}>
+        {checkoutStep === "complete" && lastCompletedSale ? (
+          <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
+            <div className="text-4xl">✓</div>
+            <p className="mt-3 text-lg font-semibold text-slate-900">{t.saleComplete}</p>
+            <p className="mt-1 text-3xl font-bold text-slate-950 tabular-nums">{lastCompletedSale.amountLabel}</p>
+            <div className="mt-8 flex w-full flex-col gap-2">
+              <Button
+                type="button"
+                className="h-12 w-full bg-blue-600 text-white hover:bg-blue-700"
+                onClick={() => {
+                  setCheckoutStep("order");
+                  setLastCompletedSale(null);
+                  setSaleStatus(null);
+                  setDrawerNotice(null);
+                  setLastFiscalTxt(null);
+                  if (pendingFirstSaleCelebration) {
+                    setFirstSaleCelebration(pendingFirstSaleCelebration);
+                    setPendingFirstSaleCelebration(null);
+                  }
+                }}
+              >
+                {t.newSaleAfter}
+              </Button>
+              <a
+                href={`/app/transactions/${lastCompletedSale.transactionId}`}
+                className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 hover:bg-slate-50"
+              >
+                {t.viewReceiptAfter}
+              </a>
+              {fiscalActive && lastFiscalTxt && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 w-full"
+                  onClick={() => downloadFiscalNetTxt(lastFiscalTxt.filename, lastFiscalTxt.content)}
+                >
+                  {t.printReceipt}
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-10 w-full text-slate-500"
+                onClick={() => {
+                  setCheckoutStep("order");
+                  setLastCompletedSale(null);
+                  setSaleStatus(null);
+                  setDrawerNotice(null);
+                  setLastFiscalTxt(null);
+                  if (pendingFirstSaleCelebration) {
+                    setFirstSaleCelebration(pendingFirstSaleCelebration);
+                    setPendingFirstSaleCelebration(null);
+                  }
+                }}
+              >
+                {t.noReceipt}
+              </Button>
+            </div>
+          </div>
+        ) : checkoutStep === "payment" ? (
+          <div className="flex flex-1 flex-col py-6">
+            <div className="mb-6 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setCheckoutStep("order")}
+                className="text-sm font-medium text-blue-600 hover:text-blue-800"
+              >
+                ← {t.backToOrder}
+              </button>
+              {features.splitPayments && (
+                <button type="button" onClick={() => setSplitOpen(true)} className="text-sm font-medium text-blue-600 hover:text-blue-800">
+                  {t.splitAmount}
+                </button>
+              )}
+            </div>
+            <div className="flex-1 flex flex-col justify-center space-y-6">
+              <div className="text-center">
+                <p className="text-5xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</p>
+                <p className="mt-3 text-base text-slate-600">{t.howToPay}</p>
+              </div>
+              {(!features.splitPayments || activeSplitPayments.length === 0) && (
+                <div className="space-y-2">
+                  {paymentMethods.map((m) => {
+                    const selected = paymentMethodId === m.id;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          setPaymentMethodId(m.id);
+                          if (m.type !== "cash") setCashReceived("");
+                        }}
+                        className={`flex w-full items-center justify-between rounded-xl border px-4 py-4 text-base font-semibold transition-colors ${selected ? "border-blue-600 bg-blue-50 text-blue-800" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
+                      >
+                        <span>{paymentTypeLabel(m.type, m.name, locale)}</span>
+                        {selected ? <span className="text-blue-600">✓</span> : null}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {features.splitPayments && activeSplitPayments.length > 0 && (
+                <button type="button" onClick={() => setSplitOpen(true)}
+                  className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}>
+                  <span className="font-semibold">{t.splitPayment}</span>
+                  {" · "}{t.splitPaid(money(splitPaid))}
+                  {splitRemaining > 0.01 ? ` · ${t.splitRemaining(money(splitRemaining))}` : ` · ${t.splitFullyPaid}`}
+                </button>
+              )}
+              {isCashSingle && (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {quickCashOptions.map((v) => (
+                      <button
+                        key={v}
+                        type="button"
+                        onClick={() => setCashReceived(v)}
+                        className={`rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                          cashReceived === v
+                            ? "border-blue-600 bg-blue-600 text-white"
+                            : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        {v === Number(totalDue.toFixed(2)) ? t.exact : money(v)}
+                      </button>
+                    ))}
+                  </div>
+                  {changeDue !== null && (
+                    <div className={`flex items-center justify-between rounded-xl px-4 py-3 ${
+                      cashUnderPaid ? "bg-red-50" : "bg-green-50"
+                    }`}>
+                      <span className={`text-sm font-semibold ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
+                        {t.changeDue}
+                      </span>
+                      <span className={`text-xl font-bold tabular-nums ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
+                        {cashUnderPaid ? `−${money(Math.abs(changeDue))}` : money(changeDue)}
+                      </span>
+                    </div>
+                  )}
+                  {cashUnderPaid && <p className="text-center text-sm text-red-600">{t.cashUnderpaidMsg}</p>}
+                </div>
+              )}
+              {saleStatus && !saleStatus.ok && (
+                <p className="text-center text-sm text-red-600">{saleStatus.msg}</p>
+              )}
+              <Button
+                ref={chargeRef}
+                type="submit"
+                disabled={chargeDisabled}
+                className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40"
+              >
+                {salePending
+                  ? t.processing
+                  : cashUnderPaid
+                    ? t.insufficientCash
+                    : t.confirmPayment(money(totalDue))}
+              </Button>
+            </div>
+          </div>
+        ) : (
+        <>
         <div className="px-4 pt-3 pb-1 flex items-center justify-between shrink-0 gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.order}</span>
+          <span className="text-sm font-semibold text-slate-800">{t.currentSale(cartItemCount)}</span>
           <div className="flex items-center gap-2 flex-wrap justify-end">
           {(pendingSyncSales.length > 0 || pendingFiscalSales.length > 0) && (
             <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">
               {pendingSyncSales.length > 0 ? t.offlinePendingSync(pendingSyncSales.length) : t.offlinePendingFiscal(pendingFiscalSales.length)}
             </span>
           )}
+            <button
+              type="button"
+              onClick={() => setCustomersSheetOpen(true)}
+              className="text-xs font-medium text-blue-600 hover:text-blue-800"
+            >
+              {selectedCustomer ? selectedCustomer.name : t.addCustomerBtn}
+            </button>
           {cart.length > 0 && (
               <button type="button" onClick={() => setCart([])} className="text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
           )}
@@ -896,6 +1204,7 @@ function PosRegisterInner({
             ))}
           </div>
         )}
+        {checkoutStep === "order" && (
         <div className="flex-1 overflow-y-auto space-y-1.5 px-4 pb-2" style={{minHeight: 0, WebkitOverflowScrolling: "touch"}}>
           {cart.map((item) => {
             const linePct = item.discount_pct ?? 0;
@@ -925,181 +1234,75 @@ function PosRegisterInner({
           );})}
           {!cart.length && <p className="py-10 text-center text-sm text-slate-300">{t.tapToAdd}</p>}
         </div>
+        )}
         <div className="border-t border-slate-100 px-4 pt-4 pb-4 space-y-3 shrink-0">
-          {(features.tips || features.splitPayments || features.kitchenDisplay || features.restaurantOrderFlow) && cart.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {(features.kitchenDisplay || features.restaurantOrderFlow) && (
-                <button type="button" onClick={() => setNotesOpen(true)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${(kitchenNote || customerNote) ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                  📝 {t.notes}{(kitchenNote || customerNote) ? " ●" : ""}
-                </button>
-              )}
-              {features.tips && (
-                <button type="button" onClick={() => setTipOpen(true)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${safeTipAmount > 0 ? "border-green-300 bg-green-50 text-green-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                  💰 {safeTipAmount > 0 ? `${t.tip} ${money(safeTipAmount)}` : t.tip}
-                </button>
-              )}
-              {features.splitPayments && (
-                <button type="button" onClick={() => setSplitOpen(true)}
-                  className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${activeSplitPayments.length > 0 ? "border-purple-300 bg-purple-50 text-purple-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                  ⚡ {activeSplitPayments.length > 0 ? `${t.splitPayment} (${activeSplitPayments.length})` : t.splitPayment}
-                </button>
-              )}
-            </div>
-          )}
-          {cart.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400 shrink-0">{t.discountPct}</span>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="1"
-                value={uniformCartDiscount === null ? "" : uniformCartDiscount || ""}
-                onChange={(e) => applyDiscountToAllCurrentItems(Number(e.target.value) || 0)}
-                placeholder="0"
-                aria-label={t.discountPctAria}
-                className="h-8 w-16 rounded-lg border border-slate-200 px-2 text-sm text-right"
-              />
-              {discountAmount > 0 && <span className="text-xs text-blue-600 font-medium">−{money(discountAmount)}</span>}
-              {uniformCartDiscount === null && cart.some((i) => (i.discount_pct ?? 0) > 0) && (
-                <span className="text-[10px] text-slate-400">Mixed</span>
-              )}
-            </div>
-          )}
-          {discountAmount > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span>{money(grossTotal)}</span></div>}
-          {totalVat > 0.01 && <div className="flex justify-between text-xs text-slate-400"><span>{vatLabel}</span><span>{money(totalVat)}</span></div>}
-          {safeTipAmount > 0 && <div className="flex justify-between text-xs text-green-700"><span>{t.tip}</span><span>{money(safeTipAmount)}</span></div>}
-          <div className="flex justify-between items-baseline">
-            <span className="text-base font-semibold text-slate-700">{t.total}</span>
-            <span className="text-3xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</span>
-          </div>
-          {(!features.splitPayments || activeSplitPayments.length === 0) && cart.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {paymentMethods.map((m) => {
-                const selected = paymentMethodId === m.id;
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => {
-                      setPaymentMethodId(m.id);
-                      if (m.type !== "cash") setCashReceived("");
-                    }}
-                    className={`min-h-12 rounded-lg border px-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${selected ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
-                  >
-                    {paymentTypeLabel(m.type, m.name, locale)}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-          {features.splitPayments && activeSplitPayments.length > 0 && (
-            <button type="button" onClick={() => setSplitOpen(true)}
-              className={`w-full rounded-lg border px-3 py-2 text-left text-xs transition-colors ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}>
-              <span className="font-semibold">{t.splitPayment}</span>
-              {" · "}{t.splitPaid(money(splitPaid))}
-              {splitRemaining > 0.01 ? ` · ${t.splitRemaining(money(splitRemaining))}` : ` · ${t.splitFullyPaid}`}
-              <span className="float-right text-slate-500">{t.edit} ›</span>
-            </button>
-          )}
-          {features.splitPayments && activeSplitPayments.length === 0 && cart.length > 0 && (
-            <button type="button" onClick={() => setSplitOpen(true)}
-              className="w-full rounded-lg border border-dashed border-slate-200 px-3 py-2 text-xs text-slate-400 hover:bg-slate-50 transition-colors">
-              {t.addSplitPayment}
-            </button>
-          )}
-          {isCashSingle && (
-            <div className="space-y-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div className="flex items-center gap-2">
-                <label htmlFor="cash-received-input" className="shrink-0 text-sm font-medium text-slate-700">
-                  {t.cashReceived}
-                </label>
-                <input
-                  id="cash-received-input"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={cashReceived}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    setCashReceived(v === "" ? "" : Math.max(0, parseFloat(v) || 0));
-                  }}
-                  placeholder={totalDue.toFixed(2)}
-                  className="ml-auto h-9 w-28 rounded-lg border border-slate-200 bg-white px-2 text-right text-base font-bold tabular-nums text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                />
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {([
-                  { label: t.exact, v: Number(totalDue.toFixed(2)) },
-                  { label: t.quickCashAmount(5, currency), v: Math.ceil(totalDue / 5) * 5 },
-                  { label: t.quickCashAmount(10, currency), v: Math.ceil(totalDue / 10) * 10 },
-                  { label: t.quickCashAmount(20, currency), v: Math.ceil(totalDue / 20) * 20 },
-                ] as { label: string; v: number }[])
-                  .filter((btn, i, arr) => arr.findIndex((b) => b.v === btn.v) === i)
-                  .map(({ label, v }) => (
-                    <button
-                      key={label}
-                      type="button"
-                      onClick={() => setCashReceived(v)}
-                      className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                        cashReceived === v
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-              </div>
-              {changeDue !== null && (
-                <div className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                  cashUnderPaid ? "border border-red-200 bg-red-50" : "border border-green-200 bg-green-50"
-                }`}>
-                  <span className={`text-sm font-semibold ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
-                    {t.changeDue}
-                  </span>
-                  <span className={`text-lg font-bold tabular-nums ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
-                    {cashUnderPaid ? `−${money(Math.abs(changeDue))}` : money(changeDue)}
-                  </span>
-                </div>
-              )}
-              {cashUnderPaid && (
-                <p className="text-xs text-red-600">{t.cashUnderpaidMsg}</p>
-              )}
-            </div>
-          )}
-          {saleStatus && (
-            <div className={`rounded-lg p-3 text-sm font-medium ${saleStatus.ok ? "bg-green-50 border border-green-200 text-green-800" : "bg-red-50 border border-red-200 text-red-700"}`}>
-              <p>{saleStatus.msg}</p>
-              {lastFiscalTxt && (
+              {hasAdvancedOptions && cart.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => downloadFiscalNetTxt(lastFiscalTxt.filename, lastFiscalTxt.content)}
-                  className="mt-2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                  onClick={() => setOptionsOpen((v) => !v)}
+                  className="text-xs font-medium text-slate-500 hover:text-slate-700"
                 >
-                  {t.downloadTxtAgain}
+                  {optionsOpen ? "▾" : "▸"} {t.moreOptions}
                 </button>
               )}
-            </div>
-          )}
-          <Button
-            ref={chargeRef}
-            type="submit"
-            disabled={chargeDisabled}
-            className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {salePending
-              ? t.processing
-              : cashUnderPaid
-                ? t.insufficientCash
-                : !paymentMethods.length
-                  ? t.setupPaymentMethods
-                  : cart.length === 0
-                    ? t.addItems
-                    : `${t.validateCharge} ${money(totalDue)}`}
-          </Button>
+              {optionsOpen && cart.length > 0 && (
+                <>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(features.kitchenDisplay || features.restaurantOrderFlow) && (
+                      <button type="button" onClick={() => setNotesOpen(true)}
+                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${(kitchenNote || customerNote) ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
+                        📝 {t.notes}{(kitchenNote || customerNote) ? " ●" : ""}
+                      </button>
+                    )}
+                    {features.tips && (
+                      <button type="button" onClick={() => setTipOpen(true)}
+                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${safeTipAmount > 0 ? "border-green-300 bg-green-50 text-green-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
+                        💰 {safeTipAmount > 0 ? `${t.tip} ${money(safeTipAmount)}` : t.tip}
+                      </button>
+                    )}
+                    {features.splitPayments && (
+                      <button type="button" onClick={() => setSplitOpen(true)}
+                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${activeSplitPayments.length > 0 ? "border-purple-300 bg-purple-50 text-purple-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
+                        ⚡ {activeSplitPayments.length > 0 ? `${t.splitPayment} (${activeSplitPayments.length})` : t.splitPayment}
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400 shrink-0">{t.discountPct}</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={uniformCartDiscount === null ? "" : uniformCartDiscount || ""}
+                      onChange={(e) => applyDiscountToAllCurrentItems(Number(e.target.value) || 0)}
+                      placeholder="0"
+                      aria-label={t.discountPctAria}
+                      className="h-8 w-16 rounded-lg border border-slate-200 px-2 text-sm text-right"
+                    />
+                    {discountAmount > 0 && <span className="text-xs text-blue-600 font-medium">−{money(discountAmount)}</span>}
+                  </div>
+                </>
+              )}
+              {discountAmount > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span>{money(grossTotal)}</span></div>}
+              {totalVat > 0.01 && <div className="flex justify-between text-xs text-slate-400"><span>{vatLabel}</span><span>{money(totalVat)}</span></div>}
+              {safeTipAmount > 0 && <div className="flex justify-between text-xs text-green-700"><span>{t.tip}</span><span>{money(safeTipAmount)}</span></div>}
+              <div className="flex justify-between items-baseline">
+                <span className="text-base font-semibold text-slate-700">{t.total}</span>
+                <span className="text-3xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</span>
+              </div>
+              <Button
+                type="button"
+                disabled={!cart.length || !paymentMethods.length}
+                data-tour="pos-charge"
+                className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40"
+                onClick={() => setCheckoutStep("payment")}
+              >
+                {!paymentMethods.length ? t.setupPaymentMethods : cart.length === 0 ? t.addItems : t.chargeAmount(money(totalDue))}
+              </Button>
+        </div>
+        </>
+        )}
         </div>
 
           <input type="hidden" name="customer_name" value={selectedCustomer?.name ?? ""} />
@@ -1344,6 +1547,12 @@ function PosRegisterInner({
             </DialogContent>
           </Dialog>
       </form>
+      {checkoutStep === "order" && firstSaleCelebration ? (
+        <FirstSaleCelebration
+          amountLabel={firstSaleCelebration.amountLabel}
+          onClose={() => setFirstSaleCelebration(null)}
+        />
+      ) : null}
     </div>
   );
 }
