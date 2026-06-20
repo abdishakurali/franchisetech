@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { creditReferralOnFirstPayment } from "@/lib/referrals";
+import { trackLoopsEvent } from "@/lib/loops";
 import type { BillingPlan } from "@/lib/billing/plans";
 
 export const dynamic = "force-dynamic";
@@ -181,7 +182,26 @@ export async function POST(request: Request) {
       event.type === "customer.subscription.updated" ||
       event.type === "customer.subscription.deleted"
     ) {
-      await upsertSubscription(event.data.object as Stripe.Subscription);
+      const subscription = event.data.object as Stripe.Subscription;
+      await upsertSubscription(subscription);
+
+      if (event.type === "customer.subscription.created") {
+        let customerEmail: string | null = null;
+        const customerId = subscription.customer;
+        if (customerId) {
+          const customer = await stripe.customers.retrieve(String(customerId));
+          if (!customer.deleted && customer.email) {
+            customerEmail = customer.email;
+          }
+        }
+        if (customerEmail) {
+          void trackLoopsEvent(customerEmail, "subscription_created", {
+            organisationId: subscription.metadata?.organisation_id ?? "",
+            plan: subscription.metadata?.plan ?? "",
+            status: subscription.status,
+          });
+        }
+      }
     }
 
     if (

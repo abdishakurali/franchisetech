@@ -16,6 +16,7 @@ import { getDefaultThresholds, type AssetType } from "@/lib/temperature";
 import { demoProductsForCountry } from "@/lib/onboarding/demo-products";
 import { saveOrgModuleFlags } from "@/lib/org-module-flags";
 import type { BillingPlan } from "@/lib/billing/plans";
+import { trackLoopsEvent, upsertLoopsContact } from "@/lib/loops";
 
 const COUNTRY_LABELS: Record<string, string> = {
   RO: "Romania",
@@ -192,6 +193,20 @@ export async function completePosOnboarding(input: {
       path: "/",
       maxAge: 604800,
       sameSite: "lax",
+    });
+  }
+
+  if (user.email) {
+    const trialStartedAt = new Date().toISOString();
+    void upsertLoopsContact(user.email, {
+      firstName: input.userName?.trim(),
+      plan: input.preferredPlan ?? "starter",
+      trialStartedAt,
+    });
+    void trackLoopsEvent(user.email, "trial_started", {
+      businessName: input.orgName.trim(),
+      countryCode: input.countryCode,
+      plan: input.preferredPlan ?? "starter",
     });
   }
 
