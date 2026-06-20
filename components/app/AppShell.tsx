@@ -425,15 +425,22 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-        {/* Top banner — hidden on POS to maximise workspace */}
-        {!isPosMode && (
-          <TrialBanner
-            subStatus={subStatus}
-            daysLeft={daysLeft}
-            creditMonths={creditMonths}
-            referral={referral}
-            onReferralOpen={() => setReferralOpen(true)}
-          />
+        <TrialBanner
+          subStatus={subStatus}
+          daysLeft={daysLeft}
+          creditMonths={creditMonths}
+          referral={referral}
+          onReferralOpen={() => setReferralOpen(true)}
+        />
+
+        {/* POS slim header — logo only; actions live in till quick menu */}
+        {isPosRoute && (
+          <header className="print:hidden flex items-center justify-between h-11 px-4 bg-white border-b border-slate-100 shrink-0">
+            <FranchiseTechLogo className="h-5 w-auto" />
+            {activeOrg?.name ? (
+              <span className="truncate text-xs font-medium text-slate-500 max-w-[50%]">{activeOrg.name}</span>
+            ) : null}
+          </header>
         )}
 
         {/* Referral dialog (desktop) */}

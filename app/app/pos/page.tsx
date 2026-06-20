@@ -12,10 +12,16 @@ import Link from "next/link";
 import {
   ReceiptText, RefreshCcw, LayoutDashboard, Store, Calendar, Banknote, CreditCard,
 } from "lucide-react";
+import { listActiveVatRates } from "@/lib/vat-rates-server";
+import { getDefaultVatRateValue } from "@/lib/vat-rates";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: cur || "EUR" }).format(v);
+}
+
+function canManagePos(role: string | null | undefined) {
+  return role === "owner" || role === "manager";
 }
 
 function formatTime(ts: string | null | undefined) {
@@ -25,6 +31,8 @@ function formatTime(ts: string | null | undefined) {
 
 export default async function PosPage() {
   const { supabase, orgId, currency, currencySymbol, user, membership } = await getKitchenOpsContext();
+  const userRole = membership.role as string;
+  const canManage = canManagePos(userRole);
   // Org name for print slips
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orgRow = (membership as any)?.organisations;
@@ -265,6 +273,8 @@ export default async function PosPage() {
   const sgrProduct = (products ?? []).find((p) => p.name?.toUpperCase() === "SGR") ?? null;
   const { data: categories } = await supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).in("category_type", ["pos", "both"]).order("sort_order");
   const { data: methods } = await supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at");
+  const vatRates = await listActiveVatRates(supabase, orgId);
+  const defaultVatRate = getDefaultVatRateValue(vatRates);
   const [{ data: customers }, { data: recentTransactions }] = await Promise.all([
     supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
     supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
@@ -403,6 +413,8 @@ export default async function PosPage() {
         sgrEnabled={sgrEnabled}
         sgrProduct={sgrProduct as never}
         features={features}
+        canManage={canManage}
+        defaultVatRate={defaultVatRate}
         summary={{
           openingCash: Number(openSession.opening_cash ?? 0),
           cashSales,

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Coffee, Droplets, LockKeyhole, MoreHorizontal, Package, RefreshCcw, UserPlus, Utensils } from "lucide-react";
+import { Banknote, Coffee, Droplets, LayoutGrid, LockKeyhole, MoreHorizontal, Package, Plus, RefreshCcw, UserPlus, Utensils } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
 import {
   DropdownMenu,
@@ -52,6 +52,8 @@ import {
 } from "@/lib/pos-offline-queue";
 import { FIRST_SALE_DONE_KEY } from "@/lib/onboarding/demo-products";
 import { FirstSaleCelebration } from "@/components/app/FirstSaleCelebration";
+import { PosQuickAddProduct } from "@/components/app/PosQuickAddProduct";
+import { PosQuickAccessSheet } from "@/components/app/PosQuickAccessSheet";
 
 type Product = {
   id: string; name: string; sale_price: number | string; vat_rate?: number | string | null;
@@ -489,6 +491,8 @@ function PosRegisterInner({
   isRO = false, fiscalZReportDone: initialZReportDone = false,
   vatRateGroupMap = {},
   features = {},
+  canManage = false,
+  defaultVatRate = 0,
 }: {
   products: Product[];
   categories: Category[];
@@ -520,6 +524,8 @@ function PosRegisterInner({
     splitPayments?: boolean;
     tips?: boolean;
   };
+  canManage?: boolean;
+  defaultVatRate?: number;
 }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -573,6 +579,8 @@ function PosRegisterInner({
   const [heldSales, setHeldSales] = useState<HeldSale[]>(() => listHeldSales());
   const [heldOpen, setHeldOpen] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<QueuedSale[]>(() => listOfflineQueue());
+  const [quickAccessOpen, setQuickAccessOpen] = useState(false);
+  const [addProductOpen, setAddProductOpen] = useState(false);
   const syncingOfflineRef = useRef(false);
 
   const pendingSyncSales = useMemo(
@@ -803,6 +811,43 @@ function PosRegisterInner({
       {/* Left: Products column — order step only */}
       {checkoutStep === "order" && (
       <div className="min-w-0 lg:flex-1 lg:flex lg:flex-col lg:overflow-hidden" style={{display: "flex", flexDirection: "column", overflow: "hidden", flex: "1 1 auto", minWidth: 0}}>
+        {/* Top bar: quick access + add product + new sale */}
+        <div className="flex items-center gap-2 border-b border-slate-100 bg-white px-3 py-2 sm:px-4 shrink-0">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 px-3 shrink-0"
+            onClick={() => setQuickAccessOpen(true)}
+          >
+            <LayoutGrid className="h-4 w-4" />
+            <span className="hidden sm:inline">{t.quickAccess}</span>
+          </Button>
+          {canManage && (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11 px-3 shrink-0 border-blue-200 text-blue-700 hover:bg-blue-50"
+              onClick={() => setAddProductOpen(true)}
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">{t.addProduct}</span>
+            </Button>
+          )}
+          <div className="flex-1" />
+          <Button
+            type="button"
+            variant="outline"
+            className="h-11 px-4 shrink-0"
+            onClick={() => {
+              setCart([]);
+              setCheckoutStep("order");
+              setLastCompletedSale(null);
+              setSaleStatus(null);
+            }}
+          >
+            {t.newSale}
+          </Button>
+        </div>
         {/* Products toolbar: categories, search */}
         <div className="space-y-2 p-2 sm:p-3 lg:px-4 lg:pt-3 lg:pb-2 lg:flex-none" style={{flexShrink: 0}}>
         <div className="-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
@@ -847,70 +892,53 @@ function PosRegisterInner({
             );
           })}
           {!filtered.length && (
-            <div className="col-span-full rounded-xl border border-dashed p-8 text-center text-sm text-slate-400">
-              {posProducts.length === 0 ? t.noProductsYet : t.noProductsMatch}
+            <div className="col-span-full rounded-xl border border-dashed p-8 text-center text-sm text-slate-400 space-y-3">
+              <p>{posProducts.length === 0 ? t.noProductsYet : t.noProductsMatch}</p>
+              {canManage && posProducts.length === 0 && (
+                <Button type="button" className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => setAddProductOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  {t.addProduct}
+                </Button>
+              )}
             </div>
           )}
         </div>
         </div>
-        {/* pos-utility-bar — keep only essentials visible */}
-        <div className="border-t border-slate-200 bg-white px-3 py-2 sm:px-4" style={{ flexShrink: 0 }}>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-11 px-4 shrink-0"
-              onClick={() => {
-                setCart([]);
-                setCheckoutStep("order");
-                setLastCompletedSale(null);
-                setSaleStatus(null);
-              }}
-            >
-              {t.newSale}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                <MoreHorizontal className="h-4 w-4" />
-                {t.moreMenu}
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="min-w-[200px]">
-                <DropdownMenuItem render={<a href="/app" />}>{t.leavePos}</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setCustomersSheetOpen(true)}>{t.customers}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setOrdersSheetOpen(true)}>{t.orders}</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setRefundDialogOpen(true)}>{t.refund}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTillDialogOpen(true)}>{t.cashMovement}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCloseTillDialogOpen(true)}>{t.closeTill}</DropdownMenuItem>
-                {cart.length > 0 && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      const held = holdCurrentSale({ cart, customerName: selectedCustomer?.name });
-                      if (held) {
-                        setCart([]);
-                        setHeldSales(listHeldSales());
-                        setCheckoutStep("order");
-                      }
-                    }}
-                  >
-                    {t.holdOrder}
-                  </DropdownMenuItem>
-                )}
-                {heldSales.length > 0 && (
-                  <DropdownMenuItem onClick={() => setHeldOpen(true)}>
-                    {t.heldOrders} ({heldSales.length})
-                  </DropdownMenuItem>
-                )}
-                {fiscalActive && (
-                  <DropdownMenuItem onClick={() => setZReportOpen(true)} disabled={zReportDone || zReportPending}>
-                    {zReportPending ? t.zReportProcessing : zReportDone ? t.zReportDone : t.zReport}
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
+        <PosQuickAccessSheet
+          open={quickAccessOpen}
+          onOpenChange={setQuickAccessOpen}
+          canManage={canManage}
+          onAddProduct={() => setAddProductOpen(true)}
+          onCustomers={() => setCustomersSheetOpen(true)}
+          onOrders={() => setOrdersSheetOpen(true)}
+          onRefund={() => setRefundDialogOpen(true)}
+          onCashMovement={() => setTillDialogOpen(true)}
+          onCloseTill={() => setCloseTillDialogOpen(true)}
+          onHoldOrder={() => {
+            const held = holdCurrentSale({ cart, customerName: selectedCustomer?.name });
+            if (held) {
+              setCart([]);
+              setHeldSales(listHeldSales());
+              setCheckoutStep("order");
+            }
+          }}
+          heldCount={heldSales.length}
+          onHeldOrders={() => setHeldOpen(true)}
+          fiscalActive={fiscalActive}
+          onZReport={() => setZReportOpen(true)}
+          zReportDone={zReportDone}
+          zReportPending={zReportPending}
+          cartHasItems={cart.length > 0}
+        />
+        {canManage && (
+          <PosQuickAddProduct
+            open={addProductOpen}
+            onOpenChange={setAddProductOpen}
+            categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+            defaultVatRate={defaultVatRate}
+            currency={currency}
+          />
+        )}
         <Sheet open={customersSheetOpen} onOpenChange={setCustomersSheetOpen}>
           <SheetContent className="w-full sm:max-w-lg">
             <SheetHeader><SheetTitle>{t.customers}</SheetTitle></SheetHeader>

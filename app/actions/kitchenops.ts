@@ -371,6 +371,38 @@ export async function addProduct(formData: FormData) {
   redirect("/app/products");
 }
 
+/** Minimal POS quick-add — no redirect; returns result for in-till dialog. */
+export async function addProductFromPos(formData: FormData): Promise<{ ok: boolean; error?: string }> {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  const name = stringValue(formData, "name");
+  if (!name) return { ok: false, error: "Product name is required." };
+  const salePrice = numberValue(formData, "sale_price", 0);
+  if (!Number.isFinite(salePrice) || salePrice < 0) return { ok: false, error: "Enter a valid sale price." };
+
+  const { error } = await supabase.from("products").insert({
+    organisation_id: orgId,
+    name,
+    category_id: stringValue(formData, "category_id") || null,
+    unit_of_measure: "each",
+    sale_price: salePrice,
+    vat_rate: numberValue(formData, "vat_rate"),
+    available_in_pos: true,
+    is_ingredient: false,
+    is_stock_tracked: false,
+    is_sellable: true,
+    is_purchaseable: false,
+    item_type: "finished_product",
+    current_stock_qty: 0,
+    active: true,
+  });
+
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/app/products");
+  revalidatePath("/app/pos");
+  return { ok: true };
+}
+
 export async function updateProduct(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
