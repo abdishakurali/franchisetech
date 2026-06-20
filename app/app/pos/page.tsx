@@ -284,17 +284,19 @@ export default async function PosPage() {
   // ── CLOSED: show open-till form + last session summary + quick links ──
   if (!openSession) {
     return (
-      <div className="min-h-0 p-4 sm:p-6">
+      <div className="min-h-0 bg-white px-4 py-8 sm:px-6 sm:py-10">
         <PosTillStateSync sessionOpen={false} />
-        <div className="mx-auto max-w-lg space-y-6 pb-8">
+        <div className="mx-auto max-w-lg space-y-8 pb-4">
 
           {/* Open till form */}
-          <div className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-              <Store className="h-8 w-8 text-slate-500" />
+          <div className="text-center space-y-3">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-100 bg-white">
+              <Store className="h-7 w-7 text-slate-500" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-950">Till is closed</h1>
-            <p className="text-sm text-slate-500 mt-1">Enter your opening float to start selling.</p>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-950">Till is closed</h1>
+              <p className="text-sm text-slate-500 mt-1">Enter your opening float to start selling.</p>
+            </div>
           </div>
 
           <PageHint id="pos-closed">
@@ -306,10 +308,10 @@ export default async function PosPage() {
 
           {/* Last closed session summary */}
           {lastClosed && (
-            <Card className="border-slate-200 bg-slate-50">
-              <CardContent className="pt-4 pb-4">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-200">
+            <Card className="border-slate-100 bg-white shadow-none">
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-white">
                     <Calendar className="h-4 w-4 text-slate-600" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -318,13 +320,13 @@ export default async function PosPage() {
                   </div>
                   <Badge variant="secondary" className="shrink-0 text-xs capitalize">{lastClosed.status}</Badge>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="col-span-2 rounded-lg bg-white border border-slate-200 p-3">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="col-span-2 rounded-xl border border-slate-100 p-4">
                     <p className="text-xs text-slate-400 mb-0.5">Last counted cash</p>
                     <p className="text-2xl font-bold text-slate-950">{money(Number(lastClosed.counted_cash ?? lastClosed.expected_cash ?? 0), currency)}</p>
                     <p className="text-xs text-slate-500 mt-0.5">Closed {formatTime(lastClosed.closed_at)} by {lastClosedBy}</p>
                   </div>
-                  <div className="rounded-lg bg-white border border-slate-200 p-3">
+                  <div className="rounded-xl border border-slate-100 p-4">
                     <p className="text-xs text-slate-400 mb-0.5">Total sales</p>
                     <div className="flex items-center gap-1.5">
                       <Banknote className="h-3.5 w-3.5 text-blue-600" />
@@ -332,7 +334,7 @@ export default async function PosPage() {
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">{lastSessionTxCount} transactions</p>
                   </div>
-                  <div className="rounded-lg bg-white border border-slate-200 p-3">
+                  <div className="rounded-xl border border-slate-100 p-4">
                     <p className="text-xs text-slate-400 mb-0.5">Cash / Card split</p>
                     <div className="flex items-center gap-1.5">
                       <CreditCard className="h-3.5 w-3.5 text-green-600" />
@@ -341,7 +343,7 @@ export default async function PosPage() {
                     <p className="text-xs text-slate-400 mt-0.5">Card: {money(lastSessionCard, currency)}</p>
                   </div>
                   {lastClosed.counted_cash != null && (
-                    <div className="col-span-2 rounded-lg bg-white border border-slate-200 p-3 text-sm">
+                    <div className="col-span-2 rounded-xl border border-slate-100 p-4 text-sm">
                       <div className="flex justify-between">
                         <span className="text-slate-500">Expected cash</span>
                         <span className="font-medium">{money(Number(lastClosed.expected_cash ?? 0), currency)}</span>
@@ -369,18 +371,18 @@ export default async function PosPage() {
           )}
 
           {/* Quick access when till is closed */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Quick access</p>
-            <div className="grid grid-cols-3 gap-2">
-              <Link href="/app/transactions" className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-4 text-center hover:bg-slate-50 hover:border-blue-200 transition-colors">
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Quick access</p>
+            <div className="grid grid-cols-3 gap-3">
+              <Link href="/app/transactions" className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-white p-4 text-center hover:border-blue-200 transition-colors">
                 <ReceiptText className="h-5 w-5 text-blue-600" />
                 <span className="text-xs font-medium text-slate-700">Transactions</span>
               </Link>
-              <Link href="/app/refunds" className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-4 text-center hover:bg-slate-50 hover:border-blue-200 transition-colors">
+              <Link href="/app/refunds" className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-white p-4 text-center hover:border-blue-200 transition-colors">
                 <RefreshCcw className="h-5 w-5 text-orange-500" />
                 <span className="text-xs font-medium text-slate-700">Refunds</span>
               </Link>
-              <Link href="/app" className="flex flex-col items-center gap-1.5 rounded-xl border border-slate-200 bg-white p-4 text-center hover:bg-slate-50 hover:border-blue-200 transition-colors">
+              <Link href="/app" className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-white p-4 text-center hover:border-blue-200 transition-colors">
                 <LayoutDashboard className="h-5 w-5 text-blue-600" />
                 <span className="text-xs font-medium text-slate-700">Dashboard</span>
               </Link>
@@ -395,7 +397,7 @@ export default async function PosPage() {
   // ── OPEN SESSION ──
   const expectedCash = Number(openSession.expected_cash ?? openSession.opening_cash ?? 0);
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex flex-1 flex-col min-h-0 bg-white">
       <PosTillStateSync sessionOpen />
       {/* POS register */}
       <PosWithTour

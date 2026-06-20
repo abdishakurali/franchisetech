@@ -406,7 +406,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   };
 
   return (
-    <div className={cn("app-shell-h flex overflow-hidden bg-slate-50", tillCompact && "till-compact-mode")}>
+    <div className={cn("app-shell-h flex overflow-hidden", isPosRoute ? "bg-white" : "bg-slate-50", tillCompact && "till-compact-mode")}>
       {/* Desktop sidebar — collapsed on POS (till closed); hidden while selling */}
       {showSidebar && (
       <aside className={cn(
@@ -440,17 +440,19 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
       )}
 
       {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-        <TrialBanner
-          subStatus={subStatus}
-          daysLeft={daysLeft}
-          creditMonths={creditMonths}
-          referral={referral}
-          onReferralOpen={() => setReferralOpen(true)}
-        />
+      <div className={cn("flex-1 flex flex-col overflow-hidden min-h-0", isPosRoute && "bg-white")}>
+        {!isPosRoute && (
+          <TrialBanner
+            subStatus={subStatus}
+            daysLeft={daysLeft}
+            creditMonths={creditMonths}
+            referral={referral}
+            onReferralOpen={() => setReferralOpen(true)}
+          />
+        )}
 
-        {/* POS slim header — logo; menu when till closed on mobile */}
-        {isPosRoute && (
+        {/* POS slim header — only when till is closed (nav + logo) */}
+        {isPosRoute && !posTillSelling && (
           <header className="print:hidden flex items-center justify-between h-11 px-4 bg-white border-b border-slate-100 shrink-0">
             <FranchiseTechLogo className="h-5 w-auto" />
             <div className="flex items-center gap-2 min-w-0">
@@ -525,6 +527,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
         )}
 
         <main className={cn(
+          "bg-white",
           posTillSelling ? "flex-1 flex flex-col overflow-hidden min-h-0" : "flex-1 min-h-0 overflow-y-auto",
           isPosRoute && !posTillOpen && "lg:max-w-5xl lg:mx-auto lg:w-full"
         )}>{children}</main>

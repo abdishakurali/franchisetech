@@ -807,12 +807,12 @@ function PosRegisterInner({
   const fiscalActive = isFiscalNetClientActive(isRO, fiscalNet);
 
   return (
-    <div className="relative mx-auto flex w-full max-w-6xl flex-1 lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
+    <div className="relative flex w-full flex-1 bg-white lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
       {/* Left: Products column — order step only */}
       {checkoutStep === "order" && (
-      <div className="min-w-0 lg:flex-1 lg:flex lg:flex-col lg:overflow-hidden" style={{display: "flex", flexDirection: "column", overflow: "hidden", flex: "1 1 auto", minWidth: 0}}>
+      <div className="min-w-0 lg:flex-1 lg:flex lg:flex-col lg:overflow-hidden bg-white" style={{display: "flex", flexDirection: "column", overflow: "hidden", flex: "1 1 auto", minWidth: 0}}>
         {/* Top bar: quick access + add product + new sale */}
-        <div className="flex items-center gap-2 border-b border-slate-100 bg-white px-3 py-2 sm:px-4 shrink-0">
+        <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3 shrink-0">
           <Button
             type="button"
             variant="outline"
@@ -849,8 +849,8 @@ function PosRegisterInner({
           </Button>
         </div>
         {/* Products toolbar: categories, search */}
-        <div className="space-y-2 p-2 sm:p-3 lg:px-4 lg:pt-3 lg:pb-2 lg:flex-none" style={{flexShrink: 0}}>
-        <div className="-mx-2 flex gap-1.5 overflow-x-auto px-2 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+        <div className="space-y-3 px-4 py-3 lg:flex-none" style={{flexShrink: 0}}>
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 sm:flex-wrap sm:mx-0 sm:px-0">
           <button onClick={() => setActiveCategory("all")}
             className={`min-h-11 shrink-0 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${activeCategory === "all" ? "bg-blue-600 text-white border-blue-600" : "bg-white hover:bg-slate-50"}`}>
             {t.allCategories}
@@ -866,8 +866,8 @@ function PosRegisterInner({
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.searchProducts} className="max-w-none" aria-label={t.searchProducts} />
         </div>
         {/* Scrollable products area */}
-        <div className="p-3 sm:p-4 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:px-4 lg:py-4" style={{WebkitOverflowScrolling: "touch", flex: "1 1 auto", minHeight: 0, overflowY: "auto"}}>
-        <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5" data-tour="pos-product">
+        <div className="px-4 pb-4 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:py-4" style={{WebkitOverflowScrolling: "touch", flex: "1 1 auto", minHeight: 0, overflowY: "auto"}}>
+        <div className="grid gap-2.5 grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5" data-tour="pos-product">
           {filtered.map((p) => {
             const cfg = getPhCfg(p);
             const inCart = cart.find((i) => i.product_id === p.id);
@@ -1110,7 +1110,7 @@ function PosRegisterInner({
           setSalePending(false);
           setCheckoutStep("payment");
         }
-      }} className={`flex flex-col bg-white ${focusedCheckout ? "absolute inset-0 z-20 min-h-0" : "min-h-[28rem] rounded-xl border border-slate-200 shadow-sm lg:min-h-0 lg:w-[300px] lg:flex-none lg:overflow-hidden lg:rounded-none lg:border-0 lg:border-l lg:shadow-none"}`} data-tour="pos-cart">
+      }} className={`flex flex-col bg-white ${focusedCheckout ? "absolute inset-0 z-20 min-h-0" : "min-h-[28rem] lg:min-h-0 lg:w-[300px] lg:flex-none lg:overflow-hidden lg:border-l lg:border-slate-100"}`} data-tour="pos-cart">
         <div className={`flex flex-1 flex-col min-h-0 ${focusedCheckout ? "mx-auto w-full max-w-sm px-5" : ""}`}>
         {checkoutStep === "complete" && lastCompletedSale ? (
           <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
