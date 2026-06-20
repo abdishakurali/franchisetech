@@ -1,35 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import {
-  APP_LOCALE_CHANGE_EVENT,
-  POS_LOCALE_STORAGE_KEY,
-  type PosLocale,
-} from "@/lib/pos-i18n";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
+import { useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import { MarketingBrand } from "@/components/marketing/MarketingBrand";
 import { socialLinks } from "@/components/marketing/social";
 
-function readLocale(): PosLocale {
-  if (typeof window === "undefined") return "en";
-  try {
-    const raw = localStorage.getItem(POS_LOCALE_STORAGE_KEY);
-    if (raw === "en" || raw === "ro") return raw;
-  } catch {
-    /* ignore */
-  }
-  return "en";
-}
-
 export function MarketingFooterClient() {
-  const [locale, setLocale] = useState<PosLocale>(readLocale);
+  const locale = useMarketingLocale();
   const t = getMarketingMessages(locale);
-
-  useEffect(() => {
-    const sync = () => setLocale(readLocale());
-    window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-    return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-  }, []);
 
   const featureLinks = [
     ["/features/pos", t.footer.featureLinks.pos],
@@ -62,11 +41,7 @@ export function MarketingFooterClient() {
       <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-5">
         <div className="md:col-span-2">
           <div className="mb-4">
-            <Link href="/" className="inline-flex items-center gap-2.5 text-white">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icon.svg" alt="" className="h-9 w-9 shrink-0 rounded-lg" />
-              <span className="text-lg font-semibold tracking-tight">franchisetech</span>
-            </Link>
+            <MarketingBrand variant="footer" />
           </div>
           <p className="max-w-sm text-sm">{t.footer.tagline}</p>
           <p className="mt-4 max-w-sm text-xs">{t.footer.subtagline}</p>

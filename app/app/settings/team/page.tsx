@@ -1,5 +1,6 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { requireBusinessModule } from "@/lib/module-guard";
 import Link from "next/link";
 import { TeamClient } from "./TeamClient";
 import { redirect } from "next/navigation";
@@ -13,6 +14,7 @@ function makeAdminClient() {
 }
 
 export default async function TeamSettingsPage() {
+  await requireBusinessModule("team_advanced");
   const { membership, orgId } = await getKitchenOpsContext();
 
   // Only owner/manager can see this page

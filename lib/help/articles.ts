@@ -40,7 +40,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     category: "getting-started",
     icon: "🚀",
     steps: [
-      { title: "Open the Setup guide", body: "After logging in, click **Setup guide** in the left sidebar. You will see a checklist of everything needed before your first sale.", screenshot: "setup-checklist.png" },
+      { title: "Open the Setup guide", body: "After logging in, click **Setup guide** in the left sidebar. The checklist adapts to your business level: small shops see a POS-first path; restaurants also see stock and recipe steps when those modules are enabled.", screenshot: "setup-checklist.png" },
       { title: "Add your business details", body: "Enter your business name, currency, and timezone. These appear on reports and receipts.", screenshot: "settings.png" },
       { title: "Add your first product", body: "Go to **Products → New product**. Give it a name, set the selling price, and choose a category. Click Save.", screenshot: "products-new.png" },
       { title: "Open the POS and make a test sale", body: "Click **POS** in the sidebar. Tap a product to add it to the cart, then press **Charge**. Your setup is complete.", screenshot: "pos-with-items.png" },
@@ -54,7 +54,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     category: "getting-started",
     icon: "✅",
     steps: [
-      { title: "Add business details", body: "Open **Settings** and confirm the business name, country, currency, and receipt details." },
+      { title: "Add business details", body: "Open **Settings** and confirm the business name, country, currency, and receipt details. If you chose a simple shop profile at signup, stock and recipe steps stay hidden until you enable them under **Settings → Modules**." },
       { title: "Add your first 5 products", body: "Open **Products** and add the most common items you sell. Keep it simple: name, category, selling price, and POS visibility." },
       { title: "Check payment methods", body: "Open **Settings** and make sure Cash and Card are available. Add other methods only if you really use them." },
       { title: "Open the till", body: "Open **POS**, enter the opening cash float, and start the session." },

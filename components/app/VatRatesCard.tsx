@@ -36,6 +36,7 @@ const FISCALNET_GROUPS = [
 export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, updateAction, deleteAction }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
+  const [filter, setFilter] = useState("");
   const [editState, setEditState] = useState<Partial<VatRate>>({});
   const [newState, setNewState] = useState<{ name: string; rate: string; is_default: boolean; fiscalnet_vat_group: string }>({
     name: "", rate: "", is_default: false, fiscalnet_vat_group: "",
@@ -95,6 +96,13 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
     });
   }
 
+  const filteredRates = rates.filter((v) => {
+    if (!filter.trim()) return true;
+    const q = filter.trim().toLowerCase();
+    return v.name.toLowerCase().includes(q) || String(v.rate).includes(q);
+  });
+  const displayRates = filter.trim() ? filteredRates : rates;
+
   return (
     <Card>
       <CardHeader>
@@ -106,8 +114,19 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {rates.length > 3 && (
+          <div className="mb-4">
+            <Label className="text-xs text-slate-500">Filter by name or rate</Label>
+            <Input
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="e.g. 19 or TVA Standard"
+              className="mt-1 h-9"
+            />
+          </div>
+        )}
         <div className="divide-y divide-slate-100">
-          {rates.map((v) =>
+          {displayRates.map((v) =>
             editingId === v.id ? (
               /* ── EDIT ROW ── */
               <div key={v.id} className="py-3 flex flex-wrap items-end gap-2">

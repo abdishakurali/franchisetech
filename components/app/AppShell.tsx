@@ -31,9 +31,15 @@ import type { SubscriptionStatus } from "@/lib/billing/subscription";
 interface AppShellProps {
   user: User;
   profile: { full_name: string | null; email: string | null } | null;
-  activeOrg: { id: string; name: string; trial_ends_at?: string | null; referral_credit_months?: number | null; kitchen_display_enabled?: boolean | null; compact_workstation_nav_enabled?: boolean | null } | null;
+  activeOrg: { id: string; name: string; trial_ends_at?: string | null; referral_credit_months?: number | null; kitchen_display_enabled?: boolean | null; compact_workstation_nav_enabled?: boolean | null; business_profile?: string | null } | null;
   userRole: string | null;
   setupComplete?: boolean;
+  moduleVisibility?: {
+    inventory: boolean;
+    recipeCosting: boolean;
+    teamAdvanced: boolean;
+    multiSite: boolean;
+  };
   trialDaysLeft?: number;
   referral?: {
     link: string | null;
@@ -175,6 +181,7 @@ function StockSection({
 
 function AppSidebar({
   pathname, activeOrg, userRole, initials, profile, user, setupComplete,
+  moduleVisibility,
   onNavigate, onSettings, onLogout, collapsed = false,
   accessibleSites = [], activeSiteId = null,
 }: {
@@ -185,6 +192,12 @@ function AppSidebar({
   profile: { full_name: string | null; email: string | null } | null;
   user: User;
   setupComplete?: boolean;
+  moduleVisibility?: {
+    inventory: boolean;
+    recipeCosting: boolean;
+    teamAdvanced: boolean;
+    multiSite: boolean;
+  };
   mobile?: boolean;
   onNavigate?: () => void;
   onSettings: () => void;
@@ -235,7 +248,9 @@ function AppSidebar({
         {[
           ...mainNav.filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
           ...(activeOrg?.kitchen_display_enabled ? [{ href: "/app/kitchen", label: "Kitchen", icon: ChefHat, exact: false }] : []),
-        ].map((item) => (
+        ]
+          .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting !== false)
+          .map((item) => (
           <NavLink
             key={item.href}
             {...item}
@@ -245,8 +260,9 @@ function AppSidebar({
           />
         ))}
 
-        {/* Stock collapsible section */}
-        <StockSection pathname={pathname} onNavigate={onNavigate} collapsed={collapsed} />
+        {moduleVisibility?.inventory !== false ? (
+          <StockSection pathname={pathname} onNavigate={onNavigate} collapsed={collapsed} />
+        ) : null}
 
         {/* Bottom nav */}
         <div className={cn("mt-1 border-t border-slate-100", collapsed ? "pt-1 space-y-1" : "pt-1")}>
@@ -403,7 +419,7 @@ function TopBanner({
   );
 }
 
-export function AppShell({ user, profile, activeOrg, userRole, setupComplete = false, trialDaysLeft = 15, referral, subStatus, accessibleSites = [], activeSiteId = null, children }: AppShellProps) {
+export function AppShell({ user, profile, activeOrg, userRole, setupComplete = false, moduleVisibility, trialDaysLeft = 15, referral, subStatus, accessibleSites = [], activeSiteId = null, children }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -442,7 +458,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   };
 
   const sidebarProps = {
-    pathname, activeOrg, userRole, initials, profile, user, setupComplete,
+    pathname, activeOrg, userRole, initials, profile, user, setupComplete, moduleVisibility,
     onSettings: () => router.push("/app/settings"),
     onLogout: handleLogout,
     collapsed: isCollapsed,

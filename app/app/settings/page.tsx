@@ -1,4 +1,4 @@
-import { addCategory, updateCategory, deleteCategory, addUnit, updateUnit, deleteUnit, updateOrgCountry, updateOrgCurrency, updateOrganisationIndustry, updateRestaurantFeatureFlags, addPaymentMethod, updatePaymentMethod, deletePaymentMethod, addVatRate, updateVatRate, deleteVatRate, seedDefaultVatRates } from "@/app/actions/kitchenops";
+import { addCategory, updateCategory, deleteCategory, addUnit, updateUnit, deleteUnit, updateOrgCountry, updateOrgCurrency, updateOrganisationIndustry, updateRestaurantFeatureFlags, addPaymentMethod, updatePaymentMethod, deletePaymentMethod, addVatRate, updateVatRate, deleteVatRate, seedDefaultVatRates, updateBusinessProfileAndModules } from "@/app/actions/kitchenops";
 import { PaymentMethodsCard } from "@/components/app/PaymentMethodsCard";
 import { VatRatesCard } from "@/components/app/VatRatesCard";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,10 @@ import { FiscalNetSettingsCard } from "@/components/app/FiscalNetSettingsCard";
 import { SettingsTabNav } from "@/components/app/SettingsTabNav";
 import type { CashDrawerMode } from "@/lib/cash-drawer";
 import { FeatureSettingsCard } from "@/components/app/FeatureSettingsCard";
+import { BusinessModulesCard } from "@/components/app/BusinessModulesCard";
 import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
+import { getSubscriptionStatus } from "@/lib/billing/subscription";
+import type { BillingPlan } from "@/lib/billing/plans";
 import { INDUSTRY_OPTIONS, RESTAURANT_FEATURE_KEYS, RESTAURANT_FEATURES, getSuggestedFeaturesForIndustry, type RestaurantFeatureKey } from "@/lib/restaurant-features";
 
 const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
@@ -58,10 +61,12 @@ function canManage(role: string | null | undefined) {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ tab?: string }>;
+  searchParams?: Promise<{ tab?: string; locked?: string; msg?: string }>;
 }) {
   const params = await searchParams;
   const activeTab = params?.tab ?? "business";
+  const lockedModule = params?.locked ?? null;
+  const lockedMessage = params?.msg ? decodeURIComponent(params.msg) : null;
 
   const { supabase, orgId, membership, user } = await getKitchenOpsContext();
 
@@ -129,9 +134,17 @@ export default async function SettingsPage({
     available: false, link: null, code: null, creditMonths: 0, daysLeft: null, referrals: [],
   }));
 
+  const sub = await getSubscriptionStatus(orgId).catch(() => null);
+  const subscriptionPlan = (sub?.plan === "starter" || sub?.plan === "pro" || sub?.plan === "multi_location")
+    ? sub.plan as BillingPlan
+    : null;
+  const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
+  const appLocale = (profile?.locale as string | null) ?? null;
+
   // ── Tab list ─────────────────────────────────────────────────────────
   const tabs = [
     { id: "business",  label: "Business"  },
+    { id: "modules",   label: "Modules"   },
     { id: "features",  label: "Features"  },
     { id: "products",  label: "Products"  },
     { id: "hardware",  label: "Hardware"  },
@@ -358,6 +371,25 @@ export default async function SettingsPage({
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {activeTab === "modules" && (
+        <BusinessModulesCard
+          org={{
+            business_profile: orgRow?.business_profile as string | null,
+            inventory_enabled: Boolean(orgRow?.inventory_enabled),
+            recipe_costing_enabled: Boolean(orgRow?.recipe_costing_enabled),
+            team_advanced_enabled: Boolean(orgRow?.team_advanced_enabled),
+            multi_site_ops_enabled: Boolean(orgRow?.multi_site_ops_enabled),
+          }}
+          canEdit={canEdit}
+          subscriptionPlan={subscriptionPlan}
+          hasTrial={hasTrial}
+          locale={appLocale}
+          lockedModule={lockedModule}
+          lockedMessage={lockedMessage}
+          updateAction={updateBusinessProfileAndModules as unknown as (fd: FormData) => Promise<void>}
+        />
       )}
 
       {/* ── FEATURES TAB ─────────────────────────────────────────────── */}

@@ -2,8 +2,10 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { RecipeCostCalculator } from "@/components/app/RecipeCostCalculator";
+import { requireBusinessModule } from "@/lib/module-guard";
 
 export default async function RecipesNewPage() {
+  await requireBusinessModule("recipe_costing");
   const { supabase, orgId } = await getKitchenOpsContext();
 
   const [{ data: sellableProducts }, { data: ingredientProducts }] = await Promise.all([

@@ -3,6 +3,9 @@ import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { isBillingConfigured } from "@/lib/billing/plans";
 import { PricingCards } from "@/components/app/PricingCards";
 import { BillingPortalButton } from "@/components/app/BillingPortalButton";
+import { modulesForPlan } from "@/lib/billing/entitlements";
+import { BUSINESS_MODULE_DEFINITIONS } from "@/lib/business-modules";
+import type { BillingPlan } from "@/lib/billing/plans";
 import { AlertCircle, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
 
 function statusColor(state: string) {
@@ -123,6 +126,22 @@ export default async function BillingPage({
                 ? "Complete your subscription:"
                 : "Choose a plan to get started:"}
           </p>
+          <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4">
+            <p className="text-sm font-semibold text-slate-800">What each plan unlocks</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {(["starter", "pro"] as BillingPlan[]).map((planId) => (
+                <div key={planId} className="rounded-lg bg-slate-50 p-3 text-sm">
+                  <p className="font-medium capitalize">{planId}</p>
+                  <ul className="mt-2 space-y-1 text-slate-600">
+                    {modulesForPlan(planId).map((key) => {
+                      const def = BUSINESS_MODULE_DEFINITIONS.find((d) => d.key === key);
+                      return <li key={key}>· {def?.label ?? key}</li>;
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
           <PricingCards loggedIn={Boolean(user)} configured={configured} />
         </div>
       )}

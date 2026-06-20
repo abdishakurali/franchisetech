@@ -2,8 +2,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { requireBusinessModule } from "@/lib/module-guard";
 
 export default async function StockReportPage() {
+  await requireBusinessModule("inventory");
   const { supabase, orgId, currency } = await getKitchenOpsContext();
   const { data: stock } = await supabase.from("stock_items").select("*").eq("organisation_id", orgId).order("name");
   const estimatedValue = (stock ?? []).reduce((total, item) => total + Number(item.current_qty ?? 0) * Number(item.cost_per_unit ?? 0), 0);

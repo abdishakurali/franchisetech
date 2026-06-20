@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { VatRateSelect } from "@/components/app/VatRateSelect";
+import type { OrgVatRate } from "@/lib/vat-rates";
+import { getDefaultVatRateValue } from "@/lib/vat-rates";
 import { Plus, Trash2 } from "lucide-react";
 
 type Supplier = { id: string; name: string };
@@ -17,6 +20,7 @@ type Product = {
   unit_of_measure: string | null;
   item_type: string | null;
   is_ingredient: boolean | null;
+  vat_rate?: number | null;
 };
 type LineItem = {
   id: number;
@@ -65,17 +69,6 @@ const ITEM_TYPE_LABELS_EN: Record<string, string> = {
 
 const RO_UM_OPTIONS = ["Buc", "kg", "g", "L", "ml", "pachet", "cutie", "bax", "doză", "pungă"];
 const EN_UM_OPTIONS = ["each", "kg", "g", "L", "ml", "pack", "box", "case", "bag"];
-
-const RO_TAX_RATES = [
-  { label: "0% TVA", value: "0" },
-  { label: "11% TVA", value: "11" },
-  { label: "21% TVA", value: "21" },
-];
-const EN_TAX_RATES = [
-  { label: "0% VAT", value: "0" },
-  { label: "9% VAT", value: "9" },
-  { label: "23% VAT", value: "23" },
-];
 
 function SupplierCombobox({
   suppliers,
@@ -282,6 +275,7 @@ export function PurchaseForm({
   currency = "EUR",
   currentUserId,
   initialDraft,
+  vatRates = [],
 }: {
   suppliers: Supplier[];
   products: Product[];
@@ -289,10 +283,11 @@ export function PurchaseForm({
   currency?: string;
   currentUserId?: string;
   initialDraft?: PurchaseDraftInitial;
+  vatRates?: OrgVatRate[];
 }) {
   const isRO = currency === "RON";
   const taxLabel = isRO ? "TVA" : "VAT";
-  const taxRates = isRO ? RO_TAX_RATES : EN_TAX_RATES;
+  const defaultVatRate = String(getDefaultVatRateValue(vatRates));
   const umOptions = isRO ? RO_UM_OPTIONS : EN_UM_OPTIONS;
   const itemTypeLabels = isRO ? ITEM_TYPE_LABELS : ITEM_TYPE_LABELS_EN;
   const defaultUm = isRO ? "Buc" : "each";
@@ -317,11 +312,11 @@ export function PurchaseForm({
         unit_of_measure: item.unit_of_measure || defaultUm,
       }));
     }
-    return [{ id: 0, product_id: "", quantity: "", unit_cost: "", tax_rate: "0", unit_of_measure: defaultUm }];
+    return [{ id: 0, product_id: "", quantity: "", unit_cost: "", tax_rate: defaultVatRate, unit_of_measure: defaultUm }];
   });
 
   function addLine() {
-    setLines((prev) => [...prev, { id: nextId.current++, product_id: "", quantity: "", unit_cost: "", tax_rate: "0", unit_of_measure: defaultUm }]);
+    setLines((prev) => [...prev, { id: nextId.current++, product_id: "", quantity: "", unit_cost: "", tax_rate: defaultVatRate, unit_of_measure: defaultUm }]);
   }
   function removeLine(id: number) {
     setLines((prev) => prev.filter((l) => l.id !== id));
@@ -331,8 +326,9 @@ export function PurchaseForm({
   }
   function onProductChange(lineId: number, productId: string) {
     const p = products.find((pr) => pr.id === productId);
+    const taxRate = p?.vat_rate != null ? String(p.vat_rate) : defaultVatRate;
     setLines((prev) => prev.map((l) => l.id === lineId
-      ? { ...l, product_id: productId, unit_of_measure: p?.unit_of_measure || defaultUm }
+      ? { ...l, product_id: productId, unit_of_measure: p?.unit_of_measure || defaultUm, tax_rate: taxRate }
       : l));
   }
 
@@ -505,14 +501,14 @@ export function PurchaseForm({
                       value={line.unit_cost}
                       onChange={(e) => updateLine(line.id, "unit_cost", e.target.value)}
                     />
-                    <select
-                      name="tax_rate"
+                    <VatRateSelect
+                      rates={vatRates}
                       value={line.tax_rate}
-                      onChange={(e) => updateLine(line.id, "tax_rate", e.target.value)}
-                      className="h-10 rounded-md border border-slate-200 bg-white px-2 text-sm"
-                    >
-                      {taxRates.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
-                    </select>
+                      onChange={(rate) => updateLine(line.id, "tax_rate", rate)}
+                      name="tax_rate"
+                      compact
+                      settingsHint={false}
+                    />
                     <div className="text-right text-sm font-medium text-slate-700 tabular-nums">
                       {calc.lineTotal > 0 ? fmt(calc.lineTotal) : "—"}
                     </div>

@@ -1,16 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  APP_LOCALE_CHANGE_EVENT,
-  POS_LOCALE_STORAGE_KEY,
-  type PosLocale,
-} from "@/lib/pos-i18n";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
+import { useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import type { MarketingLocale } from "@/lib/marketing/locale";
 
 const PARTNER_TYPES_EN = [
   "POS / software reseller",
@@ -28,29 +25,26 @@ const PARTNER_TYPES_RO = [
   "Altul",
 ] as const;
 
-function readLocale(): PosLocale {
-  if (typeof window === "undefined") return "en";
-  try {
-    const raw = localStorage.getItem(POS_LOCALE_STORAGE_KEY);
-    if (raw === "en" || raw === "ro") return raw;
-  } catch {
-    /* ignore */
-  }
-  return "en";
-}
+const PARTNER_TYPES_IT = [
+  "Rivenditore POS / software",
+  "Commercialista o consulente fiscale",
+  "Consulente hospitality",
+  "Operatore multi-sede",
+  "Altro",
+] as const;
+
+const PARTNER_TYPES: Record<MarketingLocale, readonly string[]> = {
+  en: PARTNER_TYPES_EN,
+  ro: PARTNER_TYPES_RO,
+  it: PARTNER_TYPES_IT,
+};
 
 export function PartnerContactForm() {
-  const [locale, setLocale] = useState<PosLocale>(readLocale);
+  const locale = useMarketingLocale();
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState("");
   const t = getMarketingMessages(locale);
-  const partnerTypes = locale === "ro" ? PARTNER_TYPES_RO : PARTNER_TYPES_EN;
-
-  useEffect(() => {
-    const sync = () => setLocale(readLocale());
-    window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-    return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-  }, []);
+  const partnerTypes = PARTNER_TYPES[locale];
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

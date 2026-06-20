@@ -2,10 +2,13 @@ import { redirect } from "next/navigation";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { listAccessibleSites } from "@/lib/site-context";
 import { PurchaseForm, type PurchaseDraftInitial } from "@/components/app/PurchaseForm";
+import { ensurePosDefaults } from "@/app/actions/kitchenops";
+import { listActiveVatRates } from "@/lib/vat-rates-server";
 
 export default async function PurchaseEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, orgId, currency, membership, user } = await getKitchenOpsContext();
+  await ensurePosDefaults();
 
   const { data: purchase } = await supabase
     .from("purchases")
@@ -16,16 +19,17 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
 
   if (!purchase || purchase.status !== "draft") redirect(`/app/purchases/${id}`);
 
-  const [suppRes, prodRes, sites] = await Promise.all([
+  const [suppRes, prodRes, sites, vatRates] = await Promise.all([
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     supabase
       .from("products")
-      .select("id,name,unit_of_measure,item_type,is_ingredient")
+      .select("id,name,unit_of_measure,item_type,is_ingredient,vat_rate")
       .eq("organisation_id", orgId)
       .eq("active", true)
       .or("is_purchaseable.eq.true,is_ingredient.eq.true")
       .order("name"),
     listAccessibleSites(supabase, orgId, membership.id, membership.role),
+    listActiveVatRates(supabase, orgId),
   ]);
 
   type ItemRow = {
@@ -56,6 +60,7 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
       currency={currency}
       currentUserId={user?.id}
       initialDraft={initialDraft}
+      vatRates={vatRates}
     />
   );
 }

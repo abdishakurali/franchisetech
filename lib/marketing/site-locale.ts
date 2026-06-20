@@ -10,6 +10,7 @@ export function localeAlternates(path: string): Metadata["alternates"] {
     languages: {
       en: url,
       ro: url,
+      it: url,
       "x-default": url,
     },
   };

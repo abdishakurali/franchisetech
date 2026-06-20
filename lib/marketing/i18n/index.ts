@@ -2,15 +2,19 @@ import type { MarketingLocale } from "@/lib/marketing/locale";
 import type { SeoPage } from "@/lib/marketing/seo";
 import { en, type MarketingMessages } from "./en";
 import { ro } from "./ro";
+import { it } from "./it";
 import { seoRoOverrides } from "./seo-ro";
+import { seoItOverrides } from "./seo-it";
 
 export function getMarketingMessages(locale: MarketingLocale): MarketingMessages {
-  return (locale === "ro" ? ro : en) as MarketingMessages;
+  return (locale === "ro" ? ro : locale === "it" ? it : en) as MarketingMessages;
 }
 
 export function localizeSeoPage(page: SeoPage, locale: MarketingLocale): SeoPage {
-  if (locale !== "ro") return page;
-  const override = seoRoOverrides[page.slug];
+  const overrides =
+    locale === "ro" ? seoRoOverrides : locale === "it" ? seoItOverrides : null;
+  if (!overrides) return page;
+  const override = overrides[page.slug];
   if (!override) return page;
   return {
     ...page,
@@ -22,4 +26,4 @@ export function localizeSeoPage(page: SeoPage, locale: MarketingLocale): SeoPage
   };
 }
 
-export { en, ro };
+export { en, ro, it };

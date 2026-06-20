@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { requireBusinessModule } from "@/lib/module-guard";
 
 export default async function StockPage() {
+  await requireBusinessModule("inventory");
   const { supabase, orgId, currency } = await getKitchenOpsContext();
   let products: Array<{id:string;name:string;current_stock_qty:number|null;reorder_level:number|null;unit_of_measure:string|null;cost_price:number|null;product_categories?:{name:string}|null}> = [];
   try {

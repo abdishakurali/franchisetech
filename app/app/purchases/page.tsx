@@ -6,6 +6,7 @@ import { deletePurchases } from "@/app/actions/kitchenops";
 import { PurchasesBulkTable } from "@/components/app/PurchasesBulkTable";
 import { PageHint } from "@/components/app/PageHint";
 import { countsTowardPurchaseSpend } from "@/lib/nir/purchase";
+import { requireBusinessModule } from "@/lib/module-guard";
 
 type SupplierRef = { name: string } | null;
 type PurchaseRow = {
@@ -23,6 +24,7 @@ type PurchaseRow = {
 };
 
 export default async function PurchasesPage() {
+  await requireBusinessModule("inventory");
   const { supabase, orgId, currency } = await getKitchenOpsContext();
   const isRO = currency === "RON";
   const purchRes = await supabase.from("purchases")

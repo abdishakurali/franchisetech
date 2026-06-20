@@ -27,6 +27,7 @@ export function writeMarketingLocaleClient(locale: MarketingLocale): void {
   try {
     localStorage.setItem(MARKETING_LOCALE_STORAGE_KEY, locale);
     document.cookie = `${MARKETING_LOCALE_COOKIE}=${locale};path=/;max-age=31536000;samesite=lax`;
+    window.dispatchEvent(new Event(MARKETING_LOCALE_CHANGE_EVENT));
   } catch {
     /* ignore */
   }

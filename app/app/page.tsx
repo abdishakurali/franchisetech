@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { DateFilter } from "@/components/app/DateFilter";
+import { DashboardModulePrompts } from "@/components/app/DashboardModulePrompts";
+import { enableInventoryFromDashboard, enableRecipeFromDashboard } from "@/app/actions/dashboard-modules";
+import { canUseModule, type OrgModuleRow } from "@/lib/business-modules";
+import { getSubscriptionStatus } from "@/lib/billing/subscription";
+import type { BillingPlan } from "@/lib/billing/plans";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -51,8 +56,22 @@ export default async function DashboardPage({ searchParams }: Props) {
     periodLabel = "vs yesterday";
   }
 
-  const { supabase, orgId, currency } = await getKitchenOpsContext();
-  const [currentTx, prevTx, sessionResult, productCount, recipeCount, lowStockResult, topItems] = await Promise.all([
+  const { supabase, orgId, currency, membership } = await getKitchenOpsContext();
+  const orgRow = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as Record<string, unknown> | null;
+  const sub = await getSubscriptionStatus(orgId).catch(() => null);
+  const subscriptionPlan = (sub?.plan === "starter" || sub?.plan === "pro" || sub?.plan === "multi_location") ? sub.plan as BillingPlan : null;
+  const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
+  const orgModules: OrgModuleRow = {
+    business_profile: (orgRow?.business_profile as string | null) ?? null,
+    inventory_enabled: Boolean(orgRow?.inventory_enabled),
+    recipe_costing_enabled: Boolean(orgRow?.recipe_costing_enabled),
+    team_advanced_enabled: Boolean(orgRow?.team_advanced_enabled),
+    multi_site_ops_enabled: Boolean(orgRow?.multi_site_ops_enabled),
+  };
+  const inventoryVisible = canUseModule({ org: orgModules, module: "inventory", subscriptionPlan, hasTrial });
+  const recipeVisible = canUseModule({ org: orgModules, module: "recipe_costing", subscriptionPlan, hasTrial });
+
+  const [currentTx, prevTx, sessionResult, productCount, recipeCount, lowStockResult, topItems, txTotal] = await Promise.all([
     supabase
       .from("pos_transactions")
       .select("total,tip_amount,payment_methods(type)")
@@ -71,6 +90,7 @@ export default async function DashboardPage({ searchParams }: Props) {
     supabase.from("recipes").select("id", { count: "exact", head: true }).eq("organisation_id", orgId),
     supabase.from("products").select("id,name,current_stock_qty,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true"),
     supabase.from("pos_transaction_items").select("product_name,gross_amount,pos_transactions!inner(organisation_id,status)").eq("pos_transactions.organisation_id", orgId).eq("pos_transactions.status", "completed"),
+    supabase.from("pos_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "completed"),
   ]);
 
   const currentTotal = (currentTx.data ?? []).reduce((s, t) => s + Number(t.total ?? 0), 0);
@@ -92,9 +112,21 @@ export default async function DashboardPage({ searchParams }: Props) {
   const topProduct = [...productTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "No sales yet";
   const lowStock = (lowStockResult.data ?? []).filter((p) => Number(p.reorder_level ?? 0) > 0 && Number(p.current_stock_qty ?? 0) <= Number(p.reorder_level ?? 0));
   const setupDone = (productCount.count ?? 0) > 0 && (recipeCount.count ?? 0) > 0;
+  const visibleReports = reportCards.filter((card) => {
+    if (card.href.includes("/stock") || card.href.includes("/purchases")) return inventoryVisible;
+    if (card.href.includes("/margins")) return recipeVisible;
+    return true;
+  });
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
+      <DashboardModulePrompts
+        showInventoryPrompt={!inventoryVisible && !orgModules.inventory_enabled}
+        showRecipePrompt={!recipeVisible && !orgModules.recipe_costing_enabled}
+        showFirstSaleTour={(txTotal.count ?? 0) === 0}
+        enableInventoryAction={enableInventoryFromDashboard}
+        enableRecipeAction={enableRecipeFromDashboard}
+      />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-slate-950">Today at a glance</h1>
@@ -102,8 +134,8 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <DateFilter current={period} />
-          <Link href="/app/setup-checklist"><Button variant="outline">Setup guide</Button></Link>
-          <Link href="/app/pos"><Button className="bg-blue-600 hover:bg-blue-700 text-white">Open POS</Button></Link>
+          <Link href="/app/setup-checklist" data-tour="setup-guide"><Button variant="outline">Setup guide</Button></Link>
+          <Link href="/app/pos" data-tour="open-pos"><Button className="bg-blue-600 hover:bg-blue-700 text-white">Open POS</Button></Link>
         </div>
       </div>
 
@@ -164,17 +196,27 @@ export default async function DashboardPage({ searchParams }: Props) {
           <CardHeader><CardTitle className="text-base">What needs attention</CardTitle></CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-3">
             <Link href="/app/products/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50"><Package className="mb-2 h-5 w-5 text-blue-600" /><p className="font-semibold">Add products</p><p className="text-xs text-slate-500">Add items you sell.</p></Link>
-            <Link href="/app/stock" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50"><Package className="mb-2 h-5 w-5 text-blue-600" /><p className="font-semibold">Manage stock</p><p className="text-xs text-slate-500">Track stock and ingredients.</p></Link>
-            <Link href="/app/recipes/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50"><TrendingUp className="mb-2 h-5 w-5 text-blue-600" /><p className="font-semibold">Create recipe</p><p className="text-xs text-slate-500">See margin and can make.</p></Link>
+            {inventoryVisible ? (
+              <Link href="/app/stock" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50"><Package className="mb-2 h-5 w-5 text-blue-600" /><p className="font-semibold">Manage stock</p><p className="text-xs text-slate-500">Track stock and ingredients.</p></Link>
+            ) : null}
+            {recipeVisible ? (
+              <Link href="/app/recipes/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50"><TrendingUp className="mb-2 h-5 w-5 text-blue-600" /><p className="font-semibold">Create recipe</p><p className="text-xs text-slate-500">See margin and can make.</p></Link>
+            ) : null}
           </CardContent>
         </Card>
         <Card>
           <CardHeader><CardTitle className="text-base">Stock watch</CardTitle></CardHeader>
           <CardContent className="space-y-2">
-            {lowStock.length ? lowStock.slice(0, 5).map((p) => (
-              <div key={p.id} className="flex items-center justify-between text-sm"><span>{p.name}</span><Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge></div>
-            )) : <p className="text-sm text-slate-500">{setupDone ? "Stock looks okay." : "Create recipes and purchases to start tracking stock."}</p>}
-            <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">View stock <ArrowRight className="h-3 w-3" /></Link>
+            {inventoryVisible ? (
+              <>
+                {lowStock.length ? lowStock.slice(0, 5).map((p) => (
+                  <div key={p.id} className="flex items-center justify-between text-sm"><span>{p.name}</span><Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge></div>
+                )) : <p className="text-sm text-slate-500">{setupDone ? "Stock looks okay." : "Create recipes and purchases to start tracking stock."}</p>}
+                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">View stock <ArrowRight className="h-3 w-3" /></Link>
+              </>
+            ) : (
+              <p className="text-sm text-slate-500">Enable stock tracking in Settings when you are ready to manage inventory.</p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -185,7 +227,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           <p className="text-sm text-slate-500">Clear numbers for managers and owners.</p>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {reportCards.map(({ href, title, text, icon: Icon }) => (
+          {visibleReports.map(({ href, title, text, icon: Icon }) => (
             <Link key={href} href={href} className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
               <Icon className="mb-2 h-5 w-5 text-blue-600" />
               <p className="font-semibold">{title}</p>

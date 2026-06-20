@@ -20,6 +20,8 @@ import {
   type PurchaseLineInput,
 } from "@/lib/nir/purchase";
 import { createServiceClient } from "@/lib/supabase/server";
+import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
+import { nearestVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 
 function canTransact(role: string | null) { return ["owner","manager","staff","cashier"].includes(role ?? ""); }
 function canManage(role: string | null) { return ["owner","manager"].includes(role ?? ""); }
@@ -157,6 +159,9 @@ async function createKitchenOrderIfEnabled({
 
 export async function ensurePosDefaults() {
   const { supabase, orgId } = await getActiveOrg();
+  const { data: orgRow } = await supabase.from("organisations").select("country_code").eq("id", orgId).single();
+  const countryCode = orgRow?.country_code ?? null;
+
   const { data: cats } = await supabase.from("product_categories").select("id").eq("organisation_id", orgId).limit(1);
   if (!cats?.length) {
     await supabase.from("product_categories").insert([
@@ -174,6 +179,7 @@ export async function ensurePosDefaults() {
       { organisation_id: orgId, name: "Other", type: "other" },
     ]);
   }
+  await seedOrgVatRatesIfEmpty(supabase, orgId, countryCode);
 }
 
 export async function addCategory(formData: FormData) {
@@ -1226,6 +1232,21 @@ export async function importProductsCsv(formData: FormData) {
   let imported = 0, skipped = 0;
   const { data: existingCats } = await supabase.from("product_categories").select("id,name").eq("organisation_id", orgId);
   const categories = new Map((existingCats ?? []).map((c) => [String(c.name).toLowerCase(), c.id]));
+  const { data: vatRateRows } = await supabase
+    .from("vat_rates")
+    .select("id,name,rate,is_default,active,fiscalnet_vat_group,sort_order")
+    .eq("organisation_id", orgId)
+    .eq("active", true)
+    .order("sort_order");
+  const catalogRates = (vatRateRows ?? []).map((r) => ({
+    id: r.id as string,
+    name: r.name as string,
+    rate: Number(r.rate),
+    is_default: r.is_default as boolean | null,
+    active: r.active as boolean | null,
+    fiscalnet_vat_group: r.fiscalnet_vat_group as number | null,
+    sort_order: r.sort_order as number | null,
+  }));
   for (const row of rows) {
     const name = row.name?.trim();
     if (!name) { skipped++; continue; }
@@ -1239,13 +1260,19 @@ export async function importProductsCsv(formData: FormData) {
         if (categoryId) categories.set(categoryName.toLowerCase(), categoryId);
       }
     }
+    const rawVat = row.vat_rate !== "" && row.vat_rate != null ? Number(row.vat_rate) : null;
+    let vatRate = rawVat ?? 0;
+    if (catalogRates.length > 0) {
+      const nearest = nearestVatRate(catalogRates, vatRate);
+      vatRate = nearest?.rate ?? vatRate;
+    }
     const { error } = await supabase.from("products").insert({
       organisation_id: orgId, name, category_id: categoryId,
       sku: row.sku || row.barcode || null,
       unit_of_measure: row.unit || "each",
       sale_price: Number(row.sale_price_gross || 0),
       cost_price: row.cost_price ? Number(row.cost_price) : null,
-      vat_rate: Number(row.vat_rate || 0),
+      vat_rate: vatRate,
       available_in_pos: row.available_in_pos ? csvBool(row.available_in_pos) : true,
       is_ingredient: csvBool(row.is_ingredient),
       is_stock_tracked: csvBool(row.is_stock_tracked),
@@ -1870,27 +1897,12 @@ export async function deleteVatRate(formData: FormData): Promise<void> {
 
 // ── VAT defaults seeding ─────────────────────────────────────────────────
 
-const VAT_DEFAULTS: Record<string, Array<{ name: string; rate: number; fiscalnet_vat_group: number | null; is_default: boolean }>> = {
-  RO: [
-    { name: "TVA Standard 19%", rate: 19, fiscalnet_vat_group: 1, is_default: true },
-    { name: "TVA Redus 9%",     rate: 9,  fiscalnet_vat_group: 2, is_default: false },
-    { name: "TVA Super-redus 5%", rate: 5, fiscalnet_vat_group: 3, is_default: false },
-    { name: "Scutit 0%",        rate: 0,  fiscalnet_vat_group: 4, is_default: false },
-  ],
-  IE: [
-    { name: "Standard Rate 23%",       rate: 23,   fiscalnet_vat_group: null, is_default: true },
-    { name: "Reduced Rate 13.5%",      rate: 13.5, fiscalnet_vat_group: null, is_default: false },
-    { name: "Second Reduced Rate 9%",  rate: 9,    fiscalnet_vat_group: null, is_default: false },
-    { name: "Zero Rate 0%",            rate: 0,    fiscalnet_vat_group: null, is_default: false },
-  ],
-};
-
 export async function seedDefaultVatRates(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
   const countryCode = (stringValue(formData, "country_code") ?? "IE").toUpperCase();
-  const defaults = VAT_DEFAULTS[countryCode] ?? VAT_DEFAULTS.IE;
+  const defaults = VAT_DEFAULTS_BY_COUNTRY[countryCode] ?? VAT_DEFAULTS_BY_COUNTRY.IE;
   const { count } = await supabase
     .from("vat_rates")
     .select("id", { count: "exact", head: true })
@@ -1907,6 +1919,60 @@ export async function seedDefaultVatRates(formData: FormData): Promise<void> {
   }));
   await supabase.from("vat_rates").insert(rows);
   revalidatePath("/app/settings");
+}
+
+
+// ── Business profile & modules ────────────────────────────────────────────
+
+export async function updateBusinessProfileAndModules(formData: FormData): Promise<void> {
+  "use server";
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+
+  const profile = String(formData.get("business_profile") ?? "").trim();
+  const inventory = formData.get("inventory_enabled") === "true";
+  const recipeCosting = formData.get("recipe_costing_enabled") === "true";
+  const teamAdvanced = formData.get("team_advanced_enabled") === "true";
+  const multiSite = formData.get("multi_site_ops_enabled") === "true";
+
+  const updates: Record<string, unknown> = {};
+  if (profile === "simple" || profile === "standard" || profile === "multi_site") {
+    updates.business_profile = profile;
+  }
+  updates.inventory_enabled = inventory;
+  updates.recipe_costing_enabled = recipeCosting;
+  updates.team_advanced_enabled = teamAdvanced;
+  updates.multi_site_ops_enabled = multiSite;
+
+  if (Object.keys(updates).length) {
+    await supabase.from("organisations").update(updates).eq("id", orgId);
+  }
+
+  revalidatePath("/app");
+  revalidatePath("/app/settings");
+  revalidatePath("/app/setup-checklist");
+}
+
+export async function enableBusinessModule(module: "inventory" | "recipe_costing" | "team_advanced" | "multi_site"): Promise<void> {
+  "use server";
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+
+  const columnMap = {
+    inventory: "inventory_enabled",
+    recipe_costing: "recipe_costing_enabled",
+    team_advanced: "team_advanced_enabled",
+    multi_site: "multi_site_ops_enabled",
+  } as const;
+
+  await supabase.from("organisations").update({ [columnMap[module]]: true }).eq("id", orgId);
+  revalidatePath("/app");
+  revalidatePath("/app/settings");
+  revalidatePath("/app/setup-checklist");
+}
+
+export async function enableInventoryFromSetup(): Promise<void> {
+  return enableBusinessModule("inventory");
 }
 
 

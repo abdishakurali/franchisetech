@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { requireBusinessModule } from "@/lib/module-guard";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -35,6 +36,7 @@ function firstJoined<T>(v: T | T[] | null | undefined): T | null {
 }
 
 export default async function RecipesPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
+  await requireBusinessModule("recipe_costing");
   const { supabase, orgId, currency } = await getKitchenOpsContext();
   const params = await searchParams;
   const q = (params?.q ?? "").trim().toLowerCase();

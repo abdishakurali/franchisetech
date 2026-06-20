@@ -1,14 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import {
-  APP_LOCALE_CHANGE_EVENT,
-  POS_LOCALE_STORAGE_KEY,
-  type PosLocale,
-} from "@/lib/pos-i18n";
+import Link from "next/link";
+import { useState } from "react";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
+import { useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import { MarketingBrand } from "@/components/marketing/MarketingBrand";
 import { MarketingLocaleSwitcher } from "@/components/marketing/MarketingLocaleSwitcher";
 
 type UserChip = {
@@ -16,27 +13,10 @@ type UserChip = {
   initials: string;
 };
 
-function readLocale(): PosLocale {
-  if (typeof window === "undefined") return "en";
-  try {
-    const raw = localStorage.getItem(POS_LOCALE_STORAGE_KEY);
-    if (raw === "en" || raw === "ro") return raw;
-  } catch {
-    /* ignore */
-  }
-  return "en";
-}
-
 export function MarketingHeader({ user }: { user: UserChip | null }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [locale, setLocale] = useState<PosLocale>(readLocale);
+  const locale = useMarketingLocale();
   const t = getMarketingMessages(locale);
-
-  useEffect(() => {
-    const sync = () => setLocale(readLocale());
-    window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-    return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-  }, []);
 
   const navLinks = [
     { href: "/features", label: t.nav.features },
@@ -49,11 +29,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-[4.25rem] max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon.svg" alt="" className="h-8 w-8 shrink-0 rounded-lg" />
-          <span className="text-base font-semibold tracking-tight text-slate-900">franchisetech</span>
-        </Link>
+        <MarketingBrand onClick={() => setMobileOpen(false)} />
 
         <nav className="hidden items-center gap-6 text-sm text-slate-500 md:flex">
           {navLinks.map((link) => (

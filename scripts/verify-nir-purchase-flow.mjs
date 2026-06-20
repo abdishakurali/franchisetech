@@ -193,5 +193,28 @@ console.log("P1.8 NIR purchase flow verification\n");
   assert("cancelled excluded from spend", !countsTowardPurchaseSpend("cancelled"));
 }
 
+// 9. Unified VAT catalog — no hardcoded purchase/product rate arrays
+{
+  const purchaseForm = read("components/app/PurchaseForm.tsx");
+  const productNew = read("app/app/products/new/page.tsx");
+  const productEdit = read("app/app/products/[id]/edit/page.tsx");
+  const vatLib = read("lib/vat-rates.ts");
+  assert("PurchaseForm has no RO_TAX_RATES", !purchaseForm.includes("RO_TAX_RATES"));
+  assert("PurchaseForm has no EN_TAX_RATES", !purchaseForm.includes("EN_TAX_RATES"));
+  assert("PurchaseForm uses VatRateSelect", purchaseForm.includes("VatRateSelect"));
+  assert("products/new has no VAT_RATES constant", !productNew.includes("VAT_RATES = ["));
+  assert("products/edit has no VAT_RATES constant", !productEdit.includes("VAT_RATES = ["));
+  assert("PurchaseForm inherits product vat_rate on pick", purchaseForm.includes("tax_rate: taxRate"));
+  const roDefaults = vatLib.match(/RO:\s*\[[\s\S]*?\]/);
+  assert("RO VAT defaults defined", Boolean(roDefaults));
+  if (roDefaults) {
+    const block = roDefaults[0];
+    assert("RO seed includes 19%", block.includes("rate: 19"));
+    assert("RO seed includes 9%", block.includes("rate: 9"));
+    assert("RO seed includes 5%", block.includes("rate: 5"));
+    assert("RO seed includes 0%", block.includes("rate: 0"));
+  }
+}
+
 console.log(`\n${passed} passed, ${failed} failed`);
 process.exit(failed > 0 ? 1 : 0);

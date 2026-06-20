@@ -1,26 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import {
-  APP_LOCALE_CHANGE_EVENT,
-  POS_LOCALE_STORAGE_KEY,
-  type PosLocale,
-} from "@/lib/pos-i18n";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
+import { useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
 import { Section } from "@/components/marketing/MarketingShell.primitives";
-
-function readLocale(): PosLocale {
-  if (typeof window === "undefined") return "en";
-  try {
-    const raw = localStorage.getItem(POS_LOCALE_STORAGE_KEY);
-    if (raw === "en" || raw === "ro") return raw;
-  } catch {
-    /* ignore */
-  }
-  return "en";
-}
 
 export function CtaRow({
   secondaryHref = "/pricing",
@@ -29,15 +13,8 @@ export function CtaRow({
   secondaryHref?: string;
   secondaryLabel?: string;
 }) {
-  const [locale, setLocale] = useState<PosLocale>(readLocale);
+  const locale = useMarketingLocale();
   const t = getMarketingMessages(locale);
-
-  useEffect(() => {
-    const sync = () => setLocale(readLocale());
-    window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-    return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-  }, []);
-
   const secondary = secondaryLabel ?? t.cta.seePricing;
 
   return (
@@ -59,14 +36,8 @@ export function CtaRow({
 }
 
 export function FinalCta({ title }: { title?: string }) {
-  const [locale, setLocale] = useState<PosLocale>(readLocale);
+  const locale = useMarketingLocale();
   const t = getMarketingMessages(locale);
-
-  useEffect(() => {
-    const sync = () => setLocale(readLocale());
-    window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-    return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-  }, []);
 
   return (
     <Section tone="slate">

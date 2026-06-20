@@ -1,19 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Bell, CheckCircle2, Plus, Thermometer, Trash2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import { ArrowRight, CheckCircle2, Store, Building2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { createOrganisationWithOwner } from "@/app/actions/onboarding";
-import { saveReminderSchedules } from "@/app/actions/reminders";
-import { targetRangeLabel, type AssetType } from "@/lib/temperature";
+import { completePosOnboarding } from "@/app/actions/onboarding";
+import {
+  deriveBusinessProfile,
+  recommendedPlanForProfile,
+  BUSINESS_PROFILE_LABELS,
+  type IngredientTrackingIntent,
+  type LocationBand,
+} from "@/lib/business-profile";
+import { pricingPlans } from "@/lib/billing/plans";
 
-const steps = ["Business", "Units", "Reminders", "Start"];
+const steps = ["Business", "Size", "Plan", "Quick setup", "Start"];
 
 const businessTypes = [
   "Restaurant",
@@ -29,214 +33,216 @@ const businessTypes = [
   "Other",
 ];
 
-const roles = ["Owner", "Manager", "Staff"];
-
-const unitTypes = [
-  { value: "fridge", label: "Fridge" },
-  { value: "freezer", label: "Freezer" },
-  { value: "cold_room", label: "Cold Room" },
-  { value: "chill_display", label: "Chill Display" },
-  { value: "hot_hold", label: "Hot Hold" },
-  { value: "other", label: "Other" },
+const countryOptions = [
+  { code: "RO", label: "Romania" },
+  { code: "IE", label: "Ireland" },
+  { code: "UK", label: "United Kingdom" },
+  { code: "OTHER", label: "Other" },
 ];
 
-const ALL_DAYS = [1, 2, 3, 4, 5, 6, 7];
-const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const locationOptions: { value: LocationBand; label: string; hint: string }[] = [
+  { value: "one", label: "1 location", hint: "Single shop or café" },
+  { value: "few", label: "2–5 locations", hint: "Small chain or franchise" },
+  { value: "many", label: "6+ locations", hint: "Multi-site operator" },
+];
 
-type UnitForm = { id: string; name: string; unitType: AssetType };
-
-function newUnit(): UnitForm {
-  return { id: crypto.randomUUID(), name: "", unitType: "fridge" };
-}
+const ingredientOptions: { value: IngredientTrackingIntent; label: string }[] = [
+  { value: "no", label: "No — sell finished products only" },
+  { value: "yes", label: "Yes — track ingredients and costs" },
+  { value: "later", label: "Later — start with POS first" },
+];
 
 export default function OnboardingPage() {
-  const router = useRouter();
   const [step, setStep] = useState(0);
-  const [saving, setSaving] = useState(false);
-  const [orgForm, setOrg] = useState({ name: "", businessType: "", userName: "", role: "Owner" });
-  const [units, setUnits] = useState<UnitForm[]>([newUnit()]);
+  const [pending, startTransition] = useTransition();
+  const [form, setForm] = useState({
+    name: "",
+    businessType: "",
+    userName: "",
+    countryCode: "RO",
+    locationBand: "one" as LocationBand,
+    ingredientTracking: "later" as IngredientTrackingIntent,
+    seedSampleCategory: true,
+  });
 
-  // Reminder step state
-  const [remindersEnabled, setRemindersEnabled] = useState(false);
-  const [reminderRecipients, setReminderRecipients] = useState("");
-  const [morningTime, setMorningTime] = useState("09:00");
-  const [eveningTime, setEveningTime] = useState("17:00");
-  const [reviewTime, setReviewTime] = useState("18:00");
-  const [reminderDays, setReminderDays] = useState(ALL_DAYS);
-  const [onboardingOrgId, setOnboardingOrgId] = useState<string | null>(null);
+  const profile = deriveBusinessProfile({
+    locationBand: form.locationBand,
+    ingredientTracking: form.ingredientTracking,
+  });
+  const recommendedPlan = recommendedPlanForProfile(profile);
+  const planDef = pricingPlans.find((p) => p.id === recommendedPlan);
 
-  const businessTypeLabel = orgForm.businessType || "Select type…";
-  const roleLabel = orgForm.role;
+  const update = (patch: Partial<typeof form>) => setForm((current) => ({ ...current, ...patch }));
 
-  const updateUnit = (id: string, patch: Partial<UnitForm>) => {
-    setUnits((current) => current.map((unit) => unit.id === id ? { ...unit, ...patch } : unit));
-  };
-
-  const removeUnit = (id: string) => {
-    setUnits((current) => current.length === 1 ? current : current.filter((unit) => unit.id !== id));
-  };
-
-  const handleBusinessNext = () => {
-    if (!orgForm.name.trim()) return toast.error("Business name is required");
-    if (!orgForm.userName.trim()) return toast.error("Your name is required");
-    setStep(1);
-  };
-
-  const handleUnitsNext = () => {
-    if (units.some((unit) => !unit.name.trim())) return toast.error("Each unit needs a name");
-    setStep(2);
-  };
-
-  const handleRemindersNext = async () => {
-    // Save org first if not yet saved (we save here so reminders can reference the org)
-    if (!onboardingOrgId) {
-      setSaving(true);
-      const result = await createOrganisationWithOwner({
-        orgName: orgForm.name,
-        businessType: orgForm.businessType || undefined,
-        userName: orgForm.userName,
-        assets: units.map((unit) => ({ name: unit.name, assetType: unit.unitType })),
+  const handleFinish = () => {
+    startTransition(async () => {
+      const result = await completePosOnboarding({
+        orgName: form.name,
+        businessType: form.businessType || undefined,
+        userName: form.userName,
+        countryCode: form.countryCode,
+        locationBand: form.locationBand,
+        ingredientTracking: form.ingredientTracking,
+        seedSampleCategory: form.seedSampleCategory,
       });
-      setSaving(false);
-      if ("error" in result && result.error) {
+      if (result && "error" in result && result.error) {
         toast.error(result.error);
-        return;
       }
-      setOnboardingOrgId(result.organisationId ?? null);
-    }
-
-    if (remindersEnabled) {
-      const recipients = reminderRecipients
-        .split(/[,\n]/)
-        .map((r) => r.trim())
-        .filter(Boolean);
-
-      if (!recipients.length) {
-        toast.error("Add at least one recipient email, or skip reminders.");
-        return;
-      }
-
-      const schedules = [
-        { label: "Morning fridge/freezer check", time_of_day: morningTime },
-        { label: "Evening fridge/freezer check", time_of_day: eveningTime },
-        { label: "Manager daily review", time_of_day: reviewTime, reminder_type: "manager_review" as const },
-      ].map((s) => ({
-        reminder_type: (s.reminder_type ?? "temperature_check") as "temperature_check" | "manager_review",
-        label: s.label,
-        time_of_day: s.time_of_day,
-        days_of_week: reminderDays,
-        recipients,
-        enabled: true,
-      }));
-
-      const saveResult = await saveReminderSchedules(schedules);
-      if (saveResult.error) {
-        toast.error(saveResult.error);
-        return;
-      }
-    }
-
-    setStep(3);
-  };
-
-  const handleFinish = async () => {
-    // Org was already created in handleRemindersNext; just redirect
-    router.push("/app/checks/new?tour=first-check");
-    router.refresh();
+    });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-xl">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <Thermometer className="h-7 w-7 text-blue-600" />
-          <span className="font-bold text-slate-900 text-xl">FridgeProof</span>
+    <div className="min-h-screen bg-slate-50">
+      <header className="border-b bg-white">
+        <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-4">
+          <img src="/franchise-tech-logo.png" alt="franchisetech" className="h-8 w-auto" />
         </div>
+      </header>
 
-        <div className="flex items-center justify-center mb-8 gap-2">
-          {steps.map((s, i) => (
-            <div key={s} className="flex items-center gap-1">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${i < step ? "bg-green-500 text-white" : i === step ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-500"}`}>
-                {i < step ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
-              </div>
-              <span className={`text-xs font-medium hidden sm:block mr-2 ${i === step ? "text-blue-700" : i < step ? "text-green-700" : "text-slate-400"}`}>{s}</span>
-              {i < steps.length - 1 && <div className="w-8 h-px bg-slate-200" />}
-            </div>
-          ))}
+      <main className="mx-auto max-w-3xl px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-slate-950">Set up your business</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            A short quiz so we show the right tools — POS first, stock and recipes when you need them.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {steps.map((label, index) => (
+              <span
+                key={label}
+                className={`rounded-full px-3 py-1 text-xs font-medium ${
+                  index === step
+                    ? "bg-blue-600 text-white"
+                    : index < step
+                      ? "bg-green-100 text-green-700"
+                      : "bg-slate-100 text-slate-500"
+                }`}
+              >
+                {index + 1}. {label}
+              </span>
+            ))}
+          </div>
         </div>
 
         {step === 0 && (
           <Card>
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div>
-                <h1 className="text-xl font-bold text-slate-900">About your business</h1>
-                <p className="text-sm text-slate-500 mt-1">We create Main Kitchen automatically.</p>
+                <Label htmlFor="name">Business name</Label>
+                <Input
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => update({ name: e.target.value })}
+                  placeholder="e.g. Café Central"
+                  className="mt-1"
+                />
               </div>
-              <div className="space-y-1.5">
-                <Label>Business name *</Label>
-                <Input data-tour="business-name" placeholder="Use the name on your food business records" value={orgForm.name} onChange={(e) => setOrg((f) => ({ ...f, name: e.target.value }))} />
-                <p className="text-xs text-slate-500">Use the name shown on your food business records.</p>
+              <div>
+                <Label htmlFor="userName">Your name</Label>
+                <Input
+                  id="userName"
+                  value={form.userName}
+                  onChange={(e) => update({ userName: e.target.value })}
+                  placeholder="Owner or manager name"
+                  className="mt-1"
+                />
               </div>
-              <div className="space-y-1.5" data-tour="business-type">
-                <Label>Business type</Label>
-                <Select value={orgForm.businessType} onValueChange={(v) => setOrg((f) => ({ ...f, businessType: v }))}>
-                  <SelectTrigger><span className="truncate">{businessTypeLabel}</span></SelectTrigger>
-                  <SelectContent>{businessTypes.map((type) => <SelectItem key={type} value={type}>{type}</SelectItem>)}</SelectContent>
-                </Select>
+              <div>
+                <Label htmlFor="businessType">Industry</Label>
+                <select
+                  id="businessType"
+                  value={form.businessType}
+                  onChange={(e) => update({ businessType: e.target.value })}
+                  className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+                >
+                  <option value="">Select type…</option>
+                  {businessTypes.map((type) => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
               </div>
-              <div className="space-y-1.5">
-                <Label>Your name *</Label>
-                <Input data-tour="user-name" placeholder="e.g. Alex Murphy" value={orgForm.userName} onChange={(e) => setOrg((f) => ({ ...f, userName: e.target.value }))} />
+              <div>
+                <Label htmlFor="countryCode">Country</Label>
+                <select
+                  id="countryCode"
+                  value={form.countryCode}
+                  onChange={(e) => update({ countryCode: e.target.value })}
+                  className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+                >
+                  {countryOptions.map((opt) => (
+                    <option key={opt.code} value={opt.code}>{opt.label}</option>
+                  ))}
+                </select>
               </div>
-              <div className="space-y-1.5" data-tour="role-select">
-                <Label>Your role</Label>
-                <Select value={orgForm.role} onValueChange={(v) => setOrg((f) => ({ ...f, role: v }))}>
-                  <SelectTrigger><span className="truncate">{roleLabel}</span></SelectTrigger>
-                  <SelectContent>{roles.map((role) => <SelectItem key={role} value={role}>{role}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <Button onClick={handleBusinessNext} className="w-full bg-blue-600 hover:bg-blue-700 text-white gap-2">Continue <ArrowRight className="h-4 w-4" /></Button>
+              <Button
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                onClick={() => {
+                  if (!form.name.trim()) return toast.error("Business name is required");
+                  if (!form.userName.trim()) return toast.error("Your name is required");
+                  setStep(1);
+                }}
+              >
+                Continue <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </CardContent>
           </Card>
         )}
 
         {step === 1 && (
           <Card>
-            <CardContent className="p-6 space-y-5">
+            <CardContent className="space-y-5 pt-6">
               <div>
-                <h1 className="text-xl font-bold text-slate-900">Add your first units</h1>
-                <p className="text-sm text-slate-500 mt-1">Add 1 to 5 fridges, freezers, cold rooms, or hot-hold units.</p>
+                <p className="text-sm font-medium text-slate-700">How many locations?</p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                  {locationOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => update({ locationBand: opt.value })}
+                      className={`rounded-xl border p-3 text-left transition-colors ${
+                        form.locationBand === opt.value
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <MapPin className="mb-1 h-4 w-4 text-blue-600" />
+                      <p className="text-sm font-semibold">{opt.label}</p>
+                      <p className="text-xs text-slate-500">{opt.hint}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
-              {units.map((unit, index) => {
-                const typeLabel = unitTypes.find((type) => type.value === unit.unitType)?.label ?? "Fridge";
-                return (
-                  <div key={unit.id} className="rounded-lg border border-slate-100 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-slate-900">Unit {index + 1}</p>
-                      {units.length > 1 && <Button variant="ghost" size="sm" onClick={() => removeUnit(unit.id)}><Trash2 className="h-4 w-4" /></Button>}
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Unit name *</Label>
-                      <Input data-tour="unit-name" placeholder={index === 0 ? "Walk-in Cold Room" : "Fish Fridge"} value={unit.name} onChange={(e) => updateUnit(unit.id, { name: e.target.value })} />
-                      <p className="text-xs text-slate-500">Example: Walk-in Cold Room, Fish Fridge, Main Freezer.</p>
-                    </div>
-                    <div className="space-y-1.5" data-tour="unit-type">
-                      <Label>Unit type</Label>
-                      <Select value={unit.unitType} onValueChange={(v) => updateUnit(unit.id, { unitType: v as AssetType })}>
-                        <SelectTrigger><span className="truncate">{typeLabel}</span></SelectTrigger>
-                        <SelectContent>{unitTypes.map((type) => <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>)}</SelectContent>
-                      </Select>
-                      <p className="text-xs text-slate-500">Target range: {targetRangeLabel(unit.unitType)}</p>
-                    </div>
-                  </div>
-                );
-              })}
-              <Button data-tour="add-unit" variant="outline" className="w-full gap-2" disabled={units.length >= 5} onClick={() => setUnits((current) => [...current, newUnit()])}>
-                <Plus className="h-4 w-4" /> Add another unit
-              </Button>
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(0)}>Back</Button>
-                <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={handleUnitsNext}>Continue</Button>
+              <div>
+                <p className="text-sm font-medium text-slate-700">Track ingredients and stock?</p>
+                <div className="mt-2 space-y-2">
+                  {ingredientOptions.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 ${
+                        form.ingredientTracking === opt.value
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-slate-200"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="ingredientTracking"
+                        checked={form.ingredientTracking === opt.value}
+                        onChange={() => update({ ingredientTracking: opt.value })}
+                      />
+                      <span className="text-sm">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+                <span className="font-medium">Your profile:</span>{" "}
+                {BUSINESS_PROFILE_LABELS[profile]}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(0)}>Back</Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => setStep(2)}>
+                  Continue <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -244,92 +250,30 @@ export default function OnboardingPage() {
 
         {step === 2 && (
           <Card>
-            <CardContent className="p-6 space-y-5">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Bell className="h-5 w-5 text-blue-600" />
-                  <h1 className="text-xl font-bold text-slate-900">Set reminder times</h1>
-                </div>
-                <p className="text-sm text-slate-500">
-                  FridgeProof can email reminders so checks are not forgotten.
+            <CardContent className="space-y-4 pt-6">
+              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                <p className="text-sm text-blue-800">Recommended plan for your setup</p>
+                <p className="mt-1 text-xl font-semibold text-slate-950">{planDef?.name ?? recommendedPlan}</p>
+                <p className="mt-1 text-sm text-slate-600">{planDef?.description}</p>
+                <p className="mt-2 text-lg font-bold text-blue-700">
+                  {planDef?.price}{planDef?.cadence}
                 </p>
               </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRemindersEnabled((v) => !v)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${remindersEnabled ? "bg-blue-600" : "bg-slate-200"}`}
-                >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${remindersEnabled ? "translate-x-6" : "translate-x-1"}`} />
-                </button>
-                <span className="text-sm font-medium text-slate-700">
-                  {remindersEnabled ? "Email reminders on" : "Enable email reminders"}
-                </span>
-              </div>
-
-              {remindersEnabled && (
-                <div className="space-y-4 pt-1">
-                  <div className="space-y-1.5">
-                    <Label>Recipient emails</Label>
-                    <Input
-                      placeholder="chef@example.com, manager@example.com"
-                      value={reminderRecipients}
-                      onChange={(e) => setReminderRecipients(e.target.value)}
-                    />
-                    <p className="text-xs text-slate-500">Comma-separated. Defaults to your account email.</p>
-                  </div>
-
-                  <div className="grid sm:grid-cols-3 gap-3">
-                    <div className="space-y-1.5">
-                      <Label>Morning check</Label>
-                      <Input type="time" value={morningTime} onChange={(e) => setMorningTime(e.target.value)} />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Evening check</Label>
-                      <Input type="time" value={eveningTime} onChange={(e) => setEveningTime(e.target.value)} />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Manager review</Label>
-                      <Input type="time" value={reviewTime} onChange={(e) => setReviewTime(e.target.value)} />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label>Days</Label>
-                    <div className="flex gap-1 flex-wrap">
-                      {ALL_DAYS.map((d, i) => (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() =>
-                            setReminderDays((prev) =>
-                              prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()
-                            )
-                          }
-                          className={`w-9 h-8 rounded text-xs font-medium border transition-colors ${
-                            reminderDays.includes(d)
-                              ? "bg-blue-600 text-white border-blue-600"
-                              : "bg-white text-slate-600 border-slate-200 hover:border-slate-400"
-                          }`}
-                        >
-                          {DAY_LABELS[i]}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>Back</Button>
-                <Button
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white gap-2"
-                  disabled={saving}
-                  onClick={handleRemindersNext}
-                >
-                  {saving ? "Saving…" : remindersEnabled ? "Save & continue" : "Skip reminders"}
-                  {!saving && <ArrowRight className="h-4 w-4" />}
+              <ul className="space-y-2 text-sm text-slate-600">
+                {(planDef?.features ?? []).slice(0, 5).map((feature) => (
+                  <li key={feature} className="flex items-start gap-2">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-slate-500">
+                You start on a free trial. Choose a plan later from Billing — no checkout now.
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => setStep(3)}>
+                  Continue <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
@@ -338,29 +282,67 @@ export default function OnboardingPage() {
 
         {step === 3 && (
           <Card>
-            <CardContent className="p-6 space-y-5">
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">Start first check</h1>
-                <p className="text-sm text-slate-500 mt-1">Start with one fridge. Add sensors later.</p>
-              </div>
-              <div className="rounded-lg border border-slate-100 bg-slate-50 p-4 text-sm text-slate-700 space-y-2">
-                <p><span className="font-medium text-slate-900">Business:</span> {orgForm.name}</p>
-                <p><span className="font-medium text-slate-900">Role:</span> {orgForm.role}</p>
-                <p><span className="font-medium text-slate-900">Kitchen:</span> Main Kitchen</p>
-                <p><span className="font-medium text-slate-900">Units:</span> {units.map((unit) => unit.name).join(", ")}</p>
-                {remindersEnabled && <p><span className="font-medium text-slate-900">Reminders:</span> Set up ✓</p>}
-              </div>
-              <div className="flex gap-3">
-                <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>Back</Button>
-                <Button data-tour="start-first-check" className="flex-1 bg-blue-600 hover:bg-blue-700 text-white gap-2" onClick={handleFinish}>
-                  Start first temperature check
-                  <ArrowRight className="h-4 w-4" />
+            <CardContent className="space-y-4 pt-6">
+              <p className="text-sm text-slate-600">
+                We will add Cash and Card payment methods automatically. Optionally seed a starter category.
+              </p>
+              <label className="flex items-start gap-3 rounded-lg border border-slate-200 p-3">
+                <input
+                  type="checkbox"
+                  checked={form.seedSampleCategory}
+                  onChange={(e) => update({ seedSampleCategory: e.target.checked })}
+                  className="mt-1"
+                />
+                <div>
+                  <p className="text-sm font-medium">Add a &quot;General&quot; product category</p>
+                  <p className="text-xs text-slate-500">Saves one step when you add your first products.</p>
+                </div>
+              </label>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white" onClick={() => setStep(4)}>
+                  Continue <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
           </Card>
         )}
-      </div>
+
+        {step === 4 && (
+          <Card>
+            <CardContent className="space-y-4 pt-6">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-lg border p-3 text-center">
+                  <Store className="mx-auto mb-2 h-6 w-6 text-blue-600" />
+                  <p className="text-xs font-medium">{BUSINESS_PROFILE_LABELS[profile]}</p>
+                </div>
+                <div className="rounded-lg border p-3 text-center">
+                  <Building2 className="mx-auto mb-2 h-6 w-6 text-blue-600" />
+                  <p className="text-xs font-medium">{planDef?.name ?? "Trial"}</p>
+                </div>
+                <div className="rounded-lg border p-3 text-center">
+                  <CheckCircle2 className="mx-auto mb-2 h-6 w-6 text-green-600" />
+                  <p className="text-xs font-medium">POS-first setup guide</p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-600">
+                Next: add products, open the till, and make your first sale. Stock and recipes stay hidden until you enable them.
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(3)} disabled={pending}>Back</Button>
+                <Button
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={pending}
+                  onClick={handleFinish}
+                >
+                  {pending ? "Creating workspace…" : "Go to setup guide"}
+                  {!pending && <ArrowRight className="ml-2 h-4 w-4" />}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </main>
     </div>
   );
 }

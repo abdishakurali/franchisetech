@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { addProduct, ensurePosDefaults } from "@/app/actions/kitchenops";
 import { ImageUploadField } from "@/components/app/ImageUploadField";
-
-const VAT_RATES = [0, 9, 13.5, 23];
+import { ProductVatField } from "@/components/app/ProductVatField";
+import { listActiveVatRates } from "@/lib/vat-rates-server";
+import { getDefaultVatRateValue } from "@/lib/vat-rates";
 const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
 const KITCHEN_STATIONS = [
   { value: "bar",         label: "Bar" },
@@ -30,11 +31,13 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
   const params = await searchParams;
   const defaultIngredient = params?.type === "ingredient";
 
-  const [{ data: categories }, { data: units }, { data: suppliers }] = await Promise.all([
+  const [{ data: categories }, { data: units }, { data: suppliers }, vatRates] = await Promise.all([
     supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).order("sort_order"),
     supabase.from("units_of_measure").select("name").or(`organisation_id.eq.${orgId},organisation_id.is.null`).order("name").then(r => ({ data: r.data })),
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
+    listActiveVatRates(supabase, orgId),
   ]);
+  const defaultVatRate = getDefaultVatRateValue(vatRates);
 
   const allUnits = [...new Set([...DEFAULT_UNITS, ...((units ?? []).map((u: {name:string}) => u.name))])];
 
@@ -101,9 +104,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
               </div>
               <div>
                 <Label>VAT rate</Label>
-                <select name="vat_rate" className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
-                  {VAT_RATES.map((r) => <option key={r} value={r}>{r}%</option>)}
-                </select>
+                <ProductVatField rates={vatRates} defaultRate={defaultVatRate} />
               </div>
               <div>
                 <Label>Unit *</Label>

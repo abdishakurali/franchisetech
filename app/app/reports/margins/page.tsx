@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext, marginPercent } from "@/lib/kitchenops/metrics";
+import { requireBusinessModule } from "@/lib/module-guard";
 
 type JoinedProduct = { name?: string | null; sale_price?: number | string | null } | null;
 
@@ -11,6 +12,7 @@ function firstJoined<T>(value: T | T[] | null | undefined): T | null {
 }
 
 export default async function MarginReportPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
+  await requireBusinessModule("recipe_costing");
   const { supabase, orgId, currency } = await getKitchenOpsContext();
   const params = await searchParams;
   const q = (params?.q ?? "").trim().toLowerCase();

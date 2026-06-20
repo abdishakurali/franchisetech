@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { updateProduct, deleteProduct, ensurePosDefaults } from "@/app/actions/kitchenops";
 import { ImageUploadField } from "@/components/app/ImageUploadField";
-
-const VAT_RATES = [0, 9, 13.5, 23];
+import { ProductVatField } from "@/components/app/ProductVatField";
+import { listActiveVatRates } from "@/lib/vat-rates-server";
 const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
 const PLACEHOLDER_TYPES = ["coffee","drink","food","snack","ingredient","other"];
 const KITCHEN_STATIONS = [
@@ -29,11 +29,12 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
   const kitchenStationsEnabled = Boolean(orgInfo?.kitchen_stations_enabled);
   await ensurePosDefaults();
 
-  const [{ data: product }, { data: categories }, { data: units }, { data: suppliers }] = await Promise.all([
+  const [{ data: product }, { data: categories }, { data: units }, { data: suppliers }, vatRates] = await Promise.all([
     supabase.from("products").select("*").eq("id", id).eq("organisation_id", orgId).single(),
     supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).order("sort_order"),
     supabase.from("units_of_measure").select("name").or(`organisation_id.eq.${orgId},organisation_id.is.null`).order("name"),
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
+    listActiveVatRates(supabase, orgId),
   ]);
 
   if (!product) return <div className="p-6 text-slate-500">Product not found.</div>;
@@ -91,9 +92,7 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
               </div>
               <div>
                 <Label>VAT rate</Label>
-                <select name="vat_rate" defaultValue={product.vat_rate ?? 0} className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
-                  {VAT_RATES.map((r) => <option key={r} value={r}>{r}%</option>)}
-                </select>
+                <ProductVatField rates={vatRates} defaultRate={Number(product.vat_rate ?? 0)} />
               </div>
               <div>
                 <Label>Unit</Label>

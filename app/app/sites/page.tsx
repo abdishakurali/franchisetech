@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SitesManager } from "@/components/app/SitesManager";
+import { requireBusinessModule } from "@/lib/module-guard";
 
 export default async function SitesPage() {
+  await requireBusinessModule("multi_site");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");

@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { addSupplier } from "@/app/actions/kitchenops";
+import { requireBusinessModule } from "@/lib/module-guard";
 
 export default async function SuppliersNewPage() {
+  await requireBusinessModule("inventory");
   await getKitchenOpsContext();
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-6">

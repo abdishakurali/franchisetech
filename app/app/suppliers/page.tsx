@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { requireBusinessModule } from "@/lib/module-guard";
 import { importSuppliersCsv } from "@/app/actions/kitchenops";
 
 type SupplierRow = { id: string; name: string; contact_name: string | null; email: string | null; phone: string | null; active: boolean };
 type PurchaseRow = { supplier_id: string | null; total_amount: number | null };
 
 export default async function SuppliersPage() {
+  await requireBusinessModule("inventory");
   const { supabase, orgId, currency } = await getKitchenOpsContext();
   const [suppRes, purchRes] = await Promise.all([
     supabase.from("suppliers").select("*").eq("organisation_id", orgId).eq("active", true).order("name"),

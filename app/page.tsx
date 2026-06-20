@@ -10,7 +10,8 @@ import {
   Section,
   SectionLabel,
 } from "@/components/marketing/MarketingShell";
-import { BrowserFrame } from "@/components/marketing/DeviceFrames";
+import { HeroVisualCollage } from "@/components/marketing/HeroVisualCollage";
+import { HeroTrustSignals } from "@/components/marketing/HeroTrustSignals";
 import { ProductScreenshot } from "@/components/marketing/ProductScreenshot";
 import { FeatureShowcaseCard } from "@/components/marketing/FeatureShowcaseCard";
 import { JsonLd } from "@/components/marketing/JsonLd";
@@ -18,6 +19,7 @@ import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketi
 import { faqJsonLd, SITE_URL } from "@/lib/marketing/seo";
 import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
+import { marketingOpenGraphLocale } from "@/lib/marketing/locale";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
 import { showcaseAssets, type ShowcaseKey } from "@/lib/marketing/showcase";
 
@@ -33,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t.home.meta.title,
       description: t.home.meta.description,
       url: SITE_URL,
-      locale: locale === "ro" ? "ro_RO" : "en",
+      locale: marketingOpenGraphLocale(locale),
       images: [{ url: "/showcase/reports-dashboard.png", width: 1200, height: 750, alt: t.home.dashboard.alt }],
     },
   };
@@ -71,25 +73,19 @@ export default async function HomePage() {
             <p className={`mt-5 ${marketingSubtext}`}>{t.home.hero.subtitle}</p>
             <CtaRow secondaryHref="/features" secondaryLabel={t.cta.seeFeatures} />
             <p className="mt-5 text-sm text-slate-400">{t.home.hero.trialNote}</p>
+            <HeroTrustSignals items={t.home.hero.trustSignals} />
           </div>
-          <div className="relative">
-            <BrowserFrame
-              src={showcaseAssets.posCart.src}
-              alt={t.home.hero.posAlt}
-              path={showcaseAssets.posCart.path}
-              priority
-            />
-            <div className="absolute -bottom-6 -left-4 hidden w-[42%] overflow-hidden rounded-2xl border border-white/80 shadow-xl sm:block lg:-left-8">
-              <Image
-                src="/marketing/hero-cafe-pos.png"
-                alt={t.home.hero.cafeAlt}
-                width={400}
-                height={500}
-                className="aspect-[4/5] w-full object-cover"
-                unoptimized
-              />
-            </div>
-          </div>
+          <HeroVisualCollage
+            posSrc={showcaseAssets.posCart.src}
+            posAlt={t.home.hero.posAlt}
+            posPath={showcaseAssets.posCart.path}
+            cafeSrc="/marketing/hero-cafe-pos.png"
+            cafeAlt={t.home.hero.cafeAlt}
+            kitchenSrc={showcaseAssets.kitchenDisplay.src}
+            kitchenAlt={t.home.hero.kitchenAlt}
+            kitchenPath={showcaseAssets.kitchenDisplay.path}
+            priority
+          />
         </div>
       </section>
 
