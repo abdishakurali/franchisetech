@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthBrand } from "@/components/marketing/AuthBrand";
@@ -24,6 +24,7 @@ export default function SignupPage() {
   const planParam = searchParams.get("plan");
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
+  const [, startHydrate] = useTransition();
   const [form, setForm] = useState({ fullName: "", businessName: "", email: "", password: "" });
 
   useEffect(() => {
@@ -34,10 +35,11 @@ export default function SignupPage() {
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
-    if (emailParam) {
+    if (!emailParam) return;
+    startHydrate(() => {
       setForm((prev) => (prev.email ? prev : { ...prev, email: emailParam }));
-    }
-  }, [searchParams]);
+    });
+  }, [searchParams, startHydrate]);
 
   const selectedPlan = isPreferredBillingPlan(planParam) ? getPlan(planParam) : null;
 

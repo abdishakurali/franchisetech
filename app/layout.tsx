@@ -4,9 +4,10 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from "@/lib/marketing/seo";
-import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
+import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
-import { marketingHtmlLang } from "@/lib/marketing/locale";
+import { marketingHtmlLang, marketingOpenGraphLocale } from "@/lib/marketing/locale";
+import { getMarketingMessages } from "@/lib/marketing/i18n";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -21,49 +22,53 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export const metadata: Metadata = {
-  title: {
-    default: DEFAULT_TITLE,
-    template: "%s | franchisetech",
-  },
-  description: DEFAULT_DESCRIPTION,
-  keywords: [...MARKETING_KEYWORDS],
-  authors: [{ name: "franchisetech" }],
-  creator: "franchisetech",
-  metadataBase: new URL(SITE_URL),
-  manifest: "/manifest.webmanifest",
-  alternates: localeAlternates("/"),
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
-  },
-  openGraph: {
-    title: DEFAULT_TITLE,
-    description: DEFAULT_DESCRIPTION,
-    siteName: "franchisetech",
-    type: "website",
-    locale: "en",
-    url: SITE_URL,
-    images: [{ url: "/showcase/reports-dashboard.png", width: 1200, height: 750, alt: "franchisetech owner dashboard — today at a glance" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: DEFAULT_TITLE,
-    description: DEFAULT_DESCRIPTION,
-    images: ["/showcase/reports-dashboard.png"],
-  },
-  icons: {
-    icon: [
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/favicon.ico", sizes: "32x32" },
-    ],
-    apple: [
-      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
-    ],
-    shortcut: "/favicon.ico",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getMarketingLocale();
+  const t = getMarketingMessages(locale);
+  return {
+    title: {
+      default: t.home.meta.title || DEFAULT_TITLE,
+      template: "%s | franchisetech",
+    },
+    description: t.home.meta.description || DEFAULT_DESCRIPTION,
+    keywords: marketingKeywords(locale),
+    authors: [{ name: "franchisetech" }],
+    creator: "franchisetech",
+    metadataBase: new URL(SITE_URL),
+    manifest: "/manifest.webmanifest",
+    alternates: localeAlternates("/", locale),
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+    },
+    openGraph: {
+      title: t.home.meta.title || DEFAULT_TITLE,
+      description: t.home.meta.description || DEFAULT_DESCRIPTION,
+      siteName: "franchisetech",
+      type: "website",
+      locale: marketingOpenGraphLocale(locale),
+      url: SITE_URL,
+      images: [{ url: "/showcase/reports-dashboard.png", width: 1200, height: 750, alt: "franchisetech owner dashboard" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: t.home.meta.title || DEFAULT_TITLE,
+      description: t.home.meta.description || DEFAULT_DESCRIPTION,
+      images: ["/showcase/reports-dashboard.png"],
+    },
+    icons: {
+      icon: [
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/favicon.ico", sizes: "32x32" },
+      ],
+      apple: [
+        { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      ],
+      shortcut: "/favicon.ico",
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

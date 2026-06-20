@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t.industriesIndex.title,
     description: t.industriesIndex.description,
-    alternates: localeAlternates("/industries"),
+    alternates: localeAlternates("/industries", locale),
   };
 }
 

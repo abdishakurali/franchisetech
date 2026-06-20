@@ -14,7 +14,7 @@ import { IndustryTabs } from "@/components/marketing/IndustryTabs";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketing/tokens";
 import { faqJsonLd, SITE_URL } from "@/lib/marketing/seo";
-import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
+import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { marketingOpenGraphLocale } from "@/lib/marketing/locale";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
@@ -27,8 +27,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t.home.meta.title,
     description: t.home.meta.description,
-    keywords: [...MARKETING_KEYWORDS],
-    alternates: localeAlternates("/"),
+    keywords: marketingKeywords(locale),
+    alternates: localeAlternates("/", locale),
     openGraph: {
       title: t.home.meta.title,
       description: t.home.meta.description,

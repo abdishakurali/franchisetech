@@ -66,6 +66,7 @@ export const posText = {
     cashReceived: "Cash received",
     changeDue: "Change due",
     exact: "Exact",
+    custom: "Custom",
     cashUnderpaidMsg: "Amount received is less than the total due.",
     paymentMethod: "Payment method",
     saleNotCompleted: "Sale not completed. No payment recorded. Please try again.",
@@ -300,6 +301,7 @@ export const posText = {
     cashReceived: "Clientul a dat",
     changeDue: "Rest de dat",
     exact: "Exact",
+    custom: "Personalizat",
     cashUnderpaidMsg: "Suma primită este insuficientă.",
     paymentMethod: "Metodă de plată",
     saleNotCompleted: "Vânzarea nu a fost finalizată. Nicio plată nu a fost înregistrată. Încearcă din nou.",
@@ -485,6 +487,12 @@ export function posLocale(isRO: boolean): PosLocale {
 export function readPosLocalePreference(fallback: PosLocale): PosLocale {
   if (typeof window === "undefined") return fallback;
   try {
+    const marketingStored = localStorage.getItem("franchisetech:marketingLocale");
+    if (marketingStored === "ro") return "ro";
+    if (marketingStored === "en") return "en";
+    const cookieMatch = document.cookie.match(/franchisetech_locale=(en|ro|it)/);
+    if (cookieMatch?.[1] === "ro") return "ro";
+    if (cookieMatch?.[1] === "en") return "en";
     const raw = localStorage.getItem(POS_LOCALE_STORAGE_KEY);
     if (raw === "en" || raw === "ro") return raw;
   } catch {

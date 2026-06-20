@@ -5,6 +5,7 @@ export const en = {
     partners: "Partners",
     pricing: "Pricing",
     resources: "Resources",
+    blog: "Blog",
   },
   header: {
     login: "Login",
@@ -379,6 +380,23 @@ export const en = {
     updated: "Last updated:",
     disclaimer: "These terms are a practical starting point and should be reviewed by a qualified legal professional before paid customer use.",
     backPrivacy: "Privacy Policy",
+  },
+  blog: {
+    meta: {
+      title: "Blog — POS, stock & till tips for food businesses",
+      description:
+        "Practical guides for cafe and restaurant owners: POS, till close, stock control, and Z-reports — in plain language.",
+    },
+    eyebrow: "Blog",
+    title: "Guides for food business owners",
+    subtitle:
+      "POS, till close, stock, and compliance — written for cafes and restaurants in Romania and beyond.",
+    readMore: "Read article",
+    readMinutesLabel: (n: number) => `${n} min read`,
+    backToBlog: "Back to blog",
+    published: "Published",
+    ctaTitle: "Try franchisetech on your till",
+    ctaText: "15-day assisted trial. Setup help for products, payment methods, and your first sale.",
   },
 } as const;
 

@@ -1,4 +1,5 @@
 import { isMarketingLocale, MARKETING_LOCALE_COOKIE, type MarketingLocale } from "@/lib/marketing/locale";
+import { writePlatformLocale } from "@/lib/platform-locale";
 
 export const MARKETING_LOCALE_STORAGE_KEY = "franchisetech:marketingLocale";
 export const MARKETING_LOCALE_CHANGE_EVENT = "franchisetech:marketingLocaleChange";
@@ -23,12 +24,5 @@ export function readMarketingLocaleClient(): MarketingLocale {
 }
 
 export function writeMarketingLocaleClient(locale: MarketingLocale): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(MARKETING_LOCALE_STORAGE_KEY, locale);
-    document.cookie = `${MARKETING_LOCALE_COOKIE}=${locale};path=/;max-age=31536000;samesite=lax`;
-    window.dispatchEvent(new Event(MARKETING_LOCALE_CHANGE_EVENT));
-  } catch {
-    /* ignore */
-  }
+  writePlatformLocale(locale);
 }

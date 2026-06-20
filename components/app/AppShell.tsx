@@ -29,11 +29,14 @@ import { cn } from "@/lib/utils";
 import type { SubscriptionStatus } from "@/lib/billing/subscription";
 import { TrialBanner } from "@/components/billing/TrialBanner";
 import { resetPosTillOpen, subscribePosTillOpen, readPosTillOpenCookie } from "@/lib/pos-till-state";
+import { useAppI18n } from "@/lib/app-i18n-context";
+import { PlatformLocaleSwitcher } from "@/components/shared/PlatformLocaleSwitcher";
+import type { AppT } from "@/lib/app-i18n";
 
 interface AppShellProps {
   user: User;
   profile: { full_name: string | null; email: string | null } | null;
-  activeOrg: { id: string; name: string; trial_ends_at?: string | null; referral_credit_months?: number | null; kitchen_display_enabled?: boolean | null; compact_workstation_nav_enabled?: boolean | null; business_profile?: string | null } | null;
+  activeOrg: { id: string; name: string; country_code?: string | null; trial_ends_at?: string | null; referral_credit_months?: number | null; kitchen_display_enabled?: boolean | null; compact_workstation_nav_enabled?: boolean | null; business_profile?: string | null } | null;
   userRole: string | null;
   setupComplete?: boolean;
   moduleVisibility?: {
@@ -62,39 +65,42 @@ type NavItem = {
   exact: boolean;
 };
 
-function buildMainNav(userRole: string | null): NavItem[] {
+function buildMainNav(userRole: string | null, t: AppT): NavItem[] {
   const limited = userRole === "cashier" || userRole === "kitchen";
   if (limited) {
     return [
-      { href: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
-      { href: "/app/pos", label: "POS", icon: CreditCard, exact: false },
+      { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
+      { href: "/app/pos", label: t.nav.pos, icon: CreditCard, exact: false },
     ];
   }
 
   const nav: NavItem[] = [
-    { href: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { href: "/app/setup-checklist", label: "Setup guide", icon: ListChecks, exact: false },
-    { href: "/app/pos", label: "POS", icon: CreditCard, exact: false },
+    { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
+    { href: "/app/setup-checklist", label: t.nav.setupGuide, icon: ListChecks, exact: false },
+    { href: "/app/pos", label: t.nav.pos, icon: CreditCard, exact: false },
   ];
 
   nav.push(
-    { href: "/app/products", label: "Products", icon: Package, exact: false },
-    { href: "/app/recipes", label: "Recipes", icon: BookOpen, exact: false },
+    { href: "/app/products", label: t.nav.products, icon: Package, exact: false },
+    { href: "/app/recipes", label: t.nav.recipes, icon: BookOpen, exact: false },
   );
 
   return nav;
 }
 
-// Stock sub-section
-const stockNav = [
-  { href: "/app/stock",      label: "Stock levels", icon: Archive },
-  { href: "/app/purchases",  label: "Purchases",    icon: ShoppingBag },
-  { href: "/app/suppliers",  label: "Suppliers",    icon: Truck },
-];
+function buildStockNav(t: AppT) {
+  return [
+    { href: "/app/stock", label: t.nav.stockLevels, icon: Archive },
+    { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag },
+    { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck },
+  ];
+}
 
-const bottomNav = [
-  { href: "/app/settings", label: "Settings",    icon: Settings,   exact: false },
-];
+function buildBottomNav(t: AppT) {
+  return [
+    { href: "/app/settings", label: t.nav.settings, icon: Settings, exact: false },
+  ];
+}
 
 function FranchiseTechLogo({ className }: { className?: string }) {
   return <img src="/franchise-tech-logo.png" alt="FranchiseTech" className={className} />;
@@ -145,10 +151,11 @@ function NavLink({
 }
 
 function StockSection({
-  pathname, onNavigate, collapsed = false,
+  pathname, onNavigate, collapsed = false, t,
 }: {
-  pathname: string; onNavigate?: () => void; collapsed?: boolean;
+  pathname: string; onNavigate?: () => void; collapsed?: boolean; t: AppT;
 }) {
+  const stockNav = buildStockNav(t);
   const isStockActive = ["/app/stock", "/app/purchases", "/app/suppliers"].some(
     (p) => pathname.startsWith(p)
   );
@@ -158,7 +165,7 @@ function StockSection({
     return (
       <Link
         href="/app/stock"
-        title="Stock"
+        title={t.nav.stock}
         className={cn(
           "flex items-center justify-center rounded-lg transition-colors h-9 w-9 mx-auto",
           isStockActive
@@ -181,7 +188,7 @@ function StockSection({
         )}
       >
         <Archive className="h-4 w-4 flex-shrink-0" />
-        <span className="flex-1 text-left">Stock</span>
+        <span className="flex-1 text-left">{t.nav.stock}</span>
         <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", (open || isStockActive) ? "rotate-90" : "")} />
       </button>
       {(open || isStockActive) && (
@@ -203,7 +210,7 @@ function StockSection({
 
 function AppSidebar({
   pathname, activeOrg, userRole, initials, profile, user, setupComplete,
-  moduleVisibility,
+  moduleVisibility, t,
   onNavigate, onSettings, onLogout, collapsed = false,
   accessibleSites = [], activeSiteId = null,
 }: {
@@ -220,6 +227,7 @@ function AppSidebar({
     teamAdvanced: boolean;
     multiSite: boolean;
   };
+  t: AppT;
   mobile?: boolean;
   onNavigate?: () => void;
   onSettings: () => void;
@@ -268,8 +276,8 @@ function AppSidebar({
         collapsed ? "px-1 space-y-1" : "px-2 space-y-0.5"
       )}>
         {[
-          ...buildMainNav(userRole).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
-          ...(activeOrg?.kitchen_display_enabled ? [{ href: "/app/kitchen", label: "Kitchen", icon: ChefHat, exact: false }] : []),
+          ...buildMainNav(userRole, t).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
+          ...(activeOrg?.kitchen_display_enabled ? [{ href: "/app/kitchen", label: t.nav.kitchen, icon: ChefHat, exact: false }] : []),
         ]
           .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
           .filter((item) => {
@@ -288,12 +296,12 @@ function AppSidebar({
         ))}
 
         {moduleVisibility?.inventory === true && userRole !== "cashier" && userRole !== "kitchen" ? (
-          <StockSection pathname={pathname} onNavigate={onNavigate} collapsed={collapsed} />
+          <StockSection pathname={pathname} onNavigate={onNavigate} collapsed={collapsed} t={t} />
         ) : null}
 
         {/* Bottom nav */}
         <div className={cn("mt-1 border-t border-slate-100", collapsed ? "pt-1 space-y-1" : "pt-1")}>
-          {bottomNav
+          {buildBottomNav(t)
             .filter((item) => userRole !== "cashier" && userRole !== "kitchen")
             .map((item) => (
             <NavLink
@@ -330,10 +338,10 @@ function AppSidebar({
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align={collapsed ? "center" : "end"} className="w-48">
-            <DropdownMenuItem onClick={onSettings}>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={onSettings}>{t.nav.settings}</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onLogout} className="text-red-600">
-              <LogOut className="h-4 w-4 mr-2" />Sign out
+              <LogOut className="h-4 w-4 mr-2" />{t.nav.logout}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -346,6 +354,8 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useAppI18n();
+  const orgIsRO = activeOrg?.country_code === "RO";
   const [mobileOpen, setMobileOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
   const [mobileReferralOpen, setMobileReferralOpen] = useState(false);
@@ -397,7 +407,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   };
 
   const sidebarProps = {
-    pathname, activeOrg, userRole, initials, profile, user, setupComplete, moduleVisibility,
+    pathname, activeOrg, userRole, initials, profile, user, setupComplete, moduleVisibility, t,
     onSettings: () => router.push("/app/settings"),
     onLogout: handleLogout,
     collapsed: sidebarCollapsed,
@@ -430,7 +440,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
             />
             <button
               className="absolute top-3 right-3 text-slate-400 hover:text-slate-700"
-              aria-label="Close navigation"
+              aria-label={t.shell.closeNav}
               onClick={() => setMobileOpen(false)}
             >
               <X className="h-5 w-5" />
@@ -456,11 +466,12 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           <header className="print:hidden flex items-center justify-between h-11 px-4 bg-white border-b border-slate-100 shrink-0">
             <FranchiseTechLogo className="h-5 w-auto" />
             <div className="flex items-center gap-2 min-w-0">
+              <PlatformLocaleSwitcher scope="app" orgIsRO={orgIsRO} className="hidden sm:block" />
               {activeOrg?.name ? (
                 <span className="truncate text-xs font-medium text-slate-500 max-w-[40vw] sm:max-w-none">{activeOrg.name}</span>
               ) : null}
               {!posTillSelling && (
-                <Button variant="ghost" size="icon-sm" className="lg:hidden shrink-0" aria-label="Open navigation" onClick={() => setMobileOpen(true)}>
+                <Button variant="ghost" size="icon-sm" className="lg:hidden shrink-0" aria-label={t.shell.openNav} onClick={() => setMobileOpen(true)}>
                   <Menu className="h-4 w-4" />
                 </Button>
               )}
@@ -473,20 +484,20 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           <Dialog open={referralOpen} onOpenChange={setReferralOpen}>
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>Invite a friend, get 1 free month</DialogTitle>
+                <DialogTitle>{t.shell.inviteTitle}</DialogTitle>
                 <DialogDescription>
-                  Share your link with another cafe or food business. When they make their first payment, you earn one free month on your account.
+                  {t.shell.inviteDesc}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-3">
                 <p className="break-all rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{referral.link}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <CopyReferralButton link={referral.link} />
-                  {referral.code && <Badge variant="outline">Code {referral.code}</Badge>}
+                  {referral.code && <Badge variant="outline">{t.shell.referralCode} {referral.code}</Badge>}
                 </div>
               </div>
               <p className="text-xs text-slate-500">
-                Trial: {daysLeft} day{daysLeft === 1 ? "" : "s"} left · Referral credit: {creditMonths} free month{creditMonths === 1 ? "" : "s"} earned
+                {t.shell.trialDaysLeft(daysLeft)} · {t.shell.referralCredit(creditMonths)}
               </p>
             </DialogContent>
           </Dialog>
@@ -497,6 +508,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           <header className="lg:hidden print:hidden flex items-center justify-between h-11 px-4 bg-white border-b border-slate-100">
             <FranchiseTechLogo className="h-6 w-auto" />
             <div className="flex items-center gap-1">
+              <PlatformLocaleSwitcher scope="app" orgIsRO={orgIsRO} />
               {referral?.link && (
                 <>
                   <Button variant="ghost" size="icon-sm" aria-label="Open referral dialog" onClick={() => setMobileReferralOpen(true)}>
@@ -505,21 +517,21 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
                   <Dialog open={mobileReferralOpen} onOpenChange={setMobileReferralOpen}>
                     <DialogContent className="sm:max-w-lg">
                       <DialogHeader>
-                        <DialogTitle>Invite a friend, get 1 free month</DialogTitle>
+                        <DialogTitle>{t.shell.inviteTitle}</DialogTitle>
                         <DialogDescription>
-                          Share your link with another cafe or food business. When they make their first payment, you earn one free month on your account.
+                          {t.shell.inviteDesc}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-3">
                         <p className="break-all rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{referral.link}</p>
                         <CopyReferralButton link={referral.link} />
                       </div>
-                      <p className="text-xs text-slate-500">Referral credit: {creditMonths} free month{creditMonths === 1 ? "" : "s"} earned</p>
+                      <p className="text-xs text-slate-500">{t.shell.referralCredit(creditMonths)}</p>
                     </DialogContent>
                   </Dialog>
                 </>
               )}
-              <Button variant="ghost" size="icon-sm" aria-label="Open navigation" onClick={() => setMobileOpen(true)}>
+              <Button variant="ghost" size="icon-sm" aria-label={t.shell.openNav} onClick={() => setMobileOpen(true)}>
                 <Menu className="h-4 w-4" />
               </Button>
             </div>

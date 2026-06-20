@@ -69,17 +69,24 @@ export default function OnboardingPage() {
   });
 
   useEffect(() => {
+    let cancelled = false;
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    void supabase.auth.getUser().then(({ data: { user } }) => {
+      if (cancelled) return;
       const fullName = user?.user_metadata?.full_name as string | undefined;
       const businessName = user?.user_metadata?.business_name as string | undefined;
-      setForm((current) => ({
-        ...current,
-        userName: current.userName || fullName?.trim() || "",
-        name: current.name || businessName?.trim() || "",
-      }));
+      startTransition(() => {
+        setForm((current) => ({
+          ...current,
+          userName: current.userName || fullName?.trim() || "",
+          name: current.name || businessName?.trim() || "",
+        }));
+      });
     });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [startTransition]);
 
   const profile = deriveBusinessProfile({
     locationBand: form.locationBand,

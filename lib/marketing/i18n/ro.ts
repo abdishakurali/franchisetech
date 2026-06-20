@@ -7,6 +7,7 @@ export const ro: MarketingMessages = {
     partners: "Parteneri",
     pricing: "Prețuri",
     resources: "Resurse",
+    blog: "Blog",
   },
   header: {
     login: "Autentificare",
@@ -381,5 +382,22 @@ export const ro: MarketingMessages = {
     updated: "Ultima actualizare:",
     disclaimer: "Acești termeni sunt un punct de plecare practic și ar trebui revizuiți de un profesionist juridic înainte de utilizare comercială.",
     backPrivacy: "Politica de confidențialitate",
+  },
+  blog: {
+    meta: {
+      title: "Blog — POS, stoc și închidere casă pentru HORECA",
+      description:
+        "Ghiduri practice pentru proprietari de cafenele și restaurante: POS, închidere casă, control stoc și raport Z — pe înțelesul tuturor.",
+    },
+    eyebrow: "Blog",
+    title: "Ghiduri pentru proprietari HORECA",
+    subtitle:
+      "POS, închidere casă, stoc și conformitate — pentru cafenele și restaurante din România și nu numai.",
+    readMore: "Citește articolul",
+    readMinutesLabel: (n: number) => `${n} min citire`,
+    backToBlog: "Înapoi la blog",
+    published: "Publicat",
+    ctaTitle: "Încearcă franchisetech la casă",
+    ctaText: "Trial asistat 15 zile. Ajutor la produse, metode de plată și prima vânzare.",
   },
 };

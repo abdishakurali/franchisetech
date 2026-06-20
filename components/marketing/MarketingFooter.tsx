@@ -18,6 +18,7 @@ export function MarketingFooterClient() {
   ] as const;
 
   const supportLinks = [
+    ["/blog", t.nav.blog],
     ["/help", t.footer.help],
     ["/resources", t.footer.resources],
   ] as const;

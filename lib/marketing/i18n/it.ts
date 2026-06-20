@@ -7,6 +7,7 @@ export const it: MarketingMessages = {
     partners: "Partner",
     pricing: "Prezzi",
     resources: "Risorse",
+    blog: "Blog",
   },
   header: {
     login: "Accedi",
@@ -381,5 +382,22 @@ export const it: MarketingMessages = {
     updated: "Ultimo aggiornamento:",
     disclaimer: "Questi termini sono un punto di partenza pratico e dovrebbero essere revisionati da un professionista legale prima dell'uso commerciale.",
     backPrivacy: "Informativa sulla privacy",
+  },
+  blog: {
+    meta: {
+      title: "Blog — POS, magazzino e chiusura cassa per ristorazione",
+      description:
+        "Guide pratiche per bar e ristoranti: POS, chiusura cassa, controllo stock e report Z — in linguaggio chiaro.",
+    },
+    eyebrow: "Blog",
+    title: "Guide per titolari di attività food",
+    subtitle:
+      "POS, chiusura cassa, stock e conformità — per bar e ristoranti in Romania e oltre.",
+    readMore: "Leggi articolo",
+    readMinutesLabel: (n: number) => `${n} min di lettura`,
+    backToBlog: "Torna al blog",
+    published: "Pubblicato",
+    ctaTitle: "Prova franchisetech alla cassa",
+    ctaText: "Trial assistito 15 giorni. Aiuto per prodotti, pagamenti e prima vendita.",
   },
 };

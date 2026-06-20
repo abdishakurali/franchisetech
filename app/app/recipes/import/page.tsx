@@ -69,7 +69,7 @@ export default function RecipeImportClient() {
   return (
     <div className="space-y-6 p-6 max-w-3xl">
       <div className="flex items-center gap-3">
-        <a href="/app/recipes" className="text-sm text-slate-500 hover:text-slate-700">← Recipes</a>
+        <Link href="/app/recipes" className="text-sm text-slate-500 hover:text-slate-700">← Recipes</Link>
         <div>
           <h1 className="text-2xl font-semibold text-slate-950">Import recipes from CSV</h1>
           <p className="mt-1 text-sm text-slate-500">Use this to connect products to ingredients.</p>

@@ -7,7 +7,8 @@ import { PartnerContactForm } from "@/components/marketing/PartnerContactForm";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { partnerClients } from "@/lib/marketing/partners";
 import { SITE_URL } from "@/lib/marketing/seo";
-import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
+import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
+import { marketingOpenGraphLocale } from "@/lib/marketing/locale";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
 import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketing/tokens";
@@ -18,13 +19,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t.partners.title,
     description: t.partners.description,
-    keywords: [...MARKETING_KEYWORDS, "POS reseller", "hospitality software partner"],
-    alternates: localeAlternates("/partners"),
+    keywords: [...marketingKeywords(locale), "POS reseller", "hospitality software partner"],
+    alternates: localeAlternates("/partners", locale),
     openGraph: {
       title: t.partners.title,
       description: t.partners.description,
       url: `${SITE_URL}/partners`,
-      locale: locale === "ro" ? "ro_RO" : "en",
+      locale: marketingOpenGraphLocale(locale),
       images: [{ url: "/showcase/reports-dashboard.png", width: 1200, height: 750, alt: "franchisetech partner program" }],
     },
   };

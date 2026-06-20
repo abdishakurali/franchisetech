@@ -8,7 +8,7 @@ import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketi
 import { featurePages, SITE_URL } from "@/lib/marketing/seo";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages, localizeSeoPage } from "@/lib/marketing/i18n";
-import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
+import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getMarketingLocale();
@@ -16,8 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t.featuresIndex.title,
     description: t.featuresIndex.description,
-    keywords: [...MARKETING_KEYWORDS],
-    alternates: localeAlternates("/features"),
+    keywords: marketingKeywords(locale),
+    alternates: localeAlternates("/features", locale),
   };
 }
 

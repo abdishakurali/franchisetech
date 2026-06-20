@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app/AppShell";
+import { AppI18nProvider } from "@/lib/app-i18n-context";
 import { SupportChat } from "@/components/app/SupportChat";
 import { ensureReferralCode } from "@/lib/referrals";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
@@ -105,6 +106,7 @@ export default async function AppLayout({
   const isWorkstationRoute = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen") || pathname.startsWith("/app/settings");
 
   return (
+    <AppI18nProvider orgIsRO={activeOrg?.country_code === "RO"}>
     <AppShell
       user={user}
       profile={profile}
@@ -127,5 +129,6 @@ export default async function AppLayout({
         />
       )}
     </AppShell>
+    </AppI18nProvider>
   );
 }

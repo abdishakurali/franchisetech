@@ -23,9 +23,5 @@ export default async function OnboardingLayout({
     redirect("/app");
   }
 
-  if (membership) {
-    redirect("/app");
-  }
-
   return children;
 }

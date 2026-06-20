@@ -6,9 +6,9 @@ import {
   defaultPosLocale,
   posText,
   readPosLocalePreference,
-  writePosLocalePreference,
   type PosLocale,
 } from "@/lib/pos-i18n";
+import { writeAppLocale } from "@/lib/platform-locale";
 
 export type PosT = (typeof posText)[PosLocale];
 
@@ -31,9 +31,8 @@ export function PosI18nProvider({ orgIsRO, children }: { orgIsRO: boolean; child
   }, [fallback]);
 
   const setLocale = (next: PosLocale) => {
-    writePosLocalePreference(next);
+    writeAppLocale(next);
     setLocaleState(next);
-    window.dispatchEvent(new Event(APP_LOCALE_CHANGE_EVENT));
   };
   const t = posText[locale];
   const value = useMemo(() => ({ locale, t, setLocale }), [locale, t]);

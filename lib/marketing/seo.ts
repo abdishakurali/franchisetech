@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { createElement } from "react";
 import type { MarketingLocale } from "@/lib/marketing/locale";
-import { MARKETING_KEYWORDS, localeAlternates } from "@/lib/marketing/site-locale";
+import { marketingOpenGraphLocale } from "@/lib/marketing/locale";
+import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
+import { blogPosts } from "@/lib/marketing/blog/posts";
 
 export const SITE_URL = "https://franchisetech.ro";
 export const BRAND = "franchisetech";
@@ -778,6 +780,8 @@ export const publicPaths = [
   ...resourcePages.map((p) => p.path),
   "/privacy",
   "/terms",
+  "/blog",
+  ...blogPosts.map((p) => `/blog/${p.slug}`),
   "/legal-disclaimer",
 ];
 
@@ -794,13 +798,13 @@ export function pageMetadata(
   return {
     title: page.metaTitle,
     description: page.description,
-    keywords: [...MARKETING_KEYWORDS],
-    alternates: localeAlternates(page.path),
+    keywords: marketingKeywords(locale),
+    alternates: localeAlternates(page.path, locale),
     openGraph: {
       title: page.metaTitle,
       description: page.description,
       url: page.path,
-      locale: locale === "ro" ? "ro_RO" : "en",
+      locale: marketingOpenGraphLocale(locale),
       images: [{ url: image, width: 1200, height: 750, alt: page.metaTitle }],
     },
     twitter: {
@@ -844,22 +848,24 @@ export function seoMeta({
   description,
   path,
   image = "/showcase/pos-cart.png",
+  locale = "en" as MarketingLocale,
 }: {
   title: string;
   description: string;
   path: string;
   image?: string;
+  locale?: MarketingLocale;
 }): Metadata {
   return {
     title,
     description,
-    keywords: [...MARKETING_KEYWORDS],
-    alternates: localeAlternates(path),
+    keywords: marketingKeywords(locale),
+    alternates: localeAlternates(path, locale),
     openGraph: {
       title,
       description,
       url: path,
-      locale: "en",
+      locale: marketingOpenGraphLocale(locale),
       images: [{ url: image, width: 1200, height: 750, alt: title }],
     },
     twitter: {

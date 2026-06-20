@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Coffee, Droplets, LayoutGrid, LockKeyhole, MoreHorizontal, Package, Plus, RefreshCcw, UserPlus, Utensils } from "lucide-react";
+import { Banknote, ChevronDown, Coffee, Droplets, LayoutGrid, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
 import {
   DropdownMenu,
@@ -576,6 +576,7 @@ function PosRegisterInner({
   const [tipOpen, setTipOpen] = useState(false);
   const [splitOpen, setSplitOpen] = useState(false);
   const [cashReceived, setCashReceived] = useState<number | "">("");
+  const [cashCustomOpen, setCashCustomOpen] = useState(false);
   const [heldSales, setHeldSales] = useState<HeldSale[]>(() => listHeldSales());
   const [heldOpen, setHeldOpen] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<QueuedSale[]>(() => listOfflineQueue());
@@ -644,9 +645,6 @@ function PosRegisterInner({
   const splitRemaining = totalDue - splitPaid;
   const selectedPaymentType = paymentMethods.find((m) => m.id === paymentMethodId)?.type ?? "other";
   const isCashSingle = selectedPaymentType === "cash" && activeSplitPayments.length === 0 && cart.length > 0;
-  const changeDue = isCashSingle && typeof cashReceived === "number" && cashReceived > 0
-    ? Number((cashReceived - totalDue).toFixed(2))
-    : null;
   const cashUnderPaid = isCashSingle && typeof cashReceived === "number" && cashReceived > 0 && cashReceived < totalDue - 0.005;
   const totalVat = useMemo(() => cart.reduce((s, i) => s + lineVatAmount(i), 0), [cart]);
   const txDiscountPct = useMemo(() => transactionDiscountPct(cart), [cart]);
@@ -797,20 +795,20 @@ function PosRegisterInner({
     cashUnderPaid ||
     (features.splitPayments && activeSplitPayments.length > 0 && splitPaid + 0.0001 < totalDue);
   const cartItemCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
-  const quickCashOptions = useMemo(() => {
-    const exact = Number(totalDue.toFixed(2));
-    const values = [exact, ...[5, 10, 20, 50, 100].map((step) => Math.ceil(totalDue / step) * step)];
-    return [...new Set(values)].filter((v) => v >= exact).slice(0, 5);
-  }, [totalDue]);
-  const hasAdvancedOptions =
-    features.tips || features.splitPayments || features.kitchenDisplay || features.restaurantOrderFlow;
+  const cashQuickBills = useMemo(() => [35, 40, 50, 100], []);
+  const cashExactAmount = useMemo(() => Number(totalDue.toFixed(2)), [totalDue]);
+  const displayedChangeDue = isCashSingle
+    ? (typeof cashReceived === "number" && cashReceived > 0
+        ? Number((cashReceived - totalDue).toFixed(2))
+        : 0)
+    : null;
   const fiscalActive = isFiscalNetClientActive(isRO, fiscalNet);
 
   return (
-    <div className="relative flex w-full flex-1 bg-white lg:flex lg:overflow-hidden" style={{minHeight: 0}}>
+    <div className="relative flex w-full flex-1 flex-col bg-white min-h-0 lg:flex-row lg:overflow-hidden">
       {/* Left: Products column — order step only */}
       {checkoutStep === "order" && (
-      <div className="min-w-0 lg:flex-1 lg:flex lg:flex-col lg:overflow-hidden bg-white" style={{display: "flex", flexDirection: "column", overflow: "hidden", flex: "1 1 auto", minWidth: 0}}>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white lg:min-h-0">
         {/* Top bar: quick access + add product + new sale */}
         <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3 shrink-0">
           <Button
@@ -849,7 +847,7 @@ function PosRegisterInner({
           </Button>
         </div>
         {/* Products toolbar: categories, search */}
-        <div className="space-y-3 px-4 py-3 lg:flex-none" style={{flexShrink: 0}}>
+        <div className="space-y-3 px-3 py-3 sm:px-4 lg:flex-none shrink-0">
         <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 sm:flex-wrap sm:mx-0 sm:px-0">
           <button onClick={() => setActiveCategory("all")}
             className={`min-h-11 shrink-0 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${activeCategory === "all" ? "bg-blue-600 text-white border-blue-600" : "bg-white hover:bg-slate-50"}`}>
@@ -866,8 +864,7 @@ function PosRegisterInner({
         <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.searchProducts} className="max-w-none" aria-label={t.searchProducts} />
         </div>
         {/* Scrollable products area */}
-        <div className="px-4 pb-4 lg:flex-1 lg:min-h-0 lg:overflow-y-auto lg:py-4" style={{WebkitOverflowScrolling: "touch", flex: "1 1 auto", minHeight: 0, overflowY: "auto"}}>
-        <div className="grid gap-2.5 grid-cols-3 sm:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5" data-tour="pos-product">
+        <div className="grid flex-1 min-h-0 gap-2.5 overflow-y-auto px-3 pb-3 sm:gap-3 sm:px-4 lg:px-4 lg:pb-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5" style={{WebkitOverflowScrolling: "touch"}} data-tour="pos-product">
           {filtered.map((p) => {
             const cfg = getPhCfg(p);
             const inCart = cart.find((i) => i.product_id === p.id);
@@ -902,7 +899,6 @@ function PosRegisterInner({
               )}
             </div>
           )}
-        </div>
         </div>
         <PosQuickAccessSheet
           open={quickAccessOpen}
@@ -1110,8 +1106,8 @@ function PosRegisterInner({
           setSalePending(false);
           setCheckoutStep("payment");
         }
-      }} className={`flex flex-col bg-white ${focusedCheckout ? "absolute inset-0 z-20 min-h-0" : "min-h-[28rem] lg:min-h-0 lg:w-[300px] lg:flex-none lg:overflow-hidden lg:border-l lg:border-slate-100"}`} data-tour="pos-cart">
-        <div className={`flex flex-1 flex-col min-h-0 ${focusedCheckout ? "mx-auto w-full max-w-sm px-5" : ""}`}>
+      }} className={`flex min-h-0 flex-col bg-white ${focusedCheckout ? "absolute inset-0 z-20" : "w-full max-h-[min(52vh,32rem)] shrink-0 border-t border-slate-200 lg:max-h-none lg:w-[400px] lg:shrink-0 lg:overflow-hidden lg:border-t-0 lg:border-l lg:border-slate-100"}`} data-tour="pos-cart">
+        <div className={`flex min-h-0 flex-1 flex-col overflow-hidden ${focusedCheckout ? "mx-auto w-full max-w-xl px-6" : ""}`}>
         {checkoutStep === "complete" && lastCompletedSale ? (
           <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
             <div className="text-4xl">✓</div>
@@ -1174,12 +1170,13 @@ function PosRegisterInner({
             </div>
           </div>
         ) : checkoutStep === "payment" ? (
-          <div className="flex flex-1 flex-col py-6">
-            <div className="mb-6 flex items-center justify-between">
+          <div className="flex flex-1 flex-col py-5">
+            <div className="mb-5 flex items-center justify-between">
               <button
                 type="button"
                 onClick={() => {
                   setPaymentCartSnapshot(null);
+                  setCashCustomOpen(false);
                   setCheckoutStep("order");
                 }}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800"
@@ -1192,73 +1189,114 @@ function PosRegisterInner({
                 </button>
               )}
             </div>
-            <div className="flex-1 flex flex-col justify-center space-y-6">
-              <div className="text-center">
+            <div className="flex-1 flex flex-col space-y-5">
+              <div className="text-center py-2">
                 <p className="text-5xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</p>
-                <p className="mt-3 text-base text-slate-600">{t.howToPay}</p>
+                <p className="mt-2 text-sm text-slate-500">{t.howToPay}</p>
               </div>
-              {(!features.splitPayments || activeSplitPayments.length === 0) && (
-                <div className="space-y-2">
-                  {paymentMethods.map((m) => {
-                    const selected = paymentMethodId === m.id;
-                    return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => {
-                          setPaymentMethodId(m.id);
-                          if (m.type !== "cash") setCashReceived("");
-                        }}
-                        className={`flex w-full items-center justify-between rounded-xl border px-4 py-4 text-base font-semibold transition-colors ${selected ? "border-blue-600 bg-blue-50 text-blue-800" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}
-                      >
-                        <span>{paymentTypeLabel(m.type, m.name, locale)}</span>
-                        {selected ? <span className="text-blue-600">✓</span> : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-              {features.splitPayments && activeSplitPayments.length > 0 && (
+
+              {features.splitPayments && activeSplitPayments.length > 0 ? (
                 <button type="button" onClick={() => setSplitOpen(true)}
-                  className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}>
+                  className={`w-full rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}>
                   <span className="font-semibold">{t.splitPayment}</span>
                   {" · "}{t.splitPaid(money(splitPaid))}
                   {splitRemaining > 0.01 ? ` · ${t.splitRemaining(money(splitRemaining))}` : ` · ${t.splitFullyPaid}`}
                 </button>
-              )}
-              {isCashSingle && (
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2 justify-center">
-                    {quickCashOptions.map((v) => (
-                      <button
-                        key={v}
-                        type="button"
-                        onClick={() => setCashReceived(v)}
-                        className={`rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
-                          cashReceived === v
-                            ? "border-blue-600 bg-blue-600 text-white"
-                            : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-                        }`}
-                      >
-                        {v === Number(totalDue.toFixed(2)) ? t.exact : money(v)}
-                      </button>
-                    ))}
-                  </div>
-                  {changeDue !== null && (
-                    <div className={`flex items-center justify-between rounded-xl px-4 py-3 ${
-                      cashUnderPaid ? "bg-red-50" : "bg-green-50"
-                    }`}>
-                      <span className={`text-sm font-semibold ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
-                        {t.changeDue}
-                      </span>
-                      <span className={`text-xl font-bold tabular-nums ${cashUnderPaid ? "text-red-700" : "text-green-800"}`}>
-                        {cashUnderPaid ? `−${money(Math.abs(changeDue))}` : money(changeDue)}
-                      </span>
-                    </div>
-                  )}
-                  {cashUnderPaid && <p className="text-center text-sm text-red-600">{t.cashUnderpaidMsg}</p>}
+              ) : (
+                <div className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+                  {paymentMethods.map((m) => {
+                    const selected = paymentMethodId === m.id;
+                    const isCash = m.type === "cash";
+                    return (
+                      <div key={m.id} className="bg-white first:rounded-t-xl last:rounded-b-xl">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPaymentMethodId(m.id);
+                            if (m.type !== "cash") {
+                              setCashReceived("");
+                              setCashCustomOpen(false);
+                            }
+                          }}
+                          className={`flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors ${selected && !isCash ? "bg-blue-50/40" : "hover:bg-slate-50/80"}`}
+                        >
+                          <span className={`text-base font-medium ${selected ? "text-slate-900" : "text-slate-700"}`}>
+                            {paymentTypeLabel(m.type, m.name, locale)}
+                          </span>
+                          {selected && !isCash ? <span className="text-blue-600 text-sm font-semibold">✓</span> : null}
+                        </button>
+                        {isCash && selected && (
+                          <div className="border-t border-slate-100 px-4 py-3 space-y-3">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCashReceived(cashExactAmount);
+                                  setCashCustomOpen(false);
+                                }}
+                                className={`text-sm font-semibold transition-colors ${cashReceived === cashExactAmount && !cashCustomOpen ? "text-blue-700" : "text-blue-600 hover:text-blue-800"}`}
+                              >
+                                {t.exact}
+                              </button>
+                              {cashQuickBills.map((v) => (
+                                <button
+                                  key={v}
+                                  type="button"
+                                  onClick={() => {
+                                    setCashReceived(v);
+                                    setCashCustomOpen(false);
+                                  }}
+                                  className={`text-sm font-semibold tabular-nums transition-colors ${cashReceived === v && !cashCustomOpen ? "text-blue-700" : "text-blue-600 hover:text-blue-800"}`}
+                                >
+                                  {money(v)}
+                                </button>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCashCustomOpen(true);
+                                  setCashReceived("");
+                                }}
+                                className={`text-sm font-semibold transition-colors ${cashCustomOpen ? "text-blue-700" : "text-blue-600 hover:text-blue-800"}`}
+                              >
+                                {t.custom}
+                              </button>
+                            </div>
+                            {cashCustomOpen && (
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                autoFocus
+                                placeholder={money(cashExactAmount)}
+                                value={cashReceived === "" ? "" : cashReceived}
+                                onChange={(e) => {
+                                  const raw = e.target.value;
+                                  setCashReceived(raw === "" ? "" : Number(raw));
+                                }}
+                                className="h-11 text-lg font-semibold tabular-nums"
+                                aria-label={t.cashReceived}
+                              />
+                            )}
+                            <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${cashUnderPaid ? "bg-red-50" : "bg-slate-50"}`}>
+                              <span className={`text-sm font-medium ${cashUnderPaid ? "text-red-700" : "text-slate-600"}`}>
+                                {t.changeDue}
+                              </span>
+                              <span className={`text-lg font-bold tabular-nums ${cashUnderPaid ? "text-red-700" : "text-slate-900"}`}>
+                                {cashUnderPaid && displayedChangeDue !== null
+                                  ? `−${money(Math.abs(displayedChangeDue))}`
+                                  : money(displayedChangeDue ?? 0)}
+                              </span>
+                            </div>
+                            {cashUnderPaid && <p className="text-xs text-red-600">{t.cashUnderpaidMsg}</p>}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
+
               {saleStatus && !saleStatus.ok && (
                 <p className="text-center text-sm text-red-600">{saleStatus.msg}</p>
               )}
@@ -1266,7 +1304,7 @@ function PosRegisterInner({
                 ref={chargeRef}
                 type="submit"
                 disabled={chargeDisabled}
-                className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40"
+                className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40 mt-auto"
               >
                 {salePending
                   ? t.processing
@@ -1278,23 +1316,23 @@ function PosRegisterInner({
           </div>
         ) : (
         <>
-        <div className="px-4 pt-3 pb-1 flex items-center justify-between shrink-0 gap-2">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-3 py-2.5 sm:px-4">
           <span className="text-sm font-semibold text-slate-800">{t.currentSale(cartItemCount)}</span>
-          <div className="flex items-center gap-2 flex-wrap justify-end">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
           {(pendingSyncSales.length > 0 || pendingFiscalSales.length > 0) && (
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+            <span className="hidden text-[10px] font-semibold uppercase tracking-wide text-amber-700 sm:inline">
               {pendingSyncSales.length > 0 ? t.offlinePendingSync(pendingSyncSales.length) : t.offlinePendingFiscal(pendingFiscalSales.length)}
             </span>
           )}
             <button
               type="button"
               onClick={() => setCustomersSheetOpen(true)}
-              className="text-xs font-medium text-blue-600 hover:text-blue-800"
+              className="max-w-[7rem] truncate text-xs font-medium text-blue-600 hover:text-blue-800 sm:max-w-[10rem]"
             >
               {selectedCustomer ? selectedCustomer.name : t.addCustomerBtn}
             </button>
           {cart.length > 0 && (
-              <button type="button" onClick={() => setCart([])} className="text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
+              <button type="button" onClick={() => setCart([])} className="shrink-0 text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
           )}
           </div>
         </div>
@@ -1337,97 +1375,131 @@ function PosRegisterInner({
           </div>
         )}
         {checkoutStep === "order" && (
-        <div className="flex-1 overflow-y-auto space-y-1.5 px-4 pb-2" style={{minHeight: 0, WebkitOverflowScrolling: "touch"}}>
+        <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-3 py-2 sm:px-4" style={{WebkitOverflowScrolling: "touch"}}>
           {cart.map((item) => {
             const linePct = item.discount_pct ?? 0;
             const lineTotal = lineGrossAfter(item);
             const lineList = lineGrossBefore(item);
             return (
-            <div key={item.product_id} className="flex flex-col gap-1 rounded-xl border border-transparent bg-white/80 px-2 py-2 transition-colors hover:border-blue-100 hover:bg-blue-50/40">
-              <div className="flex items-center gap-2">
-              <button type="button" onClick={() => openItemOptions(item.product_id)} className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium text-slate-900 truncate">{item.product_name}</p>
+            <div key={item.product_id} className="rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm sm:p-3">
+              <div className="flex items-center gap-2 sm:gap-3">
+              <button type="button" onClick={() => openItemOptions(item.product_id)} className="min-w-0 flex-1 text-left">
+                <p className="truncate text-sm font-semibold text-slate-900">{item.product_name}</p>
                 {linePct > 0 && (
-                  <span className="inline-block mt-0.5 rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">{t.discountBadge(linePct)}</span>
+                  <span className="mt-1 inline-flex rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">{t.discountBadge(linePct)}</span>
                 )}
               </button>
-              <div className="flex items-center gap-1">
-                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity - 1); }} aria-label={t.decreaseQty} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">−</button>
-                <span className="w-7 text-center text-sm font-semibold tabular-nums">{item.quantity}</span>
-                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity + 1); }} aria-label={t.increaseQty} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300">+</button>
+              <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-slate-100 bg-slate-50/80 p-0.5">
+                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity - 1); }} aria-label={t.decreaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-slate-600 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:h-10 sm:w-10">−</button>
+                <span className="w-6 text-center text-sm font-bold tabular-nums sm:w-7">{item.quantity}</span>
+                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity + 1); }} aria-label={t.increaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-slate-600 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:h-10 sm:w-10">+</button>
               </div>
-              <div className="text-right min-w-[4.5rem]">
+              <div className="shrink-0 text-right min-w-[4rem] sm:min-w-[4.5rem]">
                 {linePct > 0 && <p className="text-[10px] text-slate-400 line-through tabular-nums">{money(lineList)}</p>}
-                <p className="text-sm font-bold tabular-nums text-slate-950">{money(lineTotal)}</p>
+                <p className="text-sm font-bold tabular-nums text-slate-950 sm:text-base">{money(lineTotal)}</p>
               </div>
-              <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, 0); }} aria-label={t.removeItem} className="flex h-9 w-9 items-center justify-center rounded-lg text-sm text-slate-400 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200">×</button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, 0); }} aria-label={t.removeItem} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 sm:h-9 sm:w-9">×</button>
               </div>
             </div>
           );})}
-          {!cart.length && <p className="py-10 text-center text-sm text-slate-300">{t.tapToAdd}</p>}
+          {!cart.length && <p className="py-8 text-center text-sm text-slate-300 sm:py-10">{t.tapToAdd}</p>}
         </div>
         )}
-        <div className="border-t border-slate-100 px-4 pt-4 pb-4 space-y-3 shrink-0">
-              {hasAdvancedOptions && cart.length > 0 && (
+        <div className="shrink-0 space-y-3 border-t border-slate-100 bg-white px-3 pt-3 pb-3 shadow-[0_-6px_16px_rgba(15,23,42,0.06)] sm:px-4 sm:pb-4 lg:shadow-none">
+              {cart.length > 0 && (
+                <div className="space-y-2">
                 <button
                   type="button"
                   onClick={() => setOptionsOpen((v) => !v)}
-                  className="text-xs font-medium text-slate-500 hover:text-slate-700"
+                  className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
                 >
-                  {optionsOpen ? "▾" : "▸"} {t.moreOptions}
+                  <span>{t.moreOptions}</span>
+                  <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${optionsOpen ? "rotate-180" : ""}`} />
                 </button>
-              )}
-              {optionsOpen && cart.length > 0 && (
-                <>
-                  <div className="flex flex-wrap gap-1.5">
+              {optionsOpen && (
+                <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                  {(features.kitchenDisplay || features.restaurantOrderFlow || features.tips || features.splitPayments) && (
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {(features.kitchenDisplay || features.restaurantOrderFlow) && (
                       <button type="button" onClick={() => setNotesOpen(true)}
-                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${(kitchenNote || customerNote) ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                        📝 {t.notes}{(kitchenNote || customerNote) ? " ●" : ""}
+                        className={`flex min-h-[3.5rem] flex-col justify-center rounded-xl border px-3 py-2.5 text-left transition-colors ${(kitchenNote || customerNote) ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-white"}`}>
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                          <StickyNote className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                          {t.notes}
+                        </span>
+                        {(kitchenNote || customerNote) && <span className="mt-1 text-[11px] font-medium text-blue-600">●</span>}
                       </button>
                     )}
                     {features.tips && (
                       <button type="button" onClick={() => setTipOpen(true)}
-                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${safeTipAmount > 0 ? "border-green-300 bg-green-50 text-green-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                        💰 {safeTipAmount > 0 ? `${t.tip} ${money(safeTipAmount)}` : t.tip}
+                        className={`flex min-h-[3.5rem] flex-col justify-center rounded-xl border px-3 py-2.5 text-left transition-colors ${safeTipAmount > 0 ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-white"}`}>
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                          <Banknote className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                          {t.tip}
+                        </span>
+                        {safeTipAmount > 0
+                          ? <span className="mt-1 text-sm font-bold tabular-nums text-emerald-700">{money(safeTipAmount)}</span>
+                          : <span className="mt-1 text-[11px] text-slate-400">{t.addTip}</span>}
                       </button>
                     )}
                     {features.splitPayments && (
                       <button type="button" onClick={() => setSplitOpen(true)}
-                        className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors ${activeSplitPayments.length > 0 ? "border-purple-300 bg-purple-50 text-purple-700" : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"}`}>
-                        ⚡ {activeSplitPayments.length > 0 ? `${t.splitPayment} (${activeSplitPayments.length})` : t.splitPayment}
+                        className={`flex min-h-[3.5rem] flex-col justify-center rounded-xl border px-3 py-2.5 text-left transition-colors ${activeSplitPayments.length > 0 ? "border-violet-300 bg-violet-50" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-white"}`}>
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                          <Zap className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                          {t.splitPayment}
+                        </span>
+                        {activeSplitPayments.length > 0
+                          ? <span className="mt-1 text-sm font-bold tabular-nums text-violet-700">{activeSplitPayments.length}×</span>
+                          : <span className="mt-1 text-[11px] text-slate-400">{t.splitAmount}</span>}
                       </button>
                     )}
+                    </div>
+                  )}
+                  <div className="rounded-xl border border-slate-200 bg-white p-3">
+                    <div className="mb-2.5 flex items-center justify-between gap-3">
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                        <Percent className="h-4 w-4 text-slate-500" />
+                        {t.discountPct}
+                      </span>
+                      {discountAmount > 0 && (
+                        <span className="text-sm font-bold tabular-nums text-blue-600">−{money(discountAmount)}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={uniformCartDiscount === null ? "" : uniformCartDiscount || ""}
+                        onChange={(e) => applyDiscountToAllCurrentItems(Number(e.target.value) || 0)}
+                        placeholder="0"
+                        aria-label={t.discountPctAria}
+                        className="h-11 flex-1 text-center text-lg font-bold tabular-nums"
+                      />
+                      <span className="w-6 shrink-0 text-sm font-semibold text-slate-400">%</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400 shrink-0">{t.discountPct}</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="1"
-                      value={uniformCartDiscount === null ? "" : uniformCartDiscount || ""}
-                      onChange={(e) => applyDiscountToAllCurrentItems(Number(e.target.value) || 0)}
-                      placeholder="0"
-                      aria-label={t.discountPctAria}
-                      className="h-8 w-16 rounded-lg border border-slate-200 px-2 text-sm text-right"
-                    />
-                    {discountAmount > 0 && <span className="text-xs text-blue-600 font-medium">−{money(discountAmount)}</span>}
-                  </div>
-                </>
+                </div>
               )}
-              {discountAmount > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span>{money(grossTotal)}</span></div>}
-              {totalVat > 0.01 && <div className="flex justify-between text-xs text-slate-400"><span>{vatLabel}</span><span>{money(totalVat)}</span></div>}
-              {safeTipAmount > 0 && <div className="flex justify-between text-xs text-green-700"><span>{t.tip}</span><span>{money(safeTipAmount)}</span></div>}
-              <div className="flex justify-between items-baseline">
-                <span className="text-base font-semibold text-slate-700">{t.total}</span>
-                <span className="text-3xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</span>
+                </div>
+              )}
+              <div className="space-y-1.5 rounded-xl bg-slate-50 px-3.5 py-3">
+              {discountAmount > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span className="tabular-nums">{money(grossTotal)}</span></div>}
+              {discountAmount > 0 && <div className="flex justify-between text-xs text-blue-600"><span>{t.discount}</span><span className="font-medium tabular-nums">−{money(discountAmount)}</span></div>}
+              {totalVat > 0.01 && <div className="flex justify-between text-xs text-slate-400"><span>{vatLabel}</span><span className="tabular-nums">{money(totalVat)}</span></div>}
+              {safeTipAmount > 0 && <div className="flex justify-between text-xs text-emerald-700"><span>{t.tip}</span><span className="font-medium tabular-nums">{money(safeTipAmount)}</span></div>}
+              <div className="flex items-baseline justify-between border-t border-slate-200/80 pt-2">
+                <span className="text-sm font-semibold text-slate-700 sm:text-base">{t.total}</span>
+                <span className="text-2xl font-bold tabular-nums text-slate-950 sm:text-3xl">{money(totalDue)}</span>
+              </div>
               </div>
               <Button
                 type="button"
                 disabled={!cart.length || !paymentMethods.length}
                 data-tour="pos-charge"
-                className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40"
+                className="h-12 w-full rounded-xl bg-blue-600 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-40 sm:h-14 sm:text-lg"
                 onClick={() => {
                   setPaymentCartSnapshot(normalizeCartLines(cart, txDiscountPct));
                   setCheckoutStep("payment");
@@ -1443,7 +1515,7 @@ function PosRegisterInner({
           <input type="hidden" name="customer_name" value={selectedCustomer?.name ?? ""} />
           <input type="hidden" name="payment_method_id" value={paymentMethodId} />
           <input type="hidden" name="cash_received" value={isCashSingle && typeof cashReceived === "number" && cashReceived > 0 ? cashReceived.toFixed(2) : ""} />
-          <input type="hidden" name="change_due" value={isCashSingle && changeDue !== null && changeDue >= 0 ? changeDue.toFixed(2) : ""} />
+          <input type="hidden" name="change_due" value={isCashSingle && typeof cashReceived === "number" && cashReceived > 0 && !cashUnderPaid ? Math.max(0, displayedChangeDue ?? 0).toFixed(2) : ""} />
           <input type="hidden" name="cart_json" value={JSON.stringify(cart)} />
           <input type="hidden" name="session_id" value={sessionId ?? ""} />
           <input type="hidden" name="payment_type" value={selectedPaymentType} />
