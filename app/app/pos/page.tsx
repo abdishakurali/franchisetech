@@ -197,6 +197,15 @@ export default async function PosPage() {
   let cashSales = 0;
   let cardSales = 0;
   let txCount = 0;
+  let cashInTotal = 0;
+  let cashOutTotal = 0;
+  const cashOperations: Array<{
+    id: string;
+    movement_type: "cash_in" | "cash_out";
+    amount: number;
+    reason: string | null;
+    performedAt: string | null;
+  }> = [];
   const productTotals = new Map<string, number>();
   if (openSession) {
     const { data: txs } = await supabase
@@ -221,6 +230,28 @@ export default async function PosPage() {
       for (const item of tx.pos_transaction_items ?? []) {
         productTotals.set(item.product_name, (productTotals.get(item.product_name) ?? 0) + Number(item.gross_amount ?? item.line_total ?? 0));
       }
+    }
+
+    const { data: movementRows } = await supabase
+      .from("pos_cash_movements")
+      .select("id,movement_type,amount,reason,performed_at,created_at")
+      .eq("organisation_id", orgId)
+      .eq("session_id", openSession.id)
+      .in("movement_type", ["cash_in", "cash_out"])
+      .order("performed_at", { ascending: true });
+
+    for (const row of movementRows ?? []) {
+      const absAmount = Math.abs(Number(row.amount ?? 0));
+      const movementType = row.movement_type as "cash_in" | "cash_out";
+      if (movementType === "cash_in") cashInTotal += absAmount;
+      else cashOutTotal += absAmount;
+      cashOperations.push({
+        id: row.id,
+        movement_type: movementType,
+        amount: absAmount,
+        reason: row.reason,
+        performedAt: (row.performed_at ?? row.created_at) as string | null,
+      });
     }
   }
   const topProduct = [...productTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
@@ -379,6 +410,9 @@ export default async function PosPage() {
           expectedCash,
           txCount,
           topProduct,
+          cashInTotal,
+          cashOutTotal,
+          cashOperations,
         }}
       />
     </div>

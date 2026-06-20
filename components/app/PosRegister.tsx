@@ -67,7 +67,24 @@ type CartItem = PosCartLine;
 type SplitPayment = { id: string; payment_method_id: string; amount: number; reference?: string };
 type Customer = { id: string; name: string; phone: string | null; email: string | null };
 type Transaction = { id: string; transaction_number: string; customer_name: string | null; sold_at: string | null; total: number | string; discount_total?: number | string | null; status: string; payment_methods?: { name?: string | null; type?: string | null } | null };
-type PosSummary = { openingCash: number; cashSales: number; cardSales: number; expectedCash: number; txCount: number; topProduct: string | null };
+type CashOperation = {
+  id: string;
+  movement_type: "cash_in" | "cash_out";
+  amount: number;
+  reason: string | null;
+  performedAt: string | null;
+};
+type PosSummary = {
+  openingCash: number;
+  cashSales: number;
+  cardSales: number;
+  expectedCash: number;
+  txCount: number;
+  topProduct: string | null;
+  cashInTotal: number;
+  cashOutTotal: number;
+  cashOperations: CashOperation[];
+};
 type FiscalDownloadPayload = { ok: boolean; message: string; filename?: string; content?: string; status?: string; mode?: string };
 type PlaceholderCfg = { bg: string; text: string; icon: "coffee" | "drink" | "food" | "package"; style?: React.CSSProperties };
 
@@ -386,7 +403,8 @@ function CloseTillDialog({
   onOpenChange?: (open: boolean) => void;
   showTrigger?: boolean;
 }) {
-  const { t } = usePosI18n();
+  const { locale, t } = usePosI18n();
+  const intlLocale = posIntlLocale(locale);
   const currencySymbol = currency === "RON" ? "lei" : "€";
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen ?? internalOpen;
@@ -399,7 +417,7 @@ function CloseTillDialog({
           <LockKeyhole className="h-4 w-4" />{t.closeTill}
         </DialogTrigger>
       ) : null}
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{t.closeTill}</DialogTitle></DialogHeader>
         <form action={async (fd: FormData) => {
           await (closePosSession as unknown as (fd: FormData) => Promise<void>)(fd);
@@ -407,10 +425,41 @@ function CloseTillDialog({
           <input type="hidden" name="session_id" value={sessionId ?? ""} />
           <div className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm">
             <div className="flex justify-between"><span>{t.openingCash}</span><strong>{money(summary.openingCash, currency)}</strong></div>
+            {summary.cashInTotal > 0 && (
+              <div className="flex justify-between text-green-700"><span>{t.cashInTotal}</span><strong>{money(summary.cashInTotal, currency)}</strong></div>
+            )}
+            {summary.cashOutTotal > 0 && (
+              <div className="flex justify-between text-red-600"><span>{t.cashOutTotal}</span><strong>{money(summary.cashOutTotal, currency)}</strong></div>
+            )}
             <div className="flex justify-between"><span>{t.cashSales}</span><strong>{money(summary.cashSales, currency)}</strong></div>
             <div className="flex justify-between"><span>{t.cardSales}</span><strong>{money(summary.cardSales, currency)}</strong></div>
             <div className="flex justify-between border-t pt-2"><span className="font-medium">{t.expectedCash}</span><strong className="text-blue-700">{money(summary.expectedCash, currency)}</strong></div>
           </div>
+          {summary.cashOperations.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t.cashOperations}</p>
+              <div className="max-h-44 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100 bg-white">
+                {summary.cashOperations.map((op) => (
+                  <div key={op.id} className="flex items-start justify-between gap-3 px-3 py-2.5 text-sm">
+                    <div className="min-w-0 flex-1">
+                      <p className={`font-medium ${op.movement_type === "cash_in" ? "text-green-700" : "text-red-600"}`}>
+                        {op.movement_type === "cash_in" ? `+ ${t.cashIn}` : `− ${t.cashOut}`}
+                      </p>
+                      <p className="truncate text-xs text-slate-500">{op.reason || "—"}</p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="font-semibold tabular-nums text-slate-900">{money(op.amount, currency)}</p>
+                      {op.performedAt && (
+                        <p className="text-[10px] text-slate-400">
+                          {new Intl.DateTimeFormat(intlLocale, { timeStyle: "short" }).format(new Date(op.performedAt))}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div>
             <Label>{t.countedCashLabel} ({currencySymbol})</Label>
             <Input name="counted_cash" type="number" step="0.01" min="0" required />
