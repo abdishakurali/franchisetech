@@ -33,6 +33,12 @@ export async function completePosOnboarding(input: {
   ingredientTracking: IngredientTrackingIntent;
   preferredPlan?: BillingPlan;
   referralCode?: string | null;
+  acquisition?: {
+    utm_source?: string;
+    utm_campaign?: string;
+    utm_content?: string;
+    utm_medium?: string;
+  } | null;
 }) {
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -107,6 +113,10 @@ export async function completePosOnboarding(input: {
     trial_started_at: new Date().toISOString(),
     trial_ends_at: trialEndsAt,
     referred_by_code: input.referralCode?.trim() || null,
+    acquisition_source: input.acquisition?.utm_source || null,
+    acquisition_campaign: input.acquisition?.utm_campaign || null,
+    acquisition_content: input.acquisition?.utm_content || null,
+    acquisition_medium: input.acquisition?.utm_medium || null,
   }).eq("id", orgId);
 
   // Module columns — safe if migration 039 not yet applied.

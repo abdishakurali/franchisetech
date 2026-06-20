@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL, publicPaths } from "@/lib/marketing/seo";
-import { blogPosts } from "@/lib/marketing/blog/posts";
 
 const MARKETING_LOCALES = ["en", "ro", "it"] as const;
 
@@ -12,9 +11,8 @@ function urlForPath(path: string, lang: (typeof MARKETING_LOCALES)[number]): str
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPaths = [...publicPaths, "/blog", "/help", "/login", "/signup"];
-  const blogPaths = blogPosts.map((p) => `/blog/${p.slug}`);
-  const allPaths = [...new Set([...staticPaths, ...blogPaths])];
+  const staticPaths = [...publicPaths, "/help", "/login", "/signup"];
+  const allPaths = [...new Set(staticPaths)];
 
   const entries: MetadataRoute.Sitemap = [];
 
@@ -23,8 +21,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       entries.push({
         url: urlForPath(path, lang),
         lastModified: new Date(),
-        changeFrequency: path === "/" || path.startsWith("/blog") ? "weekly" : "monthly",
-        priority: path === "/" ? 1 : path.startsWith("/blog") ? 0.75 : 0.6,
+        changeFrequency: path === "/" ? "weekly" : "monthly",
+        priority: path === "/" ? 1 : 0.6,
       });
     }
   }

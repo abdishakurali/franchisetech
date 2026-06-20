@@ -166,11 +166,11 @@ export const en = {
       ],
     },
     socialProof: {
-      label: "What owners say",
+      label: "Early access program",
       quotes: [
-        { quote: "We had our first sale in under 15 minutes after setup.", name: "Maria D.", business: "Café owner, Dublin", metric: "First sale in 12 min" },
-        { quote: "Closing the till finally matches what I count in the drawer.", name: "James K.", business: "Restaurant owner", metric: "Till matched on day one" },
-        { quote: "One login for POS, stock, and daily reports — my team gets it.", name: "Ana P.", business: "Multi-site operator", metric: "3 sites, one workspace" },
+        { quote: "Built for operators who want till, stock, and reports in one place — with no per-seat fees.", name: "franchisetech", business: "HORECA platform", metric: "15-day assisted trial" },
+        { quote: "Human onboarding: products, staff, and your first sale — not an empty account.", name: "franchisetech team", business: "Setup support", metric: "Guided first sale" },
+        { quote: "Romania: NIR, per-product VAT, and FiscalNet guide for multi-site when your accountant is ready.", name: "For RO operators", business: "Multi-site", metric: "Step-by-step guide" },
       ],
     },
     faq: {
@@ -244,7 +244,7 @@ export const en = {
     faqs: [
       { question: "What does franchisetech handle vs the partner?", answer: "We run the platform, hosting, updates, and core support. You sell, onboard, and support clients locally." },
       { question: "Who is a good fit?", answer: "POS resellers, accountants, hospitality consultants, and multi-site operators with an existing food-business client base." },
-      { question: "How do partners earn?", answer: "Referral partners typically earn 20% recurring on active subscriptions. Setup fees (€249) are shared — partners who onboard keep roughly €100–€150 per setup. Volume partners can discuss wholesale pricing (~20% off list)." },
+      { question: "How do partners earn?", answer: "Referral partners typically earn 20% recurring on active subscriptions. Setup fees (€199) are shared — partners who onboard keep roughly €100–€150 per setup. Volume partners can discuss wholesale pricing (~20% off list)." },
       { question: "Is there a formal reseller agreement?", answer: "We discuss terms after your application. Commercial models can vary by volume." },
       { question: "How fast will you respond?", answer: "We aim to respond within 2 business days." },
     ],

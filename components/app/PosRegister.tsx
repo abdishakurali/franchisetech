@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { addCustomerFromPos, closePosSession, completeSaleReturn, posCashMovement, voidTransaction } from "@/app/actions/kitchenops";
 import { runZReport } from "@/app/actions/fiscalnet";
 import { fiscalBrowserReceipt, fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
-import { isFiscalNetClientActive } from "@/lib/fiscalnet/eligibility";
+import { useFiscalNetActive } from "@/lib/fiscalnet/use-fiscalnet-active";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { downloadSlipAsTxt, cashInTxt, cashOutTxt } from "@/lib/pos-print";
 import { friendlySaleError, paymentTypeLabel } from "@/lib/pos-i18n";
 import { PosI18nProvider, usePosI18n, posIntlLocale } from "@/lib/pos-i18n-context";
 import {
@@ -50,8 +49,6 @@ import {
   payloadToFormData,
   type QueuedSale,
 } from "@/lib/pos-offline-queue";
-import { FIRST_SALE_DONE_KEY } from "@/lib/onboarding/demo-products";
-import { FirstSaleCelebration } from "@/components/app/FirstSaleCelebration";
 import { PosQuickAddProduct } from "@/components/app/PosQuickAddProduct";
 import { PosQuickAccessSheet } from "@/components/app/PosQuickAccessSheet";
 
@@ -99,7 +96,12 @@ const PLACEHOLDERS: Record<string, PlaceholderCfg> = {
   other:      { bg: "bg-slate-100", text: "text-slate-400",  icon: "package" },
 };
 
-async function downloadFiscalPayload(result: FiscalDownloadPayload, label: string) {
+async function downloadFiscalPayload(
+  result: FiscalDownloadPayload,
+  label: string,
+  fiscalEnabled: boolean,
+) {
+  if (!fiscalEnabled) return false;
   console.info("[FiscalNet] client result received", {
     label,
     ok: result.ok,
@@ -188,6 +190,7 @@ function TillDialog({
   sessionId,
   cashDrawerSettings,
   fiscalNet,
+  fiscalActive = false,
   isRO = false,
   currency = "EUR",
   orgName = "",
@@ -199,6 +202,7 @@ function TillDialog({
   sessionId?: string | null;
   cashDrawerSettings?: CashDrawerSettings;
   fiscalNet?: BrowserFiscalConfig | null;
+  fiscalActive?: boolean;
   isRO?: boolean;
   currency?: string;
   orgName?: string;
@@ -224,8 +228,8 @@ function TillDialog({
       const amount = Number(formData.get("amount") ?? 0);
       await posCashMovement(formData);
       const result = await openCashDrawer(movementType, cashDrawerSettings);
-      // FiscalNet cash in/out (browser → localhost:65400)
-      if (fiscalNet?.enabled && amount > 0) {
+      // FiscalNet cash in/out — only when enabled in Settings
+      if (fiscalActive && fiscalNet?.enabled && amount > 0) {
         const fnRes = movementType === "cash_in"
           ? await fiscalBrowserCashIn(fiscalNet, amount)
           : await fiscalBrowserCashOut(fiscalNet, amount);
@@ -235,19 +239,6 @@ function TillDialog({
         setMessage((result.cashierMessage ? `✓ ${result.cashierMessage}` : t.cashMovementSaved) + fnMsg);
       } else {
         setMessage(result.cashierMessage ? `✓ ${result.cashierMessage}` : t.cashMovementSaved);
-      }
-      // Download TXT slip only when FiscalNet is not active. When FiscalNet is active,
-      // avoid a second automatic download because browsers may block it.
-      if (isRO && !fiscalNet?.enabled) {
-        const slipAmount = Number(formData.get("amount") ?? 0);
-        const slipReason = String(formData.get("reason") ?? "");
-        if (movementType === "cash_in") {
-          const { text, filename } = cashInTxt({ orgName, currency, amount: slipAmount, reason: slipReason, userName });
-          downloadSlipAsTxt(text, filename);
-        } else {
-          const { text, filename } = cashOutTxt({ orgName, currency, amount: slipAmount, reason: slipReason, userName });
-          downloadSlipAsTxt(text, filename);
-        }
       }
       setTimeout(() => { setOpen(false); setMessage(null); setPending(false); }, 2000);
     } catch {
@@ -550,12 +541,10 @@ function PosRegisterInner({
   const [closeTillDialogOpen, setCloseTillDialogOpen] = useState(false);
   const [drawerNotice, setDrawerNotice] = useState<string | null>(null);
   const [lastCompletedSale, setLastCompletedSale] = useState<{ transactionId: string; amountLabel: string } | null>(null);
-  const [pendingFirstSaleCelebration, setPendingFirstSaleCelebration] = useState<{ amountLabel: string } | null>(null);
   const focusedCheckout = checkoutStep === "payment" || checkoutStep === "complete";
   const [discountEditId, setDiscountEditId] = useState<string | null>(null);
   const [discountEditValue, setDiscountEditValue] = useState<number | "">("");
   const [saleStatus, setSaleStatus] = useState<{ ok: boolean; msg: string; transactionId?: string } | null>(null);
-  const [firstSaleCelebration, setFirstSaleCelebration] = useState<{ amountLabel: string } | null>(null);
   const [lastFiscalTxt, setLastFiscalTxt] = useState<{ filename: string; content: string } | null>(null);
   const [salePending, setSalePending] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -802,7 +791,7 @@ function PosRegisterInner({
         ? Number((cashReceived - totalDue).toFixed(2))
         : 0)
     : null;
-  const fiscalActive = isFiscalNetClientActive(isRO, fiscalNet);
+  const fiscalActive = useFiscalNetActive(isRO, fiscalNet);
 
   return (
     <div className="relative flex w-full flex-1 flex-col bg-white min-h-0 lg:flex-row lg:overflow-hidden">
@@ -985,7 +974,7 @@ function PosRegisterInner({
           </SheetContent>
         </Sheet>
         <RefundDialog recentTransactions={recentTransactions} currency={currency} open={refundDialogOpen} onOpenChange={setRefundDialogOpen} showTrigger={false} />
-        <TillDialog sessionId={sessionId} cashDrawerSettings={cashDrawerSettings} fiscalNet={fiscalNet} isRO={isRO} currency={currency} orgName={orgName} userName={userName} open={tillDialogOpen} onOpenChange={setTillDialogOpen} showTrigger={false} />
+        <TillDialog sessionId={sessionId} cashDrawerSettings={cashDrawerSettings} fiscalNet={fiscalNet} fiscalActive={fiscalActive} isRO={isRO} currency={currency} orgName={orgName} userName={userName} open={tillDialogOpen} onOpenChange={setTillDialogOpen} showTrigger={false} />
         <CloseTillDialog sessionId={sessionId} summary={summary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName} open={closeTillDialogOpen} onOpenChange={setCloseTillDialogOpen} showTrigger={false} />
         {fiscalActive && (
           <Dialog open={zReportOpen} onOpenChange={setZReportOpen}>
@@ -1004,13 +993,13 @@ function PosRegisterInner({
                     const fd = new FormData();
                     if (sessionId) fd.set("session_id", sessionId);
                     const res = await (runZReport as unknown as (fd: FormData) => Promise<FiscalDownloadPayload>)(fd);
-                    if (res.status === "browser_api_pending" && fiscalNet) {
+                    if (res.status === "browser_api_pending" && fiscalActive && fiscalNet?.enabled) {
                       const fnRes = await fiscalBrowserZReport(fiscalNet);
                       setZReportDone(true);
                       setSaleStatus({ ok: fnRes.ok, msg: fnRes.ok ? t.zReportSent(fnRes.message) : `FiscalNet: ${fnRes.message}` });
                     } else {
-                      const downloaded = res.ok ? await downloadFiscalPayload(res, "z_report") : false;
-                      if (res.filename && res.content) setLastFiscalTxt({ filename: res.filename, content: res.content });
+                      const downloaded = res.ok && fiscalActive ? await downloadFiscalPayload(res, "z_report", fiscalActive) : false;
+                      if (fiscalActive && res.filename && res.content) setLastFiscalTxt({ filename: res.filename, content: res.content });
                       if (res.ok) setZReportDone(true);
                       setSaleStatus({ ok: res.ok, msg: downloaded ? t.zReportDownloaded : res.message });
                     }
@@ -1071,9 +1060,9 @@ function PosRegisterInner({
             return;
           }
           // FiscalNet receipt — Romania + enabled in Settings only (browser → localhost:65400)
-          if (res.fiscalApiPending && fiscalActive && fiscalNet) {
+          if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
             const fnRes = await fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType);
-            if (fnRes.filename && fnRes.content) setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
+            if (fiscalActive && fnRes.filename && fnRes.content) setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
             console.info("[FiscalNet] receipt browser result", { ok: fnRes.ok, message: fnRes.message, mode: fiscalNet.connectionMode });
           }
           setSaleStatus(null);
@@ -1085,11 +1074,6 @@ function PosRegisterInner({
           setCashReceived("");
           setSalePending(false);
           clearCartBackupFromStorage();
-          const isFirstSale = typeof window !== "undefined" && !localStorage.getItem(FIRST_SALE_DONE_KEY);
-          if (isFirstSale) {
-            localStorage.setItem(FIRST_SALE_DONE_KEY, "1");
-            setPendingFirstSaleCelebration({ amountLabel: money(res.total) });
-          }
           if (res.cashSale) {
             openCashDrawer("cash_sale", cashDrawerSettings).then((drawerResult) => {
               if (drawerResult.cashierMessage) setDrawerNotice(drawerResult.cashierMessage);
@@ -1124,10 +1108,6 @@ function PosRegisterInner({
                   setSaleStatus(null);
                   setDrawerNotice(null);
                   setLastFiscalTxt(null);
-                  if (pendingFirstSaleCelebration) {
-                    setFirstSaleCelebration(pendingFirstSaleCelebration);
-                    setPendingFirstSaleCelebration(null);
-                  }
                 }}
               >
                 {t.newSaleAfter}
@@ -1159,10 +1139,6 @@ function PosRegisterInner({
                   setSaleStatus(null);
                   setDrawerNotice(null);
                   setLastFiscalTxt(null);
-                  if (pendingFirstSaleCelebration) {
-                    setFirstSaleCelebration(pendingFirstSaleCelebration);
-                    setPendingFirstSaleCelebration(null);
-                  }
                 }}
               >
                 {t.noReceipt}
@@ -1754,12 +1730,6 @@ function PosRegisterInner({
             </DialogContent>
           </Dialog>
       </form>
-      {checkoutStep === "order" && firstSaleCelebration ? (
-        <FirstSaleCelebration
-          amountLabel={firstSaleCelebration.amountLabel}
-          onClose={() => setFirstSaleCelebration(null)}
-        />
-      ) : null}
     </div>
   );
 }

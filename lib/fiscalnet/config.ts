@@ -5,6 +5,7 @@
 
 import type { FiscalNetConfig, VatGroup, FiscalPaymentCode } from "./types";
 import { DEFAULT_VAT_GROUPS, DEFAULT_PAYMENT_TYPE_MAP } from "./types";
+import { isFiscalNetActive } from "./eligibility";
 
 export function buildFiscalNetConfig(org: Record<string, unknown>): FiscalNetConfig {
   // VAT groups: use stored JSON or fall back to defaults
@@ -26,7 +27,7 @@ export function buildFiscalNetConfig(org: Record<string, unknown>): FiscalNetCon
   const mode = (org.fiscalnet_connection_mode as string) === "file" ? "file" : "api";
 
   return {
-    enabled:        Boolean(org.fiscalnet_enabled ?? false),
+    enabled:        isFiscalNetActive(org.country_code as string | null | undefined, org.fiscalnet_enabled as boolean | null | undefined),
     connectionMode: mode,
     apiHost:        ((org.fiscalnet_api_host as string) || "http://localhost:65400").replace(/\/$/, ""),
     mockMode:       org.fiscalnet_mock_mode !== false,  // default true = safe

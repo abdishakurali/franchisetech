@@ -188,3 +188,13 @@
 .app-shell-h {
   height: 100vh;
 }
+
+/* Hide Chatwoot bubble and panel on POS (widget may already be loaded from other routes). */
+body.hide-chatwoot #woot-widget-holder,
+body.hide-chatwoot .woot--bubble-holder,
+body.hide-chatwoot .woot-widget-bubble,
+body.hide-chatwoot iframe[title="Chatwoot"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

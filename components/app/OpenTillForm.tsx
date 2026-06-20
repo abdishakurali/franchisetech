@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { openPosSession } from "@/app/actions/kitchenops";
-import { downloadSlipAsTxt, openingBalanceTxt } from "@/lib/pos-print";
 import { downloadFiscalNetTxt, fiscalBrowserCashIn, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
+import { useFiscalNetActive } from "@/lib/fiscalnet/use-fiscalnet-active";
 
 interface Props {
   currencySymbol: string;
@@ -24,6 +24,7 @@ interface Props {
 
 export function OpenTillForm({ currencySymbol, currency, orgName, userName, fiscalNet, isRO = false, defaultCash }: Props) {
   const router = useRouter();
+  const fiscalActive = useFiscalNetActive(isRO, fiscalNet);
   const [openingCash, setOpeningCash] = useState(defaultCash != null && defaultCash > 0 ? defaultCash.toFixed(2) : "");
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -42,14 +43,10 @@ export function OpenTillForm({ currencySymbol, currency, orgName, userName, fisc
     try {
       await (openPosSession as (fd: FormData) => Promise<void>)(fd);
 
-      if (fiscalNet?.enabled) {
+      if (fiscalActive && fiscalNet?.enabled) {
         const result = await fiscalBrowserCashIn(fiscalNet, amount);
         if (result.filename && result.content) setLastTxt({ filename: result.filename, content: result.content });
         setMessage(result.ok ? result.message : `FiscalNet: ${result.message}`);
-      } else if (isRO) {
-        const { text, filename } = openingBalanceTxt({ orgName, currency, amount, userName });
-        downloadSlipAsTxt(text, filename);
-        setMessage(`Opening slip downloaded: ${filename}`);
       }
       setTimeout(() => router.refresh(), 700);
     } catch (e) {

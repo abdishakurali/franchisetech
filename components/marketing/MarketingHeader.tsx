@@ -20,7 +20,6 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
 
   const navLinks = [
     { href: "/features", label: t.nav.features },
-    { href: "/blog", label: t.nav.blog },
     { href: "/pricing", label: t.nav.pricing },
     { href: "/partners", label: t.nav.partners },
   ];

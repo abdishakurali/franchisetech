@@ -168,11 +168,11 @@ export const ro: MarketingMessages = {
       ],
     },
     socialProof: {
-      label: "Ce spun proprietarii",
+      label: "Program beta România",
       quotes: [
-        { quote: "Am avut prima vânzare în sub 15 minute după configurare.", name: "Maria D.", business: "Proprietar cafenea, Dublin", metric: "Prima vânzare în 12 min" },
-        { quote: "Închiderea casei se potrivește în sfârșit cu ce număr.", name: "James K.", business: "Proprietar restaurant", metric: "Casa potrivită din prima zi" },
-        { quote: "Un singur login pentru POS, stoc și rapoarte — echipa înțelege.", name: "Ana P.", business: "Operator multi-locație", metric: "3 locații, un workspace" },
+        { quote: "Construit pentru operatori care vor casă, stoc și rapoarte într-un singur loc — fără taxă per angajat.", name: "franchisetech", business: "Platformă pentru HORECA", metric: "Trial asistat 15 zile" },
+        { quote: "Onboarding cu oameni reali: produse, personal, prima vânzare — nu doar un cont gol.", name: "Echipa franchisetech", business: "Suport setup", metric: "Prima vânzare ghidată" },
+        { quote: "NIR, TVA pe produs și ghid FiscalNet pentru multi-locație — când contabilul e gata.", name: "Pentru RO", business: "Operatori multi-site", metric: "Ghid pas cu pas" },
       ],
     },
     faq: {
@@ -246,7 +246,7 @@ export const ro: MarketingMessages = {
     faqs: [
       { question: "Ce gestionează franchisetech vs partenerul?", answer: "Noi rulăm platforma, hostingul, actualizările și suportul de bază. Dvs. vindeți, faceți onboarding și suportați clienții local." },
       { question: "Cine se potrivește?", answer: "Reselleri POS, contabili, consultanți ospitalitate și operatori multi-locație cu bază existentă de clienți alimentari." },
-      { question: "Cum câștigă partenerii?", answer: "Partenerii de recomandare câștigă de obicei 20% recurent pe abonamente active. Taxa de configurare (249 €) se împarte — partenerii care fac onboarding păstrează circa 100–150 €. Partenerii cu volum pot discuta prețuri wholesale (~20% reducere)." },
+      { question: "Cum câștigă partenerii?", answer: "Partenerii de recomandare câștigă de obicei 20% recurent pe abonamente active. Taxa de configurare (199 €) se împarte — partenerii care fac onboarding păstrează circa 100–150 €. Partenerii cu volum pot discuta prețuri wholesale (~20% reducere)." },
       { question: "Există acord formal de reseller?", answer: "Discutăm termenii după aplicație. Modelele comerciale pot varia după volum." },
       { question: "Cât de repede răspundeți?", answer: "Țintim răspuns în 2 zile lucrătoare." },
     ],

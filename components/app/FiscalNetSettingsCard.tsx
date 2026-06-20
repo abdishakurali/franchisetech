@@ -7,7 +7,9 @@
  */
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { saveFiscalNetSettings } from "@/app/actions/fiscalnet";
+import { writeFiscalNetEnabledPreference } from "@/lib/fiscalnet/client-preference";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +34,7 @@ interface Props {
 }
 
 export function FiscalNetSettingsCard(props: Props) {
+  const router = useRouter();
   const [enabled,   setEnabled]   = useState(props.enabled);
   const [platform,  setPlatform]  = useState<"api" | "file">(props.connectionMode === "file" ? "file" : "api");
   const [apiHost,   setApiHost]   = useState(props.apiHost || "http://localhost:65400");
@@ -51,7 +54,11 @@ export function FiscalNetSettingsCard(props: Props) {
       fd.set("fiscalnet_operator_code",   opCode);
       const res = await saveFiscalNetSettings(fd);
       if (res?.error) setStatus({ ok: false, msg: res.error });
-      else            setStatus({ ok: true,  msg: "Receipt settings saved." });
+      else {
+        writeFiscalNetEnabledPreference(enabled);
+        setStatus({ ok: true,  msg: "Receipt settings saved." });
+        router.refresh();
+      }
     });
   }
 

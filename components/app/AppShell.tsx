@@ -388,12 +388,22 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
     if (!isPosRoute) resetPosTillOpen();
   }, [isPosRoute]);
 
-  const hideChat = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen") || pathname.startsWith("/app/settings");
+  const hideChatOnPos = pathname.startsWith("/app/pos");
   useEffect(() => {
-    if (hideChat) { document.body.classList.add("hide-chatwoot"); }
-    else { document.body.classList.remove("hide-chatwoot"); }
-    return () => { document.body.classList.remove("hide-chatwoot"); };
-  }, [hideChat]);
+    if (hideChatOnPos) {
+      document.body.classList.add("hide-chatwoot");
+      try {
+        window.$chatwoot?.toggle("close");
+      } catch {
+        /* widget may not be loaded yet */
+      }
+    } else {
+      document.body.classList.remove("hide-chatwoot");
+    }
+    return () => {
+      document.body.classList.remove("hide-chatwoot");
+    };
+  }, [hideChatOnPos]);
 
   const initials = (profile?.full_name ?? user.email ?? "?")
     .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);

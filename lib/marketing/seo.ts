@@ -3,7 +3,6 @@ import { createElement } from "react";
 import type { MarketingLocale } from "@/lib/marketing/locale";
 import { marketingOpenGraphLocale } from "@/lib/marketing/locale";
 import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
-import { blogPosts } from "@/lib/marketing/blog/posts";
 
 export const SITE_URL = "https://franchisetech.ro";
 export const BRAND = "franchisetech";
@@ -780,8 +779,6 @@ export const publicPaths = [
   ...resourcePages.map((p) => p.path),
   "/privacy",
   "/terms",
-  "/blog",
-  ...blogPosts.map((p) => `/blog/${p.slug}`),
   "/legal-disclaimer",
 ];
 

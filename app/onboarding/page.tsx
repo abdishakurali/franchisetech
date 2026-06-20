@@ -22,6 +22,8 @@ import {
   type LocationBand,
 } from "@/lib/business-profile";
 import { createClient } from "@/lib/supabase/client";
+import { readAcquisitionClient } from "@/lib/marketing/acquisition";
+import { readPreferredPlanClient } from "@/lib/billing/preferred-plan";
 
 const businessTypes = [
   "Restaurant",
@@ -97,6 +99,10 @@ export default function OnboardingPage() {
 
   const handleFinish = () => {
     startTransition(async () => {
+      const acquisition = readAcquisitionClient();
+      const preferredPlan = readPreferredPlanClient();
+      const ref = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("ref") : null;
+
       const result = await completePosOnboarding({
         orgName: form.name,
         businessType: form.businessType || undefined,
@@ -104,6 +110,16 @@ export default function OnboardingPage() {
         countryCode: form.countryCode,
         locationBand: form.locationBand,
         ingredientTracking: form.ingredientTracking,
+        preferredPlan: preferredPlan ?? undefined,
+        referralCode: ref,
+        acquisition: acquisition
+          ? {
+              utm_source: acquisition.utm_source,
+              utm_campaign: acquisition.utm_campaign,
+              utm_content: acquisition.utm_content,
+              utm_medium: acquisition.utm_medium,
+            }
+          : null,
       });
       if (result && "error" in result && result.error) {
         toast.error(result.error);

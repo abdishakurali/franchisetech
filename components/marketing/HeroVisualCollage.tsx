@@ -58,18 +58,18 @@ export function HeroVisualCollage({
         alt={posAlt}
         width={1200}
         height={750}
-        className="w-full object-cover object-top"
+        className="max-h-[200px] w-full object-cover object-top sm:max-h-[240px] lg:max-h-[260px]"
         priority={priority}
       />
 
-      <div className="grid grid-cols-2 gap-2 border-t border-slate-100 bg-slate-50/60 p-2 sm:gap-3 sm:p-3">
+      <div className="grid grid-cols-2 gap-2 border-t border-slate-100 bg-slate-50/60 p-2 sm:gap-2.5 sm:p-2.5">
         <div className="overflow-hidden rounded-xl border border-slate-200/80 shadow-sm">
           <Image
             src={cafeSrc}
             alt={cafeAlt}
             width={400}
-            height={500}
-            className="aspect-[4/5] w-full object-cover"
+            height={300}
+            className="aspect-[4/3] w-full object-cover"
             unoptimized
           />
         </div>
@@ -79,8 +79,8 @@ export function HeroVisualCollage({
             src={kitchenSrc}
             alt={kitchenAlt}
             width={400}
-            height={500}
-            className="aspect-[4/5] w-full object-cover object-top"
+            height={300}
+            className="aspect-[4/3] w-full object-cover object-top"
             unoptimized
           />
         </div>

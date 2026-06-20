@@ -152,6 +152,7 @@ export async function saveFiscalNetSettings(formData: FormData) {
 
   if (error) return { error: error.message };
   revalidatePath("/app/settings");
+  revalidatePath("/app/pos");
   return { success: true };
 }
 

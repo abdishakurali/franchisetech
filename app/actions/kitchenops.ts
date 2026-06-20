@@ -3,6 +3,7 @@
 // FiscalNet — Romania-only fiscal receipt integration
 import { printFiscalReceipt, shouldPrintFiscalReceipt } from "@/lib/fiscalnet";
 import { buildFiscalNetConfig } from "@/lib/fiscalnet/config";
+import { isFiscalNetActive } from "@/lib/fiscalnet/eligibility";
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -1791,13 +1792,13 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   // ── FiscalNet: for API mode, mark pending — browser will fire the call ──
   const countryCode = (orgRow?.country_code as string) ?? null;
   const isRO = countryCode === "RO";
-  const fnEnabled = Boolean(orgRow?.fiscalnet_enabled);
+  const fnEnabled = isFiscalNetActive(countryCode, orgRow?.fiscalnet_enabled as boolean | null | undefined);
   const fnMock    = (orgRow?.fiscalnet_mock_mode as boolean) !== false;
   const connMode  = (orgRow?.fiscalnet_connection_mode as string) ?? "api";
 
   // For API mode: just mark the flag — browser will call localhost:65400
-  const fiscalApiPending = isRO && fnEnabled && (connMode === "file" || !fnMock); // file downloads even if legacy mock flag is still true
-  if (isRO && fnEnabled) {
+  const fiscalApiPending = fnEnabled && (connMode === "file" || !fnMock);
+  if (fnEnabled) {
     await supabase.from("pos_transactions")
       .update({ fiscal_receipt_required: true, fiscal_receipt_status: (fiscalApiPending) ? "api_pending" : "pending" })
       .eq("id", transactionId).eq("organisation_id", orgId)

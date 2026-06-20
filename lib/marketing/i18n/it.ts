@@ -168,11 +168,11 @@ export const it: MarketingMessages = {
       ],
     },
     socialProof: {
-      label: "Cosa dicono i titolari",
+      label: "Program beta",
       quotes: [
-        { quote: "Prima vendita in meno di 15 minuti dopo il setup.", name: "Maria D.", business: "Titolare bar, Dublino", metric: "Prima vendita in 12 min" },
-        { quote: "Chiudere la cassa coincide con quello che conto.", name: "James K.", business: "Titolare ristorante", metric: "Cassa ok dal primo giorno" },
-        { quote: "Un login per POS, stock e report — il team capisce subito.", name: "Ana P.", business: "Operatore multi-sede", metric: "3 sedi, un workspace" },
+        { quote: "Un'unica app per cassa, magazzino e report — senza costi per postazione.", name: "franchisetech", business: "Piattaforma HORECA", metric: "Trial assistito 15 giorni" },
+        { quote: "Onboarding umano: prodotti, staff e prima vendita.", name: "Team franchisetech", business: "Supporto setup", metric: "Prima vendita guidata" },
+        { quote: "Romania: NIR, IVA per prodotto e guida FiscalNet per multi-sede.", name: "Per operatori RO", business: "Multi-sede", metric: "Guida passo passo" },
       ],
     },
     faq: {
@@ -246,7 +246,7 @@ export const it: MarketingMessages = {
     faqs: [
       { question: "Cosa gestisce franchisetech vs il partner?", answer: "Noi gestiamo piattaforma, hosting, aggiornamenti e supporto di base. Voi vendete, fate onboarding e supportate i clienti localmente." },
       { question: "Chi è adatto?", answer: "Rivenditori POS, commercialisti, consulenti hospitality e operatori multi-sede con base clienti food esistente." },
-      { question: "Come guadagnano i partner?", answer: "I partner referral guadagnano di solito il 20% ricorrente sugli abbonamenti attivi. La fee di setup (€249) è condivisa — chi fa onboarding trattiene circa €100–150. Partner con volume possono avere prezzi wholesale (~20% di sconto)." },
+      { question: "Come guadagnano i partner?", answer: "I partner referral guadagnano di solito il 20% ricorrente sugli abbonamenti attivi. La fee di setup (€199) è condivisa — chi fa onboarding trattiene circa €100–150. Partner con volume possono avere prezzi wholesale (~20% di sconto)." },
       { question: "C'è un accordo formale da rivenditore?", answer: "Discutiamo i termini dopo la candidatura. I modelli commerciali possono variare per volume." },
       { question: "Quanto velocemente rispondete?", answer: "Puntiamo a rispondere entro 2 giorni lavorativi." },
     ],

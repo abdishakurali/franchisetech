@@ -15,6 +15,12 @@ import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { getPlan } from "@/lib/billing/plans";
 import { isPreferredBillingPlan, writePreferredPlanClient } from "@/lib/billing/preferred-plan";
+import {
+  hasAcquisitionData,
+  parseAcquisitionFromSearchParams,
+  writeAcquisitionClient,
+} from "@/lib/marketing/acquisition";
+import { MARKETING_LOCALE_COOKIE } from "@/lib/marketing/locale";
 
 const googleAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "true";
 
@@ -32,6 +38,16 @@ export default function SignupPage() {
       writePreferredPlanClient(planParam);
     }
   }, [planParam]);
+
+  useEffect(() => {
+    const acquisition = parseAcquisitionFromSearchParams(searchParams);
+    if (hasAcquisitionData(acquisition)) {
+      writeAcquisitionClient(acquisition);
+    }
+    if (acquisition.lang) {
+      document.cookie = `${MARKETING_LOCALE_COOKIE}=${acquisition.lang};path=/;max-age=31536000;samesite=lax`;
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
