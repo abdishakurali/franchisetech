@@ -1,0 +1,36 @@
+---
+globs: .n8n/**/*,scripts/**/*.ts,scripts/**/*.py
+alwaysApply: false
+---
+
+# Automation & n8n Rules
+
+## n8n instance
+
+- URL: https://n8n.franchisetech.ro
+- Connected via n8n-mcp in .cursor/mcp.json
+- Use MCP to CREATE workflows — do not write raw JSON workflow files manually
+
+## Webhook convention
+
+All n8n webhooks that Next.js calls must:
+
+- Accept POST with JSON body
+- Include { email, userId, businessName } at minimum
+- Be documented in a comment above the fetch() call in the Next.js code
+
+## Priority workflows to build (in order)
+
+1. Trial Conversion Alert (z_report_viewed → check Stripe → Telegram if no subscription)
+2. Cold email pipeline (CSV → dedup Supabase → Zoho send → log result)
+3. Stripe churn warning (past_due → Loops payment issue sequence → Telegram)
+4. Weekly metrics digest (Monday 8am → Supabase + Stripe query → email summary)
+5. Partner lead routing (form submit → Supabase insert → Loops partner sequence → Telegram)
+
+## Credential storage
+
+All credentials in n8n must use n8n Credential nodes — never hardcoded in workflow nodes.
+Supabase: use service role key stored as n8n HTTP Header Auth credential.
+Telegram: use n8n Telegram credential node.
+Stripe: use n8n Stripe credential node.
+Loops: use n8n HTTP Request node with Authorization header from credential.

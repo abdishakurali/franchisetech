@@ -1,0 +1,39 @@
+---
+globs: app/**/*.ts,app/**/*.tsx,lib/**/*.ts,components/**/*.tsx
+alwaysApply: false
+---
+
+# Product Development Rules
+
+## Architecture patterns in use
+
+- Server actions for all mutations (no separate REST endpoints unless webhook/external)
+- Supabase RLS for all data access — never bypass with service role key in client code
+- shadcn/ui components — check components/ui/ before building new UI primitives
+- Tailwind CSS 4 — no inline styles, no external CSS files
+
+## The activation funnel is sacred
+
+Any feature that touches: till sessions, sale recording, Z-report, or subscription must:
+
+1. Preserve the existing recordGrowthMilestone calls
+2. Add the corresponding Loops trackLoopsEvent call (see lib/loops.ts)
+3. Not block the main user action with async email/analytics calls
+
+## POS-specific rules
+
+- POS sessions live in app/app/pos/ — changes here affect live till sessions
+- Never break the completeSaleReturn flow — it is the primary revenue-generating action
+- Kitchen display (KDS) and POS must stay in sync — test both when touching kitchenops.ts
+
+## Stripe rules
+
+- Webhook handler is at app/api/billing/webhook/route.ts
+- Always verify webhook signature before processing
+- Subscription status changes must update Supabase subscriptions table
+
+## When adding a new page or route
+
+- Check app/ structure before creating — follow existing folder conventions
+- Add to sitemap if it's a marketing/public page
+- Add to llms.txt if it's relevant for AI discoverability

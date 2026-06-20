@@ -1,0 +1,33 @@
+---
+globs: outreach/**/*.py,outreach/**/*.csv
+alwaysApply: false
+---
+
+# Sales & Outreach Rules
+
+## Current outreach system
+
+- Cold email via Zoho Mail API (ZohoMCP connected)
+- Python scripts in outreach/ handle: CSV loading, dedup against Supabase, payload generation, send logging
+- Target: Romanian food business owners — cafés, restaurants, takeaway, patisseries
+- Cities: București, Cluj, Timișoara, Iași, Brașov, Constanța
+
+## Email rules
+
+- Always check Supabase (via MCP) for existing signups before adding to outreach CSV
+- Never send to an email that already exists in auth.users
+- Zoho daily send limit: respect it — do not batch more than the account allows
+- All cold emails in Romanian — conversational, not corporate
+
+## ICP scoring (for qualify-lead skill)
+
+- Score 1–10
+- High (8–10): 3+ locations, owner or ops manager role, food business
+- Mid (5–7): 1–2 locations, owner, food business
+- Low (1–4): wrong industry, employee not owner, outside Romania
+
+## Partner channel
+
+- Partners are: contabili, FiscalNet integrators, POS resellers
+- Commission: 20% recurring + setup fee split
+- Partner onboarding triggers: Loops "partner_signup" event

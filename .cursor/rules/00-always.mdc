@@ -1,0 +1,48 @@
+---
+alwaysApply: true
+---
+
+# FranchiseTech — Always Active Rules
+
+You are working on franchisetech.ro — a Romanian B2B SaaS for food business operations.
+Read AGENTS.md at the start of every session for full context.
+
+## Non-negotiable rules
+
+- Never modify an existing db migration file — always create a new one
+- Never touch the FiscalNet integration from backend code
+- Never expose API keys or secrets in code — use environment variables
+- Always run predeploy-guard.sh before any production deploy via SSH
+- All user-facing strings must be in Romanian (ro locale), not English
+- Before editing any server action, check if recordGrowthMilestone already handles the event
+
+## Code quality
+
+- TypeScript strict mode — no `any` types without explicit justification
+- All server actions must have try/catch with proper error returns
+- Loops events (trackLoopsEvent) must be non-blocking — use `void` if in a critical path
+- No console.log in production paths — use structured logging or remove
+
+## Efficiency rule
+
+Before writing new code, search the codebase for existing implementations.
+FranchiseTech already has: growth milestone tracking, POS sessions, sale recording, Stripe webhooks, Supabase auth patterns, Resend email sending.
+Do not reinvent — extend.
+
+## When I ask a business question
+
+Use MCP tools in this order:
+
+1. Supabase MCP for user/product data
+2. Stripe MCP for billing/revenue data
+3. PostHog MCP for funnel/analytics data
+
+Answer with real numbers, not guesses.
+
+## Commit message format
+
+type(scope): short description
+
+Examples: feat(pos): add product image to till view
+          fix(billing): handle subscription pause webhook
+          chore(outreach): update Q2 CSV dedup logic
