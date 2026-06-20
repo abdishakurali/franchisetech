@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getMarketingMessages } from "@/lib/marketing/i18n";
-import { useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import { useMarketingMessages } from "@/lib/marketing/use-marketing-locale";
 import { Section } from "@/components/marketing/MarketingShell.primitives";
 
 export function CtaRow({
@@ -15,8 +14,7 @@ export function CtaRow({
   secondaryLabel?: string;
   plan?: "starter" | "pro" | "multi_location";
 }) {
-  const locale = useMarketingLocale();
-  const t = getMarketingMessages(locale);
+  const t = useMarketingMessages();
   const secondary = secondaryLabel ?? t.cta.seePricing;
   const signupHref = plan ? `/signup?plan=${plan}` : "/signup";
 
@@ -39,8 +37,7 @@ export function CtaRow({
 }
 
 export function FinalCta({ title }: { title?: string }) {
-  const locale = useMarketingLocale();
-  const t = getMarketingMessages(locale);
+  const t = useMarketingMessages();
 
   return (
     <Section tone="slate">

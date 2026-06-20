@@ -5,37 +5,30 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import type { MarketingMessages } from "@/lib/marketing/i18n/en";
+import { useMarketingMessages } from "@/lib/marketing/use-marketing-locale";
 import { marketingCard, marketingHeading } from "@/lib/marketing/tokens";
 import { SectionLabel } from "@/components/marketing/MarketingShell.primitives";
 
 type IndustryItem = MarketingMessages["home"]["industries"]["items"][number];
 
-function tabItems(items: readonly IndustryItem[]) {
+function tabItems(
+  items: readonly IndustryItem[],
+  multiSiteTab: MarketingMessages["home"]["industries"]["multiSiteTab"],
+) {
   const cafe = items.find((i) => i.href.includes("cafes"));
   const restaurant = items.find((i) => i.href.includes("restaurants"));
-  const multi = {
-    title: "Multi-site",
-    text: "Central reporting and one workspace per location.",
+  const multi: IndustryItem = {
+    title: multiSiteTab.title,
+    text: multiSiteTab.text,
     href: "/pricing",
     image: items.find((i) => i.href.includes("restaurants"))?.image ?? "/marketing/industry-restaurant.png",
   };
   return [cafe, restaurant, multi].filter(Boolean) as IndustryItem[];
 }
 
-export function IndustryTabs({
-  label,
-  title,
-  items,
-  getStarted,
-  learnMore,
-}: {
-  label: string;
-  title: string;
-  items: readonly IndustryItem[];
-  getStarted: string;
-  learnMore: string;
-}) {
-  const tabs = tabItems(items);
+export function IndustryTabs() {
+  const t = useMarketingMessages();
+  const tabs = tabItems(t.home.industries.items, t.home.industries.multiSiteTab);
   const [active, setActive] = useState(0);
   const current = tabs[active] ?? tabs[0];
 
@@ -44,8 +37,8 @@ export function IndustryTabs({
   return (
     <div>
       <div className="max-w-2xl">
-        <SectionLabel>{label}</SectionLabel>
-        <h2 className={`mt-3 ${marketingHeading}`}>{title}</h2>
+        <SectionLabel>{t.home.industries.label}</SectionLabel>
+        <h2 className={`mt-3 ${marketingHeading}`}>{t.home.industries.title}</h2>
       </div>
       <div className="mt-8 flex flex-wrap gap-2">
         {tabs.map((tab, i) => (
@@ -83,13 +76,13 @@ export function IndustryTabs({
                 href="/signup"
                 className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
               >
-                {getStarted} <ArrowRight className="h-4 w-4" />
+                {t.cta.getStarted} <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href={current.href}
                 className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline"
               >
-                {learnMore} <ArrowRight className="h-4 w-4" />
+                {t.cta.learnMore} <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>

@@ -9,6 +9,8 @@ import { MobileStickyCta } from "@/components/marketing/MobileStickyCta";
 import { BrowserFrame } from "@/components/marketing/DeviceFrames";
 import { marketingSectionY } from "@/lib/marketing/tokens";
 import { socialLinks } from "@/components/marketing/social";
+import { getMarketingLocale } from "@/lib/marketing/locale-server";
+import { MarketingLocaleProvider } from "@/lib/marketing/marketing-locale-context";
 import { showcaseAssets } from "@/lib/marketing/showcase";
 
 export { Section, SectionLabel, Faq, CardGrid } from "@/components/marketing/MarketingShell.primitives";
@@ -58,17 +60,20 @@ export function HeroScreenshots() {
   );
 }
 
-export function PageShell({ children, schema }: { children: ReactNode; schema?: Record<string, unknown>[] }) {
+export async function PageShell({ children, schema }: { children: ReactNode; schema?: Record<string, unknown>[] }) {
+  const locale = await getMarketingLocale();
   return (
-    <div className="min-h-screen bg-white">
-      {schema?.map((item, index) => <div key={index}>{jsonLd(item)}</div>)}
-      <MarketingNav />
-      <div className="pb-24 md:pb-0">{children}</div>
-      <MarketingFooterClient />
-      <Suspense fallback={null}>
-        <MobileStickyCta />
-      </Suspense>
-    </div>
+    <MarketingLocaleProvider key={locale} initialLocale={locale}>
+      <div className="min-h-screen bg-white">
+        {schema?.map((item, index) => <div key={index}>{jsonLd(item)}</div>)}
+        <MarketingNav />
+        <div className="pb-24 md:pb-0">{children}</div>
+        <MarketingFooterClient />
+        <Suspense fallback={null}>
+          <MobileStickyCta />
+        </Suspense>
+      </div>
+    </MarketingLocaleProvider>
   );
 }
 

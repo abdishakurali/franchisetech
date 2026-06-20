@@ -2,12 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { getMarketingMessages } from "@/lib/marketing/i18n";
-import { useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import { useMarketingMessages } from "@/lib/marketing/use-marketing-locale";
 
 export function MobileStickyCta() {
-  const locale = useMarketingLocale();
-  const t = getMarketingMessages(locale);
+  const t = useMarketingMessages();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const plan = searchParams.get("plan");

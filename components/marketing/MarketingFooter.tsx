@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getMarketingMessages } from "@/lib/marketing/i18n";
-import { useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import { useMarketingMessages } from "@/lib/marketing/use-marketing-locale";
 import { MarketingBrand } from "@/components/marketing/MarketingBrand";
 import { socialLinks } from "@/components/marketing/social";
 
 export function MarketingFooterClient() {
-  const locale = useMarketingLocale();
-  const t = getMarketingMessages(locale);
+  const t = useMarketingMessages();
 
   const productLinks = [
     ["/features", t.footer.features],

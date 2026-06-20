@@ -15,6 +15,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
   const { supabase, orgId, currency } = await getKitchenOpsContext();
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const recipeVisible = isModuleEnabled(moduleFlags, "recipe_costing");
+  const inventoryVisible = isModuleEnabled(moduleFlags, "inventory");
   await ensurePosDefaults();
   const params = await searchParams;
   const q = params?.q ?? "";
@@ -40,6 +41,15 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
       || (typeFilter === "pos" && p.available_in_pos !== false);
     return matchText && matchCat && matchType;
   });
+
+  const typeOptions = [
+    { value: "all", label: "All" },
+    { value: "pos", label: "POS items" },
+    ...(inventoryVisible || recipeVisible
+      ? [{ value: "ingredient", label: "Ingredients" }]
+      : []),
+    { value: "sellable", label: "Sellable" },
+  ];
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -101,12 +111,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
                 name="type"
                 defaultValue={typeFilter}
                 className="w-36"
-                options={[
-                  { value: "all", label: "All" },
-                  { value: "pos", label: "POS items" },
-                  { value: "ingredient", label: "Ingredients" },
-                  { value: "sellable", label: "Sellable" },
-                ]}
+                options={typeOptions}
               />
               <Button type="submit" variant="outline" size="sm" className="h-8">Filter</Button>
             </form>
@@ -123,7 +128,9 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
             <ProductsBulkTable
               products={products as never}
               deleteAction={deleteProducts}
-              updateStockAction={updateProductStock}
+              updateStockAction={inventoryVisible ? updateProductStock : undefined}
+              inventoryVisible={inventoryVisible}
+              recipeVisible={recipeVisible}
             />
           )}
         </CardContent>

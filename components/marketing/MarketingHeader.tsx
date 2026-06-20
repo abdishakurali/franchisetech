@@ -3,8 +3,7 @@
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { getMarketingMessages } from "@/lib/marketing/i18n";
-import { useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import { useMarketingMessages } from "@/lib/marketing/use-marketing-locale";
 import { MarketingBrand } from "@/components/marketing/MarketingBrand";
 import { MarketingLocaleSwitcher } from "@/components/marketing/MarketingLocaleSwitcher";
 
@@ -15,8 +14,7 @@ type UserChip = {
 
 export function MarketingHeader({ user }: { user: UserChip | null }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const locale = useMarketingLocale();
-  const t = getMarketingMessages(locale);
+  const t = useMarketingMessages();
 
   const navLinks = [
     { href: "/features", label: t.nav.features },

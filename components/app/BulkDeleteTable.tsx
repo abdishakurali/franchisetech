@@ -74,10 +74,14 @@ export function ProductsBulkTable({
   products,
   deleteAction,
   updateStockAction,
+  inventoryVisible = true,
+  recipeVisible = true,
 }: {
   products: Product[];
   deleteAction: (ids: string[]) => Promise<void>;
   updateStockAction?: (fd: FormData) => Promise<void>;
+  inventoryVisible?: boolean;
+  recipeVisible?: boolean;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
@@ -149,7 +153,7 @@ export function ProductsBulkTable({
               <TableHead className="text-right">Cost</TableHead>
               <TableHead>VAT</TableHead>
               <TableHead>Type</TableHead>
-              <TableHead className="text-right">Stock</TableHead>
+              {inventoryVisible ? <TableHead className="text-right">Stock</TableHead> : null}
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -195,17 +199,19 @@ export function ProductsBulkTable({
                     {p.available_in_pos !== false && (
                       <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700">POS</Badge>
                     )}
-                    {p.is_ingredient && (
+                    {recipeVisible && p.is_ingredient && (
                       <Badge variant="outline" className="text-xs">Ingredient</Badge>
                     )}
-                    {p.is_stock_tracked && (
+                    {inventoryVisible && p.is_stock_tracked && (
                       <Badge variant="outline" className="text-xs">Stock</Badge>
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                  <StockCell product={p} updateStock={updateStockAction} />
-                </TableCell>
+                {inventoryVisible ? (
+                  <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                    <StockCell product={p} updateStock={updateStockAction} />
+                  </TableCell>
+                ) : null}
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <Link href={`/app/products/${p.id}/edit`}>
                     <Button variant="outline" size="sm" className="h-7 text-xs">Edit</Button>

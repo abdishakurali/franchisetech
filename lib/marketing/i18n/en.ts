@@ -127,6 +127,10 @@ export const en = {
     industries: {
       label: "Industries",
       title: "Built for how you serve food.",
+      multiSiteTab: {
+        title: "Multi-site",
+        text: "Central reporting and one workspace per location.",
+      },
       items: [
         { title: "Cafes", text: "Counter service and recipe margins.", href: "/industries/cafes", image: "/marketing/industry-cafe.png" },
         { title: "Restaurants", text: "Table service, kitchen, and staff.", href: "/industries/restaurants", image: "/marketing/industry-restaurant.png" },

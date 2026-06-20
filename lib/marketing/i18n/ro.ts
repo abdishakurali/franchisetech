@@ -129,6 +129,10 @@ export const ro: MarketingMessages = {
     industries: {
       label: "Industrii",
       title: "Construit pentru modul în care serviți mâncarea.",
+      multiSiteTab: {
+        title: "Multi-locație",
+        text: "Raportare centralizată și un spațiu de lucru per locație.",
+      },
       items: [
         { title: "Cafenele", text: "Serviciu la tejghea și marje pe rețete.", href: "/industries/cafes", image: "/marketing/industry-cafe.png" },
         { title: "Restaurante", text: "Servire la masă, bucătărie și personal.", href: "/industries/restaurants", image: "/marketing/industry-restaurant.png" },

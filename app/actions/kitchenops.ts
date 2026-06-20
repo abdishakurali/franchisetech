@@ -24,7 +24,8 @@ import {
 import { createServiceClient } from "@/lib/supabase/server";
 import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
-import { saveOrgModuleFlags } from "@/lib/org-module-flags";
+import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
 import { nearestVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 
 function canTransact(role: string | null) { return ["owner","manager","staff","cashier"].includes(role ?? ""); }
@@ -299,18 +300,11 @@ export async function addProduct(formData: FormData) {
   const name = stringValue(formData, "name");
   if (!name) return;
   const availableInPos = formData.get("available_in_pos") === "on";
-  const isIngredient = formData.get("is_ingredient") === "on";
-  // When ingredient is checked, always track stock too
-  const isStockTracked = isIngredient || formData.get("is_stock_tracked") === "on";
+  const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
+  const visibility = productModuleVisibility(moduleFlags);
+  const typeFields = resolveProductTypeFields(formData, visibility, "create");
   const isSellable = availableInPos || formData.get("is_sellable") === "on";
-  const isPurchaseable = formData.get("is_purchaseable") === "on" || isIngredient;
-  const openingStock = nullableNum(formData, "opening_stock");
-  const rawItemType = stringValue(formData, "item_type");
-  const validItemTypes = ["finished_product","ingredient","merchandise","supply","packaging","raw_material"];
-  const itemType = validItemTypes.includes(rawItemType) ? rawItemType
-    : isIngredient ? "ingredient"
-    : availableInPos ? "finished_product"
-    : null;
+  const openingStock = visibility.inventory ? nullableNum(formData, "opening_stock") : null;
 
   const { data: inserted } = await supabase.from("products").insert({
     organisation_id: orgId,
@@ -324,11 +318,12 @@ export async function addProduct(formData: FormData) {
     placeholder_type: stringValue(formData, "placeholder_type") || null,
     kitchen_station: stringValue(formData, "kitchen_station") || null,
     available_in_pos: availableInPos,
-    is_ingredient: isIngredient,
-    is_stock_tracked: isStockTracked,
+    is_ingredient: typeFields.is_ingredient,
+    is_stock_tracked: typeFields.is_stock_tracked,
     is_sellable: isSellable,
-    is_purchaseable: isPurchaseable,
-    item_type: itemType,
+    is_purchaseable: typeFields.is_purchaseable,
+    item_type: typeFields.item_type,
+    supplier_id: typeFields.supplier_id,
     current_stock_qty: openingStock ?? 0,
     active: true,
   }).select("id").single();
@@ -356,7 +351,7 @@ export async function addProduct(formData: FormData) {
   }
 
   // Record opening stock movement if opening_stock was given
-  if (inserted && openingStock && openingStock > 0) {
+  if (visibility.inventory && inserted && openingStock && openingStock > 0) {
     await supabase.from("stock_movements").insert({
       organisation_id: orgId,
       product_id: inserted.id,
@@ -405,14 +400,27 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
   return { ok: true };
 }
 
-export async function updateProduct(formData: FormData) {
+export async function updateProduct(
+  formData: FormData,
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
   const id = stringValue(formData, "id");
-  if (!id) return;
+  if (!id) return { ok: false, error: "Product not found." };
   const availableInPos = formData.get("available_in_pos") === "on";
-  const isIngredient = formData.get("is_ingredient") === "on";
-  const isStockTracked = formData.get("is_stock_tracked") === "on";
+
+  const [{ data: existing }, moduleFlags] = await Promise.all([
+    supabase
+      .from("products")
+      .select("is_ingredient,is_stock_tracked,is_purchaseable,item_type,supplier_id")
+      .eq("id", id)
+      .eq("organisation_id", orgId)
+      .maybeSingle(),
+    fetchOrgModuleFlags(supabase, orgId),
+  ]);
+
+  const visibility = productModuleVisibility(moduleFlags);
+  const typeFields = resolveProductTypeFields(formData, visibility, "update", existing);
 
   // Determine image URL: new upload > clear > keep existing
   const imageFile = formData.get("image_file") as File | null;
@@ -438,7 +446,7 @@ export async function updateProduct(formData: FormData) {
     imageUrl = null;
   }
 
-  await supabase.from("products").update({
+  const { error } = await supabase.from("products").update({
     name: stringValue(formData, "name"),
     category_id: stringValue(formData, "category_id") || null,
     sku: stringValue(formData, "sku") || null,
@@ -450,32 +458,36 @@ export async function updateProduct(formData: FormData) {
     placeholder_type: stringValue(formData, "placeholder_type") || null,
     kitchen_station: stringValue(formData, "kitchen_station") || null,
     available_in_pos: availableInPos,
-    is_ingredient: isIngredient,
-    is_stock_tracked: isStockTracked,
+    is_ingredient: typeFields.is_ingredient,
+    is_stock_tracked: typeFields.is_stock_tracked,
     is_sellable: availableInPos || formData.get("is_sellable") === "on",
-    is_purchaseable: formData.get("is_purchaseable") === "on" || isIngredient,
-    ...((() => {
-      const raw = String(formData.get("item_type") ?? "").trim();
-      const valid = ["finished_product","ingredient","merchandise","supply","packaging","raw_material"];
-      return raw && valid.includes(raw) ? { item_type: raw } : {};
-    })()),
+    is_purchaseable: typeFields.is_purchaseable,
+    item_type: typeFields.item_type,
+    supplier_id: typeFields.supplier_id,
     updated_at: new Date().toISOString(),
   }).eq("id", id).eq("organisation_id", orgId);
+
+  if (error) return { ok: false, error: error.message };
+
   revalidatePath("/app/products");
   revalidatePath(`/app/products/${id}`);
+  revalidatePath(`/app/products/${id}/edit`);
   revalidatePath("/app/pos");
-  redirect("/app/products");
+  return { ok: true };
 }
 
-export async function deleteProduct(formData: FormData) {
+export async function deleteProduct(
+  formData: FormData,
+): Promise<{ ok: true } | { ok: false; error: string }> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
   const id = stringValue(formData, "id");
-  if (!id) return;
-  await supabase.from("products").update({ active: false }).eq("id", id).eq("organisation_id", orgId);
+  if (!id) return { ok: false, error: "Product not found." };
+  const { error } = await supabase.from("products").update({ active: false }).eq("id", id).eq("organisation_id", orgId);
+  if (error) return { ok: false, error: error.message };
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
-  redirect("/app/products");
+  return { ok: true };
 }
 
 // ---- POS Session Management ----

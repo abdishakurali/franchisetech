@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,12 @@ import { ImageUploadField } from "@/components/app/ImageUploadField";
 import { ProductVatField } from "@/components/app/ProductVatField";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { getDefaultVatRateValue } from "@/lib/vat-rates";
+import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import {
+  itemTypeSelectOptions,
+  productModuleVisibility,
+  showProductTypeSection,
+} from "@/lib/product-module-fields";
 const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
 const KITCHEN_STATIONS = [
   { value: "bar",         label: "Bar" },
@@ -29,7 +36,15 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
   await ensurePosDefaults();
 
   const params = await searchParams;
-  const defaultIngredient = params?.type === "ingredient";
+  const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
+  const visibility = productModuleVisibility(moduleFlags);
+  const itemTypes = itemTypeSelectOptions(visibility, isRO);
+  const wantsIngredient = params?.type === "ingredient";
+  const defaultIngredient = wantsIngredient && (visibility.inventory || visibility.recipeCosting);
+
+  if (wantsIngredient && !defaultIngredient) {
+    redirect("/app/products/new");
+  }
 
   const [{ data: categories }, { data: units }, { data: suppliers }, vatRates] = await Promise.all([
     supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).order("sort_order"),
@@ -115,10 +130,16 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
               </div>
             </div>
 
-            {/* Product type — 2 clear checkboxes */}
+            {/* Product type */}
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-4">
               <p className="text-sm font-semibold text-slate-800">What is this product?</p>
-              <p className="text-xs text-slate-500 -mt-2">You can select both — e.g. a soup base that is sold AND used as an ingredient.</p>
+              {showProductTypeSection(visibility) && (
+                <p className="text-xs text-slate-500 -mt-2">
+                  {isRO
+                    ? "Puteți selecta ambele — ex. o bază de supă vândută și folosită ca ingredient."
+                    : "You can select both — e.g. a soup base that is sold AND used as an ingredient."}
+                </p>
+              )}
 
               <label className="flex items-start gap-3 cursor-pointer group">
                 <input
@@ -138,72 +159,97 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                 </div>
               </label>
 
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="is_ingredient"
-                  value="on"
-                  defaultChecked={defaultIngredient}
-                  className="mt-0.5 h-4 w-4 accent-blue-600"
-                />
-                {/* When is_ingredient is checked we also want is_stock_tracked=on */}
-                <input type="hidden" name="is_stock_tracked" value="off" />
-                <div>
-                  <p className="text-sm font-medium text-slate-900 group-hover:text-blue-700">
-                    {isRO ? "Urmărire stoc / ingredient" : "Track as ingredient / stock"}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {isRO ? "Activați dacă cumpărați acest articol și doriți urmărirea stocului." : "Turn on if you buy this item and want stock tracked."}
-                  </p>
-                </div>
-              </label>
-
-              <label className="flex items-start gap-3 cursor-pointer group">
-                <input
-                  type="checkbox"
-                  name="is_purchaseable"
-                  value="on"
-                  defaultChecked={defaultIngredient}
-                  className="mt-0.5 h-4 w-4 accent-green-600"
-                />
-                <div>
-                  <p className="text-sm font-medium text-slate-900 group-hover:text-green-700">
-                    {isRO ? "Poate fi cumpărat" : "Can be purchased"}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {isRO
-                      ? "Activați pentru mărfuri, ingrediente, consumabile și ambalaje — articole cumpărate de la furnizori. Apare la Înregistrează cumpărătură."
-                      : "Turn on for goods, ingredients, supplies, and packaging — items you buy from suppliers. Appears in Record Purchase."}
-                  </p>
-                </div>
-              </label>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {isRO ? "Tip articol" : "Item type"}
+              {visibility.recipeCosting && (
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    name="is_ingredient"
+                    value="on"
+                    defaultChecked={defaultIngredient}
+                    className="mt-0.5 h-4 w-4 accent-blue-600"
+                  />
+                  {visibility.inventory && <input type="hidden" name="is_stock_tracked" value="off" />}
+                  <div>
+                    <p className="text-sm font-medium text-slate-900 group-hover:text-blue-700">
+                      {visibility.inventory
+                        ? (isRO ? "Urmărire stoc / ingredient" : "Track as ingredient / stock")
+                        : (isRO ? "Ingredient pentru rețete" : "Recipe ingredient")}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {visibility.inventory
+                        ? (isRO ? "Activați dacă cumpărați acest articol și doriți urmărirea stocului." : "Turn on if you buy this item and want stock tracked.")
+                        : (isRO ? "Activați dacă acest articol este folosit în rețete." : "Turn on if this item is used in recipes.")}
+                    </p>
+                  </div>
                 </label>
-                <select name="item_type" defaultValue={defaultIngredient ? "ingredient" : "finished_product"} className="h-9 w-full max-w-xs rounded-md border border-slate-200 bg-white px-3 text-sm">
-                  <option value="finished_product">{isRO ? "Produs finit" : "Finished product"}</option>
-                  <option value="ingredient">{isRO ? "Ingredient" : "Ingredient"}</option>
-                  <option value="merchandise">{isRO ? "Marfă" : "Goods"}</option>
-                  <option value="supply">{isRO ? "Consumabil" : "Supply"}</option>
-                  <option value="packaging">{isRO ? "Ambalaj" : "Packaging"}</option>
-                  <option value="raw_material">{isRO ? "Materie primă" : "Raw material"}</option>
-                </select>
-                <p className="text-xs text-slate-500 mt-1">
-                  {isRO ? "Separă produsele POS de articolele de inventar." : "Helps separate POS products from inventory items."}
-                </p>
-                {!defaultIngredient && (
-                  <p className="text-xs text-amber-700 mt-1">
-                    {isRO
-                      ? "Produsele finite nu apar la Înregistrează cumpărătură decât dacă bifați «Poate fi cumpărat»."
-                      : "Finished products won't appear in Record Purchase unless you check 'Can be purchased'."}
-                  </p>
-                )}
-              </div>
+              )}
 
-              {/* Opening stock — shown for ingredient products */}
-              {defaultIngredient && (
+              {visibility.inventory && !visibility.recipeCosting && (
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    name="is_stock_tracked"
+                    value="on"
+                    defaultChecked={defaultIngredient}
+                    className="mt-0.5 h-4 w-4 accent-blue-600"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-slate-900 group-hover:text-blue-700">
+                      {isRO ? "Urmărire stoc" : "Track stock"}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {isRO ? "Activați dacă cumpărați acest articol și doriți urmărirea stocului." : "Turn on if you buy this item and want stock tracked."}
+                    </p>
+                  </div>
+                </label>
+              )}
+
+              {visibility.inventory && (
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    name="is_purchaseable"
+                    value="on"
+                    defaultChecked={defaultIngredient}
+                    className="mt-0.5 h-4 w-4 accent-green-600"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-slate-900 group-hover:text-green-700">
+                      {isRO ? "Poate fi cumpărat" : "Can be purchased"}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {isRO
+                        ? "Activați pentru mărfuri, ingrediente, consumabile și ambalaje — articole cumpărate de la furnizori. Apare la Înregistrează cumpărătură."
+                        : "Turn on for goods, ingredients, supplies, and packaging — items you buy from suppliers. Appears in Record Purchase."}
+                    </p>
+                  </div>
+                </label>
+              )}
+
+              {showProductTypeSection(visibility) && itemTypes.length > 1 && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    {isRO ? "Tip articol" : "Item type"}
+                  </label>
+                  <select name="item_type" defaultValue={defaultIngredient ? "ingredient" : "finished_product"} className="h-9 w-full max-w-xs rounded-md border border-slate-200 bg-white px-3 text-sm">
+                    {itemTypes.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {isRO ? "Separă produsele POS de articolele de inventar." : "Helps separate POS products from inventory items."}
+                  </p>
+                  {!defaultIngredient && visibility.inventory && (
+                    <p className="text-xs text-amber-700 mt-1">
+                      {isRO
+                        ? "Produsele finite nu apar la Înregistrează cumpărătură decât dacă bifați «Poate fi cumpărat»."
+                        : "Finished products won't appear in Record Purchase unless you check 'Can be purchased'."}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {visibility.inventory && defaultIngredient && (
                 <div className="ml-7 mt-1">
                   <Label>Opening stock (optional)</Label>
                   <Input
@@ -225,7 +271,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                 <Label>SKU (optional)</Label>
                 <Input name="sku" placeholder="e.g. CHK-001" className="mt-1" />
               </div>
-              {(suppliers ?? []).length > 0 && (
+              {(suppliers ?? []).length > 0 && visibility.inventory && (
                 <div>
                   <Label>Supplier (optional)</Label>
                   <select name="supplier_id" className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
@@ -263,7 +309,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
         </CardContent>
       </Card>
 
-      {defaultIngredient && (
+      {defaultIngredient && visibility.recipeCosting && (
         <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
           <p className="font-semibold mb-2">Ingredient cost examples</p>
           <div className="space-y-1 text-xs text-blue-700">

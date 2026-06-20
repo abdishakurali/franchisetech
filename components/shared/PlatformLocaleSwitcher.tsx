@@ -6,8 +6,8 @@ import { ChevronDown } from "lucide-react";
 import type { MarketingLocale } from "@/lib/marketing/locale";
 import { marketingHtmlLang } from "@/lib/marketing/locale";
 import { marketingLocaleOptions } from "@/lib/marketing/locale-client";
-import { getMarketingMessages } from "@/lib/marketing/i18n";
-import { useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import { useMarketingMessages, useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import { getAppText } from "@/lib/app-i18n";
 import {
   readAppLocaleUnified,
   writeAppLocale,
@@ -28,6 +28,16 @@ type Props = {
   className?: string;
 };
 
+function marketingPathForLocale(code: MarketingLocale): string {
+  const url = new URL(window.location.href);
+  if (code === "en") {
+    url.searchParams.delete("lang");
+  } else {
+    url.searchParams.set("lang", code);
+  }
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 export function PlatformLocaleSwitcher({ scope = "marketing", orgIsRO = false, className }: Props) {
   const router = useRouter();
   const marketingLocale = useMarketingLocale();
@@ -38,7 +48,8 @@ export function PlatformLocaleSwitcher({ scope = "marketing", orgIsRO = false, c
   const isApp = scope === "app";
   const locale = isApp ? appLocale : marketingLocale;
   const options = isApp ? appLocaleOptions : marketingLocaleOptions;
-  const t = getMarketingMessages(isApp ? (appLocale === "ro" ? "ro" : "en") : marketingLocale);
+  const t = useMarketingMessages();
+  const appT = getAppText(appLocale);
   const current = options.find((o) => o.code === locale) ?? options[0];
 
   useEffect(() => {
@@ -70,9 +81,10 @@ export function PlatformLocaleSwitcher({ scope = "marketing", orgIsRO = false, c
     if (isApp) {
       writeAppLocale(code as PosLocale);
       setAppLocale(code as PosLocale);
+      router.refresh();
     } else {
       writePlatformLocale(code as MarketingLocale);
-      router.refresh();
+      router.push(marketingPathForLocale(code as MarketingLocale));
     }
     setOpen(false);
   }
@@ -83,7 +95,7 @@ export function PlatformLocaleSwitcher({ scope = "marketing", orgIsRO = false, c
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={t.header.language}
+        aria-label={isApp ? appT.shell.language : t.header.language}
         onClick={() => setOpen((v) => !v)}
         className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
       >

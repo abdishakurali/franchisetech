@@ -168,8 +168,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
           <div className="flex flex-wrap gap-2 mt-2">
             {cat && <Badge variant="secondary" style={{ backgroundColor: (cat.color ?? "#94a3b8") + "20", color: cat.color ?? undefined }}>{cat.name}</Badge>}
             {product.available_in_pos !== false && <Badge className="bg-blue-100 text-blue-700 border-0">POS</Badge>}
-            {product.is_ingredient && <Badge variant="outline">Ingredient</Badge>}
-            {product.is_stock_tracked && <Badge variant="outline">Stock tracked</Badge>}
+            {recipeVisible && product.is_ingredient && <Badge variant="outline">Ingredient</Badge>}
+            {inventoryVisible && product.is_stock_tracked && <Badge variant="outline">Stock tracked</Badge>}
             {!product.active && <Badge variant="destructive">Inactive</Badge>}
           </div>
         </div>

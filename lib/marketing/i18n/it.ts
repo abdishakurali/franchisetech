@@ -129,6 +129,10 @@ export const it: MarketingMessages = {
     industries: {
       label: "Settori",
       title: "Pensato per come servite il cibo.",
+      multiSiteTab: {
+        title: "Multi-sede",
+        text: "Report centralizzati e un workspace per sede.",
+      },
       items: [
         { title: "Bar e caffè", text: "Servizio al banco e margini sulle ricette.", href: "/industries/cafes", image: "/marketing/industry-cafe.png" },
         { title: "Ristoranti", text: "Servizio al tavolo, cucina e staff.", href: "/industries/restaurants", image: "/marketing/industry-restaurant.png" },
