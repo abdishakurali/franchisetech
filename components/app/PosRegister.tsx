@@ -485,6 +485,8 @@ function PosRegisterInner({
     new Intl.NumberFormat(intlLocale, { style: "currency", currency: currency || "EUR" }).format(v);
   const chargeRef = useRef<HTMLButtonElement>(null);
   const [checkoutStep, setCheckoutStep] = useState<"order" | "payment" | "complete">("order");
+  /** Frozen cart when entering payment — submit uses this so the sale is never sent with an empty cart. */
+  const [paymentCartSnapshot, setPaymentCartSnapshot] = useState<CartItem[] | null>(null);
   const [optionsOpen, setOptionsOpen] = useState(false);
   const [customersSheetOpen, setCustomersSheetOpen] = useState(false);
   const [ordersSheetOpen, setOrdersSheetOpen] = useState(false);
@@ -591,6 +593,62 @@ function PosRegisterInner({
   const cashUnderPaid = isCashSingle && typeof cashReceived === "number" && cashReceived > 0 && cashReceived < totalDue - 0.005;
   const totalVat = useMemo(() => cart.reduce((s, i) => s + lineVatAmount(i), 0), [cart]);
   const txDiscountPct = useMemo(() => transactionDiscountPct(cart), [cart]);
+  const checkoutCart = paymentCartSnapshot ?? cart;
+  const checkoutTotalDue = useMemo(
+    () => cartGrossAfter(checkoutCart) + safeTipAmount,
+    [checkoutCart, safeTipAmount]
+  );
+
+  function buildSaleFormData(saleCart: CartItem[], dueTotal: number): FormData {
+    const fd = new FormData();
+    fd.set("cart_json", JSON.stringify(saleCart));
+    fd.set("session_id", sessionId ?? "");
+    fd.set("payment_method_id", paymentMethodId);
+    fd.set("payment_type", selectedPaymentType);
+    fd.set("customer_name", selectedCustomer?.name ?? "");
+    fd.set("discount_pct", String(txDiscountPct));
+    fd.set("tip_amount", String(safeTipAmount));
+    fd.set("order_type", features.orderTypes ? orderType : "");
+    fd.set("table_label", features.tableService ? tableLabel : "");
+    fd.set("kitchen_note", (features.kitchenDisplay || features.restaurantOrderFlow) ? kitchenNote : "");
+    fd.set("customer_note", features.restaurantOrderFlow ? customerNote : "");
+
+    const cashSingle =
+      selectedPaymentType === "cash" &&
+      activeSplitPayments.length === 0 &&
+      saleCart.length > 0;
+
+    if (cashSingle) {
+      const received =
+        typeof cashReceived === "number" && cashReceived > 0
+          ? Number(cashReceived.toFixed(2))
+          : Number(dueTotal.toFixed(2));
+      fd.set("cash_received", received.toFixed(2));
+      fd.set("change_due", Math.max(0, received - dueTotal).toFixed(2));
+    } else {
+      fd.set("cash_received", "");
+      fd.set("change_due", "");
+    }
+
+    if (features.splitPayments) {
+      fd.set(
+        "split_payments_json",
+        JSON.stringify(
+          activeSplitPayments.map((row) => {
+            const method = paymentMethods.find((m) => m.id === row.payment_method_id);
+            return {
+              payment_method_id: row.payment_method_id,
+              method: method?.type ?? "other",
+              amount: row.amount,
+              reference: row.reference ?? "",
+            };
+          })
+        )
+      );
+    }
+
+    return fd;
+  }
 
   const posProducts = useMemo(() =>
     products.filter((p) => p.available_in_pos !== false && p.is_ingredient !== true), [products]);
@@ -899,44 +957,26 @@ function PosRegisterInner({
       {/* Cart / payment / complete */}
       <form onSubmit={async (e) => {
         e.preventDefault();
-        if (salePending || !cart.length || checkoutStep !== "payment") return;
+        if (salePending || !checkoutCart.length || checkoutStep !== "payment") return;
         setSalePending(true);
         setSaleStatus(null);
         setLastFiscalTxt(null);
-          const fd = new FormData(e.currentTarget);
-          if (isCashSingle) {
-            const received =
-              typeof cashReceived === "number" && cashReceived > 0
-                ? Number(cashReceived.toFixed(2))
-                : Number(totalDue.toFixed(2));
-            fd.set("cash_received", received.toFixed(2));
-            fd.set("change_due", Math.max(0, received - totalDue).toFixed(2));
-          }
-          if (features.splitPayments) {
-            fd.set("split_payments_json", JSON.stringify(activeSplitPayments.map((row) => {
-              const method = paymentMethods.find((m) => m.id === row.payment_method_id);
-              return {
-                payment_method_id: row.payment_method_id,
-                method: method?.type ?? "other",
-                amount: row.amount,
-                reference: row.reference ?? "",
-              };
-            })));
-          }
+          const fd = buildSaleFormData(checkoutCart, checkoutTotalDue);
           try {
           if (!isBrowserOnline()) {
             enqueueOfflineSale(
               formDataToPayload(fd),
-              t.offlineQueueLabel(cart.length, money(totalDue))
+              t.offlineQueueLabel(checkoutCart.length, money(checkoutTotalDue))
             );
             resetCartAfterSale();
+            setPaymentCartSnapshot(null);
             setOfflineQueue(listOfflineQueue());
             setSaleStatus({ ok: true, msg: t.offlineQueued });
             setSalePending(false);
             return;
           }
           writeCartBackupToStorage({
-            cart,
+            cart: checkoutCart,
             sessionId: sessionId ?? "",
             paymentMethodId,
             cashReceived,
@@ -946,6 +986,13 @@ function PosRegisterInner({
           if (!res.ok) {
             setSaleStatus({ ok: false, msg: friendlySaleError(res.error, locale) });
             setSalePending(false);
+            setCheckoutStep("payment");
+            return;
+          }
+          if (!res.transactionId) {
+            setSaleStatus({ ok: false, msg: friendlySaleError("Failed to save transaction.", locale) });
+            setSalePending(false);
+            setCheckoutStep("payment");
             return;
           }
           // FiscalNet receipt — Romania + enabled in Settings only (browser → localhost:65400)
@@ -956,6 +1003,7 @@ function PosRegisterInner({
           }
           setSaleStatus(null);
           setCart([]);
+          setPaymentCartSnapshot(null);
           setTipAmount(0);
           setSplitPayments([]);
           setSelectedCustomer(null);
@@ -996,6 +1044,7 @@ function PosRegisterInner({
                 className="h-12 w-full bg-blue-600 text-white hover:bg-blue-700"
                 onClick={() => {
                   setCheckoutStep("order");
+                  setPaymentCartSnapshot(null);
                   setLastCompletedSale(null);
                   setSaleStatus(null);
                   setDrawerNotice(null);
@@ -1030,6 +1079,7 @@ function PosRegisterInner({
                 className="h-10 w-full text-slate-500"
                 onClick={() => {
                   setCheckoutStep("order");
+                  setPaymentCartSnapshot(null);
                   setLastCompletedSale(null);
                   setSaleStatus(null);
                   setDrawerNotice(null);
@@ -1049,7 +1099,10 @@ function PosRegisterInner({
             <div className="mb-6 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => setCheckoutStep("order")}
+                onClick={() => {
+                  setPaymentCartSnapshot(null);
+                  setCheckoutStep("order");
+                }}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800"
               >
                 ← {t.backToOrder}
@@ -1296,7 +1349,10 @@ function PosRegisterInner({
                 disabled={!cart.length || !paymentMethods.length}
                 data-tour="pos-charge"
                 className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40"
-                onClick={() => setCheckoutStep("payment")}
+                onClick={() => {
+                  setPaymentCartSnapshot(normalizeCartLines(cart, txDiscountPct));
+                  setCheckoutStep("payment");
+                }}
               >
                 {!paymentMethods.length ? t.setupPaymentMethods : cart.length === 0 ? t.addItems : t.chargeAmount(money(totalDue))}
               </Button>
