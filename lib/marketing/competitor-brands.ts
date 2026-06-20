@@ -1,0 +1,45 @@
+/** Competitor visual identity for compare pages, OG images, and AI-readable summaries. */
+export type CompetitorBrand = {
+  slug: string;
+  name: string;
+  /** Public URL path — PNG preferred, SVG fallback. */
+  logoSrc: string;
+  accent: string;
+  domain: string;
+  market: "global" | "ro";
+};
+
+const BRANDS: CompetitorBrand[] = [
+  { slug: "square", name: "Square", logoSrc: "/compare/logos/square.png", accent: "#006AFF", domain: "squareup.com", market: "global" },
+  { slug: "sumup", name: "SumUp", logoSrc: "/compare/logos/sumup.png", accent: "#1A1F36", domain: "sumup.com", market: "global" },
+  { slug: "lightspeed", name: "Lightspeed", logoSrc: "/compare/logos/lightspeed.png", accent: "#E02020", domain: "lightspeedhq.com", market: "global" },
+  { slug: "smartbill", name: "SmartBill", logoSrc: "/compare/logos/smartbill.png", accent: "#2563EB", domain: "smartbill.ro", market: "ro" },
+  { slug: "saga", name: "Saga", logoSrc: "/compare/logos/saga.svg", accent: "#0F766E", domain: "saga.ro", market: "ro" },
+  { slug: "rezosoft", name: "RezoSoft", logoSrc: "/compare/logos/rezosoft.svg", accent: "#1D4ED8", domain: "rezosoft.ro", market: "ro" },
+  { slug: "expressoft", name: "Expressoft", logoSrc: "/compare/logos/expressoft.png", accent: "#DC2626", domain: "expressoft.ro", market: "ro" },
+  { slug: "hepos", name: "hePOS", logoSrc: "/compare/logos/hepos.svg", accent: "#EA580C", domain: "hepos.ro", market: "ro" },
+  { slug: "vilicorest", name: "VilicoRest", logoSrc: "/compare/logos/vilicorest.svg", accent: "#7C3AED", domain: "vilicorest.ro", market: "ro" },
+];
+
+export const FRANCHISETECH_BRAND = {
+  name: "franchisetech",
+  logoSrc: "/franchise-tech-logo.png",
+  logoFallbackSrc: "/franchise-tech-logo.svg",
+  accent: "#2563EB",
+};
+
+const brandBySlug = new Map(BRANDS.map((b) => [b.slug, b]));
+
+export function getCompetitorBrand(slug: string): CompetitorBrand | undefined {
+  return brandBySlug.get(slug);
+}
+
+export function competitorLogoForOg(slug: string): string {
+  const brand = brandBySlug.get(slug);
+  return brand?.logoSrc ?? `/compare/logos/${slug}.svg`;
+}
+
+export function featuredCompareSlugs(locale: "en" | "ro" | "it"): string[] {
+  if (locale === "ro") return ["smartbill", "saga", "rezosoft", "expressoft"];
+  return ["square", "sumup", "smartbill"];
+}

@@ -8,6 +8,7 @@ import { IndustryTabs } from "@/components/marketing/IndustryTabs";
 import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketing/tokens";
 import { useMarketingLocaleContext } from "@/lib/marketing/marketing-locale-context";
 import { pricingPlans } from "@/lib/billing/plans";
+import { HomeCompareStrip } from "@/components/marketing/HomeCompareStrip";
 import { showcaseAssets } from "@/lib/marketing/showcase";
 
 export function HomePageContent() {
@@ -104,6 +105,8 @@ export function HomePageContent() {
           ))}
         </div>
       </Section>
+
+      <HomeCompareStrip />
 
       <Section tone="slate">
         <div className="max-w-xl">

@@ -31,6 +31,8 @@ export const it: MarketingMessages = {
     pricing: "Prezzi",
     resources: "Risorse",
     help: "Centro assistenza",
+    compare: "Confronta POS",
+    romania: "Romania",
     privacy: "Privacy",
     terms: "Termini",
     featureLinks: {
@@ -178,6 +180,13 @@ export const it: MarketingMessages = {
         { quote: "Onboarding umano: prodotti, staff e prima vendita.", name: "Team franchisetech", business: "Supporto setup", metric: "Prima vendita guidata" },
         { quote: "Romania: NIR, IVA per prodotto e guida FiscalNet per multi-sede.", name: "Per operatori RO", business: "Multi-sede", metric: "Guida passo passo" },
       ],
+    },
+    compare: {
+      label: "Confronta POS",
+      title: "Come si confronta franchisetech",
+      subtitle: "Guide oneste vs SmartBill, Square, SumUp e altri — con loghi e tabelle funzioni.",
+      viewAll: "Tutti i confronti",
+      cardCta: "Leggi confronto",
     },
     faq: {
       title: "Domande dei titolari",

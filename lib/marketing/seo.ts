@@ -3,6 +3,10 @@ import { createElement } from "react";
 import type { MarketingLocale } from "@/lib/marketing/locale";
 import { marketingOpenGraphLocale } from "@/lib/marketing/locale";
 import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
+import { comparisonPages } from "@/lib/marketing/comparisons";
+
+export type { ComparisonPage } from "@/lib/marketing/comparisons";
+export { comparisonPages, comparisonsByMarket, COMPARE_HUB_PATH } from "@/lib/marketing/comparisons";
 
 export const SITE_URL = "https://franchisetech.ro";
 export const BRAND = "franchisetech";
@@ -606,46 +610,6 @@ export const industryPages: SeoPage[] = [
   },
 ];
 
-export type ComparisonPage = {
-  slug: string;
-  path: string;
-  competitor: string;
-  metaTitle: string;
-  description: string;
-  intro: string;
-  betterFor: string;
-};
-
-export const comparisonPages: ComparisonPage[] = [
-  {
-    slug: "square",
-    path: "/compare/square",
-    competitor: "Square",
-    metaTitle: "franchisetech vs Square for Small Food Businesses",
-    description: "A fair comparison of franchisetech and Square for small food businesses that need POS, stock, purchases, recipes, and records.",
-    intro: "Square is strong for payments and POS. franchisetech focuses on business control around products, stock, suppliers, purchases, recipe costing, Z-reports, and food-safety records.",
-    betterFor: "Square may be better if you need integrated payment hardware immediately. franchisetech may fit if you want a simple POS with stock, purchases, recipes, and food-business records in one place.",
-  },
-  {
-    slug: "sumup",
-    path: "/compare/sumup",
-    competitor: "SumUp",
-    metaTitle: "franchisetech vs SumUp for Small Food Businesses",
-    description: "Compare franchisetech and SumUp for cafes, takeaways, restaurants, and food trucks that need simple POS and business records.",
-    intro: "SumUp is widely known for card payment tools. franchisetech focuses on the daily operating layer around POS, stock, purchases, suppliers, recipes, and reports.",
-    betterFor: "SumUp may be better if your priority is payment acceptance hardware. franchisetech may fit if your priority is connecting sales records with stock, recipes, and daily cash-up.",
-  },
-  {
-    slug: "lightspeed",
-    path: "/compare/lightspeed",
-    competitor: "Lightspeed",
-    metaTitle: "franchisetech vs Lightspeed for Small Food Businesses",
-    description: "Compare franchisetech and Lightspeed for food businesses that want POS, stock, suppliers, purchases, recipe costing, and records.",
-    intro: "Lightspeed offers broad retail and hospitality tools. franchisetech is positioned for small food businesses that want a simpler operating system around the till.",
-    betterFor: "Lightspeed may be better if you need a larger established platform with advanced integrations. franchisetech may fit if you want a focused POS and food-business control workspace.",
-  },
-];
-
 export type ResourcePage = {
   slug: string;
   path: string;
@@ -766,6 +730,132 @@ export const resourcePages: ResourcePage[] = [
     ],
     related: [{ label: "Z-report", href: "/features/z-report" }, { label: "POS", href: "/features/pos" }, { label: "Z-report explained", href: "/resources/z-report-explained" }],
   },
+  {
+    slug: "pos-software-romania",
+    path: "/resources/pos-software-romania",
+    title: "Software POS pentru restaurante și cafenele în România",
+    metaTitle: "Software POS România — casă, FiscalNet, TVA, stoc | franchisetech",
+    description:
+      "Ghid practic pentru alegerea unui software POS în România: casă de marcat, FiscalNet, TVA 19%/9%/5%, stoc, rețete și raport Z pentru cafenele și restaurante mici.",
+    intro:
+      "Un POS bun în România trebuie să rezolve ziua de zi: vânzare rapidă, bon fiscal când FiscalNet e configurat, stoc care nu rămâne în Excel, și închidere casă clară pentru contabil.",
+    sections: [
+      {
+        title: "Ce caută proprietarii români la POS",
+        body: "Viteză la servire, lei (RON) peste tot, cote TVA corecte, integrare FiscalNet unde e cazul, și rapoarte pe care contabilul le poate folosi fără reconstrucție manuală.",
+      },
+      {
+        title: "POS plăți-first vs operațiuni-first",
+        body: "Terminalul de card rezolvă plata. franchisetech rezolvă ce se întâmplă după: ce s-a vândut, ce stoc s-a consumat, care e marja pe rețetă, și dacă numerarul din sertar se potrivește cu raportul.",
+      },
+      {
+        title: "Trial fără risc",
+        body: "Rulați 15 zile în paralel cu sistemul actual. Adăugați produsele principale, faceți o vânzare test, comparați raportul zilnic — apoi decideți.",
+      },
+    ],
+    faqs: [
+      {
+        question: "franchisetech emite bon fiscal?",
+        answer:
+          "Da, când FiscalNet este activat și configurat corect pe stația de casă. Nu presupuneți conformitate fără verificarea contabilului.",
+      },
+      {
+        question: "Funcționează pentru retail, nu doar restaurant?",
+        answer: "Da. Catalog produse, reduceri, personal și rapoarte zilnice funcționează și pentru magazine mici.",
+      },
+      {
+        question: "Cât costă per angajat?",
+        answer: "Planurile plătite includ personal nelimitat — fără taxă per casier.",
+      },
+    ],
+    related: [
+      { label: "Pagina România", href: "/industries/romania" },
+      { label: "Alternative SmartBill", href: "/compare/smartbill" },
+      { label: "Ghid FiscalNet", href: "/help/romania-fiscalnet" },
+    ],
+  },
+  {
+    slug: "stock-management-romania",
+    path: "/resources/stock-management-romania",
+    title: "Gestiune stoc și achiziții pentru restaurante în România",
+    metaTitle: "Gestiune stoc restaurant România — NIR, furnizori, rețete | franchisetech",
+    description:
+      "Cum să țineți stocul, achizițiile de la furnizori și legătura cu rețetele într-un restaurant mic din România — fără software de depozit enterprise.",
+    intro:
+      "Restaurantele mici nu au nevoie de WMS enterprise, dar au nevoie de claritate: ce a intrat de la furnizor, ce s-a consumat, ce e pe terminate.",
+    sections: [
+      {
+        title: "De la NIR la porții posibile",
+        body: "Înregistrați achizițiile cu furnizor, cantitate și cost. Leagați ingredientele de rețete ca să vedeți câte porții puteți face din stocul curent.",
+      },
+      {
+        title: "Alerte stoc scăzut",
+        body: "Setați praguri pentru ingredientele critice — lapte, carne, ambalaje — ca să comandați înainte de serviciu, nu în timpul lui.",
+      },
+      {
+        title: "Contabilul vrea claritate",
+        body: "franchisetech păstrează mișcări organizate. Nu înlocuiește sfatul fiscal — exportați și reconciliați cu contabilul.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Pot importa produse din Excel?",
+        answer: "Da, prin CSV. Util pentru meniuri mari sau migrare de la alt sistem.",
+      },
+      {
+        question: "Vânzările scad automat stocul?",
+        answer: "Da, când rețetele sunt configurate și legate de produsele POS.",
+      },
+    ],
+    related: [
+      { label: "Stock feature", href: "/features/stock-management" },
+      { label: "Recipe costing", href: "/features/recipe-costing" },
+      { label: "Restaurante", href: "/industries/restaurants" },
+    ],
+  },
+  {
+    slug: "choose-pos-romania",
+    path: "/resources/choose-pos-romania",
+    title: "Cum alegi un POS pentru restaurant sau cafenea în România",
+    metaTitle: "Cum alegi POS restaurant România — checklist 2026 | franchisetech",
+    description:
+      "Checklist pentru evaluarea POS-urilor în România: FiscalNet, TVA, stoc, rețete, raport Z, cost total și trial paralel.",
+    intro:
+      "Piața POS din România e aglomerată. Acest checklist te ajută să compari onest — fără promisiuni pe care niciun vendor nu le poate garanta universal.",
+    sections: [
+      {
+        title: "1. Casă și servire",
+        body: "Personalul poate vinde produsele frecvente în sub 3 atingeri? Refundurile și anulările sunt urmărite cu motiv?",
+      },
+      {
+        title: "2. Fiscal și TVA",
+        body: "Afișaj lei, cote TVA 19/9/5%, FiscalNet dacă aveți nevoie de bon fiscal — verificați cu contabilul înainte de go-live.",
+      },
+      {
+        title: "3. Stoc și marje",
+        body: "Dacă marjele sunt în Excel astăzi, POS-ul trebuie să lege vânzările de ingrediente sau veți continua să ghiciți.",
+      },
+      {
+        title: "4. Cost total",
+        body: "Licență + terminale + taxă per casier + ore reconciliere manuală. Compară totalul lunar, nu doar prețul afișat.",
+      },
+      {
+        title: "5. Trial paralel",
+        body: "Orice vendor serios permite o perioadă de test în paralel. Refuză dacă singura opțiune e migrare big-bang fără backup.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Unde compar alternative?",
+        answer: "Vezi pagina noastră de comparații: SmartBill, Saga, RezoSoft, Expressoft, hePOS și altele.",
+      },
+    ],
+    related: [
+      { label: "Comparații POS", href: "/compare" },
+      { label: "SmartBill vs franchisetech", href: "/compare/smartbill" },
+      { label: "Prețuri", href: "/pricing" },
+    ],
+  },
 ];
 
 export const publicPaths = [
@@ -774,9 +864,13 @@ export const publicPaths = [
   "/features",
   ...featurePages.map((p) => p.path),
   ...industryPages.map((p) => p.path),
+  "/compare",
   ...comparisonPages.map((p) => p.path),
   "/resources",
   ...resourcePages.map((p) => p.path),
+  "/partners",
+  "/help",
+  "/help/romania-fiscalnet",
   "/privacy",
   "/terms",
   "/legal-disclaimer",

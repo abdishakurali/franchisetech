@@ -18,6 +18,8 @@ export function MarketingFooterClient() {
   const supportLinks = [
     ["/help", t.footer.help],
     ["/resources", t.footer.resources],
+    ["/compare", t.footer.compare],
+    ["/industries/romania", t.footer.romania],
   ] as const;
 
   const legalLinks = [

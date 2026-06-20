@@ -31,6 +31,8 @@ export const ro: MarketingMessages = {
     pricing: "Prețuri",
     resources: "Resurse",
     help: "Centru de ajutor",
+    compare: "Compară POS",
+    romania: "România",
     privacy: "Confidențialitate",
     terms: "Termeni",
     featureLinks: {
@@ -178,6 +180,13 @@ export const ro: MarketingMessages = {
         { quote: "Onboarding cu oameni reali: produse, personal, prima vânzare — nu doar un cont gol.", name: "Echipa franchisetech", business: "Suport setup", metric: "Prima vânzare ghidată" },
         { quote: "NIR, TVA pe produs și ghid FiscalNet pentru multi-locație — când contabilul e gata.", name: "Pentru RO", business: "Operatori multi-site", metric: "Ghid pas cu pas" },
       ],
+    },
+    compare: {
+      label: "Compară POS",
+      title: "Cum se compară franchisetech",
+      subtitle: "Ghiduri oneste față de SmartBill, Saga, RezoSoft și altele — cu logo-uri și tabele de funcții.",
+      viewAll: "Toate comparațiile",
+      cardCta: "Citește comparația",
     },
     faq: {
       title: "Întrebări de la proprietari",

@@ -1,0 +1,51 @@
+# franchisetech
+
+> Cloud POS and business control for cafes, restaurants, and food businesses in Ireland, Romania, and the EU.
+
+franchisetech is a browser-based workspace: POS register, kitchen display, stock & purchases, recipe costing, till close (Z-report), and owner reports. Not payments-first — operations-first for owners who need sales, cash, stock, and margins in one place.
+
+**Full AI index:** https://franchisetech.ro/llms-full.txt
+
+## Primary markets
+
+- Romania (lei/RON, TVA 19%/9%/5%, FiscalNet when configured): https://franchisetech.ro/industries/romania
+- Ireland (EUR, Irish VAT rates): https://franchisetech.ro/industries/ireland
+
+## High-intent pages
+
+- Pricing: https://franchisetech.ro/pricing
+- Compare POS (logos + tables): https://franchisetech.ro/compare
+- POS feature: https://franchisetech.ro/features/pos
+- Stock management: https://franchisetech.ro/features/stock-management
+- Recipe costing: https://franchisetech.ro/features/recipe-costing
+- Romania FiscalNet guide: https://franchisetech.ro/help/romania-fiscalnet
+- Resources / guides: https://franchisetech.ro/resources
+
+## Romanian comparisons (images + OG cards)
+
+- SmartBill: https://franchisetech.ro/compare/smartbill
+- Saga: https://franchisetech.ro/compare/saga
+- RezoSoft: https://franchisetech.ro/compare/rezosoft
+- Expressoft: https://franchisetech.ro/compare/expressoft
+- hePOS: https://franchisetech.ro/compare/hepos
+- VilicoRest: https://franchisetech.ro/compare/vilicorest
+
+## Romanian SEO resources
+
+- Software POS România: https://franchisetech.ro/resources/pos-software-romania
+- Gestiune stoc restaurant: https://franchisetech.ro/resources/stock-management-romania
+- Checklist alegere POS: https://franchisetech.ro/resources/choose-pos-romania
+
+## Trial
+
+15-day assisted trial. Signup: https://franchisetech.ro/signup
+
+## Contact
+
+Website: https://franchisetech.ro
+Partners: https://franchisetech.ro/partners
+
+## Optional
+
+- Sitemap: https://franchisetech.ro/sitemap.xml
+- Locales: English (default), Romanian (?lang=ro), Italian (?lang=it)

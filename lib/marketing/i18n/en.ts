@@ -29,6 +29,8 @@ export const en = {
     pricing: "Pricing",
     resources: "Resources",
     help: "Help centre",
+    compare: "Compare POS",
+    romania: "Romania",
     privacy: "Privacy",
     terms: "Terms",
     featureLinks: {
@@ -176,6 +178,13 @@ export const en = {
         { quote: "Human onboarding: products, staff, and your first sale — not an empty account.", name: "franchisetech team", business: "Setup support", metric: "Guided first sale" },
         { quote: "Romania: NIR, per-product VAT, and FiscalNet guide for multi-site when your accountant is ready.", name: "For RO operators", business: "Multi-site", metric: "Step-by-step guide" },
       ],
+    },
+    compare: {
+      label: "Compare POS",
+      title: "See how franchisetech compares",
+      subtitle: "Honest side-by-side guides for Romania and international POS tools — with logos and feature tables.",
+      viewAll: "All comparisons",
+      cardCta: "Read comparison",
     },
     faq: {
       title: "Questions from owners",

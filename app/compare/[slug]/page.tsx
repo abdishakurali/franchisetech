@@ -1,35 +1,33 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { CompareBrandLogosLabeled } from "@/components/marketing/CompareBrandLogos";
+import { competitorLogoForOg } from "@/lib/marketing/competitor-brands";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
 import { JsonLd } from "@/components/marketing/JsonLd";
-import { comparisonPages, findPage, SITE_URL } from "@/lib/marketing/seo";
+import {
+  breadcrumbSchema,
+  comparisonPages,
+  faqJsonLd,
+  findPage,
+  pageMetadata,
+  SITE_URL,
+} from "@/lib/marketing/seo";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
-
-const rows = [
-  ["POS", "Simple food-business POS register", "Available depending on product setup"],
-  ["Payments/hardware", "Records payment method; integrations planned", "May be stronger if payment hardware is the main need"],
-  ["Stock", "Products, ingredients, low stock, can-make", "Varies by provider and plan"],
-  ["Recipes/costing", "Recipe cost, margin, can-make", "Varies by provider and plan"],
-  ["Purchases/suppliers", "Supplier and purchase records", "Varies by provider and plan"],
-  ["Food safety", "Record-keeping support, no compliance certification claim", "Varies by provider"],
-  ["Reports", "Z-report, sales, VAT-ready records, audit export", "Varies by provider and plan"],
-  ["Best fit", "Small food businesses wanting POS plus operating records", "Businesses prioritising that provider’s ecosystem"],
-];
 
 export function generateStaticParams() {
   return comparisonPages.map((page) => ({ slug: page.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const locale = await getMarketingLocale();
   const page = findPage(comparisonPages, (await params).slug);
   if (!page) return {};
-  return {
-    title: page.metaTitle,
-    description: page.description,
-    alternates: { canonical: page.path },
-  };
+  return pageMetadata(
+    { metaTitle: page.metaTitle, description: page.description, path: page.path },
+    locale,
+  );
 }
 
 export default async function ComparePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -40,33 +38,152 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
 
   return (
     <MarketingShell>
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Compare", item: `${SITE_URL}/compare/${page.slug}` },
-        { "@type": "ListItem", position: 2, name: `franchisetech vs ${page.competitor}`, item: `${SITE_URL}${page.path}` },
-      ] }} />
+      <JsonLd data={faqJsonLd(page.faqs)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", path: "/" },
+          { name: "Compare", path: "/compare" },
+          { name: `vs ${page.competitor}`, path: page.path },
+        ])}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: page.metaTitle,
+          description: page.description,
+          url: `${SITE_URL}${page.path}`,
+          primaryImageOfPage: {
+            "@type": "ImageObject",
+            url: `${SITE_URL}${competitorLogoForOg(page.slug)}`,
+            name: `${page.competitor} logo comparison`,
+          },
+          isPartOf: { "@type": "WebSite", name: "franchisetech", url: SITE_URL },
+        }}
+      />
+
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Comparison</p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">franchisetech vs {page.competitor} for small food businesses</h1>
+          <Link href="/compare" className="text-sm font-medium text-blue-600 hover:underline">
+            ← {locale === "ro" ? "Toate comparațiile" : "All comparisons"}
+          </Link>
+          <div className="mt-6">
+            <CompareBrandLogosLabeled competitorSlug={page.slug} />
+          </div>
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-600">
+            {page.market === "ro" ? "Comparație România" : "Comparison"}
+          </p>
+          <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+            {page.h1}
+          </h1>
           <p className="mt-5 max-w-3xl text-lg text-slate-600">{page.intro}</p>
-          <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">{page.betterFor}</p>
-          <div className="mt-8 flex flex-wrap gap-3"><Link href="/signup" className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">{t.cta.getStarted}</Link><Link href="/pricing" className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">{t.cta.seePricing}</Link></div>
+          <p className="mt-4 max-w-3xl rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+            {page.betterFor}
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/signup"
+              className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+            >
+              {t.cta.startTrial}
+            </Link>
+            <Link
+              href="/pricing"
+              className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              {t.cta.seePricing}
+            </Link>
+          </div>
         </div>
       </section>
+
+      <section className="px-4 pb-8 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2">
+          <div className="rounded-xl border border-slate-200 bg-white p-6">
+            <h2 className="text-lg font-bold text-slate-950">franchisetech</h2>
+            <ul className="mt-4 space-y-2">
+              {page.franchisetechStrengths.map((item) => (
+                <li key={item} className="flex gap-2 text-sm text-slate-600">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <h2 className="text-lg font-bold text-slate-950">{page.competitor}</h2>
+            <ul className="mt-4 space-y-2">
+              {page.competitorStrengths.map((item) => (
+                <li key={item} className="flex gap-2 text-sm text-slate-600">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
       <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <div className="grid grid-cols-3 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-950"><span>Area</span><span>franchisetech</span><span>{page.competitor}</span></div>
-          {rows.map((row) => <div key={row[0]} className="grid grid-cols-3 gap-3 border-t border-slate-100 px-4 py-4 text-sm"><strong>{row[0]}</strong><span className="text-slate-600">{row[1]}</span><span className="text-slate-600">{row[2]}</span></div>)}
+          <div className="grid grid-cols-3 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-950">
+            <span>Area</span>
+            <span>franchisetech</span>
+            <span>{page.competitor}</span>
+          </div>
+          {page.rows.map((row) => (
+            <div
+              key={row[0]}
+              className="grid grid-cols-3 gap-3 border-t border-slate-100 px-4 py-4 text-sm"
+            >
+              <strong>{row[0]}</strong>
+              <span className="text-slate-600">{row[1]}</span>
+              <span className="text-slate-600">{row[2]}</span>
+            </div>
+          ))}
         </div>
-        <p className="mx-auto mt-5 max-w-6xl text-xs text-slate-500">Information may change. Check each provider’s current pricing and features before making a buying decision.</p>
+        <p className="mx-auto mt-5 max-w-6xl text-xs text-slate-500">
+          Information may change. Verify each provider&apos;s current pricing, fiscal modules, and features before buying.
+        </p>
       </section>
-      <section className="px-4 py-12 sm:px-6 lg:px-8">
+
+      {page.sections.length > 0 ? (
+        <section className="px-4 py-14 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl space-y-10">
+            {page.sections.map((section) => (
+              <article key={section.title}>
+                <h2 className="text-xl font-bold text-slate-950">{section.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-slate-600">{section.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="border-t border-slate-100 bg-white px-4 py-14 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="text-xl font-bold text-slate-950">FAQ</h2>
+          <dl className="mt-6 space-y-6">
+            {page.faqs.map((faq) => (
+              <div key={faq.question}>
+                <dt className="font-semibold text-slate-900">{faq.question}</dt>
+                <dd className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      <section className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-6xl flex-wrap gap-4 text-sm font-medium">
-          <Link href="/features/pos" className="text-blue-600 hover:underline">POS feature <ArrowRight className="inline h-4 w-4" /></Link>
-          <Link href="/features/stock-management" className="text-blue-600 hover:underline">Stock management <ArrowRight className="inline h-4 w-4" /></Link>
-          <Link href="/features/recipe-costing" className="text-blue-600 hover:underline">Recipe costing <ArrowRight className="inline h-4 w-4" /></Link>
+          {page.related.map((link) => (
+            <Link key={link.href} href={link.href} className="text-blue-600 hover:underline">
+              {link.label} <ArrowRight className="inline h-4 w-4" />
+            </Link>
+          ))}
         </div>
       </section>
+
       <CTASection />
     </MarketingShell>
   );

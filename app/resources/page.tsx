@@ -224,6 +224,41 @@ export default function ResourcesPage() {
         </div>
       </section>
 
+      {/* ── SEO GUIDES (indexable articles) ── */}
+      <section className="px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeader
+            title="POS & restaurant guides (Romania & international)"
+            subtitle="Searchable guides with comparisons, checklists, and honest vendor evaluations."
+          />
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              { href: "/compare", title: "Compare POS software", summary: "SmartBill, Saga, RezoSoft, Square — logos and feature tables.", image: "/showcase/pos-cart.png" },
+              { href: "/resources/pos-software-romania", title: "Software POS România", summary: "FiscalNet, TVA, stoc și raport Z pentru restaurante.", image: "/marketing/pos-hero.png" },
+              { href: "/resources/choose-pos-romania", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", image: "/showcase/reports-dashboard.png" },
+              { href: "/industries/romania", title: "POS pentru România", summary: "lei, TVA, FiscalNet, echipă nelimitată.", image: "/marketing/reports-zreport.png" },
+              { href: "/compare/smartbill", title: "vs SmartBill", summary: "Facturare vs operațiuni zilnice — comparație onestă.", image: "/compare/logos/smartbill.png" },
+              { href: "/help/romania-fiscalnet", title: "Ghid FiscalNet", summary: "Configurare pas cu pas pentru bonuri fiscale.", image: "/marketing/reports-zreport.png" },
+            ].map((card) => (
+              <Link
+                key={card.href}
+                href={card.href}
+                className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-blue-300 hover:shadow-md"
+              >
+                <div className="relative aspect-[16/9] bg-slate-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={card.image} alt="" className="h-full w-full object-cover object-top opacity-90 transition group-hover:opacity-100" />
+                </div>
+                <div className="p-5">
+                  <h3 className="font-semibold text-slate-900 group-hover:text-blue-700">{card.title}</h3>
+                  <p className="mt-1.5 text-sm text-slate-500">{card.summary}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── GETTING STARTED ── */}
       <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
@@ -632,6 +667,8 @@ export default function ResourcesPage() {
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm font-medium text-slate-500">Related pages:</span>
             {[
+              ["/compare",                   "Compare POS"],
+              ["/resources/pos-software-romania", "POS România guide"],
               ["/",                          "← Home"],
               ["/features/pos",              "POS register"],
               ["/features/stock-management", "Stock management"],

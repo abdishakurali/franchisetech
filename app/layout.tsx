@@ -8,6 +8,7 @@ import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { marketingHtmlLang, marketingOpenGraphLocale } from "@/lib/marketing/locale";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
+import { GlobalSeoJsonLd } from "@/components/marketing/GlobalSeoJsonLd";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -67,6 +68,13 @@ export async function generateMetadata(): Promise<Metadata> {
       ],
       shortcut: "/favicon.ico",
     },
+    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? {
+          verification: {
+            google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+          },
+        }
+      : {}),
   };
 }
 
@@ -83,7 +91,12 @@ export default async function RootLayout({
       lang={htmlLang}
       className={`${outfit.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM site summary" />
+        <link rel="alternate" type="text/plain" href="/llms-full.txt" title="LLM full site index" />
+      </head>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-outfit)]">
+        <GlobalSeoJsonLd />
         {process.env.NEXT_PUBLIC_GA_ID ? (
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`} strategy="afterInteractive" />
