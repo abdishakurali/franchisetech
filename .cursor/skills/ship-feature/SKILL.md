@@ -35,12 +35,18 @@ Run locally before deploying:
 
 ### Phase 4 — Deploy
 
-ssh do-server 'cd /opt/franchisetech && bash predeploy-guard.sh && git pull && npm run build && pm2 restart fridgeproof'
+Production is rsync-based. Run these locally on Mac (never git pull on server):
 
-Show me PM2 status after restart:
+```bash
+bash scripts/predeploy-guard.sh   # must pass — shows you what's safe to deploy
+bash deploy.sh                     # rsyncs build to /var/www/fp-releases/ + restarts PM2
+```
 
-ssh do-server 'pm2 status'
-ssh do-server 'pm2 logs fridgeproof --lines 20'
+After deploy, verify PM2 is healthy:
+
+```bash
+ssh do-server 'pm2 status && pm2 logs fridgeproof --lines 15 --nostream'
+```
 
 ### Phase 5 — Verify
 

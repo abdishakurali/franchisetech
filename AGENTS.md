@@ -95,7 +95,16 @@ Cities: București, Cluj, Timișoara, Iași, Brașov, Constanța.
 
 ## How to Deploy
 
-ssh do-server 'cd /opt/franchisetech && bash predeploy-guard.sh && git pull && npm run build && pm2 restart fridgeproof'
+Production deploy is rsync-based — NOT git pull on server.
+Run locally from Mac:
+
+```bash
+bash scripts/predeploy-guard.sh   # must pass before anything else
+bash deploy.sh                     # rsync to /var/www/fp-releases/ on do-server
+```
+
+Do NOT run git pull or git clone on do-server — /opt/franchisetech is unrelated (Odoo).
+The Next.js app runs from /var/www/fp-releases/current via PM2 (process: fridgeproof).
 
 ## When Stuck
 
