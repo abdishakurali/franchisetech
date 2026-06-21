@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authorizeCron, loadPendingCustomers } from "@/lib/outreach/csv";
+import { emailsPlannedToday, filterNotPlannedToday } from "@/lib/outreach/planned-dedup";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,9 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(50, Math.max(1, Number.parseInt(limitRaw, 10) || 10));
 
   try {
-    const rows = loadPendingCustomers(limit);
+    const pending = loadPendingCustomers(limit * 2);
+    const plannedToday = await emailsPlannedToday(1);
+    const rows = filterNotPlannedToday(pending, plannedToday).slice(0, limit);
     return NextResponse.json({ rows, count: rows.length, limit });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to read customer CSV";
