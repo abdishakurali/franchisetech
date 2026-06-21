@@ -1,20 +1,27 @@
 // Server-side only — never import in client components
 import { LoopsClient } from "loops";
 
-const apiKey = process.env.LOOPS_API_KEY;
-if (!apiKey) {
-  throw new Error("LOOPS_API_KEY is not set");
-}
+let loops: LoopsClient | null = null;
 
-const loops = new LoopsClient(apiKey);
+function getLoops(): LoopsClient | null {
+  const apiKey = process.env.LOOPS_API_KEY?.trim();
+  if (!apiKey) {
+    console.warn("[Loops] LOOPS_API_KEY is not set — lifecycle events skipped");
+    return null;
+  }
+  loops ??= new LoopsClient(apiKey);
+  return loops;
+}
 
 export async function trackLoopsEvent(
   email: string,
   eventName: string,
   properties?: Record<string, string | number | boolean>
 ) {
+  const client = getLoops();
+  if (!client) return;
   try {
-    await loops.sendEvent({
+    await client.sendEvent({
       email,
       eventName,
       eventProperties: properties,
@@ -39,11 +46,11 @@ export async function upsertLoopsContact(
     Object.entries(properties).filter(([, value]) => value !== undefined),
   ) as Record<string, string | number | boolean | null>;
 
+  const client = getLoops();
+  if (!client) return;
   try {
-    await loops.createContact({ email, properties: contactProperties });
+    await client.createContact({ email, properties: contactProperties });
   } catch {
-    await loops.updateContact({ email, properties: contactProperties });
+    await client.updateContact({ email, properties: contactProperties });
   }
 }
-
-export { loops };

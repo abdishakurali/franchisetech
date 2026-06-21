@@ -25,6 +25,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
 import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
 import { nearestVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 
@@ -517,6 +518,7 @@ export async function openPosSession(formData: FormData) {
     console.error("openPosSession:", error.message);
     return;
   }
+  await recordGrowthMilestone(supabase, orgId, "till_opened");
   const cookieStore = await cookies();
   cookieStore.set("pos_till_open", "1", { path: "/app", maxAge: 60 * 60 * 24 });
   revalidatePath("/app/pos");
@@ -644,6 +646,8 @@ export async function completeSale(formData: FormData) {
   if (txErr || !tx) {
     return;
   }
+
+  await recordGrowthMilestone(supabase, orgId, "first_sale");
 
   const transactionId = tx.id;
 
@@ -1705,6 +1709,8 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   }).select("id").single();
 
   if (txErr || !tx) return { ok: false, error: txErr?.message ?? "Failed to save transaction." };
+
+  await recordGrowthMilestone(supabase, orgId, "first_sale");
 
   const transactionId = tx.id;
 
