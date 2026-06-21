@@ -1,0 +1,302 @@
+[
+  {
+    "type": "partner",
+    "company": "Orieda",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@orieda.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=orieda\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "MDV Consulting",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@mdvconsulting.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=mdv-consulting\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "A&A Accounts",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@accounts.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=a-a-accounts\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Contab Servicii Smart",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@contabss.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=contab-servicii-smart\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Zeus Service SRL",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "vanzari@zeusservice.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=zeus-service-srl\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "ADPOS Retail Systems",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@adpos.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua Adrian Merlan,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=adpos-retail-systems\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "AMEF Constalaris",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@amef.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=amef-constalaris\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Sedona ALM",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@aparaturafiscala.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=sedona-alm\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "ExpertPos EconMedia",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@econmedia.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=expertpos-econmedia\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Q Retail",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@qretail.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=q-retail\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Anzi Soft",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "vanzari@anzisoft.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=anzi-soft\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Vlarox Fiscal",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@vlarox.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua Vlad Lembrău,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=vlarox-fiscal\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "RezoSoft",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@rezosoft.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=rezosoft\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Selectsoft SRL",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@selectsoft.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=selectsoft-srl\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "tiny.ERP",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@tinyerp.app",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=tiny-erp\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "ExpertAccounts",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "sales@expertaccounts.com",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=expertaccounts\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Salad Box",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@saladbox.ro",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=salad-box\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "TED'S Coffee",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "info@tedscoffeecompany.com",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=ted-s-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Tucano Coffee",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "franchise@tucanocoffee.com",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=tucano-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Hello Donuts",
+    "step": 4,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@hellodonuts.com",
+      "subject": "ultim mesaj",
+      "content": "Bună ziua,\n\nUltimul mesaj — dacă parteneriatul workspace POS+stoc+NIR nu e pe agenda voastră acum, e în regulă.\n\nDacă revine tema: https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=hello-donuts\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  }
+]

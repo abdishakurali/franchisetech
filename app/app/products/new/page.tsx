@@ -16,6 +16,7 @@ import {
   productModuleVisibility,
   showProductTypeSection,
 } from "@/lib/product-module-fields";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
 const KITCHEN_STATIONS = [
   { value: "bar",         label: "Bar" },
@@ -29,8 +30,9 @@ const KITCHEN_STATIONS = [
 
 
 export default async function ProductsNewPage({ searchParams }: { searchParams?: Promise<{ type?: string }> }) {
-  const { supabase, orgId, membership, currency } = await getKitchenOpsContext();
-  const isRO = currency === "RON";
+  const { supabase, orgId, membership, currency, countryCode } = await getKitchenOpsContext();
+  const { locale, t } = await getAppLocaleAndText(countryCode);
+  const pf = t.productsForm;
   const orgInfo = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as { kitchen_stations_enabled?: boolean | null } | null;
   const kitchenStationsEnabled = Boolean(orgInfo?.kitchen_stations_enabled);
   await ensurePosDefaults();
@@ -38,7 +40,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
   const params = await searchParams;
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const visibility = productModuleVisibility(moduleFlags);
-  const itemTypes = itemTypeSelectOptions(visibility, isRO);
+  const itemTypes = itemTypeSelectOptions(visibility, locale);
   const wantsIngredient = params?.type === "ingredient";
   const defaultIngredient = wantsIngredient && (visibility.inventory || visibility.recipeCosting);
 
@@ -55,23 +57,22 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
   const defaultVatRate = getDefaultVatRateValue(vatRates);
 
   const allUnits = [...new Set([...DEFAULT_UNITS, ...((units ?? []).map((u: {name:string}) => u.name))])];
+  const sym = currency === "RON" ? "lei" : currency === "GBP" ? "£" : "€";
 
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-4 sm:p-6">
       <div className="flex items-center gap-3">
-        <Link href="/app/products" className="text-sm text-slate-500 hover:text-slate-700">← Products</Link>
+        <Link href="/app/products" className="text-sm text-slate-500 hover:text-slate-700">← {pf.backToProducts}</Link>
         <h1 className="text-2xl font-semibold text-slate-950">
-          {defaultIngredient ? "Add ingredient" : "Add product"}
+          {defaultIngredient ? pf.addIngredient : pf.addProduct}
         </h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{defaultIngredient ? "New ingredient" : "New product"}</CardTitle>
+          <CardTitle>{defaultIngredient ? pf.newIngredient : pf.newProduct}</CardTitle>
           <p className="text-sm text-slate-500 mt-1">
-            {defaultIngredient
-              ? "Add items you buy and use in recipes, like milk, chicken, lettuce, or coffee beans."
-              : "Add items you sell, like Americano, Smoothie, or Chicken Caesar."}
+            {defaultIngredient ? pf.newIngredientDesc : pf.newProductDesc}
           </p>
         </CardHeader>
         <CardContent>
@@ -85,7 +86,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
             {/* Name + Category */}
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label>Product name *</Label>
+                <Label>{pf.productName} *</Label>
                 <Input
                   name="name"
                   required
@@ -93,52 +94,43 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                   autoFocus
                   className="mt-1"
                 />
-                <p className="text-xs text-slate-500 mt-1">Example: Americano, Chicken Caesar, Banana Smoothie.</p>
               </div>
               <div>
-                <Label>Category</Label>
+                <Label>{pf.category}</Label>
                 <select name="category_id" className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
-                  <option value="">— none —</option>
+                  <option value="">{pf.none}</option>
                   {(categories ?? []).map((c: {id:string;name:string}) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
-                <p className="text-xs text-slate-500 mt-1">Group similar items, like Drinks, Food, Snacks.</p>
               </div>
             </div>
 
             {/* Prices + VAT + Unit */}
             <div className="grid gap-3 sm:grid-cols-4">
               <div>
-                <Label>{defaultIngredient ? "Sale price (€)" : "Sale price (€) *"}</Label>
+                <Label>{pf.salePrice(sym)}{defaultIngredient ? "" : " *"}</Label>
                 <Input name="sale_price" type="number" step="0.01" min="0" placeholder="0.00" className="mt-1" />
-                <p className="text-xs text-slate-500 mt-1">{defaultIngredient ? "Leave 0 if customers do not buy this directly." : "The price the customer pays."}</p>
               </div>
               <div>
-                <Label>Cost price (€){defaultIngredient ? " *" : ""}</Label>
+                <Label>{pf.costPrice(sym)}{defaultIngredient ? " *" : ""}</Label>
                 <Input name="cost_price" type="number" step="0.0001" min="0" placeholder="0.0000" className="mt-1" />
-                <p className="text-xs text-slate-500 mt-1">What one unit costs you. Used for margin.</p>
               </div>
               <div>
-                <Label>VAT rate</Label>
+                <Label>{pf.vatRate}</Label>
                 <ProductVatField rates={vatRates} defaultRate={defaultVatRate} />
               </div>
               <div>
-                <Label>Unit *</Label>
+                <Label>{pf.unit} *</Label>
                 <select name="unit_of_measure" className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
                   {allUnits.map((u) => <option key={u} selected={defaultIngredient && u === "g"}>{u}</option>)}
                 </select>
-                <p className="text-xs text-slate-500 mt-1">How this item is measured, like each, g, kg, ml, litre, bottle.</p>
               </div>
             </div>
 
             {/* Product type */}
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-4">
-              <p className="text-sm font-semibold text-slate-800">What is this product?</p>
+              <p className="text-sm font-semibold text-slate-800">{pf.whatIsProduct}</p>
               {showProductTypeSection(visibility) && (
-                <p className="text-xs text-slate-500 -mt-2">
-                  {isRO
-                    ? "Puteți selecta ambele — ex. o bază de supă vândută și folosită ca ingredient."
-                    : "You can select both — e.g. a soup base that is sold AND used as an ingredient."}
-                </p>
+                <p className="text-xs text-slate-500 -mt-2">{pf.typeBothHint}</p>
               )}
 
               <label className="flex items-start gap-3 cursor-pointer group">
@@ -150,12 +142,8 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                   className="mt-0.5 h-4 w-4 accent-blue-600"
                 />
                 <div>
-                  <p className="text-sm font-medium text-slate-900 group-hover:text-blue-700">
-                    {isRO ? "Se vinde la POS" : "Sell this item on POS"}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {isRO ? "Activați dacă angajații trebuie să vândă acest articol la casă." : "Turn on if staff should be able to sell this."}
-                  </p>
+                  <p className="text-sm font-medium text-slate-900 group-hover:text-blue-700">{pf.sellOnPos}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{pf.sellOnPosHint}</p>
                 </div>
               </label>
 
@@ -171,14 +159,10 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                   {visibility.inventory && <input type="hidden" name="is_stock_tracked" value="off" />}
                   <div>
                     <p className="text-sm font-medium text-slate-900 group-hover:text-blue-700">
-                      {visibility.inventory
-                        ? (isRO ? "Urmărire stoc / ingredient" : "Track as ingredient / stock")
-                        : (isRO ? "Ingredient pentru rețete" : "Recipe ingredient")}
+                      {visibility.inventory ? pf.stockIngredient : pf.recipeIngredient}
                     </p>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      {visibility.inventory
-                        ? (isRO ? "Activați dacă cumpărați acest articol și doriți urmărirea stocului." : "Turn on if you buy this item and want stock tracked.")
-                        : (isRO ? "Activați dacă acest articol este folosit în rețete." : "Turn on if this item is used in recipes.")}
+                      {visibility.inventory ? pf.stockHint : pf.ingredientHint}
                     </p>
                   </div>
                 </label>
@@ -194,12 +178,8 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                     className="mt-0.5 h-4 w-4 accent-blue-600"
                   />
                   <div>
-                    <p className="text-sm font-medium text-slate-900 group-hover:text-blue-700">
-                      {isRO ? "Urmărire stoc" : "Track stock"}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {isRO ? "Activați dacă cumpărați acest articol și doriți urmărirea stocului." : "Turn on if you buy this item and want stock tracked."}
-                    </p>
+                    <p className="text-sm font-medium text-slate-900 group-hover:text-blue-700">{pf.stock}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{pf.stockHint}</p>
                   </div>
                 </label>
               )}
@@ -214,44 +194,30 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                     className="mt-0.5 h-4 w-4 accent-green-600"
                   />
                   <div>
-                    <p className="text-sm font-medium text-slate-900 group-hover:text-green-700">
-                      {isRO ? "Poate fi cumpărat" : "Can be purchased"}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {isRO
-                        ? "Activați pentru mărfuri, ingrediente, consumabile și ambalaje — articole cumpărate de la furnizori. Apare la Înregistrează cumpărătură."
-                        : "Turn on for goods, ingredients, supplies, and packaging — items you buy from suppliers. Appears in Record Purchase."}
-                    </p>
+                    <p className="text-sm font-medium text-slate-900 group-hover:text-green-700">{pf.purchase}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{pf.purchaseHint}</p>
                   </div>
                 </label>
               )}
 
               {showProductTypeSection(visibility) && itemTypes.length > 1 && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    {isRO ? "Tip articol" : "Item type"}
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{pf.itemType}</label>
                   <select name="item_type" defaultValue={defaultIngredient ? "ingredient" : "finished_product"} className="h-9 w-full max-w-xs rounded-md border border-slate-200 bg-white px-3 text-sm">
                     {itemTypes.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </select>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {isRO ? "Separă produsele POS de articolele de inventar." : "Helps separate POS products from inventory items."}
-                  </p>
+                  <p className="text-xs text-slate-500 mt-1">{pf.itemTypeHint}</p>
                   {!defaultIngredient && visibility.inventory && (
-                    <p className="text-xs text-amber-700 mt-1">
-                      {isRO
-                        ? "Produsele finite nu apar la Înregistrează cumpărătură decât dacă bifați «Poate fi cumpărat»."
-                        : "Finished products won't appear in Record Purchase unless you check 'Can be purchased'."}
-                    </p>
+                    <p className="text-xs text-amber-700 mt-1">{pf.finishedHint}</p>
                   )}
                 </div>
               )}
 
               {visibility.inventory && defaultIngredient && (
                 <div className="ml-7 mt-1">
-                  <Label>Opening stock (optional)</Label>
+                  <Label>{pf.openingStock}</Label>
                   <Input
                     name="opening_stock"
                     type="number"
@@ -260,7 +226,6 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                     placeholder="0"
                     className="mt-1 w-36"
                   />
-                  <p className="text-xs text-slate-500 mt-1">How much you currently have.</p>
                 </div>
               )}
             </div>
@@ -268,17 +233,16 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
             {/* SKU + Supplier */}
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label>SKU (optional)</Label>
+                <Label>{pf.skuOptional}</Label>
                 <Input name="sku" placeholder="e.g. CHK-001" className="mt-1" />
               </div>
               {(suppliers ?? []).length > 0 && visibility.inventory && (
                 <div>
-                  <Label>Supplier (optional)</Label>
+                  <Label>{pf.supplierOptional}</Label>
                   <select name="supplier_id" className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
-                    <option value="">— none —</option>
+                    <option value="">{pf.none}</option>
                     {(suppliers ?? []).map((s: {id:string;name:string}) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
-                  <p className="text-xs text-slate-500 mt-1">Who you usually buy this from.</p>
                 </div>
               )}
             </div>
@@ -287,7 +251,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
             {/* Kitchen Station */}
             {kitchenStationsEnabled && (
               <div>
-                <label className="text-sm font-medium leading-none">Kitchen station</label>
+                <label className="text-sm font-medium leading-none">{pf.kitchenStation}</label>
                 <select name="kitchen_station" className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
                   <option value="">— all stations (default) —</option>
                   {KITCHEN_STATIONS.map((s) => (
@@ -300,9 +264,9 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
               </div>
             )}
             <div className="flex gap-3 pt-2 border-t border-slate-100">
-              <Link href="/app/products"><Button variant="outline" type="button">Cancel</Button></Link>
+              <Link href="/app/products"><Button variant="outline" type="button">{t.common.cancel}</Button></Link>
               <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                {defaultIngredient ? "Add ingredient" : "Add product"}
+                {defaultIngredient ? pf.addIngredient : pf.addProduct}
               </Button>
             </div>
           </form>

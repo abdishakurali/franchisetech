@@ -1,0 +1,100 @@
+[
+  {
+    "company": "Orieda",
+    "type": "partner",
+    "to": "office@orieda.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "MDV Consulting",
+    "type": "partner",
+    "to": "office@mdvconsulting.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "A&A Accounts",
+    "type": "partner",
+    "to": "office@accounts.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Contab Servicii Smart",
+    "type": "partner",
+    "to": "office@contabss.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Beans and Dots",
+    "type": "customer",
+    "to": "hello@beansanddots.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Coffee Designers",
+    "type": "customer",
+    "to": "contact@coffeedesigners.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Uzina Coffee",
+    "type": "customer",
+    "to": "contact@uzinacoffee.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Arcade Cafe",
+    "type": "customer",
+    "to": "contact@arcadecafe.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Cafeneaua Nației",
+    "type": "customer",
+    "to": "contact@stareanatiei.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Madison Coffee",
+    "type": "customer",
+    "to": "hello@madisoncoffee.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Kestar Coffee",
+    "type": "customer",
+    "to": "info@kestarcoffee.com",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Gallery Concept",
+    "type": "customer",
+    "to": "rsvp@gallery-concept.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Rhédey Café",
+    "type": "customer",
+    "to": "rhedeycafe@gmail.com",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "YUME Coffee Roasters",
+    "type": "customer",
+    "to": "info@yume.coffee",
+    "step": 1,
+    "status": "success"
+  }
+]

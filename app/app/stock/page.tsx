@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 export default async function StockPage() {
   await requireBusinessModule("inventory");
-  const { supabase, orgId, currency } = await getKitchenOpsContext();
+  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode);
   let products: Array<{id:string;name:string;current_stock_qty:number|null;reorder_level:number|null;unit_of_measure:string|null;cost_price:number|null;product_categories?:{name:string}|null}> = [];
   try {
     const { data } = await supabase
@@ -20,35 +22,33 @@ export default async function StockPage() {
       .order("name");
     products = (data ?? []) as unknown as typeof products;
   } catch {
-    // Columns may not exist before migration — show empty state
     products = [];
   }
 
   const rows = products;
-
   const lowStock = rows.filter((r) => Number(r.current_stock_qty ?? 0) <= Number(r.reorder_level ?? 0));
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Stock</h1>
-          <p className="text-sm text-slate-500">Ingredient and product stock levels. Updated by purchases and sales.</p>
+          <h1 className="text-2xl font-semibold text-slate-950">{t.stock.title}</h1>
+          <p className="text-sm text-slate-500">{t.stock.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/app/products?type=all" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">All stock</Link>
-          <Link href="/app/products?type=ingredient" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">Ingredients</Link>
-          <Link href="/app/products/import-ingredients" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">Import ingredients</Link>
-          <Link href="/app/products/import-ingredients" className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">Import stock items</Link>
-          <Link href="/app/purchases" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">Purchases</Link>
-          <Link href="/app/suppliers" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">Suppliers</Link>
-          <Link href="/app/purchases/new" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">Record purchase</Link>
+          <Link href="/app/products?type=all" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">{t.stock.allStock}</Link>
+          <Link href="/app/products?type=ingredient" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">{t.stock.ingredients}</Link>
+          <Link href="/app/products/import-ingredients" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">{t.stock.importIngredients}</Link>
+          <Link href="/app/products/import-ingredients" className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">{t.stock.importStock}</Link>
+          <Link href="/app/purchases" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">{t.nav.purchases}</Link>
+          <Link href="/app/suppliers" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">{t.nav.suppliers}</Link>
+          <Link href="/app/purchases/new" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">{t.stock.recordPurchase}</Link>
         </div>
       </div>
 
       {lowStock.length > 0 && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-          <p className="font-medium text-red-800 mb-2">⚠ {lowStock.length} item{lowStock.length !== 1 ? "s" : ""} low in stock</p>
+          <p className="font-medium text-red-800 mb-2">⚠ {t.stock.lowInStock(lowStock.length)}</p>
           <div className="flex flex-wrap gap-2">
             {lowStock.map((r) => (
               <Badge key={r.id} variant="outline" className="text-red-700 border-red-300 bg-white">
@@ -60,24 +60,24 @@ export default async function StockPage() {
       )}
 
       <Card>
-        <CardHeader><CardTitle>Stock levels ({rows.length} tracked products)</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t.stock.stockLevelsTitle(rows.length)}</CardTitle></CardHeader>
         <CardContent>
           {!rows.length ? (
             <div className="rounded-xl border border-dashed p-10 text-center">
-              <p className="text-slate-500">No stock-tracked products yet.</p>
-              <p className="text-sm text-slate-400 mt-1">Enable &quot;Track stock&quot; on a product to monitor it here.</p>
+              <p className="text-slate-500">{t.stock.empty}</p>
+              <p className="text-sm text-slate-400 mt-1">{t.stock.noTrackedHint}</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-right">On hand</TableHead>
-                  <TableHead className="text-right">Reorder at</TableHead>
-                  <TableHead>Unit</TableHead>
-                  <TableHead className="text-right">Cost/unit</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>{t.tables.product}</TableHead>
+                  <TableHead>{t.tables.category}</TableHead>
+                  <TableHead className="text-right">{t.tables.onHand}</TableHead>
+                  <TableHead className="text-right">{t.stock.reorderAt}</TableHead>
+                  <TableHead>{t.tables.unit}</TableHead>
+                  <TableHead className="text-right">{t.stock.costUnit}</TableHead>
+                  <TableHead>{t.tables.status}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -97,8 +97,8 @@ export default async function StockPage() {
                       <TableCell className="text-right"><Link className="block" href={`/app/products/${r.id}`}>{r.cost_price ? formatMoney(Number(r.cost_price), currency) : "—"}</Link></TableCell>
                       <TableCell>
                         {isLow
-                          ? <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">Low</Badge>
-                          : <Badge variant="secondary">OK</Badge>}
+                          ? <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">{t.tables.low}</Badge>
+                          : <Badge variant="secondary">{t.tables.ok}</Badge>}
                       </TableCell>
                     </TableRow>
                   );

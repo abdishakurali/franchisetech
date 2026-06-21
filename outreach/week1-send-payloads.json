@@ -1,0 +1,342 @@
+[
+  {
+    "type": "customer",
+    "company": "Express Caffe",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=express-caffe-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@expresscaffe.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nExpress Caffe din Miroslava gestionează contracte HoReCa pe kg/lună — POS cu abonamente ar automatiza reînnoirile.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Express Caffe?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=express-caffe\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Urbanistic Coffee",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=urbanistic-coffee-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@urbanistic.coffee",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nUrbanistic pe Vulturului 2 prăjește propriu — promoțiile la kilogram ar fi mai ușor de controlat cu POS + fidelizare.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Urbanistic Coffee?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=urbanistic-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Habitat Coffee Studio",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=habitat-coffee-studio-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "hello@ourhabitat.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nHabitat pe Prundului 57 combină café și academy SCA — separarea veniturilor bar vs. cursuri în POS ar clarifica P&L.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Habitat Coffee Studio?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=habitat-coffee-studio\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Ch9 Specialty Coffee",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=ch9-specialty-coffee-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "vio@spired.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua Vio Spiru,\n\nCh9 în curtea Johannes Honterus trăiește de turism — POS cu rapoarte sezon ar ajuta la personalul de vară vs. iarnă.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Ch9 Specialty Coffee?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=ch9-specialty-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Book Coffee Shop",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=book-coffee-shop-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "shop@bookcoffee.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nBook Coffee e orientat take-away — un POS preset pentru rețete latte ar accelera servirea dimineața.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Book Coffee Shop?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=book-coffee-shop\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Mica Elvetie",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mica-elvetie-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@micaelvetie.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua Jakob Hausmann,\n\nMica Elveție pe Franceza 60-62 e institution local — POS discret cu rezervări ar păstra eleganța fără bonuri pierdute.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Mica Elvetie?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mica-elvetie\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Minish",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-minish-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "restaurant.minish@outlook.com",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nMinish pe Barajul Uzului pare unitate compactă — un POS all-in-one ar înlocui procesele manuale de la primul serviciu.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Minish?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-minish\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Vulturul",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-vulturul-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@restaurantvulturul.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nVulturul din Intrarea Blejoiu deservește cartierul — un till simplu cu bon fiscal ar reduce timpul la închiderea zilei.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Vulturul?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-vulturul\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Rispetto Cucina Italiana",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rispetto-cucina-italiana-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@rispettorestaurant.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua Constantin Ghimpu,\n\nRispetto cu Chef Ghimpu pe Progresului — rapoarte food cost pe fel principal ar spori încrederea ownerului în cifre.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Rispetto Cucina Italiana?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rispetto-cucina-italiana\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "KIMU",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kimu-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@kimu.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nKIMU pe Clucerului 19 vinde experiență premium — POS cu meniu degustare preset ar reduce erorile între salon și bucătărie.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru KIMU?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kimu\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Osho Restaurant",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=osho-restaurant-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@osho-restaurant.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nOsho pe bd. Primaverii atrage corporate — POS cu factură rapidă și split plată ar scurta checkout-ul la prânz.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Osho Restaurant?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=osho-restaurant\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Baracca",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=baracca-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@baracca.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nBaracca pe Napoca 8A combină terasă și salon — un POS cu plan mese ar reduce dubla rezervare în sezon.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Baracca?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=baracca\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "DaVinci Ristorante",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=davinci-ristorante-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@davinciristorante.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua Oana Munteanu,\n\nDaVinci pe Str. Fagului are salon evenimente separat — avans POS la rezervare ar securiza mesele mari.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru DaVinci Ristorante?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=davinci-ristorante\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Kupaj Wine Bar",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kupaj-wine-bar-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@kupaj.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nKupaj pe Sindicatelor 4 vinde sticle și pahar — POS cu inventar vin ar reduce diferențele la inventar lunar.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Kupaj Wine Bar?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kupaj-wine-bar\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "My Thai",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=my-thai-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@mythai.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nMy Thai pe Rebreanu 3 are meniu zilei + grill — POS cu modificatori masă/terasă ar evita confuziile la serviciu.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru My Thai?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=my-thai\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Nativ",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-nativ-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@restaurantnativ.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nNativ pe Clemenceau 3 promite carne românească — POS cu note pe proveniență lot ar susține povestea la audit.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Nativ?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-nativ\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Panoramic Cetățuie",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=panoramic-cet-uie-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@panoramic-cluj.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nPanoramic pe Șerpuitoare 1 combină restaurant și pensiune — POS unificat ar lega consumul cameră de restaurant.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Panoramic Cetățuie?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=panoramic-cet-uie\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Valahia",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-valahia-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@restaurant-valahia.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nValahia pe Rebreanu 52-54 e restaurant de cartier — POS simplu cu raport pe interval prânz/cină ar ajuta la staffing.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Valahia?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-valahia\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Tied",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=tied-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@tied.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nTied pe Emanoil Ungureanu 3 vinde ritm lent — POS cu course firing ar sincroniza bucătăria cu tempo-ul serii.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Tied?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=tied\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Insula",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/smartbill?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-insula-compare-smartbill",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@restaurant-insula.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nInsula pe Aleea Ghirodei 36 are sezon estival — rapoarte POS pe lună ar ghida angajările de vară.\n\nPOS + display bucătărie, stoc și rețete cu marjă — închiderea zilei și raportul Z în același workspace, personal nelimitat.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Insula?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-insula\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  }
+]

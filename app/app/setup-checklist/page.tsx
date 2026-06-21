@@ -9,14 +9,15 @@ import { normaliseBusinessProfile, BUSINESS_PROFILE_LABELS } from "@/lib/busines
 import { enableInventoryFromSetup } from "@/app/actions/kitchenops";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleEnabled } from "@/lib/business-modules";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
-function Step({ done, num, title, text, href, label, status }: { done: boolean; num: number; title: string; text: string; href: string; label: string; status?: string }) {
+function Step({ done, num, title, text, href, label, status, stepLabel }: { done: boolean; num: number; title: string; text: string; href: string; label: string; status?: string; stepLabel: string }) {
   return (
     <div className={`flex items-start gap-4 rounded-xl border p-4 ${done ? "border-green-200 bg-green-50" : "border-slate-200 bg-white"}`}>
       <div className="mt-0.5">{done ? <CheckCircle2 className="h-5 w-5 text-green-600" /> : <Circle className="h-5 w-5 text-slate-300" />}</div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400">Step {num}</span>
+          <span className="text-xs font-semibold text-slate-400">{stepLabel}</span>
           {status && <Badge variant="secondary" className="text-[10px]">{status}</Badge>}
         </div>
         <p className="mt-0.5 font-semibold text-slate-950">{title}</p>
@@ -30,7 +31,8 @@ function Step({ done, num, title, text, href, label, status }: { done: boolean; 
 }
 
 export default async function SetupChecklistPage() {
-  const { supabase, orgId } = await getKitchenOpsContext();
+  const { countryCode, supabase, orgId } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode);
   const [
     { data: org },
     { count: productCount },
@@ -86,65 +88,66 @@ export default async function SetupChecklistPage() {
   const showAdvanced = advancedSteps.length > 0;
   const showInventoryPrompt = !showAdvanced && profile === "simple";
 
+  const profileSubtitle =
+    profile === "simple"
+      ? t.setupChecklist.subtitleSimple
+      : profile === "multi_site"
+        ? t.setupChecklist.subtitleMultiSite
+        : t.setupChecklist.subtitleStandard;
+
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-950">Setup guide</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {profile === "simple"
-            ? "Start with products, payments, the till, one sale, and one report. Stock and recipes can wait."
-            : profile === "multi_site"
-              ? "Set up each location, then run sales and reporting across sites."
-              : "POS first, then stock and recipes as part of your core path."}
-        </p>
+        <h1 className="text-2xl font-semibold text-slate-950">{t.setupChecklist.title}</h1>
+        <p className="mt-1 text-sm text-slate-500">{profileSubtitle}</p>
         <Badge variant="secondary" className="mt-2">
           {BUSINESS_PROFILE_LABELS[profile]}
         </Badge>
         <div className="mt-3 flex flex-wrap gap-3 text-sm">
-          <Link href="/help/first-15-minutes-checklist" className="text-blue-600 hover:underline">First 15 minutes checklist</Link>
-          <Link href="/help/staff-cashier-checklist" className="text-blue-600 hover:underline">Staff checklist</Link>
-          <a href="mailto:info@franchisetech.ro?subject=Setup help" className="text-blue-600 hover:underline">Need help?</a>
+          <Link href="/help/first-15-minutes-checklist" className="text-blue-600 hover:underline">{t.setupChecklist.first15}</Link>
+          <Link href="/help/staff-cashier-checklist" className="text-blue-600 hover:underline">{t.setupChecklist.staffChecklist}</Link>
+          <a href="mailto:info@franchisetech.ro?subject=Setup help" className="text-blue-600 hover:underline">{t.setupChecklist.needHelp}</a>
         </div>
       </div>
       <Card>
         <CardContent className="pt-4">
-          <div className="mb-2 flex justify-between text-sm"><span className="font-medium">{progress.doneCount} of {progress.totalCount} done</span><span className="font-bold text-blue-700">{progress.percent}%</span></div>
+          <div className="mb-2 flex justify-between text-sm"><span className="font-medium">{t.setupChecklist.progress(progress.doneCount, progress.totalCount)}</span><span className="font-bold text-blue-700">{progress.percent}%</span></div>
           <div className="h-2 rounded-full bg-slate-100"><div className="h-2 rounded-full bg-blue-600" style={{ width: `${progress.percent}%` }} /></div>
         </CardContent>
       </Card>
       <div className="space-y-3">
-        {coreSteps.map((step, index) => <Step key={step.id} num={index + 1} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
+        {coreSteps.map((step, index) => <Step key={step.id} num={index + 1} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
       </div>
       {multiSiteSteps.length > 0 ? (
         <div className="space-y-3 pt-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">Multi-site setup</h2>
-            <p className="mt-1 text-sm text-slate-500">Add each branch before rolling out POS everywhere.</p>
+            <h2 className="text-lg font-semibold text-slate-950">{t.setupChecklist.multiSiteTitle}</h2>
+            <p className="mt-1 text-sm text-slate-500">{t.setupChecklist.multiSiteDesc}</p>
           </div>
-          {multiSiteSteps.map((step, index) => <Step key={step.id} num={index + 1} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
+          {multiSiteSteps.map((step, index) => <Step key={step.id} num={index + 1} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
         </div>
       ) : null}
       {showAdvanced ? (
         <div className="space-y-3 pt-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">Stock, purchases &amp; recipes</h2>
+            <h2 className="text-lg font-semibold text-slate-950">{t.setupChecklist.advancedTitle}</h2>
             <p className="mt-1 text-sm text-slate-500">
               {profile === "standard" || profile === "multi_site"
-                ? "These steps are part of your setup path — not optional extras."
-                : "Improve margins and stock control after the till is working."}
+                ? t.setupChecklist.advancedStandard
+                : t.setupChecklist.advancedOptional}
             </p>
           </div>
-          {advancedSteps.map((step, index) => <Step key={step.id} num={index + 1} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
+          {advancedSteps.map((step, index) => <Step key={step.id} num={index + 1} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
         </div>
       ) : showInventoryPrompt ? (
         <Card>
           <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
             <div>
-              <p className="font-semibold text-slate-950">Ready to track stock?</p>
-              <p className="text-sm text-slate-500">Enable inventory and recipe modules when you want purchases and margins.</p>
+              <p className="font-semibold text-slate-950">{t.setupChecklist.readyStock}</p>
+              <p className="text-sm text-slate-500">{t.setupChecklist.readyStockDesc}</p>
             </div>
             <form action={enableInventoryFromSetup}>
-              <Button type="submit" variant="outline">Enable stock tracking</Button>
+              <Button type="submit" variant="outline">{t.setupChecklist.enableStock}</Button>
             </form>
           </CardContent>
         </Card>
@@ -152,11 +155,11 @@ export default async function SetupChecklistPage() {
       {billingSteps.length > 0 ? (
         <div className="space-y-3 pt-4">
           <div>
-            <h2 className="text-lg font-semibold text-slate-950">Billing</h2>
-            <p className="mt-1 text-sm text-slate-500">Optional until your assisted trial ends — subscribe when you are ready.</p>
+            <h2 className="text-lg font-semibold text-slate-950">{t.setupChecklist.billingTitle}</h2>
+            <p className="mt-1 text-sm text-slate-500">{t.setupChecklist.billingDesc}</p>
           </div>
           {billingSteps.map((step, index) => (
-            <Step key={step.id} num={index + 1} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />
+            <Step key={step.id} num={index + 1} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />
           ))}
         </div>
       ) : null}

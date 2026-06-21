@@ -1,0 +1,250 @@
+{
+  "summary": {
+    "date": "2026-06-20",
+    "partner_count": 4,
+    "customer_count": 10,
+    "total": 14,
+    "items": [
+      "STEP1 partner Zeus Service SRL <vanzari@zeusservice.ro>",
+      "STEP1 partner ADPOS Retail Systems <comenzi@adpos.ro>",
+      "STEP1 partner AMEF Constalaris <office@amef.ro>",
+      "STEP1 partner Sedona ALM <contact@aparaturafiscala.ro>",
+      "STEP1 customer Wake Cup Coffee & Bar <office@wake-cup.ro>",
+      "STEP1 customer Planetarium Café <office@plani.ro>",
+      "STEP1 customer Next Quarter Coffee <contact@nextquartercoffe.ro>",
+      "STEP1 customer Kintsu Coffee <contact@kintsu.coffee>",
+      "STEP1 customer Mokum Specialty Coffee <office@mokum.ro>",
+      "STEP1 customer Metaphor Coffee Roasters <metaphorcoffee@gmail.com>",
+      "STEP1 customer Nori Specialty Coffee <contact@noricoffeeshop.ro>",
+      "STEP1 customer True Fine Coffee <office@truefinecoffee.ro>",
+      "STEP1 customer Ecce Coffee Roasters <ecceroasters@gmail.com>",
+      "STEP1 customer Baristas.ro <cafeabaristas@gmail.com>"
+    ]
+  },
+  "payloads": [
+    {
+      "type": "partner",
+      "company": "Zeus Service SRL",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "vanzari@zeusservice.ro",
+        "subject": "workspace HORECA",
+        "content": "Bună ziua,\n\nDupă casa fiscală clienții HoReCa au nevoie de POS cloud cu stoc și NIR — franchisetech completează pachetul cu 20% recurent.\n\nfranchisetech e workspace în browser pentru cafenele și restaurante — nu doar plăți: casă, stoc, NIR (14-3-1A) și rapoarte pentru contabil. Căutăm parteneri HORECA în România: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€) când onboardați un client.\n\nMerită 10 minute să vedeți dacă se potrivește clienților voștri?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=zeus-service-srl\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_partner"
+    },
+    {
+      "type": "partner",
+      "company": "ADPOS Retail Systems",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "comenzi@adpos.ro",
+        "subject": "workspace HORECA",
+        "content": "Bună ziua Adrian Merlan,\n\nVindeți case fiscale — adăugați franchisetech ca POS+stoc+NIR în cloud și câștigați 20% recurent.\n\nfranchisetech e workspace în browser pentru cafenele și restaurante — nu doar plăți: casă, stoc, NIR (14-3-1A) și rapoarte pentru contabil. Căutăm parteneri HORECA în România: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€) când onboardați un client.\n\nMerită 10 minute să vedeți dacă se potrivește clienților voștri?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=adpos-retail-systems\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_partner"
+    },
+    {
+      "type": "partner",
+      "company": "AMEF Constalaris",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "office@amef.ro",
+        "subject": "workspace HORECA",
+        "content": "Bună ziua,\n\nClienții care cumpără AMEF au nevoie de gestiune stoc și NIR — recomandați franchisetech cu 20% recurent.\n\nfranchisetech e workspace în browser pentru cafenele și restaurante — nu doar plăți: casă, stoc, NIR (14-3-1A) și rapoarte pentru contabil. Căutăm parteneri HORECA în România: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€) când onboardați un client.\n\nMerită 10 minute să vedeți dacă se potrivește clienților voștri?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=amef-constalaris\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_partner"
+    },
+    {
+      "type": "partner",
+      "company": "Sedona ALM",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "contact@aparaturafiscala.ro",
+        "subject": "workspace HORECA",
+        "content": "Bună ziua,\n\nSedona livrează echipament fiscal — franchisetech aduce POS cloud stoc+NIR cu 20% comision recurent.\n\nfranchisetech e workspace în browser pentru cafenele și restaurante — nu doar plăți: casă, stoc, NIR (14-3-1A) și rapoarte pentru contabil. Căutăm parteneri HORECA în România: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€) când onboardați un client.\n\nMerită 10 minute să vedeți dacă se potrivește clienților voștri?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=sedona-alm\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_partner"
+    },
+    {
+      "type": "customer",
+      "company": "Wake Cup Coffee & Bar",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "office@wake-cup.ro",
+        "subject": "casa după program",
+        "content": "Bună ziua,\n\nWake Cup pe Donath 100E combină bar și café — un POS care prinde tips și split bill ar ușura serile de weekend.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Wake Cup Coffee & Bar?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=wake-cup-coffee-bar\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Planetarium Café",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "office@plani.ro",
+        "subject": "casa după program",
+        "content": "Bună ziua,\n\nPlanetarium pe Piața Unirii funcționează noaptea — un POS cu rezervări integrate ar înlocui confirmările manuale de pe Facebook.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Planetarium Café?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=planetarium-caf\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Next Quarter Coffee",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "contact@nextquartercoffe.ro",
+        "subject": "casa după program",
+        "content": "Bună ziua,\n\nNext Quarter oferă custodie aparate pe Piața 1 Mai — urmărirea consumului per client HoReCa ar crește retenția contractelor.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Next Quarter Coffee?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=next-quarter-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Kintsu Coffee",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "contact@kintsu.coffee",
+        "subject": "casa după program",
+        "content": "Bună ziua,\n\nKintsu livrează specialty din Cluj — inventar loturi prăjire legat de comenzile online ar reduce retururile de gust.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Kintsu Coffee?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kintsu-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Mokum Specialty Coffee",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "office@mokum.ro",
+        "subject": "casa după program",
+        "content": "Bună ziua,\n\nMokum pe Eugeniu de Savoya e landmark local — un till rapid pentru comenzi telefon + walk-in ar scurta cozile de dimineață.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Mokum Specialty Coffee?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mokum-specialty-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Metaphor Coffee Roasters",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "metaphorcoffee@gmail.com",
+        "subject": "casa după program",
+        "content": "Bună ziua Gina Veveriță,\n\nMetaphor pe Take Ionescu 71 e unic prin carte + café — POS simplu ar elibera timp pentru experiența cu clienții.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Metaphor Coffee Roasters?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=metaphor-coffee-roasters\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Nori Specialty Coffee",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "contact@noricoffeeshop.ro",
+        "subject": "casa după program",
+        "content": "Bună ziua,\n\nNori pe Protopop George Dragomir 7A — raport Z automat pe espresso vs. retail ar ajuta la reordonarea boabelor.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Nori Specialty Coffee?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=nori-specialty-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "True Fine Coffee",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "office@truefinecoffee.ro",
+        "subject": "casa după program",
+        "content": "Bună ziua,\n\nTrue Fine pe Sfântul Andrei combină brunch și specialty — POS cu comanda bucătărie/bar sincronizată ar reduce erorile la weekend.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru True Fine Coffee?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=true-fine-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Ecce Coffee Roasters",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "ecceroasters@gmail.com",
+        "subject": "casa după program",
+        "content": "Bună ziua,\n\nEcce pe Bd. Carol I continuă povestea Harmony — păstrarea istoricului clienților într-un POS nou ar proteja loialitatea.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Ecce Coffee Roasters?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=ecce-coffee-roasters\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Baristas.ro",
+      "step": 1,
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "cafeabaristas@gmail.com",
+        "subject": "casa după program",
+        "content": "Bună ziua,\n\nBaristas pe Silvestru 4 vinde boabe și accesorii — inventar unificat magazin/online ar evita vânzarea produselor epuizate.\n\nCasă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.\n\nfranchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.\n\nV-ar fi util să vedeți cum arată pentru Baristas.ro?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=baristas-ro\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    }
+  ]
+}

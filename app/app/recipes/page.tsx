@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { RecipesFilterForm } from "@/components/app/RecipesFilterForm";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import {
   firstJoined,
   formatRecipeMoney,
@@ -16,7 +17,8 @@ import {
 
 export default async function RecipesPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
   await requireBusinessModule("recipe_costing");
-  const { supabase, orgId, currency } = await getKitchenOpsContext();
+  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode);
   const params = await searchParams;
   const q = (params?.q ?? "").trim().toLowerCase();
   const status = params?.status ?? "all";
@@ -90,19 +92,15 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Product ingredients</h1>
-          <p className="text-sm text-slate-500">
-            Recipe list with cost and margin summary. Open a recipe for full ingredient breakdown.
-          </p>
+          <h1 className="text-2xl font-semibold text-slate-950">{t.recipes.listTitle}</h1>
+          <p className="text-sm text-slate-500">{t.recipes.listSubtitle}</p>
         </div>
         <div className="flex gap-2">
           <Link href="/app/products/import-ingredients">
-            <Button variant="outline" size="sm">
-              Import stock items
-            </Button>
+            <Button variant="outline" size="sm">{t.recipes.importStock}</Button>
           </Link>
           <Link href="/app/recipes/new">
-            <Button>Create recipe</Button>
+            <Button>{t.recipes.createRecipe}</Button>
           </Link>
         </div>
       </div>
@@ -113,17 +111,14 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
         <Card>
           <CardContent className="space-y-4 pb-10 pt-10 text-center">
             <div className="text-4xl">👨‍🍳</div>
-            <p className="font-medium text-slate-700">No product ingredients yet.</p>
-            <p className="mx-auto max-w-sm text-sm text-slate-400">
-              First add your ingredients as products (with cost per unit), then link them to a product to see cost,
-              margin, and how many portions you can make.
-            </p>
+            <p className="font-medium text-slate-700">{t.recipes.emptyList}</p>
+            <p className="mx-auto max-w-sm text-sm text-slate-400">{t.recipes.emptyListHint}</p>
             <div className="flex justify-center gap-3">
               <Link href="/app/products/import-ingredients">
-                <Button variant="outline">Import stock items</Button>
+                <Button variant="outline">{t.recipes.importStock}</Button>
               </Link>
               <Link href="/app/recipes/new">
-                <Button>Create recipe</Button>
+                <Button>{t.recipes.createRecipe}</Button>
               </Link>
             </div>
           </CardContent>
@@ -134,13 +129,13 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Recipe</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead className="text-right">Ingredients</TableHead>
-                  <TableHead className="text-right">Sale price</TableHead>
-                  <TableHead className="text-right">Cost / portion</TableHead>
-                  <TableHead className="text-right">Margin</TableHead>
-                  <TableHead className="text-right">Can make</TableHead>
+                  <TableHead>{t.recipes.recipe}</TableHead>
+                  <TableHead>{t.tables.product}</TableHead>
+                  <TableHead className="text-right">{t.recipes.ingredients}</TableHead>
+                  <TableHead className="text-right">{t.recipes.salePrice}</TableHead>
+                  <TableHead className="text-right">{t.recipes.costPerPortion}</TableHead>
+                  <TableHead className="text-right">{t.tables.margin}</TableHead>
+                  <TableHead className="text-right">{t.recipes.canMake}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -211,7 +206,7 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
                           href={`/app/recipes/${recipe.id}`}
                           className="text-sm font-medium text-blue-600 hover:text-blue-800"
                         >
-                          View
+                          {t.recipes.view}
                         </Link>
                       </TableCell>
                     </TableRow>
@@ -220,7 +215,7 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
               </TableBody>
             </Table>
             {!rows.length ? (
-              <p className="py-8 text-center text-sm text-slate-500">No recipes match this search or filter.</p>
+              <p className="py-8 text-center text-sm text-slate-500">{t.recipes.noMatch}</p>
             ) : null}
           </CardContent>
         </Card>

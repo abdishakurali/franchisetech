@@ -1,0 +1,175 @@
+product_name,odoo_category,odoo_active,odoo_purchase_ok,supabase_status,action
+AEROPRESS - BARI S.O. 360ml,PRODUSE FINITE,True,False,ok,skip
+AEROPRESS - BIO COLUMBIA S.O. 360ml,PRODUSE FINITE,True,False,ok,skip
+AEROPRESS - NICARAGUA S.O. 360ml,PRODUSE FINITE,True,False,ok,skip
+AEROPRESS - PERU S.O. 360ml,PRODUSE FINITE,True,False,ok,skip
+AMERICANO,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+AMERICANO - COLUMBIA BIO 360ml,PRODUSE FINITE,True,False,ok,skip
+AMERICANO - COLUMBIA BIO 480ml,PRODUSE FINITE,True,False,ok,skip
+AMERICANO - DEKOF COLUMBIA S.O. 240ml,PRODUSE FINITE,True,False,missing,insert
+AMERICANO - PERU S.O. 240ml,PRODUSE FINITE,True,False,ok,skip
+AMERICANO H.B. 300ml,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+AMERICANO H.B. 480ml,PRODUSE FINITE,True,False,ok,skip
+AMERICANO S.O. 230ml,PRODUSE FINITE,True,False,missing,insert
+AMERICANO S.O. 240ml,PRODUSE FINITE,False,False,ok,skip
+AMERICANO S.O. 300ml,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+APA MINERALA DORNA,MARFURi,False,True,missing,insert
+APA PLATA DORNA,MARFURi,True,True,exists active=False purchaseable=False,update_flags
+APA PLATA IZVORUL ALB,MARFURi,True,True,exists active=False purchaseable=False,update_flags
+BISCUITI PARMEZAN,MARFURi,False,True,missing,insert
+CAFEA BOABE - CUORE DI COLUMBIA,MARFURi,False,True,missing,insert
+CAFEA BOABE - CUORE DI COLUMBIA 1kg,MARFURi,False,True,missing,insert
+CAFEA BOABE - GIOIA DI GUATEMALA,MARFURi,False,True,missing,insert
+CAFEA BOABE - GIOIA DI GUATEMALA 1kg,MARFURi,False,True,missing,insert
+CAFEA BOABE - NOSTALGIA DI ETHIOPIA,MARFURi,False,True,missing,insert
+CAFEA BOABE - NOSTALGIA DI ETHIOPIA 1kg n,MARFURi,False,True,missing,insert
+CAFEA BOABE - PREMIUM 10,MARFURi,False,True,missing,insert
+CAFEA BOABE - PREMIUM 10 1kg (copie),MARFURi,False,True,missing,insert
+CAFEA BOABE - PREMIUM 3,MARFURi,False,True,missing,insert
+CAFEA BOABE - PREMIUM 3 (copie),MARFURi,False,True,missing,insert
+CAFEA BOABE - SEGRETO DI INDIA,MARFURi,False,True,missing,insert
+CAFEA BOABE - SEGRETO DI INDIA 1kg,MARFURi,False,True,missing,insert
+CAFEA BOABE - SOGNO DI KENIA,MARFURi,False,True,missing,insert
+CAFEA BOABE DECOF - CUORE DI COLUMBIA 1kg,MARFURi,False,True,missing,insert
+CAFEA PRAJITA DECOF SWISS WATER,MATERIA PRIMA,True,True,missing,insert
+CAFEA PRAJITA ETHIOPIA,MATERIA PRIMA,True,True,missing,insert
+CAFEA PRAJITA PREMIUM 10,MATERIA PRIMA,True,True,missing,insert
+CAPAC DE PLASTIC 6 OZ,MATERIA PRIMA,True,True,ok,skip
+CAPAC PAHAR FRAPPE DL95,MATERIA PRIMA,True,True,ok,skip
+CAPAC SL37,MATERIA PRIMA,True,True,ok,skip
+CAPAC SL45,MATERIA PRIMA,True,True,ok,skip
+CAPPUCCINO - BARI S.O. 480ml,PRODUSE FINITE,True,False,ok,skip
+CAPPUCCINO - COLUMBIA BIO 250ml,PRODUSE FINITE,True,False,missing,insert
+CAPPUCCINO H.B. 230ml,PRODUSE FINITE,True,False,missing,insert
+CAPPUCCINO H.B. 480ml,PRODUSE FINITE,True,False,ok,skip
+CAPPUCCINO S.O 300ml,PRODUSE FINITE,True,False,missing,insert
+CAPPUCCINO VEGETAL H.B. 240ml,PRODUSE FINITE,True,False,missing,insert
+CAPPUCCINO VIENNESE - COLUMBIA BIO 360ml,PRODUSE FINITE,True,False,ok,skip
+CAPPUCCINO VIENNESSE H.B. 300ml,PRODUSE FINITE,True,False,missing,insert
+CAPPUCCINO VIENNESSE H.B. 480ml,PRODUSE FINITE,True,False,ok,skip
+CAPPUCCINO VIENNESSE S.O. 230ml,PRODUSE FINITE,True,False,missing,insert
+CAPPUCCINO VIENNESSE S.O. 300ml,PRODUSE FINITE,True,False,missing,insert
+CAPUCCINO,PRODUSE FINITE,False,False,missing,insert
+CAPUCCINO VIENEZ,PRODUSE FINITE,True,False,missing,insert
+CAPUCCINO double,PRODUSE FINITE,True,False,missing,insert
+CEAI ALB VANILIE & PIERSICA,PRODUSE FINITE,True,True,ok,skip
+CEAI BERRY WOW,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI CAPSUNI & MENTA,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI CAPSUNI & MENTA 16 oz,PRODUSE FINITE,True,False,ok,skip
+CEAI DE MUSETEL,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI EARL GREY,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI FRUCTE DE PADURE,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI FRUCTE DE PADURE 16 oz,PRODUSE FINITE,True,False,ok,skip
+CEAI FRUITY CAMOMILE,PRODUSE FINITE,True,True,missing,insert
+CEAI FRUITY CAMOMILE (copie),PRODUSE FINITE,True,False,ok,skip
+CEAI GHIMBIR & LAMAIE,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI JADE GREEN,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI LAMAIE,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI LAMAIE & GHIMBIR 16 oz,PRODUSE FINITE,True,False,ok,skip
+CEAI LAMAIE 16 oz,PRODUSE FINITE,True,False,ok,skip
+CEAI MENTA CU LAMAIE,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI MINT KISS,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI SUNNY FRUIT,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI VERDE,PRODUSE FINITE,True,True,ok,skip
+CEAI VERDE SENCHA MANGO,PRODUSE FINITE,True,True,exists active=True purchaseable=False,update_flags
+CEAI VERDE SENCHA MANGO 16 oz,PRODUSE FINITE,True,False,ok,skip
+CEAI VERDE VANILIE & PIERSICA 16 oz,PRODUSE FINITE,True,False,ok,skip
+CHEC CU LAMAIE & MAC,MARFURi,False,True,missing,insert
+CHEC CU MORCOV & CIOCOLATA ALBA,MARFURi,False,True,missing,insert
+CHEC MARMORAT,MARFURi,False,True,missing,insert
+CIOCOLATA ALBA,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+CIOCOLATA NEAGRA,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+COCACOLA 330 ML DOZA,MARFURi,True,True,exists active=False purchaseable=False,update_flags
+COLD BEVERAGE,MATERIA PRIMA,False,True,missing,insert
+COOKIE CIOCOLATA ALBA,MARFURi,False,True,missing,insert
+COOKIE CIOCOLATA NEAGRA & FULGI SARE,MARFURi,False,True,missing,insert
+DARK CHOCOLATE GOURMET VANILA,MATERIA PRIMA,False,True,missing,insert
+DOUBLE ESPRESSO - COLUMBIA BIO 60ml,PRODUSE FINITE,True,False,ok,skip
+DOUBLE ESPRESSO - PERU S.O. 60ml,PRODUSE FINITE,True,False,ok,skip
+DOUBLE MACCHIATO - COLUMBIA BIO 60ml (copie),PRODUSE FINITE,True,False,ok,skip
+DOUBLE MACCHIATO H.B. 80ml,PRODUSE FINITE,True,False,ok,skip
+DOUBLE MACCHIATO S.O. 80ml,PRODUSE FINITE,True,False,ok,skip
+DOUBLE RISTRETTO - COLUMBIA BIO 60ml,PRODUSE FINITE,True,False,ok,skip
+DOUBLE RISTRETTO H.B. 40ml,PRODUSE FINITE,True,False,ok,skip
+DOUBLE RISTRETTO S.O. 40ml,PRODUSE FINITE,True,False,ok,skip
+DUSTY CAFF BRATTOLO 900 GR,MATERIA PRIMA,True,True,ok,skip
+ESPRESSO,PRODUSE FINITE,True,False,ok,skip
+ESPRESSO DOUBLE single origin,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+ESPRESSO DUPLU,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+ESPRESSO MACHIATO DOUBLE,PRODUSE FINITE,False,False,missing,insert
+ESPRESSO double,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+ESPRESSO single origin,PRODUSE FINITE,False,False,missing,insert
+FANTA 330 ML DOZA,MARFURi,False,True,missing,insert
+FANTA 330 ML DOZA (copie),MARFURi,False,True,missing,insert
+FENTIMAS,MARFURi,False,True,missing,insert
+FLAT WHITE,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+FLAT WHITE - COLUMBIA BIO 240ml,PRODUSE FINITE,True,False,ok,skip
+FLATT WHITE H.B. 230ml,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+FRAPPE DOLCE NERA,PRODUSE FINITE,True,False,ok,skip
+FRENCHPRESS - BARI S.O. 480ml,PRODUSE FINITE,True,False,ok,skip
+FRENCHPRESS - BIO COLUMBIA S.O. 480ml,PRODUSE FINITE,True,False,ok,skip
+FRENCHPRESS - NICARAGUA S.O. 480ml,PRODUSE FINITE,True,False,ok,skip
+FRENCHPRESS - PERU S.O. 480ml,PRODUSE FINITE,True,False,ok,skip
+FRISCA,MARFURi,False,True,missing,insert
+FRISCA (copie),MARFURi,True,True,missing,insert
+FRITZCOLA,MARFURi,False,True,missing,insert
+FURSEC CU STAFIDE & UNT,MARFURi,False,True,missing,insert
+Franchise Tech Subscription,MATERIA PRIMA,True,False,ok,skip
+ITALIAN ICE LATTE,PRODUSE FINITE,True,False,ok,skip
+LAPTE CONDENSAT,MATERIA PRIMA,True,True,ok,skip
+LAPTE MLEKO UHT,MATERIA PRIMA,True,True,missing,insert
+LATTE,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+LATTE - COLUMBIA BIO 360ml,PRODUSE FINITE,True,False,ok,skip
+LATTE H.B. 300ml,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+LATTE S.O. 300ml,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+LATTE S.O. 480ml,PRODUSE FINITE,True,False,ok,skip
+LIMONADA,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+LIMONADA 5 LITRI,MATERIA PRIMA,False,True,missing,insert
+LIMONADA CU KIWI & MENTA (copie),PRODUSE FINITE,False,False,missing,insert
+LIMONADA CU MANGO & MENTA,PRODUSE FINITE,True,False,ok,skip
+LIMONADA CU MANGO & MENTA 400ml,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+MACCHIATO S.O. 40ml,PRODUSE FINITE,False,False,missing,insert
+MACHIATO,PRODUSE FINITE,False,False,missing,insert
+MATCHA LATTE,MATERIA PRIMA,True,True,ok,skip
+MATCHA LATTE BIG,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+MIERE PLIC,MATERIA PRIMA,True,True,ok,skip
+MOELK BARISTA BAUTURA VEGETALA DE OVAZ,MATERIA PRIMA,True,True,ok,skip
+PACHET FRAPPE DOLCE NERA,MATERIA PRIMA,True,True,ok,skip
+PAHAR 12 OZ,MATERIA PRIMA,True,True,ok,skip
+PAHAR 16 OZ,MATERIA PRIMA,True,True,ok,skip
+PAHAR 6 OZ,MATERIA PRIMA,True,True,ok,skip
+PAHAR 8 OZ,MATERIA PRIMA,True,True,ok,skip
+PAHAR FRAPPE DOLCE NERA 3CNEW,MATERIA PRIMA,True,True,ok,skip
+PAIE,MATERIA PRIMA,True,True,ok,skip
+PALETE,MATERIA PRIMA,True,True,ok,skip
+PALETE CAFEA 14cm,MATERIA PRIMA,True,True,ok,skip
+PLATOU CU CAPAC 32cm,MATERIA PRIMA,True,True,ok,skip
+RISTRETTO H.B. 20ml,PRODUSE FINITE,True,False,ok,skip
+RISTRETTO S.O. 20ml,PRODUSE FINITE,False,False,missing,insert
+SALAM DE BISCUITI,MARFURi,False,True,missing,insert
+SERVETELE PERS DISPENSER 25x25 75/PAC,MATERIA PRIMA,True,True,ok,skip
+SGR,MATERIA PRIMA,True,True,exists active=True purchaseable=False,update_flags
+SIROP GIFFARD CARAMEL,MATERIA PRIMA,True,True,ok,skip
+SIROP GIFFARD CARAMEL SARAT,MATERIA PRIMA,True,True,ok,skip
+SIROP GIFFARD CHOCOLATE COOKIES,MATERIA PRIMA,True,True,missing,insert
+SIROP GIFFARD CIOCOLATA NEAGRA,MATERIA PRIMA,True,True,ok,skip
+SIROP GIFFARD IRISH,MATERIA PRIMA,True,True,ok,skip
+SIROP GIFFARD VANILIA,MATERIA PRIMA,True,True,ok,skip
+SOCATA,MARFURi,False,True,missing,insert
+SPANISH ICE LATTE,PRODUSE FINITE,False,False,missing,insert
+Schweppes Bitter Lemon 250ml,MARFURi,True,True,exists active=True purchaseable=False,update_flags
+Schweppes Mandarin 250ml,MARFURi,True,True,exists active=True purchaseable=False,update_flags
+Schweppes Tonic Water 250ml,MARFURi,True,True,exists active=True purchaseable=False,update_flags
+Sprite Lamaie & Lamaie Verde 250ml,MARFURi,True,True,exists active=True purchaseable=False,update_flags
+V60,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+V60 - BIO COLUMBIA S.O. 360ml,PRODUSE FINITE,True,False,ok,skip
+V60 - NICARAGUA S.O. 360ml,PRODUSE FINITE,True,False,ok,skip
+V60 - PERU S.O. 360ml,PRODUSE FINITE,True,False,ok,skip
+VEGETAL CAPPUCCINO H.B. 360ml,PRODUSE FINITE,True,False,ok,skip
+VEGETAL CAPPUCCINO H.B. 480ml,PRODUSE FINITE,True,False,ok,skip
+VEGETAL FLATT WHITE H.B. 240ml,PRODUSE FINITE,True,False,ok,skip
+VEGETAL LATTE H.B. 360ml,PRODUSE FINITE,True,False,ok,skip
+VIENEZ ICE LATTE,PRODUSE FINITE,True,False,exists active=False purchaseable=False,update_flags
+WHITE CHOCOLATE GOURMET WHITE VANILA,MATERIA PRIMA,True,True,ok,skip
+ZAHAR ALB 5 GR,MATERIA PRIMA,True,True,ok,skip
+ZAHAR BRUN 5 GR,MATERIA PRIMA,True,True,ok,skip

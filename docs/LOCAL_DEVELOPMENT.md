@@ -46,6 +46,8 @@ Open http://localhost:3000 in your browser.
 | `NEXT_PUBLIC_ENABLE_DEMO_TOOLS` | `false` | Enable demo mode UI |
 | `NEXT_PUBLIC_ENABLE_GOOGLE_AUTH` | `false` | Enable Google OAuth login button |
 | `NEXT_PUBLIC_GA_ID` | *(blank)* | Google Analytics — leave blank locally |
+| `NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN` | *(blank)* | PostHog EU — from Project settings; enables analytics + session replay |
+| `NEXT_PUBLIC_POSTHOG_HOST` | `https://eu.i.posthog.com` | PostHog ingest host (EU cloud) |
 
 ---
 

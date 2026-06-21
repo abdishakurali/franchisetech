@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trash2, Loader2, ChevronRight } from "lucide-react";
 import { canCancelPurchase, purchaseStatusBadge } from "@/lib/nir/purchase";
+import type { PurchaseStatus } from "@/lib/nir/purchase";
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 type SupplierRef = { name: string } | null;
 type PurchaseRow = {
@@ -37,7 +39,7 @@ export function PurchasesBulkTable({
   deleteAction: (ids: string[]) => Promise<void>;
   currency?: string;
 }) {
-  const isRO = currency === "RON";
+  const { t } = useAppI18n();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
 
@@ -62,9 +64,7 @@ export function PurchasesBulkTable({
   async function handleDelete() {
     const draftSelected = [...selected].filter((id) => cancellableIds.has(id));
     if (!draftSelected.length) return;
-    if (!confirm(isRO
-      ? `Anulați ${draftSelected.length} ciornă/ciorne?`
-      : `Cancel ${draftSelected.length} draft purchase${draftSelected.length !== 1 ? "s" : ""}?`)) return;
+    if (!confirm(t.purchases.cancelDraftConfirm(draftSelected.length))) return;
     setDeleting(true);
     try {
       await deleteAction(draftSelected);
@@ -80,7 +80,7 @@ export function PurchasesBulkTable({
     <div>
       {selectedDraftCount > 0 && (
         <div className="flex items-center gap-3 mb-3 px-1">
-          <span className="text-sm font-medium text-slate-700">{selectedDraftCount} {isRO ? "selectate" : "selected"}</span>
+          <span className="text-sm font-medium text-slate-700">{t.common.selected(selectedDraftCount)}</span>
           <Button
             variant="outline"
             size="sm"
@@ -89,10 +89,10 @@ export function PurchasesBulkTable({
             className="border-red-200 text-red-600 hover:bg-red-50 h-8"
           >
             {deleting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 mr-1.5" />}
-            {isRO ? "Anulează ciorne" : "Cancel drafts"}
+            {t.purchases.cancelDrafts}
           </Button>
           <button type="button" className="text-xs text-slate-400 hover:text-slate-600" onClick={() => setSelected(new Set())}>
-            {isRO ? "Golește" : "Clear"}
+            {t.common.clearSelection}
           </button>
         </div>
       )}
@@ -107,16 +107,16 @@ export function PurchasesBulkTable({
                   onChange={toggleAll}
                   disabled={cancellableIds.size === 0}
                   className="h-4 w-4 accent-blue-600 cursor-pointer disabled:opacity-40"
-                  title={isRO ? "Selectează ciorne" : "Select drafts"}
+                  title={t.purchases.selectDrafts}
                 />
               </TableHead>
-              <TableHead>{isRO ? "Data" : "Date"}</TableHead>
-              <TableHead>{isRO ? "Nr. NIR" : "NIR no."}</TableHead>
-              <TableHead>{isRO ? "Furnizor" : "Supplier"}</TableHead>
-              <TableHead>{isRO ? "Factură" : "Invoice"}</TableHead>
-              <TableHead>{isRO ? "Articole" : "Items"}</TableHead>
-              <TableHead>{isRO ? "Status" : "Status"}</TableHead>
-              <TableHead className="text-right">{isRO ? "Total brut" : "Gross"}</TableHead>
+              <TableHead>{t.tables.date}</TableHead>
+              <TableHead>{t.tables.nirNo}</TableHead>
+              <TableHead>{t.tables.supplier}</TableHead>
+              <TableHead>{t.tables.invoice}</TableHead>
+              <TableHead>{t.tables.items}</TableHead>
+              <TableHead>{t.tables.status}</TableHead>
+              <TableHead className="text-right">{t.purchases.gross}</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -125,7 +125,7 @@ export function PurchasesBulkTable({
               const dateStr = String(p.purchase_date ?? p.purchased_at ?? "").slice(0, 10);
               const supplierName = (p.suppliers as SupplierRef)?.name ?? "—";
               const invoiceRef = p.invoice_number ?? p.reference ?? "—";
-              const badge = purchaseStatusBadge(p.status, p.nir_number, isRO);
+              const badge = purchaseStatusBadge(t, p.status as PurchaseStatus, p.nir_number);
               const isCancelled = p.status === "cancelled";
               const canSelect = canCancelPurchase(p.status);
               return (

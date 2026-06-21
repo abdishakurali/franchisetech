@@ -34,7 +34,8 @@ export async function getActiveOrg() {
   const orgInfo = Array.isArray(orgRow) ? orgRow[0] : orgRow;
   const currency: string = orgInfo?.currency_code ?? "EUR";
   const currencySymbol: string = orgInfo?.currency_symbol ?? "€";
-  return { supabase, user, membership, orgId: membership.organisation_id, currency, currencySymbol };
+  const countryCode: string | null = orgInfo?.country_code ?? null;
+  return { supabase, user, membership, orgId: membership.organisation_id, currency, currencySymbol, countryCode };
 }
 
 export function money(value: number | null | undefined) {

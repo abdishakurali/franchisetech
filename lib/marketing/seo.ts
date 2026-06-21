@@ -853,7 +853,52 @@ export const resourcePages: ResourcePage[] = [
     related: [
       { label: "Comparații POS", href: "/compare" },
       { label: "SmartBill vs franchisetech", href: "/compare/smartbill" },
+      { label: "Obiecții frecvente", href: "/resources/objections-pos-romania" },
       { label: "Prețuri", href: "/pricing" },
+    ],
+  },
+  {
+    slug: "objections-pos-romania",
+    path: "/resources/objections-pos-romania",
+    title: "Obiecții frecvente la alegerea unui POS în România",
+    metaTitle: "Obiecții POS România — SmartBill, FiscalNet, timp, preț | franchisetech",
+    description:
+      "Răspunsuri oneste la obiecțiile din apelurile de vânzare: SmartBill existent, FiscalNet, lipsă de timp, preț — cu trial paralel 15 zile.",
+    intro:
+      "Aceste obiecții apar în aproape fiecare evaluare POS pentru restaurante și cafenele din România. Răspunsurile de mai jos reflectă ce putem susține onest astăzi — fără promisiuni de conformitate universală.",
+    sections: [
+      {
+        title: "„Am deja SmartBill / Saga”",
+        body: "Multe afaceri păstrează SmartBill sau Saga pentru facturare și e-Factura. franchisetech țintește golul zilnic: casă, stoc, rețete, raport Z. Rulați 15 zile în paralel — aceleași produse, aceeași echipă — și comparați timpul de reconciliere la final de zi.",
+      },
+      {
+        title: "„FiscalNet e greu / nu vreau risc fiscal”",
+        body: "Integrarea FiscalNet necesită configurare corectă pe stația de casă. Oferim ghid pas cu pas; contabilul verifică înainte de go-live. Nu presupuneți conformitate fără verificare profesională.",
+      },
+      {
+        title: "„Nu am timp de migrare”",
+        body: "Nu cerem migrare big-bang. Setup asistat (199€) include produse demo, deschidere casă și ghidare la prima vânzare. Majoritatea trialurilor activează prima vânzare într-o singură sesiune ghidată.",
+      },
+      {
+        title: "„E scump față de Excel / POS vechi”",
+        body: "Comparați costul total: licență, taxă per casier, ore reconciliere manuală, rupturi de stoc. Planurile franchisetech includ personal nelimitat — util când rotația echipei e mare.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Pot păstra contabilul actual?",
+        answer: "Da. Exportați rapoarte zilnice și reconciliați cu contabilul — franchisetech nu înlocuiește sfatul fiscal profesional.",
+      },
+      {
+        question: "Unde văd comparația cu SmartBill?",
+        answer: "Pagina dedicată: franchisetech vs SmartBill pentru operațiuni zilnice HORECA.",
+      },
+    ],
+    related: [
+      { label: "SmartBill vs franchisetech", href: "/compare/smartbill" },
+      { label: "Checklist alegere POS", href: "/resources/choose-pos-romania" },
+      { label: "Ghid FiscalNet", href: "/help/romania-fiscalnet" },
+      { label: "Prețuri și trial", href: "/pricing" },
     ],
   },
 ];

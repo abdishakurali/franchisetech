@@ -16,6 +16,7 @@ import type { OrgVatRate } from "@/lib/vat-rates";
 import type { ProductModuleVisibility } from "@/lib/product-module-fields";
 import { showProductTypeSection } from "@/lib/product-module-fields";
 import { cn } from "@/lib/utils";
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 const PLACEHOLDER_TYPES = ["coffee", "drink", "food", "snack", "ingredient", "other"];
 const KITCHEN_STATIONS = [
@@ -60,7 +61,6 @@ type Props = {
   visibility: ProductModuleVisibility;
   itemTypes: { value: string; label: string }[];
   kitchenStationsEnabled: boolean;
-  isRO: boolean;
   currencySymbol: string;
 };
 
@@ -127,44 +127,41 @@ export function ProductEditForm({
   visibility,
   itemTypes,
   kitchenStationsEnabled,
-  isRO,
   currencySymbol,
 }: Props) {
   const router = useRouter();
+  const { t: i18n } = useAppI18n();
+  const pf = i18n.productsForm;
   const formRef = useRef<HTMLFormElement>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDanger, setShowDanger] = useState(false);
 
   const t = {
-    basics: isRO ? "Detalii" : "Basics",
-    pricing: isRO ? "Prețuri" : "Pricing",
-    options: isRO ? "Opțiuni" : "Options",
-    advanced: isRO ? "Avansat" : "Advanced",
-    salePrice: isRO ? `Preț vânzare (${currencySymbol})` : `Sale price (${currencySymbol})`,
-    costPrice: isRO ? `Preț cost (${currencySymbol})` : `Cost price (${currencySymbol})`,
-    save: isRO ? "Salvează" : "Save changes",
-    saving: isRO ? "Se salvează…" : "Saving…",
-    cancel: isRO ? "Anulează" : "Cancel",
-    pos: isRO ? "Se vinde la POS" : "Sell on POS",
-    posHint: isRO ? "Apare la casă pentru angajați." : "Shows on the till for staff to sell.",
-    stock: isRO ? "Urmărire stoc" : "Track stock",
-    stockHint: isRO ? "Niveluri stoc și achiziții." : "Stock levels and purchase receiving.",
-    ingredient: "Ingredient",
-    ingredientHint: isRO ? "Folosit în rețete." : "Used in recipes.",
-    purchase: isRO ? "Poate fi cumpărat" : "Can be purchased",
-    purchaseHint: isRO ? "Apare la înregistrarea cumpărăturilor." : "Appears when recording purchases.",
-    itemType: isRO ? "Tip articol" : "Item type",
-    supplier: isRO ? "Furnizor" : "Supplier",
-    saved: isRO ? "Produs salvat" : "Product saved",
-    deleted: isRO ? "Produs șters" : "Product removed",
-    deleteConfirm: isRO
-      ? "Ascundeți acest produs? Poate fi restaurat ulterior."
-      : "Hide this product? It can be restored later if needed.",
-    deleteBtn: isRO ? "Șterge produs" : "Delete product",
-    finishedHint: isRO
-      ? "Produsele finite apar la cumpărături doar dacă «Poate fi cumpărat» este activ."
-      : "Finished products only appear in purchases when «Can be purchased» is on.",
+    basics: pf.basics,
+    pricing: pf.pricing,
+    options: pf.options,
+    advanced: pf.advanced,
+    salePrice: pf.salePrice(currencySymbol),
+    costPrice: pf.costPrice(currencySymbol),
+    save: pf.save,
+    saving: pf.saving,
+    cancel: i18n.common.cancel,
+    pos: pf.pos,
+    posHint: pf.posHint,
+    stock: pf.stock,
+    stockHint: pf.stockHint,
+    ingredient: pf.ingredient,
+    ingredientHint: pf.ingredientHint,
+    purchase: pf.purchase,
+    purchaseHint: pf.purchaseHint,
+    itemType: pf.itemType,
+    supplier: pf.supplier,
+    saved: pf.saved,
+    deleted: pf.deleted,
+    deleteConfirm: pf.deleteConfirm,
+    deleteBtn: pf.deleteBtn,
+    finishedHint: pf.finishedHint,
   };
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
@@ -466,13 +463,13 @@ export function ProductEditForm({
           onClick={() => setShowDanger((v) => !v)}
           className="text-xs font-medium text-slate-400 hover:text-red-600 transition-colors"
         >
-          {showDanger ? (isRO ? "Ascunde opțiuni ștergere" : "Hide delete options") : (isRO ? "Opțiuni ștergere" : "Delete options")}
+          {showDanger ? pf.hideDelete : pf.showDelete}
         </button>
         {showDanger && (
           <Card className="mt-3 border-red-200">
             <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
               <p className="text-sm text-slate-600">
-                {isRO ? "Ascunde produsul din POS și rapoarte." : "Hides the product from POS and reports."}
+                {pf.hideProductHint}
               </p>
               <Button
                 type="button"

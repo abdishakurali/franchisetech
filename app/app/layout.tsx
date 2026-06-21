@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app/AppShell";
 import { AppI18nProvider } from "@/lib/app-i18n-context";
 import { SupportChat } from "@/components/app/SupportChat";
+import { PostHogIdentify } from "@/components/app/PostHogIdentify";
 import { ensureReferralCode } from "@/lib/referrals";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { listAccessibleSites, getActiveSiteId } from "@/lib/site-context";
@@ -121,6 +122,12 @@ export default async function AppLayout({
       activeSiteId={activeSiteId}
     >
       {children}
+      <PostHogIdentify
+        userId={user.id}
+        email={user.email}
+        orgId={activeOrg?.id ?? null}
+        orgName={activeOrg?.name ?? null}
+      />
       {!isWorkstationRoute && (
         <SupportChat
           userId={user.id}

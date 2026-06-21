@@ -1,0 +1,226 @@
+[
+  {
+    "company": "Orieda",
+    "type": "partner",
+    "to": "office@orieda.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "MDV Consulting",
+    "type": "partner",
+    "to": "office@mdvconsulting.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "A&A Accounts",
+    "type": "partner",
+    "to": "office@accounts.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Contab Servicii Smart",
+    "type": "partner",
+    "to": "office@contabss.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Beans and Dots",
+    "type": "customer",
+    "to": "hello@beansanddots.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Coffee Designers",
+    "type": "customer",
+    "to": "contact@coffeedesigners.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Uzina Coffee",
+    "type": "customer",
+    "to": "contact@uzinacoffee.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Arcade Cafe",
+    "type": "customer",
+    "to": "contact@arcadecafe.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Cafeneaua Nației",
+    "type": "customer",
+    "to": "contact@stareanatiei.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Madison Coffee",
+    "type": "customer",
+    "to": "hello@madisoncoffee.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Kestar Coffee",
+    "type": "customer",
+    "to": "info@kestarcoffee.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Gallery Concept",
+    "type": "customer",
+    "to": "rsvp@gallery-concept.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Rhédey Café",
+    "type": "customer",
+    "to": "rhedeycafe@gmail.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "YUME Coffee Roasters",
+    "type": "customer",
+    "to": "info@yume.coffee",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Zeus Service SRL",
+    "type": "partner",
+    "to": "vanzari@zeusservice.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "ADPOS Retail Systems",
+    "type": "partner",
+    "to": "comenzi@adpos.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "AMEF Constalaris",
+    "type": "partner",
+    "to": "office@amef.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Sedona ALM",
+    "type": "partner",
+    "to": "contact@aparaturafiscala.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Wake Cup Coffee & Bar",
+    "type": "customer",
+    "to": "office@wake-cup.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Planetarium Café",
+    "type": "customer",
+    "to": "office@plani.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Next Quarter Coffee",
+    "type": "customer",
+    "to": "contact@nextquartercoffe.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Kintsu Coffee",
+    "type": "customer",
+    "to": "contact@kintsu.coffee",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Mokum Specialty Coffee",
+    "type": "customer",
+    "to": "office@mokum.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Metaphor Coffee Roasters",
+    "type": "customer",
+    "to": "metaphorcoffee@gmail.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Nori Specialty Coffee",
+    "type": "customer",
+    "to": "contact@noricoffeeshop.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "True Fine Coffee",
+    "type": "customer",
+    "to": "office@truefinecoffee.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Ecce Coffee Roasters",
+    "type": "customer",
+    "to": "ecceroasters@gmail.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Baristas.ro",
+    "type": "customer",
+    "to": "cafeabaristas@gmail.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  }
+]

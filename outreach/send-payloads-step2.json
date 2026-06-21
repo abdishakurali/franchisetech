@@ -1,0 +1,1802 @@
+[
+  {
+    "type": "partner",
+    "company": "Orieda",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@orieda.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=orieda\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "MDV Consulting",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@mdvconsulting.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=mdv-consulting\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "A&A Accounts",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@accounts.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=a-a-accounts\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Contab Servicii Smart",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@contabss.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=contab-servicii-smart\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Zeus Service SRL",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "vanzari@zeusservice.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=zeus-service-srl\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "ADPOS Retail Systems",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@adpos.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua Adrian Merlan,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=adpos-retail-systems\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "AMEF Constalaris",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@amef.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=amef-constalaris\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Sedona ALM",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@aparaturafiscala.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=sedona-alm\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "ExpertPos EconMedia",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@econmedia.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=expertpos-econmedia\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Q Retail",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@qretail.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=q-retail\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Anzi Soft",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "vanzari@anzisoft.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=anzi-soft\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Vlarox Fiscal",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@vlarox.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua Vlad Lembrău,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=vlarox-fiscal\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "RezoSoft",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@rezosoft.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=rezosoft\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Selectsoft SRL",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@selectsoft.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=selectsoft-srl\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "tiny.ERP",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@tinyerp.app",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=tiny-erp\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "ExpertAccounts",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "sales@expertaccounts.com",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=expertaccounts\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Salad Box",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@saladbox.ro",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=salad-box\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "TED'S Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "info@tedscoffeecompany.com",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=ted-s-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Tucano Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "franchise@tucanocoffee.com",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=tucano-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Hello Donuts",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@hellodonuts.com",
+      "subject": "stoc + NIR",
+      "content": "Bună ziua,\n\nRevin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=hello-donuts\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Beans and Dots",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "hello@beansanddots.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Beans and Dots: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=beans-and-dots\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Coffee Designers",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@coffeedesigners.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Coffee Designers: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=coffee-designers\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Uzina Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@uzinacoffee.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Uzina Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=uzina-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Arcade Cafe",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@arcadecafe.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Arcade Cafe: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=arcade-cafe\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cafeneaua Nației",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@stareanatiei.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Cafeneaua Nației: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cafeneaua-na-iei\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Madison Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "hello@madisoncoffee.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Radu Potolea,\n\nRevin la Madison Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=madison-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Kestar Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "info@kestarcoffee.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Kestar Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kestar-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Gallery Concept",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rsvp@gallery-concept.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Gallery Concept: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=gallery-concept\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Rhédey Café",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rhedeycafe@gmail.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Rhédey Café: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rh-dey-caf\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "YUME Coffee Roasters",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "info@yume.coffee",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la YUME Coffee Roasters: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=yume-coffee-roasters\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Wake Cup Coffee & Bar",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@wake-cup.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Wake Cup Coffee & Bar: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=wake-cup-coffee-bar\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Planetarium Café",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@plani.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Planetarium Café: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=planetarium-caf\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Next Quarter Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@nextquartercoffe.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Next Quarter Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=next-quarter-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Kintsu Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@kintsu.coffee",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Kintsu Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kintsu-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Mokum Specialty Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@mokum.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Mokum Specialty Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mokum-specialty-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Metaphor Coffee Roasters",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "metaphorcoffee@gmail.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Gina Veveriță,\n\nRevin la Metaphor Coffee Roasters: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=metaphor-coffee-roasters\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Nori Specialty Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@noricoffeeshop.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Nori Specialty Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=nori-specialty-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "True Fine Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@truefinecoffee.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la True Fine Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=true-fine-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Ecce Coffee Roasters",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "ecceroasters@gmail.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Ecce Coffee Roasters: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=ecce-coffee-roasters\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Baristas.ro",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "cafeabaristas@gmail.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Baristas.ro: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=baristas-ro\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Express Caffe",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@expresscaffe.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Express Caffe: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=express-caffe\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Urbanistic Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@urbanistic.coffee",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Urbanistic Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=urbanistic-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Habitat Coffee Studio",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "hello@ourhabitat.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Habitat Coffee Studio: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=habitat-coffee-studio\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Ch9 Specialty Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "vio@spired.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Vio Spiru,\n\nRevin la Ch9 Specialty Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=ch9-specialty-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Book Coffee Shop",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "shop@bookcoffee.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Book Coffee Shop: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=book-coffee-shop\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Mica Elvetie",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@micaelvetie.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Jakob Hausmann,\n\nRevin la Mica Elvetie: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mica-elvetie\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Minish",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "restaurant.minish@outlook.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Restaurant Minish: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-minish\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Vulturul",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@restaurantvulturul.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Restaurant Vulturul: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-vulturul\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Rispetto Cucina Italiana",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@rispettorestaurant.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Constantin Ghimpu,\n\nRevin la Rispetto Cucina Italiana: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rispetto-cucina-italiana\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "KIMU",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@kimu.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la KIMU: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kimu\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Osho Restaurant",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@osho-restaurant.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Osho Restaurant: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=osho-restaurant\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Baracca",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@baracca.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Baracca: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=baracca\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "DaVinci Ristorante",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@davinciristorante.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Oana Munteanu,\n\nRevin la DaVinci Ristorante: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=davinci-ristorante\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Kupaj Wine Bar",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@kupaj.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Kupaj Wine Bar: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kupaj-wine-bar\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "My Thai",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@mythai.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la My Thai: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=my-thai\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Nativ",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@restaurantnativ.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Restaurant Nativ: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-nativ\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Panoramic Cetățuie",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@panoramic-cluj.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Panoramic Cetățuie: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=panoramic-cet-uie\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Valahia",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@restaurant-valahia.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Restaurant Valahia: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-valahia\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Tied",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@tied.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Tied: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=tied\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Insula",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@restaurant-insula.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Restaurant Insula: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-insula\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Tassei Sushi Robata",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@tasseifamily.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Tassei Sushi Robata: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=tassei-sushi-robata\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Vinto Gastro Wine Bar",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@vinto.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Vinto Gastro Wine Bar: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=vinto-gastro-wine-bar\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Trai Restaurant",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@trairestaurant.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Trai Restaurant: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=trai-restaurant\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "FOOM",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@foom.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la FOOM: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=foom\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Creveteria",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@creveteria.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Creveteria: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=creveteria\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Conac",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@laconac-traditie.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la La Conac: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-conac\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Veranda Restaurant",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@verandarestaurant.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Veranda Restaurant: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=veranda-restaurant\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Brukenhalle",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@brukenhalle.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Brukenhalle: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=brukenhalle\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Prato",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "eat@prato.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Restaurant Prato: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-prato\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Bistro Aha",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@ahabistro.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Bistro Aha: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=bistro-aha\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Noe Patisserie",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@noe-patisserie.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Noe Patisserie: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=noe-patisserie\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Magicake",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@magicake.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Magicake: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=magicake\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Noisette Bakery",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@noisette-bakery.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Anna,\n\nRevin la Noisette Bakery: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=noisette-bakery\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "House of Cookies",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@houseofcookies.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la House of Cookies: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=house-of-cookies\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "MamaPan",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@mamapan.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la MamaPan: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mamapan\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetăria Alice",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@cofetariaalice.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Cofetăria Alice: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-alice\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Dolceria",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@ladolceria.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la La Dolceria: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-dolceria\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Leonidas Ciocolaterie Online",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@ciocolaterieonline.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Leonidas Ciocolaterie Online: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=leonidas-ciocolaterie-online\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Saveur du Levain",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@lasaveur.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la La Saveur du Levain: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-saveur-du-levain\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetaria Altfel",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@cofetariaaltfel.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Cofetaria Altfel: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-altfel\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetaria Armand",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comanda@cofetariaarmand.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Cofetaria Armand: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-armand\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetăria Naomi",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@cofetarianaomi.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Cofetăria Naomi: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-naomi\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Makis Pizza",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@makispizza.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Makis Pizza: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=makis-pizza\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Pizza Primavera",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@pizzalaprimavera.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Pizza Primavera: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=pizza-primavera\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Rikissimo",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@rikissimo.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Rikissimo: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rikissimo\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetaria Madise",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@cofetariamadise.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Cofetaria Madise: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-madise\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Dor de Dulce",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@dordedulce.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Dor de Dulce: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=dor-de-dulce\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Prăjitură din Natură",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "deliciirawvegane@gmail.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Prăjitură din Natură: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=pr-jitur-din-natur\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Wagner's Loft",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@wagnersloft.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Wagner's Loft: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=wagner-s-loft\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetaria Loren",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@cofetaria-loren.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Cofetaria Loren: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-loren\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Casa de Turtă Dulce",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@lacasadeturtadulce.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la La Casa de Turtă Dulce: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-casa-de-turt-dulce\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Nadiniere",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "lanadiniere@gmail.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la La Nadiniere: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-nadiniere\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Ganesha Caffe",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "ganeshacaffevictoriei@gmail.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Ganesha Caffe: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=ganesha-caffe\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Cocoșatu'",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@lacocosatu.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la La Cocoșatu': onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-coco-atu\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Maroon Experience",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@maroonexperience.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Maroon Experience: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=maroon-experience\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Hedone Cafe",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@hedonecafe.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Diana Nicola,\n\nRevin la Hedone Cafe: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=hedone-cafe\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Saitos Kürtőskalács",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@saitos.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Melina,\n\nRevin la Saitos Kürtőskalács: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=saitos-k-rt-skal-cs\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "IL TACCHINO",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@iltacchino.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua Bogdan Irina,\n\nRevin la IL TACCHINO: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=il-tacchino\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Teo's Cafe",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@teoscafe.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Teo's Cafe: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=teo-s-cafe\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Kafea",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@kafeabuna.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Kafea: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kafea\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Delicio Pizza",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "brasov@delicio.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Delicio Pizza: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=delicio-pizza\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "HUGO Restaurant",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari.city@hugorestaurants.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la HUGO Restaurant: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=hugo-restaurant\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Origo Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@origocoffee.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Origo Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=origo-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Stația de Cafea",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@statiadecafea.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Stația de Cafea: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=sta-ia-de-cafea\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Lex Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "shop@lexcoffe.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Lex Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=lex-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Meron",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@meron.coffee",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Meron: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=meron\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Ceaun",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@laceaun.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la La Ceaun: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-ceaun\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Brutăria cu Maia",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@brutariacumaia.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Brutăria cu Maia: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=brut-ria-cu-maia\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Brutăria Merloni",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@brutariamerloni.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Brutăria Merloni: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=brut-ria-merloni\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Brutăria MAIU",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@brutariamaiu.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Brutăria MAIU: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=brut-ria-maiu\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Narativ Coffee",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@narativcoffee.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Narativ Coffee: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=narativ-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Pizzeria Volare",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "pizzavolare@yahoo.com",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Pizzeria Volare: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=pizzeria-volare\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Reset Irish Pub",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@restaurant-reset.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Reset Irish Pub: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=reset-irish-pub\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Chopstix",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@chopstix.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Chopstix: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=chopstix\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Stradale",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@flavours.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Stradale: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=stradale\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Tip Top",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@tiptop.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Tip Top: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=tip-top\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Paul Romania",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@paul.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Paul Romania: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=paul-romania\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Simbio",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@simbio.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Simbio: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: pro (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=simbio\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Acuarela Cofetărie",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@acuarela.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Acuarela Cofetărie: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: starter (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=acuarela-cofet-rie\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Franco",
+    "step": 2,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@franco.ro",
+      "subject": "trial 15 zile",
+      "content": "Bună ziua,\n\nRevin la Franco: onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol.\n\nPlan recomandat: multi_location (de la 39€/lună, fără taxă per angajat).\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=franco\n\n— Franchise Tech\ninfo@franchisetech.ro",
+      "mailFormat": "plaintext"
+    }
+  }
+]

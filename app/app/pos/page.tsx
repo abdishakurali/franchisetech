@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { PageHint } from "@/components/app/PageHint";
 import Link from "next/link";
 import {
@@ -31,7 +32,8 @@ function formatTime(ts: string | null | undefined) {
 }
 
 export default async function PosPage() {
-  const { supabase, orgId, currency, currencySymbol, user, membership } = await getKitchenOpsContext();
+  const { countryCode, supabase, orgId, currency, currencySymbol, user, membership } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode);
   const userRole = membership.role as string;
   const canManage = canManagePos(userRole);
   // Org name for print slips
@@ -294,8 +296,8 @@ export default async function PosPage() {
               <Store className="h-7 w-7 text-slate-500" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-950">Till is closed</h1>
-              <p className="text-sm text-slate-500 mt-1">Enter your opening float to start selling.</p>
+              <h1 className="text-2xl font-bold text-slate-950">{t.pos.tillClosedTitle}</h1>
+              <p className="text-sm text-slate-500 mt-1">{t.pos.openingFloat}</p>
             </div>
           </div>
 
@@ -372,19 +374,19 @@ export default async function PosPage() {
 
           {/* Quick access when till is closed */}
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Quick access</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.pos.quickAccess}</p>
             <div className="grid grid-cols-3 gap-3">
               <Link href="/app/transactions" className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-white p-4 text-center hover:border-blue-200 transition-colors">
                 <ReceiptText className="h-5 w-5 text-blue-600" />
-                <span className="text-xs font-medium text-slate-700">Transactions</span>
+                <span className="text-xs font-medium text-slate-700">{t.pos.transactions}</span>
               </Link>
               <Link href="/app/refunds" className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-white p-4 text-center hover:border-blue-200 transition-colors">
                 <RefreshCcw className="h-5 w-5 text-orange-500" />
-                <span className="text-xs font-medium text-slate-700">Refunds</span>
+                <span className="text-xs font-medium text-slate-700">{t.pos.refunds}</span>
               </Link>
               <Link href="/app" className="flex flex-col items-center gap-2 rounded-xl border border-slate-100 bg-white p-4 text-center hover:border-blue-200 transition-colors">
                 <LayoutDashboard className="h-5 w-5 text-blue-600" />
-                <span className="text-xs font-medium text-slate-700">Dashboard</span>
+                <span className="text-xs font-medium text-slate-700">{t.pos.dashboard}</span>
               </Link>
             </div>
           </div>

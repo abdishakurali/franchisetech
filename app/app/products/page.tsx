@@ -3,16 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleEnabled } from "@/lib/business-modules";
 import { FormSelect } from "@/components/app/FormSelect";
 import { addCategory, ensurePosDefaults, deleteProducts, updateProductStock } from "@/app/actions/kitchenops";
 import { ProductsBulkTable } from "@/components/app/BulkDeleteTable";
-import { PageHint } from "@/components/app/PageHint";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 export default async function ProductsPage({ searchParams }: { searchParams?: Promise<{ q?: string; category?: string; type?: string }> }) {
-  const { supabase, orgId, currency } = await getKitchenOpsContext();
+  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode);
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const recipeVisible = isModuleEnabled(moduleFlags, "recipe_costing");
   const inventoryVisible = isModuleEnabled(moduleFlags, "inventory");
@@ -43,52 +44,51 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
   });
 
   const typeOptions = [
-    { value: "all", label: "All" },
-    { value: "pos", label: "POS items" },
+    { value: "all", label: t.products.typeAll },
+    { value: "pos", label: t.products.typePos },
     ...(inventoryVisible || recipeVisible
-      ? [{ value: "ingredient", label: "Ingredients" }]
+      ? [{ value: "ingredient", label: t.products.typeIngredient }]
       : []),
-    { value: "sellable", label: "Sellable" },
+    { value: "sellable", label: t.products.typeSellable },
   ];
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Products</h1>
-          <p className="text-sm text-slate-500">Menu items, ingredients, VAT, pricing, and stock.</p>
+          <h1 className="text-2xl font-semibold text-slate-950">{t.products.title}</h1>
+          <p className="text-sm text-slate-500">{t.products.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <a href="/api/products/export"><Button variant="outline" size="sm">Export CSV</Button></a>
-          <Link href="/app/products/import"><Button variant="outline" size="sm">Import CSV</Button></Link>
+          <a href="/api/products/export"><Button variant="outline" size="sm">{t.common.export}</Button></a>
+          <Link href="/app/products/import"><Button variant="outline" size="sm">{t.common.import}</Button></Link>
           {recipeVisible ? (
             <Link href="/app/recipes/new">
-              <Button variant="outline" size="sm">Create recipe</Button>
+              <Button variant="outline" size="sm">{t.products.createRecipe}</Button>
             </Link>
           ) : null}
           <Link href="/app/products/new">
-            <Button size="sm">Add product</Button>
+            <Button size="sm">{t.products.addProduct}</Button>
           </Link>
         </div>
       </div>
 
       {loadError && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          Products could not load: {loadError}
+          {t.products.loadError} {loadError}
         </div>
       )}
 
-      {/* Categories */}
       <details className="rounded-xl border border-slate-200 bg-white">
         <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-xl">
-          Manage categories ({categories.length})
+          {t.products.manageCategories(categories.length)}
         </summary>
         <div className="p-4 border-t">
           <form action={addCategory as unknown as (fd: FormData) => Promise<void>} className="flex flex-wrap gap-3 items-end mb-3">
-            <div><Input name="name" required placeholder="Category name" className="w-40" /></div>
+            <div><Input name="name" required placeholder={t.products.categoryName} className="w-40" /></div>
             <div><Input name="color" placeholder="#2563eb" className="w-28" /></div>
-            <div><Input name="sort_order" type="number" placeholder="Sort" className="w-20" /></div>
-            <Button type="submit" variant="outline" size="sm">Add</Button>
+            <div><Input name="sort_order" type="number" placeholder={t.products.sort} className="w-20" /></div>
+            <Button type="submit" variant="outline" size="sm">{t.common.add}</Button>
           </form>
           <div className="flex flex-wrap gap-2">
             {categories.map((c) => (
@@ -100,29 +100,28 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
         </div>
       </details>
 
-      {/* Product list with bulk select */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <CardTitle>Product list ({products.length})</CardTitle>
+            <CardTitle>{t.products.productList(products.length)}</CardTitle>
             <form className="flex flex-wrap gap-2">
-              <Input name="q" placeholder="Search" defaultValue={q} className="w-36 h-8 text-sm" />
+              <Input name="q" placeholder={t.common.search} defaultValue={q} className="w-36 h-8 text-sm" />
               <FormSelect
                 name="type"
                 defaultValue={typeFilter}
                 className="w-36"
                 options={typeOptions}
               />
-              <Button type="submit" variant="outline" size="sm" className="h-8">Filter</Button>
+              <Button type="submit" variant="outline" size="sm" className="h-8">{t.common.filter}</Button>
             </form>
           </div>
-          <p className="text-xs text-slate-400 mt-1">Check boxes to select items, then delete selected.</p>
+          <p className="text-xs text-slate-400 mt-1">{t.products.bulkHint}</p>
         </CardHeader>
         <CardContent>
           {!products.length ? (
             <div className="text-center py-10">
-              <p className="text-slate-400 mb-4">No products yet.</p>
-              <Link href="/app/products/new"><Button variant="outline">Add first product</Button></Link>
+              <p className="text-slate-400 mb-4">{t.products.empty}</p>
+              <Link href="/app/products/new"><Button variant="outline">{t.products.addFirst}</Button></Link>
             </div>
           ) : (
             <ProductsBulkTable
@@ -131,6 +130,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
               updateStockAction={inventoryVisible ? updateProductStock : undefined}
               inventoryVisible={inventoryVisible}
               recipeVisible={recipeVisible}
+              currency={currency}
             />
           )}
         </CardContent>

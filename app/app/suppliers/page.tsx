@@ -6,13 +6,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { importSuppliersCsv } from "@/app/actions/kitchenops";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 type SupplierRow = { id: string; name: string; contact_name: string | null; email: string | null; phone: string | null; active: boolean };
 type PurchaseRow = { supplier_id: string | null; total_amount: number | null };
 
 export default async function SuppliersPage() {
   await requireBusinessModule("inventory");
-  const { supabase, orgId, currency } = await getKitchenOpsContext();
+  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode);
   const [suppRes, purchRes] = await Promise.all([
     supabase.from("suppliers").select("*").eq("organisation_id", orgId).eq("active", true).order("name"),
     supabase.from("purchases").select("supplier_id,total_amount").eq("organisation_id", orgId),
@@ -29,41 +31,41 @@ export default async function SuppliersPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Suppliers</h1>
-          <p className="text-sm text-slate-500">Manage suppliers and track purchase spend by vendor.</p>
+          <h1 className="text-2xl font-semibold text-slate-950">{t.suppliers.title}</h1>
+          <p className="text-sm text-slate-500">{t.suppliers.subtitleManage}</p>
         </div>
         <div className="flex gap-2">
-          <a href="/api/suppliers/export"><Button variant="outline">Export CSV</Button></a>
-          <Link href="/app/suppliers/import"><Button variant="outline">Import CSV</Button></Link>
-          <Link href="/app/suppliers/new"><Button>Add supplier</Button></Link>
+          <a href="/api/suppliers/export"><Button variant="outline">{t.common.export}</Button></a>
+          <Link href="/app/suppliers/import"><Button variant="outline">{t.common.import}</Button></Link>
+          <Link href="/app/suppliers/new"><Button>{t.suppliers.add}</Button></Link>
         </div>
       </div>
       <details className="rounded-xl border border-slate-200 bg-white">
-        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-700">Import suppliers</summary>
+        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-700">{t.suppliers.importSuppliers}</summary>
         <form action={importSuppliersCsv as unknown as (fd: FormData) => Promise<void>} className="space-y-3 border-t p-4">
-          <a className="text-sm text-blue-600 hover:underline" href={`data:text/csv;charset=utf-8,${encodeURIComponent("name,contact_name,phone,email,address,notes\nFresh Foods,Jane Murphy,+353 1 000 0000,orders@example.ie,Dublin,Weekly delivery")}`} download="franchisetech-suppliers-template.csv">Download CSV template</a>
+          <a className="text-sm text-blue-600 hover:underline" href={`data:text/csv;charset=utf-8,${encodeURIComponent("name,contact_name,phone,email,address,notes\nFresh Foods,Jane Murphy,+353 1 000 0000,orders@example.ie,Dublin,Weekly delivery")}`} download="franchisetech-suppliers-template.csv">{t.suppliers.downloadTemplate}</a>
           <input name="csv_file" type="file" accept=".csv,text/csv" className="block text-sm" />
           <textarea name="csv_text" className="min-h-24 w-full rounded-md border border-slate-200 p-3 font-mono text-xs" placeholder="name,contact_name,phone,email,address,notes" />
-          <Button type="submit" size="sm">Import suppliers</Button>
+          <Button type="submit" size="sm">{t.suppliers.importSuppliers}</Button>
         </form>
       </details>
       <Card>
-        <CardHeader><CardTitle>Supplier list ({suppliers.length})</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t.suppliers.supplierList(suppliers.length)}</CardTitle></CardHeader>
         <CardContent>
           {!suppliers.length ? (
             <div className="text-center py-10">
-              <p className="text-slate-400 mb-4">No suppliers yet.</p>
-              <Link href="/app/suppliers/new"><Button variant="outline">Add first supplier</Button></Link>
+              <p className="text-slate-400 mb-4">{t.suppliers.empty}</p>
+              <Link href="/app/suppliers/new"><Button variant="outline">{t.suppliers.addFirst}</Button></Link>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead className="text-right">Total spend</TableHead>
+                  <TableHead>{t.tables.name}</TableHead>
+                  <TableHead>{t.suppliers.contact}</TableHead>
+                  <TableHead>{t.customers.email}</TableHead>
+                  <TableHead>{t.customers.phone}</TableHead>
+                  <TableHead className="text-right">{t.suppliers.totalSpend}</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -77,7 +79,7 @@ export default async function SuppliersPage() {
                     <TableCell className="text-right"><Link className="block" href={`/app/suppliers/${s.id}/edit`}>{formatMoney(spendBySupplier.get(s.id) ?? 0, currency)}</Link></TableCell>
                     <TableCell>
                       <Link href={`/app/suppliers/${s.id}/edit`}>
-                        <Badge variant="outline" className="cursor-pointer hover:bg-slate-50">Edit</Badge>
+                        <Badge variant="outline" className="cursor-pointer hover:bg-slate-50">{t.common.edit}</Badge>
                       </Link>
                     </TableCell>
                   </TableRow>

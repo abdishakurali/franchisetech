@@ -1,0 +1,741 @@
+[
+  {
+    "company": "Orieda",
+    "type": "partner",
+    "to": "office@orieda.ro",
+    "status": "success"
+  },
+  {
+    "company": "MDV Consulting",
+    "type": "partner",
+    "to": "office@mdvconsulting.ro",
+    "status": "success"
+  },
+  {
+    "company": "A&A Accounts",
+    "type": "partner",
+    "to": "office@accounts.ro",
+    "status": "success"
+  },
+  {
+    "company": "Contab Servicii Smart",
+    "type": "partner",
+    "to": "office@contabss.ro",
+    "status": "success"
+  },
+  {
+    "company": "Zeus Service SRL",
+    "type": "partner",
+    "to": "vanzari@zeusservice.ro",
+    "status": "success"
+  },
+  {
+    "company": "ADPOS Retail Systems",
+    "type": "partner",
+    "to": "comenzi@adpos.ro",
+    "status": "success"
+  },
+  {
+    "company": "AMEF Constalaris",
+    "type": "partner",
+    "to": "office@amef.ro",
+    "status": "success"
+  },
+  {
+    "company": "Sedona ALM",
+    "type": "partner",
+    "to": "contact@aparaturafiscala.ro",
+    "status": "success"
+  },
+  {
+    "company": "ExpertPos EconMedia",
+    "type": "partner",
+    "to": "office@econmedia.ro",
+    "status": "success"
+  },
+  {
+    "company": "Q Retail",
+    "type": "partner",
+    "to": "office@qretail.ro",
+    "status": "success"
+  },
+  {
+    "company": "Anzi Soft",
+    "type": "partner",
+    "to": "vanzari@anzisoft.ro",
+    "status": "success"
+  },
+  {
+    "company": "Vlarox Fiscal",
+    "type": "partner",
+    "to": "office@vlarox.ro",
+    "status": "success"
+  },
+  {
+    "company": "RezoSoft",
+    "type": "partner",
+    "to": "contact@rezosoft.ro",
+    "status": "success"
+  },
+  {
+    "company": "Selectsoft SRL",
+    "type": "partner",
+    "to": "contact@selectsoft.ro",
+    "status": "success"
+  },
+  {
+    "company": "tiny.ERP",
+    "type": "partner",
+    "to": "office@tinyerp.app",
+    "status": "success"
+  },
+  {
+    "company": "ExpertAccounts",
+    "type": "partner",
+    "to": "sales@expertaccounts.com",
+    "status": "success"
+  },
+  {
+    "company": "Salad Box",
+    "type": "partner",
+    "to": "contact@saladbox.ro",
+    "status": "success"
+  },
+  {
+    "company": "TED'S Coffee",
+    "type": "partner",
+    "to": "info@tedscoffeecompany.com",
+    "status": "success"
+  },
+  {
+    "company": "Tucano Coffee",
+    "type": "partner",
+    "to": "franchise@tucanocoffee.com",
+    "status": "success"
+  },
+  {
+    "company": "Hello Donuts",
+    "type": "partner",
+    "to": "office@hellodonuts.com",
+    "status": "success"
+  },
+  {
+    "company": "Beans and Dots",
+    "type": "customer",
+    "to": "hello@beansanddots.ro",
+    "status": "success"
+  },
+  {
+    "company": "Coffee Designers",
+    "type": "customer",
+    "to": "contact@coffeedesigners.ro",
+    "status": "success"
+  },
+  {
+    "company": "Uzina Coffee",
+    "type": "customer",
+    "to": "contact@uzinacoffee.ro",
+    "status": "success"
+  },
+  {
+    "company": "Arcade Cafe",
+    "type": "customer",
+    "to": "contact@arcadecafe.ro",
+    "status": "success"
+  },
+  {
+    "company": "Cafeneaua Nației",
+    "type": "customer",
+    "to": "contact@stareanatiei.ro",
+    "status": "success"
+  },
+  {
+    "company": "Madison Coffee",
+    "type": "customer",
+    "to": "hello@madisoncoffee.ro",
+    "status": "success"
+  },
+  {
+    "company": "Kestar Coffee",
+    "type": "customer",
+    "to": "info@kestarcoffee.com",
+    "status": "success"
+  },
+  {
+    "company": "Gallery Concept",
+    "type": "customer",
+    "to": "rsvp@gallery-concept.ro",
+    "status": "success"
+  },
+  {
+    "company": "Rhédey Café",
+    "type": "customer",
+    "to": "rhedeycafe@gmail.com",
+    "status": "success"
+  },
+  {
+    "company": "YUME Coffee Roasters",
+    "type": "customer",
+    "to": "info@yume.coffee",
+    "status": "success"
+  },
+  {
+    "company": "Wake Cup Coffee & Bar",
+    "type": "customer",
+    "to": "office@wake-cup.ro",
+    "status": "success"
+  },
+  {
+    "company": "Planetarium Café",
+    "type": "customer",
+    "to": "office@plani.ro",
+    "status": "success"
+  },
+  {
+    "company": "Next Quarter Coffee",
+    "type": "customer",
+    "to": "contact@nextquartercoffe.ro",
+    "status": "success"
+  },
+  {
+    "company": "Kintsu Coffee",
+    "type": "customer",
+    "to": "contact@kintsu.coffee",
+    "status": "success"
+  },
+  {
+    "company": "Mokum Specialty Coffee",
+    "type": "customer",
+    "to": "office@mokum.ro",
+    "status": "success"
+  },
+  {
+    "company": "Metaphor Coffee Roasters",
+    "type": "customer",
+    "to": "metaphorcoffee@gmail.com",
+    "status": "success"
+  },
+  {
+    "company": "Nori Specialty Coffee",
+    "type": "customer",
+    "to": "contact@noricoffeeshop.ro",
+    "status": "success"
+  },
+  {
+    "company": "True Fine Coffee",
+    "type": "customer",
+    "to": "office@truefinecoffee.ro",
+    "status": "success"
+  },
+  {
+    "company": "Ecce Coffee Roasters",
+    "type": "customer",
+    "to": "ecceroasters@gmail.com",
+    "status": "success"
+  },
+  {
+    "company": "Baristas.ro",
+    "type": "customer",
+    "to": "cafeabaristas@gmail.com",
+    "status": "success"
+  },
+  {
+    "company": "Express Caffe",
+    "type": "customer",
+    "to": "office@expresscaffe.ro",
+    "status": "success"
+  },
+  {
+    "company": "Urbanistic Coffee",
+    "type": "customer",
+    "to": "contact@urbanistic.coffee",
+    "status": "success"
+  },
+  {
+    "company": "Habitat Coffee Studio",
+    "type": "customer",
+    "to": "hello@ourhabitat.ro",
+    "status": "success"
+  },
+  {
+    "company": "Ch9 Specialty Coffee",
+    "type": "customer",
+    "to": "vio@spired.ro",
+    "status": "success"
+  },
+  {
+    "company": "Book Coffee Shop",
+    "type": "customer",
+    "to": "shop@bookcoffee.ro",
+    "status": "success"
+  },
+  {
+    "company": "Mica Elvetie",
+    "type": "customer",
+    "to": "office@micaelvetie.ro",
+    "status": "success"
+  },
+  {
+    "company": "Restaurant Minish",
+    "type": "customer",
+    "to": "restaurant.minish@outlook.com",
+    "status": "success"
+  },
+  {
+    "company": "Restaurant Vulturul",
+    "type": "customer",
+    "to": "contact@restaurantvulturul.ro",
+    "status": "success"
+  },
+  {
+    "company": "Rispetto Cucina Italiana",
+    "type": "customer",
+    "to": "rezervari@rispettorestaurant.ro",
+    "status": "success"
+  },
+  {
+    "company": "KIMU",
+    "type": "customer",
+    "to": "rezervari@kimu.ro",
+    "status": "success"
+  },
+  {
+    "company": "Osho Restaurant",
+    "type": "customer",
+    "to": "rezervari@osho-restaurant.ro",
+    "status": "success"
+  },
+  {
+    "company": "Baracca",
+    "type": "customer",
+    "to": "rezervari@baracca.ro",
+    "status": "success"
+  },
+  {
+    "company": "DaVinci Ristorante",
+    "type": "customer",
+    "to": "rezervari@davinciristorante.ro",
+    "status": "success"
+  },
+  {
+    "company": "Kupaj Wine Bar",
+    "type": "customer",
+    "to": "rezervari@kupaj.ro",
+    "status": "success"
+  },
+  {
+    "company": "My Thai",
+    "type": "customer",
+    "to": "rezervari@mythai.ro",
+    "status": "success"
+  },
+  {
+    "company": "Restaurant Nativ",
+    "type": "customer",
+    "to": "contact@restaurantnativ.ro",
+    "status": "success"
+  },
+  {
+    "company": "Panoramic Cetățuie",
+    "type": "customer",
+    "to": "office@panoramic-cluj.ro",
+    "status": "success"
+  },
+  {
+    "company": "Restaurant Valahia",
+    "type": "customer",
+    "to": "rezervari@restaurant-valahia.ro",
+    "status": "success"
+  },
+  {
+    "company": "Tied",
+    "type": "customer",
+    "to": "contact@tied.ro",
+    "status": "success"
+  },
+  {
+    "company": "Restaurant Insula",
+    "type": "customer",
+    "to": "office@restaurant-insula.ro",
+    "status": "success"
+  },
+  {
+    "company": "Tassei Sushi Robata",
+    "type": "customer",
+    "to": "office@tasseifamily.ro",
+    "status": "success"
+  },
+  {
+    "company": "Vinto Gastro Wine Bar",
+    "type": "customer",
+    "to": "office@vinto.ro",
+    "status": "success"
+  },
+  {
+    "company": "Trai Restaurant",
+    "type": "customer",
+    "to": "contact@trairestaurant.ro",
+    "status": "success"
+  },
+  {
+    "company": "FOOM",
+    "type": "customer",
+    "to": "contact@foom.ro",
+    "status": "success"
+  },
+  {
+    "company": "Creveteria",
+    "type": "customer",
+    "to": "contact@creveteria.ro",
+    "status": "success"
+  },
+  {
+    "company": "La Conac",
+    "type": "customer",
+    "to": "contact@laconac-traditie.ro",
+    "status": "success"
+  },
+  {
+    "company": "Veranda Restaurant",
+    "type": "customer",
+    "to": "contact@verandarestaurant.ro",
+    "status": "success"
+  },
+  {
+    "company": "Brukenhalle",
+    "type": "customer",
+    "to": "rezervari@brukenhalle.ro",
+    "status": "success"
+  },
+  {
+    "company": "Restaurant Prato",
+    "type": "customer",
+    "to": "eat@prato.ro",
+    "status": "success"
+  },
+  {
+    "company": "Bistro Aha",
+    "type": "customer",
+    "to": "contact@ahabistro.ro",
+    "status": "success"
+  },
+  {
+    "company": "Noe Patisserie",
+    "type": "customer",
+    "to": "comenzi@noe-patisserie.ro",
+    "status": "success"
+  },
+  {
+    "company": "Magicake",
+    "type": "customer",
+    "to": "comenzi@magicake.ro",
+    "status": "success"
+  },
+  {
+    "company": "Noisette Bakery",
+    "type": "customer",
+    "to": "contact@noisette-bakery.ro",
+    "status": "success"
+  },
+  {
+    "company": "House of Cookies",
+    "type": "customer",
+    "to": "comenzi@houseofcookies.ro",
+    "status": "success"
+  },
+  {
+    "company": "MamaPan",
+    "type": "customer",
+    "to": "comenzi@mamapan.ro",
+    "status": "success"
+  },
+  {
+    "company": "Cofetăria Alice",
+    "type": "customer",
+    "to": "office@cofetariaalice.ro",
+    "status": "success"
+  },
+  {
+    "company": "La Dolceria",
+    "type": "customer",
+    "to": "contact@ladolceria.ro",
+    "status": "success"
+  },
+  {
+    "company": "Leonidas Ciocolaterie Online",
+    "type": "customer",
+    "to": "contact@ciocolaterieonline.ro",
+    "status": "success"
+  },
+  {
+    "company": "La Saveur du Levain",
+    "type": "customer",
+    "to": "office@lasaveur.ro",
+    "status": "success"
+  },
+  {
+    "company": "Cofetaria Altfel",
+    "type": "customer",
+    "to": "office@cofetariaaltfel.ro",
+    "status": "success"
+  },
+  {
+    "company": "Cofetaria Armand",
+    "type": "customer",
+    "to": "comanda@cofetariaarmand.ro",
+    "status": "success"
+  },
+  {
+    "company": "Cofetăria Naomi",
+    "type": "customer",
+    "to": "comenzi@cofetarianaomi.ro",
+    "status": "success"
+  },
+  {
+    "company": "Makis Pizza",
+    "type": "customer",
+    "to": "comenzi@makispizza.ro",
+    "status": "success"
+  },
+  {
+    "company": "Pizza Primavera",
+    "type": "customer",
+    "to": "office@pizzalaprimavera.ro",
+    "status": "success"
+  },
+  {
+    "company": "Rikissimo",
+    "type": "customer",
+    "to": "contact@rikissimo.ro",
+    "status": "success"
+  },
+  {
+    "company": "Cofetaria Madise",
+    "type": "customer",
+    "to": "office@cofetariamadise.ro",
+    "status": "success"
+  },
+  {
+    "company": "Dor de Dulce",
+    "type": "customer",
+    "to": "comenzi@dordedulce.ro",
+    "status": "success"
+  },
+  {
+    "company": "Prăjitură din Natură",
+    "type": "customer",
+    "to": "deliciirawvegane@gmail.com",
+    "status": "success"
+  },
+  {
+    "company": "Wagner's Loft",
+    "type": "customer",
+    "to": "contact@wagnersloft.ro",
+    "status": "success"
+  },
+  {
+    "company": "Cofetaria Loren",
+    "type": "customer",
+    "to": "contact@cofetaria-loren.ro",
+    "status": "success"
+  },
+  {
+    "company": "La Casa de Turtă Dulce",
+    "type": "customer",
+    "to": "comenzi@lacasadeturtadulce.ro",
+    "status": "success"
+  },
+  {
+    "company": "La Nadiniere",
+    "type": "customer",
+    "to": "lanadiniere@gmail.com",
+    "status": "success"
+  },
+  {
+    "company": "Ganesha Caffe",
+    "type": "customer",
+    "to": "ganeshacaffevictoriei@gmail.com",
+    "status": "success"
+  },
+  {
+    "company": "La Cocoșatu'",
+    "type": "customer",
+    "to": "office@lacocosatu.ro",
+    "status": "success"
+  },
+  {
+    "company": "Maroon Experience",
+    "type": "customer",
+    "to": "office@maroonexperience.ro",
+    "status": "success"
+  },
+  {
+    "company": "Hedone Cafe",
+    "type": "customer",
+    "to": "office@hedonecafe.ro",
+    "status": "success"
+  },
+  {
+    "company": "Saitos Kürtőskalács",
+    "type": "customer",
+    "to": "office@saitos.ro",
+    "status": "success"
+  },
+  {
+    "company": "IL TACCHINO",
+    "type": "customer",
+    "to": "office@iltacchino.ro",
+    "status": "success"
+  },
+  {
+    "company": "Teo's Cafe",
+    "type": "customer",
+    "to": "contact@teoscafe.ro",
+    "status": "success"
+  },
+  {
+    "company": "Kafea",
+    "type": "customer",
+    "to": "office@kafeabuna.ro",
+    "status": "success"
+  },
+  {
+    "company": "Delicio Pizza",
+    "type": "customer",
+    "to": "brasov@delicio.ro",
+    "status": "success"
+  },
+  {
+    "company": "HUGO Restaurant",
+    "type": "customer",
+    "to": "rezervari.city@hugorestaurants.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Origo Coffee",
+    "type": "customer",
+    "to": "office@origocoffee.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Stația de Cafea",
+    "type": "customer",
+    "to": "contact@statiadecafea.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Lex Coffee",
+    "type": "customer",
+    "to": "shop@lexcoffe.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Meron",
+    "type": "customer",
+    "to": "office@meron.coffee",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "La Ceaun",
+    "type": "customer",
+    "to": "contact@laceaun.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Brutăria cu Maia",
+    "type": "customer",
+    "to": "office@brutariacumaia.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Brutăria Merloni",
+    "type": "customer",
+    "to": "contact@brutariamerloni.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Brutăria MAIU",
+    "type": "customer",
+    "to": "office@brutariamaiu.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Narativ Coffee",
+    "type": "customer",
+    "to": "comenzi@narativcoffee.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Pizzeria Volare",
+    "type": "customer",
+    "to": "pizzavolare@yahoo.com",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Reset Irish Pub",
+    "type": "customer",
+    "to": "office@restaurant-reset.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Chopstix",
+    "type": "customer",
+    "to": "office@chopstix.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Stradale",
+    "type": "customer",
+    "to": "office@flavours.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Tip Top",
+    "type": "customer",
+    "to": "office@tiptop.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Paul Romania",
+    "type": "customer",
+    "to": "contact@paul.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Simbio",
+    "type": "customer",
+    "to": "office@simbio.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Acuarela Cofetărie",
+    "type": "customer",
+    "to": "comenzi@acuarela.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  },
+  {
+    "company": "Franco",
+    "type": "customer",
+    "to": "office@franco.ro",
+    "status": "failure",
+    "error": "550 5.4.6 Unusual sending activity detected. Please try after sometime."
+  }
+]

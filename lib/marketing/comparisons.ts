@@ -229,6 +229,7 @@ export const comparisonPages: ComparisonPage[] = [
     related: [
       { label: "România", href: "/industries/romania" },
       { label: "Ghid FiscalNet", href: "/help/romania-fiscalnet" },
+      { label: "Obiecții frecvente POS", href: "/resources/objections-pos-romania" },
       { label: "Alternative Saga", href: "/compare/saga" },
       { label: "Software POS România", href: "/resources/pos-software-romania" },
     ],

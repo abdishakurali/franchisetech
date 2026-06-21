@@ -1,11 +1,13 @@
+import type { AppLocale, AppT } from "@/lib/app-i18n";
+
 /** Official Romanian finance-accounting document title (Cod 14-3-1A). */
 export const NIR_RO_TITLE = "NOTĂ DE RECEPȚIE ȘI CONSTATARE DE DIFERENȚE";
 export const NIR_RO_CODE = "14-3-1A";
 
-export function formatDateDisplay(value: string | null | undefined, isRO: boolean): string {
+export function formatDateDisplay(value: string | null | undefined, locale: AppLocale): string {
   if (!value) return "—";
   const s = String(value).slice(0, 10);
-  if (!isRO) return s;
+  if (locale !== "ro") return s;
   const [y, m, d] = s.split("-");
   if (!y || !m || !d) return s;
   return `${d}.${m}.${y}`;
@@ -123,36 +125,37 @@ export function mapNirPostRpcError(message: string | undefined): string | undefi
 }
 
 export function purchaseStatusBadge(
+  t: AppT,
   status: PurchaseStatus,
   nirNumber: string | null | undefined,
-  isRO: boolean
 ): { label: string; className: string } {
+  const s = t.purchases.status;
   if (status === "cancelled") {
     return {
-      label: isRO ? "Anulat" : "Cancelled",
+      label: s.cancelled,
       className: "text-red-600 bg-red-50 border-red-200",
     };
   }
   if (status === "draft") {
     return {
-      label: isRO ? "Ciornă" : "Draft",
+      label: s.draft,
       className: "text-amber-700 bg-amber-50 border-amber-200",
     };
   }
   if (status === "posted" && nirNumber) {
     return {
-      label: isRO ? "NIR emis" : "NIR posted",
+      label: s.nirPosted,
       className: "text-green-700 bg-green-50 border-green-200",
     };
   }
   if (status === "posted" || status === "received") {
     return {
-      label: isRO ? "Cumpărare veche / fără NIR" : "Legacy purchase / no NIR",
+      label: s.legacy,
       className: "text-slate-600 bg-slate-100 border-slate-200",
     };
   }
   return {
-    label: isRO ? "Înregistrat" : "Recorded",
+    label: s.recorded,
     className: "text-green-700 bg-green-50 border-green-200",
   };
 }

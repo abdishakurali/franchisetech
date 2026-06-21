@@ -1,0 +1,17 @@
+# Priority URLs for GSC "Request indexing" (one-time after SEO deploy)
+# Base: https://franchisetech.ro
+
+/compare
+/compare/smartbill
+/compare/saga
+/compare/rezosoft
+/compare/expressoft
+/compare/hepos
+/industries/romania
+/resources/choose-pos-romania
+/resources/pos-software-romania
+/resources/stock-management-restaurants-romania
+/resources/objections-pos-romania
+/help/romania-fiscalnet
+/partners
+/pricing

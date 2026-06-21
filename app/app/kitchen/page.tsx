@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { KitchenDisplayClient } from "@/components/app/KitchenDisplayClient";
 import { requireActiveSite } from "@/lib/site-context";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 function canManage(role: string | null | undefined) {
   return ["owner", "manager"].includes(role ?? "");
@@ -14,7 +15,8 @@ function canUpdateKitchen(role: string | null | undefined) {
 }
 
 export default async function KitchenPage() {
-  const { supabase, orgId, membership, currency } = await getKitchenOpsContext();
+  const { countryCode, supabase, orgId, membership, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode);
   const orgRow = Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations;
   const enabled = Boolean((orgRow as { kitchen_display_enabled?: boolean | null } | null)?.kitchen_display_enabled);
   const stationsEnabled = Boolean((orgRow as { kitchen_stations_enabled?: boolean | null } | null)?.kitchen_stations_enabled);
@@ -24,15 +26,13 @@ export default async function KitchenPage() {
       <div className="max-w-3xl p-4 sm:p-6">
         <Card>
           <CardHeader>
-            <CardTitle>Kitchen Display is not enabled</CardTitle>
+            <CardTitle>{t.kitchen.notEnabled}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-slate-600">
-              Kitchen Display is optional. POS works normally until an owner or manager enables it.
-            </p>
+            <p className="text-sm text-slate-600">{t.kitchen.notEnabledDesc}</p>
             {canManage(membership.role) && (
               <Link href="/app/settings?tab=features">
-                <Button>Enable in Settings</Button>
+                <Button>{t.kitchen.enableInSettings}</Button>
               </Link>
             )}
           </CardContent>
@@ -41,10 +41,8 @@ export default async function KitchenPage() {
     );
   }
 
-  // Resolve active site and check access
   const { siteId: activeSiteId } = await requireActiveSite(supabase, orgId, membership.id, membership.role);
 
-  // Fetch active orders with kitchen_station on items — scoped to active site
   const { data: orders } = await supabase
     .from("kitchen_orders")
     .select("id,order_number,status,created_at,order_type,table_label,note,kitchen_order_items(id,name,quantity,note,modifiers,unit_price,line_total,image_url,kitchen_station)")
@@ -53,7 +51,6 @@ export default async function KitchenPage() {
     .in("status", ["sent", "preparing", "ready"])
     .order("created_at", { ascending: true });
 
-  // Find which stations are actually used by products in this org (for the tab strip)
   let activeStations: string[] = [];
   if (stationsEnabled) {
     const { data: stationRows } = await supabase
@@ -69,7 +66,6 @@ export default async function KitchenPage() {
         .filter((s): s is string => Boolean(s))
     );
 
-    // Keep display order: bar → starters → mains → vegetables → desserts → cold_prep → hot_kitchen → custom
     const ORDER = ["bar","starters","mains","vegetables","desserts","cold_prep","hot_kitchen"];
     activeStations = [
       ...ORDER.filter((s) => stationSet.has(s)),
@@ -81,11 +77,11 @@ export default async function KitchenPage() {
     <div className="p-4 sm:p-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Kitchen Display</h1>
-          <p className="mt-1 text-sm text-slate-500">Orders created after Kitchen Display was enabled appear here.</p>
+          <h1 className="text-2xl font-semibold text-slate-950">{t.kitchen.title}</h1>
+          <p className="mt-1 text-sm text-slate-500">{t.kitchen.ordersDesc}</p>
         </div>
         <Link href="/app/settings?tab=features">
-          <Button variant="outline">Feature settings</Button>
+          <Button variant="outline">{t.kitchen.featureSettings}</Button>
         </Link>
       </div>
       <KitchenDisplayClient

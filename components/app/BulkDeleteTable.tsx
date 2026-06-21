@@ -5,9 +5,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-function fmt(v: number) { return new Intl.NumberFormat("en-IE",{style:"currency",currency:"EUR"}).format(v); }
-
 import { Trash2, Loader2 } from "lucide-react";
+import { useAppI18n } from "@/lib/app-i18n-context";
+
+function fmt(v: number, currency = "EUR") {
+  const n = Number(v ?? 0);
+  if (currency === "RON") return `${n.toFixed(2)} lei`;
+  return new Intl.NumberFormat("en-IE", { style: "currency", currency: currency || "EUR" }).format(n);
+}
 
 type Product = {
   id: string; name: string; sale_price: number | null; cost_price: number | null;
@@ -17,7 +22,7 @@ type Product = {
   product_categories: { name: string } | null;
 };
 
-function StockCell({ product, updateStock }: { product: Product; updateStock?: (fd: FormData) => Promise<void> }) {
+function StockCell({ product, updateStock, clickHint }: { product: Product; updateStock?: (fd: FormData) => Promise<void>; clickHint: string }) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [val, setVal] = useState(String(product.current_stock_qty ?? 0));
@@ -31,7 +36,7 @@ function StockCell({ product, updateStock }: { product: Product; updateStock?: (
         type="button"
         onClick={() => setEditing(true)}
         className="tabular-nums text-sm rounded px-1 hover:bg-blue-50 hover:text-blue-700 transition-colors"
-        title="Click to update stock"
+        title={clickHint}
       >
         {product.current_stock_qty ?? 0}
       </button>
@@ -76,13 +81,16 @@ export function ProductsBulkTable({
   updateStockAction,
   inventoryVisible = true,
   recipeVisible = true,
+  currency = "EUR",
 }: {
   products: Product[];
   deleteAction: (ids: string[]) => Promise<void>;
   updateStockAction?: (fd: FormData) => Promise<void>;
   inventoryVisible?: boolean;
   recipeVisible?: boolean;
+  currency?: string;
 }) {
+  const { t } = useAppI18n();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
 
@@ -104,7 +112,7 @@ export function ProductsBulkTable({
 
   async function handleDelete() {
     if (!selected.size) return;
-    if (!confirm(`Delete ${selected.size} product${selected.size !== 1 ? "s" : ""}? This cannot be undone.`)) return;
+    if (!confirm(t.tables.deleteConfirm(selected.size))) return;
     setDeleting(true);
     try {
       await deleteAction([...selected]);
@@ -118,7 +126,7 @@ export function ProductsBulkTable({
     <div>
       {selected.size > 0 && (
         <div className="flex items-center gap-3 mb-3 px-1">
-          <span className="text-sm font-medium text-slate-700">{selected.size} selected</span>
+          <span className="text-sm font-medium text-slate-700">{t.common.selected(selected.size)}</span>
           <Button
             variant="outline"
             size="sm"
@@ -127,10 +135,10 @@ export function ProductsBulkTable({
             className="border-red-200 text-red-600 hover:bg-red-50 h-8"
           >
             {deleting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 mr-1.5" />}
-            Delete selected
+            {t.tables.deleteSelected}
           </Button>
           <button className="text-xs text-slate-400 hover:text-slate-600" onClick={() => setSelected(new Set())}>
-            Clear selection
+            {t.common.clearSelection}
           </button>
         </div>
       )}
@@ -144,16 +152,16 @@ export function ProductsBulkTable({
                   checked={allSelected}
                   onChange={toggleAll}
                   className="h-4 w-4 accent-blue-600 cursor-pointer"
-                  title="Select all"
+                  title={t.common.selectAll}
                 />
               </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead className="text-right">Price</TableHead>
-              <TableHead className="text-right">Cost</TableHead>
-              <TableHead>VAT</TableHead>
-              <TableHead>Type</TableHead>
-              {inventoryVisible ? <TableHead className="text-right">Stock</TableHead> : null}
+              <TableHead>{t.tables.name}</TableHead>
+              <TableHead>{t.tables.category}</TableHead>
+              <TableHead className="text-right">{t.tables.price}</TableHead>
+              <TableHead className="text-right">{t.tables.cost}</TableHead>
+              <TableHead>{t.tables.vat}</TableHead>
+              <TableHead>{t.tables.type}</TableHead>
+              {inventoryVisible ? <TableHead className="text-right">{t.tables.stock}</TableHead> : null}
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -181,40 +189,41 @@ export function ProductsBulkTable({
                     )}
                     <div>
                       <Link href={`/app/products/${p.id}`} onClick={(e) => e.stopPropagation()} className="hover:text-blue-600 hover:underline">
-                        {p.name || "Untitled product"}
+                        {p.name || t.common.untitled}
                       </Link>
                       {p.available_in_pos === false && (
-                        <span className="ml-2 text-xs text-slate-400">not in POS</span>
+                        <span className="ml-2 text-xs text-slate-400">{t.common.notInPos}</span>
                       )}
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-right tabular-nums">{fmt(Number(p.sale_price ?? 0))}</TableCell>
+                <TableCell className="text-sm text-slate-600">{p.product_categories?.name ?? "—"}</TableCell>
+                <TableCell className="text-right tabular-nums">{fmt(Number(p.sale_price ?? 0), currency)}</TableCell>
                 <TableCell className="text-right tabular-nums">
-                  {p.cost_price ? fmt(Number(p.cost_price)) : "—"}
+                  {p.cost_price ? fmt(Number(p.cost_price), currency) : "—"}
                 </TableCell>
                 <TableCell className="text-sm">{p.vat_rate ?? 0}%</TableCell>
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     {p.available_in_pos !== false && (
-                      <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700">POS</Badge>
+                      <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700">{t.badges.pos}</Badge>
                     )}
                     {recipeVisible && p.is_ingredient && (
-                      <Badge variant="outline" className="text-xs">Ingredient</Badge>
+                      <Badge variant="outline" className="text-xs">{t.badges.ingredient}</Badge>
                     )}
                     {inventoryVisible && p.is_stock_tracked && (
-                      <Badge variant="outline" className="text-xs">Stock</Badge>
+                      <Badge variant="outline" className="text-xs">{t.badges.stock}</Badge>
                     )}
                   </div>
                 </TableCell>
                 {inventoryVisible ? (
                   <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <StockCell product={p} updateStock={updateStockAction} />
+                    <StockCell product={p} updateStock={updateStockAction} clickHint={t.tables.clickUpdateStock} />
                   </TableCell>
                 ) : null}
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <Link href={`/app/products/${p.id}/edit`}>
-                    <Button variant="outline" size="sm" className="h-7 text-xs">Edit</Button>
+                    <Button variant="outline" size="sm" className="h-7 text-xs">{t.common.edit}</Button>
                   </Link>
                 </TableCell>
               </TableRow>

@@ -1,0 +1,100 @@
+[
+  {
+    "company": "Zeus Service SRL",
+    "type": "partner",
+    "to": "vanzari@zeusservice.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "ADPOS Retail Systems",
+    "type": "partner",
+    "to": "comenzi@adpos.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "AMEF Constalaris",
+    "type": "partner",
+    "to": "office@amef.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Sedona ALM",
+    "type": "partner",
+    "to": "contact@aparaturafiscala.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Wake Cup Coffee & Bar",
+    "type": "customer",
+    "to": "office@wake-cup.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Planetarium Café",
+    "type": "customer",
+    "to": "office@plani.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Next Quarter Coffee",
+    "type": "customer",
+    "to": "contact@nextquartercoffe.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Kintsu Coffee",
+    "type": "customer",
+    "to": "contact@kintsu.coffee",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Mokum Specialty Coffee",
+    "type": "customer",
+    "to": "office@mokum.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Metaphor Coffee Roasters",
+    "type": "customer",
+    "to": "metaphorcoffee@gmail.com",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Nori Specialty Coffee",
+    "type": "customer",
+    "to": "contact@noricoffeeshop.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "True Fine Coffee",
+    "type": "customer",
+    "to": "office@truefinecoffee.ro",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Ecce Coffee Roasters",
+    "type": "customer",
+    "to": "ecceroasters@gmail.com",
+    "step": 1,
+    "status": "success"
+  },
+  {
+    "company": "Baristas.ro",
+    "type": "customer",
+    "to": "cafeabaristas@gmail.com",
+    "step": 1,
+    "status": "success"
+  }
+]

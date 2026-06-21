@@ -4,7 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { PrintButton } from "@/components/app/PrintButton";
 import { ZReportCashForm } from "@/components/app/ZReportCashForm";
 import { GrowthReportViewTracker } from "@/components/app/GrowthReportViewTracker";
+import { ZReportReferralNudge } from "@/components/app/ZReportReferralNudge";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { ensureReferralCode } from "@/lib/referrals";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 function firstJoined<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
@@ -96,9 +99,21 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
   const generatedAt = new Intl.DateTimeFormat("en-IE", { dateStyle: "medium", timeStyle: "short" }).format(new Date());
   const { data: profile } = await supabase.from("profiles").select("full_name,email").eq("id", user.id).single();
   const generatedBy = profile?.full_name || profile?.email || user.email || "Unknown";
+  const referral = await ensureReferralCode(orgId).catch(() => ({
+    available: false,
+    link: null as string | null,
+  }));
+  const showReferralNudge = completedTx.length > 0 && Boolean(referral.link);
   return (
     <div className="space-y-6 p-6">
       <GrowthReportViewTracker />
+      {referral.link && (
+        <ZReportReferralNudge
+          orgId={orgId}
+          referralLink={referral.link}
+          show={showReferralNudge}
+        />
+      )}
       <div className="flex items-center justify-between gap-4 flex-wrap print:hidden">
         <div>
           <h1 className="text-2xl font-semibold text-slate-950">{zp.title}</h1>
@@ -133,9 +148,9 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
       {totalTips > 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <div className="flex flex-wrap gap-8 text-sm">
-            <div><p className="text-slate-500">Gross sales excl. tips</p><p className="text-xl font-semibold text-slate-900">{formatMoney(grossExTips, currency)}</p></div>
-            <div><p className="text-slate-500">Tips collected</p><p className="text-xl font-semibold text-amber-700">{formatMoney(totalTips, currency)}</p></div>
-            <div><p className="text-slate-500">Total collected</p><p className="text-xl font-bold text-slate-900">{formatMoney(totalGross, currency)}</p></div>
+            <div><p className="text-slate-500">{t.reportPages.sales.grossExTipsShort}</p><p className="text-xl font-semibold text-slate-900">{formatMoney(grossExTips, currency)}</p></div>
+            <div><p className="text-slate-500">{t.reportPages.sales.tipsCollected}</p><p className="text-xl font-semibold text-amber-700">{formatMoney(totalTips, currency)}</p></div>
+            <div><p className="text-slate-500">{t.reportPages.sales.totalCollected}</p><p className="text-xl font-bold text-slate-900">{formatMoney(totalGross, currency)}</p></div>
           </div>
         </div>
       )}
@@ -143,30 +158,30 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Payment breakdown */}
         <Card>
-          <CardHeader><CardTitle>Payment breakdown</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{zp.paymentBreakdown}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">Cash</span><strong>{formatMoney(cashTotal, currency)}</strong></div>
-            <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">Card</span><strong>{formatMoney(cardTotal, currency)}</strong></div>
-            <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">Online</span><strong>{formatMoney(onlineTotal, currency)}</strong></div>
-            {otherTotal > 0 && <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">Other</span><strong>{formatMoney(otherTotal, currency)}</strong></div>}
-            <div className="flex justify-between py-2 text-base font-bold"><span>Total collected</span><span>{formatMoney(totalGross, currency)}</span></div>
+            <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">{t.common.cash}</span><strong>{formatMoney(cashTotal, currency)}</strong></div>
+            <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">{t.common.card}</span><strong>{formatMoney(cardTotal, currency)}</strong></div>
+            <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">{zp.online}</span><strong>{formatMoney(onlineTotal, currency)}</strong></div>
+            {otherTotal > 0 && <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">{zp.other}</span><strong>{formatMoney(otherTotal, currency)}</strong></div>}
+            <div className="flex justify-between py-2 text-base font-bold"><span>{t.reportPages.sales.totalCollected}</span><span>{formatMoney(totalGross, currency)}</span></div>
           </CardContent>
         </Card>
 
         {/* VAT breakdown */}
         <Card>
-          <CardHeader><CardTitle>VAT breakdown</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{zp.vatBreakdown}</CardTitle></CardHeader>
           <CardContent>
             {vatByRate.size === 0 ? (
-              <p className="text-sm text-slate-400">No VAT data for this date.</p>
+              <p className="text-sm text-slate-400">{zp.noVatData}</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Rate</TableHead>
-                    <TableHead className="text-right">Net</TableHead>
-                    <TableHead className="text-right">VAT</TableHead>
-                    <TableHead className="text-right">Gross</TableHead>
+                    <TableHead>{zp.rate}</TableHead>
+                    <TableHead className="text-right">{t.tables.net}</TableHead>
+                    <TableHead className="text-right">{t.tables.vat}</TableHead>
+                    <TableHead className="text-right">{t.tables.gross}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -187,20 +202,20 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
 
       {/* Void / refund count */}
       <Card>
-        <CardHeader><CardTitle>Adjustments</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{zp.adjustments}</CardTitle></CardHeader>
         <CardContent className="flex gap-8 text-sm">
-          <div><p className="text-slate-500">Voids</p><p className="text-xl font-bold text-red-600">{voidedTx.length}</p></div>
-          <div><p className="text-slate-500">Refunds</p><p className="text-xl font-bold text-amber-600">0 <span className="text-sm font-normal text-slate-400">(coming soon)</span></p></div>
+          <div><p className="text-slate-500">{zp.voids}</p><p className="text-xl font-bold text-red-600">{voidedTx.length}</p></div>
+          <div><p className="text-slate-500">{zp.refunds}</p><p className="text-xl font-bold text-amber-600">0 <span className="text-sm font-normal text-slate-400">{zp.comingSoon}</span></p></div>
         </CardContent>
       </Card>
 
       {/* Top products */}
       {topProducts.length > 0 && (
         <Card>
-          <CardHeader><CardTitle>Top products</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{zp.topProducts}</CardTitle></CardHeader>
           <CardContent>
             <Table>
-              <TableHeader><TableRow><TableHead>Product</TableHead><TableHead className="text-right">Total</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>{t.tables.product}</TableHead><TableHead className="text-right">{t.tables.total}</TableHead></TableRow></TableHeader>
               <TableBody>
                 {topProducts.map(([name, total]) => (
                   <TableRow key={name}><TableCell>{name}</TableCell><TableCell className="text-right font-medium">{formatMoney(total, currency)}</TableCell></TableRow>
@@ -215,26 +230,26 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
       {(cashMovements ?? []).length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Cash movements</CardTitle>
+            <CardTitle>{zp.cashMovements}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='grid grid-cols-2 gap-4 mb-4'>
               <div className='rounded-lg bg-green-50 border border-green-200 p-3'>
-                <p className='text-xs text-slate-500'>Cash in (total)</p>
+                <p className='text-xs text-slate-500'>{zp.cashInTotal}</p>
                 <p className='text-xl font-bold text-green-700'>{formatMoney(cashInTotal, currency)}</p>
               </div>
               <div className='rounded-lg bg-red-50 border border-red-200 p-3'>
-                <p className='text-xs text-slate-500'>Cash out (total)</p>
+                <p className='text-xs text-slate-500'>{zp.cashOutTotal}</p>
                 <p className='text-xl font-bold text-red-600'>{formatMoney(cashOutTotal, currency)}</p>
               </div>
             </div>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead className='text-right'>Amount</TableHead>
+                  <TableHead>{zp.type}</TableHead>
+                  <TableHead>{zp.reason}</TableHead>
+                  <TableHead>{zp.time}</TableHead>
+                  <TableHead className='text-right'>{t.tables.amount}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -242,7 +257,7 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
                   <TableRow key={m.id}>
                     <TableCell>
                       <span className={m.movement_type === 'cash_in' ? 'text-green-700 font-medium' : 'text-red-600 font-medium'}>
-                        {m.movement_type === 'cash_in' ? '+ Cash in' : '− Cash out'}
+                        {m.movement_type === 'cash_in' ? zp.cashIn : zp.cashOut}
                       </span>
                     </TableCell>
                     <TableCell className='text-slate-600'>{m.reason ?? '—'}</TableCell>
@@ -265,18 +280,18 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
 
       {/* Manager sign-off */}
       <Card className="print:block">
-        <CardHeader><CardTitle>Manager sign-off</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{zp.managerSignoff}</CardTitle></CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-8 mt-4 text-sm print:grid-cols-2">
             <div>
-              <p className="text-slate-500 mb-8">Manager signature</p>
+              <p className="text-slate-500 mb-8">{zp.managerSignature}</p>
               <div className="border-b border-slate-400 w-full" />
-              <p className="text-slate-400 mt-2">Name / Date</p>
+              <p className="text-slate-400 mt-2">{zp.nameDate}</p>
             </div>
             <div>
-              <p className="text-slate-500 mb-8">Counted by</p>
+              <p className="text-slate-500 mb-8">{zp.countedBy}</p>
               <div className="border-b border-slate-400 w-full" />
-              <p className="text-slate-400 mt-2">Name / Date</p>
+              <p className="text-slate-400 mt-2">{zp.nameDate}</p>
             </div>
           </div>
         </CardContent>

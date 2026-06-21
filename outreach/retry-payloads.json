@@ -1,0 +1,287 @@
+[
+  {
+    "type": "customer",
+    "company": "HUGO Restaurant",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "rezervari.city@hugorestaurants.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nHUGO City și Bulevard au rezervări separate — POS multi-locație ar compara ocuparea sălii pe seri.\n\nMulte unități ca HUGO Restaurant încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=hugo-restaurant\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Origo Coffee",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@origocoffee.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nOrigo are Lipscani Dorobanți și prăjitorie Cernica — POS pe locație ar separa bar de academy fără Excel.\n\nMulte unități ca Origo Coffee încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=origo-coffee\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Stația de Cafea",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "contact@statiadecafea.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nStația de Cafea pe Revoluției și Vox Park au programe diferite — POS cu clock-in per locație ar simplifica turele.\n\nMulte unități ca Stația de Cafea încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=sta-ia-de-cafea\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Lex Coffee",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "shop@lexcoffe.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nLex Coffee a deschis a doua locație în Timișoara — POS comparativ ar arăta care unitate iese pe plus.\n\nMulte unități ca Lex Coffee încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=lex-coffee\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Meron",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@meron.coffee",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nMeron e prăjitorie și lanț café din Cluj — POS wholesale + retail ar lega comenzile HoReCa de producție.\n\nMulte unități ca Meron încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=meron\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Ceaun",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "contact@laceaun.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nLa Ceaun pe Sfatului și Weiss umple prânzurile — POS cu alertă ocupare ar balansa clienții între locații.\n\nMulte unități ca La Ceaun încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=la-ceaun\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Brutăria cu Maia",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@brutariacumaia.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nBrutăria cu Maia pe Câmpeanu și Taberei coace pe comandă — inventar POS per locație ar opri overselling-ul.\n\nMulte unități ca Brutăria cu Maia încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=brut-ria-cu-maia\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Brutăria Merloni",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "contact@brutariamerloni.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nMerloni pe Vâlcea 17 și Afumați preia comenzi speciale pe WhatsApp — POS le-ar transforma în comenzi urmărite.\n\nMulte unități ca Brutăria Merloni încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=brut-ria-merloni\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Brutăria MAIU",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@brutariamaiu.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nMAIU pe Foișorului și Goga vinde pâine artizanală — POS multi-shop ar arata care cartier consumă mai mult.\n\nMulte unități ca Brutăria MAIU încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=brut-ria-maiu\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Narativ Coffee",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "comenzi@narativcoffee.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nNarativ pe Titulescu și Regele Mihai vinde specialty — inventar boabe sincronizat ar evita ruptura la weekend.\n\nMulte unități ca Narativ Coffee încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=narativ-coffee\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Pizzeria Volare",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "pizzavolare@yahoo.com",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nVolare cu Piccola Allegro și Natura folosește app — POS in-store aliniat cu app ar elimina dublarea comenzilor.\n\nMulte unități ca Pizzeria Volare încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=pizzeria-volare\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Reset Irish Pub",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@restaurant-reset.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nReset operează Irish Pub și Scuar în Brăila — POS pe locație ar compara veniturile pe concept.\n\nMulte unități ca Reset Irish Pub încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=reset-irish-pub\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Chopstix",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@chopstix.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nChopstix cu 22+ locații în food court-uri — POS central cu meniu master ar simplifica update-urile de preț.\n\nMulte unități ca Chopstix încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=chopstix\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Stradale",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@flavours.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nStradale e în S-Park J8 și Hexagon — POS lanț ar compara vânzările café per clădire office.\n\nMulte unități ca Stradale încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=stradale\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Tip Top",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@tiptop.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nTip Top livrează patiserie din 1993 — POS modern per magazin ar accelera reconcilierea cu Takeaway.\n\nMulte unități ca Tip Top încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=tip-top\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Paul Romania",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "contact@paul.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nPaul servește corporate și retail — POS multi-locație ar alinia rapoartele Z pe toate unitățile.\n\nMulte unități ca Paul Romania încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=paul-romania\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Simbio",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@simbio.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nSimbio pe Negustori livrează organic — POS cu rețete ar proteja marja pe meniul sezonier.\n\nMulte unități ca Simbio încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=simbio\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Acuarela Cofetărie",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "comenzi@acuarela.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nAcuarela face torturi la comandă — POS comenzi cu dată livrare ar reduce comenzile ratate.\n\nMulte unități ca Acuarela Cofetărie încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=acuarela-cofet-rie\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Franco",
+    "step": 1,
+    "path_variables": {
+      "accountId": "6147765000000002002"
+    },
+    "body": {
+      "fromAddress": "info@garaad.org",
+      "toAddress": "office@franco.ro",
+      "subject": "casa după program",
+      "content": "Bună ziua,\n\nFranco operează mai multe trattorii — raport POS central ar compara performanța pe locație.\n\nMulte unități ca Franco încă închid ziua cu numere care nu se potrivesc cu sertarul. franchisetech leagă POS, stoc și raport Z într-un singur loc — trial asistat 15 zile, fără card pentru deschiderea casei, personal nelimitat.\n\nV-ar fi util să vedeți cum arată pentru locația voastră?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2&utm_content=franco\n\n— franchisetech\nhello@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  }
+]

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { cancelPurchase, postNirPurchase } from "@/app/actions/kitchenops";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import {
   formatDateDisplay,
   isPurchaseLocked,
@@ -19,10 +20,6 @@ function money(v: number, cur = "EUR") {
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: cur || "EUR" }).format(v);
 }
 
-function dateOnly(value: string | null | undefined, isRO: boolean) {
-  return formatDateDisplay(value, isRO);
-}
-
 export default async function PurchaseDetailPage({
   params,
   searchParams,
@@ -32,9 +29,11 @@ export default async function PurchaseDetailPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const { supabase, orgId, membership, currency } = await getKitchenOpsContext();
-  const isRO = currency === "RON";
-  const taxLabel = isRO ? "TVA" : "VAT";
+  const { countryCode, supabase, orgId, membership, currency } = await getKitchenOpsContext();
+  const { locale, t } = await getAppLocaleAndText(countryCode);
+  const d = t.purchases.detail;
+  const f = t.purchases.form;
+  const taxLabel = f.vat;
 
   const { data: purchase } = await supabase
     .from("purchases")
@@ -70,9 +69,9 @@ export default async function PurchaseDetailPage({
   const canManage = ["owner", "manager"].includes(membership.role ?? "");
   const isDraft = purchase.status === "draft";
   const locked = isPurchaseLocked(purchase.status, purchase.posted_at);
-  const badge = purchaseStatusBadge(purchase.status, purchase.nir_number, isRO);
-  const dateStr = dateOnly(purchase.purchase_date ?? purchase.purchased_at, isRO);
-  const supplierName = (purchase.suppliers as { name?: string } | null)?.name ?? (isRO ? "Direct" : "Direct");
+  const badge = purchaseStatusBadge(t, purchase.status, purchase.nir_number);
+  const dateStr = formatDateDisplay(purchase.purchase_date ?? purchase.purchased_at, locale);
+  const supplierName = (purchase.suppliers as { name?: string } | null)?.name ?? d.direct;
   const invoiceNo = purchase.invoice_number ?? purchase.reference;
 
   type PurchaseItem = {
@@ -93,24 +92,30 @@ export default async function PurchaseDetailPage({
   const grossTotal = Number(purchase.total_amount ?? netTotal + taxTotal);
 
   const errorMsg = query.error === "already_posted"
-    ? (isRO ? "NIR-ul a fost deja emis." : "This NIR was already posted.")
+    ? d.errors.alreadyPosted
     : query.error === "cannot_cancel"
-      ? (isRO ? "Doar ciornele pot fi anulate." : "Only drafts can be cancelled.")
+      ? d.errors.cannotCancel
       : query.error === "nir_number"
-        ? (isRO ? "Nu s-a putut genera numărul NIR. Verificați migrarea 037." : "Could not generate NIR number. Check migration 037.")
+        ? d.errors.nirNumber
         : null;
+
+  const printTitle = purchase.nir_number
+    ? locale === "ro"
+      ? NIR_RO_TITLE
+      : d.printTitleWithNir
+    : d.printTitleLegacyFull;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6 print:max-w-none print:p-4">
       <div className="flex items-start justify-between gap-4 print:hidden">
         <div>
           <Link href="/app/purchases" className="text-sm text-slate-500 hover:text-slate-700">
-            ← {isRO ? "Cumpărături" : "Purchases"}
+            ← {t.nav.purchases}
           </Link>
           <h1 className="text-2xl font-semibold text-slate-950 mt-1">
-            {purchase.nir_number ?? (isRO ? "Cumpărare" : "Purchase")}
+            {purchase.nir_number ?? d.purchase}
           </h1>
-          {isRO && purchase.nir_number && (
+          {locale === "ro" && purchase.nir_number && (
             <p className="text-xs text-slate-500 mt-1">
               {NIR_RO_TITLE} · Cod {NIR_RO_CODE}
             </p>
@@ -123,12 +128,12 @@ export default async function PurchaseDetailPage({
         <div className="flex flex-wrap gap-2 justify-end">
           {(purchase.status === "posted" || purchase.status === "received") && (
             <Link href={`/app/purchases/${id}/print`}>
-              <Button variant="outline">{isRO ? "Tipărește NIR" : "Print NIR"}</Button>
+              <Button variant="outline">{d.printNir}</Button>
             </Link>
           )}
           {canManage && isDraft && (
             <Link href={`/app/purchases/${id}/edit`}>
-              <Button variant="outline">{isRO ? "Editează ciorna" : "Edit draft"}</Button>
+              <Button variant="outline">{d.editDraft}</Button>
             </Link>
           )}
         </div>
@@ -136,7 +141,7 @@ export default async function PurchaseDetailPage({
 
       {query.posted === "1" && (
         <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 print:hidden">
-          {isRO ? "NIR emis cu succes. Stocul a fost actualizat." : "NIR posted successfully. Stock has been updated."}
+          {d.postedSuccess}
         </div>
       )}
       {errorMsg && (
@@ -145,87 +150,79 @@ export default async function PurchaseDetailPage({
 
       <div id="nir-print-area" className="space-y-6">
         <div className="hidden print:block border-b pb-4 mb-2">
-          <h1 className="text-xl font-bold">
-            {isRO
-              ? purchase.nir_number
-                ? NIR_RO_TITLE
-                : "Notă de recepție marfă (cumpărare veche)"
-              : purchase.nir_number
-                ? "Goods Receiving Note (NIR)"
-                : "Legacy purchase receipt"}
-          </h1>
+          <h1 className="text-xl font-bold">{printTitle}</h1>
           {purchase.nir_number && <p className="text-lg font-semibold mt-1">{purchase.nir_number}</p>}
         </div>
 
         <Card className="print:shadow-none print:border-slate-300">
           <CardHeader className="print:pb-2">
-            <CardTitle>{isRO ? "Detalii NIR" : "NIR details"}</CardTitle>
+            <CardTitle>{d.detailsTitle}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {purchase.nir_number && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Nr. NIR" : "NIR number"}</p>
+                  <p className="text-xs text-slate-400 mb-0.5">{t.tables.nirNo}</p>
                   <p className="font-medium text-slate-900">{purchase.nir_number}</p>
                 </div>
               )}
               <div>
-                <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Data NIR" : "NIR date"}</p>
-                <p className="font-medium text-slate-900">{dateOnly(purchase.nir_date ?? purchase.purchase_date, isRO)}</p>
+                <p className="text-xs text-slate-400 mb-0.5">{f.nirDate}</p>
+                <p className="font-medium text-slate-900">{formatDateDisplay(purchase.nir_date ?? purchase.purchase_date, locale)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Furnizor" : "Supplier"}</p>
+                <p className="text-xs text-slate-400 mb-0.5">{f.supplier}</p>
                 <p className="font-medium text-slate-900">{supplierName}</p>
               </div>
               {invoiceNo && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Nr. factură furnizor" : "Supplier invoice no."}</p>
+                  <p className="text-xs text-slate-400 mb-0.5">{f.invoiceNo}</p>
                   <p className="font-medium text-slate-900">{invoiceNo}</p>
                 </div>
               )}
               {purchase.supplier_invoice_date && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Data factură" : "Invoice date"}</p>
-                  <p className="font-medium text-slate-900">{dateOnly(purchase.supplier_invoice_date, isRO)}</p>
+                  <p className="text-xs text-slate-400 mb-0.5">{f.invoiceDate}</p>
+                  <p className="font-medium text-slate-900">{formatDateDisplay(purchase.supplier_invoice_date, locale)}</p>
                 </div>
               )}
               {siteName && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Gestiune / Locație" : "Location"}</p>
+                  <p className="text-xs text-slate-400 mb-0.5">{f.site}</p>
                   <p className="font-medium text-slate-900">{siteName}</p>
                 </div>
               )}
               {receivedByName && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Recepționat de" : "Received by"}</p>
+                  <p className="text-xs text-slate-400 mb-0.5">{d.receivedBy}</p>
                   <p className="font-medium text-slate-900">{receivedByName}</p>
                 </div>
               )}
               {postedByName && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{isRO ? "Emis de" : "Posted by"}</p>
+                  <p className="text-xs text-slate-400 mb-0.5">{d.postedBy}</p>
                   <p className="font-medium text-slate-900">{postedByName}</p>
                 </div>
               )}
             </div>
             {(purchase.notes || isDraft) && (
               <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
-                <p className="text-xs text-slate-400 mb-1">{isRO ? "Observații / diferențe" : "Observations / differences"}</p>
-                <p className="text-slate-700">{purchase.notes || (isRO ? "—" : "—")}</p>
+                <p className="text-xs text-slate-400 mb-1">{d.observations}</p>
+                <p className="text-slate-700">{purchase.notes || "—"}</p>
               </div>
             )}
 
             <div className="grid grid-cols-3 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
               <div>
-                <p className="text-xs text-slate-400">{isRO ? "Total net" : "Net total"}</p>
+                <p className="text-xs text-slate-400">{d.netTotal}</p>
                 <p className="font-semibold text-slate-900">{money(netTotal, currency)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">{isRO ? `Total ${taxLabel}` : `Total ${taxLabel}`}</p>
+                <p className="text-xs text-slate-400">{`Total ${taxLabel}`}</p>
                 <p className="font-semibold text-slate-900">{money(taxTotal, currency)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">{isRO ? "Total brut" : "Gross total"}</p>
+                <p className="text-xs text-slate-400">{d.grossTotal}</p>
                 <p className="font-semibold text-slate-900">{money(grossTotal, currency)}</p>
               </div>
             </div>
@@ -234,22 +231,22 @@ export default async function PurchaseDetailPage({
 
         <Card className="print:shadow-none print:border-slate-300">
           <CardHeader className="print:pb-2">
-            <CardTitle>{isRO ? "Articole primite" : "Received items"} ({items.length})</CardTitle>
+            <CardTitle>{d.receivedItems} ({items.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {!items.length ? (
-              <p className="text-sm text-slate-400">{isRO ? "Niciun articol." : "No items recorded."}</p>
+              <p className="text-sm text-slate-400">{d.noItems}</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{isRO ? "Articol" : "Item"}</TableHead>
-                    <TableHead className="text-right">{isRO ? "Cantitate" : "Qty"}</TableHead>
-                    <TableHead className="text-right">{isRO ? "Cost net" : "Net cost"}</TableHead>
+                    <TableHead>{d.item}</TableHead>
+                    <TableHead className="text-right">{f.qty}</TableHead>
+                    <TableHead className="text-right">{d.netCost}</TableHead>
                     <TableHead className="text-right">{taxLabel} %</TableHead>
-                    <TableHead className="text-right">{isRO ? "Total net" : "Net total"}</TableHead>
+                    <TableHead className="text-right">{d.netTotal}</TableHead>
                     <TableHead className="text-right">{taxLabel}</TableHead>
-                    <TableHead className="text-right">{isRO ? "Total brut" : "Gross"}</TableHead>
+                    <TableHead className="text-right">{t.purchases.gross}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -277,7 +274,7 @@ export default async function PurchaseDetailPage({
                     );
                   })}
                   <TableRow className="border-t-2 font-semibold">
-                    <TableCell colSpan={4} className="text-right text-slate-600">{isRO ? "Total net" : "Net total"}</TableCell>
+                    <TableCell colSpan={4} className="text-right text-slate-600">{d.netTotal}</TableCell>
                     <TableCell className="text-right">{money(netTotal, currency)}</TableCell>
                     <TableCell className="text-right">{money(taxTotal, currency)}</TableCell>
                     <TableCell className="text-right">{money(grossTotal, currency)}</TableCell>
@@ -300,13 +297,13 @@ export default async function PurchaseDetailPage({
             {purchase.supplier_id && <input type="hidden" name="supplier_id" value={purchase.supplier_id} />}
             {purchase.site_id && <input type="hidden" name="site_id" value={purchase.site_id} />}
             <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-              {isRO ? "Generează NIR" : "Post NIR"}
+              {d.generateNir}
             </Button>
           </form>
           <form action={cancelPurchase as unknown as (fd: FormData) => Promise<void>}>
             <input type="hidden" name="purchase_id" value={id} />
             <Button type="submit" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50">
-              {isRO ? "Anulează ciorna" : "Cancel draft"}
+              {d.cancelDraft}
             </Button>
           </form>
         </div>
@@ -314,18 +311,14 @@ export default async function PurchaseDetailPage({
 
       {purchase.status === "cancelled" && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 print:hidden">
-          {isRO ? "Această ciornă a fost anulată." : "This draft was cancelled."}
+          {d.draftCancelled}
         </div>
       )}
 
       {locked && purchase.status === "received" && !purchase.nir_number && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 print:hidden">
-          <p className="font-medium">{isRO ? "Cumpărare veche / fără NIR" : "Legacy purchase / no NIR"}</p>
-          <p className="mt-1 opacity-90">
-            {isRO
-              ? "Înregistrată înainte de NIR. Stocul a fost deja actualizat. Poate fi tipărită ca notă de recepție marfă, fără număr NIR oficial."
-              : "Recorded before NIR workflow. Stock was already updated. Printable as a purchase receipt, not an official NIR number."}
-          </p>
+          <p className="font-medium">{d.legacyTitle}</p>
+          <p className="mt-1 opacity-90">{d.legacyDesc}</p>
         </div>
       )}
     </div>

@@ -11,6 +11,8 @@ import { VatRateSelect } from "@/components/app/VatRateSelect";
 import type { OrgVatRate } from "@/lib/vat-rates";
 import { getDefaultVatRateValue } from "@/lib/vat-rates";
 import { Plus, Trash2 } from "lucide-react";
+import { useAppI18n } from "@/lib/app-i18n-context";
+import type { AppT } from "@/lib/app-i18n";
 
 type Supplier = { id: string; name: string };
 type Site = { id: string; name: string };
@@ -72,12 +74,12 @@ const EN_UM_OPTIONS = ["each", "kg", "g", "L", "ml", "pack", "box", "case", "bag
 
 function SupplierCombobox({
   suppliers,
-  isRO,
+  t,
   initialId,
   initialName,
 }: {
   suppliers: Supplier[];
-  isRO: boolean;
+  t: AppT;
   initialId?: string;
   initialName?: string;
 }) {
@@ -114,7 +116,7 @@ function SupplierCombobox({
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder={isRO ? "Caută furnizor…" : "Search supplier…"}
+          placeholder={t.purchases.form.searchSupplier}
           autoComplete="off"
           className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 pr-8 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
         />
@@ -123,7 +125,7 @@ function SupplierCombobox({
             type="button"
             onClick={handleClear}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
-            aria-label={isRO ? "Șterge furnizor" : "Clear supplier"}
+            aria-label={t.purchases.form.clearSupplier}
           >✕</button>
         )}
       </div>
@@ -134,7 +136,7 @@ function SupplierCombobox({
             onMouseDown={handleClear}
             className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-slate-100 italic text-slate-400"
           >
-            {isRO ? "— fără furnizor —" : "— no supplier —"}
+            {t.purchases.form.noSupplier}
           </button>
           {filtered.length > 0 ? (
             filtered.map((s) => (
@@ -149,9 +151,9 @@ function SupplierCombobox({
             ))
           ) : (
             <div className="px-3 py-3 text-xs text-slate-500">
-              {query && <span>{isRO ? "Niciun furnizor găsit. " : "No supplier found. "}</span>}
+              {query && <span>{t.purchases.form.noSupplierFound}</span>}
               <Link href="/app/suppliers/new" className="text-blue-600 hover:underline">
-                {isRO ? "Adaugă furnizorul din pagina Furnizori →" : "Add suppliers from the Suppliers page →"}
+                {t.purchases.form.addSupplierLink}
               </Link>
             </div>
           )}
@@ -164,13 +166,13 @@ function SupplierCombobox({
 function PurchaseItemCombobox({
   products,
   productId,
-  isRO,
+  t,
   itemTypeLabels,
   onSelect,
 }: {
   products: Product[];
   productId: string;
-  isRO: boolean;
+  t: AppT;
   itemTypeLabels: Record<string, string>;
   onSelect: (id: string) => void;
 }) {
@@ -217,7 +219,7 @@ function PurchaseItemCombobox({
               if (!productId) setQuery("");
             }, 150)
           }
-          placeholder={isRO ? "Caută articol…" : "Search item…"}
+          placeholder={t.purchases.form.searchItem}
           autoComplete="off"
           className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 pr-7 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
         />
@@ -226,7 +228,7 @@ function PurchaseItemCombobox({
             type="button"
             onClick={handleClear}
             className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
-            aria-label={isRO ? "Șterge articol" : "Clear item"}
+            aria-label={t.purchases.form.clearItem}
           >✕</button>
         )}
       </div>
@@ -254,11 +256,9 @@ function PurchaseItemCombobox({
             })
           ) : (
             <div className="px-3 py-3 text-xs text-slate-500">
-              {isRO ? "Niciun articol găsit. " : "No item found. "}
+              {t.purchases.form.noItemFound}
               <Link href="/app/products/new" className="text-blue-600 hover:underline">
-                {isRO
-                  ? "Adaugă ingredient, marfă sau consumabil din Produse →"
-                  : "Add an ingredient, goods item, or supply from Products →"}
+                {t.purchases.form.addItemLink}
               </Link>
             </div>
           )}
@@ -285,16 +285,15 @@ export function PurchaseForm({
   initialDraft?: PurchaseDraftInitial;
   vatRates?: OrgVatRate[];
 }) {
-  const isRO = currency === "RON";
-  const taxLabel = isRO ? "TVA" : "VAT";
+  const { t, locale } = useAppI18n();
+  const isRO = locale === "ro";
+  const taxLabel = t.purchases.form.vat;
   const defaultVatRate = String(getDefaultVatRateValue(vatRates));
   const umOptions = isRO ? RO_UM_OPTIONS : EN_UM_OPTIONS;
   const itemTypeLabels = isRO ? ITEM_TYPE_LABELS : ITEM_TYPE_LABELS_EN;
   const defaultUm = isRO ? "Buc" : "each";
   const today = new Date().toISOString().slice(0, 10);
-  const emptyMsg = isRO
-    ? "Nu există articole de cumpărat. Adăugați ingrediente, mărfuri sau consumabile în catalogul de produse, marcând «Poate fi cumpărat»."
-    : "No purchase items yet. Add ingredients, goods, or supplies to your product catalogue and mark them as purchaseable.";
+  const emptyMsg = t.purchases.form.emptyItems;
 
   const initialSupplier = initialDraft?.supplier_id
     ? suppliers.find((s) => s.id === initialDraft.supplier_id)
@@ -349,14 +348,12 @@ export function PurchaseForm({
     return new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" }).format(v);
   };
 
-  const title = initialDraft
-    ? (isRO ? "Editează ciorna NIR" : "Edit NIR draft")
-    : (isRO ? "Înregistrează NIR / cumpărare" : "Record NIR / purchase");
+  const title = initialDraft ? t.purchases.form.saveDraft : t.purchases.newNir;
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       <div className="flex items-center gap-3">
-        <Link href="/app/purchases" className="text-sm text-slate-500 hover:text-slate-700">← {isRO ? "Cumpărături" : "Purchases"}</Link>
+        <Link href="/app/purchases" className="text-sm text-slate-500 hover:text-slate-700">← {t.purchases.title}</Link>
         <h1 className="text-2xl font-semibold text-slate-950">{title}</h1>
       </div>
 
@@ -372,12 +369,8 @@ export function PurchaseForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>{isRO ? "Detalii NIR" : "NIR details"}</CardTitle>
-          <p className="text-sm text-slate-500 mt-1">
-            {isRO
-              ? "Salvați ciorna fără a modifica stocul. Generarea NIR actualizează stocul o singură dată."
-              : "Save a draft without changing stock. Posting the NIR increases stock once."}
-          </p>
+          <CardTitle>{t.purchases.form.lineItems}</CardTitle>
+          <p className="text-sm text-slate-500 mt-1">{t.purchases.hintPosted}</p>
         </CardHeader>
         <CardContent>
           <form className="space-y-5">
@@ -387,16 +380,16 @@ export function PurchaseForm({
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div>
-                <Label>{isRO ? "Furnizor" : "Supplier"}</Label>
+                <Label>{t.purchases.form.supplier}</Label>
                 <SupplierCombobox
                   suppliers={suppliers}
-                  isRO={isRO}
+                  t={t}
                   initialId={initialDraft?.supplier_id ?? undefined}
                   initialName={initialSupplier?.name}
                 />
               </div>
               <div>
-                <Label>{isRO ? "Nr. factură furnizor" : "Supplier invoice no."}</Label>
+                <Label>{t.purchases.form.invoiceNo}</Label>
                 <Input
                   name="invoice_number"
                   defaultValue={initialDraft?.invoice_number ?? ""}
@@ -405,7 +398,7 @@ export function PurchaseForm({
                 />
               </div>
               <div>
-                <Label>{isRO ? "Data factură furnizor" : "Supplier invoice date"}</Label>
+                <Label>{t.purchases.form.invoiceDate}</Label>
                 <Input
                   name="supplier_invoice_date"
                   type="date"
@@ -414,7 +407,7 @@ export function PurchaseForm({
                 />
               </div>
               <div>
-                <Label>{isRO ? "Data NIR" : "NIR date"}</Label>
+                <Label>{t.purchases.form.nirDate}</Label>
                 <Input
                   name="nir_date"
                   type="date"
@@ -423,7 +416,7 @@ export function PurchaseForm({
                 />
               </div>
               <div>
-                <Label>{isRO ? "Data cumpărăturii" : "Purchase date"}</Label>
+                <Label>{t.purchases.form.purchaseDate}</Label>
                 <Input
                   name="purchase_date"
                   type="date"
@@ -433,13 +426,13 @@ export function PurchaseForm({
               </div>
               {sites.length > 0 && (
                 <div>
-                  <Label>{isRO ? "Gestiune / Locație" : "Location / warehouse"}</Label>
+                  <Label>{t.purchases.form.site}</Label>
                   <select
                     name="site_id"
                     defaultValue={initialDraft?.site_id ?? ""}
                     className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
                   >
-                    <option value="">{isRO ? "— fără locație —" : "— no location —"}</option>
+                    <option value="">—</option>
                     {sites.map((s) => (
                       <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
@@ -450,17 +443,17 @@ export function PurchaseForm({
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label>{isRO ? "Articole primite" : "Received items"}</Label>
-                <span className="text-xs text-slate-400">{lines.length} {isRO ? "linie/linii" : `line${lines.length !== 1 ? "s" : ""}`}</span>
+                <Label>{t.purchases.form.lineItems}</Label>
+                <span className="text-xs text-slate-400">{lines.length}</span>
               </div>
 
               <div className="grid grid-cols-[1fr_80px_90px_90px_80px_80px_36px] gap-2 px-0.5 text-xs text-slate-400 font-medium">
-                <span>{isRO ? "Articol" : "Item"}</span>
-                <span>{isRO ? "UM" : "Unit"}</span>
-                <span>{isRO ? "Cantitate" : "Quantity"}</span>
-                <span>{isRO ? "Cost net" : "Net cost"}</span>
+                <span>{t.purchases.form.product}</span>
+                <span>{t.purchases.form.um}</span>
+                <span>{t.purchases.form.qty}</span>
+                <span>{t.purchases.form.unitCost}</span>
                 <span>{taxLabel} %</span>
-                <span>{isRO ? "Total brut" : "Gross"}</span>
+                <span>{t.purchases.gross}</span>
                 <span />
               </div>
 
@@ -472,7 +465,7 @@ export function PurchaseForm({
                     <PurchaseItemCombobox
                       products={products}
                       productId={line.product_id}
-                      isRO={isRO}
+                      t={t}
                       itemTypeLabels={itemTypeLabels}
                       onSelect={(id) => onProductChange(line.id, id)}
                     />
@@ -490,14 +483,14 @@ export function PurchaseForm({
                     <Input
                       name="quantity"
                       type="number" step="0.001" min="0"
-                      placeholder={isRO ? "Cantitate" : "Qty"}
+                      placeholder={t.purchases.form.qty}
                       value={line.quantity}
                       onChange={(e) => updateLine(line.id, "quantity", e.target.value)}
                     />
                     <Input
                       name="unit_cost"
                       type="number" step="0.0001" min="0"
-                      placeholder={isRO ? "Cost net" : "Net cost"}
+                      placeholder={t.purchases.form.unitCost}
                       value={line.unit_cost}
                       onChange={(e) => updateLine(line.id, "unit_cost", e.target.value)}
                     />
@@ -530,21 +523,21 @@ export function PurchaseForm({
                 onClick={addLine}
                 className="flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-500 hover:border-blue-300 hover:text-blue-600 transition-colors w-full justify-center"
               >
-                <Plus className="h-4 w-4" />{isRO ? "Adaugă linie" : "Add line"}
+                <Plus className="h-4 w-4" />{t.purchases.form.addLine}
               </button>
 
               {grandTotal > 0 && (
                 <div className="space-y-1 rounded-lg bg-slate-50 px-4 py-3 text-sm">
                   <div className="flex justify-between text-slate-500">
-                    <span>{isRO ? "Total net" : "Net total"}</span>
+                    <span>{t.purchases.form.subtotal}</span>
                     <span className="tabular-nums">{fmt(subtotalSum)}</span>
                   </div>
                   <div className="flex justify-between text-slate-500">
-                    <span>{isRO ? `Total ${taxLabel}` : `Total ${taxLabel}`}</span>
+                    <span>{t.purchases.form.tax}</span>
                     <span className="tabular-nums">{fmt(taxSum)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold text-slate-900 border-t pt-2 mt-1">
-                    <span>{isRO ? "Total brut" : "Gross total"}</span>
+                    <span>{t.purchases.form.total}</span>
                     <span className="tabular-nums">{fmt(grandTotal)}</span>
                   </div>
                 </div>
@@ -561,7 +554,7 @@ export function PurchaseForm({
             </div>
 
             <div>
-              <Label>{isRO ? "Observații / diferențe" : "Observations / differences"}</Label>
+              <Label>{t.purchases.form.notes}</Label>
               <Input
                 name="notes"
                 defaultValue={initialDraft?.notes ?? ""}
@@ -571,14 +564,14 @@ export function PurchaseForm({
             </div>
 
             <div className="flex flex-wrap gap-3 pt-1">
-              <Link href="/app/purchases"><Button variant="outline" type="button">{isRO ? "Anulează" : "Cancel"}</Button></Link>
+              <Link href="/app/purchases"><Button variant="outline" type="button">{t.common.cancel}</Button></Link>
               <Button
                 type="submit"
                 variant="outline"
                 disabled={products.length === 0}
                 formAction={savePurchaseDraft as unknown as (fd: FormData) => Promise<void>}
               >
-                {isRO ? "Salvează ciornă" : "Save draft"}
+                {t.purchases.form.saveDraft}
               </Button>
               <Button
                 type="submit"
@@ -586,7 +579,7 @@ export function PurchaseForm({
                 className="bg-blue-600 hover:bg-blue-700 text-white"
                 formAction={postNirPurchase as unknown as (fd: FormData) => Promise<void>}
               >
-                {isRO ? "Generează NIR" : "Post NIR"}
+                {t.purchases.form.postNir}
               </Button>
             </div>
           </form>

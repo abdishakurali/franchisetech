@@ -330,7 +330,7 @@ function AppSidebar({
             {!collapsed && (
               <>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-slate-900 truncate">{profile?.full_name ?? "User"}</p>
+                  <p className="text-xs font-medium text-slate-900 truncate">{profile?.full_name ?? t.shell.user}</p>
                   <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
                 </div>
                 <ChevronDown className="h-3.5 w-3.5 text-slate-400 shrink-0" />

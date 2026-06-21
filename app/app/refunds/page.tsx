@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
-// Safe date formatter — never throws regardless of input
 function safeDate(value: string | null | undefined): string {
   if (!value) return "—";
   try {
@@ -15,18 +15,6 @@ function safeDate(value: string | null | undefined): string {
   }
 }
 
-// Safe money formatter — never throws
-function safeMoney(value: number | string | null | undefined): string {
-  try {
-    const n = Number(value ?? 0);
-    const amount = Number.isFinite(n) ? n : 0;
-    return `€${amount.toFixed(2)}`;
-  } catch {
-    return "€0.00";
-  }
-}
-
-// Unwrap Supabase join result (single or array)
 function firstJoined<T>(v: T | T[] | null | undefined): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : (v ?? null);
 }
@@ -46,8 +34,15 @@ export default async function RefundsPage() {
     performed_at: string | null;
   }> | null = null;
 
+  let t: Awaited<ReturnType<typeof getAppLocaleAndText>>["t"];
+  let currency = "EUR";
+
   try {
-    const { supabase, orgId } = await getKitchenOpsContext();
+    const ctx = await getKitchenOpsContext();
+    const locale = await getAppLocaleAndText(ctx.countryCode);
+    t = locale.t;
+    currency = ctx.currency;
+    const { supabase, orgId } = ctx;
 
     const [txResult, auditResult] = await Promise.all([
       supabase
@@ -69,48 +64,44 @@ export default async function RefundsPage() {
     voided = txResult.data ?? null;
     auditRows = auditResult.data ?? null;
   } catch {
-    // Errors handled by error.tsx boundary — return graceful empty state
     voided = null;
     auditRows = null;
+    const locale = await getAppLocaleAndText();
+    t = locale.t;
   }
 
   const safeTx = voided ?? [];
   const safeAudit = auditRows ?? [];
 
-  // Simple O(n²) lookup instead of Map — avoids any serialization issues
   const getAudit = (txId: string) =>
     safeAudit.find((a) => a.transaction_id === txId) ?? null;
 
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-950">Refunds &amp; Voids</h1>
-        <p className="text-sm text-slate-500">
-          Voided transactions with reason and audit trail.
-        </p>
+        <h1 className="text-2xl font-semibold text-slate-950">{t.refunds.titleFull}</h1>
+        <p className="text-sm text-slate-500">{t.refunds.subtitle}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Voided transactions ({safeTx.length})</CardTitle>
+          <CardTitle>{t.refunds.voidedTransactions(safeTx.length)}</CardTitle>
         </CardHeader>
         <CardContent>
           {safeTx.length === 0 ? (
             <div className="text-center py-12 space-y-2">
-              <p className="text-slate-400 text-sm">No refunds or voids recorded.</p>
-              <p className="text-slate-300 text-xs">
-                Voids will appear here after you void a transaction from its receipt.
-              </p>
+              <p className="text-slate-400 text-sm">{t.refunds.empty}</p>
+              <p className="text-slate-300 text-xs">{t.refunds.emptyDetail}</p>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Order #</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
+                  <TableHead>{t.refunds.orderNo}</TableHead>
+                  <TableHead>{t.tables.date}</TableHead>
+                  <TableHead>{t.tables.payment}</TableHead>
+                  <TableHead>{t.refunds.reason}</TableHead>
+                  <TableHead className="text-right">{t.tables.amount}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -133,14 +124,14 @@ export default async function RefundsPage() {
                         {audit?.reason ?? "—"}
                       </TableCell>
                       <TableCell className="text-right font-medium text-red-600">
-                        &minus;{safeMoney(tx.total)}
+                        &minus;{formatMoney(tx.total, currency)}
                       </TableCell>
                       <TableCell>
                         <Link
                           href={`/app/transactions/${tx.id}`}
                           className="text-sm text-blue-600 hover:underline"
                         >
-                          View
+                          {t.refunds.view}
                         </Link>
                       </TableCell>
                     </TableRow>
@@ -152,10 +143,7 @@ export default async function RefundsPage() {
         </CardContent>
       </Card>
 
-      <p className="text-xs text-slate-400">
-        To void a sale: open the transaction receipt and click &quot;Void
-        transaction&quot;. Partial refunds are coming soon.
-      </p>
+      <p className="text-xs text-slate-400">{t.refunds.footerHint}</p>
     </div>
   );
 }

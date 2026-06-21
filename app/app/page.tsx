@@ -17,6 +17,7 @@ import { DashboardSalesHighlight } from "@/components/app/DashboardSalesHighligh
 import { isModuleEnabled } from "@/lib/business-modules";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { filterReportLinks } from "@/lib/app-report-links";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { Suspense } from "react";
 
 function money(v: number, cur = "EUR") {
@@ -34,33 +35,33 @@ export default async function DashboardPage({ searchParams }: Props) {
   let rangeStart: Date;
   let prevStart: Date;
   let prevEnd: Date;
-  let periodLabel: string;
 
   if (period === "week") {
     rangeStart = startOfWeek(now, { weekStartsOn: 1 });
     prevEnd = rangeStart;
     prevStart = subWeeks(rangeStart, 1);
-    periodLabel = "vs last week";
   } else if (period === "month") {
     rangeStart = startOfMonth(now);
     prevEnd = rangeStart;
     prevStart = subMonths(now, 1);
-    periodLabel = "vs last month";
   } else {
     rangeStart = startOfDay(now);
     prevEnd = rangeStart;
     prevStart = subDays(rangeStart, 1);
-    periodLabel = "vs yesterday";
   }
 
   const monthStart = startOfMonth(now).toISOString();
   const weekAgo = subDays(now, 7).toISOString();
 
-  const { supabase, orgId, currency } = await getKitchenOpsContext();
+  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode);
+  const periodLabel =
+    period === "week" ? t.period.vsLastWeek : period === "month" ? t.period.vsLastMonth : t.period.vsYesterday;
+
   const orgModules = await fetchOrgModuleFlags(supabase, orgId);
   const inventoryVisible = isModuleEnabled(orgModules, "inventory");
   const recipeVisible = isModuleEnabled(orgModules, "recipe_costing");
-  const visibleReports = filterReportLinks({ inventoryVisible, recipeVisible });
+  const visibleReports = filterReportLinks(t, { inventoryVisible, recipeVisible });
 
   const [
     currentTxResult,
@@ -103,21 +104,21 @@ export default async function DashboardPage({ searchParams }: Props) {
   const lowStockResultData = lowStockResult.data ?? [];
   const purchaseWeek = purchaseWeekResult.data ?? [];
 
-  const currentTotal = currentTx.reduce((s, t) => s + Number(t.total ?? 0), 0);
-  const currentTips = currentTx.reduce((s, t) => s + Number(t.tip_amount ?? 0), 0);
+  const currentTotal = currentTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
+  const currentTips = currentTx.reduce((s, tx) => s + Number(tx.tip_amount ?? 0), 0);
   const currentSalesExTips = currentTotal - currentTips;
   const currentCount = currentTx.length;
-  const prevTotal = prevTx.reduce((s, t) => s + Number(t.total ?? 0), 0);
+  const prevTotal = prevTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
 
   const isGrowing = currentSalesExTips >= prevTotal;
   const salesColor = prevTotal === 0 && currentTotal === 0 ? "text-slate-950" : isGrowing ? "text-green-600" : "text-red-600";
   const diffSign = isGrowing ? "+" : "";
   const diffAmount = currentSalesExTips - prevTotal;
 
-  const currentCash = currentTx.filter((t) => (t.payment_methods as { type?: string } | null)?.type === "cash").reduce((s, t) => s + Number(t.total ?? 0), 0);
+  const currentCash = currentTx.filter((tx) => (tx.payment_methods as { type?: string } | null)?.type === "cash").reduce((s, tx) => s + Number(tx.total ?? 0), 0);
   const currentCard = currentTotal - currentCash;
   const expectedCash = Number(sessionData?.expected_cash ?? 0);
-  const monthTotal = monthTx.reduce((s, t) => s + Number(t.total ?? 0), 0);
+  const monthTotal = monthTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
   const purchaseSpend = purchaseWeek
     .filter((p) => p.status === "posted" || p.status === "received")
     .reduce((s, p) => s + Number(p.total_amount ?? 0), 0);
@@ -131,19 +132,19 @@ export default async function DashboardPage({ searchParams }: Props) {
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Dashboard</h1>
-          <p className="text-sm text-slate-500">Sales, cash, and reports.</p>
+          <h1 className="text-2xl font-semibold text-slate-950">{t.dashboard.title}</h1>
+          <p className="text-sm text-slate-500">{t.dashboard.subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {sessionData ? (
             <div className="flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-800">
               <span className="inline-flex h-2 w-2 rounded-full bg-green-500" />
-              Till open
+              {t.dashboard.tillOpen}
             </div>
           ) : null}
           <DateFilter current={period} />
-          <Link href="/app/setup-checklist"><Button variant="outline">Setup guide</Button></Link>
-          <Link href="/app/pos"><Button className="bg-blue-600 hover:bg-blue-700 text-white">Open POS</Button></Link>
+          <Link href="/app/setup-checklist"><Button variant="outline">{t.dashboard.setupGuide}</Button></Link>
+          <Link href="/app/pos"><Button className="bg-blue-600 hover:bg-blue-700 text-white">{t.dashboard.openPos}</Button></Link>
         </div>
       </div>
 
@@ -152,7 +153,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           <Card>
             <CardHeader className="pb-1">
               <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-                <BarChart3 className="h-4 w-4" />Sales{currentTips > 0 ? " (ex tips)" : ""}
+                <BarChart3 className="h-4 w-4" />{t.dashboard.sales}{currentTips > 0 ? t.common.exTips : ""}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -164,12 +165,12 @@ export default async function DashboardPage({ searchParams }: Props) {
             <Card>
               <CardHeader className="pb-1">
                 <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-                  <BarChart3 className="h-4 w-4" />Sales{currentTips > 0 ? " (ex tips)" : ""}
+                  <BarChart3 className="h-4 w-4" />{t.dashboard.sales}{currentTips > 0 ? t.common.exTips : ""}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className={`text-2xl font-bold ${salesColor}`}>{money(currentSalesExTips, currency)}</p>
-                <p className="text-xs text-slate-400">{currentCount} transaction{currentCount !== 1 ? "s" : ""}{currentTips > 0 ? ` · +${money(currentTips, currency)} tips` : ""}</p>
+                <p className="text-xs text-slate-400">{t.common.transactions(currentCount)}{currentTips > 0 ? ` · +${money(currentTips, currency)} ${t.common.tips}` : ""}</p>
                 {prevTotal > 0 || currentTotal > 0 ? (
                   <p className={`text-xs mt-0.5 ${isGrowing ? "text-green-600" : "text-red-600"}`}>
                     {diffSign}{money(diffAmount, currency)} {periodLabel}
@@ -182,25 +183,25 @@ export default async function DashboardPage({ searchParams }: Props) {
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <Banknote className="h-4 w-4" />Cash in till
+              <Banknote className="h-4 w-4" />{t.dashboard.cashInTill}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{money(expectedCash, currency)}</p>
-            <p className="text-xs text-slate-400">{sessionData ? "Till is open" : "Open the till to track cash"}</p>
+            <p className="text-xs text-slate-400">{sessionData ? t.dashboard.tillIsOpen : t.dashboard.openTillHint}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <CreditCard className="h-4 w-4" />This month
+              <CreditCard className="h-4 w-4" />{t.dashboard.thisMonth}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{money(monthTotal, currency)}</p>
             <p className="text-xs text-slate-400">
-              Cash {money(currentCash, currency)} · Card {money(currentCard, currency)}
-              {voidedCount > 0 ? ` · Voided: ${voidedCount}` : ""}
+              {t.common.cash} {money(currentCash, currency)} · {t.common.card} {money(currentCard, currency)}
+              {voidedCount > 0 ? ` · ${t.common.voided}: ${voidedCount}` : ""}
             </p>
           </CardContent>
         </Card>
@@ -209,32 +210,32 @@ export default async function DashboardPage({ searchParams }: Props) {
       {showAttentionRow ? (
         <div className={`grid gap-4 ${inventoryVisible ? "lg:grid-cols-3" : ""}`}>
           <Card className={inventoryVisible ? "lg:col-span-2" : ""}>
-            <CardHeader><CardTitle className="text-base">What needs attention</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">{t.dashboard.attention}</CardTitle></CardHeader>
             <CardContent className={`grid gap-3 ${attentionCols >= 3 ? "sm:grid-cols-3" : attentionCols === 2 ? "sm:grid-cols-2" : ""}`}>
               <Link href="/app/products/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
                 <Package className="mb-2 h-5 w-5 text-blue-600" />
-                <p className="font-semibold">Add products</p>
-                <p className="text-xs text-slate-500">Add items you sell.</p>
+                <p className="font-semibold">{t.dashboard.addProducts}</p>
+                <p className="text-xs text-slate-500">{t.dashboard.addProductsDesc}</p>
               </Link>
               {inventoryVisible ? (
                 <Link href="/app/stock" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
                   <Package className="mb-2 h-5 w-5 text-blue-600" />
-                  <p className="font-semibold">Manage stock</p>
-                  <p className="text-xs text-slate-500">Track stock and ingredients.</p>
+                  <p className="font-semibold">{t.dashboard.manageStock}</p>
+                  <p className="text-xs text-slate-500">{t.dashboard.manageStockDesc}</p>
                 </Link>
               ) : null}
               {recipeVisible ? (
                 <Link href="/app/recipes/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
                   <TrendingUp className="mb-2 h-5 w-5 text-blue-600" />
-                  <p className="font-semibold">Create recipe</p>
-                  <p className="text-xs text-slate-500">See margin and can make.</p>
+                  <p className="font-semibold">{t.dashboard.createRecipe}</p>
+                  <p className="text-xs text-slate-500">{t.dashboard.createRecipeDesc}</p>
                 </Link>
               ) : null}
             </CardContent>
           </Card>
           {inventoryVisible ? (
             <Card>
-              <CardHeader><CardTitle className="text-base">Stock watch</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base">{t.dashboard.stockWatch}</CardTitle></CardHeader>
               <CardContent className="space-y-2">
                 {lowStock.length ? lowStock.slice(0, 5).map((p) => (
                   <div key={p.id} className="flex items-center justify-between text-sm">
@@ -242,10 +243,10 @@ export default async function DashboardPage({ searchParams }: Props) {
                     <Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge>
                   </div>
                 )) : (
-                  <p className="text-sm text-slate-500">Stock looks okay.</p>
+                  <p className="text-sm text-slate-500">{t.dashboard.stockOk}</p>
                 )}
                 <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
-                  View stock <ArrowRight className="h-3 w-3" />
+                  {t.dashboard.viewStock} <ArrowRight className="h-3 w-3" />
                 </Link>
               </CardContent>
             </Card>
@@ -255,13 +256,13 @@ export default async function DashboardPage({ searchParams }: Props) {
 
       <div>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-700">Reports</h2>
+          <h2 className="text-sm font-semibold text-slate-700">{t.dashboard.reports}</h2>
           {inventoryVisible ? (
             <p className="text-xs text-slate-500">
-              Purchases (7 days): {money(purchaseSpend, currency)}
+              {t.dashboard.purchases7d(money(purchaseSpend, currency))}
               {lowStock.length > 0 ? (
                 <span className="ml-2 text-amber-600">
-                  · {lowStock.length} low stock
+                  · {t.dashboard.lowStock(lowStock.length)}
                 </span>
               ) : null}
             </p>

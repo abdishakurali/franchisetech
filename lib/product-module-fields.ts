@@ -46,9 +46,11 @@ export function allowedItemTypes(visibility: ProductModuleVisibility): string[] 
   return types;
 }
 
+import type { PosLocale } from "@/lib/pos-i18n";
+
 export function itemTypeSelectOptions(
   visibility: ProductModuleVisibility,
-  isRO: boolean,
+  locale: PosLocale = "en",
 ): { value: string; label: string }[] {
   const labels: Record<string, { en: string; ro: string }> = {
     finished_product: { en: "Finished product", ro: "Produs finit" },
@@ -60,7 +62,7 @@ export function itemTypeSelectOptions(
   };
   return allowedItemTypes(visibility).map((value) => ({
     value,
-    label: isRO ? labels[value].ro : labels[value].en,
+    label: locale === "ro" ? labels[value].ro : labels[value].en,
   }));
 }
 

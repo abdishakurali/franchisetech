@@ -1,17 +1,19 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-
-const PERIODS = [
-  { value: "today", label: "Today" },
-  { value: "week", label: "This week" },
-  { value: "month", label: "This month" },
-];
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 export function DateFilter({ current }: { current: string }) {
+  const { t } = useAppI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const active = searchParams.get("period") ?? current;
+
+  const PERIODS = [
+    { value: "today", label: t.period.today },
+    { value: "week", label: t.period.week },
+    { value: "month", label: t.period.month },
+  ];
 
   return (
     <div className="flex gap-1.5 flex-wrap">

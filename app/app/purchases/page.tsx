@@ -7,6 +7,7 @@ import { PurchasesBulkTable } from "@/components/app/PurchasesBulkTable";
 import { PageHint } from "@/components/app/PageHint";
 import { countsTowardPurchaseSpend } from "@/lib/nir/purchase";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 type SupplierRef = { name: string } | null;
 type PurchaseRow = {
@@ -25,8 +26,8 @@ type PurchaseRow = {
 
 export default async function PurchasesPage() {
   await requireBusinessModule("inventory");
-  const { supabase, orgId, currency } = await getKitchenOpsContext();
-  const isRO = currency === "RON";
+  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode);
   const purchRes = await supabase.from("purchases")
       .select("id,purchase_date,purchased_at,reference,invoice_number,nir_number,total_amount,tax_total,status,suppliers!purchases_supplier_id_fkey(name),purchase_items(id)")
       .eq("organisation_id", orgId)
@@ -42,50 +43,44 @@ export default async function PurchasesPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{isRO ? "Cumpărături / NIR" : "Purchases / NIR"}</h1>
-          <p className="text-sm text-slate-500">
-            {isRO ? "Recepții furnizor, NIR și facturi de achiziție." : "Supplier deliveries, NIR notes, and purchase invoices."}
-          </p>
+          <h1 className="text-2xl font-semibold text-slate-950">{t.purchases.titleNir}</h1>
+          <p className="text-sm text-slate-500">{t.purchases.subtitleNir}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/app/purchases/import"><Button variant="outline" size="sm">{isRO ? "Import CSV" : "Import CSV"}</Button></Link>
-          <Link href="/app/purchases/new"><Button>{isRO ? "NIR nou" : "New NIR"}</Button></Link>
+          <Link href="/app/purchases/import"><Button variant="outline" size="sm">{t.common.import}</Button></Link>
+          <Link href="/app/purchases/new"><Button>{t.purchases.newNir}</Button></Link>
         </div>
       </div>
 
       <PageHint id="purchases">
-        <p className="font-medium">{isRO ? "NIR emis = stoc actualizat. Ciorna = fără modificare stoc." : "Posted NIR updates stock. Drafts do not change stock."}</p>
+        <p className="font-medium">{t.purchases.hintPosted}</p>
       </PageHint>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{isRO ? "Total achiziții" : "Total spend"}</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{t.purchases.totalSpend}</CardTitle></CardHeader>
           <CardContent className="text-2xl font-bold">{formatMoney(totalSpend, currency)}</CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{isRO ? "Total TVA achiziții" : "Purchase VAT total"}</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{t.purchases.vatTotal}</CardTitle></CardHeader>
           <CardContent className="text-2xl font-bold">{formatMoney(totalVat, currency)}</CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{isRO ? "NIR / cumpărări active" : "Active NIR / purchases"}</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{t.purchases.activeCount}</CardTitle></CardHeader>
           <CardContent className="text-2xl font-bold">{activeCount}</CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{isRO ? "Istoric cumpărături" : "Purchase history"}</CardTitle>
-          <p className="text-xs text-slate-400 mt-1">
-            {isRO
-              ? "Selectați ciorne pentru anulare. NIR emise și cumpărările vechi sunt blocate."
-              : "Select drafts to cancel. Posted NIR and legacy purchases are locked."}
-          </p>
+          <CardTitle>{t.purchases.historyTitle}</CardTitle>
+          <p className="text-xs text-slate-400 mt-1">{t.purchases.historyHint}</p>
         </CardHeader>
         <CardContent>
           {!purchases.length ? (
             <div className="text-center py-8">
-              <p className="text-slate-400 mb-4">{isRO ? "Nicio cumpărare înregistrată." : "No purchases recorded yet."}</p>
-              <Link href="/app/purchases/new"><Button variant="outline">{isRO ? "Primul NIR" : "Record first NIR"}</Button></Link>
+              <p className="text-slate-400 mb-4">{t.purchases.emptyRecorded}</p>
+              <Link href="/app/purchases/new"><Button variant="outline">{t.purchases.recordFirstNir}</Button></Link>
             </div>
           ) : (
             <PurchasesBulkTable purchases={purchases as never} deleteAction={deletePurchases} currency={currency} />

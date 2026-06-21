@@ -17,6 +17,7 @@ import type { CashDrawerMode } from "@/lib/cash-drawer";
 import { BusinessCapabilitiesCard } from "@/components/app/BusinessCapabilitiesCard";
 import { FormSelect } from "@/components/app/FormSelect";
 import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
@@ -90,6 +91,7 @@ export default async function SettingsPage({
   const rawCode     = (orgRow?.country_code as string) ?? null;
   const legacyText  = (orgRow?.country as string) ?? null;
   const countryCode = resolveCountryCode(rawCode, legacyText);
+  const { t } = await getAppLocaleAndText(countryCode);
   const isRO        = countryCode === "RO";
   const currencyCode = (orgRow?.currency_code as string) ?? "EUR";
 
@@ -150,19 +152,19 @@ export default async function SettingsPage({
 
   // ── Tab list ─────────────────────────────────────────────────────────
   const tabs = [
-    { id: "business",  label: "Business"  },
-    { id: "features",  label: "Features"  },
-    { id: "products",  label: "Products"  },
-    { id: "hardware",  label: "Hardware"  },
-    ...(isRO ? [{ id: "fiscal", label: "Receipts" }] : []),
-    { id: "billing",   label: "Billing"   },
+    { id: "business",  label: t.settings.tabBusiness  },
+    { id: "features",  label: t.settings.tabFeatures  },
+    { id: "products",  label: t.settings.tabProducts  },
+    { id: "hardware",  label: t.settings.tabHardware  },
+    ...(isRO ? [{ id: "fiscal", label: t.settings.tabReceipts }] : []),
+    { id: "billing",   label: t.settings.tabBilling   },
   ];
 
   return (
     <div className="settings-page-wrapper max-w-4xl p-4 sm:p-6">
       <div className="settings-page-heading mb-6">
-        <h1 className="text-2xl font-semibold text-slate-950">Settings</h1>
-        <p className="text-sm text-slate-500 mt-1">Keep business details, products, payments, and hardware simple.</p>
+        <h1 className="text-2xl font-semibold text-slate-950">{t.settings.title}</h1>
+        <p className="text-sm text-slate-500 mt-1">{t.settings.subtitleSimple}</p>
       </div>
 
       {/* Horizontal tab nav */}
@@ -406,14 +408,14 @@ export default async function SettingsPage({
                 <div><Label>Colour</Label><Input name="color" type="color" defaultValue="#2563eb" className="h-10 w-16 p-1" /></div>
                 <div><Label>Sort order</Label><Input name="sort_order" type="number" placeholder="1" className="w-20" /></div>
                 <div>
-                  <Label>{isRO ? "Tip categorie" : "Category type"}</Label>
+                  <Label>{t.settings.categoryType}</Label>
                   <FormSelect
                     name="category_type"
                     defaultValue="both"
                     options={[
-                      { value: "both", label: isRO ? "POS și inventar" : "POS & Inventory" },
-                      { value: "pos", label: isRO ? "Doar POS" : "POS only" },
-                      { value: "inventory", label: isRO ? "Doar inventar" : "Inventory only" },
+                      { value: "both", label: t.settings.categoryBoth },
+                      { value: "pos", label: t.settings.categoryPos },
+                      { value: "inventory", label: t.settings.categoryInventory },
                     ]}
                   />
                 </div>
@@ -431,14 +433,14 @@ export default async function SettingsPage({
                     <div><Label>Colour</Label><Input name="color" type="color" defaultValue={c.color ?? "#64748b"} className="h-10 w-16 p-1" /></div>
                     <div><Label>Sort</Label><Input name="sort_order" type="number" defaultValue={c.sort_order ?? 0} /></div>
                     <div>
-                      <Label>{isRO ? "Tip" : "Type"}</Label>
+                      <Label>{t.settings.type}</Label>
                       <FormSelect
                         name="category_type"
                         defaultValue={(c as {category_type?: string}).category_type ?? "both"}
                         options={[
-                          { value: "both", label: isRO ? "POS și inventar" : "POS & Inventory" },
-                          { value: "pos", label: isRO ? "Doar POS" : "POS only" },
-                          { value: "inventory", label: isRO ? "Doar inventar" : "Inventory only" },
+                          { value: "both", label: t.settings.categoryBoth },
+                          { value: "pos", label: t.settings.categoryPos },
+                          { value: "inventory", label: t.settings.categoryInventory },
                         ]}
                       />
                     </div>
