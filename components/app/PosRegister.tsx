@@ -985,7 +985,11 @@ function PosRegisterInner({
 
   async function syncQueuedEntry(entry: QueuedSale): Promise<boolean> {
     try {
-      const res = await completeSaleReturn(payloadToFormData(entry.payload));
+      const syncPromise = completeSaleReturn(payloadToFormData(entry.payload));
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(t.saleSaveFailed)), 25_000)
+      );
+      const res = await Promise.race([syncPromise, timeoutPromise]);
       if (!res.ok || !res.transactionId) {
         markOfflineSaleSyncFailed(
           entry.id,
