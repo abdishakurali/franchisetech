@@ -44,8 +44,8 @@ function StatusBadge({ status, isRO }: { status: IntegrationStatus; isRO: boolea
 
 function IntegrationLogo({ src, name }: { src: string; name: string }) {
   return (
-    <div className="flex-shrink-0 h-10 w-10 rounded-lg overflow-hidden border border-slate-100">
-      <Image src={src} alt={name} width={40} height={40} className="object-contain" />
+    <div className="relative h-8 w-32 flex-shrink-0">
+      <Image src={src} alt={name} fill className="object-contain object-left" />
     </div>
   );
 }
@@ -78,7 +78,7 @@ export async function IntegrationCards({ orgId, countryCode }: IntegrationCardsP
     {
       id: "fiscalnet",
       name: "FiscalNet",
-      logo: "/integrations/fiscalnet.svg",
+      logo: "/integrations/fiscalnet.png",
       description: isRO
         ? "Casă fiscală omologată ANAF. Bonuri fiscale, raport Z, deschidere sertar."
         : "Fiscal printer for compliant receipts, Z-report, cash drawer.",
@@ -115,7 +115,7 @@ export async function IntegrationCards({ orgId, countryCode }: IntegrationCardsP
     {
       id: "tazz",
       name: "Tazz by eMAG",
-      logo: "/integrations/tazz.svg",
+      logo: "/integrations/tazz.webp",
       description: isRO
         ? "Sincronizare comenzi Tazz în POS. Disponibil curând."
         : "Tazz orders sync to POS. Coming soon.",
@@ -135,7 +135,7 @@ export async function IntegrationCards({ orgId, countryCode }: IntegrationCardsP
     {
       id: "smartbill",
       name: "SmartBill",
-      logo: "/integrations/smartbill.svg",
+      logo: "/integrations/smartbill.webp",
       description: isRO
         ? "Export vânzări și facturi direct în SmartBill pentru contabil."
         : "Export sales and invoices to SmartBill for your accountant.",
@@ -181,11 +181,11 @@ export async function IntegrationCards({ orgId, countryCode }: IntegrationCardsP
                   className={integration.status === "coming_soon" ? "opacity-60" : ""}
                 >
                   <CardHeader className="pb-2">
+                    <div className="mb-2.5">
+                      <IntegrationLogo src={integration.logo} name={integration.name} />
+                    </div>
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-3">
-                        <IntegrationLogo src={integration.logo} name={integration.name} />
-                        <CardTitle className="text-base">{integration.name}</CardTitle>
-                      </div>
+                      <CardTitle className="text-sm font-semibold text-slate-800">{integration.name}</CardTitle>
                       <StatusBadge status={integration.status} isRO={isRO} />
                     </div>
                     <CardDescription className="text-xs leading-relaxed mt-1">
