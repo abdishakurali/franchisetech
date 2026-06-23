@@ -15,6 +15,7 @@ type Props = {
   onQueueChange: () => void;
   onSyncAll?: () => void;
   onResend?: (id: string) => void;
+  onDismiss?: (id: string) => void;
 };
 
 export function PosOfflineBar({
@@ -26,6 +27,7 @@ export function PosOfflineBar({
   onQueueChange,
   onSyncAll,
   onResend,
+  onDismiss,
 }: Props) {
   const hasQueue = pendingSync.length > 0 || pendingFiscal.length > 0;
   if (!browserOffline && !hasQueue) return null;
@@ -65,16 +67,29 @@ export function PosOfflineBar({
               <p className="mt-0.5 text-[11px] text-amber-700">{t.offlineSyncFailed}</p>
             )}
           </div>
-          {onResend && (
-            <button
-              type="button"
-              disabled={syncing}
-              onClick={() => onResend(entry.id)}
-              className="shrink-0 rounded-md border border-amber-400 bg-white px-2.5 py-1 font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
-            >
-              {t.offlineResend}
-            </button>
-          )}
+          <div className="flex shrink-0 items-center gap-2">
+            {onResend && (
+              <button
+                type="button"
+                disabled={syncing}
+                onClick={() => onResend(entry.id)}
+                className="shrink-0 rounded-md border border-amber-400 bg-white px-2.5 py-1 font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
+              >
+                {t.offlineResend}
+              </button>
+            )}
+            {onDismiss && (
+              <button
+                type="button"
+                disabled={syncing}
+                onClick={() => { onDismiss(entry.id); onQueueChange(); }}
+                className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                title="Elimină din coadă"
+              >
+                ×
+              </button>
+            )}
+          </div>
         </div>
       ))}
       {pendingFiscal.map((entry) => (

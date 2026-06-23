@@ -2216,19 +2216,21 @@ export async function seedDefaultVatRates(formData: FormData): Promise<void> {
   if (!canManage(membership.role)) return;
   const countryCode = (stringValue(formData, "country_code") ?? "IE").toUpperCase();
   const defaults = VAT_DEFAULTS_BY_COUNTRY[countryCode] ?? VAT_DEFAULTS_BY_COUNTRY.IE;
-  const { count } = await supabase
+  const { data: existing } = await supabase
     .from("vat_rates")
-    .select("id", { count: "exact", head: true })
+    .select("rate")
     .eq("organisation_id", orgId);
-  if ((count ?? 0) > 0) return; // don't overwrite existing
-  const rows = defaults.map((d, i) => ({
+  const existingRates = new Set((existing ?? []).map((r) => Number(r.rate)));
+  const missing = defaults.filter((d) => !existingRates.has(d.rate));
+  if (missing.length === 0) return;
+  const rows = missing.map((d, i) => ({
     organisation_id: orgId,
     name: d.name,
     rate: d.rate,
     fiscalnet_vat_group: d.fiscalnet_vat_group,
-    is_default: d.is_default,
+    is_default: d.is_default && existingRates.size === 0,
     active: true,
-    sort_order: i + 1,
+    sort_order: (existingRates.size + i + 1),
   }));
   await supabase.from("vat_rates").insert(rows);
   revalidatePath("/app/settings");

@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 import Link from "next/link";
 import { CopyReferralButton } from "@/components/app/CopyReferralButton";
 import { ensureReferralCode } from "@/lib/referrals";
@@ -363,8 +364,12 @@ export default async function SettingsPage({
             deleteAction={deletePaymentMethod as unknown as (fd: FormData) => Promise<void>}
           />
 
-          {/* VAT Rates */}
-          {canEdit && (vatRates ?? []).length === 0 && (
+          {/* VAT Rates — show seed button when at least one default is missing */}
+          {canEdit && (() => {
+            const defaults = VAT_DEFAULTS_BY_COUNTRY[countryCode] ?? [];
+            const existing = new Set((vatRates ?? []).map((r) => Number(r.rate)));
+            return defaults.some((d) => !existing.has(d.rate));
+          })() && (
             <form action={seedDefaultVatRates as unknown as (fd: FormData) => Promise<void>} className="mb-2">
               <input type="hidden" name="country_code" value={countryCode} />
               <Button type="submit" variant="outline" size="sm">
