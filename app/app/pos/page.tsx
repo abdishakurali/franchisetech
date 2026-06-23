@@ -273,9 +273,10 @@ export default async function PosPage() {
     .select(PRODUCT_LIST_WITH_POS_SELECT)
     .eq("organisation_id", orgId)
     .eq("active", true)
-    .order("name");
+    .order("pos_sort_order", { ascending: true })
+    .order("name", { ascending: true });
   const sgrProduct = (products ?? []).find((p) => p.name?.toUpperCase() === "SGR") ?? null;
-  const { data: categories } = await supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("name");
+  const { data: categories } = await supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("sort_order", { ascending: true }).order("name", { ascending: true });
   const { data: methods } = await supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at");
   const vatRates = await listActiveVatRates(supabase, orgId);
   const defaultVatRate = getDefaultVatRateValue(vatRates);

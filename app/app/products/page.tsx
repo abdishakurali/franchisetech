@@ -110,6 +110,9 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
               <Button variant="outline" size="sm">{t.products.createRecipe}</Button>
             </Link>
           ) : null}
+          <Link href="/app/products/modifiers">
+            <Button variant="outline" size="sm">{t.products.modifiers?.title ?? "Modifiers"}</Button>
+          </Link>
           <Link href="/app/products/new">
             <Button size="sm">{t.products.addProduct}</Button>
           </Link>
