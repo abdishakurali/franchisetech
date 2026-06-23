@@ -1045,12 +1045,14 @@ function PosRegisterInner({
     setOfflineQueue(listOfflineQueue());
     if (synced > 0) {
       setSaleStatus({ ok: true, msg: t.offlineSyncDone(synced) });
-      setTimeout(() => setSaleStatus(null), 4000);
+    } else {
+      setSaleStatus(null);
     }
+    setTimeout(() => setSaleStatus(null), 4000);
   }
 
   async function resendQueuedSale(id: string) {
-    if (!isBrowserOnline() || syncingOfflineRef.current) return;
+    if (syncingOfflineRef.current) return;
     const entry = listOfflineQueue().find((q) => q.id === id && q.status === "pending_sync");
     if (!entry) return;
     syncingOfflineRef.current = true;

@@ -65,7 +65,7 @@ export function PosOfflineBar({
               <p className="mt-0.5 text-[11px] text-amber-700">{t.offlineSyncFailed}</p>
             )}
           </div>
-          {onResend && !browserOffline && (
+          {onResend && (
             <button
               type="button"
               disabled={syncing}
