@@ -47,6 +47,8 @@ import {
   enqueueOfflineSale,
   formDataToPayload,
   isBrowserOnline,
+  probeServerOnline,
+  invalidateProbeCache,
   isRetryableNetworkError,
   listOfflineQueue,
   listPendingSync,
@@ -659,13 +661,31 @@ function PosRegisterInner({
   );
 
   useEffect(() => {
-    const syncOfflineState = () => setBrowserOffline(!isBrowserOnline());
-    window.addEventListener("offline", syncOfflineState);
-    window.addEventListener("online", syncOfflineState);
-    syncOfflineState();
+    let cancelled = false;
+
+    async function runProbe() {
+      const online = await probeServerOnline();
+      if (!cancelled) setBrowserOffline(!online);
+    }
+
+    // Immediately offline when adapter disconnects; probe to confirm when it reconnects
+    const onOffline = () => { invalidateProbeCache(); setBrowserOffline(true); };
+    const onOnline = () => { invalidateProbeCache(); void runProbe(); };
+
+    window.addEventListener("offline", onOffline);
+    window.addEventListener("online", onOnline);
+
+    // Initial probe on mount
+    void runProbe();
+
+    // Re-probe every 45 s to catch silent connectivity loss
+    const interval = setInterval(() => void runProbe(), 45_000);
+
     return () => {
-      window.removeEventListener("offline", syncOfflineState);
-      window.removeEventListener("online", syncOfflineState);
+      cancelled = true;
+      window.removeEventListener("offline", onOffline);
+      window.removeEventListener("online", onOnline);
+      clearInterval(interval);
     };
   }, []);
 
@@ -1030,7 +1050,8 @@ function PosRegisterInner({
   }
 
   async function flushAllPending() {
-    if (!isBrowserOnline() || syncingOfflineRef.current) return;
+    if (syncingOfflineRef.current) return;
+    if (!(await probeServerOnline())) return;
     const pending = listPendingSync();
     if (!pending.length) return;
     syncingOfflineRef.current = true;
@@ -1350,7 +1371,7 @@ function PosRegisterInner({
         const amountLabel = money(checkoutTotalDue);
         const cartSnapshot = checkoutCart;
 
-        if (!isBrowserOnline()) {
+        if (browserOffline) {
           queueCurrentSale(cartSnapshot, checkoutTotalDue);
           return;
         }
