@@ -236,6 +236,7 @@ export async function fetchOwnerDigestData(
   const { rangeStart, rangeEnd } = getSalesRange(frequency, timeZone, referenceNow);
   const { priorStart, priorEnd } = getPriorRange(frequency, rangeStart, timeZone);
   const periodLabel = formatPeriodLabel(frequency, rangeStart, rangeEnd, locale);
+  const priorPeriodLabel = formatPeriodLabel(frequency, priorStart, priorEnd, locale);
 
   const rangeIso = { start: rangeStart.toISOString(), end: rangeEnd.toISOString() };
   const priorIso = { start: priorStart.toISOString(), end: priorEnd.toISOString() };
@@ -434,6 +435,7 @@ export async function fetchOwnerDigestData(
     voidCount,
     tradingDays,
     busiestDay,
+    priorPeriodLabel,
     attentionItems,
     allClear: attentionItems.length === 0,
   };

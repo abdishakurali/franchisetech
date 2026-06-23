@@ -58,6 +58,7 @@ export type OwnerDigestData = {
   voidCount: number;
   tradingDays: number;
   busiestDay: { date: string; total: number; count: number } | null;
+  priorPeriodLabel: string;
   attentionItems: OwnerDigestAttention[];
   allClear: boolean;
 };
@@ -93,13 +94,13 @@ function formatUnit(unit: string, locale: AppLocale): string {
   return RO_UNITS[key] ?? unit;
 }
 
-function formatTrend(pct: number | null, locale: AppLocale): string {
+function formatTrend(pct: number | null, locale: AppLocale, priorLabel: string): string {
   const ro = locale === "ro";
   if (pct == null) {
     return ro ? "fără vânzări în perioada anterioară" : "no sales in prior period";
   }
   const sign = pct >= 0 ? "+" : "";
-  const label = ro ? "față de perioada anterioară" : "vs prior period";
+  const label = ro ? `față de ${priorLabel}` : `vs ${priorLabel}`;
   return `${sign}${pct.toFixed(0)}% ${label}`;
 }
 
@@ -171,7 +172,7 @@ function buildHealthBanner(data: OwnerDigestData, ro: boolean): string {
 }
 
 function buildSalesSection(data: OwnerDigestData, ro: boolean, m: (v: number) => string): string {
-  const trend = formatTrend(data.salesChangePct, data.locale);
+  const trend = formatTrend(data.salesChangePct, data.locale, data.priorPeriodLabel);
   const trendCol = trendColor(data.salesChangePct);
 
   const extraPayments =

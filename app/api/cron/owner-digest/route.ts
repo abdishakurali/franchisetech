@@ -58,11 +58,6 @@ export async function POST(req: NextRequest) {
   for (const row of (orgs as DigestOrgRow[]) ?? []) {
     checked++;
 
-    if (!row.inventory_enabled) {
-      skipped++;
-      continue;
-    }
-
     const recipients = row.owner_digest_recipients ?? [];
     if (!recipients.length) {
       skipped++;

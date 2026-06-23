@@ -24,7 +24,7 @@ export type OwnerDigestInitial = {
 type Props = {
   locale: AppLocale;
   canEdit: boolean;
-  inventoryEnabled: boolean;
+  inventoryEnabled?: boolean;
   ownerEmail: string;
   initial: OwnerDigestInitial;
 };
@@ -42,7 +42,6 @@ const DAY_KEYS = [
 export function OwnerDigestCard({
   locale,
   canEdit,
-  inventoryEnabled,
   ownerEmail,
   initial,
 }: Props) {
@@ -102,22 +101,6 @@ export function OwnerDigestCard({
       setTestLoading(false);
     }
   };
-
-  if (!inventoryEnabled) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>{t.title}</CardTitle>
-          <CardDescription>{t.description}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">
-            {t.inventoryRequired}
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>
