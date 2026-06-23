@@ -11,8 +11,8 @@ const DEFAULT_UNITS = ["each", "portion", "kg", "g", "litre", "ml", "cup", "bott
 
 export default async function ProductEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { supabase, orgId, membership, currency, countryCode } = await getKitchenOpsContext();
-  const { locale, t } = await getAppLocaleAndText(countryCode);
+  const { supabase, orgId, membership, currency, countryCode, profileLocale } = await getKitchenOpsContext();
+  const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const currencySymbol = currency === "RON" ? "lei" : "€";
   const orgInfo = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as {
     kitchen_stations_enabled?: boolean | null;
@@ -24,9 +24,10 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
   const visibility = productModuleVisibility(moduleFlags);
   const itemTypes = itemTypeSelectOptions(visibility, locale);
 
-  const [{ data: product }, { data: categories }, { data: units }, { data: suppliers }, vatRates] = await Promise.all([
+  const [{ data: product }, { data: inventoryCategories }, { data: posCategories }, { data: units }, { data: suppliers }, vatRates] = await Promise.all([
     supabase.from("products").select("*").eq("id", id).eq("organisation_id", orgId).single(),
-    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).order("sort_order"),
+    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "inventory").order("name"),
+    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "pos").order("name"),
     supabase.from("units_of_measure").select("name").or(`organisation_id.eq.${orgId},organisation_id.is.null`).order("name"),
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     listActiveVatRates(supabase, orgId),
@@ -63,7 +64,8 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
 
       <ProductEditForm
         product={product}
-        categories={categories ?? []}
+        categories={inventoryCategories ?? []}
+        posCategories={posCategories ?? []}
         suppliers={suppliers ?? []}
         units={allUnits}
         vatRates={vatRates}

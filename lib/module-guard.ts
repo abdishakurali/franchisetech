@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import { resolveAppLocale } from "@/lib/app-locale";
 import {
   canUseModule,
   moduleBlockReason,
@@ -18,6 +19,11 @@ function subscriptionPlan(plan: string | null | undefined): BillingPlan | null {
 export async function requireBusinessModule(module: BusinessModuleKey): Promise<void> {
   const { membership, supabase, orgId } = await getActiveOrg();
   const org = await fetchOrgModuleFlags(supabase, orgId);
+  const orgRow = Array.isArray(membership.organisations)
+    ? membership.organisations[0]
+    : membership.organisations;
+  const countryCode = (orgRow as { country_code?: string } | null)?.country_code ?? null;
+  const locale = resolveAppLocale({ orgCountryCode: countryCode });
   const sub = await getSubscriptionStatus(orgId).catch(() => null);
   const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
 
@@ -35,7 +41,7 @@ export async function requireBusinessModule(module: BusinessModuleKey): Promise<
     module,
     subscriptionPlan: subscriptionPlan(sub?.plan),
     hasTrial,
-  });
+  }, locale);
   redirect(`/app/settings?tab=features&locked=${module}&msg=${encodeURIComponent(reason ?? "Module not available")}`);
 }
 

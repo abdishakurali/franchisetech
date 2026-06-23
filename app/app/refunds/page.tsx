@@ -39,8 +39,8 @@ export default async function RefundsPage() {
 
   try {
     const ctx = await getKitchenOpsContext();
-    const locale = await getAppLocaleAndText(ctx.countryCode);
-    t = locale.t;
+    const { locale, t: localeText } = getAppLocaleAndText(ctx.countryCode, ctx.profileLocale);
+    t = localeText;
     currency = ctx.currency;
     const { supabase, orgId } = ctx;
 
@@ -66,8 +66,8 @@ export default async function RefundsPage() {
   } catch {
     voided = null;
     auditRows = null;
-    const locale = await getAppLocaleAndText();
-    t = locale.t;
+    const { t: fallbackT } = getAppLocaleAndText();
+    t = fallbackT;
   }
 
   const safeTx = voided ?? [];

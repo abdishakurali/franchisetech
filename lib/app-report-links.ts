@@ -2,11 +2,15 @@ import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Calculator,
+  ClipboardList,
+  FileDown,
   FileText,
   Package,
   Receipt,
+  Scale,
   ShoppingBag,
   TrendingUp,
+  Warehouse,
 } from "lucide-react";
 import type { AppT } from "@/lib/app-i18n";
 
@@ -81,6 +85,41 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
       icon: FileText,
       color: "bg-indigo-50 text-indigo-700",
       tag: t.reports.transactions.tag,
+    },
+    {
+      href: "/app/reports/consum",
+      title: t.reports.consum.title,
+      desc: t.reports.consum.desc,
+      icon: ClipboardList,
+      color: "bg-rose-50 text-rose-700",
+      tag: t.reports.consum.tag,
+      requiresInventory: true,
+    },
+    {
+      href: "/app/reports/balanta",
+      title: t.reports.balanta.title,
+      desc: t.reports.balanta.desc,
+      icon: Scale,
+      color: "bg-cyan-50 text-cyan-700",
+      tag: t.reports.balanta.tag,
+      requiresInventory: true,
+    },
+    {
+      href: "/app/reports/gestiune",
+      title: t.reports.gestiune.title,
+      desc: t.reports.gestiune.desc,
+      icon: Warehouse,
+      color: "bg-slate-100 text-slate-700",
+      tag: t.reports.gestiune.tag,
+      requiresInventory: true,
+    },
+    {
+      href: "/app/reports/audit-export",
+      title: t.reports.auditExport.title,
+      desc: t.reports.auditExport.desc,
+      icon: FileDown,
+      color: "bg-violet-50 text-violet-700",
+      tag: t.reports.auditExport.tag,
     },
   ];
 }

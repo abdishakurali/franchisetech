@@ -25,6 +25,7 @@ function priorityFor(path: string): number {
   if (path.startsWith("/compare/")) return 0.75;
   if (path === COMPARE_HUB_PATH) return 0.8;
   if (path.startsWith("/industries/romania")) return 0.85;
+  if (path.startsWith("/industries/multi-site")) return 0.85;
   if (path.startsWith("/resources/")) return 0.7;
   if (path.startsWith("/features/")) return 0.75;
   if (path.startsWith("/help/")) return 0.65;

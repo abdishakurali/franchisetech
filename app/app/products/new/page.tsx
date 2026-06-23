@@ -30,8 +30,8 @@ const KITCHEN_STATIONS = [
 
 
 export default async function ProductsNewPage({ searchParams }: { searchParams?: Promise<{ type?: string }> }) {
-  const { supabase, orgId, membership, currency, countryCode } = await getKitchenOpsContext();
-  const { locale, t } = await getAppLocaleAndText(countryCode);
+  const { supabase, orgId, membership, currency, countryCode, profileLocale } = await getKitchenOpsContext();
+  const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const pf = t.productsForm;
   const orgInfo = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as { kitchen_stations_enabled?: boolean | null } | null;
   const kitchenStationsEnabled = Boolean(orgInfo?.kitchen_stations_enabled);
@@ -48,8 +48,9 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
     redirect("/app/products/new");
   }
 
-  const [{ data: categories }, { data: units }, { data: suppliers }, vatRates] = await Promise.all([
-    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).order("sort_order"),
+  const [{ data: inventoryCategories }, { data: posCategories }, { data: units }, { data: suppliers }, vatRates] = await Promise.all([
+    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "inventory").order("name"),
+    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "pos").order("name"),
     supabase.from("units_of_measure").select("name").or(`organisation_id.eq.${orgId},organisation_id.is.null`).order("name").then(r => ({ data: r.data })),
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     listActiveVatRates(supabase, orgId),
@@ -99,9 +100,18 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                 <Label>{pf.category}</Label>
                 <select name="category_id" className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
                   <option value="">{pf.none}</option>
-                  {(categories ?? []).map((c: {id:string;name:string}) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {(inventoryCategories ?? []).map((c: {id:string;name:string}) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
+              {(posCategories ?? []).length > 0 ? (
+                <div>
+                  <Label>{pf.category} (POS)</Label>
+                  <select name="pos_category_id" className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
+                    <option value="">{pf.none}</option>
+                    {(posCategories ?? []).map((c: {id:string;name:string}) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+              ) : null}
             </div>
 
             {/* Prices + VAT + Unit */}

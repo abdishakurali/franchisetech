@@ -26,8 +26,8 @@ type PurchaseRow = {
 
 export default async function PurchasesPage() {
   await requireBusinessModule("inventory");
-  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const purchRes = await supabase.from("purchases")
       .select("id,purchase_date,purchased_at,reference,invoice_number,nir_number,total_amount,tax_total,status,suppliers!purchases_supplier_id_fkey(name),purchase_items(id)")
       .eq("organisation_id", orgId)

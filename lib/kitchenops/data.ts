@@ -35,7 +35,15 @@ export async function getActiveOrg() {
   const currency: string = orgInfo?.currency_code ?? "EUR";
   const currencySymbol: string = orgInfo?.currency_symbol ?? "€";
   const countryCode: string | null = orgInfo?.country_code ?? null;
-  return { supabase, user, membership, orgId: membership.organisation_id, currency, currencySymbol, countryCode };
+
+  const { data: profileRow } = await supabase
+    .from("profiles")
+    .select("locale")
+    .eq("id", user.id)
+    .maybeSingle();
+  const profileLocale: string | null = (profileRow?.locale as string | null) ?? null;
+
+  return { supabase, user, membership, orgId: membership.organisation_id, currency, currencySymbol, countryCode, profileLocale };
 }
 
 export function money(value: number | null | undefined) {

@@ -19,6 +19,7 @@ type Product = {
   vat_rate: number | null; available_in_pos: boolean | null; is_ingredient: boolean | null;
   is_stock_tracked: boolean | null; current_stock_qty: number | null;
   image_url?: string | null;
+  active?: boolean | null;
   product_categories: { name: string } | null;
 };
 
@@ -170,7 +171,7 @@ export function ProductsBulkTable({
               <TableRow
                 key={p.id}
                 onClick={() => { window.location.href = `/app/products/${p.id}`; }}
-                className={`cursor-pointer hover:bg-slate-50 ${selected.has(p.id) ? "bg-blue-50/50" : ""}`}
+                className={`cursor-pointer hover:bg-slate-50 ${selected.has(p.id) ? "bg-blue-50/50" : ""} ${p.active === false ? "opacity-70" : ""}`}
               >
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <input
@@ -191,6 +192,11 @@ export function ProductsBulkTable({
                       <Link href={`/app/products/${p.id}`} onClick={(e) => e.stopPropagation()} className="hover:text-blue-600 hover:underline">
                         {p.name || t.common.untitled}
                       </Link>
+                      {p.active === false && (
+                        <Badge variant="secondary" className="ml-2 text-xs bg-slate-100 text-slate-600">
+                          {t.badges.archived}
+                        </Badge>
+                      )}
                       {p.available_in_pos === false && (
                         <span className="ml-2 text-xs text-slate-400">{t.common.notInPos}</span>
                       )}

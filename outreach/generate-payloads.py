@@ -13,7 +13,7 @@ FROM = "info@franchisetech.ro"
 SIGNATURE = "Franchise Tech\ninfo@franchisetech.ro"
 OPT_OUT = 'Răspundeți „stop” dacă nu doriți alte mesaje.'
 CUSTOMER_CAMPAIGN = "ro-customer-q2-r2"
-PARTNER_CAMPAIGN = "ro-partner-q2-r2"
+PARTNER_CAMPAIGN = "ro-partner-2026-h2"
 WEEK1_BATCH = 20
 
 SEGMENT_VALUE = {
@@ -37,8 +37,8 @@ SEGMENT_VALUE = {
 
 # Compare page follow-up angle by segment (C2 — new angle, not "just checking in")
 COMPARE_BY_SEGMENT = {
-    "cafenea": "smartbill",
-    "restaurant mic": "smartbill",
+    "cafenea": "ebriza",
+    "restaurant mic": "ebriza",
     "takeaway/patiserie": "saga",
     "multi_location": "expressoft",
 }
@@ -56,7 +56,7 @@ def greeting(name: str) -> str:
 
 def signup_link(row: dict) -> str:
     slug = slugify(row["company"])
-    plan = row.get("recommended_plan") or "pro"
+    plan = row.get("recommended_plan") or "starter"
     return (
         f"https://franchisetech.ro/signup?plan={plan}&lang=ro"
         f"&utm_source=zoho&utm_campaign={CUSTOMER_CAMPAIGN}&utm_content={slug}"
@@ -79,7 +79,7 @@ def partner_email(row: dict, step: int = 1) -> dict:
         f"https://franchisetech.ro/partners?lang=ro"
         f"&utm_source=zoho&utm_campaign={PARTNER_CAMPAIGN}&utm_content={slug}"
     )
-    compare = "https://franchisetech.ro/compare/smartbill?lang=ro"
+    compare = "https://franchisetech.ro/compare/ebriza?lang=ro"
     fiscal = "https://franchisetech.ro/help/romania-fiscalnet?lang=ro"
     g = greeting(row.get("contact_name", ""))
     subjects = ["workspace HORECA", "stoc + NIR", "20% recurent", "ultim mesaj"]
@@ -88,9 +88,11 @@ def partner_email(row: dict, step: int = 1) -> dict:
 
 {row['hook_line']}
 
-franchisetech e workspace în browser pentru cafenele și restaurante — nu doar plăți: casă, stoc, NIR (14-3-1A) și rapoarte pentru contabil. Căutăm parteneri HORECA în România: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€) când onboardați un client.
+Clienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.
 
-Merită 10 minute să vedeți dacă se potrivește clienților voștri?
+Comparație: {compare}
+
+Parteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:
 
 {link}
 
@@ -99,9 +101,9 @@ Merită 10 minute să vedeți dacă se potrivește clienților voștri?
 {OPT_OUT}""",
         f"""Bună ziua{g},
 
-Revin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.
+Revin scurt: clienții HORECA plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights (rapoarte) +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.
 
-Comparație onestă vs SmartBill (facturare vs operațiuni zilnice): {compare}
+Comparație onestă: {compare}
 
 Aveți 1–2 clienți care ar beneficia acum?
 
@@ -142,21 +144,18 @@ Dacă revine tema: {link}
 
 def customer_email(row: dict, step: int = 1) -> dict:
     segment = row.get("segment") or "restaurant mic"
-    value_line = SEGMENT_VALUE.get(segment, SEGMENT_VALUE["restaurant mic"])
     link = signup_link(row)
     comp_link = compare_link(row)
     comp_slug = COMPARE_BY_SEGMENT.get(segment, "smartbill")
     g = greeting(row.get("contact_name", ""))
-    plan = row.get("recommended_plan") or "pro"
-    subjects = ["casa după program", "trial 15 zile", "ultim mesaj"]
+    plan = row.get("recommended_plan") or "starter"
+    subjects = ["sertarul după program", "trial 15 zile", "ultim mesaj"]
     bodies = [
         f"""Bună ziua{g},
 
 {row['personalization_line']}
 
-{value_line}
-
-franchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.
+La închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.
 
 V-ar fi util să vedeți cum arată pentru {row['company']}?
 
@@ -167,18 +166,18 @@ V-ar fi util să vedeți cum arată pentru {row['company']}?
 {OPT_OUT}""",
         f"""Bună ziua{g},
 
-Revin la {row['company']} — nu doar ca reminder: am publicat o comparație onestă franchisetech vs {comp_slug.title()} pentru operatori din România (trial paralel 15 zile, fără migrare big-bang).
+Revin la {row['company']} — nu doar ca reminder: Ebriza Pro e 49€/locație, dar Insights (rapoarte) costă +19€/lună. franchisetech Starter: 49€ cu raport Z inclus — trial paralel 15 zile, aceeași echipă.
 
 {comp_link}
 
-Onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol. Plan recomandat: {plan} (de la 39€/lună, fără taxă per angajat).
+Onboarding: produse demo, deschidere casă, ghidare la prima vânzare. Plan recomandat: {plan} (de la 49€/lună, fără taxă per angajat).
 
 {link}
 
 — {SIGNATURE}""",
         f"""Bună ziua{g},
 
-Nu vă mai scriu după acest mesaj. Dacă vreți să testați workspace-ul POS + stoc fără angajament: trial 15 zile asistat.
+Nu vă mai scriu după acest mesaj. Trial paralel 15 zile — aceeași echipă, aceeași închidere de zi — fără angajament.
 
 {link}
 
@@ -211,11 +210,18 @@ def pending_customers(customers: list[dict], limit: int | None = None) -> list[d
     return rows[:limit] if limit else rows
 
 
+def pending_partners(partners: list[dict], limit: int | None = None) -> list[dict]:
+    rows = [r for r in partners if (r.get("status") or "").strip() == "pending"]
+    return rows[:limit] if limit else rows
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate Zoho outreach payloads")
     parser.add_argument("step", nargs="?", type=int, default=1, help="Sequence step (1-4 partners, 1-3 customers)")
     parser.add_argument("--week1", action="store_true", help=f"First {WEEK1_BATCH} pending customers only (step 1)")
     parser.add_argument("--customers-only", action="store_true", help="Skip partner payloads")
+    parser.add_argument("--partners-only", action="store_true", help="Skip customer payloads")
+    parser.add_argument("--partners-limit", type=int, metavar="N", help="Max pending partners to include")
     parser.add_argument("--write", metavar="FILE", help="Write JSON to file instead of stdout")
     args = parser.parse_args()
 
@@ -225,9 +231,15 @@ def main():
 
     payloads: list[dict] = []
     if not args.customers_only:
-        payloads.extend(partner_email(r, step) for r in partners)
+        if args.partners_limit:
+            partner_rows = pending_partners(partners, args.partners_limit)
+        elif args.partners_only:
+            partner_rows = pending_partners(partners)
+        else:
+            partner_rows = partners
+        payloads.extend(partner_email(r, step) for r in partner_rows)
 
-    if step <= 3:
+    if not args.partners_only and step <= 3:
         if args.week1:
             batch = pending_customers(customers, WEEK1_BATCH)
             payloads.extend(customer_email(r, step=1) for r in batch)

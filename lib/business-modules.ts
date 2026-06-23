@@ -1,3 +1,5 @@
+import type { AppLocale } from "@/lib/app-i18n";
+import { getAppText } from "@/lib/app-i18n";
 import type { BusinessProfile } from "@/lib/business-profile";
 import {
   planAllowsModuleEffective,
@@ -128,17 +130,18 @@ export function moduleBlockReason(input: {
   module: BusinessModuleKey;
   subscriptionPlan?: BillingPlan | null;
   hasTrial?: boolean;
-}): string | null {
+}, locale: AppLocale = "en"): string | null {
+  const t = getAppText(locale);
   if (input.module === "pos_core") return null;
   if (!isModuleEnabled(input.org, input.module)) {
-    return "Enable this module in Settings when you are ready.";
+    return t.settings.features.blockReasonEnable;
   }
   const effectivePlan = resolveEffectivePlan({
     subscriptionPlan: input.subscriptionPlan,
     hasTrial: input.hasTrial,
   });
   if (!planAllowsModuleEffective(effectivePlan, input.module)) {
-    return "Available on Pro. Upgrade your plan or start a Pro trial.";
+    return t.settings.features.blockReasonPro;
   }
   return null;
 }

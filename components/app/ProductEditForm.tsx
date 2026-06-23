@@ -36,6 +36,7 @@ type ProductRecord = {
   id: string;
   name: string;
   category_id: string | null;
+  pos_category_id?: string | null;
   sale_price: number | null;
   cost_price: number | null;
   vat_rate: number | null;
@@ -55,6 +56,7 @@ type ProductRecord = {
 type Props = {
   product: ProductRecord;
   categories: { id: string; name: string }[];
+  posCategories?: { id: string; name: string }[];
   suppliers: { id: string; name: string }[];
   units: string[];
   vatRates: OrgVatRate[];
@@ -121,6 +123,7 @@ function OptionToggle({
 export function ProductEditForm({
   product,
   categories,
+  posCategories = [],
   suppliers,
   units,
   vatRates,
@@ -236,7 +239,7 @@ export function ProductEditForm({
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <Label htmlFor="product-category">Category</Label>
+                    <Label htmlFor="product-category">{pf.category}</Label>
                     <select
                       id="product-category"
                       name="category_id"
@@ -249,6 +252,22 @@ export function ProductEditForm({
                       ))}
                     </select>
                   </div>
+                  {posCategories.length > 0 ? (
+                    <div className="sm:col-span-2">
+                      <Label htmlFor="product-pos-category">{pf.category} (POS)</Label>
+                      <select
+                        id="product-pos-category"
+                        name="pos_category_id"
+                        defaultValue={product.pos_category_id ?? ""}
+                        className={cn(selectClass, "mt-1.5")}
+                      >
+                        <option value="">— none —</option>
+                        {posCategories.map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </div>

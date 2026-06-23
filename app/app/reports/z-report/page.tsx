@@ -2,20 +2,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { PrintButton } from "@/components/app/PrintButton";
+import { RegistruDeCasaButton } from "@/components/app/RegistruDeCasaButton";
 import { ZReportCashForm } from "@/components/app/ZReportCashForm";
 import { GrowthReportViewTracker } from "@/components/app/GrowthReportViewTracker";
 import { ZReportReferralNudge } from "@/components/app/ZReportReferralNudge";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { ensureReferralCode } from "@/lib/referrals";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { formatAppDate, intlLocaleForApp } from "@/lib/app-locale";
 
 function firstJoined<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
 }
 
 export default async function ZReportPage({ searchParams }: { searchParams?: Promise<{ date?: string }> }) {
-  const { countryCode, supabase, orgId, user, membership, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, user, membership, currency } = await getKitchenOpsContext();
+  const { t, locale } = await getAppLocaleAndText(countryCode, profileLocale);
   const zp = t.reportPages.zReport;
   const params = await searchParams;
   const org = firstJoined(membership.organisations as { name?: string | null } | { name?: string | null }[]);
@@ -49,6 +51,17 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
     .lte('performed_at', dayEnd)
     .order('performed_at');
 
+  // Get opening cash from pos_sessions for this day
+  const { data: sessions } = await supabase
+    .from('pos_sessions')
+    .select('opening_cash')
+    .eq('organisation_id', orgId)
+    .gte('opened_at', dayStart)
+    .lte('opened_at', dayEnd)
+    .order('opened_at', { ascending: true })
+    .limit(1);
+  const openingCash = Number(sessions?.[0]?.opening_cash ?? 0);
+
   const cashInTotal = (cashMovements ?? []).filter((m) => m.movement_type === 'cash_in').reduce((s, m) => s + Number(m.amount ?? 0), 0);
   const cashOutTotal = (cashMovements ?? []).filter((m) => m.movement_type === 'cash_out').reduce((s, m) => s + Number(m.amount ?? 0), 0);
 
@@ -67,7 +80,7 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
   for (const tx of completedTx) {
     const method = firstJoined(tx.payment_methods as {name?:string;type?:string}|{name?:string;type?:string}[]);
     const type = ((method as { name?: string | null; type?: string | null } | null)?.type) ?? "other";
-    const name = ((method as { name?: string | null; type?: string | null } | null)?.name) ?? "Other";
+    const name = ((method as { name?: string | null; type?: string | null } | null)?.name) ?? zp.other;
     byPaymentType.set(name, (byPaymentType.get(name) ?? 0) + Number(tx.total ?? 0));
   }
   const cashTotal = [...byPaymentType.entries()].filter(([k]) => k.toLowerCase() === "cash").reduce((s, [, v]) => s + v, 0);
@@ -96,9 +109,9 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
   }
   const topProducts = [...byProduct.entries()].sort(([,a],[,b]) => b - a).slice(0, 5);
 
-  const generatedAt = new Intl.DateTimeFormat("en-IE", { dateStyle: "medium", timeStyle: "short" }).format(new Date());
+  const generatedAt = formatAppDate(new Date().toISOString(), locale);
   const { data: profile } = await supabase.from("profiles").select("full_name,email").eq("id", user.id).single();
-  const generatedBy = profile?.full_name || profile?.email || user.email || "Unknown";
+  const generatedBy = profile?.full_name || profile?.email || user.email || t.common.unknown;
   const referral = await ensureReferralCode(orgId).catch(() => ({
     available: false,
     link: null as string | null,
@@ -124,6 +137,24 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
             <input type="date" name="date" defaultValue={reportDate} max={today} className="h-10 rounded-md border border-slate-200 px-3 text-sm" />
             <button type="submit" className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50">{zp.load}</button>
           </form>
+          {countryCode === "RO" && (
+            <RegistruDeCasaButton
+              orgName={((org as { name?: string | null } | null)?.name) ?? "franchisetech"}
+              currency={currency}
+              openingCash={openingCash}
+              movements={(cashMovements ?? []).map((m) => ({
+                movement_type: m.movement_type,
+                amount: m.amount,
+                reason: m.reason,
+                performed_at: m.performed_at,
+              }))}
+              cashSales={cashTotal}
+              expectedCash={openingCash + cashTotal + cashInTotal - cashOutTotal}
+              userName={generatedBy}
+              dateStart={dayStart}
+              dateEnd={dayEnd}
+            />
+          )}
           <PrintButton />
         </div>
       </div>
@@ -262,7 +293,7 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
                     </TableCell>
                     <TableCell className='text-slate-600'>{m.reason ?? '—'}</TableCell>
                     <TableCell className='text-xs text-slate-400'>
-                      {m.performed_at ? new Intl.DateTimeFormat('en-IE', { timeStyle: 'short' }).format(new Date(m.performed_at)) : '—'}
+                      {m.performed_at ? new Intl.DateTimeFormat(intlLocaleForApp(locale), { timeStyle: "short" }).format(new Date(m.performed_at)) : "—"}
                     </TableCell>
                     <TableCell className='text-right font-medium tabular-nums'>
                       {formatMoney(Math.abs(Number(m.amount ?? 0)), currency)}
@@ -276,7 +307,7 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
       )}
 
       {/* Cash reconciliation */}
-      <ZReportCashForm expectedCash={cashTotal} reportDate={reportDate} orgId={orgId} />
+      <ZReportCashForm expectedCash={cashTotal} reportDate={reportDate} orgId={orgId} currency={currency} />
 
       {/* Manager sign-off */}
       <Card className="print:block">

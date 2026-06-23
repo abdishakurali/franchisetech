@@ -1,0 +1,48 @@
+[
+  {
+    "message_id": "1782057029629014300",
+    "received_at": "2026-06-21T17:30:19+03:00",
+    "from": "rezervari@mythai.ro",
+    "from_name": "Cristi",
+    "company": "My Thai",
+    "type": "customer",
+    "classification": "opt_out",
+    "subject": "Re: sertarul după program",
+    "snippet": "Stop",
+    "action": "no further outreach — GDPR opt-out"
+  },
+  {
+    "message_id": "1782049777269004300",
+    "received_at": "2026-06-21T16:09:31+03:00",
+    "from": "vlad.simanovszky@vlarox.ro",
+    "from_name": "Vlad Simanovszky",
+    "company": "Vlarox Fiscal",
+    "type": "partner",
+    "classification": "opt_out",
+    "subject": "Re: workspace HORECA",
+    "snippet": "Stop !",
+    "action": "no further outreach — also match office@vlarox.ro"
+  },
+  {
+    "message_id": "1782050718871005600",
+    "received_at": "2026-06-21T16:25:16+03:00",
+    "from": "Mailer-Daemon@zeus.hostideea.ro",
+    "company": "FOOM",
+    "type": "customer",
+    "classification": "bounce",
+    "subject": "Mail delivery failed",
+    "snippet": "contact@foom.ro Disabled recipient address",
+    "action": "failed_bounce — do not retry"
+  },
+  {
+    "message_id": "1782050558093005600",
+    "received_at": "2026-06-21T16:22:37+03:00",
+    "from": "mailer-daemon@mail.zoho.eu",
+    "company": "KIMU",
+    "type": "customer",
+    "classification": "bounce",
+    "subject": "Undelivered Mail Returned to Sender",
+    "snippet": "rezervari@kimu.ro 550 No Such User Here",
+    "action": "failed_bounce — do not retry"
+  }
+]

@@ -101,7 +101,9 @@ export default function OnboardingPage() {
     startTransition(async () => {
       const acquisition = readAcquisitionClient();
       const preferredPlan = readPreferredPlanClient();
-      const ref = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("ref") : null;
+      const urlRef =
+        typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("ref") : null;
+      const ref = urlRef ?? acquisition?.ref ?? null;
 
       const result = await completePosOnboarding({
         orgName: form.name,

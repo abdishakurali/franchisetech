@@ -44,15 +44,25 @@ export function getPlanFeatureCategories(
   const tillClose = tillCloseLabelForMarket(market);
 
   if (plan === "starter") {
+    const tillItems =
+      market === "RO"
+        ? [
+            "POS checkout",
+            "Cash & card payments",
+            "Transaction history & receipts",
+            "Open/close till",
+            "% or fixed lei discounts at checkout",
+          ]
+        : [
+            "POS checkout",
+            "Cash & card payments",
+            "Transaction history & receipts",
+            "Open/close till",
+          ];
     return [
       {
         title: "Till & sales",
-        items: [
-          "POS checkout",
-          "Cash & card payments",
-          "Transaction history & receipts",
-          "Open/close till",
-        ],
+        items: tillItems,
       },
       {
         title: "Products",

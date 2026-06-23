@@ -19,6 +19,9 @@ const BRANDS: CompetitorBrand[] = [
   { slug: "expressoft", name: "Expressoft", logoSrc: "/compare/logos/expressoft.png", accent: "#DC2626", domain: "expressoft.ro", market: "ro" },
   { slug: "hepos", name: "hePOS", logoSrc: "/compare/logos/hepos.svg", accent: "#EA580C", domain: "hepos.ro", market: "ro" },
   { slug: "vilicorest", name: "VilicoRest", logoSrc: "/compare/logos/vilicorest.svg", accent: "#7C3AED", domain: "vilicorest.ro", market: "ro" },
+  { slug: "ebriza", name: "Ebriza", logoSrc: "/compare/logos/ebriza.svg", accent: "#4F46E5", domain: "ebriza.ro", market: "ro" },
+  { slug: "oblio", name: "Oblio", logoSrc: "/compare/logos/oblio.svg", accent: "#0F766E", domain: "oblio.eu", market: "ro" },
+  { slug: "bit-soft", name: "Bit-Soft", logoSrc: "/compare/logos/bit-soft.svg", accent: "#1E293B", domain: "bit-soft.ro", market: "ro" },
 ];
 
 export const FRANCHISETECH_BRAND = {
@@ -40,6 +43,6 @@ export function competitorLogoForOg(slug: string): string {
 }
 
 export function featuredCompareSlugs(locale: "en" | "ro" | "it"): string[] {
-  if (locale === "ro") return ["smartbill", "saga", "rezosoft", "expressoft"];
+  if (locale === "ro") return ["ebriza", "smartbill", "oblio", "saga"];
   return ["square", "sumup", "smartbill"];
 }

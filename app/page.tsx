@@ -42,7 +42,7 @@ export default async function HomePage() {
           inLanguage: locale,
           description: t.home.meta.description,
           url: SITE_URL,
-          offers: { "@type": "Offer", price: "39", priceCurrency: "EUR" },
+          offers: { "@type": "Offer", price: "49", priceCurrency: "EUR" },
         }}
       />
       <JsonLd data={faqJsonLd([...t.home.faq.items])} />

@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, ChevronDown, Coffee, Droplets, LayoutGrid, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
+import { Banknote, Check, ChevronDown, Coffee, Droplets, LayoutGrid, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +19,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { friendlySaleError, paymentTypeLabel } from "@/lib/pos-i18n";
+import { PosPaymentPanel } from "@/components/app/PosPaymentPanel";
+import { PosOfflineBar } from "@/components/app/PosOfflineBar";
+import { friendlySaleError, paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
 import { PosI18nProvider, usePosI18n, posIntlLocale } from "@/lib/pos-i18n-context";
 import {
   readCartBackupFromStorage,
@@ -28,29 +31,34 @@ import {
 import { holdCurrentSale, listHeldSales, resumeHeldSale, type HeldSale } from "@/lib/pos-held-sales";
 import {
   clampDiscountPct,
+  clampDiscountLei,
   cartDiscountAmount,
   cartGrossAfter,
+  cartGrossAfterLei,
   cartGrossBefore,
+  cartLeiDiscountAmount,
   lineGrossAfter,
   lineGrossBefore,
-  lineVatAmount,
   normalizeCartLines,
   transactionDiscountPct,
   type PosCartLine,
 } from "@/lib/pos-line-discount";
 import {
-  dismissPendingFiscal,
   enqueueOfflineSale,
   formDataToPayload,
   isBrowserOnline,
+  isRetryableNetworkError,
   listOfflineQueue,
   listPendingSync,
   markOfflineSaleSynced,
   payloadToFormData,
+  removeOfflineSale,
+  markOfflineSaleSyncFailed,
   type QueuedSale,
 } from "@/lib/pos-offline-queue";
 import { PosQuickAddProduct } from "@/components/app/PosQuickAddProduct";
 import { PosQuickAccessSheet } from "@/components/app/PosQuickAccessSheet";
+import { sortCategoriesByName } from "@/lib/product-categories";
 
 type Product = {
   id: string; name: string; sale_price: number | string; vat_rate?: number | string | null;
@@ -59,6 +67,8 @@ type Product = {
   available_in_pos?: boolean | null; is_ingredient?: boolean | null; is_sellable?: boolean | null;
   has_sgr?: boolean | null;
   product_categories?: { id: string; name: string; color: string | null } | null;
+  pos_category?: { id: string; name: string; color: string | null } | null;
+  inventory_category?: { id: string; name: string; color: string | null } | null;
 };
 type Category = { id: string; name: string; color: string | null };
 type PaymentMethod = { id: string; name: string; type: string };
@@ -85,16 +95,6 @@ type PosSummary = {
   cashOperations: CashOperation[];
 };
 type FiscalDownloadPayload = { ok: boolean; message: string; filename?: string; content?: string; status?: string; mode?: string };
-type PlaceholderCfg = { bg: string; text: string; icon: "coffee" | "drink" | "food" | "package"; style?: React.CSSProperties };
-
-const PLACEHOLDERS: Record<string, PlaceholderCfg> = {
-  coffee:     { bg: "bg-amber-50",  text: "text-amber-500",  icon: "coffee"  },
-  drink:      { bg: "bg-sky-50",    text: "text-sky-500",    icon: "drink"   },
-  food:       { bg: "bg-green-50",  text: "text-green-600",  icon: "food"    },
-  snack:      { bg: "bg-yellow-50", text: "text-yellow-500", icon: "food"    },
-  ingredient: { bg: "bg-slate-100", text: "text-slate-400",  icon: "package" },
-  other:      { bg: "bg-slate-100", text: "text-slate-400",  icon: "package" },
-};
 
 async function downloadFiscalPayload(
   result: FiscalDownloadPayload,
@@ -117,68 +117,131 @@ async function downloadFiscalPayload(
 
 function money(v: number, cur = "EUR") { if (cur === "RON") return `${v.toFixed(2)} lei`; return new Intl.NumberFormat("en-IE",{style:"currency",currency: cur || "EUR"}).format(v); }
 
-function getPhCfg(p: Product): PlaceholderCfg {
-  if (p.placeholder_type && PLACEHOLDERS[p.placeholder_type]) return PLACEHOLDERS[p.placeholder_type];
-  const cat = p.product_categories?.name?.toLowerCase() ?? "";
-  if (cat.includes("coffee")||cat.includes("espresso")||cat.includes("cappuccino")||cat.includes("blend")||cat.includes("speciality")) return PLACEHOLDERS.coffee;
-  if (cat.includes("drink")||cat.includes("beverage")||cat.includes("juice")||cat.includes("limonada")||cat.includes("bauturi")||cat.includes("iced")) return PLACEHOLDERS.drink;
-  if (cat.includes("food")||cat.includes("meal")||cat.includes("lunch")||cat.includes("snack")||cat.includes("bakery")||cat.includes("pastry")||cat.includes("hot beverage")) return PLACEHOLDERS.food;
-  const col = p.product_categories?.color;
-  if (col) return { bg: "", text: "text-white", icon: "package", style: { backgroundColor: col } };
-  return PLACEHOLDERS.other;
+type PlaceholderCfg = {
+  bg: string;
+  iconColor: string;
+  icon: typeof Coffee;
+  style?: React.CSSProperties;
+};
+
+const PLACEHOLDER_STYLES: Record<string, PlaceholderCfg> = {
+  coffee: { bg: "bg-amber-50", iconColor: "text-amber-400", icon: Coffee },
+  drink: { bg: "bg-sky-50", iconColor: "text-sky-400", icon: Droplets },
+  food: { bg: "bg-emerald-50", iconColor: "text-emerald-500", icon: Utensils },
+  snack: { bg: "bg-yellow-50", iconColor: "text-yellow-500", icon: Utensils },
+  ingredient: { bg: "bg-slate-100", iconColor: "text-slate-400", icon: Package },
+  other: { bg: "bg-slate-100", iconColor: "text-slate-400", icon: Package },
+};
+
+function productPlaceholderCfg(
+  placeholderType: string | null | undefined,
+  categoryName: string | null | undefined,
+  categoryColor: string | null | undefined,
+): PlaceholderCfg {
+  if (placeholderType && PLACEHOLDER_STYLES[placeholderType]) return PLACEHOLDER_STYLES[placeholderType];
+  const cat = categoryName?.toLowerCase() ?? "";
+  if (cat.includes("coffee") || cat.includes("espresso") || cat.includes("cafe")) return PLACEHOLDER_STYLES.coffee;
+  if (cat.includes("drink") || cat.includes("beverage") || cat.includes("bauturi")) return PLACEHOLDER_STYLES.drink;
+  if (cat.includes("food") || cat.includes("meal") || cat.includes("snack")) return PLACEHOLDER_STYLES.food;
+  if (categoryColor) {
+    return { bg: "", iconColor: "text-white/80", icon: Package, style: { backgroundColor: categoryColor } };
+  }
+  return PLACEHOLDER_STYLES.other;
 }
 
-function PlaceholderIcon({ icon, className }: { icon: PlaceholderCfg["icon"]; className?: string }) {
-  const cls = className ?? "h-8 w-8";
-  if (icon === "coffee")  return <Coffee className={cls} />;
-  if (icon === "drink")   return <Droplets className={cls} />;
-  if (icon === "food")    return <Utensils className={cls} />;
-  return <Package className={cls} />;
-}
-
-// ── Product image with polished fallback ─────────────────────────────────────────
-function ProductImage({ src, alt, cfg }: { src: string | null | undefined; alt: string; cfg: PlaceholderCfg }) {
+function ProductTileMedia({
+  imageUrl,
+  name,
+  placeholderType,
+  categoryName,
+  categoryColor,
+}: {
+  imageUrl: string | null | undefined;
+  name: string;
+  placeholderType: string | null | undefined;
+  categoryName: string | null | undefined;
+  categoryColor: string | null | undefined;
+}) {
   const [failed, setFailed] = useState(false);
-  if (!src || failed) {
+  const showImage = Boolean(imageUrl && !failed);
+
+  if (showImage) {
     return (
-      <div
-        className={`flex h-28 w-full shrink-0 items-center justify-center ${cfg.bg} ${cfg.text}`}
-        style={cfg.style}
-      >
-        <PlaceholderIcon icon={cfg.icon} className="h-9 w-9 opacity-40" />
+      <div className="h-10 w-full shrink-0 overflow-hidden bg-slate-100 sm:h-11">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl!}
+          alt={name}
+          className="h-full w-full object-cover object-center"
+          loading="lazy"
+          onError={() => setFailed(true)}
+        />
       </div>
     );
   }
+
+  const cfg = productPlaceholderCfg(placeholderType, categoryName, categoryColor);
+  const Icon = cfg.icon;
   return (
-    <div className="h-28 w-full shrink-0 overflow-hidden bg-slate-100">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={alt}
-        className="h-full w-full object-cover transition-opacity duration-200"
-        onError={() => setFailed(true)}
-      />
+    <div
+      className={cn("flex h-10 w-full shrink-0 items-center justify-center sm:h-11", cfg.bg)}
+      style={cfg.style}
+      aria-hidden
+    >
+      <Icon className={cn("h-5 w-5 opacity-50 sm:h-6 sm:w-6", cfg.iconColor)} />
     </div>
   );
 }
 
-function ProductImageCompact({ src, alt, cfg }: { src: string | null | undefined; alt: string; cfg: PlaceholderCfg }) {
-  const [failed, setFailed] = useState(false);
-  if (!src || failed) {
-    return (
-      <div
-        className={`flex h-20 w-full shrink-0 items-center justify-center ${cfg.bg} ${cfg.text}`}
-        style={cfg.style}
-      >
-        <PlaceholderIcon icon={cfg.icon} className="h-7 w-7 opacity-40" />
-      </div>
-    );
-  }
+function ProductGridTile({
+  name,
+  priceLabel,
+  imageUrl,
+  placeholderType,
+  categoryName,
+  categoryColor,
+  inCartQty,
+  selected,
+  onClick,
+}: {
+  name: string;
+  priceLabel: string;
+  imageUrl: string | null | undefined;
+  placeholderType: string | null | undefined;
+  categoryName: string | null | undefined;
+  categoryColor: string | null | undefined;
+  inCartQty: number;
+  selected: boolean;
+  onClick: () => void;
+}) {
   return (
-    <div className="h-20 w-full shrink-0 overflow-hidden bg-slate-100">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} className="h-full w-full object-cover" onError={() => setFailed(true)} />
-    </div>
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "relative flex flex-col overflow-hidden rounded-xl border text-left shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300",
+        selected ? "border-blue-400 bg-blue-50/30 ring-1 ring-blue-100" : "border-slate-200 bg-white hover:border-blue-300",
+      )}
+    >
+      <ProductTileMedia
+        imageUrl={imageUrl}
+        name={name}
+        placeholderType={placeholderType}
+        categoryName={categoryName}
+        categoryColor={categoryColor}
+      />
+      {inCartQty > 0 && (
+        <span className="absolute right-1.5 top-1.5 rounded-md bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm sm:text-xs">
+          ×{inCartQty}
+        </span>
+      )}
+      <div className="flex min-h-0 flex-1 flex-col justify-between gap-0.5 p-1.5 sm:p-2">
+        <span className="line-clamp-2 text-[11px] font-semibold leading-snug text-slate-900 [overflow-wrap:anywhere] sm:text-xs">
+          {name}
+        </span>
+        <span className="text-[10px] font-bold tabular-nums text-slate-700 sm:text-[11px]">{priceLabel}</span>
+      </div>
+    </button>
   );
 }
 
@@ -484,6 +547,8 @@ function PosRegisterInner({
   features = {},
   canManage = false,
   defaultVatRate = 0,
+  catalogOffline = false,
+  catalogCachedAt = null,
 }: {
   products: Product[];
   categories: Category[];
@@ -517,6 +582,8 @@ function PosRegisterInner({
   };
   canManage?: boolean;
   defaultVatRate?: number;
+  catalogOffline?: boolean;
+  catalogCachedAt?: string | null;
 }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -540,10 +607,18 @@ function PosRegisterInner({
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [closeTillDialogOpen, setCloseTillDialogOpen] = useState(false);
   const [drawerNotice, setDrawerNotice] = useState<string | null>(null);
-  const [lastCompletedSale, setLastCompletedSale] = useState<{ transactionId: string; amountLabel: string } | null>(null);
+  const [lastCompletedSale, setLastCompletedSale] = useState<{
+    amountLabel: string;
+    transactionId?: string;
+    status: "saving" | "saved" | "failed" | "queued";
+    errorMsg?: string;
+    retryPayload?: Record<string, string>;
+  } | null>(null);
   const focusedCheckout = checkoutStep === "payment" || checkoutStep === "complete";
   const [discountEditId, setDiscountEditId] = useState<string | null>(null);
   const [discountEditValue, setDiscountEditValue] = useState<number | "">("");
+  const [discountMode, setDiscountMode] = useState<"pct" | "lei">("pct");
+  const [cartDiscountLei, setCartDiscountLei] = useState(0);
   const [saleStatus, setSaleStatus] = useState<{ ok: boolean; msg: string; transactionId?: string } | null>(null);
   const [lastFiscalTxt, setLastFiscalTxt] = useState<{ filename: string; content: string } | null>(null);
   const [salePending, setSalePending] = useState(false);
@@ -565,10 +640,11 @@ function PosRegisterInner({
   const [tipOpen, setTipOpen] = useState(false);
   const [splitOpen, setSplitOpen] = useState(false);
   const [cashReceived, setCashReceived] = useState<number | "">("");
-  const [cashCustomOpen, setCashCustomOpen] = useState(false);
   const [heldSales, setHeldSales] = useState<HeldSale[]>(() => listHeldSales());
   const [heldOpen, setHeldOpen] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<QueuedSale[]>(() => listOfflineQueue());
+  const [browserOffline, setBrowserOffline] = useState(() => !isBrowserOnline());
+  const [syncingOffline, setSyncingOffline] = useState(false);
   const [quickAccessOpen, setQuickAccessOpen] = useState(false);
   const [addProductOpen, setAddProductOpen] = useState(false);
   const syncingOfflineRef = useRef(false);
@@ -583,37 +659,15 @@ function PosRegisterInner({
   );
 
   useEffect(() => {
-    async function flushOfflineQueue() {
-      if (!isBrowserOnline() || syncingOfflineRef.current) return;
-      const pending = listPendingSync();
-      if (!pending.length) return;
-      syncingOfflineRef.current = true;
-      setSaleStatus({ ok: true, msg: t.offlineSyncing });
-      let synced = 0;
-      for (const entry of pending) {
-        try {
-          const res = await completeSaleReturn(payloadToFormData(entry.payload));
-          if (res.ok && res.transactionId) {
-            markOfflineSaleSynced(entry.id, res.transactionId);
-            synced++;
-          } else {
-            break;
-          }
-        } catch {
-          break;
-        }
-      }
-      syncingOfflineRef.current = false;
-      setOfflineQueue(listOfflineQueue());
-      if (synced > 0) {
-        setSaleStatus({ ok: true, msg: t.offlineSyncDone(synced) });
-        setTimeout(() => setSaleStatus(null), 4000);
-      }
-    }
-    window.addEventListener("online", flushOfflineQueue);
-    flushOfflineQueue();
-    return () => window.removeEventListener("online", flushOfflineQueue);
-  }, [t.offlineSyncDone, t.offlineSyncing]);
+    const syncOfflineState = () => setBrowserOffline(!isBrowserOnline());
+    window.addEventListener("offline", syncOfflineState);
+    window.addEventListener("online", syncOfflineState);
+    syncOfflineState();
+    return () => {
+      window.removeEventListener("offline", syncOfflineState);
+      window.removeEventListener("online", syncOfflineState);
+    };
+  }, []);
 
   function resetCartAfterSale() {
     setCart([]);
@@ -621,12 +675,24 @@ function PosRegisterInner({
     setSplitPayments([]);
     setSelectedCustomer(null);
     setCashReceived("");
+    setCartDiscountLei(0);
+    setDiscountMode("pct");
     clearCartBackupFromStorage();
   }
 
   const grossTotal = useMemo(() => cartGrossBefore(cart), [cart]);
-  const discountAmount = useMemo(() => cartDiscountAmount(cart), [cart]);
-  const afterDiscount = useMemo(() => cartGrossAfter(cart), [cart]);
+  const discountAmount = useMemo(() => {
+    if (discountMode === "lei" && cartDiscountLei > 0) {
+      return cartLeiDiscountAmount(cart, cartDiscountLei);
+    }
+    return cartDiscountAmount(cart);
+  }, [cart, discountMode, cartDiscountLei]);
+  const afterDiscount = useMemo(() => {
+    if (discountMode === "lei" && cartDiscountLei > 0) {
+      return cartGrossAfterLei(cart, cartDiscountLei);
+    }
+    return cartGrossAfter(cart);
+  }, [cart, discountMode, cartDiscountLei]);
   const safeTipAmount = features.tips ? Math.max(0, tipAmount) : 0;
   const totalDue = afterDiscount + safeTipAmount;
   const activeSplitPayments = splitPayments.filter((row) => row.amount > 0 && row.payment_method_id);
@@ -635,13 +701,15 @@ function PosRegisterInner({
   const selectedPaymentType = paymentMethods.find((m) => m.id === paymentMethodId)?.type ?? "other";
   const isCashSingle = selectedPaymentType === "cash" && activeSplitPayments.length === 0 && cart.length > 0;
   const cashUnderPaid = isCashSingle && typeof cashReceived === "number" && cashReceived > 0 && cashReceived < totalDue - 0.005;
-  const totalVat = useMemo(() => cart.reduce((s, i) => s + lineVatAmount(i), 0), [cart]);
   const txDiscountPct = useMemo(() => transactionDiscountPct(cart), [cart]);
   const checkoutCart = paymentCartSnapshot ?? cart;
-  const checkoutTotalDue = useMemo(
-    () => cartGrossAfter(checkoutCart) + safeTipAmount,
-    [checkoutCart, safeTipAmount]
-  );
+  const checkoutTotalDue = useMemo(() => {
+    const base =
+      discountMode === "lei" && cartDiscountLei > 0
+        ? cartGrossAfterLei(checkoutCart, cartDiscountLei)
+        : cartGrossAfter(checkoutCart);
+    return base + safeTipAmount;
+  }, [checkoutCart, safeTipAmount, discountMode, cartDiscountLei]);
 
   function buildSaleFormData(saleCart: CartItem[], dueTotal: number): FormData {
     const fd = new FormData();
@@ -650,7 +718,13 @@ function PosRegisterInner({
     fd.set("payment_method_id", paymentMethodId);
     fd.set("payment_type", selectedPaymentType);
     fd.set("customer_name", selectedCustomer?.name ?? "");
-    fd.set("discount_pct", String(txDiscountPct));
+    if (discountMode === "lei" && cartDiscountLei > 0) {
+      fd.set("discount_lei", String(cartDiscountLei));
+      fd.set("discount_pct", "0");
+    } else {
+      fd.set("discount_pct", String(txDiscountPct));
+      fd.set("discount_lei", "0");
+    }
     fd.set("tip_amount", String(safeTipAmount));
     fd.set("order_type", features.orderTypes ? orderType : "");
     fd.set("table_label", features.tableService ? tableLabel : "");
@@ -694,18 +768,118 @@ function PosRegisterInner({
     return fd;
   }
 
+  function queueCurrentSale(saleCart: CartItem[], dueTotal: number) {
+    const fd = buildSaleFormData(saleCart, dueTotal);
+    enqueueOfflineSale(
+      formDataToPayload(fd),
+      t.offlineQueueLabel(saleCart.length, money(dueTotal)),
+    );
+    resetCartAfterSale();
+    setPaymentCartSnapshot(null);
+    setOfflineQueue(listOfflineQueue());
+    setLastCompletedSale({ amountLabel: money(dueTotal), status: "queued" });
+    setCheckoutStep("complete");
+    setSalePending(false);
+  }
+
+  async function persistSaleInBackground(
+    fd: FormData,
+    cartSnapshot: CartItem[],
+    amountLabel: string,
+  ) {
+    const payload = formDataToPayload(fd);
+    try {
+      writeCartBackupToStorage({
+        cart: cartSnapshot,
+        sessionId: sessionId ?? "",
+        paymentMethodId,
+        cashReceived,
+        discountPct: txDiscountPct,
+      });
+      const res = await completeSaleReturn(fd);
+      if (!res.ok || !res.transactionId) {
+        const errMsg = res.ok
+          ? t.saleSaveFailed
+          : friendlySaleError(res.error, locale);
+        enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
+        setOfflineQueue(listOfflineQueue());
+        clearCartBackupFromStorage();
+        setLastCompletedSale((prev) =>
+          prev
+            ? { ...prev, status: "queued", errorMsg: errMsg }
+            : { amountLabel, status: "queued" },
+        );
+        return;
+      }
+      clearCartBackupFromStorage();
+      setLastCompletedSale({
+        amountLabel: money(res.total),
+        transactionId: res.transactionId,
+        status: "saved",
+      });
+      if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
+        void fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType).then((fnRes) => {
+          if (fiscalActive && fnRes.filename && fnRes.content) {
+            setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
+          }
+          console.info("[FiscalNet] receipt browser result", {
+            ok: fnRes.ok,
+            message: fnRes.message,
+            mode: fiscalNet.connectionMode,
+          });
+        });
+      }
+      if (res.cashSale) {
+        void openCashDrawer("cash_sale", cashDrawerSettings).then((drawerResult) => {
+          if (drawerResult.cashierMessage) setDrawerNotice(drawerResult.cashierMessage);
+        });
+      }
+    } catch (err) {
+      enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
+      setOfflineQueue(listOfflineQueue());
+      clearCartBackupFromStorage();
+      setLastCompletedSale((prev) =>
+        prev
+          ? {
+              ...prev,
+              status: "queued",
+              retryPayload: payload,
+              errorMsg: isRetryableNetworkError(err) ? undefined : t.saleSaveFailed,
+            }
+          : { amountLabel, status: "queued", retryPayload: payload },
+      );
+    }
+  }
+
+  async function retryFailedSale(payload: Record<string, string>, amountLabel: string) {
+    setLastCompletedSale((prev) =>
+      prev ? { ...prev, status: "saving", errorMsg: undefined } : null,
+    );
+    const cartSnapshot = (() => {
+      try {
+        return JSON.parse(payload.cart_json ?? "[]") as CartItem[];
+      } catch {
+        return [] as CartItem[];
+      }
+    })();
+    await persistSaleInBackground(payloadToFormData(payload), cartSnapshot, amountLabel);
+  }
+
   const posProducts = useMemo(() =>
     products.filter((p) => p.available_in_pos !== false && p.is_ingredient !== true), [products]);
 
   const filtered = useMemo(() =>
     posProducts.filter((p) => {
-      const matchCat = search.trim() ? true : activeCategory === "all" || p.product_categories?.id === activeCategory;
+      const matchCat = search.trim() ? true : activeCategory === "all" || p.pos_category?.id === activeCategory;
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     }), [posProducts, activeCategory, search]);
 
-  const activeCategoryIds = useMemo(() => new Set(posProducts.map((p) => p.product_categories?.id).filter(Boolean)), [posProducts]);
-  const visibleCategories = categories.filter((c) => activeCategoryIds.has(c.id));
+  const activeCategoryIds = useMemo(() => new Set(posProducts.map((p) => p.pos_category?.id).filter(Boolean)), [posProducts]);
+  const visibleCategories = useMemo(
+    () => sortCategoriesByName(categories.filter((c) => activeCategoryIds.has(c.id))),
+    [categories, activeCategoryIds],
+  );
   const shownTransactions = recentTransactions.filter((tx) =>
     [tx.transaction_number, tx.customer_name, tx.payment_methods?.name].filter(Boolean).join(" ").toLowerCase().includes(txSearch.toLowerCase())
   ).slice(0, 12);
@@ -729,7 +903,25 @@ function PosRegisterInner({
 
   function applyDiscountToAllCurrentItems(pct: number) {
     const clamped = clampDiscountPct(pct);
+    setDiscountMode("pct");
+    setCartDiscountLei(0);
     setCart((items) => syncSgr(items.map((i) => ({ ...i, discount_pct: clamped }))));
+  }
+
+  function applyCartDiscountLei(lei: number) {
+    const clamped = clampDiscountLei(lei, cartGrossBefore(cart));
+    setDiscountMode("lei");
+    setCartDiscountLei(clamped);
+    setCart((items) => syncSgr(items.map((i) => ({ ...i, discount_pct: 0 }))));
+  }
+
+  function switchDiscountMode(mode: "pct" | "lei") {
+    setDiscountMode(mode);
+    if (mode === "pct") {
+      setCartDiscountLei(0);
+    } else {
+      applyDiscountToAllCurrentItems(0);
+    }
   }
 
   function openItemOptions(productId: string) {
@@ -776,7 +968,6 @@ function PosRegisterInner({
       return syncSgr(updated);
     });
 
-  const vatLabel = isRO ? t.inclTva : t.inclVat;
   const chargeDisabled =
     !cart.length ||
     !paymentMethods.length ||
@@ -784,7 +975,6 @@ function PosRegisterInner({
     cashUnderPaid ||
     (features.splitPayments && activeSplitPayments.length > 0 && splitPaid + 0.0001 < totalDue);
   const cartItemCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
-  const cashQuickBills = useMemo(() => [35, 40, 50, 100], []);
   const cashExactAmount = useMemo(() => Number(totalDue.toFixed(2)), [totalDue]);
   const displayedChangeDue = isCashSingle
     ? (typeof cashReceived === "number" && cashReceived > 0
@@ -793,11 +983,97 @@ function PosRegisterInner({
     : null;
   const fiscalActive = useFiscalNetActive(isRO, fiscalNet);
 
+  async function syncQueuedEntry(entry: QueuedSale): Promise<boolean> {
+    try {
+      const res = await completeSaleReturn(payloadToFormData(entry.payload));
+      if (!res.ok || !res.transactionId) {
+        markOfflineSaleSyncFailed(
+          entry.id,
+          !res.ok ? friendlySaleError(res.error, locale) : t.saleSaveFailed,
+        );
+        return false;
+      }
+      let fiscalDone = !res.fiscalApiPending;
+      if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
+        try {
+          const fnRes = await fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType);
+          if (fiscalActive && fnRes.filename && fnRes.content) {
+            setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
+          }
+          fiscalDone = fnRes.ok;
+        } catch {
+          fiscalDone = false;
+        }
+      }
+      if (fiscalDone) {
+        removeOfflineSale(entry.id);
+      } else {
+        markOfflineSaleSynced(entry.id, res.transactionId);
+      }
+      if (res.cashSale) {
+        void openCashDrawer("cash_sale", cashDrawerSettings).then((drawerResult) => {
+          if (drawerResult.cashierMessage) setDrawerNotice(drawerResult.cashierMessage);
+        });
+      }
+      return true;
+    } catch (err) {
+      markOfflineSaleSyncFailed(
+        entry.id,
+        err instanceof Error ? err.message : t.saleSaveFailed,
+      );
+      return false;
+    }
+  }
+
+  async function flushAllPending() {
+    if (!isBrowserOnline() || syncingOfflineRef.current) return;
+    const pending = listPendingSync();
+    if (!pending.length) return;
+    syncingOfflineRef.current = true;
+    setSyncingOffline(true);
+    setSaleStatus({ ok: true, msg: t.offlineSyncing });
+    let synced = 0;
+    for (const entry of pending) {
+      if (await syncQueuedEntry(entry)) synced++;
+    }
+    syncingOfflineRef.current = false;
+    setSyncingOffline(false);
+    setOfflineQueue(listOfflineQueue());
+    if (synced > 0) {
+      setSaleStatus({ ok: true, msg: t.offlineSyncDone(synced) });
+      setTimeout(() => setSaleStatus(null), 4000);
+    }
+  }
+
+  async function resendQueuedSale(id: string) {
+    if (!isBrowserOnline() || syncingOfflineRef.current) return;
+    const entry = listOfflineQueue().find((q) => q.id === id && q.status === "pending_sync");
+    if (!entry) return;
+    syncingOfflineRef.current = true;
+    setSyncingOffline(true);
+    await syncQueuedEntry(entry);
+    syncingOfflineRef.current = false;
+    setSyncingOffline(false);
+    setOfflineQueue(listOfflineQueue());
+  }
+
+  useEffect(() => {
+    const onOnline = () => { void flushAllPending(); };
+    window.addEventListener("online", onOnline);
+    void flushAllPending();
+    const timer = setInterval(() => { void flushAllPending(); }, 60_000);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      clearInterval(timer);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- flush uses stable sale/fiscal helpers
+  }, [t.offlineSyncDone, t.offlineSyncing, fiscalActive, fiscalNet, cashDrawerSettings, locale]);
+
   return (
-    <div className="relative flex w-full flex-1 flex-col bg-white min-h-0 lg:flex-row lg:overflow-hidden">
+    <div className="relative grid min-h-0 w-full flex-1 grid-rows-[minmax(0,1fr)_auto] overflow-hidden bg-white lg:flex lg:flex-row">
       {/* Left: Products column — order step only */}
       {checkoutStep === "order" && (
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white lg:min-h-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white lg:min-h-0 lg:min-w-0">
         {/* Top bar: quick access + add product + new sale */}
         <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3 shrink-0">
           <Button
@@ -835,46 +1111,87 @@ function PosRegisterInner({
             {t.newSale}
           </Button>
         </div>
-        {/* Products toolbar: categories, search */}
-        <div className="space-y-3 px-3 py-3 sm:px-4 lg:flex-none shrink-0">
-        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-0.5 sm:flex-wrap sm:mx-0 sm:px-0">
-          <button onClick={() => setActiveCategory("all")}
-            className={`min-h-11 shrink-0 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${activeCategory === "all" ? "bg-blue-600 text-white border-blue-600" : "bg-white hover:bg-slate-50"}`}>
-            {t.allCategories}
-          </button>
-          {visibleCategories.map((c) => (
-            <button key={c.id} onClick={() => setActiveCategory(c.id)}
-              className={`min-h-11 shrink-0 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${activeCategory === c.id ? "text-white border-transparent" : "bg-white hover:bg-slate-50"}`}
-              style={activeCategory === c.id ? { backgroundColor: c.color ?? "#2563eb" } : undefined}>
-              {c.name}
+        {/* Products toolbar */}
+        <div className="shrink-0 space-y-2 border-b border-slate-100 px-3 py-2 sm:px-4">
+          {catalogOffline && !browserOffline && (
+            <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900">
+              {t.catalogOfflineMenu}
+            </p>
+          )}
+          <div
+            className="flex gap-1.5 overflow-x-auto overscroll-x-contain pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="tablist"
+            aria-label={t.allCategories}
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeCategory === "all"}
+              onClick={() => setActiveCategory("all")}
+              className={cn(
+                "shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
+                activeCategory === "all"
+                  ? "border-blue-600 bg-blue-600 text-white"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+              )}
+            >
+              {t.allCategories}
             </button>
-          ))}
-        </div>
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t.searchProducts} className="max-w-none" aria-label={t.searchProducts} />
-        </div>
-        {/* Scrollable products area */}
-        <div className="grid flex-1 min-h-0 gap-2.5 overflow-y-auto px-3 pb-3 sm:gap-3 sm:px-4 lg:px-4 lg:pb-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5" style={{WebkitOverflowScrolling: "touch"}} data-tour="pos-product">
-          {filtered.map((p) => {
-            const cfg = getPhCfg(p);
-            const inCart = cart.find((i) => i.product_id === p.id);
-            const price = Number(p.sale_price);
-            const cost = Number(p.cost_price ?? 0);
-            const lowMargin = cost > 0 && price > 0 && (price - cost) / price < 0.3;
-            return (
-              <button key={p.id} onClick={() => addToCart(p)}
-                className={`group flex flex-col overflow-hidden rounded-lg border text-left shadow-sm transition-all hover:shadow-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 ${inCart ? "border-blue-400 ring-2 ring-blue-100 bg-blue-50/30" : "border-slate-200 bg-white hover:border-blue-300"}`}>
-                <ProductImageCompact src={p.image_url} alt={p.name} cfg={cfg} />
-                <div className="flex flex-1 flex-col bg-white p-1.5">
-                  <p className="line-clamp-2 text-xs font-semibold leading-tight text-slate-900" title={p.name}>{p.name}</p>
-                  <div className="mt-1 flex items-end justify-between">
-                    <div className="flex flex-col items-start gap-0.5">
-                      {inCart && <span className="text-[9px] font-semibold text-blue-600">×{inCart.quantity}</span>}
-                      {lowMargin && <span className="text-[9px] bg-red-50 border border-red-200 text-red-600 rounded px-0.5 leading-tight">!</span>}
-                    </div>
-                    <p className="text-xs font-bold text-slate-900 leading-none">{money(price)}</p>
-                  </div>
-                </div>
+            {visibleCategories.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="tab"
+                aria-selected={activeCategory === c.id}
+                onClick={() => setActiveCategory(c.id)}
+                className={cn(
+                  "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
+                  activeCategory === c.id
+                    ? "border-blue-600 bg-blue-50 text-blue-800"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                )}
+              >
+                {c.color ? (
+                  <span
+                    className="h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: c.color }}
+                    aria-hidden
+                  />
+                ) : null}
+                {c.name}
               </button>
+            ))}
+          </div>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t.searchProducts}
+            className="h-10 max-w-none"
+            aria-label={t.searchProducts}
+          />
+        </div>
+        {/* Scrollable product grid */}
+        <div
+          className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-3 pb-6 pt-2 sm:px-4"
+          style={{ WebkitOverflowScrolling: "touch" }}
+          data-tour="pos-product"
+        >
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6">
+          {filtered.map((p) => {
+            const inCart = cart.find((i) => i.product_id === p.id);
+            return (
+              <ProductGridTile
+                key={p.id}
+                name={p.name}
+                imageUrl={p.image_url}
+                placeholderType={p.placeholder_type}
+                categoryName={p.pos_category?.name}
+                categoryColor={p.pos_category?.color}
+                priceLabel={money(Number(p.sale_price))}
+                inCartQty={inCart?.quantity ?? 0}
+                selected={Boolean(inCart)}
+                onClick={() => addToCart(p)}
+              />
             );
           })}
           {!filtered.length && (
@@ -888,6 +1205,7 @@ function PosRegisterInner({
               )}
             </div>
           )}
+          </div>
         </div>
         <PosQuickAccessSheet
           open={quickAccessOpen}
@@ -1019,291 +1337,167 @@ function PosRegisterInner({
       )}
 
       {/* Cart / payment / complete */}
-      <form onSubmit={async (e) => {
+      <form onSubmit={(e) => {
         e.preventDefault();
-        if (salePending || !checkoutCart.length || checkoutStep !== "payment") return;
-        setSalePending(true);
-        setSaleStatus(null);
-        setLastFiscalTxt(null);
-          const fd = buildSaleFormData(checkoutCart, checkoutTotalDue);
-          try {
-          if (!isBrowserOnline()) {
-            enqueueOfflineSale(
-              formDataToPayload(fd),
-              t.offlineQueueLabel(checkoutCart.length, money(checkoutTotalDue))
-            );
-            resetCartAfterSale();
-            setPaymentCartSnapshot(null);
-            setOfflineQueue(listOfflineQueue());
-            setSaleStatus({ ok: true, msg: t.offlineQueued });
-            setSalePending(false);
-            return;
-          }
-          writeCartBackupToStorage({
-            cart: checkoutCart,
-            sessionId: sessionId ?? "",
-            paymentMethodId,
-            cashReceived,
-            discountPct: txDiscountPct,
-          });
-          const res = await completeSaleReturn(fd);
-          if (!res.ok) {
-            setSaleStatus({ ok: false, msg: friendlySaleError(res.error, locale) });
-            setSalePending(false);
-            setCheckoutStep("payment");
-            return;
-          }
-          if (!res.transactionId) {
-            setSaleStatus({ ok: false, msg: friendlySaleError("Failed to save transaction.", locale) });
-            setSalePending(false);
-            setCheckoutStep("payment");
-            return;
-          }
-          // FiscalNet receipt — Romania + enabled in Settings only (browser → localhost:65400)
-          if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
-            const fnRes = await fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType);
-            if (fiscalActive && fnRes.filename && fnRes.content) setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
-            console.info("[FiscalNet] receipt browser result", { ok: fnRes.ok, message: fnRes.message, mode: fiscalNet.connectionMode });
-          }
-          setSaleStatus(null);
-          setCart([]);
-          setPaymentCartSnapshot(null);
-          setTipAmount(0);
-          setSplitPayments([]);
-          setSelectedCustomer(null);
-          setCashReceived("");
-          setSalePending(false);
-          clearCartBackupFromStorage();
-          if (res.cashSale) {
-            openCashDrawer("cash_sale", cashDrawerSettings).then((drawerResult) => {
-              if (drawerResult.cashierMessage) setDrawerNotice(drawerResult.cashierMessage);
-            });
-          }
-          setLastCompletedSale({ transactionId: res.transactionId!, amountLabel: money(res.total) });
-          setCheckoutStep("complete");
-        } catch (err) {
-          const rawMsg = err instanceof Error ? err.message : "";
-          // Detect framework/network errors (build mismatch, dropped connection, etc.)
-          const isFrameworkError = /unexpected response|from the server|failed to fetch|networkerror|load failed|fetch/i.test(rawMsg);
-          const safeMsg = isFrameworkError ? t.appUpdated : t.saleNotCompleted;
-          setSaleStatus({ ok: false, msg: safeMsg });
-          setSalePending(false);
-          setCheckoutStep("payment");
+        if (!checkoutCart.length || checkoutStep !== "payment") return;
+        const fd = buildSaleFormData(checkoutCart, checkoutTotalDue);
+        const amountLabel = money(checkoutTotalDue);
+        const cartSnapshot = checkoutCart;
+
+        if (!isBrowserOnline()) {
+          queueCurrentSale(cartSnapshot, checkoutTotalDue);
+          return;
         }
-      }} className={`flex min-h-0 flex-col bg-white ${focusedCheckout ? "absolute inset-0 z-20" : "w-full max-h-[min(52vh,32rem)] shrink-0 border-t border-slate-200 lg:max-h-none lg:w-[400px] lg:shrink-0 lg:overflow-hidden lg:border-t-0 lg:border-l lg:border-slate-100"}`} data-tour="pos-cart">
-        <div className={`flex min-h-0 flex-1 flex-col overflow-hidden ${focusedCheckout ? "mx-auto w-full max-w-xl px-6" : ""}`}>
+
+        resetCartAfterSale();
+        setPaymentCartSnapshot(null);
+        setLastFiscalTxt(null);
+        setLastCompletedSale({ amountLabel, status: "saving" });
+        setCheckoutStep("complete");
+        setSalePending(false);
+        void persistSaleInBackground(fd, cartSnapshot, amountLabel);
+      }} className={`flex min-h-0 flex-col bg-white lg:min-h-0 ${focusedCheckout ? "absolute inset-0 z-20" : "w-full max-h-[min(48vh,28rem)] shrink-0 border-t border-slate-200 sm:max-h-[min(52vh,32rem)] lg:max-h-none lg:w-[400px] lg:shrink-0 lg:overflow-hidden lg:border-t-0 lg:border-l lg:border-slate-100"}`} data-tour="pos-cart">
+        <PosOfflineBar
+          t={t}
+          browserOffline={browserOffline}
+          pendingSync={pendingSyncSales}
+          pendingFiscal={pendingFiscalSales}
+          syncing={syncingOffline}
+          onQueueChange={() => setOfflineQueue(listOfflineQueue())}
+          onSyncAll={() => void flushAllPending()}
+          onResend={(id) => void resendQueuedSale(id)}
+        />
+        <div className={`flex min-h-0 flex-1 flex-col overflow-hidden ${focusedCheckout ? (checkoutStep === "payment" ? "mx-auto w-full max-w-md px-3 sm:px-4" : "mx-auto w-full max-w-xl px-6") : ""}`}>
         {checkoutStep === "complete" && lastCompletedSale ? (
-          <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
-            <div className="text-4xl">✓</div>
-            <p className="mt-3 text-lg font-semibold text-slate-900">{t.saleComplete}</p>
-            <p className="mt-1 text-3xl font-bold text-slate-950 tabular-nums">{lastCompletedSale.amountLabel}</p>
-            <div className="mt-8 flex w-full flex-col gap-2">
-              <Button
-                type="button"
-                className="h-12 w-full bg-blue-600 text-white hover:bg-blue-700"
-                onClick={() => {
-                  setCheckoutStep("order");
-                  setPaymentCartSnapshot(null);
-                  setLastCompletedSale(null);
-                  setSaleStatus(null);
-                  setDrawerNotice(null);
-                  setLastFiscalTxt(null);
-                }}
-              >
-                {t.newSaleAfter}
-              </Button>
-              <a
-                href={`/app/transactions/${lastCompletedSale.transactionId}`}
-                className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-800 hover:bg-slate-50"
-              >
-                {t.viewReceiptAfter}
-              </a>
-              {fiscalActive && lastFiscalTxt && (
+          <div className="flex flex-1 flex-col justify-center px-2 py-8 sm:py-10">
+            <div className="mx-auto w-full max-w-sm text-center">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                <Check className="h-8 w-8" strokeWidth={2.5} aria-hidden />
+              </div>
+              <p className="mt-4 text-sm font-medium text-slate-500">{t.saleComplete}</p>
+              <p className="mt-1 text-4xl font-bold tabular-nums text-slate-950">{lastCompletedSale.amountLabel}</p>
+              {lastCompletedSale.status === "saving" && (
+                <p className="mt-2 text-sm font-medium text-slate-400">{t.saleSaving}</p>
+              )}
+              {lastCompletedSale.status === "queued" && (
+                <p className="mt-2 text-sm font-medium text-amber-700">{t.offlineQueued}</p>
+              )}
+              {lastCompletedSale.status === "failed" && (
+                <div className="mt-3 space-y-2">
+                  <p className="text-sm font-medium text-red-600">
+                    {lastCompletedSale.errorMsg ?? t.saleSaveFailed}
+                  </p>
+                  {lastCompletedSale.retryPayload && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-10 border-red-200 text-red-700"
+                      onClick={() =>
+                        void retryFailedSale(lastCompletedSale.retryPayload!, lastCompletedSale.amountLabel)
+                      }
+                    >
+                      {t.saleRetry}
+                    </Button>
+                  )}
+                </div>
+              )}
+              <div className="mt-8 grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  className="h-12 bg-blue-600 text-white hover:bg-blue-700"
+                  onClick={() => {
+                    setCheckoutStep("order");
+                    setPaymentCartSnapshot(null);
+                    setLastCompletedSale(null);
+                    setSaleStatus(null);
+                    setDrawerNotice(null);
+                    setLastFiscalTxt(null);
+                  }}
+                >
+                  {t.newSaleAfter}
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-11 w-full"
+                  className="h-12"
+                  disabled={!lastCompletedSale.transactionId}
+                  render={
+                    lastCompletedSale.transactionId ? (
+                      <a href={`/app/transactions/${lastCompletedSale.transactionId}`} />
+                    ) : undefined
+                  }
+                >
+                  {lastCompletedSale.transactionId ? t.viewReceiptAfter : t.receiptPending}
+                </Button>
+              </div>
+              {fiscalActive && lastFiscalTxt && (
+                <button
+                  type="button"
+                  className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800"
                   onClick={() => downloadFiscalNetTxt(lastFiscalTxt.filename, lastFiscalTxt.content)}
                 >
                   {t.printReceipt}
-                </Button>
+                </button>
               )}
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-10 w-full text-slate-500"
-                onClick={() => {
-                  setCheckoutStep("order");
-                  setPaymentCartSnapshot(null);
-                  setLastCompletedSale(null);
-                  setSaleStatus(null);
-                  setDrawerNotice(null);
-                  setLastFiscalTxt(null);
-                }}
-              >
-                {t.noReceipt}
-              </Button>
             </div>
           </div>
         ) : checkoutStep === "payment" ? (
-          <div className="flex flex-1 flex-col py-5">
-            <div className="mb-5 flex items-center justify-between">
+          <div className="flex flex-1 flex-col items-center min-h-0 w-full">
+            {features.splitPayments && activeSplitPayments.length > 0 && (
               <button
                 type="button"
-                onClick={() => {
-                  setPaymentCartSnapshot(null);
-                  setCashCustomOpen(false);
-                  setCheckoutStep("order");
-                }}
-                className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                onClick={() => setSplitOpen(true)}
+                className={`mx-3 mb-2 mt-2 w-[calc(100%-1.5rem)] rounded-xl border px-3 py-2.5 text-left text-sm transition-colors sm:mx-0 sm:w-full ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}
               >
-                ← {t.backToOrder}
+                <span className="font-semibold">{t.splitPayment}</span>
+                {" · "}{t.splitPaid(money(splitPaid))}
+                {splitRemaining > 0.01 ? ` · ${t.splitRemaining(money(splitRemaining))}` : ` · ${t.splitFullyPaid}`}
               </button>
-              {features.splitPayments && (
-                <button type="button" onClick={() => setSplitOpen(true)} className="text-sm font-medium text-blue-600 hover:text-blue-800">
-                  {t.splitAmount}
-                </button>
-              )}
-            </div>
-            <div className="flex-1 flex flex-col space-y-5">
-              <div className="text-center py-2">
-                <p className="text-5xl font-bold text-slate-950 tabular-nums">{money(totalDue)}</p>
-                <p className="mt-2 text-sm text-slate-500">{t.howToPay}</p>
-              </div>
-
-              {features.splitPayments && activeSplitPayments.length > 0 ? (
-                <button type="button" onClick={() => setSplitOpen(true)}
-                  className={`w-full rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}>
-                  <span className="font-semibold">{t.splitPayment}</span>
-                  {" · "}{t.splitPaid(money(splitPaid))}
-                  {splitRemaining > 0.01 ? ` · ${t.splitRemaining(money(splitRemaining))}` : ` · ${t.splitFullyPaid}`}
-                </button>
-              ) : (
-                <div className="divide-y divide-slate-100 rounded-xl border border-slate-100">
-                  {paymentMethods.map((m) => {
-                    const selected = paymentMethodId === m.id;
-                    const isCash = m.type === "cash";
-                    return (
-                      <div key={m.id} className="bg-white first:rounded-t-xl last:rounded-b-xl">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setPaymentMethodId(m.id);
-                            if (m.type !== "cash") {
-                              setCashReceived("");
-                              setCashCustomOpen(false);
-                            }
-                          }}
-                          className={`flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors ${selected && !isCash ? "bg-blue-50/40" : "hover:bg-slate-50/80"}`}
-                        >
-                          <span className={`text-base font-medium ${selected ? "text-slate-900" : "text-slate-700"}`}>
-                            {paymentTypeLabel(m.type, m.name, locale)}
-                          </span>
-                          {selected && !isCash ? <span className="text-blue-600 text-sm font-semibold">✓</span> : null}
-                        </button>
-                        {isCash && selected && (
-                          <div className="border-t border-slate-100 px-4 py-3 space-y-3">
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setCashReceived(cashExactAmount);
-                                  setCashCustomOpen(false);
-                                }}
-                                className={`text-sm font-semibold transition-colors ${cashReceived === cashExactAmount && !cashCustomOpen ? "text-blue-700" : "text-blue-600 hover:text-blue-800"}`}
-                              >
-                                {t.exact}
-                              </button>
-                              {cashQuickBills.map((v) => (
-                                <button
-                                  key={v}
-                                  type="button"
-                                  onClick={() => {
-                                    setCashReceived(v);
-                                    setCashCustomOpen(false);
-                                  }}
-                                  className={`text-sm font-semibold tabular-nums transition-colors ${cashReceived === v && !cashCustomOpen ? "text-blue-700" : "text-blue-600 hover:text-blue-800"}`}
-                                >
-                                  {money(v)}
-                                </button>
-                              ))}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setCashCustomOpen(true);
-                                  setCashReceived("");
-                                }}
-                                className={`text-sm font-semibold transition-colors ${cashCustomOpen ? "text-blue-700" : "text-blue-600 hover:text-blue-800"}`}
-                              >
-                                {t.custom}
-                              </button>
-                            </div>
-                            {cashCustomOpen && (
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                autoFocus
-                                placeholder={money(cashExactAmount)}
-                                value={cashReceived === "" ? "" : cashReceived}
-                                onChange={(e) => {
-                                  const raw = e.target.value;
-                                  setCashReceived(raw === "" ? "" : Number(raw));
-                                }}
-                                className="h-11 text-lg font-semibold tabular-nums"
-                                aria-label={t.cashReceived}
-                              />
-                            )}
-                            <div className={`flex items-center justify-between rounded-lg px-3 py-2.5 ${cashUnderPaid ? "bg-red-50" : "bg-slate-50"}`}>
-                              <span className={`text-sm font-medium ${cashUnderPaid ? "text-red-700" : "text-slate-600"}`}>
-                                {t.changeDue}
-                              </span>
-                              <span className={`text-lg font-bold tabular-nums ${cashUnderPaid ? "text-red-700" : "text-slate-900"}`}>
-                                {cashUnderPaid && displayedChangeDue !== null
-                                  ? `−${money(Math.abs(displayedChangeDue))}`
-                                  : money(displayedChangeDue ?? 0)}
-                              </span>
-                            </div>
-                            {cashUnderPaid && <p className="text-xs text-red-600">{t.cashUnderpaidMsg}</p>}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {saleStatus && !saleStatus.ok && (
-                <p className="text-center text-sm text-red-600">{saleStatus.msg}</p>
-              )}
-              <Button
-                ref={chargeRef}
-                type="submit"
-                disabled={chargeDisabled}
-                className="h-14 w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl disabled:opacity-40 mt-auto"
-              >
-                {salePending
-                  ? t.processing
-                  : cashUnderPaid
-                    ? t.insufficientCash
-                    : t.confirmPayment(money(totalDue))}
-              </Button>
-            </div>
+            )}
+            <PosPaymentPanel
+              t={t}
+              locale={locale}
+              money={money}
+              currency={currency}
+              intlLocale={posIntlLocale(locale)}
+              totalDue={totalDue}
+              paymentMethods={paymentMethods}
+              paymentMethodId={paymentMethodId}
+              onSelectMethod={(id, isCash) => {
+                setPaymentMethodId(id);
+                if (!isCash) {
+                  setCashReceived("");
+                } else if (cashReceived === "" || cashReceived === 0) {
+                  setCashReceived(cashExactAmount);
+                }
+              }}
+              cashExactAmount={cashExactAmount}
+              cashReceived={cashReceived}
+              setCashReceived={setCashReceived}
+              cashUnderPaid={cashUnderPaid}
+              displayedChangeDue={displayedChangeDue}
+              chargeDisabled={Boolean(chargeDisabled)}
+              salePending={salePending}
+              saleError={saleStatus && !saleStatus.ok ? saleStatus.msg : null}
+              onBack={() => {
+                setPaymentCartSnapshot(null);
+                setCheckoutStep("order");
+              }}
+              onSplit={features.splitPayments ? () => setSplitOpen(true) : undefined}
+              showSplitLink={features.splitPayments && activeSplitPayments.length === 0}
+              chargeRef={chargeRef}
+              isOffline={browserOffline}
+            />
           </div>
         ) : (
         <>
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-3 py-2.5 sm:px-4">
           <span className="text-sm font-semibold text-slate-800">{t.currentSale(cartItemCount)}</span>
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-          {(pendingSyncSales.length > 0 || pendingFiscalSales.length > 0) && (
-            <span className="hidden text-[10px] font-semibold uppercase tracking-wide text-amber-700 sm:inline">
-              {pendingSyncSales.length > 0 ? t.offlinePendingSync(pendingSyncSales.length) : t.offlinePendingFiscal(pendingFiscalSales.length)}
-            </span>
-          )}
             <button
               type="button"
               onClick={() => setCustomersSheetOpen(true)}
-              className="max-w-[7rem] truncate text-xs font-medium text-blue-600 hover:text-blue-800 sm:max-w-[10rem]"
+              className="max-w-[9rem] truncate text-xs font-medium text-blue-600 hover:text-blue-800 sm:max-w-[12rem] sm:text-sm"
             >
               {selectedCustomer ? selectedCustomer.name : t.addCustomerBtn}
             </button>
@@ -1312,44 +1506,6 @@ function PosRegisterInner({
           )}
           </div>
         </div>
-        {(pendingSyncSales.length > 0 || pendingFiscalSales.length > 0) && (
-          <div className="mx-4 mb-2 space-y-1.5 shrink-0">
-            {pendingSyncSales.map((entry) => (
-              <div key={entry.id} className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-                <span className="font-semibold">{t.offlinePendingSyncRow}</span>
-                <span className="text-amber-800"> — {entry.label}</span>
-              </div>
-            ))}
-            {pendingFiscalSales.map((entry) => (
-              <div key={entry.id} className="flex items-center justify-between gap-2 rounded-lg border border-orange-200 bg-orange-50 px-3 py-2 text-xs text-orange-900">
-                <div className="min-w-0">
-                  <span className="font-semibold">{t.offlinePendingFiscalRow}</span>
-                  <span className="text-orange-800"> — {entry.label}</span>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  {entry.transactionId && (
-                    <a
-                      href={`/app/transactions/${entry.transactionId}`}
-                      className="font-medium text-orange-700 underline hover:text-orange-900"
-                    >
-                      {t.offlineViewReceipt}
-                    </a>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      dismissPendingFiscal(entry.id);
-                      setOfflineQueue(listOfflineQueue());
-                    }}
-                    className="rounded-md border border-orange-300 bg-white px-2 py-0.5 font-medium text-orange-800 hover:bg-orange-100"
-                  >
-                    {t.offlineFiscalDismiss}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
         {checkoutStep === "order" && (
         <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-3 py-2 sm:px-4" style={{WebkitOverflowScrolling: "touch"}}>
           {cart.map((item) => {
@@ -1358,19 +1514,19 @@ function PosRegisterInner({
             const lineList = lineGrossBefore(item);
             return (
             <div key={item.product_id} className="rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm sm:p-3">
-              <div className="flex items-center gap-2 sm:gap-3">
-              <button type="button" onClick={() => openItemOptions(item.product_id)} className="min-w-0 flex-1 text-left">
-                <p className="truncate text-sm font-semibold text-slate-900">{item.product_name}</p>
+              <button type="button" onClick={() => openItemOptions(item.product_id)} className="mb-2 w-full text-left">
+                <p className="line-clamp-2 break-words text-sm font-semibold leading-snug text-slate-900 sm:text-base">{item.product_name}</p>
                 {linePct > 0 && (
                   <span className="mt-1 inline-flex rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">{t.discountBadge(linePct)}</span>
                 )}
               </button>
+              <div className="flex items-center gap-2">
               <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-slate-100 bg-slate-50/80 p-0.5">
                 <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity - 1); }} aria-label={t.decreaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-slate-600 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:h-10 sm:w-10">−</button>
                 <span className="w-6 text-center text-sm font-bold tabular-nums sm:w-7">{item.quantity}</span>
                 <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity + 1); }} aria-label={t.increaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-slate-600 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:h-10 sm:w-10">+</button>
               </div>
-              <div className="shrink-0 text-right min-w-[4rem] sm:min-w-[4.5rem]">
+              <div className="ml-auto shrink-0 text-right">
                 {linePct > 0 && <p className="text-[10px] text-slate-400 line-through tabular-nums">{money(lineList)}</p>}
                 <p className="text-sm font-bold tabular-nums text-slate-950 sm:text-base">{money(lineTotal)}</p>
               </div>
@@ -1382,6 +1538,71 @@ function PosRegisterInner({
         </div>
         )}
         <div className="shrink-0 space-y-3 border-t border-slate-100 bg-white px-3 pt-3 pb-3 shadow-[0_-6px_16px_rgba(15,23,42,0.06)] sm:px-4 sm:pb-4 lg:shadow-none">
+              {cart.length > 0 && (
+                <div className="rounded-xl border border-blue-100 bg-blue-50/30 p-3">
+                  <div className="mb-2.5 flex items-center justify-between gap-3">
+                    <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                      <Percent className="h-4 w-4 text-slate-500" />
+                      {t.discount}
+                    </span>
+                    {discountAmount > 0 && (
+                      <span className="text-sm font-bold tabular-nums text-blue-600">−{money(discountAmount)}</span>
+                    )}
+                  </div>
+                  <div className="mb-2 flex gap-1 rounded-lg bg-slate-100 p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => switchDiscountMode("pct")}
+                      className={cn(
+                        "flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors",
+                        discountMode === "pct" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      )}
+                    >
+                      {t.discountModePct}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => switchDiscountMode("lei")}
+                      className={cn(
+                        "flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors",
+                        discountMode === "lei" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                      )}
+                    >
+                      {t.discountModeLei}
+                    </button>
+                  </div>
+                  {discountMode === "pct" ? (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={uniformCartDiscount === null ? "" : uniformCartDiscount || ""}
+                        onChange={(e) => applyDiscountToAllCurrentItems(Number(e.target.value) || 0)}
+                        placeholder="0"
+                        aria-label={t.discountPctAria}
+                        className="h-11 flex-1 text-center text-lg font-bold tabular-nums"
+                      />
+                      <span className="w-6 shrink-0 text-sm font-semibold text-slate-400">%</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={cartDiscountLei > 0 ? cartDiscountLei : ""}
+                        onChange={(e) => applyCartDiscountLei(Number(e.target.value) || 0)}
+                        placeholder="0"
+                        aria-label={t.discountLeiAria}
+                        className="h-11 flex-1 text-center text-lg font-bold tabular-nums"
+                      />
+                      <span className="w-10 shrink-0 text-right text-sm font-semibold text-slate-400">lei</span>
+                    </div>
+                  )}
+                </div>
+              )}
               {cart.length > 0 && (
                 <div className="space-y-2">
                 <button
@@ -1432,31 +1653,6 @@ function PosRegisterInner({
                     )}
                     </div>
                   )}
-                  <div className="rounded-xl border border-slate-200 bg-white p-3">
-                    <div className="mb-2.5 flex items-center justify-between gap-3">
-                      <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
-                        <Percent className="h-4 w-4 text-slate-500" />
-                        {t.discountPct}
-                      </span>
-                      {discountAmount > 0 && (
-                        <span className="text-sm font-bold tabular-nums text-blue-600">−{money(discountAmount)}</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="1"
-                        value={uniformCartDiscount === null ? "" : uniformCartDiscount || ""}
-                        onChange={(e) => applyDiscountToAllCurrentItems(Number(e.target.value) || 0)}
-                        placeholder="0"
-                        aria-label={t.discountPctAria}
-                        className="h-11 flex-1 text-center text-lg font-bold tabular-nums"
-                      />
-                      <span className="w-6 shrink-0 text-sm font-semibold text-slate-400">%</span>
-                    </div>
-                  </div>
                 </div>
               )}
                 </div>
@@ -1464,9 +1660,8 @@ function PosRegisterInner({
               <div className="space-y-1.5 rounded-xl bg-slate-50 px-3.5 py-3">
               {discountAmount > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span className="tabular-nums">{money(grossTotal)}</span></div>}
               {discountAmount > 0 && <div className="flex justify-between text-xs text-blue-600"><span>{t.discount}</span><span className="font-medium tabular-nums">−{money(discountAmount)}</span></div>}
-              {totalVat > 0.01 && <div className="flex justify-between text-xs text-slate-400"><span>{vatLabel}</span><span className="tabular-nums">{money(totalVat)}</span></div>}
               {safeTipAmount > 0 && <div className="flex justify-between text-xs text-emerald-700"><span>{t.tip}</span><span className="font-medium tabular-nums">{money(safeTipAmount)}</span></div>}
-              <div className="flex items-baseline justify-between border-t border-slate-200/80 pt-2">
+              <div className="flex items-baseline justify-between pt-1">
                 <span className="text-sm font-semibold text-slate-700 sm:text-base">{t.total}</span>
                 <span className="text-2xl font-bold tabular-nums text-slate-950 sm:text-3xl">{money(totalDue)}</span>
               </div>
@@ -1495,7 +1690,8 @@ function PosRegisterInner({
           <input type="hidden" name="cart_json" value={JSON.stringify(cart)} />
           <input type="hidden" name="session_id" value={sessionId ?? ""} />
           <input type="hidden" name="payment_type" value={selectedPaymentType} />
-          <input type="hidden" name="discount_pct" value={txDiscountPct} />
+          <input type="hidden" name="discount_pct" value={discountMode === "lei" ? 0 : txDiscountPct} />
+          <input type="hidden" name="discount_lei" value={discountMode === "lei" && cartDiscountLei > 0 ? cartDiscountLei : 0} />
           <input type="hidden" name="tip_amount" value={safeTipAmount} />
           <input type="hidden" name="order_type" value={features.orderTypes ? orderType : ""} />
           <input type="hidden" name="table_label" value={features.tableService ? tableLabel : ""} />
@@ -1734,10 +1930,11 @@ function PosRegisterInner({
   );
 }
 
-export function PosRegister(props: Parameters<typeof PosRegisterInner>[0]) {
+export function PosRegister(props: Parameters<typeof PosRegisterInner>[0] & { appLocale?: PosLocale }) {
+  const { appLocale, isRO, ...rest } = props;
   return (
-    <PosI18nProvider orgIsRO={props.isRO ?? false}>
-      <PosRegisterInner {...props} />
+    <PosI18nProvider orgIsRO={isRO ?? false} initialLocale={appLocale}>
+      <PosRegisterInner {...rest} isRO={isRO} />
     </PosI18nProvider>
   );
 }

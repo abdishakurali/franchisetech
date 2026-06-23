@@ -12,26 +12,13 @@ import {
   seoMeta,
   SITE_URL,
 } from "@/lib/marketing/seo";
+import {
+  RO_COMPARE_HORECA_SLUGS,
+  RO_COMPARE_INVOICING_SLUGS,
+} from "@/lib/marketing/comparisons";
+import { compareHubFaqs, compareUi } from "@/lib/marketing/compare-locale";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
-
-const HUB_FAQS = [
-  {
-    question: "What is the best POS alternative in Romania?",
-    answer:
-      "It depends on your priority: invoicing (SmartBill/Saga), payments hardware (Square/SumUp class), or daily operations (POS + stock + recipes + till close). franchisetech targets the last — compare honestly on our SmartBill, Saga, RezoSoft, and Expressoft pages.",
-  },
-  {
-    question: "Can I switch POS without losing my fiscal setup?",
-    answer:
-      "FiscalNet and fiscal printer setup stay on your till PC. Run a parallel trial, verify receipts with your accountant, then migrate products and workflows — do not assume automatic migration from another vendor.",
-  },
-  {
-    question: "Does franchisetech replace my accountant software?",
-    answer:
-      "Not necessarily. Many operators keep invoicing/accounting tools and use franchisetech for daily POS, stock, recipes, and Z-style till close. Professional tax advice remains your responsibility.",
-  },
-];
 
 export async function generateMetadata() {
   const locale = await getMarketingLocale();
@@ -40,10 +27,10 @@ export async function generateMetadata() {
     locale,
     path: "/compare",
     title: isRo
-      ? "Comparații POS România — SmartBill, Saga, RezoSoft | franchisetech"
+      ? "Comparații POS România — Ebriza, SmartBill, Oblio | franchisetech"
       : "Compare POS & restaurant software — Square, SmartBill, Saga | franchisetech",
     description: isRo
-      ? "Comparații oneste franchisetech vs SmartBill, Saga, RezoSoft, Expressoft, hePOS și altele — POS, stoc, rețete, FiscalNet și raport Z."
+      ? "Comparații oneste franchisetech vs Ebriza, SmartBill, Oblio, Bit-Soft, Saga și altele — POS, stoc, rețete, FiscalNet, raport Z și cost real."
       : "Honest comparisons: franchisetech vs Square, SumUp, Lightspeed, SmartBill, Saga, and Romanian restaurant POS options.",
   });
 }
@@ -54,12 +41,14 @@ function CompareCard({
   path,
   description,
   market,
+  readLabel,
 }: {
   slug: string;
   competitor: string;
   path: string;
   description: string;
   market: string;
+  readLabel: string;
 }) {
   const brand = getCompetitorBrand(slug);
   return (
@@ -84,7 +73,7 @@ function CompareCard({
       </div>
       <p className="mt-3 flex-1 text-sm leading-6 text-slate-600">{description}</p>
       <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-blue-600">
-        Read comparison <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+        {readLabel} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
       </span>
     </Link>
   );
@@ -93,16 +82,25 @@ function CompareCard({
 export default async function CompareHubPage() {
   const locale = await getMarketingLocale();
   const t = getMarketingMessages(locale);
+  const ui = compareUi(locale);
+  const hubFaqs = compareHubFaqs(locale);
   const roPages = comparisonsByMarket("ro");
   const globalPages = comparisonsByMarket("global");
+  const roHoreca = roPages.filter((p) => (RO_COMPARE_HORECA_SLUGS as readonly string[]).includes(p.slug));
+  const roInvoicing = roPages.filter((p) => (RO_COMPARE_INVOICING_SLUGS as readonly string[]).includes(p.slug));
+  const roOther = roPages.filter(
+    (p) =>
+      !(RO_COMPARE_HORECA_SLUGS as readonly string[]).includes(p.slug) &&
+      !(RO_COMPARE_INVOICING_SLUGS as readonly string[]).includes(p.slug),
+  );
 
   return (
     <MarketingShell>
-      <JsonLd data={faqJsonLd(HUB_FAQS)} />
+      <JsonLd data={faqJsonLd(hubFaqs)} />
       <JsonLd
         data={breadcrumbSchema([
-          { name: "Home", path: "/" },
-          { name: "Compare", path: "/compare" },
+          { name: ui.breadcrumbHome, path: "/" },
+          { name: ui.breadcrumbCompare, path: "/compare" },
         ])}
       />
       <JsonLd
@@ -153,27 +151,75 @@ export default async function CompareHubPage() {
       </section>
 
       <section className="bg-slate-50 px-4 py-14 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <h2 className="text-2xl font-bold text-slate-950">
-            {locale === "ro" ? "🇷🇴 România — alternative POS restaurant" : "🇷🇴 Romania — restaurant POS alternatives"}
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">
-            {locale === "ro"
-              ? "Căutări frecvente: alternativă SmartBill, Saga POS, RezoSoft, Expressoft."
-              : "Common searches: SmartBill alternative, Saga POS, RezoSoft, Expressoft for restaurants."}
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {roPages.map((p) => (
-              <CompareCard
-                key={p.slug}
-                slug={p.slug}
-                competitor={p.competitor}
-                path={p.path}
-                description={p.description}
-                market={p.market}
-              />
-            ))}
+        <div className="mx-auto max-w-6xl space-y-14">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-950">
+              {locale === "ro" ? "POS HoReCa — restaurante și cafenele" : "HoReCa POS — restaurants & cafes"}
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm text-slate-600">
+              {locale === "ro"
+                ? "Ebriza, Bit-Soft, RezoSoft și altele — operațiuni zilnice, delivery, multi-locație."
+                : "Daily operations, delivery, and multi-site POS alternatives."}
+            </p>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {roHoreca.map((p) => (
+                <CompareCard
+                  key={p.slug}
+                  slug={p.slug}
+                  competitor={p.competitor}
+                  path={p.path}
+                  description={p.description}
+                  market={p.market}
+                  readLabel={ui.readComparison}
+                />
+              ))}
+            </div>
           </div>
+
+          <div>
+            <h2 className="text-2xl font-bold text-slate-950">
+              {locale === "ro" ? "Facturare & gestiune — România" : "Invoicing & stock — Romania"}
+            </h2>
+            <p className="mt-2 max-w-2xl text-sm text-slate-600">
+              {locale === "ro"
+                ? "SmartBill, Oblio, Saga — e-Factura și documente. franchisetech le completează pentru casă zilnică."
+                : "e-Factura and invoicing tools — franchisetech complements them for daily till operations."}
+            </p>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {roInvoicing.map((p) => (
+                <CompareCard
+                  key={p.slug}
+                  slug={p.slug}
+                  competitor={p.competitor}
+                  path={p.path}
+                  description={p.description}
+                  market={p.market}
+                  readLabel={ui.readComparison}
+                />
+              ))}
+            </div>
+          </div>
+
+          {roOther.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold text-slate-950">
+                {locale === "ro" ? "Alte alternative POS România" : "Other Romania POS alternatives"}
+              </h2>
+              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {roOther.map((p) => (
+                  <CompareCard
+                    key={p.slug}
+                    slug={p.slug}
+                    competitor={p.competitor}
+                    path={p.path}
+                    description={p.description}
+                    market={p.market}
+                    readLabel={ui.readComparison}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -191,6 +237,7 @@ export default async function CompareHubPage() {
                 path={p.path}
                 description={p.description}
                 market={p.market}
+                readLabel={ui.readComparison}
               />
             ))}
           </div>
@@ -199,9 +246,9 @@ export default async function CompareHubPage() {
 
       <section className="border-t border-slate-100 px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-xl font-bold text-slate-950">FAQ</h2>
+          <h2 className="text-xl font-bold text-slate-950">{ui.faq}</h2>
           <dl className="mt-6 space-y-6">
-            {HUB_FAQS.map((faq) => (
+            {hubFaqs.map((faq) => (
               <div key={faq.question}>
                 <dt className="font-semibold text-slate-900">{faq.question}</dt>
                 <dd className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</dd>

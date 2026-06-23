@@ -14,6 +14,7 @@ import {
 } from "@/lib/business-modules";
 import { BUSINESS_PROFILE_LABELS, normaliseBusinessProfile, type BusinessProfile } from "@/lib/business-profile";
 import { profileLabel } from "@/lib/business-profile-i18n";
+import type { AppLocale } from "@/lib/app-i18n";
 import type { BillingPlan } from "@/lib/billing/plans";
 import type { BusinessModuleKey } from "@/lib/billing/entitlements";
 
@@ -51,6 +52,7 @@ export function BusinessModulesCard({
   lockedMessage,
   updateAction,
 }: Props) {
+  const uiLocale: AppLocale = locale === "ro" ? "ro" : "en";
   const profile = normaliseBusinessProfile(org.business_profile);
 
   return (
@@ -112,7 +114,7 @@ export function BusinessModulesCard({
                   module: moduleKey,
                   subscriptionPlan,
                   hasTrial,
-                });
+                }, uiLocale);
 
                 return (
                   <div

@@ -1,0 +1,1297 @@
+[
+  {
+    "name": "CEAI FRUCTE DE PADURE 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI VERDE SENCHA MANGO",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI VERDE",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI FRUCTE DE PADURE",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "AMERICANO - COLUMBIA BIO 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "COLUMBIA - LA ORQUIDEA PLANADAS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "388ef06d-ca91-4781-8d38-a26764c67d7e"
+  },
+  {
+    "name": "SERVETELE PERS DISPENSER 25x25 75/PAC",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "LATTE - COLUMBIA BIO 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "COLUMBIA - LA ORQUIDEA PLANADAS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "388ef06d-ca91-4781-8d38-a26764c67d7e"
+  },
+  {
+    "name": "CEAI CAPSUNI & MENTA",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI DE MUSETEL",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI ALB VANILIE & PIERSICA",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI VERDE SENCHA MANGO 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI MENTA CU LAMAIE",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI GHIMBIR & LAMAIE",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "DOUBLE ESPRESSO - COLUMBIA BIO 60ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "COLUMBIA - LA ORQUIDEA PLANADAS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "388ef06d-ca91-4781-8d38-a26764c67d7e"
+  },
+  {
+    "name": "CEAI LAMAIE",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "DOUBLE RISTRETTO - COLUMBIA BIO 60ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "COLUMBIA - LA ORQUIDEA PLANADAS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "388ef06d-ca91-4781-8d38-a26764c67d7e"
+  },
+  {
+    "name": "MACCHIATO H.B. 80ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "DOUBLE ESPRESSO - BARI S.O. 60ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "PAHAR 16 OZ",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAPPUCCINO H.B. 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "AMERICANO S.O. 230ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI LAMAIE 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI NEGRU DARJEELING 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI LAMAIE & GHIMBIR 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CAFEA BOABE - PREMIUM 3",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "VEGETAL CAPPUCCINO H.B. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "FANTA 330 ML DOZA (copie)",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "CAPPUCCINO - DEKOF COLUMBIA S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DEKOF - CUORE DI COLUMBIA",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "f8df03fd-8ad2-4ddc-bc60-1c5ac0193656"
+  },
+  {
+    "name": "CAFEA BOABE - CUORE DI COLUMBIA 1kg",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "IZVORUL ALB APA MINERALA 330ml",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "PAHAR 16 OZ",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAPPUCCINO - BARI S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "Apa Minerala DORNA 330ml",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "CAPUCCINO VIENEZ BIG",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "LAPTE CONDENSAT",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAPPUCCINO VIENNESSE H.B. 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "CAFEA BOABE - PREMIUM 10 1kg",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "PAIE",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAFEA BOABE - GIOIA DI GUATEMALA",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "CAFEA BOABE - NOSTALGIA DI ETHIOPIA 1kg",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "CAFEA PRAJITA DECOF - SWISS WATER 250gr",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAPPUCCINO VIENNESSE H.B. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "DOUBLE ESPRESSO H.B. 60ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "BISCUITI PARMEZAN",
+    "inventory": "MARFURi",
+    "pos": "PATISERIA",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "CHEC CU BANANE",
+    "inventory": "MARFURi",
+    "pos": "PATISERIA",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "CHEC CU LAMAIE & MAC",
+    "inventory": "MARFURi",
+    "pos": "PATISERIA",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "AMERICANO - PERU S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "PERU - MONTEVERDE RUMIYACU AMAZONAS Organic",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "5ca60676-5ad6-4842-87ee-4d83e67dee7d"
+  },
+  {
+    "name": "CAPAC PAHAR FRAPPE DL95",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAFEA BOABE - GIOIA DI GUATEMALA 1kg",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "DOUBLE MACCHIATO - COLUMBIA BIO 60ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "COLUMBIA - LA ORQUIDEA PLANADAS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "388ef06d-ca91-4781-8d38-a26764c67d7e"
+  },
+  {
+    "name": "CAFEA BOABE - NOSTALGIA DI ETHIOPIA 1kg",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "CAFEA BOABE - PREMIUM 10 1kg",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "V60 - BARI S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "CAPAC SL45",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAFEA BOABE - SEGRETO DI INDIA 1kg",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "CAFEA BOABE DECOF - CUORE DI COLUMBIA 1kg",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "CEAI DARJEELING",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CAFEA BOABE - SEGRETO DI INDIA",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "LIMONADA CU MANGO & MENTA",
+    "inventory": "PRODUSE FINITE",
+    "pos": "LIMONADA",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "a9cc3068-ebdc-415b-a69b-07481decaeda"
+  },
+  {
+    "name": "DARK CHOCOLATE GOURMET VANILA",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "AMERICANO - BARI S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "ESPRESSO H.B. 30ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "MACHIATO",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOT BEVERAGE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI COACAZE",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "LIMONADA CU MENTA",
+    "inventory": "PRODUSE FINITE",
+    "pos": "LIMONADA",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "a9cc3068-ebdc-415b-a69b-07481decaeda"
+  },
+  {
+    "name": "CAPAC SL37",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CHEC CU MORCOV & CIOCOLATA ALBA",
+    "inventory": "MARFURi",
+    "pos": "PATISERIA",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "SPANISH ICE LATTE",
+    "inventory": "PRODUSE FINITE",
+    "pos": "ICED COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "69df12b5-3f22-4517-963c-1a8d20b2c0bf"
+  },
+  {
+    "name": "CAPPUCCINO - BARI S.O. 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CHEC MARMORAT",
+    "inventory": "MARFURi",
+    "pos": "PATISERIA",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "COOKIE CU STAFIDE & UNT",
+    "inventory": "MARFURi",
+    "pos": "PATISERIA",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "VIENNESSE ICE LATTE",
+    "inventory": "PRODUSE FINITE",
+    "pos": "ICED COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "69df12b5-3f22-4517-963c-1a8d20b2c0bf"
+  },
+  {
+    "name": "CEAI ROOIBOS CARAMEL SARAT 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "LATTE H.B. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "Apa Plata DORNA 330ml",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "MATCHA LATTE 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOT BEVERAGE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "PAHAR 8 OZ",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "FANTA 330 ML DOZA",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "VEGETAL CAPPUCCINO H.B. 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "CIOCOLATA CALDA ALBA 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOT BEVERAGE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "FLAT WHITE - COLUMBIA BIO 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "COLUMBIA - LA ORQUIDEA PLANADAS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "388ef06d-ca91-4781-8d38-a26764c67d7e"
+  },
+  {
+    "name": "VEGETAL CAPPUCCINO H.B. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "CAPPUCCINO VIENNESSE - BARI S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "FRISCA",
+    "inventory": "MARFURi",
+    "pos": null,
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "SALAM DE BISCUITI",
+    "inventory": "MARFURi",
+    "pos": "PATISERIA",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "FENTIMAS",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "SOCATA",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "CEAI VERDE MENTA & LAMAIE 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI VERDE 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI MUSETEL 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CAPPUCCINO VIENNESSE - BARI S.O. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "FRENCHPRESS - BARI S.O. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "DUSTY CAFF BRATTOLO 900 GR",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAPPUCCINO - BARI S.O. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "FRENCHPRESS - BIO COLUMBIA S.O. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "FRENCHPRESS - NICARAGUA S.O. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "AEROPRESS - BIO COLUMBIA S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "FRENCHPRESS - PERU S.O. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "AEROPRESS - BARI S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "AEROPRESS - NICARAGUA S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "AEROPRESS - PERU S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "LIMONADA CU MANGO & MENTA 400ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "LIMONADA",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "a9cc3068-ebdc-415b-a69b-07481decaeda"
+  },
+  {
+    "name": "AMERICANO - COLUMBIA BIO 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "COLUMBIA - LA ORQUIDEA PLANADAS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "388ef06d-ca91-4781-8d38-a26764c67d7e"
+  },
+  {
+    "name": "SGR",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CIOCOLATA CALDA NEAGRA 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOT BEVERAGE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "PALETE CAFEA 14cm",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "Sprite Lamaie & Lamaie Verde 250ml",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "PLATOU CU CAPAC 32cm",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAPPUCCINO VIENNESE - COLUMBIA BIO 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "COLUMBIA - LA ORQUIDEA PLANADAS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "388ef06d-ca91-4781-8d38-a26764c67d7e"
+  },
+  {
+    "name": "Schweppes Bitter Lemon 250ml",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "CAFEA BOABE - CUORE DI COLUMBIA",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "Schweppes Mandarin 250ml",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "Schweppes Tonic Water 250ml",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "AMERICANO H.B. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "CAPPUCCINO H.B. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "CAFEA BOABE - PREMIUM 3",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "MOELK BARISTA BAUTURA VEGETALA DE OVAZ",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "SMART WATER 600ml",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "Coca Cola Original 250ml",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "PACHET FRAPPE DOLCE NERA",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAFEA BOABE DECOF - CUORE DI COLUMBIA",
+    "inventory": "MARFURi",
+    "pos": "SHOP",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "5cde9c02-4661-4a39-b479-6e83294b0f98"
+  },
+  {
+    "name": "FRITZ-KOLA",
+    "inventory": "MARFURi",
+    "pos": "BAUTURI RACORITOARE",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": "e29d65a4-fe77-47d8-a9bb-3c001725f3e4"
+  },
+  {
+    "name": "COOKIE CIOCOLATA ALBA",
+    "inventory": "MARFURi",
+    "pos": "PATISERIA",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "AMERICANO H.B. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "CAPPUCCINO H.B. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "AMERICANO - BARI S.O. 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "SIROP GIFFARD CIOCOLATA NEAGRA",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "SIROP GIFFARD IRISH",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "SIROP GIFFARD TOFFEE NUT",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "SIROP GIFFARD VANILIA",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "COOKIE CIOCOLATA NEAGRA & FULGI SARE",
+    "inventory": "MARFURi",
+    "pos": "PATISERIA",
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "LATTE - BARI S.O. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CAPPUCCINO VIENNESSE H.B. 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "VEGETAL FLATT WHITE H.B. 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "LAPTE BIO UHT",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "Franchise Tech Subscription",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "LIMONADA 5 LITRI",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "SGR",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "MATCHA LATTE",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI VERDE MENTA & LAMAIE",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "PAHAR 6 OZ",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "COLD BEVERAGE",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "PALETE",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "PAHAR FRAPPE DOLCE NERA 3CNEW",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI ALB VANILIE & PIERSICA 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "PAHAR 12 OZ",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "FLATT WHITE H.B. 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "DOUBLE MACCHIATO H.B. 80ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "DOUBLE MACCHIATO - BARI S.O. 80ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CAFEA PRAJITA - GUJI ETHIOPIA 1kg",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "DOUBLE RISTRETTO - BARI S.O. 40ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "SIROP GIFFARD CARAMEL",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "FRAPPE DOLCE NERA",
+    "inventory": "PRODUSE FINITE",
+    "pos": "ICED COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "69df12b5-3f22-4517-963c-1a8d20b2c0bf"
+  },
+  {
+    "name": "CEAI VERDE",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "MIERE PLIC",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "ZAHAR ALB 5 GR",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "ZAHAR BRUN 5 GR",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI CAPSUNI & MENTA 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI COACAZE 480ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "DRINKS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CAFEA PRAJITA - PREMIUM 3 1kg",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "ESPRESSO - BARI S.O. 30ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "FLATT WHITE - BARI S.O. 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "DOUBLE RISTRETTO H.B. 40ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "VEGETAL LATTE H.B. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "CEAI MUSETEL",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CEAI ROOIBOS",
+    "inventory": "PRODUSE FINITE",
+    "pos": null,
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "CAPAC DE PLASTIC 6 OZ",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "SIROP GIFFARD CARAMEL SARAT",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "WHITE CHOCOLATE GOURMET WHITE VANILA",
+    "inventory": "MATERIA PRIMA",
+    "pos": null,
+    "inv_id": "eb0cb7ba-cd44-4d08-8970-94c930ebca21",
+    "pos_id": null
+  },
+  {
+    "name": "CAPPUCCINO - COLUMBIA BIO 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "COLUMBIA - LA ORQUIDEA PLANADAS",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "388ef06d-ca91-4781-8d38-a26764c67d7e"
+  },
+  {
+    "name": "AMERICANO H.B. 240ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "DOUBLE ESPRESSO - PERU S.O. 60ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "PERU - MONTEVERDE RUMIYACU AMAZONAS Organic",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "5ca60676-5ad6-4842-87ee-4d83e67dee7d"
+  },
+  {
+    "name": "FRISCA SPRAY",
+    "inventory": "MARFURi",
+    "pos": null,
+    "inv_id": "7e7932c2-4a74-4afd-bedf-e438da6258e5",
+    "pos_id": null
+  },
+  {
+    "name": "MATCHA LATTE 400ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOT BEVERAGE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "LATTE H.B. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "MACCHIATO H.B. 40ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "RISTRETTO H.B. 20ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "HOUSE BLEND COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "3505a9e9-2f93-4708-a4ac-dc8d167726b0"
+  },
+  {
+    "name": "MACCHIATO - BARI S.O. 40ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "RISTRETTO - BARI S.O. 20ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "ITALIAN ICE LATTE",
+    "inventory": "PRODUSE FINITE",
+    "pos": "ICED COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "69df12b5-3f22-4517-963c-1a8d20b2c0bf"
+  },
+  {
+    "name": "LIMONADA CU KIWI & MENTA",
+    "inventory": "PRODUSE FINITE",
+    "pos": "LIMONADA",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "a9cc3068-ebdc-415b-a69b-07481decaeda"
+  },
+  {
+    "name": "LATTE - BARI S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SINGLE ORIGIN COFFEES",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": null
+  },
+  {
+    "name": "V60 - NICARAGUA S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "V60 - PERU S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  },
+  {
+    "name": "V60 - BIO COLUMBIA S.O. 360ml",
+    "inventory": "PRODUSE FINITE",
+    "pos": "SPECIALITY COFFEE",
+    "inv_id": "348a5cbd-9522-4463-b31b-3f7695e16c73",
+    "pos_id": "01be02b5-5c21-4f5f-8c7d-21142abe009a"
+  }
+]

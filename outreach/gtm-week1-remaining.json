@@ -1,0 +1,402 @@
+[
+  {
+    "type": "partner",
+    "company": "Q Retail",
+    "step": 1,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@qretail.ro",
+      "subject": "workspace HORECA",
+      "content": "Bună ziua,\n\nCa distribuitor FiscalNet puteți oferi franchisetech — POS stoc NIR integrat fiscal cu 20% recurent.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=q-retail\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Anzi Soft",
+    "step": 1,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "vanzari@anzisoft.ro",
+      "subject": "workspace HORECA",
+      "content": "Bună ziua,\n\nSoluțiile voastre fiscale se completează cu franchisetech POS+stoc+NIR — 20% recurent per client HoReCa.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=anzi-soft\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Vlarox Fiscal",
+    "step": 1,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@vlarox.ro",
+      "subject": "workspace HORECA",
+      "content": "Bună ziua Vlad Lembrău,\n\nRecomandați franchisetech ca POS cloud cu stoc și NIR — 20% recurent din abonamente.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=vlarox-fiscal\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "RezoSoft",
+    "step": 1,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@rezosoft.ro",
+      "subject": "workspace HORECA",
+      "content": "Bună ziua,\n\nRezoSoft acoperă facturare — franchisetech adaugă POS HoReCa cu stoc NIR și 20% recurent.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=rezosoft\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Express Caffe",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=express-caffe-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@expresscaffe.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nExpress Caffe din Miroslava gestionează contracte HoReCa pe kg/lună — POS cu abonamente ar automatiza reînnoirile.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Express Caffe?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=express-caffe\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Urbanistic Coffee",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=urbanistic-coffee-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@urbanistic.coffee",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nUrbanistic pe Vulturului 2 prăjește propriu — promoțiile la kilogram ar fi mai ușor de controlat cu POS + fidelizare.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Urbanistic Coffee?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=urbanistic-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Habitat Coffee Studio",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=habitat-coffee-studio-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "hello@ourhabitat.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nHabitat pe Prundului 57 combină café și academy SCA — separarea veniturilor bar vs. cursuri în POS ar clarifica P&L.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Habitat Coffee Studio?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=habitat-coffee-studio\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Ch9 Specialty Coffee",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=ch9-specialty-coffee-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "vio@spired.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua Vio Spiru,\n\nCh9 în curtea Johannes Honterus trăiește de turism — POS cu rapoarte sezon ar ajuta la personalul de vară vs. iarnă.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Ch9 Specialty Coffee?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=ch9-specialty-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Book Coffee Shop",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=book-coffee-shop-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "shop@bookcoffee.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nBook Coffee e orientat take-away — un POS preset pentru rețete latte ar accelera servirea dimineața.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Book Coffee Shop?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=book-coffee-shop\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Mica Elvetie",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mica-elvetie-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@micaelvetie.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua Jakob Hausmann,\n\nMica Elveție pe Franceza 60-62 e institution local — POS discret cu rezervări ar păstra eleganța fără bonuri pierdute.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Mica Elvetie?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mica-elvetie\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Minish",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-minish-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "restaurant.minish@outlook.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nMinish pe Barajul Uzului pare unitate compactă — un POS all-in-one ar înlocui procesele manuale de la primul serviciu.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Minish?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-minish\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Vulturul",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-vulturul-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@restaurantvulturul.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nVulturul din Intrarea Blejoiu deservește cartierul — un till simplu cu bon fiscal ar reduce timpul la închiderea zilei.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Vulturul?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-vulturul\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Rispetto Cucina Italiana",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rispetto-cucina-italiana-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@rispettorestaurant.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua Constantin Ghimpu,\n\nRispetto cu Chef Ghimpu pe Progresului — rapoarte food cost pe fel principal ar spori încrederea ownerului în cifre.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Rispetto Cucina Italiana?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rispetto-cucina-italiana\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "KIMU",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kimu-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@kimu.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nKIMU pe Clucerului 19 vinde experiență premium — POS cu meniu degustare preset ar reduce erorile între salon și bucătărie.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru KIMU?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kimu\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Osho Restaurant",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=osho-restaurant-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@osho-restaurant.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nOsho pe bd. Primaverii atrage corporate — POS cu factură rapidă și split plată ar scurta checkout-ul la prânz.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Osho Restaurant?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=osho-restaurant\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Baracca",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=baracca-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@baracca.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nBaracca pe Napoca 8A combină terasă și salon — un POS cu plan mese ar reduce dubla rezervare în sezon.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Baracca?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=baracca\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "DaVinci Ristorante",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=davinci-ristorante-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@davinciristorante.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua Oana Munteanu,\n\nDaVinci pe Str. Fagului are salon evenimente separat — avans POS la rezervare ar securiza mesele mari.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru DaVinci Ristorante?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=davinci-ristorante\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Kupaj Wine Bar",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kupaj-wine-bar-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@kupaj.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nKupaj pe Sindicatelor 4 vinde sticle și pahar — POS cu inventar vin ar reduce diferențele la inventar lunar.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Kupaj Wine Bar?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=kupaj-wine-bar\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "My Thai",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=my-thai-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@mythai.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nMy Thai pe Rebreanu 3 are meniu zilei + grill — POS cu modificatori masă/terasă ar evita confuziile la serviciu.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru My Thai?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=my-thai\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Nativ",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-nativ-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@restaurantnativ.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nNativ pe Clemenceau 3 promite carne românească — POS cu note pe proveniență lot ar susține povestea la audit.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Nativ?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-nativ\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Panoramic Cetățuie",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=panoramic-cet-uie-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@panoramic-cluj.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nPanoramic pe Șerpuitoare 1 combină restaurant și pensiune — POS unificat ar lega consumul cameră de restaurant.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Panoramic Cetățuie?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=panoramic-cet-uie\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Valahia",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-valahia-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "rezervari@restaurant-valahia.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nValahia pe Rebreanu 52-54 e restaurant de cartier — POS simplu cu raport pe interval prânz/cină ar ajuta la staffing.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Valahia?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-valahia\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Tied",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=tied-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@tied.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nTied pe Emanoil Ungureanu 3 vinde ritm lent — POS cu course firing ar sincroniza bucătăria cu tempo-ul serii.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Tied?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=tied\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant Insula",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-insula-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@restaurant-insula.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nInsula pe Aleea Ghirodei 36 are sezon estival — rapoarte POS pe lună ar ghida angajările de vară.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Restaurant Insula?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-insula\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  }
+]

@@ -20,6 +20,16 @@ def update(path: Path, email_col: str = "email") -> None:
                 entry = BY_EMAIL[email]
                 if entry["status"] == "success":
                     row["status"] = "sent_step1"
+                elif entry["status"] == "failed_bounce":
+                    row["status"] = "failed_bounce"
+                    if "error" in entry:
+                        row["error"] = entry["error"][:200]
+                elif entry["status"] == "opted_out":
+                    row["status"] = "opted_out"
+                    if "error" in entry:
+                        row["error"] = entry["error"][:200]
+                elif entry["status"] == "replied_interested":
+                    row["status"] = "replied_interested"
                 else:
                     row["status"] = "failed_rate_limit"
                     if "error" in entry:

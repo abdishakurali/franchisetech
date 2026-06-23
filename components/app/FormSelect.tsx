@@ -21,6 +21,7 @@ type Props = {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  onValueChange?: (value: string) => void;
 };
 
 export function FormSelect({
@@ -30,15 +31,24 @@ export function FormSelect({
   placeholder = "Select…",
   disabled = false,
   className,
+  onValueChange,
 }: Props) {
   const [value, setValue] = useState(defaultValue);
+  const selectedLabel = options.find((o) => o.value === value)?.label ?? value;
 
   return (
-    <div className={className}>
+    <div className={className} key={defaultValue}>
       <input type="hidden" name={name} value={value} />
-      <Select value={value} onValueChange={setValue} disabled={disabled}>
+      <Select
+        value={value}
+        onValueChange={(next) => {
+          setValue(next);
+          onValueChange?.(next);
+        }}
+        disabled={disabled}
+      >
         <SelectTrigger className="w-full max-w-md">
-          <SelectValue placeholder={placeholder} />
+          <SelectValue placeholder={placeholder}>{selectedLabel}</SelectValue>
         </SelectTrigger>
         <SelectContent>
           {options.map((opt) => (

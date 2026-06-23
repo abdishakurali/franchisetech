@@ -53,8 +53,8 @@ export default async function DashboardPage({ searchParams }: Props) {
   const monthStart = startOfMonth(now).toISOString();
   const weekAgo = subDays(now, 7).toISOString();
 
-  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const periodLabel =
     period === "week" ? t.period.vsLastWeek : period === "month" ? t.period.vsLastMonth : t.period.vsYesterday;
 

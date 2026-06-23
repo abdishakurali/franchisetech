@@ -41,7 +41,7 @@ Core value: "Close the day with truth" — cash drawer vs expected, margin visib
 
 ## Pricing
 
-- Starter: €39/mo (café, POS + products + Z-report)
+- Starter: €49/mo (café, POS + products + Z-report)
 - Pro: €79/mo (restaurant, stock + recipes + kitchen)
 - Multi-location: €99/location/mo
 - Assisted setup: €199 one-time

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { getDefaultVatRateValue } from "@/lib/vat-rates";
+import { PRODUCT_LIST_WITH_POS_SELECT } from "@/lib/supabase/product-selects";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -26,14 +27,14 @@ function canManagePos(role: string | null | undefined) {
   return role === "owner" || role === "manager";
 }
 
-function formatTime(ts: string | null | undefined) {
+function formatTime(ts: string | null | undefined, locale: "en" | "ro") {
   if (!ts) return "—";
-  return new Intl.DateTimeFormat("en-IE", { timeStyle: "short", dateStyle: "short" }).format(new Date(ts));
+  return new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", { timeStyle: "short", dateStyle: "short" }).format(new Date(ts));
 }
 
 export default async function PosPage() {
-  const { countryCode, supabase, orgId, currency, currencySymbol, user, membership } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency, currencySymbol, user, membership } = await getKitchenOpsContext();
+  const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const userRole = membership.role as string;
   const canManage = canManagePos(userRole);
   // Org name for print slips
@@ -136,9 +137,9 @@ export default async function PosPage() {
   const { data: existingCats } = await supabase.from("product_categories").select("id").eq("organisation_id", orgId).limit(1);
   if (!existingCats?.length) {
     await supabase.from("product_categories").insert([
-      { organisation_id: orgId, name: "Drinks", color: "#2563eb", sort_order: 1 },
-      { organisation_id: orgId, name: "Food", color: "#16a34a", sort_order: 2 },
-      { organisation_id: orgId, name: "Snacks", color: "#f59e0b", sort_order: 3 },
+      { organisation_id: orgId, name: "Drinks", color: "#2563eb", sort_order: 1, category_type: "pos" },
+      { organisation_id: orgId, name: "Food", color: "#16a34a", sort_order: 2, category_type: "pos" },
+      { organisation_id: orgId, name: "Snacks", color: "#f59e0b", sort_order: 3, category_type: "pos" },
     ]).then(() => null, () => null);
   }
   const { data: existingMethods } = await supabase.from("payment_methods").select("id").eq("organisation_id", orgId).limit(1);
@@ -269,12 +270,12 @@ export default async function PosPage() {
 
   const { data: products } = await supabase
     .from("products")
-    .select("*,product_categories(id,name,color)")
+    .select(PRODUCT_LIST_WITH_POS_SELECT)
     .eq("organisation_id", orgId)
     .eq("active", true)
     .order("name");
   const sgrProduct = (products ?? []).find((p) => p.name?.toUpperCase() === "SGR") ?? null;
-  const { data: categories } = await supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).in("category_type", ["pos", "both"]).order("sort_order");
+  const { data: categories } = await supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("name");
   const { data: methods } = await supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at");
   const vatRates = await listActiveVatRates(supabase, orgId);
   const defaultVatRate = getDefaultVatRateValue(vatRates);
@@ -302,8 +303,8 @@ export default async function PosPage() {
           </div>
 
           <PageHint id="pos-closed">
-            <p className="font-medium">Open the till before your first sale.</p>
-            <p className="mt-1 text-blue-700">Opening cash is the cash float in the drawer before selling.</p>
+            <p className="font-medium">{t.pos.openTillBeforeSale}</p>
+            <p className="mt-1 text-blue-700">{t.pos.openingCashHint}</p>
           </PageHint>
 
           <OpenTillForm currencySymbol={currencySymbol} currency={currency} orgName={orgName} userName={userName} fiscalNet={fiscalNet} isRO={isRO} defaultCash={Number(lastClosed?.counted_cash ?? lastClosed?.expected_cash ?? 0) || undefined} />
@@ -317,45 +318,45 @@ export default async function PosPage() {
                     <Calendar className="h-4 w-4 text-slate-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800">Last session closed</p>
-                    <p className="text-xs text-slate-500">{formatTime(lastClosed.closed_at)} by {lastClosedBy}</p>
+                    <p className="text-sm font-semibold text-slate-800">{t.pos.lastSessionClosed}</p>
+                    <p className="text-xs text-slate-500">{t.pos.closedAtBy(formatTime(lastClosed.closed_at, locale), lastClosedBy)}</p>
                   </div>
-                  <Badge variant="secondary" className="shrink-0 text-xs capitalize">{lastClosed.status}</Badge>
+                  <Badge variant="secondary" className="shrink-0 text-xs capitalize">{t.pos.sessionClosed}</Badge>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="col-span-2 rounded-xl border border-slate-100 p-4">
-                    <p className="text-xs text-slate-400 mb-0.5">Last counted cash</p>
+                    <p className="text-xs text-slate-400 mb-0.5">{t.pos.lastCountedCash}</p>
                     <p className="text-2xl font-bold text-slate-950">{money(Number(lastClosed.counted_cash ?? lastClosed.expected_cash ?? 0), currency)}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">Closed {formatTime(lastClosed.closed_at)} by {lastClosedBy}</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{t.pos.closedAtByShort(formatTime(lastClosed.closed_at, locale), lastClosedBy)}</p>
                   </div>
                   <div className="rounded-xl border border-slate-100 p-4">
-                    <p className="text-xs text-slate-400 mb-0.5">Total sales</p>
+                    <p className="text-xs text-slate-400 mb-0.5">{t.pos.totalSales}</p>
                     <div className="flex items-center gap-1.5">
                       <Banknote className="h-3.5 w-3.5 text-blue-600" />
                       <span className="font-bold text-slate-900">{money(lastSessionTotal, currency)}</span>
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">{lastSessionTxCount} transactions</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{t.pos.transactionsCount(lastSessionTxCount)}</p>
                   </div>
                   <div className="rounded-xl border border-slate-100 p-4">
-                    <p className="text-xs text-slate-400 mb-0.5">Cash / Card split</p>
+                    <p className="text-xs text-slate-400 mb-0.5">{t.pos.cashCardSplit}</p>
                     <div className="flex items-center gap-1.5">
                       <CreditCard className="h-3.5 w-3.5 text-green-600" />
                       <span className="font-semibold text-slate-900 text-sm">{money(lastSessionCash, currency)}</span>
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">Card: {money(lastSessionCard, currency)}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{t.pos.cardLabel(money(lastSessionCard, currency))}</p>
                   </div>
                   {lastClosed.counted_cash != null && (
                     <div className="col-span-2 rounded-xl border border-slate-100 p-4 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-slate-500">Expected cash</span>
+                        <span className="text-slate-500">{t.pos.expectedCash}</span>
                         <span className="font-medium">{money(Number(lastClosed.expected_cash ?? 0), currency)}</span>
                       </div>
                       <div className="flex justify-between mt-1">
-                        <span className="text-slate-500">Counted cash</span>
+                        <span className="text-slate-500">{t.pos.countedCash}</span>
                         <span className="font-medium">{money(Number(lastClosed.counted_cash ?? 0), currency)}</span>
                       </div>
                       <div className="flex justify-between mt-1 pt-1 border-t">
-                        <span className="text-slate-500">Difference</span>
+                        <span className="text-slate-500">{t.pos.difference}</span>
                         <span className={`font-semibold ${Number(lastClosed.counted_cash) - Number(lastClosed.expected_cash) >= 0 ? "text-green-600" : "text-red-600"}`}>
                           {money(Number(lastClosed.counted_cash ?? 0) - Number(lastClosed.expected_cash ?? 0), currency)}
                         </span>
@@ -364,7 +365,7 @@ export default async function PosPage() {
                   )}
                   {lastClosed.notes && (
                     <div className="col-span-2 rounded-lg bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
-                      Note: {lastClosed.notes}
+                      {t.pos.notePrefix}: {lastClosed.notes}
                     </div>
                   )}
                 </div>
@@ -403,6 +404,7 @@ export default async function PosPage() {
       <PosTillStateSync sessionOpen />
       {/* POS register */}
       <PosWithTour
+        orgId={orgId}
         products={(products ?? []) as never}
         categories={categories ?? []}
         paymentMethods={methods ?? []}
@@ -414,6 +416,7 @@ export default async function PosPage() {
         fiscalNet={fiscalNet}
         vatRateGroupMap={vatRateGroupMap}
         isRO={isRO}
+        appLocale={locale}
         currency={currency}
         orgName={orgName}
         userName={userName}

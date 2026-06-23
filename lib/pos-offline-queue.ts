@@ -21,6 +21,7 @@ export type QueuedSale = {
   /** Human-readable summary, e.g. "2 items · €6.30" */
   label: string;
   transactionId?: string;
+  lastError?: string;
 };
 
 const STORAGE_KEY = "pos_offline_sale_queue";
@@ -56,6 +57,19 @@ export function isBrowserOnline(): boolean {
   return navigator.onLine;
 }
 
+/** True when the browser reports offline or a sale failed due to connectivity. */
+export function isRetryableNetworkError(err: unknown): boolean {
+  if (!isBrowserOnline()) return true;
+  const msg = err instanceof Error ? err.message : String(err ?? "");
+  return /failed to fetch|networkerror|load failed|fetch|unexpected response|from the server|timeout|econnrefused/i.test(
+    msg,
+  );
+}
+
+export function removeOfflineSale(id: string) {
+  writeQueue(readQueue().filter((q) => q.id !== id));
+}
+
 export function formDataToPayload(fd: FormData): QueuedSalePayload {
   const payload: QueuedSalePayload = {};
   fd.forEach((value, key) => {
@@ -88,8 +102,16 @@ export function markOfflineSaleSynced(id: string, transactionId: string) {
   writeQueue(
     readQueue().map((entry) =>
       entry.id === id
-        ? { ...entry, status: "pending_fiscal" as const, transactionId }
+        ? { ...entry, status: "pending_fiscal" as const, transactionId, lastError: undefined }
         : entry
+    )
+  );
+}
+
+export function markOfflineSaleSyncFailed(id: string, error: string) {
+  writeQueue(
+    readQueue().map((entry) =>
+      entry.id === id ? { ...entry, lastError: error.slice(0, 200) } : entry
     )
   );
 }

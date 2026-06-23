@@ -16,7 +16,7 @@ export const STRIPE_LOOKUP_KEYS: Record<BillingPlan, string> = {
 
 /** Live Stripe price IDs aligned with pricingPlans (2026-06-19). */
 export const STRIPE_CANONICAL_PRICE_IDS: Record<BillingPlan, string> = {
-  starter: "price_1TkNjMQSKBSEqRxEnsWqWy2Y",
+  starter: "price_1TkkLdQSKBSEqRxEKI1IQ0Rm",
   pro: "price_1TkNjPQSKBSEqRxEtqTSm45R",
   multi_location: "price_1TgahZQSKBSEqRxEEtIUQ0pU",
 };
@@ -46,8 +46,8 @@ export const pricingPlans: readonly PlanDefinition[] = [
   plan({
     id: "starter",
     name: "franchisetech Starter",
-    price: "€39",
-    amountCents: 3900,
+    price: "€49",
+    amountCents: 4900,
     currency: "eur",
     interval: "month",
     cadence: "/month",

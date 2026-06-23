@@ -15,8 +15,8 @@ function canUpdateKitchen(role: string | null | undefined) {
 }
 
 export default async function KitchenPage() {
-  const { countryCode, supabase, orgId, membership, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, membership, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const orgRow = Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations;
   const enabled = Boolean((orgRow as { kitchen_display_enabled?: boolean | null } | null)?.kitchen_display_enabled);
   const stationsEnabled = Boolean((orgRow as { kitchen_stations_enabled?: boolean | null } | null)?.kitchen_stations_enabled);

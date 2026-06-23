@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
@@ -15,9 +15,12 @@ function featurePath(slug: string): string {
     "stock-management": "/app/stock",
     "recipe-costing": "/app/recipes",
     "z-report": "/app/reports/z-report",
-    "food-safety-records": "/app/food-safety",
     "purchases-suppliers": "/app/suppliers",
     "setup-onboarding": "/app/setup-checklist",
+    nir: "/app/purchases",
+    offline: "/app/pos",
+    "qr-code-receipts": "/help/romania-fiscalnet",
+    "accountant-reports": "/app/reports/gestiune",
   };
   return paths[slug] ?? "/app";
 }
@@ -35,9 +38,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function FeaturePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  if (slug === "food-safety-records") {
+    redirect("/features");
+  }
+
   const locale = await getMarketingLocale();
   const t = getMarketingMessages(locale);
-  const raw = findPage(featurePages, (await params).slug);
+  const raw = findPage(featurePages, slug);
   if (!raw) notFound();
   const page = localizeSeoPage(raw, locale);
 

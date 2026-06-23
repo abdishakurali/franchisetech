@@ -1,0 +1,247 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { FormSelect } from "@/components/app/FormSelect";
+import { saveOwnerDigestSettings } from "@/app/actions/owner-digest";
+import type { AppLocale } from "@/lib/app-i18n";
+import { getAppText } from "@/lib/app-i18n";
+
+export type OwnerDigestInitial = {
+  enabled: boolean;
+  frequency: "off" | "daily" | "weekly";
+  dayOfWeek: number;
+  timeOfDay: string;
+  timezone: string;
+  recipients: string[];
+};
+
+type Props = {
+  locale: AppLocale;
+  canEdit: boolean;
+  inventoryEnabled: boolean;
+  ownerEmail: string;
+  initial: OwnerDigestInitial;
+};
+
+const DAY_KEYS = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+] as const;
+
+export function OwnerDigestCard({
+  locale,
+  canEdit,
+  inventoryEnabled,
+  ownerEmail,
+  initial,
+}: Props) {
+  const t = getAppText(locale).settings.notifications;
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [testLoading, setTestLoading] = useState(false);
+  const [digestEnabled, setDigestEnabled] = useState(initial.enabled);
+  const [frequency, setFrequency] = useState(initial.frequency);
+
+  const formKey = `${initial.enabled}-${initial.frequency}-${initial.dayOfWeek}-${initial.timeOfDay}`;
+
+  const recipientsDisplay = initial.recipients
+    .filter((e) => e.toLowerCase() !== ownerEmail.toLowerCase())
+    .join(", ");
+
+  const dayOptions = DAY_KEYS.map((key, i) => ({
+    value: String(i + 1),
+    label: t[key],
+  }));
+
+  const handleSave = (formData: FormData) => {
+    startTransition(async () => {
+      const result = await saveOwnerDigestSettings(formData);
+      if (!result.ok) {
+        toast.error(
+          result.error === "inventory_required" ? t.inventoryRequired : t.couldNotSave
+        );
+        return;
+      }
+      toast.success(t.saved);
+      router.refresh();
+    });
+  };
+
+  const handleTest = async () => {
+    setTestLoading(true);
+    try {
+      const recipientsInput = document.getElementById("owner_digest_recipients") as HTMLInputElement | null;
+      const extra = recipientsInput?.value?.trim();
+      const testTo = extra?.split(/[,;\s]+/).find((e) => e.includes("@")) ?? ownerEmail;
+
+      const res = await fetch("/api/owner-digest/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: testTo }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        toast.error(data.error ?? t.testFailed);
+        return;
+      }
+      toast.success(t.testSent);
+    } catch {
+      toast.error(t.testFailed);
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
+  if (!inventoryEnabled) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.title}</CardTitle>
+          <CardDescription>{t.description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">
+            {t.inventoryRequired}
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{t.title}</CardTitle>
+        <CardDescription>{t.description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {canEdit ? (
+          <form key={formKey} action={handleSave} className="space-y-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="owner_digest_enabled"
+                checked={digestEnabled}
+                onChange={(e) => {
+                  const on = e.target.checked;
+                  setDigestEnabled(on);
+                  if (on && frequency === "off") {
+                    setFrequency("daily");
+                  }
+                }}
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              {t.enabled}
+            </label>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="owner_digest_frequency">{t.frequency}</Label>
+                <FormSelect
+                  name="owner_digest_frequency"
+                  defaultValue={frequency}
+                  className="mt-1"
+                  onValueChange={(value) => {
+                    const next =
+                      value === "daily" || value === "weekly" ? value : "off";
+                    setFrequency(next);
+                    if (next !== "off") {
+                      setDigestEnabled(true);
+                    } else {
+                      setDigestEnabled(false);
+                    }
+                  }}
+                  options={[
+                    { value: "off", label: t.frequencyOff },
+                    { value: "daily", label: t.frequencyDaily },
+                    { value: "weekly", label: t.frequencyWeekly },
+                  ]}
+                />
+              </div>
+              <div>
+                <Label htmlFor="owner_digest_day_of_week">{t.dayOfWeek}</Label>
+                <FormSelect
+                  name="owner_digest_day_of_week"
+                  defaultValue={String(initial.dayOfWeek)}
+                  className="mt-1"
+                  options={dayOptions}
+                />
+              </div>
+              <div>
+                <Label htmlFor="owner_digest_time_of_day">{t.timeOfDay}</Label>
+                <Input
+                  id="owner_digest_time_of_day"
+                  name="owner_digest_time_of_day"
+                  type="time"
+                  defaultValue={initial.timeOfDay}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="owner_digest_timezone">{t.timezone}</Label>
+                <Input
+                  id="owner_digest_timezone"
+                  name="owner_digest_timezone"
+                  defaultValue={initial.timezone}
+                  className="mt-1"
+                  placeholder="Europe/Bucharest"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="owner_digest_recipients">{t.recipients}</Label>
+              <p className="text-xs text-slate-500 mt-0.5 mb-1">
+                {t.recipientsHint} ({ownerEmail})
+              </p>
+              <Input
+                id="owner_digest_recipients"
+                name="owner_digest_recipients"
+                defaultValue={recipientsDisplay}
+                placeholder="extra@example.com"
+                className="mt-1"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button type="submit" disabled={pending}>
+                {pending ? t.saving : t.save}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleTest}
+                disabled={testLoading}
+              >
+                {testLoading ? t.sendingTest : t.sendTest}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <p className="text-sm text-slate-500">
+            {initial.enabled
+              ? `${t.frequency}: ${
+                  initial.frequency === "daily"
+                    ? t.frequencyDaily
+                    : initial.frequency === "weekly"
+                      ? t.frequencyWeekly
+                      : t.frequencyOff
+                }`
+              : t.frequencyOff}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

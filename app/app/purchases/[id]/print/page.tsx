@@ -13,8 +13,8 @@ function money(v: number, cur = "EUR") {
 
 export default async function PurchasePrintPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { locale, t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const p = t.purchases.print;
   const f = t.purchases.form;
   const taxLabel = f.vat;

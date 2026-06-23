@@ -5,7 +5,9 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app/AppShell";
 import { AppI18nProvider } from "@/lib/app-i18n-context";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { SupportChat } from "@/components/app/SupportChat";
+import { chatwootIdentifierHash } from "@/lib/chatwoot/identity";
 import { PostHogIdentify } from "@/components/app/PostHogIdentify";
 import { ensureReferralCode } from "@/lib/referrals";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
@@ -106,8 +108,15 @@ export default async function AppLayout({
 
   const isWorkstationRoute = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen") || pathname.startsWith("/app/settings");
 
+  const chatwootHash = chatwootIdentifierHash(user.id);
+
+  const { locale: appLocale } = getAppLocaleAndText(
+    activeOrg?.country_code ?? null,
+    (profile?.locale as string | null) ?? null,
+  );
+
   return (
-    <AppI18nProvider orgIsRO={activeOrg?.country_code === "RO"}>
+    <AppI18nProvider key={appLocale} orgIsRO={activeOrg?.country_code === "RO"} initialLocale={appLocale}>
     <AppShell
       user={user}
       profile={profile}
@@ -133,6 +142,7 @@ export default async function AppLayout({
           userId={user.id}
           userName={profile?.full_name}
           userEmail={user.email}
+          identifierHash={chatwootHash}
         />
       )}
     </AppShell>

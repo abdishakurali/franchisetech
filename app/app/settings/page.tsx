@@ -17,15 +17,14 @@ import type { CashDrawerMode } from "@/lib/cash-drawer";
 import { BusinessCapabilitiesCard } from "@/components/app/BusinessCapabilitiesCard";
 import { FormSelect } from "@/components/app/FormSelect";
 import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
+import { OwnerDigestCard } from "@/components/app/OwnerDigestCard";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
-import {
-  INDUSTRY_OPTIONS,
-  RESTAURANT_FEATURE_KEYS,
-  getSuggestedFeaturesForIndustry,
-} from "@/lib/restaurant-features";
+import { isModuleEnabled } from "@/lib/business-modules";
+import { industryLabel, industryOptions } from "@/lib/restaurant-features-i18n";
+import { RESTAURANT_FEATURE_KEYS, getSuggestedFeaturesForIndustry } from "@/lib/restaurant-features";
 
 const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
 const DEFAULT_CASH_DRAWER = {
@@ -75,7 +74,7 @@ export default async function SettingsPage({
   const lockedModule = params?.locked ?? null;
   const lockedMessage = params?.msg ? decodeURIComponent(params.msg) : null;
 
-  const { supabase, orgId, membership, user } = await getKitchenOpsContext();
+  const { supabase, orgId, membership, user, profileLocale } = await getKitchenOpsContext();
 
   // ── Org row (from membership join) ───────────────────────────────────
   const orgRow = (
@@ -91,7 +90,7 @@ export default async function SettingsPage({
   const rawCode     = (orgRow?.country_code as string) ?? null;
   const legacyText  = (orgRow?.country as string) ?? null;
   const countryCode = resolveCountryCode(rawCode, legacyText);
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { locale, t } = getAppLocaleAndText(countryCode, profileLocale);
   const isRO        = countryCode === "RO";
   const currencyCode = (orgRow?.currency_code as string) ?? "EUR";
 
@@ -102,7 +101,7 @@ export default async function SettingsPage({
     { data: paymentMethods },
     { data: vatRates },
   ] = await Promise.all([
-    supabase.from("product_categories").select("*").eq("organisation_id", orgId).order("sort_order"),
+    supabase.from("product_categories").select("*").eq("organisation_id", orgId).order("name"),
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("payment_methods").select("*").eq("organisation_id", orgId).order("created_at"),
     supabase.from("vat_rates").select("*").eq("organisation_id", orgId).order("sort_order"),
@@ -150,6 +149,14 @@ export default async function SettingsPage({
   const appLocale = (profile?.locale as string | null) ?? null;
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
 
+  const { data: digestOrg } = await supabase
+    .from("organisations")
+    .select(
+      "owner_digest_enabled,owner_digest_frequency,owner_digest_day_of_week,owner_digest_time_of_day,owner_digest_timezone,owner_digest_recipients"
+    )
+    .eq("id", orgId)
+    .maybeSingle();
+
   // ── Tab list ─────────────────────────────────────────────────────────
   const tabs = [
     { id: "business",  label: t.settings.tabBusiness  },
@@ -157,6 +164,7 @@ export default async function SettingsPage({
     { id: "products",  label: t.settings.tabProducts  },
     { id: "hardware",  label: t.settings.tabHardware  },
     ...(isRO ? [{ id: "fiscal", label: t.settings.tabReceipts }] : []),
+    { id: "notifications", label: t.settings.tabNotifications },
     { id: "billing",   label: t.settings.tabBilling   },
   ];
 
@@ -175,58 +183,58 @@ export default async function SettingsPage({
         <div className="space-y-6">
           {/* Business profile */}
           <Card>
-            <CardHeader><CardTitle>Business profile</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t.settings.business.profileTitle}</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-sm text-slate-500">Business name</p>
+                  <p className="text-sm text-slate-500">{t.settings.business.businessName}</p>
                   <p className="font-medium">{org?.name ?? "—"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Business type</p>
-                  <p className="font-medium capitalize">{org?.business_type ?? "—"}</p>
+                  <p className="text-sm text-slate-500">{t.settings.business.businessType}</p>
+                  <p className="font-medium capitalize">{industryLabel(org?.business_type, locale)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Your name</p>
+                  <p className="text-sm text-slate-500">{t.settings.business.yourName}</p>
                   <p className="font-medium">{profile?.full_name ?? "—"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Email</p>
+                  <p className="text-sm text-slate-500">{t.settings.business.email}</p>
                   <p className="font-medium">{user.email}</p>
                 </div>
               </div>
               <Link href="/app/profile" className="inline-flex text-sm text-blue-600 hover:underline">
-                Edit profile &rarr;
+                {t.settings.business.editProfile}
               </Link>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Business type</CardTitle>
-              <CardDescription>Used for setup suggestions only. It never turns features on automatically.</CardDescription>
+              <CardTitle>{t.settings.business.businessTypeTitle}</CardTitle>
+              <CardDescription>{t.settings.business.businessTypeDesc}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {canEdit ? (
                 <form action={updateOrganisationIndustry as unknown as (fd: FormData) => Promise<void>} className="flex flex-wrap items-end gap-4">
                   <div>
-                    <Label htmlFor="business_type">Industry</Label>
+                    <Label htmlFor="business_type">{t.settings.business.industry}</Label>
                     <FormSelect
                       name="business_type"
                       defaultValue={org?.business_type ?? "other"}
                       className="mt-1"
-                      options={INDUSTRY_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+                      options={industryOptions(locale)}
                     />
                   </div>
-                  <Button type="submit" variant="outline">Save business type</Button>
+                  <Button type="submit" variant="outline">{t.settings.business.saveBusinessType}</Button>
                 </form>
               ) : (
-                <p className="text-sm font-medium">{INDUSTRY_OPTIONS.find((o) => o.value === org?.business_type)?.label ?? org?.business_type ?? "Other"}</p>
+                <p className="text-sm font-medium">{industryLabel(org?.business_type, locale)}</p>
               )}
               <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
                 {getSuggestedFeaturesForIndustry(org?.business_type).length
-                  ? `Suggested options for your industry are highlighted in Features. Nothing turns on automatically.`
-                  : "Open Features to choose stock, kitchen, payments, and other options for this business."}
+                  ? t.settings.business.suggestedFeaturesHighlight
+                  : t.settings.business.openFeaturesHint}
               </div>
             </CardContent>
           </Card>
@@ -234,10 +242,9 @@ export default async function SettingsPage({
           {/* Business country — editable by owner/manager */}
           <Card>
             <CardHeader>
-              <CardTitle>Business country</CardTitle>
+              <CardTitle>{t.settings.business.countryTitle}</CardTitle>
               <p className="text-sm text-slate-500 mt-1">
-                Used to determine which local features are available.
-                Enable receipt settings only for businesses that need local receipt workflows.
+                {t.settings.business.countryDesc}
               </p>
             </CardHeader>
             <CardContent>
@@ -247,7 +254,7 @@ export default async function SettingsPage({
                   className="flex flex-wrap items-end gap-4"
                 >
                   <div>
-                    <Label htmlFor="country_code">Country</Label>
+                    <Label htmlFor="country_code">{t.settings.business.country}</Label>
                     <FormSelect
                       name="country_code"
                       defaultValue={countryCode}
@@ -256,18 +263,18 @@ export default async function SettingsPage({
                     />
                   </div>
                   <Button type="submit" variant="outline" className="mb-0.5">
-                    Save country
+                    {t.settings.business.saveCountry}
                   </Button>
                 </form>
               ) : (
                 <p className="text-sm font-medium">
                   {COUNTRY_OPTIONS.find((o) => o.code === countryCode)?.label ?? countryCode}
-                  <span className="ml-2 text-xs text-slate-400">(contact your account owner to change)</span>
+                  <span className="ml-2 text-xs text-slate-400">{t.settings.business.contactOwner}</span>
                 </p>
               )}
               {isRO && (
                 <p className="mt-3 text-xs text-green-700 bg-green-50 rounded px-3 py-2">
-                  Receipt settings are now visible for this business.
+                  {t.settings.business.receiptsVisible}
                 </p>
               )}
             </CardContent>
@@ -276,9 +283,9 @@ export default async function SettingsPage({
           {/* Currency */}
           <Card>
             <CardHeader>
-              <CardTitle>Currency</CardTitle>
+              <CardTitle>{t.settings.business.currencyTitle}</CardTitle>
               <p className="text-sm text-slate-500 mt-1">
-                The currency shown across the entire app — POS, reports, products, and transactions.
+                {t.settings.business.currencyDesc}
               </p>
             </CardHeader>
             <CardContent>
@@ -288,7 +295,7 @@ export default async function SettingsPage({
                   className="flex flex-wrap items-end gap-4"
                 >
                   <div>
-                    <Label htmlFor="currency_code">Currency</Label>
+                    <Label htmlFor="currency_code">{t.settings.business.currencyTitle}</Label>
                     <FormSelect
                       name="currency_code"
                       defaultValue={currencyCode}
@@ -309,21 +316,21 @@ export default async function SettingsPage({
                     />
                   </div>
                   <Button type="submit" variant="outline" className="mb-0.5">
-                    Save currency
+                    {t.settings.business.saveCurrency}
                   </Button>
                 </form>
               ) : (
                 <p className="text-sm font-medium">{currencyCode}
-                  <span className="ml-2 text-xs text-slate-400">(contact your account owner to change)</span>
+                  <span className="ml-2 text-xs text-slate-400">{t.settings.business.contactOwner}</span>
                 </p>
               )}
 
               <div className="mt-6 border-t border-slate-100 pt-5 space-y-2">
-                <Label>Language</Label>
+                <Label>{t.settings.business.language}</Label>
                 <p className="text-sm text-slate-500">
-                  POS and register interface language for this device.
+                  {t.settings.business.languageDesc}
                 </p>
-                <AppLocaleSwitcher orgIsRO={isRO} />
+                <AppLocaleSwitcher key={locale} initialLocale={locale} />
               </div>
             </CardContent>
           </Card>
@@ -343,7 +350,7 @@ export default async function SettingsPage({
             <form action={seedDefaultVatRates as unknown as (fd: FormData) => Promise<void>} className="mb-2">
               <input type="hidden" name="country_code" value={countryCode} />
               <Button type="submit" variant="outline" size="sm">
-                Add standard tax rates
+                {t.settings.business.addStandardTax}
               </Button>
             </form>
           )}
@@ -359,12 +366,12 @@ export default async function SettingsPage({
           {/* Team */}
           <Card>
             <CardHeader>
-              <CardTitle>Team</CardTitle>
-              <CardDescription>Add staff, assign roles, and control access for your business.</CardDescription>
+              <CardTitle>{t.settings.business.teamTitle}</CardTitle>
+              <CardDescription>{t.settings.business.teamDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/app/settings/team">
-                <Button variant="outline">Manage team &rarr;</Button>
+                <Button variant="outline">{t.settings.business.manageTeam}</Button>
               </Link>
             </CardContent>
           </Card>
@@ -397,32 +404,26 @@ export default async function SettingsPage({
       {/* ── PRODUCTS TAB ─────────────────────────────────────────────── */}
       {activeTab === "products" && (
         <div className="space-y-6">
-          <Card>
-            <CardHeader><CardTitle>Product categories</CardTitle></CardHeader>
+          {(["inventory", "pos"] as const).map((scope) => {
+            const scopeCats = (categories ?? []).filter((c) => (c as { category_type?: string }).category_type === scope || ((c as { category_type?: string }).category_type === "both" && scope === "pos"));
+            const title = scope === "inventory" ? (t.settings.categoryInventory ?? "Inventory categories") : (t.settings.categoryPos ?? "POS categories");
+            const placeholder = scope === "inventory" ? "e.g. MATERIA PRIMA" : "e.g. Hot Drinks";
+            return (
+          <Card key={scope}>
+            <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
             <CardContent>
               <form
                 action={addCategory as unknown as (fd: FormData) => Promise<void>}
                 className="flex flex-wrap gap-3 items-end mb-4"
               >
-                <div><Label>Name</Label><Input name="name" required placeholder="e.g. Hot Drinks" className="w-40" /></div>
+                <input type="hidden" name="category_type" value={scope} />
+                <div><Label>Name</Label><Input name="name" required placeholder={placeholder} className="w-40" /></div>
                 <div><Label>Colour</Label><Input name="color" type="color" defaultValue="#2563eb" className="h-10 w-16 p-1" /></div>
                 <div><Label>Sort order</Label><Input name="sort_order" type="number" placeholder="1" className="w-20" /></div>
-                <div>
-                  <Label>{t.settings.categoryType}</Label>
-                  <FormSelect
-                    name="category_type"
-                    defaultValue="both"
-                    options={[
-                      { value: "both", label: t.settings.categoryBoth },
-                      { value: "pos", label: t.settings.categoryPos },
-                      { value: "inventory", label: t.settings.categoryInventory },
-                    ]}
-                  />
-                </div>
                 <Button type="submit" variant="outline" size="sm">Add category</Button>
               </form>
               <div className="space-y-2">
-                {(categories ?? []).map((c) => (
+                {scopeCats.map((c) => (
                   <form
                     key={c.id}
                     action={updateCategory as unknown as (fd: FormData) => Promise<void>}
@@ -436,9 +437,8 @@ export default async function SettingsPage({
                       <Label>{t.settings.type}</Label>
                       <FormSelect
                         name="category_type"
-                        defaultValue={(c as {category_type?: string}).category_type ?? "both"}
+                        defaultValue={(c as {category_type?: string}).category_type === "both" ? scope : ((c as {category_type?: string}).category_type ?? scope)}
                         options={[
-                          { value: "both", label: t.settings.categoryBoth },
                           { value: "pos", label: t.settings.categoryPos },
                           { value: "inventory", label: t.settings.categoryInventory },
                         ]}
@@ -451,6 +451,8 @@ export default async function SettingsPage({
               </div>
             </CardContent>
           </Card>
+            );
+          })}
 
           <Card>
             <CardHeader><CardTitle>Units of measurement</CardTitle></CardHeader>
@@ -530,6 +532,29 @@ export default async function SettingsPage({
             operatorCode={(orgRow?.fiscalnet_operator_code as string) || "1"}
             vatGroups={(orgRow?.fiscalnet_vat_groups as import('@/lib/fiscalnet/types').VatGroup[]) ?? []}
             paymentTypeMap={(orgRow?.fiscalnet_payment_type_map as Record<string, import('@/lib/fiscalnet/types').FiscalPaymentCode>) ?? {}}
+          />
+        </div>
+      )}
+
+      {/* ── NOTIFICATIONS TAB ───────────────────────────────────────── */}
+      {activeTab === "notifications" && (
+        <div className="space-y-6">
+          <OwnerDigestCard
+            locale={locale}
+            canEdit={canEdit}
+            inventoryEnabled={isModuleEnabled(moduleFlags, "inventory")}
+            ownerEmail={user.email ?? ""}
+            initial={{
+              enabled: Boolean(digestOrg?.owner_digest_enabled ?? false),
+              frequency: (() => {
+                const f = String(digestOrg?.owner_digest_frequency ?? "off");
+                return f === "daily" || f === "weekly" ? f : "off";
+              })(),
+              dayOfWeek: Number(digestOrg?.owner_digest_day_of_week ?? 1),
+              timeOfDay: String(digestOrg?.owner_digest_time_of_day ?? "08:00:00").slice(0, 5),
+              timezone: String(digestOrg?.owner_digest_timezone ?? "Europe/Bucharest"),
+              recipients: (digestOrg?.owner_digest_recipients as string[] | undefined) ?? [],
+            }}
           />
         </div>
       )}

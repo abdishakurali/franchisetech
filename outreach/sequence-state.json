@@ -1,5 +1,23 @@
 {
-  "anchors": {},
+  "anchors": {
+    "office@orieda.ro": "2026-06-21",
+    "office@mdvconsulting.ro": "2026-06-21",
+    "office@accounts.ro": "2026-06-21",
+    "office@contabss.ro": "2026-06-21",
+    "vanzari@zeusservice.ro": "2026-06-21",
+    "comenzi@adpos.ro": "2026-06-21",
+    "office@amef.ro": "2026-06-21",
+    "contact@aparaturafiscala.ro": "2026-06-21",
+    "office@econmedia.ro": "2026-06-21",
+    "office@qretail.ro": "2026-06-21",
+    "vanzari@anzisoft.ro": "2026-06-21",
+    "office@vlarox.ro": "2026-06-21",
+    "contact@rezosoft.ro": "2026-06-21",
+    "contact@selectsoft.ro": "2026-06-21",
+    "office@tinyerp.app": "2026-06-21",
+    "sales@expertaccounts.com": "2026-06-21",
+    "contact@saladbox.ro": "2026-06-21"
+  },
   "campaign_start": null,
   "note": "v2 info@franchisetech.ro"
 }

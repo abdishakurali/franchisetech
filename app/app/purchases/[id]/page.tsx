@@ -29,8 +29,8 @@ export default async function PurchaseDetailPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const { countryCode, supabase, orgId, membership, currency } = await getKitchenOpsContext();
-  const { locale, t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, membership, currency } = await getKitchenOpsContext();
+  const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const d = t.purchases.detail;
   const f = t.purchases.form;
   const taxLabel = f.vat;

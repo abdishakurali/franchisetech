@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { OPERATIONS_PRODUCT_SELECT } from "@/lib/supabase/product-selects";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -18,7 +19,7 @@ export default async function OperationsPage({ searchParams }: { searchParams?: 
   // --- Stock ---
   const { data: stockProducts } = await supabase
     .from("products")
-    .select("id,name,current_stock_qty,reorder_level,unit_of_measure,cost_price,product_categories(name)")
+    .select(OPERATIONS_PRODUCT_SELECT)
     .eq("organisation_id", orgId)
     .eq("active", true)
     .or("is_stock_tracked.eq.true,is_ingredient.eq.true")

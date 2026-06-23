@@ -16,7 +16,7 @@ export function CtaRow({
 }) {
   const t = useMarketingMessages();
   const secondary = secondaryLabel ?? t.cta.seePricing;
-  const signupHref = plan ? `/signup?plan=${plan}` : "/signup";
+  const signupHref = plan ? `/signup?plan=${plan}` : "/signup?plan=starter";
 
   return (
     <div className="mt-8 flex flex-wrap gap-3">

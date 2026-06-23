@@ -19,3 +19,9 @@ export function marketingOpenGraphLocale(locale: MarketingLocale): string {
   if (locale === "it") return "it_IT";
   return "en";
 }
+
+/** Primary Romanian marketing domain — default locale RO when no cookie is set. */
+export function isRomanianMarketingHost(host: string): boolean {
+  const hostname = host.split(":")[0]?.toLowerCase() ?? "";
+  return hostname === "franchisetech.ro" || hostname === "www.franchisetech.ro";
+}

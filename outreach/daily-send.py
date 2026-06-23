@@ -23,6 +23,13 @@ STATE = ROOT / "sequence-state.json"
 PARTNER_LIMIT = 4
 CUSTOMER_LIMIT = 10
 
+# Never auto-send to these statuses (compliance)
+BLOCK_STATUSES = frozenset({"opted_out", "failed_bounce", "replied_interested"})
+
+
+def blocked(row: dict) -> bool:
+    return row.get("status", "") in BLOCK_STATUSES
+
 # Days after step-1 anchor before next follow-up (plan cadence)
 FOLLOWUP_DAYS = {2: 3, 3: 7, 4: 14}
 
@@ -93,6 +100,8 @@ def main() -> None:
             break
         if row.get("status") != "pending":
             continue
+        if blocked(row):
+            continue
         email = row["email"].strip().lower()
         p = step1.get(email)
         if not p:
@@ -105,6 +114,8 @@ def main() -> None:
         if customer_n >= CUSTOMER_LIMIT:
             break
         if row.get("status") != "pending":
+            continue
+        if blocked(row):
             continue
         email = row["email"].strip().lower()
         p = step1.get(email)
@@ -120,6 +131,8 @@ def main() -> None:
             break
         email = row["email"].strip().lower()
         if row.get("status") != "failed_rate_limit":
+            continue
+        if blocked(row):
             continue
         p = step1.get(email)
         if not p:
@@ -137,6 +150,8 @@ def main() -> None:
             if partner_n >= PARTNER_LIMIT:
                 break
             email = row["email"].strip().lower()
+            if blocked(row):
+                continue
             last, kind = parse_status(row.get("status", ""))
             if kind != "sent" or last != step - 1:
                 continue
@@ -163,6 +178,8 @@ def main() -> None:
                 break
             email = row["email"].strip().lower()
             if row.get("status") == "failed_rate_limit":
+                continue
+            if blocked(row):
                 continue
             last, kind = parse_status(row.get("status", ""))
             if kind != "sent" or last != step - 1:

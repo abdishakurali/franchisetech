@@ -31,8 +31,8 @@ function Step({ done, num, title, text, href, label, status, stepLabel }: { done
 }
 
 export default async function SetupChecklistPage() {
-  const { countryCode, supabase, orgId } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const [
     { data: org },
     { count: productCount },
@@ -108,6 +108,9 @@ export default async function SetupChecklistPage() {
           <Link href="/help/staff-cashier-checklist" className="text-blue-600 hover:underline">{t.setupChecklist.staffChecklist}</Link>
           <a href="mailto:info@franchisetech.ro?subject=Setup help" className="text-blue-600 hover:underline">{t.setupChecklist.needHelp}</a>
         </div>
+      </div>
+      <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+        {t.setupChecklist.speedBanner}
       </div>
       <Card>
         <CardContent className="pt-4">

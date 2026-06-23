@@ -17,7 +17,9 @@ export type PartnerLeadPayload = {
   phone?: string;
   country: string;
   partnerType: string;
+  horecaClientCount?: string;
   message: string;
+  waitlist?: boolean;
 };
 
 export async function sendPartnerLeadEmail(payload: PartnerLeadPayload): Promise<{
@@ -36,14 +38,17 @@ export async function sendPartnerLeadEmail(payload: PartnerLeadPayload): Promise
 
   const from = process.env.RESEND_FROM_EMAIL ?? "franchisetech <onboarding@resend.dev>";
 
+  const kind = payload.waitlist ? "Partner waitlist" : "Partner application";
+
   const html = `<!DOCTYPE html><html><body style="font-family:sans-serif;line-height:1.5">
-<h2>New partner application</h2>
+<h2>${kind}</h2>
 <p><strong>Name:</strong> ${esc(payload.name)}</p>
 <p><strong>Company:</strong> ${esc(payload.company)}</p>
 <p><strong>Email:</strong> ${esc(payload.email)}</p>
 <p><strong>Phone:</strong> ${esc(payload.phone ?? "—")}</p>
 <p><strong>Country:</strong> ${esc(payload.country)}</p>
 <p><strong>Partner type:</strong> ${esc(payload.partnerType)}</p>
+<p><strong>HORECA clients:</strong> ${esc(payload.horecaClientCount ?? "—")}</p>
 <p><strong>Message:</strong></p>
 <p>${esc(payload.message).replace(/\n/g, "<br>")}</p>
 </body></html>`;
@@ -53,7 +58,7 @@ export async function sendPartnerLeadEmail(payload: PartnerLeadPayload): Promise
     from,
     to: [to],
     replyTo: payload.email,
-    subject: `Partner application — ${payload.company}`,
+    subject: `${kind} — ${payload.company}`,
     html,
   });
 

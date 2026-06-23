@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, startTransition } from "react";
 import { CopyReferralButton } from "@/components/app/CopyReferralButton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,7 +26,7 @@ export function ZReportReferralNudge({ orgId, referralLink, show }: Props) {
     } catch {
       /* ignore */
     }
-    setVisible(true);
+    startTransition(() => setVisible(true));
   }, [show, referralLink, orgId]);
 
   if (!visible) return null;

@@ -22,35 +22,35 @@ export const PARTNER_LINKS: PartnerLinkConfig[] = [
     id: "contabil_horeca",
     labelRo: "Contabil HORECA (NIR/TVA)",
     utmSource: "partner_contabil_horeca",
-    utmCampaign: "ro-partner-q2-r2",
+    utmCampaign: "ro-partner-2026-h2",
     description: "Contabil cu clienți restaurant/cafenea — NIR și reconciliere casă.",
   },
   {
     id: "fiscalnet_integrator",
     labelRo: "Integrator FiscalNet / casă fiscală",
     utmSource: "partner_fiscalnet_integrator",
-    utmCampaign: "ro-partner-q2-r2",
+    utmCampaign: "ro-partner-2026-h2",
     description: "Instalează case fiscale — recomandă workspace operațional lângă fiscal.",
   },
   {
     id: "consultant_deschidere",
     labelRo: "Consultant deschidere restaurant",
     utmSource: "partner_consultant_deschidere",
-    utmCampaign: "ro-partner-q2-r2",
+    utmCampaign: "ro-partner-2026-h2",
     description: "Onboarding locații noi — POS + checklist setup asistat.",
   },
   {
     id: "reseller_pos",
     labelRo: "Reseller POS local",
     utmSource: "partner_reseller_pos",
-    utmCampaign: "ro-partner-q2-r2",
+    utmCampaign: "ro-partner-2026-h2",
     description: "Vinde hardware/software POS — cloud add-on cu comision recurent.",
   },
   {
     id: "operator_champion",
     labelRo: "Operator 2+ locații (champion)",
     utmSource: "partner_operator_champion",
-    utmCampaign: "ro-partner-q2-r2",
+    utmCampaign: "ro-partner-2026-h2",
     description: "Client multi-locație mulțumit — intro la peer operators, nu revânzare.",
   },
 ];
@@ -89,6 +89,7 @@ export function partnerPortalLink(partnerId: PartnerArchetype, content?: string)
 
 export function partnerLeaveBehindUrls(): { label: string; href: string }[] {
   return [
+    { label: "Ebriza vs franchisetech (rapoarte incluse)", href: `${BASE}/compare/ebriza?lang=ro` },
     { label: "SmartBill vs franchisetech", href: `${BASE}/compare/smartbill?lang=ro` },
     { label: "Ghid FiscalNet România", href: `${BASE}/help/romania-fiscalnet?lang=ro` },
     { label: "Obiecții frecvente POS", href: `${BASE}/resources/objections-pos-romania?lang=ro` },

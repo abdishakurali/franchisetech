@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleEnabled } from "@/lib/business-modules";
+import { PRODUCT_DETAIL_SELECT } from "@/lib/supabase/product-selects";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -42,7 +43,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   // Fetch product WITHOUT supplier join (fetched separately to avoid missing-FK errors)
   const { data: product } = await supabase
     .from("products")
-    .select("*,product_categories(name,color)")
+    .select(PRODUCT_DETAIL_SELECT)
     .eq("organisation_id", orgId)
     .eq("id", id)
     .single();

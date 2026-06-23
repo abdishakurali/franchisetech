@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendPartnerLeadEmail } from "@/lib/email/partner-lead";
+import { insertPartnerWaitlist } from "@/lib/partner-waitlist";
 
 const rateLimit = new Map<string, number>();
 const RATE_MS = 60_000;
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
     const now = Date.now();
     const last = rateLimit.get(ip) ?? 0;
     if (now - last < RATE_MS) {
-      return NextResponse.json({ error: "Please wait before submitting again." }, { status: 429 });
+      return NextResponse.json({ error: "Așteptați înainte de a trimite din nou." }, { status: 429 });
     }
 
     const body = await request.json();
@@ -29,13 +30,36 @@ export async function POST(request: Request) {
     const phone = String(body.phone ?? "").trim();
     const country = String(body.country ?? "").trim();
     const partnerType = String(body.partnerType ?? "").trim();
+    const horecaClientCount = String(body.horecaClientCount ?? "").trim();
     const message = String(body.message ?? "").trim();
+    const waitlist = body.waitlist !== false;
+    const utmSource = String(body.utm_source ?? "").trim() || undefined;
+    const utmCampaign = String(body.utm_campaign ?? "").trim() || undefined;
+    const utmContent = String(body.utm_content ?? "").trim() || undefined;
 
     if (!name || !company || !email || !country || !partnerType || !message) {
-      return NextResponse.json({ error: "Please fill in all required fields." }, { status: 400 });
+      return NextResponse.json({ error: "Completați toate câmpurile obligatorii." }, { status: 400 });
     }
     if (!isValidEmail(email)) {
-      return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
+      return NextResponse.json({ error: "Introduceți o adresă de email validă." }, { status: 400 });
+    }
+
+    const dbResult = await insertPartnerWaitlist({
+      name,
+      company,
+      email,
+      phone: phone || undefined,
+      country,
+      partnerType,
+      horecaClientCount: horecaClientCount || undefined,
+      message,
+      utmSource,
+      utmCampaign,
+      utmContent,
+    });
+
+    if (!dbResult.ok) {
+      return NextResponse.json({ error: dbResult.error ?? "Nu am putut salva cererea." }, { status: 500 });
     }
 
     const result = await sendPartnerLeadEmail({
@@ -45,16 +69,18 @@ export async function POST(request: Request) {
       phone: phone || undefined,
       country,
       partnerType,
+      horecaClientCount: horecaClientCount || undefined,
       message,
+      waitlist,
     });
 
     if (!result.success) {
-      return NextResponse.json({ error: result.error ?? "Could not send application." }, { status: 500 });
+      return NextResponse.json({ error: result.error ?? "Nu am putut trimite cererea." }, { status: 500 });
     }
 
     rateLimit.set(ip, now);
     return NextResponse.json({ ok: true });
   } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    return NextResponse.json({ error: "Cerere invalidă." }, { status: 400 });
   }
 }

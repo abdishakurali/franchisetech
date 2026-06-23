@@ -5,7 +5,7 @@ description: Send today's planned outreach batch via Zoho. Use every morning. Re
 
 # Daily Outreach
 
-Run after the n8n workflow **Outreach — Daily Planner** (or when `outreach_log` has `status = planned` rows).
+Run after the n8n workflow **Outreach — Daily Planner** (step 1) or **Outreach — C2 Follow-up Planner** (step 2+).
 
 ## Process
 
@@ -19,7 +19,9 @@ ORDER BY sent_at ASC
 LIMIT 14;
 ```
 
-2. If zero rows: tell the user to run **Outreach — Daily Planner** in n8n first, then stop.
+For step 2-only batch, add `AND step = 2`.
+
+2. If zero rows: tell the user to run the matching n8n planner first, then stop.
 
 3. Enforce caps before sending:
    - Max **10** customer + **4** partner emails per run
@@ -34,7 +36,10 @@ LIMIT 14;
 | type | step | subject | body source |
 |------|------|---------|-------------|
 | customer | 1 | `casa după program` | C1 in `customer_email(..., step=1)` |
+| customer | 2 | `trial 15 zile` | C2 in `customer_email(..., step=2)` |
+| customer | 3 | `ultim mesaj` | C3 in `customer_email(..., step=3)` |
 | partner | 1 | `workspace HORECA` | P1 in `partner_email(..., step=1)` |
+| partner | 2 | `stoc + NIR` | P2 in `partner_email(..., step=2)` |
 
 Segment value line for C1 (from `SEGMENT_VALUE` in `generate-payloads.py`):
 - `cafenea` → Casă la counter, TVA pe produs și raport Z — fără taxă per angajat, trial asistat 15 zile fără card pentru deschiderea casei.
@@ -93,9 +98,12 @@ WHERE id = '<uuid>';
 
 ## Morning routine
 
-1. Run **Outreach — Daily Planner** in n8n (manual trigger) — plans batch with dedup
-2. In Cursor, invoke this skill (`/daily-outreach`)
-3. Cursor sends via ZohoMCP and updates `outreach_log`
+1. Run **Outreach — Daily Planner** in n8n (manual trigger) — plans step 1 batch
+2. When due: **Outreach — C2 Follow-up Planner** queues step 2 (day 4 after step 1 sent)
+3. In Cursor, invoke this skill (`/daily-outreach`)
+4. Cursor sends via ZohoMCP and updates `outreach_log`
+
+Follow-up cadence: `lib/outreach/followup.ts` (`customer` C2 = 4 days, C3 = 10 days; `partner` P2 = 3 days).
 
 ## Useful queries (Supabase MCP)
 

@@ -36,8 +36,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <MarketingLocaleSwitcher />
-
+          <MarketingLocaleSwitcher className="shrink-0" />
           {user ? (
             <>
               <Link href="/app" className="hidden text-sm font-medium text-slate-600 hover:text-slate-950 sm:inline">

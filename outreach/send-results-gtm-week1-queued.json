@@ -1,0 +1,170 @@
+[
+  {
+    "company": "Q Retail",
+    "type": "partner",
+    "to": "office@qretail.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Anzi Soft",
+    "type": "partner",
+    "to": "vanzari@anzisoft.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Vlarox Fiscal",
+    "type": "partner",
+    "to": "office@vlarox.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "RezoSoft",
+    "type": "partner",
+    "to": "contact@rezosoft.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Express Caffe",
+    "type": "customer",
+    "to": "office@expresscaffe.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Urbanistic Coffee",
+    "type": "customer",
+    "to": "contact@urbanistic.coffee",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Habitat Coffee Studio",
+    "type": "customer",
+    "to": "hello@ourhabitat.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Ch9 Specialty Coffee",
+    "type": "customer",
+    "to": "vio@spired.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Book Coffee Shop",
+    "type": "customer",
+    "to": "shop@bookcoffee.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Mica Elvetie",
+    "type": "customer",
+    "to": "office@micaelvetie.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Restaurant Minish",
+    "type": "customer",
+    "to": "restaurant.minish@outlook.com",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Restaurant Vulturul",
+    "type": "customer",
+    "to": "contact@restaurantvulturul.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Rispetto Cucina Italiana",
+    "type": "customer",
+    "to": "rezervari@rispettorestaurant.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "KIMU",
+    "type": "customer",
+    "to": "rezervari@kimu.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Osho Restaurant",
+    "type": "customer",
+    "to": "rezervari@osho-restaurant.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Baracca",
+    "type": "customer",
+    "to": "rezervari@baracca.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "DaVinci Ristorante",
+    "type": "customer",
+    "to": "rezervari@davinciristorante.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Kupaj Wine Bar",
+    "type": "customer",
+    "to": "rezervari@kupaj.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "My Thai",
+    "type": "customer",
+    "to": "rezervari@mythai.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Restaurant Nativ",
+    "type": "customer",
+    "to": "contact@restaurantnativ.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Panoramic Cet\u0103\u021buie",
+    "type": "customer",
+    "to": "office@panoramic-cluj.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Restaurant Valahia",
+    "type": "customer",
+    "to": "rezervari@restaurant-valahia.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Tied",
+    "type": "customer",
+    "to": "contact@tied.ro",
+    "step": 1,
+    "status": "queued"
+  },
+  {
+    "company": "Restaurant Insula",
+    "type": "customer",
+    "to": "office@restaurant-insula.ro",
+    "step": 1,
+    "status": "queued"
+  }
+]

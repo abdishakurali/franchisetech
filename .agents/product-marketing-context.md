@@ -8,6 +8,22 @@ Last updated: 2026-06-20
 
 **Positioning line (outreach v2):** „Workspace în browser pentru afaceri cu mâncare — nu doar plăți: casă, stoc, rețete și rapoarte.”
 
+**Triple-wedge GTM (Q2 2026 Romania):** one funnel, three pillars competitors struggle to match together:
+
+| Pillar | RO message | Must be true on product |
+|--------|------------|-------------------------|
+| **Free & fast** | „Configurare gratuită. Prima vânzare în sub o oră.” | Signup seeds demo products + cash/card + open till + POS tour; no card required; €199 clearly optional |
+| **Affordable** | „49€/lună, personal nelimitat, raport Z inclus.” | `lib/billing/plans.ts` — Starter €49, Pro €79 |
+| **Reliable** | „Casa se potrivește cu sertarul seara.” | Till-close flow — do not invent SLA/uptime |
+
+| Surface | Wedge emphasis | RO message |
+|---------|----------------|------------|
+| Homepage / signup | Speed + free setup | „Configurare gratuită. Live în sub o oră.” + till-truth subtitle |
+| Compare / cold email / pricing | Cost shock + setup speed | „€49 cu raport Z inclus. Setup gratuit în aplicație — sub o oră.” |
+| Setup feature page | Timeline truth | FAQ: 0–15 / 15–45 / 45–60 min core path; premium for 200+ SKU |
+
+Everything else (kitchen, recipes, multi-site) stays below the fold — proof, not headline.
+
 **Primary GTM market (Q2 2026):** Romania — cafenele, restaurante mici, takeaway/patiserie, operatori 2+ locații.
 
 **Site:** franchisetech.ro (locales: en, ro, it)
@@ -43,6 +59,8 @@ Last updated: 2026-06-20
 
 - Excel + casă fiscală tradițională
 - SmartBill / Saga (facturare + parțial POS)
+- Ebriza / Bit-Soft (POS HoReCa)
+- Oblio (facturare ieftină + e-Factura)
 - Square / SumUp class (plăți-first, fără stoc/rețete adânc)
 - „Facem așa cum am făcut mereu”
 
@@ -52,8 +70,8 @@ Last updated: 2026-06-20
 |-----------|----------|
 | Am deja SmartBill/Saga | Trial 15 zile paralel — POS + stoc + rețete în același flux zilnic |
 | FiscalNet e complicat | Ghid pas cu pas; contabilul verifică; Multi-location + integrare când e activată |
-| E scump | €79/lună Pro vs POS + inventar + 3h/săptămână reconciliere; personal nelimitat |
-| Nu am timp | Setup asistat €199 — produse, plăți, prima vânzare ghidată |
+| E scump | €49/lună Starter vs POS + inventar + 3h/săptămână reconciliere; personal nelimitat |
+| Nu am timp | Configurare gratuită în aplicație — sub o oră până la prima vânzare. Premium €199 doar dacă vreți migrare catalog mare sau training echipă |
 
 ---
 
@@ -81,11 +99,11 @@ Last updated: 2026-06-20
 
 | Plan | Price | Best for |
 |------|-------|----------|
-| Starter | €39/mo | Casă + produse + raport Z — cafenea simplă |
+| Starter | €49/mo | Casă + produse + raport Z — cafenea simplă |
 | Pro | €79/mo | Stoc, rețete, bucătărie, sertar — restaurant/takeaway |
 | Multi-location | €99/loc/mo | 2+ locații, FiscalNet când e activat |
-| Assisted setup | €199 one-time | Configurare ghidată |
-| Trial | 15 days assisted | Fără card pentru deschiderea casei |
+| Assisted setup | €199 one-time | Configurare premium opțională — migrare catalog mare, multi-site, FiscalNet |
+| Trial | 15 days | Fără card pentru deschiderea casei; setup gratuit în aplicație |
 
 **Value metric:** per shop / per location — **not** per seat.
 
@@ -99,6 +117,14 @@ Last updated: 2026-06-20
 - 15-day assisted trial with human setup help
 - Unlimited staff — no per-user fees
 - Browser POS — no hardware lock-in
+
+## Verified claims (agents: use only these)
+
+- **Free self-serve setup** — in-app checklist, demo products on signup, no card to open till
+- **Under one hour (core path)** — signup → demo products → open till → first test sale (not full 200+ SKU migration)
+- **Starter €49/mo** — POS, Z-report, sales reports included; unlimited staff
+- **Till truth** — expected cash vs counted at close, visible in-app
+- **Premium setup €199** — optional; large catalog, multi-site, FiscalNet hand-holding (1–2 days typical)
 
 ## Do NOT claim
 
@@ -121,7 +147,7 @@ Use: „Program pentru primii operatori și parteneri din România” — assist
 `https://franchisetech.ro/signup?plan={starter|pro|multi_location}&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content={company_slug}`
 
 **Partners:**
-`https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content={company_slug}`
+`https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-2026-h2&utm_content={company_slug}`
 
 **Sender:** info@franchisetech.ro (Franchise Tech). v1 sends from wrong account archived — do not reuse `ro-customer-q2` / `ro-partner-q2` UTMs for new sends.
 

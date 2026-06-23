@@ -6,8 +6,8 @@ import { filterReportLinks } from "@/lib/app-report-links";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 export default async function ReportsHubPage() {
-  const { countryCode, supabase, orgId } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const orgModules = await fetchOrgModuleFlags(supabase, orgId);
   const inventoryVisible = isModuleEnabled(orgModules, "inventory");
   const recipeVisible = isModuleEnabled(orgModules, "recipe_costing");

@@ -2,15 +2,22 @@
 # Base: https://franchisetech.ro
 
 /compare
+/compare/ebriza
+/compare/oblio
+/compare/bit-soft
 /compare/smartbill
 /compare/saga
 /compare/rezosoft
 /compare/expressoft
 /compare/hepos
+/compare/vilicorest
 /industries/romania
+/industries/multi-site
+/features/nir
+/features/offline
 /resources/choose-pos-romania
 /resources/pos-software-romania
-/resources/stock-management-restaurants-romania
+/resources/stock-management-romania
 /resources/objections-pos-romania
 /help/romania-fiscalnet
 /partners

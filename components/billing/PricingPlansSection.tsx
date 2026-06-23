@@ -16,6 +16,11 @@ type PricingLabels = {
   mainPlan: string;
   seeFeatures: string;
   getStarted: string;
+  freeSetupStrip: string;
+  setupFreeTitle: string;
+  setupFreeText: string;
+  setupTitle: string;
+  setupText: string;
   setupFeeNote: string;
   multiTitle: string;
   multiText: string;
@@ -80,7 +85,12 @@ export function PricingPlansSection({
     mainPlan: "Main plan",
     seeFeatures: "See all features",
     getStarted: "Get started",
-    setupFeeNote: `Optional assisted setup ${connectedPlan.price} one-time.`,
+    freeSetupStrip: "Start free. In-app setup included — under an hour to your first sale.",
+    setupFreeTitle: "Free in-app setup",
+    setupFreeText: "New account → demo products → open till → first sale. Step-by-step guide, no cost.",
+    setupTitle: "Optional premium setup",
+    setupText: "For large catalogs, multi-site, or FiscalNet — we configure everything for you.",
+    setupFeeNote: `Optional premium setup ${connectedPlan.price} one-time.`,
     multiTitle: "Multi-location",
     multiText: "For owners with 2+ shops or a second location opening soon.",
   };
@@ -88,9 +98,14 @@ export function PricingPlansSection({
   return (
     <div className="space-y-10">
       {variant === "marketing" ? (
+        <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-center text-sm font-medium text-blue-800">
+          {l.freeSetupStrip}
+        </div>
+      ) : null}
+
+      {variant === "marketing" ? (
         <p className="text-sm text-slate-500">
-          Features tailored for <span className="font-medium text-slate-700">{BILLING_MARKET_LABELS[market]}</span>
-          {" — change language in the header to see other regions."}
+          Features tailored for <span className="font-medium text-slate-700">{BILLING_MARKET_LABELS[market]}</span>.
         </p>
       ) : (
         <p className="text-sm text-slate-500">
@@ -131,11 +146,20 @@ export function PricingPlansSection({
         ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="rounded-2xl border border-green-200 bg-green-50/50 p-6 sm:p-8">
+          <h2 className="text-lg font-bold text-slate-950">{l.setupFreeTitle}</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">{l.setupFreeText}</p>
+          {variant === "marketing" ? (
+            <Link href="/signup?plan=starter" className="mt-6 block">
+              <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">{l.getStarted}</Button>
+            </Link>
+          ) : null}
+        </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">{connectedPlan.name}</h2>
+          <h2 className="text-lg font-bold text-slate-950">{l.setupTitle}</h2>
           <p className="mt-2 text-3xl font-bold text-slate-950">{connectedPlan.price}</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{connectedPlan.description}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">{l.setupText}</p>
           <p className="mt-4 text-xs text-slate-500">{l.setupFeeNote.replace("{price}", connectedPlan.price)}</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">

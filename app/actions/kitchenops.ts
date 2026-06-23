@@ -11,7 +11,14 @@ import { cookies } from "next/headers";
 import { getActiveOrg, numberValue, stringValue } from "@/lib/kitchenops/data";
 import { requireActiveSite } from "@/lib/site-context";
 import { normaliseIndustry, RESTAURANT_FEATURE_KEYS, type RestaurantFeatureKey } from "@/lib/restaurant-features";
-import { lineDiscountPct, transactionDiscountPct, type PosCartLine } from "@/lib/pos-line-discount";
+import {
+  cartUsesPctDiscount,
+  clampDiscountLei,
+  lineDiscountLeiShare,
+  lineDiscountPct,
+  transactionDiscountPct,
+  type PosCartLine,
+} from "@/lib/pos-line-discount";
 import {
   canCancelPurchase,
   isAlreadyPosted,
@@ -39,12 +46,33 @@ function nullableNum(fd: FormData, key: string) {
 
 type PosSaleCartItem = PosCartLine & { fiscalnet_vat_group?: number | null };
 
-function buildPosItemCalcs(cart: PosSaleCartItem[], legacyCartPct: number) {
+function buildPosItemCalcs(cart: PosSaleCartItem[], legacyCartPct: number, cartDiscountLei = 0) {
+  const hasPctDiscount = cartUsesPctDiscount(cart, legacyCartPct);
+  const leiTotal = !hasPctDiscount && cartDiscountLei > 0
+    ? clampDiscountLei(cartDiscountLei, cart.reduce((s, i) => s + i.quantity * i.unit_price, 0))
+    : 0;
+
   return cart.map((item) => {
-    const appliedPct = lineDiscountPct(item, legacyCartPct);
-    const discountMultiplier = 1 - appliedPct / 100;
     const grossBefore = item.quantity * item.unit_price;
-    const grossAmount = grossBefore * discountMultiplier;
+    let grossAmount: number;
+    let discountAmount: number;
+    let appliedPct: number;
+
+    if (hasPctDiscount) {
+      appliedPct = lineDiscountPct(item, legacyCartPct);
+      const discountMultiplier = 1 - appliedPct / 100;
+      grossAmount = grossBefore * discountMultiplier;
+      discountAmount = grossBefore - grossAmount;
+    } else if (leiTotal > 0) {
+      discountAmount = Math.min(grossBefore, lineDiscountLeiShare(item, cart, leiTotal));
+      grossAmount = grossBefore - discountAmount;
+      appliedPct = grossBefore > 0 ? Number(((discountAmount / grossBefore) * 100).toFixed(2)) : 0;
+    } else {
+      grossAmount = grossBefore;
+      discountAmount = 0;
+      appliedPct = 0;
+    }
+
     const vatDecimal = item.vat_rate / 100;
     const netAmount = vatDecimal > 0 ? grossAmount / (1 + vatDecimal) : grossAmount;
     const vatAmount = grossAmount - netAmount;
@@ -56,7 +84,7 @@ function buildPosItemCalcs(cart: PosSaleCartItem[], legacyCartPct: number) {
       vat_amount: Number(vatAmount.toFixed(4)),
       gross_amount: Number(grossAmount.toFixed(4)),
       line_total: Number(grossAmount.toFixed(2)),
-      discount_amount: Number((grossBefore - grossAmount).toFixed(4)),
+      discount_amount: Number(discountAmount.toFixed(4)),
     };
   });
 }
@@ -171,9 +199,10 @@ export async function ensurePosDefaults() {
   const { data: cats } = await supabase.from("product_categories").select("id").eq("organisation_id", orgId).limit(1);
   if (!cats?.length) {
     await supabase.from("product_categories").insert([
-      { organisation_id: orgId, name: "Drinks", color: "#2563eb", sort_order: 1 },
-      { organisation_id: orgId, name: "Food", color: "#16a34a", sort_order: 2 },
-      { organisation_id: orgId, name: "Snacks", color: "#f59e0b", sort_order: 3 },
+      { organisation_id: orgId, name: "Drinks", color: "#2563eb", sort_order: 1, category_type: "pos" },
+      { organisation_id: orgId, name: "Food", color: "#16a34a", sort_order: 2, category_type: "pos" },
+      { organisation_id: orgId, name: "Snacks", color: "#f59e0b", sort_order: 3, category_type: "pos" },
+      { organisation_id: orgId, name: "Ingredients", color: "#64748b", sort_order: 1, category_type: "inventory" },
     ]);
   }
   const { data: methods } = await supabase.from("payment_methods").select("id").eq("organisation_id", orgId).limit(1);
@@ -197,7 +226,7 @@ export async function addCategory(formData: FormData) {
     organisation_id: orgId, name,
     color: stringValue(formData, "color") || null,
     sort_order: numberValue(formData, "sort_order"),
-    category_type: stringValue(formData, "category_type") || "both",
+    category_type: stringValue(formData, "category_type") || "inventory",
   });
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
@@ -227,6 +256,7 @@ export async function deleteCategory(formData: FormData) {
   const id = stringValue(formData, "id");
   if (!id) return;
   await supabase.from("products").update({ category_id: null }).eq("organisation_id", orgId).eq("category_id", id);
+  await supabase.from("products").update({ pos_category_id: null }).eq("organisation_id", orgId).eq("pos_category_id", id);
   await supabase.from("product_categories").delete().eq("id", id).eq("organisation_id", orgId);
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
@@ -311,6 +341,7 @@ export async function addProduct(formData: FormData) {
     organisation_id: orgId,
     name,
     category_id: stringValue(formData, "category_id") || null,
+    pos_category_id: stringValue(formData, "pos_category_id") || null,
     sku: stringValue(formData, "sku") || null,
     unit_of_measure: stringValue(formData, "unit_of_measure") || "each",
     sale_price: numberValue(formData, "sale_price"),
@@ -381,7 +412,8 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
   const { error } = await supabase.from("products").insert({
     organisation_id: orgId,
     name,
-    category_id: stringValue(formData, "category_id") || null,
+    pos_category_id: stringValue(formData, "pos_category_id") || null,
+    category_id: null,
     unit_of_measure: "each",
     sale_price: salePrice,
     vat_rate: numberValue(formData, "vat_rate"),
@@ -450,6 +482,7 @@ export async function updateProduct(
   const { error } = await supabase.from("products").update({
     name: stringValue(formData, "name"),
     category_id: stringValue(formData, "category_id") || null,
+    pos_category_id: stringValue(formData, "pos_category_id") || null,
     sku: stringValue(formData, "sku") || null,
     unit_of_measure: stringValue(formData, "unit_of_measure") || "each",
     sale_price: numberValue(formData, "sale_price"),
@@ -614,8 +647,9 @@ export async function completeSale(formData: FormData) {
   const paymentType = stringValue(formData, "payment_type") || "other"; // cash|card|online|other
   const customerName = stringValue(formData, "customer_name") || null;
   const legacyCartPct = numberValue(formData, "discount_pct", 0);
+  const cartDiscountLei = numberValue(formData, "discount_lei", 0);
 
-  const itemCalcs = buildPosItemCalcs(cart, legacyCartPct);
+  const itemCalcs = buildPosItemCalcs(cart, legacyCartPct, cartDiscountLei);
   const txDiscountPct = transactionDiscountPct(cart, legacyCartPct);
 
   const subtotalNet = itemCalcs.reduce((s, i) => s + i.net_amount, 0);
@@ -1287,8 +1321,26 @@ export async function importProductsCsv(formData: FormData) {
   if (!canManage(membership.role)) return;
   const rows = parseCsv(await csvText(formData));
   let imported = 0, skipped = 0;
-  const { data: existingCats } = await supabase.from("product_categories").select("id,name").eq("organisation_id", orgId);
+  const { data: existingCats } = await supabase.from("product_categories").select("id,name,category_type").eq("organisation_id", orgId);
   const categories = new Map((existingCats ?? []).map((c) => [String(c.name).toLowerCase(), c.id]));
+  const posCategories = new Map((existingCats ?? []).filter((c) => c.category_type === "pos").map((c) => [String(c.name).toLowerCase(), c.id]));
+
+  async function ensureCategory(name: string, categoryType: "inventory" | "pos") {
+    const key = name.toLowerCase();
+    const pool = categoryType === "pos" ? posCategories : categories;
+    let categoryId = pool.get(key) ?? null;
+    if (!categoryId) {
+      const { data: cat } = await supabase.from("product_categories").insert({
+        organisation_id: orgId, name, category_type: categoryType,
+      }).select("id").single();
+      categoryId = cat?.id ?? null;
+      if (categoryId) {
+        pool.set(key, categoryId);
+        categories.set(key, categoryId);
+      }
+    }
+    return categoryId;
+  }
   const { data: vatRateRows } = await supabase
     .from("vat_rates")
     .select("id,name,rate,is_default,active,fiscalnet_vat_group,sort_order")
@@ -1308,14 +1360,14 @@ export async function importProductsCsv(formData: FormData) {
     const name = row.name?.trim();
     if (!name) { skipped++; continue; }
     let categoryId = null;
+    let posCategoryId = null;
     const categoryName = row.category?.trim();
     if (categoryName) {
-      categoryId = categories.get(categoryName.toLowerCase()) ?? null;
-      if (!categoryId) {
-        const { data: cat } = await supabase.from("product_categories").insert({ organisation_id: orgId, name: categoryName }).select("id").single();
-        categoryId = cat?.id ?? null;
-        if (categoryId) categories.set(categoryName.toLowerCase(), categoryId);
-      }
+      categoryId = await ensureCategory(categoryName, "inventory");
+    }
+    const posCategoryName = row.pos_category?.trim();
+    if (posCategoryName) {
+      posCategoryId = await ensureCategory(posCategoryName, "pos");
     }
     const rawVat = row.vat_rate !== "" && row.vat_rate != null ? Number(row.vat_rate) : null;
     let vatRate = rawVat ?? 0;
@@ -1324,7 +1376,7 @@ export async function importProductsCsv(formData: FormData) {
       vatRate = nearest?.rate ?? vatRate;
     }
     const { error } = await supabase.from("products").insert({
-      organisation_id: orgId, name, category_id: categoryId,
+      organisation_id: orgId, name, category_id: categoryId, pos_category_id: posCategoryId,
       sku: row.sku || row.barcode || null,
       unit_of_measure: row.unit || "each",
       sale_price: Number(row.sale_price_gross || 0),
@@ -1457,11 +1509,36 @@ export async function createIngredientInline(formData: FormData): Promise<{ id: 
 }
 
 export async function updateProductStock(formData: FormData): Promise<void> {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const { supabase, membership, orgId, user } = await getActiveOrg();
   if (!canManage(membership.role)) throw new Error("Permission denied");
   const productId = stringValue(formData, "product_id");
   if (!productId) throw new Error("Product ID required");
   const qty = numberValue(formData, "quantity", 0);
+
+  const { data: before, error: readError } = await supabase
+    .from("products")
+    .select("current_stock_qty, unit_of_measure")
+    .eq("id", productId)
+    .eq("organisation_id", orgId)
+    .single();
+  if (readError) throw new Error(readError.message);
+
+  const oldQty = Number(before?.current_stock_qty ?? 0);
+  const delta = qty - oldQty;
+
+  if (delta !== 0) {
+    const { error: movementError } = await supabase.from("stock_movements").insert({
+      organisation_id: orgId,
+      product_id: productId,
+      movement_type: "manual_adjustment",
+      quantity_change: delta,
+      unit_of_measure: before?.unit_of_measure ?? "each",
+      reason: "Manual stock adjustment",
+      performed_by: user.id,
+    });
+    if (movementError) throw new Error(movementError.message);
+  }
+
   const { error } = await supabase
     .from("products")
     .update({ current_stock_qty: qty })
@@ -1469,6 +1546,71 @@ export async function updateProductStock(formData: FormData): Promise<void> {
     .eq("organisation_id", orgId);
   if (error) throw new Error(error.message);
   revalidatePath("/app/products");
+  revalidatePath("/app/stock");
+  revalidatePath("/app/recipes");
+  revalidatePath("/app/reports/balanta");
+  revalidatePath("/app/reports/gestiune");
+}
+
+export async function bulkUpdateProductStock(formData: FormData): Promise<{ ok: boolean; error?: string; updated?: number }> {
+  const { supabase, membership, orgId, user } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied" };
+
+  const raw = stringValue(formData, "items_json");
+  if (!raw) return { ok: false, error: "No items to update" };
+
+  let items: Array<{ product_id: string; quantity: number }>;
+  try {
+    items = JSON.parse(raw) as Array<{ product_id: string; quantity: number }>;
+  } catch {
+    return { ok: false, error: "Invalid stock payload" };
+  }
+
+  if (!Array.isArray(items) || !items.length) return { ok: false, error: "No items to update" };
+
+  let updated = 0;
+  for (const item of items) {
+    if (!item.product_id) continue;
+    const qty = Number(item.quantity);
+    if (!Number.isFinite(qty) || qty < 0) continue;
+
+    const { data: before } = await supabase
+      .from("products")
+      .select("current_stock_qty, unit_of_measure")
+      .eq("id", item.product_id)
+      .eq("organisation_id", orgId)
+      .single();
+
+    const oldQty = Number(before?.current_stock_qty ?? 0);
+    const delta = qty - oldQty;
+
+    if (delta !== 0) {
+      const { error: movementError } = await supabase.from("stock_movements").insert({
+        organisation_id: orgId,
+        product_id: item.product_id,
+        movement_type: "manual_adjustment",
+        quantity_change: delta,
+        unit_of_measure: before?.unit_of_measure ?? "each",
+        reason: "Manual stock adjustment",
+        performed_by: user.id,
+      });
+      if (movementError) continue;
+    }
+
+    const { error } = await supabase
+      .from("products")
+      .update({ current_stock_qty: qty })
+      .eq("id", item.product_id)
+      .eq("organisation_id", orgId);
+    if (!error) updated += 1;
+  }
+
+  revalidatePath("/app/products");
+  revalidatePath("/app/stock");
+  revalidatePath("/app/recipes");
+  revalidatePath("/app/reports/balanta");
+  revalidatePath("/app/reports/gestiune");
+  return { ok: true, updated };
 }
 
 // ── Business country ────────────────────────────────────────────
@@ -1623,6 +1765,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const paymentType      = stringValue(formData, "payment_type") || "other";
   const customerName     = stringValue(formData, "customer_name") || null;
   const legacyCartPct    = numberValue(formData, "discount_pct", 0);
+  const cartDiscountLei  = numberValue(formData, "discount_lei", 0);
   const cashReceivedRaw  = stringValue(formData, "cash_received");
   const cashReceivedNum  = cashReceivedRaw ? parseFloat(cashReceivedRaw) : null;
   const cashReceivedStored = (cashReceivedNum !== null && Number.isFinite(cashReceivedNum) && cashReceivedNum > 0)
@@ -1641,7 +1784,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const customerNote = restaurantFlowEnabled ? stringValue(formData, "customer_note") : "";
   const txDiscountPct = transactionDiscountPct(cart, legacyCartPct);
 
-  const itemCalcs = buildPosItemCalcs(cart, legacyCartPct);
+  const itemCalcs = buildPosItemCalcs(cart, legacyCartPct, cartDiscountLei);
 
   const subtotalNet = itemCalcs.reduce((s, i) => s + i.net_amount, 0);
   const taxTotal    = itemCalcs.reduce((s, i) => s + i.vat_amount, 0);

@@ -1,9 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { APP_LOCALE_CHANGE_EVENT, defaultPosLocale, type PosLocale } from "@/lib/pos-i18n";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { defaultPosLocale, type PosLocale } from "@/lib/pos-i18n";
 import { appText, getAppText, type AppT } from "@/lib/app-i18n";
-import { readAppLocaleUnified } from "@/lib/platform-locale";
 
 type AppI18nContextValue = {
   locale: PosLocale;
@@ -14,19 +13,14 @@ const AppI18nContext = createContext<AppI18nContextValue | null>(null);
 
 export function AppI18nProvider({
   orgIsRO = false,
+  initialLocale,
   children,
 }: {
   orgIsRO?: boolean;
+  initialLocale?: PosLocale;
   children: ReactNode;
 }) {
-  const fallback = defaultPosLocale(orgIsRO);
-  const [locale, setLocale] = useState<PosLocale>(() => readAppLocaleUnified(orgIsRO) ?? fallback);
-
-  useEffect(() => {
-    const sync = () => setLocale(readAppLocaleUnified(orgIsRO));
-    window.addEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-    return () => window.removeEventListener(APP_LOCALE_CHANGE_EVENT, sync);
-  }, [orgIsRO]);
+  const locale = initialLocale ?? defaultPosLocale(orgIsRO);
 
   const value = useMemo(
     () => ({ locale, t: getAppText(locale) }),

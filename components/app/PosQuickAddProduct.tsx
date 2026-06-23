@@ -74,7 +74,7 @@ export function PosQuickAddProduct({
           <div>
             <Label>{t.category}</Label>
             <select
-              name="category_id"
+              name="pos_category_id"
               className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
             >
               <option value="">{t.noCategory}</option>

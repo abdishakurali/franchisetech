@@ -11,9 +11,26 @@ Query live data and report:
 
 **Supabase MCP:**
 
-- New trial signups in last 24h (auth.users created_at > now - 24h)
-- Users who triggered till_session_opened milestone yesterday
-- Users who triggered z_report_viewed milestone yesterday
+- New trial signups in last 24h (`organisations.created_at > now() - interval '24 hours'`)
+- Users who set `growth_till_opened_at` yesterday
+- Users who set `growth_first_report_at` yesterday
+- **Founder SLA — stuck trials** (run `STUCK_TRIALS_SQL` from `lib/growth/founder-sla.ts`, show rows where `sla_action IS NOT NULL`)
+
+### Activation SLA (founder actions)
+
+| SLA | Trigger | Your action |
+|-----|---------|-------------|
+| 24h | Signup, no `growth_first_sale_at` | Personal email/call — offer 30-min screen share |
+| 48h | Still no first sale | Live POS walkthrough (see `docs/growth/ireland-reengage.md`) |
+| Day 7 | Sale but no `growth_first_report_at` | Walk through Z-report / till close |
+| Day 12 | Trial ending, not activated | Offer €199 assisted setup or plan selection |
+
+**Supabase stuck-trial query:**
+
+```sql
+-- Paste STUCK_TRIALS_SQL from lib/growth/founder-sla.ts, then:
+-- SELECT * FROM (...) t WHERE sla_action IS NOT NULL;
+```
 
 **Stripe MCP:**
 
@@ -45,6 +62,7 @@ Query live data and report:
 
 ⚠️ Needs Attention
 
-[List any past_due subscriptions with their email, any failed n8n workflows]
+[List sla_action trials with org name + email + recommended action]
+[List any past_due subscriptions, any failed n8n workflows]
 
-Keep it under 20 lines total. Plain text, no markdown tables.
+Keep it under 25 lines total. Plain text, no markdown tables.
