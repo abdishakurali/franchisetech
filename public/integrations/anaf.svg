@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <rect width="48" height="48" rx="10" fill="#002b7f"/>
+  <path d="M24 6 L36 12 L36 26 C36 33 30 38 24 41 C18 38 12 33 12 26 L12 12 Z" fill="#ffd700"/>
+  <path d="M24 10 L33 15 L33 26 C33 32 28.5 36.5 24 39 C19.5 36.5 15 32 15 26 L15 15 Z" fill="#002b7f"/>
+  <text x="24" y="31" font-family="Arial,sans-serif" font-weight="bold" font-size="9" fill="#ffd700" text-anchor="middle">ANAF</text>
+</svg>

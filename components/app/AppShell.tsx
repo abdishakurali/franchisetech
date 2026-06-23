@@ -114,7 +114,7 @@ function resolveNavItems(
   if (accountant) {
     const accountantNav: NavItem[] = [
       { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
-      { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: FileText, exact: false },
+      { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
       { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
       { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck, exact: false },
       ...(isRO ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }] : []),
@@ -131,7 +131,7 @@ function resolveNavItems(
       ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }]
       : []),
     ...(!limited
-      ? [{ href: "/app/integrations", label: isRO ? "Integrări" : "Integrations", icon: Plug, exact: false }]
+      ? [{ href: "/app/settings?tab=integrations", label: isRO ? "Integrări" : "Integrations", icon: Plug, exact: false }]
       : []),
   ]
     .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)

@@ -28,7 +28,7 @@ export default async function StaffReportPage({ searchParams }: Props) {
     .select("sold_by,total,tip_amount,discount_total,status,payment_methods(type,name)")
     .eq("organisation_id", orgId)
     .gte("sold_at", from)
-    .lte("sold_at", `${to}T23:59:59`);
+    .lte("sold_at", `${to}T23:59:59.999`);
 
   const tx = transactions ?? [];
 

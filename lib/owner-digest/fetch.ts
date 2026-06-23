@@ -69,9 +69,10 @@ function getPriorRange(
 ): { priorStart: Date; priorEnd: Date } {
   const p = zonedParts(rangeStart, timeZone);
   if (frequency === "daily") {
-    const d = addCalendarDays(p.year, p.month, p.day, -1);
+    const d = addCalendarDays(p.year, p.month, p.day, -7);
     const priorStart = zonedDayStartUtc(d.year, d.month, d.day, timeZone);
-    return { priorStart, priorEnd: rangeStart };
+    const priorEnd = addCalendarDays(p.year, p.month, p.day, -6);
+    return { priorStart, priorEnd: zonedDayStartUtc(priorEnd.year, priorEnd.month, priorEnd.day, timeZone) };
   }
   const d = addCalendarDays(p.year, p.month, p.day, -7);
   const priorStart = zonedDayStartUtc(d.year, d.month, d.day, timeZone);
