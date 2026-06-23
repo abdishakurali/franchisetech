@@ -104,6 +104,13 @@ const en = {
     reports: "Reports",
     purchases7d: (amount: string) => `Purchases (7 days): ${amount}`,
     lowStock: (n: number) => `${n} low stock`,
+    transactions: "Transactions",
+    avgTicket: "Avg ticket",
+    noSalesYet: "No sales yet",
+    vsSameWeekday: "vs same day last week",
+    topProducts: "Top products",
+    viewFullReport: "Full sales report",
+    monthNoVoids: "No voids this month",
   },
   reports: {
     sales: { title: "Sales report", desc: "Totals, transactions, and top products.", tag: "Most used" },
@@ -123,6 +130,7 @@ const en = {
     },
     pageTitle: "Reports",
     pageSubtitle: "Sales, till close, VAT, stock, and more.",
+    searchPlaceholder: "Search reports…",
   },
   tables: {
     name: "Name",
@@ -1109,6 +1117,13 @@ const ro: typeof en = {
     reports: "Rapoarte",
     purchases7d: (amount: string) => `Achiziții (7 zile): ${amount}`,
     lowStock: (n: number) => `${n} stoc scăzut`,
+    transactions: "Tranzacții",
+    avgTicket: "Bon mediu",
+    noSalesYet: "Nicio vânzare încă",
+    vsSameWeekday: "față de aceeași zi săpt. trecute",
+    topProducts: "Top produse",
+    viewFullReport: "Raport complet vânzări",
+    monthNoVoids: "Nicio anulare luna aceasta",
   },
   reports: {
     sales: { title: "Raport vânzări", desc: "Totaluri, tranzacții și top produse.", tag: "Cel mai folosit" },
@@ -1128,6 +1143,7 @@ const ro: typeof en = {
     },
     pageTitle: "Rapoarte",
     pageSubtitle: "Vânzări, închidere casă, TVA, stoc și altele.",
+    searchPlaceholder: "Caută raport…",
   },
   tables: {
     name: "Nume",

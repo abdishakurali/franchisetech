@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { startOfDay, startOfMonth, startOfWeek, subDays, subWeeks, subMonths } from "date-fns";
+import { startOfDay, startOfMonth, startOfWeek, subDays, subWeeks, subMonths, endOfDay } from "date-fns";
 import {
   ArrowRight,
   Banknote,
@@ -7,6 +7,7 @@ import {
   CreditCard,
   Package,
   TrendingUp,
+  Receipt,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,12 @@ import { Suspense } from "react";
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: cur || "EUR" }).format(v);
+}
+
+function pctDiff(curr: number, prev: number): string {
+  if (prev === 0) return curr > 0 ? "+100%" : "—";
+  const pct = ((curr - prev) / prev) * 100;
+  return `${pct >= 0 ? "+" : ""}${pct.toFixed(0)}%`;
 }
 
 type Props = { searchParams: Promise<{ period?: string }> };
@@ -50,6 +57,10 @@ export default async function DashboardPage({ searchParams }: Props) {
     prevStart = subDays(rangeStart, 1);
   }
 
+  // Same weekday last week (only used for "today" view)
+  const sameWeekdayStart = subWeeks(startOfDay(now), 1);
+  const sameWeekdayEnd = subWeeks(endOfDay(now), 1);
+
   const monthStart = startOfMonth(now).toISOString();
   const weekAgo = subDays(now, 7).toISOString();
 
@@ -66,11 +77,13 @@ export default async function DashboardPage({ searchParams }: Props) {
   const [
     currentTxResult,
     prevTxResult,
+    sameWeekdayResult,
     sessionResult,
     monthTxResult,
     voidedCountResult,
     lowStockResult,
     purchaseWeekResult,
+    todayItemsResult,
   ] = await Promise.all([
     supabase
       .from("pos_transactions")
@@ -85,6 +98,15 @@ export default async function DashboardPage({ searchParams }: Props) {
       .eq("status", "completed")
       .gte("created_at", prevStart.toISOString())
       .lt("created_at", prevEnd.toISOString()),
+    period === "today"
+      ? supabase
+          .from("pos_transactions")
+          .select("total")
+          .eq("organisation_id", orgId)
+          .eq("status", "completed")
+          .gte("created_at", sameWeekdayStart.toISOString())
+          .lte("created_at", sameWeekdayEnd.toISOString())
+      : Promise.resolve({ data: [] as { total: number }[], error: null }),
     supabase.from("pos_sessions").select("expected_cash,status").eq("organisation_id", orgId).eq("status", "open").limit(1).maybeSingle(),
     supabase.from("pos_transactions").select("total").eq("organisation_id", orgId).eq("status", "completed").gte("sold_at", monthStart),
     supabase.from("pos_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "voided").gte("sold_at", monthStart),
@@ -94,21 +116,31 @@ export default async function DashboardPage({ searchParams }: Props) {
     inventoryVisible
       ? supabase.from("purchases").select("total_amount,status").eq("organisation_id", orgId).gte("created_at", weekAgo)
       : Promise.resolve({ data: [], error: null }),
+    supabase
+      .from("pos_transaction_items")
+      .select("product_name,quantity,gross_amount,line_total")
+      .eq("organisation_id", orgId)
+      .gte("created_at", rangeStart.toISOString()),
   ]);
 
   const currentTx = currentTxResult.data ?? [];
   const prevTx = prevTxResult.data ?? [];
+  const sameWeekdayTx = sameWeekdayResult.data ?? [];
   const sessionData = sessionResult.data;
   const monthTx = monthTxResult.data ?? [];
   const voidedCount = voidedCountResult.count ?? 0;
   const lowStockResultData = lowStockResult.data ?? [];
   const purchaseWeek = purchaseWeekResult.data ?? [];
+  const todayItems = todayItemsResult.data ?? [];
 
   const currentTotal = currentTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
   const currentTips = currentTx.reduce((s, tx) => s + Number(tx.tip_amount ?? 0), 0);
   const currentSalesExTips = currentTotal - currentTips;
   const currentCount = currentTx.length;
+  const avgTicket = currentCount > 0 ? currentSalesExTips / currentCount : 0;
+
   const prevTotal = prevTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
+  const sameWeekdayTotal = sameWeekdayTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
 
   const isGrowing = currentSalesExTips >= prevTotal;
   const salesColor = prevTotal === 0 && currentTotal === 0 ? "text-slate-950" : isGrowing ? "text-green-600" : "text-red-600";
@@ -124,6 +156,19 @@ export default async function DashboardPage({ searchParams }: Props) {
     .reduce((s, p) => s + Number(p.total_amount ?? 0), 0);
 
   const lowStock = lowStockResultData.filter((p) => Number(p.reorder_level ?? 0) > 0 && Number(p.current_stock_qty ?? 0) <= Number(p.reorder_level ?? 0));
+
+  // Top 5 products by revenue in current period
+  const byProduct = new Map<string, { qty: number; total: number }>();
+  for (const item of todayItems) {
+    const row = byProduct.get(item.product_name) ?? { qty: 0, total: 0 };
+    row.qty += Number(item.quantity ?? 1);
+    row.total += Number(item.gross_amount ?? item.line_total ?? 0);
+    byProduct.set(item.product_name, row);
+  }
+  const topProducts = [...byProduct.entries()]
+    .map(([name, row]) => ({ name, ...row }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
 
   const attentionCols = 1 + (inventoryVisible ? 1 : 0) + (recipeVisible ? 1 : 0);
   const showAttentionRow = attentionCols > 0 || inventoryVisible;
@@ -148,7 +193,8 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      {/* ── Primary metrics row ── */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Suspense fallback={
           <Card>
             <CardHeader className="pb-1">
@@ -180,6 +226,30 @@ export default async function DashboardPage({ searchParams }: Props) {
             </Card>
           </DashboardSalesHighlight>
         </Suspense>
+
+        {/* Transactions + avg ticket */}
+        <Card>
+          <CardHeader className="pb-1">
+            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+              <Receipt className="h-4 w-4" />{t.dashboard.transactions ?? "Transactions"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-slate-950">{currentCount}</p>
+            {currentCount > 0 ? (
+              <p className="text-xs text-slate-400">{t.dashboard.avgTicket ?? "Avg ticket"}: {money(avgTicket, currency)}</p>
+            ) : (
+              <p className="text-xs text-slate-400">{t.dashboard.noSalesYet ?? "No sales yet"}</p>
+            )}
+            {period === "today" && sameWeekdayTotal > 0 ? (
+              <p className={`text-xs mt-0.5 ${currentSalesExTips >= sameWeekdayTotal ? "text-green-600" : "text-slate-400"}`}>
+                {pctDiff(currentSalesExTips, sameWeekdayTotal)} {t.dashboard.vsSameWeekday ?? "vs same day last week"}
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        {/* Cash/card split */}
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -189,8 +259,15 @@ export default async function DashboardPage({ searchParams }: Props) {
           <CardContent>
             <p className="text-2xl font-bold">{money(expectedCash, currency)}</p>
             <p className="text-xs text-slate-400">{sessionData ? t.dashboard.tillIsOpen : t.dashboard.openTillHint}</p>
+            {currentCount > 0 ? (
+              <p className="text-xs text-slate-400 mt-0.5">
+                {t.common.cash} {money(currentCash, currency)} · {t.common.card} {money(currentCard, currency)}
+              </p>
+            ) : null}
           </CardContent>
         </Card>
+
+        {/* Month total */}
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -200,14 +277,61 @@ export default async function DashboardPage({ searchParams }: Props) {
           <CardContent>
             <p className="text-2xl font-bold">{money(monthTotal, currency)}</p>
             <p className="text-xs text-slate-400">
-              {t.common.cash} {money(currentCash, currency)} · {t.common.card} {money(currentCard, currency)}
-              {voidedCount > 0 ? ` · ${t.common.voided}: ${voidedCount}` : ""}
+              {voidedCount > 0 ? `${t.common.voided}: ${voidedCount}` : t.dashboard.monthNoVoids ?? "No voids this month"}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {showAttentionRow ? (
+      {/* ── Top products + stock watch ── */}
+      {(topProducts.length > 0 || (inventoryVisible && lowStock.length > 0)) ? (
+        <div className="grid gap-4 lg:grid-cols-2">
+          {topProducts.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">{t.dashboard.topProducts ?? "Top products"}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {topProducts.map((p, i) => (
+                  <div key={p.name} className="flex items-center justify-between gap-2 text-sm">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="w-5 shrink-0 text-xs font-medium text-slate-400">{i + 1}.</span>
+                      <span className="truncate text-slate-800">{p.name}</span>
+                    </div>
+                    <div className="shrink-0 flex items-center gap-2">
+                      <span className="text-xs text-slate-400">×{p.qty}</span>
+                      <span className="font-semibold text-slate-950">{money(p.total, currency)}</span>
+                    </div>
+                  </div>
+                ))}
+                <Link href="/app/reports/sales" className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline pt-1">
+                  {t.dashboard.viewFullReport ?? "Full sales report"} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+          {inventoryVisible && (
+            <Card>
+              <CardHeader><CardTitle className="text-base">{t.dashboard.stockWatch}</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                {lowStock.length ? lowStock.slice(0, 5).map((p) => (
+                  <div key={p.id} className="flex items-center justify-between text-sm">
+                    <span>{p.name}</span>
+                    <Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge>
+                  </div>
+                )) : (
+                  <p className="text-sm text-slate-500">{t.dashboard.stockOk}</p>
+                )}
+                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                  {t.dashboard.viewStock} <ArrowRight className="h-3 w-3" />
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : null}
+
+      {showAttentionRow && !topProducts.length ? (
         <div className={`grid gap-4 ${inventoryVisible ? "lg:grid-cols-3" : ""}`}>
           <Card className={inventoryVisible ? "lg:col-span-2" : ""}>
             <CardHeader><CardTitle className="text-base">{t.dashboard.attention}</CardTitle></CardHeader>
@@ -254,6 +378,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       ) : null}
 
+      {/* ── Reports grid ── */}
       <div>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-sm font-semibold text-slate-700">{t.dashboard.reports}</h2>
