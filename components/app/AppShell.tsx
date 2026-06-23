@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import {
-  LayoutDashboard, Package, BarChart3,
+  LayoutDashboard, Package, BarChart3, Plug,
   LogOut, Menu, X, ChevronDown, Archive,
   CreditCard, ListChecks, Truck, ShoppingBag,
   Gift, BookOpen, ChefHat, FileText,
@@ -129,6 +129,9 @@ function resolveNavItems(
       : []),
     ...(isRO && !limited
       ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }]
+      : []),
+    ...(!limited
+      ? [{ href: "/app/integrations", label: isRO ? "Integrări" : "Integrations", icon: Plug, exact: false }]
       : []),
   ]
     .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
