@@ -1135,6 +1135,104 @@ export const resourcePages: ResourcePage[] = [
       { label: "Prețuri și trial", href: "/pricing" },
     ],
   },
+  {
+    slug: "switch-from-ebriza",
+    path: "/resources/switch-from-ebriza",
+    title: "Cum migrezi de la Ebriza la franchisetech",
+    metaTitle: "Migrare de la Ebriza la franchisetech — ghid practic",
+    description:
+      "Ghid pas cu pas pentru cafenele și restaurante care vor să testeze franchisetech în paralel cu Ebriza: export, import produse, trial 15 zile și comparație cost total.",
+    intro:
+      "Migrarea nu trebuie făcută big-bang. Cel mai sigur mod este să exportați datele, să importați catalogul principal în franchisetech și să rulați 15 zile în paralel înainte să decideți.",
+    sections: [
+      {
+        title: "1. Exportați datele din Ebriza",
+        body: "Începeți cu produsele active, categorii, prețuri, cote TVA și, dacă folosiți gestiune, articole de stoc. Păstrați exportul original ca backup înainte de orice curățare.",
+      },
+      {
+        title: "2. Curățați catalogul înainte de import",
+        body: "Eliminați produse duplicate, produse inactive și denumiri ambigue. Verificați unitatea de măsură, categoria, prețul de vânzare, prețul de cost și cota TVA pentru fiecare produs important.",
+      },
+      {
+        title: "3. Importați produsele în franchisetech",
+        body: "Folosiți importul CSV pentru produse și ingrediente. Începeți cu cele mai vândute articole, nu cu întreg istoricul. Scopul primei zile este o casă funcțională și rapoarte clare.",
+      },
+      {
+        title: "4. Rulați în paralel 15 zile",
+        body: "Faceți aceleași vânzări test, urmăriți raportul Z, TVA, stocul și timpul de închidere. Nu opriți sistemul vechi până când echipa nu poate face o vânzare și o închidere fără ajutor.",
+      },
+      {
+        title: "5. Comparați costul real",
+        body: "Comparați abonamentul, add-on-urile pentru rapoarte, KDS, Saga sau stoc, taxele per terminal/casier și timpul pierdut la reconciliere. Decideți pe cost total lunar, nu doar pe prețul de intrare.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Trebuie să migrez tot istoricul din Ebriza?",
+        answer: "Nu pentru primul trial. Migrați catalogul activ și articolele critice. Istoricul vechi poate rămâne arhivat în sistemul anterior sau în exporturi.",
+      },
+      {
+        question: "Pot rula Ebriza și franchisetech în paralel?",
+        answer: "Da. Recomandarea este să testați 15 zile în paralel, cu aceleași produse principale, pentru a compara raportarea și timpul de închidere.",
+      },
+      {
+        question: "franchisetech înlocuiește contabilul?",
+        answer: "Nu. franchisetech organizează POS, stoc, NIR și rapoarte operaționale. Contabilul rămâne responsabil pentru verificări fiscale și raportări oficiale.",
+      },
+    ],
+    related: [
+      { label: "franchisetech vs Ebriza", href: "/compare/ebriza" },
+      { label: "Checklist alegere POS", href: "/resources/choose-pos-romania" },
+      { label: "Prețuri", href: "/pricing" },
+    ],
+  },
+  {
+    slug: "smartbill-si-franchisetech",
+    path: "/resources/smartbill-si-franchisetech",
+    title: "SmartBill + franchisetech — folosite împreună",
+    metaTitle: "SmartBill și franchisetech împreună — facturare, POS, stoc",
+    description:
+      "Cum pot lucra împreună SmartBill și franchisetech: SmartBill pentru facturare, franchisetech pentru POS, stoc, NIR, rețete și închiderea de zi.",
+    intro:
+      "SmartBill și franchisetech nu trebuie privite ca alegere exclusivă. Pentru multe afaceri HORECA din România, SmartBill rămâne pentru facturare, iar franchisetech acoperă operațiunile zilnice.",
+    sections: [
+      {
+        title: "SmartBill rămâne pentru facturare",
+        body: "Dacă firma folosește deja SmartBill pentru facturi, clienți B2B sau fluxuri contabile, îl puteți păstra. Nu este nevoie să schimbați facturarea doar ca să îmbunătățiți casa și stocul.",
+      },
+      {
+        title: "franchisetech acoperă operațiunile zilnice",
+        body: "franchisetech gestionează vânzările POS, produse, TVA pe produse, stoc, achiziții/NIR, furnizori, rețete și raportul de închidere. Acestea sunt zonele unde Excel și WhatsApp devin fragile.",
+      },
+      {
+        title: "Export/import pentru contabil",
+        body: "La final de zi sau perioadă, exportați rapoartele necesare din franchisetech și le transmiteți contabilului sau le reconciliați cu instrumentele existente. Scopul este claritate, nu dublă muncă.",
+      },
+      {
+        title: "Când are sens combinația",
+        body: "Combinația are sens dacă aveți nevoie de facturare consacrată, dar echipa din locație are nevoie de POS rapid, stoc legat de vânzări și închidere casă verificabilă.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Trebuie să renunț la SmartBill?",
+        answer: "Nu. Dacă SmartBill funcționează bine pentru facturare, îl puteți păstra și folosi franchisetech pentru operațiunile zilnice.",
+      },
+      {
+        question: "Pot exporta date pentru contabil?",
+        answer: "Da. franchisetech oferă rapoarte și exporturi operaționale pentru vânzări, TVA, stoc și achiziții.",
+      },
+      {
+        question: "Care sistem este sursa pentru POS?",
+        answer: "franchisetech trebuie să fie sursa pentru vânzările POS și stocul operațional. SmartBill poate rămâne sursa pentru facturi și fluxuri contabile externe.",
+      },
+    ],
+    related: [
+      { label: "franchisetech vs SmartBill", href: "/compare/smartbill" },
+      { label: "Software POS România", href: "/resources/pos-software-romania" },
+      { label: "Gestiune stoc România", href: "/resources/stock-management-romania" },
+    ],
+  },
 ];
 
 export const publicPaths = [

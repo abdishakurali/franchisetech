@@ -73,6 +73,24 @@ const GETTING_STARTED: ResourceCard[] = [
     href: "#daily-close",
     cta: "Read checklist",
   },
+  {
+    icon: "🔁",
+    category: "Getting started",
+    title: "Cum migrezi de la Ebriza la franchisetech",
+    summary: "Exportă produsele, importă în franchisetech, rulează 15 zile în paralel și compară costul real.",
+    readTime: "6 min read",
+    href: "/resources/switch-from-ebriza",
+    cta: "Read guide",
+  },
+  {
+    icon: "🧾",
+    category: "Getting started",
+    title: "SmartBill + franchisetech — folosite împreună",
+    summary: "SmartBill rămâne pentru facturare; franchisetech acoperă POS, stoc, NIR și închiderea de zi.",
+    readTime: "4 min read",
+    href: "/resources/smartbill-si-franchisetech",
+    cta: "Read guide",
+  },
 ];
 
 const INDUSTRY_GUIDES: ResourceCard[] = [

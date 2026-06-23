@@ -121,6 +121,11 @@ export function PricingPlansSection({
               plan.highlighted ? "border-blue-600 bg-blue-50/50" : "border-slate-200 bg-white"
             }`}
           >
+            {plan.id === "pro" && (
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-0.5 text-xs font-semibold text-white">
+                Recomandat
+              </span>
+            )}
             {plan.highlighted ? (
               <Badge className="absolute right-4 top-4 border-0 bg-blue-600 text-white hover:bg-blue-600">
                 {l.mainPlan}
