@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/marketing/seo";
 import { allSitemapPaths } from "@/lib/marketing/sitemap-paths";
 
-const MARKETING_LOCALES = ["en", "ro", "it"] as const;
+const MARKETING_LOCALES = ["en", "ro"] as const;
 
 function urlForPath(path: string, lang: (typeof MARKETING_LOCALES)[number]): string {
   const base = path === "/" ? SITE_URL : `${SITE_URL}${path}`;

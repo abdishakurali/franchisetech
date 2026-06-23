@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -92,10 +93,19 @@ export function ProductsBulkTable({
   currency?: string;
 }) {
   const { t } = useAppI18n();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
 
   const allSelected = products.length > 0 && selected.size === products.length;
+  const currentListPath = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+  const productHref = (id: string, mode: "show" | "edit" = "show") => {
+    const returnTo = `${currentListPath}#product-${id}`;
+    const suffix = mode === "edit" ? "/edit" : "";
+    return `/app/products/${id}${suffix}?returnTo=${encodeURIComponent(returnTo)}`;
+  };
 
   function toggleAll() {
     if (allSelected) setSelected(new Set());
@@ -170,7 +180,8 @@ export function ProductsBulkTable({
             {products.map((p) => (
               <TableRow
                 key={p.id}
-                onClick={() => { window.location.href = `/app/products/${p.id}`; }}
+                id={`product-${p.id}`}
+                onClick={() => { router.push(productHref(p.id)); }}
                 className={`cursor-pointer hover:bg-slate-50 ${selected.has(p.id) ? "bg-blue-50/50" : ""} ${p.active === false ? "opacity-70" : ""}`}
               >
                 <TableCell onClick={(e) => e.stopPropagation()}>
@@ -189,7 +200,7 @@ export function ProductsBulkTable({
                       <div className="h-8 w-8 rounded bg-slate-100 shrink-0" />
                     )}
                     <div>
-                      <Link href={`/app/products/${p.id}`} onClick={(e) => e.stopPropagation()} className="hover:text-blue-600 hover:underline">
+                      <Link href={productHref(p.id)} onClick={(e) => e.stopPropagation()} className="hover:text-blue-600 hover:underline">
                         {p.name || t.common.untitled}
                       </Link>
                       {p.active === false && (
@@ -228,7 +239,7 @@ export function ProductsBulkTable({
                   </TableCell>
                 ) : null}
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Link href={`/app/products/${p.id}/edit`}>
+                  <Link href={productHref(p.id, "edit")}>
                     <Button variant="outline" size="sm" className="h-7 text-xs">{t.common.edit}</Button>
                   </Link>
                 </TableCell>

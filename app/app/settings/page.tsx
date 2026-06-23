@@ -26,8 +26,8 @@ import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleEnabled } from "@/lib/business-modules";
 import { industryLabel, industryOptions } from "@/lib/restaurant-features-i18n";
 import { RESTAURANT_FEATURE_KEYS, getSuggestedFeaturesForIndustry } from "@/lib/restaurant-features";
+import { DEFAULT_OPERATIONAL_UNITS } from "@/lib/units-of-measure";
 
-const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
 const DEFAULT_CASH_DRAWER = {
   cash_drawer_mode: "manual" as CashDrawerMode,
   cash_drawer_connector_port: 17878,
@@ -110,8 +110,8 @@ export default async function SettingsPage({
 
   // ANAF connection status (RO only) — non-blocking
   let anafConnected = false;
-  let anafCif = (orgRow?.anaf_cif as string | null) ?? "";
-  let anafVatRegistered = Boolean(orgRow?.anaf_vat_registered ?? false);
+  const anafCif = (orgRow?.anaf_cif as string | null) ?? "";
+  const anafVatRegistered = Boolean(orgRow?.anaf_vat_registered ?? false);
   if (isRO) {
     const { count } = await supabase
       .from("anaf_oauth_tokens")
@@ -151,7 +151,7 @@ export default async function SettingsPage({
   const customUnits = unitsResult.data.filter((u) => u.organisation_id === orgId);
   const customUnitNames = new Set(customUnits.map((u) => u.name));
   const globalUnitNames = unitsResult.data.filter((u) => u.organisation_id === null).map((u) => u.name);
-  const defaultUnits = [...new Set([...DEFAULT_UNITS, ...globalUnitNames].filter((u) => !customUnitNames.has(u)))];
+  const defaultUnits = [...new Set([...DEFAULT_OPERATIONAL_UNITS, ...globalUnitNames].filter((u) => !customUnitNames.has(u)))];
 
   // Referrals
   const referral = await ensureReferralCode(orgId).catch(() => ({

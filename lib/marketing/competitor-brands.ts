@@ -42,7 +42,7 @@ export function competitorLogoForOg(slug: string): string {
   return brand?.logoSrc ?? `/compare/logos/${slug}.svg`;
 }
 
-export function featuredCompareSlugs(locale: "en" | "ro" | "it"): string[] {
+export function featuredCompareSlugs(locale: "en" | "ro"): string[] {
   if (locale === "ro") return ["ebriza", "smartbill", "oblio", "saga"];
   return ["square", "sumup", "smartbill"];
 }

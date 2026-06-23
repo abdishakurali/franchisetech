@@ -243,7 +243,7 @@ export default async function PurchaseDetailPage({
                     <TableHead>{d.item}</TableHead>
                     <TableHead className="text-right">{f.qty}</TableHead>
                     <TableHead className="text-right">{d.netCost}</TableHead>
-                    <TableHead className="text-right">{taxLabel} %</TableHead>
+                    <TableHead className="text-right">{taxLabel}</TableHead>
                     <TableHead className="text-right">{d.netTotal}</TableHead>
                     <TableHead className="text-right">{taxLabel}</TableHead>
                     <TableHead className="text-right">{t.purchases.gross}</TableHead>

@@ -30,6 +30,8 @@ export async function completePosOnboarding(input: {
   businessType?: string;
   userName?: string;
   countryCode: string;
+  anafCif?: string;
+  anafVatRegistered?: boolean;
   locationBand: LocationBand;
   ingredientTracking: IngredientTrackingIntent;
   preferredPlan?: BillingPlan;
@@ -109,6 +111,8 @@ export async function completePosOnboarding(input: {
     business_type: input.businessType || null,
     country: countryLabel,
     country_code: input.countryCode,
+    anaf_cif: input.countryCode === "RO" ? input.anafCif?.trim() || null : null,
+    anaf_vat_registered: input.countryCode === "RO" ? Boolean(input.anafVatRegistered) : false,
     currency_code: currencyCode,
     currency_symbol: currencySymbol,
     trial_started_at: new Date().toISOString(),

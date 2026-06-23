@@ -29,12 +29,13 @@ import {
   type PurchaseLineInput,
 } from "@/lib/nir/purchase";
 import { createServiceClient } from "@/lib/supabase/server";
-import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
+import { listActiveVatRates, seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
 import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
-import { nearestVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
+import { nearestVatRate, ratesMatch, validateVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
+import { listOperationalUnitNames, validateOperationalUnit } from "@/lib/units-of-measure";
 
 function canTransact(role: string | null) { return ["owner","manager","staff","cashier"].includes(role ?? ""); }
 function canManage(role: string | null) { return ["owner","manager"].includes(role ?? ""); }
@@ -42,6 +43,55 @@ function canUpdateKitchen(role: string | null) { return ["owner","manager","kitc
 function nullableNum(fd: FormData, key: string) {
   const v = Number(String(fd.get(key) ?? "").trim());
   return Number.isFinite(v) && String(fd.get(key) ?? "").trim() !== "" ? v : null;
+}
+
+async function resolveSubmittedVatRate(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  orgId: string,
+  formData: FormData,
+  key: string
+): Promise<{ ok: true; rate: number } | { ok: false; error: string }> {
+  const rate = numberValue(formData, key);
+  const vatRates = await listActiveVatRates(supabase, orgId);
+  const validation = validateVatRate(vatRates, rate);
+  if (!validation.ok) return { ok: false, error: validation.message };
+  return { ok: true, rate };
+}
+
+async function validateSubmittedVatRates(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  orgId: string,
+  rates: number[]
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const activeRates = await listActiveVatRates(supabase, orgId);
+  if (activeRates.length === 0) return { ok: true };
+  const invalid = rates.find((rate) => !activeRates.some((r) => ratesMatch(r.rate, rate)));
+  if (invalid == null) return { ok: true };
+  return { ok: false, error: `VAT rate ${invalid}% is not active in Settings.` };
+}
+
+async function resolveSubmittedUnitOfMeasure(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  orgId: string,
+  rawUnit: string,
+): Promise<{ ok: true; unit: string } | { ok: false; error: string }> {
+  const allowedUnits = await listOperationalUnitNames(supabase, orgId);
+  return validateOperationalUnit(rawUnit, allowedUnits);
+}
+
+async function validateSubmittedUnitsOfMeasure(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  orgId: string,
+  units: string[],
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const allowedUnits = await listOperationalUnitNames(supabase, orgId);
+  const invalid = units.find((unit) => !validateOperationalUnit(unit, allowedUnits).ok);
+  if (!invalid) return { ok: true };
+  return { ok: false, error: `Unit of measure "${invalid}" is not configured in Settings.` };
 }
 
 type PosSaleCartItem = PosCartLine & { fiscalnet_vat_group?: number | null };
@@ -336,6 +386,10 @@ export async function addProduct(formData: FormData) {
   const typeFields = resolveProductTypeFields(formData, visibility, "create");
   const isSellable = availableInPos || formData.get("is_sellable") === "on";
   const openingStock = visibility.inventory ? nullableNum(formData, "opening_stock") : null;
+  const vat = await resolveSubmittedVatRate(supabase, orgId, formData, "vat_rate");
+  if (!vat.ok) throw new Error(vat.error);
+  const unit = await resolveSubmittedUnitOfMeasure(supabase, orgId, stringValue(formData, "unit_of_measure") || "each");
+  if (!unit.ok) throw new Error(unit.error);
 
   const { data: inserted } = await supabase.from("products").insert({
     organisation_id: orgId,
@@ -343,10 +397,10 @@ export async function addProduct(formData: FormData) {
     category_id: stringValue(formData, "category_id") || null,
     pos_category_id: stringValue(formData, "pos_category_id") || null,
     sku: stringValue(formData, "sku") || null,
-    unit_of_measure: stringValue(formData, "unit_of_measure") || "each",
+    unit_of_measure: unit.unit,
     sale_price: numberValue(formData, "sale_price"),
     cost_price: nullableNum(formData, "cost_price"),
-    vat_rate: numberValue(formData, "vat_rate"),
+    vat_rate: vat.rate,
     placeholder_type: stringValue(formData, "placeholder_type") || null,
     kitchen_station: stringValue(formData, "kitchen_station") || null,
     available_in_pos: availableInPos,
@@ -389,7 +443,7 @@ export async function addProduct(formData: FormData) {
       product_id: inserted.id,
       movement_type: "opening",
       quantity_change: openingStock,
-      unit_of_measure: stringValue(formData, "unit_of_measure") || "each",
+      unit_of_measure: unit.unit,
       reason: "Opening stock",
     }).then(() => null, () => null);
   }
@@ -408,15 +462,19 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
   if (!name) return { ok: false, error: "Product name is required." };
   const salePrice = numberValue(formData, "sale_price", 0);
   if (!Number.isFinite(salePrice) || salePrice < 0) return { ok: false, error: "Enter a valid sale price." };
+  const vat = await resolveSubmittedVatRate(supabase, orgId, formData, "vat_rate");
+  if (!vat.ok) return vat;
+  const unit = await resolveSubmittedUnitOfMeasure(supabase, orgId, stringValue(formData, "unit_of_measure") || "each");
+  if (!unit.ok) return unit;
 
   const { error } = await supabase.from("products").insert({
     organisation_id: orgId,
     name,
     pos_category_id: stringValue(formData, "pos_category_id") || null,
     category_id: null,
-    unit_of_measure: "each",
+    unit_of_measure: unit.unit,
     sale_price: salePrice,
-    vat_rate: numberValue(formData, "vat_rate"),
+    vat_rate: vat.rate,
     available_in_pos: true,
     is_ingredient: false,
     is_stock_tracked: false,
@@ -445,7 +503,7 @@ export async function updateProduct(
   const [{ data: existing }, moduleFlags] = await Promise.all([
     supabase
       .from("products")
-      .select("is_ingredient,is_stock_tracked,is_purchaseable,item_type,supplier_id")
+      .select("is_ingredient,is_stock_tracked,is_purchaseable,item_type,supplier_id,pos_category_id,placeholder_type")
       .eq("id", id)
       .eq("organisation_id", orgId)
       .maybeSingle(),
@@ -454,6 +512,10 @@ export async function updateProduct(
 
   const visibility = productModuleVisibility(moduleFlags);
   const typeFields = resolveProductTypeFields(formData, visibility, "update", existing);
+  const vat = await resolveSubmittedVatRate(supabase, orgId, formData, "vat_rate");
+  if (!vat.ok) return vat;
+  const unit = await resolveSubmittedUnitOfMeasure(supabase, orgId, stringValue(formData, "unit_of_measure") || "each");
+  if (!unit.ok) return unit;
 
   // Determine image URL: new upload > clear > keep existing
   const imageFile = formData.get("image_file") as File | null;
@@ -479,17 +541,24 @@ export async function updateProduct(
     imageUrl = null;
   }
 
+  const hasPosCategoryField = formData.has("pos_category_id");
+  const hasPlaceholderField = formData.has("placeholder_type");
+
   const { error } = await supabase.from("products").update({
     name: stringValue(formData, "name"),
     category_id: stringValue(formData, "category_id") || null,
-    pos_category_id: stringValue(formData, "pos_category_id") || null,
+    pos_category_id: hasPosCategoryField
+      ? stringValue(formData, "pos_category_id") || null
+      : existing?.pos_category_id ?? null,
     sku: stringValue(formData, "sku") || null,
-    unit_of_measure: stringValue(formData, "unit_of_measure") || "each",
+    unit_of_measure: unit.unit,
     sale_price: numberValue(formData, "sale_price"),
     cost_price: nullableNum(formData, "cost_price"),
-    vat_rate: numberValue(formData, "vat_rate"),
+    vat_rate: vat.rate,
     ...(imageUrl !== undefined ? { image_url: imageUrl } : {}),
-    placeholder_type: stringValue(formData, "placeholder_type") || null,
+    placeholder_type: hasPlaceholderField
+      ? stringValue(formData, "placeholder_type") || null
+      : existing?.placeholder_type ?? null,
     kitchen_station: stringValue(formData, "kitchen_station") || null,
     available_in_pos: availableInPos,
     is_ingredient: typeFields.is_ingredient,
@@ -881,6 +950,9 @@ export async function addSupplier(formData: FormData) {
   if (!name) return;
   await supabase.from("suppliers").insert({
     organisation_id: orgId, name,
+    tax_id: stringValue(formData, "tax_id") || null,
+    vat_registered: formData.get("vat_registered") === "on",
+    registration_code: stringValue(formData, "registration_code") || null,
     contact_name: stringValue(formData, "contact_name") || null,
     email: stringValue(formData, "email") || null,
     phone: stringValue(formData, "phone") || null,
@@ -891,6 +963,29 @@ export async function addSupplier(formData: FormData) {
   redirect("/app/suppliers");
 }
 
+export async function createSupplierInline(formData: FormData): Promise<{ ok: true; supplier: { id: string; name: string } } | { ok: false; error: string }> {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  const name = stringValue(formData, "name");
+  if (!name) return { ok: false, error: "Supplier name is required." };
+  const { data, error } = await supabase.from("suppliers").insert({
+    organisation_id: orgId,
+    name,
+    tax_id: stringValue(formData, "tax_id") || null,
+    vat_registered: formData.get("vat_registered") === "on",
+    registration_code: stringValue(formData, "registration_code") || null,
+    contact_name: stringValue(formData, "contact_name") || null,
+    email: stringValue(formData, "email") || null,
+    phone: stringValue(formData, "phone") || null,
+    address: stringValue(formData, "address") || null,
+    notes: stringValue(formData, "notes") || null,
+    active: true,
+  }).select("id,name").single();
+  if (error || !data) return { ok: false, error: error?.message ?? "Could not create supplier." };
+  revalidatePath("/app/suppliers");
+  return { ok: true, supplier: data };
+}
+
 export async function updateSupplier(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
@@ -898,6 +993,9 @@ export async function updateSupplier(formData: FormData) {
   if (!id) return;
   await supabase.from("suppliers").update({
     name: stringValue(formData, "name"),
+    tax_id: stringValue(formData, "tax_id") || null,
+    vat_registered: formData.get("vat_registered") === "on",
+    registration_code: stringValue(formData, "registration_code") || null,
     contact_name: stringValue(formData, "contact_name") || null,
     email: stringValue(formData, "email") || null,
     phone: stringValue(formData, "phone") || null,
@@ -1019,6 +1117,10 @@ async function ensureDraftPurchaseForPost(
       items = await loadDraftPurchaseItems(supabase, orgId, purchaseId);
     }
     if (!items.length) return null;
+    const vatValidation = await validateSubmittedVatRates(supabase, orgId, items.map((i) => i.tax_rate));
+    if (!vatValidation.ok) throw new Error(vatValidation.error);
+    const unitValidation = await validateSubmittedUnitsOfMeasure(supabase, orgId, items.map((i) => i.unit_of_measure));
+    if (!unitValidation.ok) throw new Error(unitValidation.error);
 
     const totals = purchaseLineTotals(items);
     const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
@@ -1032,6 +1134,10 @@ async function ensureDraftPurchaseForPost(
   }
 
   if (!items.length) return null;
+  const vatValidation = await validateSubmittedVatRates(supabase, orgId, items.map((i) => i.tax_rate));
+  if (!vatValidation.ok) throw new Error(vatValidation.error);
+  const unitValidation = await validateSubmittedUnitsOfMeasure(supabase, orgId, items.map((i) => i.unit_of_measure));
+  if (!unitValidation.ok) throw new Error(unitValidation.error);
 
   const totals = purchaseLineTotals(items);
   const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
@@ -1107,6 +1213,10 @@ export async function savePurchaseDraft(formData: FormData) {
   const header = parsePurchaseHeaderFromForm(formData);
   const items = parsePurchaseLinesFromForm(formData);
   if (!items.length) return;
+  const vatValidation = await validateSubmittedVatRates(supabase, orgId, items.map((i) => i.tax_rate));
+  if (!vatValidation.ok) throw new Error(vatValidation.error);
+  const unitValidation = await validateSubmittedUnitsOfMeasure(supabase, orgId, items.map((i) => i.unit_of_measure));
+  if (!unitValidation.ok) throw new Error(unitValidation.error);
 
   const { subtotalAmount, taxTotal, totalAmount } = purchaseLineTotals(items);
   const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
@@ -1486,14 +1596,15 @@ export async function createIngredientInline(formData: FormData): Promise<{ id: 
   const name = stringValue(formData, "name");
   if (!name) return { error: "Name is required" };
 
-  const unitOfMeasure = stringValue(formData, "unit_of_measure") || "each";
+  const unit = await resolveSubmittedUnitOfMeasure(supabase, orgId, stringValue(formData, "unit_of_measure") || "each");
+  if (!unit.ok) return { error: unit.error };
   const costPrice = numberValue(formData, "cost_price", 0);
   const openingStock = numberValue(formData, "opening_stock", 0);
 
   const { data, error } = await supabase.from("products").insert({
     organisation_id: orgId,
     name,
-    unit_of_measure: unitOfMeasure,
+    unit_of_measure: unit.unit,
     cost_price: costPrice,
     current_stock_qty: openingStock,
     is_ingredient: true,

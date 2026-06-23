@@ -518,7 +518,7 @@ export function readPosLocalePreference(fallback: PosLocale): PosLocale {
     const marketingStored = localStorage.getItem("franchisetech:marketingLocale");
     if (marketingStored === "ro") return "ro";
     if (marketingStored === "en") return "en";
-    const cookieMatch = document.cookie.match(/franchisetech_locale=(en|ro|it)/);
+    const cookieMatch = document.cookie.match(/franchisetech_locale=(en|ro)/);
     if (cookieMatch?.[1] === "ro") return "ro";
     if (cookieMatch?.[1] === "en") return "en";
     const raw = localStorage.getItem(POS_LOCALE_STORAGE_KEY);

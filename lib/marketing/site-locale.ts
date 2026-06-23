@@ -27,7 +27,6 @@ export function localeAlternates(
     languages: {
       en: localizedUrl(path, "en"),
       ro: localizedUrl(path, "ro"),
-      it: localizedUrl(path, "it"),
       "x-default": localizedUrl(path, "x-default"),
     },
   };

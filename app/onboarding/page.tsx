@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { completePosOnboarding } from "@/app/actions/onboarding";
+import { lookupAnafCompany } from "@/app/actions/partner-lookup";
 import {
   deriveBusinessProfile,
   BUSINESS_PROFILE_LABELS,
@@ -63,6 +64,8 @@ export default function OnboardingPage() {
   const [pending, startTransition] = useTransition();
   const [form, setForm] = useState({
     name: "",
+    anafCif: "",
+    anafVatRegistered: false,
     businessType: "",
     userName: "",
     countryCode: "RO",
@@ -97,6 +100,19 @@ export default function OnboardingPage() {
 
   const update = (patch: Partial<typeof form>) => setForm((current) => ({ ...current, ...patch }));
 
+  const lookupCui = () => {
+    if (!form.anafCif.trim()) return toast.error("Introdu CUI-ul.");
+    startTransition(async () => {
+      const result = await lookupAnafCompany(form.anafCif);
+      if (!result) {
+        toast.error("Firma nu a fost găsită în ANAF.");
+        return;
+      }
+      update({ name: result.name, anafCif: result.cui, anafVatRegistered: result.vatRegistered });
+      toast.success("Date preluate din ANAF.");
+    });
+  };
+
   const handleFinish = () => {
     startTransition(async () => {
       const acquisition = readAcquisitionClient();
@@ -107,6 +123,8 @@ export default function OnboardingPage() {
 
       const result = await completePosOnboarding({
         orgName: form.name,
+        anafCif: form.anafCif,
+        anafVatRegistered: form.anafVatRegistered,
         businessType: form.businessType || undefined,
         userName: form.userName,
         countryCode: form.countryCode,
@@ -182,6 +200,31 @@ export default function OnboardingPage() {
                   </SelectContent>
                 </Select>
               </div>
+              {form.countryCode === "RO" && (
+                <div>
+                  <Label htmlFor="anafCif">CUI firmă</Label>
+                  <div className="mt-1 flex gap-2">
+                    <Input
+                      id="anafCif"
+                      value={form.anafCif}
+                      onChange={(e) => update({ anafCif: e.target.value })}
+                      placeholder="ex: 12345678"
+                    />
+                    <Button type="button" variant="outline" onClick={lookupCui} disabled={pending}>
+                      ANAF
+                    </Button>
+                  </div>
+                  <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+                    <input
+                      type="checkbox"
+                      checked={form.anafVatRegistered}
+                      onChange={(e) => update({ anafVatRegistered: e.target.checked })}
+                      className="h-4 w-4 rounded border-slate-300"
+                    />
+                    Plătitor de TVA
+                  </label>
+                </div>
+              )}
               <details className="rounded-lg border border-slate-200 p-3 text-sm">
                 <summary className="cursor-pointer font-medium text-slate-700">Optional details</summary>
                 <div className="mt-3 space-y-3">

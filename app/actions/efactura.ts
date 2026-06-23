@@ -4,9 +4,12 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { buildInvoiceXml, computeInvoiceTotals } from "@/lib/anaf/ubl-builder";
-import { validateXml, uploadDocument, lookupCompanyByCif } from "@/lib/anaf/client";
+import { validateXml, uploadDocument } from "@/lib/anaf/client";
+import { lookupRomanianCompanyByCui } from "@/lib/anaf/company-lookup";
 import { getOrgAccessToken, hasAnafCredentials, storeOrgTokens, revokeOrgTokens, exchangeCode } from "@/lib/anaf/auth";
 import type { UblLineItem, UblAddress } from "@/lib/anaf/ubl-builder";
+import { listActiveVatRates } from "@/lib/vat-rates-server";
+import { ratesMatch } from "@/lib/vat-rates";
 
 export type EfacturaLineInput = {
   name: string;
@@ -40,6 +43,11 @@ function canManage(role: string | null | undefined) {
 export async function createInvoiceDraft(input: CreateInvoiceDraftInput): Promise<{ id: string }> {
   const { supabase, orgId, membership, user } = await getKitchenOpsContext();
   if (!canManage(membership.role)) redirect("/app/invoices");
+  const activeVatRates = await listActiveVatRates(supabase, orgId);
+  if (activeVatRates.length > 0) {
+    const invalid = input.lines.find((line) => !activeVatRates.some((rate) => ratesMatch(rate.rate, line.vatRate)));
+    if (invalid) throw new Error(`Cota TVA ${invalid.vatRate}% nu este activă în Setări.`);
+  }
 
   const lines = input.lines.map((l, i) => ({
     id: i + 1,
@@ -232,7 +240,7 @@ export async function lookupBuyerByCif(cif: string): Promise<{
   address: string;
   vatRegistered: boolean;
 } | null> {
-  const result = await lookupCompanyByCif(cif);
+  const result = await lookupRomanianCompanyByCui(cif);
   if (!result) return null;
   return { name: result.name, address: result.address, vatRegistered: result.vatRegistered };
 }

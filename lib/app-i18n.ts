@@ -1673,7 +1673,7 @@ const ro: typeof en = {
     whatIsProduct: "Ce tip de produs este?",
     productName: "Nume produs",
     category: "Categorie",
-    vatRate: "Cota TVA",
+    vatRate: "Cotă TVA",
     unit: "Unitate",
     skuOptional: "SKU (opțional)",
     openingStock: "Stoc inițial (opțional)",

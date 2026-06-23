@@ -166,7 +166,7 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
             <th className="text-right py-2 px-1">{p.qty}</th>
             <th className="text-right py-2 px-1">{p.netUnit}</th>
             <th className="text-right py-2 px-1">{p.netValue}</th>
-            <th className="text-right py-2 px-1">{taxLabel} %</th>
+            <th className="text-right py-2 px-1">{taxLabel}</th>
             <th className="text-right py-2 px-1">{taxLabel}</th>
             <th className="text-right py-2 px-1">{p.grossValue}</th>
             <th className="text-left py-2 px-1">{p.notesCol}</th>

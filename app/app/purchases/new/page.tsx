@@ -4,12 +4,13 @@ import { PurchaseForm } from "@/components/app/PurchaseForm";
 import { ensurePosDefaults } from "@/app/actions/kitchenops";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { listOperationalUnitNames } from "@/lib/units-of-measure";
 
 export default async function PurchasesNewPage() {
   await requireBusinessModule("inventory");
   const { supabase, orgId, currency, membership, user } = await getKitchenOpsContext();
   await ensurePosDefaults();
-  const [suppRes, prodRes, sites, vatRates] = await Promise.all([
+  const [suppRes, prodRes, sites, vatRates, units] = await Promise.all([
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     supabase
       .from("products")
@@ -20,6 +21,7 @@ export default async function PurchasesNewPage() {
       .order("name"),
     listAccessibleSites(supabase, orgId, membership.id, membership.role),
     listActiveVatRates(supabase, orgId),
+    listOperationalUnitNames(supabase, orgId),
   ]);
   return (
     <PurchaseForm
@@ -29,6 +31,7 @@ export default async function PurchasesNewPage() {
       currency={currency}
       currentUserId={user?.id}
       vatRates={vatRates}
+      units={units}
     />
   );
 }

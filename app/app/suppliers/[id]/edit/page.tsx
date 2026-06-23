@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { updateSupplier, deleteSupplier } from "@/app/actions/kitchenops";
+import { SupplierFormFields } from "@/components/app/SupplierForm";
 
 export default async function SupplierEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -31,12 +30,7 @@ export default async function SupplierEditPage({ params }: { params: Promise<{ i
         <CardContent>
           <form action={updateSupplier as unknown as (fd: FormData) => Promise<void>} className="space-y-3">
             <input type="hidden" name="id" value={id} />
-            <div><Label>Name *</Label><Input name="name" required defaultValue={supplier.name} /></div>
-            <div><Label>Contact name</Label><Input name="contact_name" defaultValue={supplier.contact_name ?? ""} /></div>
-            <div><Label>Email</Label><Input name="email" type="email" defaultValue={supplier.email ?? ""} /></div>
-            <div><Label>Phone</Label><Input name="phone" defaultValue={supplier.phone ?? ""} /></div>
-            <div><Label>Address</Label><Input name="address" defaultValue={supplier.address ?? ""} /></div>
-            <div><Label>Notes</Label><Input name="notes" defaultValue={supplier.notes ?? ""} /></div>
+            <SupplierFormFields supplier={supplier} />
             <div className="flex gap-3 pt-2">
               <Link href="/app/suppliers"><Button variant="outline" type="button">Cancel</Button></Link>
               <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Save changes</Button>

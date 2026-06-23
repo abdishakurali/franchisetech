@@ -28,25 +28,14 @@ const PARTNER_TYPES_RO = [
   "Altul",
 ] as const;
 
-const PARTNER_TYPES_IT = [
-  "Commercialista o consulente fiscale",
-  "Rivenditore POS / software",
-  "Consulente hospitality",
-  "Integratore FiscalNet",
-  "Operatore multi-sede",
-  "Altro",
-] as const;
-
 const PARTNER_TYPES: Record<MarketingLocale, readonly string[]> = {
   en: PARTNER_TYPES_EN,
   ro: PARTNER_TYPES_RO,
-  it: PARTNER_TYPES_IT,
 };
 
 const DEFAULT_PARTNER_TYPE: Record<MarketingLocale, string> = {
   en: PARTNER_TYPES_EN[0],
   ro: PARTNER_TYPES_RO[0],
-  it: PARTNER_TYPES_IT[0],
 };
 
 export function PartnerContactForm({ programOpen = false }: { programOpen?: boolean }) {

@@ -29,7 +29,7 @@ export function parseAcquisitionFromSearchParams(
     utm_content: trim(params.get("utm_content")),
     utm_medium: trim(params.get("utm_medium")),
     ref: trim(params.get("ref")),
-    lang: lang === "ro" || lang === "it" || lang === "en" ? lang : undefined,
+    lang: lang === "ro" || lang === "en" ? lang : undefined,
   };
 }
 

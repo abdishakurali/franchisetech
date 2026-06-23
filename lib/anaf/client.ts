@@ -154,39 +154,6 @@ export async function validateXml(
   return { valid: errors.length === 0, errors };
 }
 
-/**
- * Look up a Romanian company by CIF via ANAF's free public API.
- * No authentication required. Used for buyer auto-fill in invoice form.
- */
-export async function lookupCompanyByCif(cif: string): Promise<{
-  name: string;
-  address: string;
-  vatRegistered: boolean;
-  registrationCode: string;
-} | null> {
-  const clean = cif.replace(/^RO/i, "").trim();
-  const url = `https://webservicesp.anaf.ro/AsynchWebService/api/1/ws/tva?cui=${encodeURIComponent(clean)}`;
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify([{ cui: parseInt(clean, 10), data: new Date().toISOString().slice(0, 10) }]),
-  });
-
-  if (!res.ok) return null;
-
-  const json = await res.json().catch(() => null);
-  const found = json?.found?.[0];
-  if (!found) return null;
-
-  return {
-    name: found.denumire ?? "",
-    address: [found.adresa, found.localitate, found.judet].filter(Boolean).join(", "),
-    vatRegistered: Boolean(found.scpTva),
-    registrationCode: found.cod_inmatriculare ?? "",
-  };
-}
-
 export class AnafApiError extends Error {
   constructor(
     message: string,

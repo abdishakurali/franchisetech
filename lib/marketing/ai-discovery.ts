@@ -10,7 +10,7 @@ export const AI_ENTITY = {
   description:
     "Browser-based POS, stock management, recipe costing, till close (Z-report), and owner reports for cafes, restaurants, and small food operators. Operations-first — not a payment terminal vendor.",
   markets: ["Romania", "Ireland", "European Union (configurable VAT/currency)"],
-  languages: ["English", "Romanian", "Italian"],
+  languages: ["English", "Romanian"],
   pricingModel: "Monthly SaaS subscription with unlimited staff on paid plans; 15-day assisted trial",
   pricingUrl: `${SITE_URL}/pricing`,
   signupUrl: `${SITE_URL}/signup`,

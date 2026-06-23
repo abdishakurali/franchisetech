@@ -9,7 +9,7 @@ import {
   readPosCatalogCache,
   writePosCatalogCache,
 } from "@/lib/pos-catalog-cache";
-import { isBrowserOnline } from "@/lib/pos-offline-queue";
+import { invalidateProbeCache, isBrowserOnline, probeServerOnline } from "@/lib/pos-offline-queue";
 import type { PosLocale } from "@/lib/pos-i18n";
 
 type PosRegisterProps = React.ComponentProps<typeof PosRegister> & {
@@ -17,9 +17,9 @@ type PosRegisterProps = React.ComponentProps<typeof PosRegister> & {
   appLocale?: PosLocale;
 };
 
-function mergeCatalogProps(props: PosRegisterProps, cached: ReturnType<typeof readPosCatalogCache>) {
+function mergeCatalogProps(props: PosRegisterProps, cached: ReturnType<typeof readPosCatalogCache>, offline: boolean) {
   if (!cached?.products.length) return props;
-  const useCache = !isBrowserOnline() || !props.products?.length;
+  const useCache = offline || !props.products?.length;
   if (!useCache) return props;
   return {
     ...props,
@@ -32,7 +32,7 @@ function mergeCatalogProps(props: PosRegisterProps, cached: ReturnType<typeof re
     defaultVatRate: cached.defaultVatRate ?? props.defaultVatRate,
     sessionId: props.sessionId ?? cached.sessionId,
     currency: props.currency ?? cached.currency,
-    catalogOffline: !isBrowserOnline(),
+    catalogOffline: offline,
     catalogCachedAt: cached.cachedAt,
   };
 }
@@ -55,7 +55,7 @@ function buildRegisterProps(props: PosRegisterProps, offline: boolean) {
     });
   }
   const cached = readPosCatalogCache(orgId);
-  const merged = mergeCatalogProps(props, cached);
+  const merged = mergeCatalogProps(props, cached, offline);
   return {
     ...merged,
     catalogOffline: offline || Boolean(merged.catalogOffline),
@@ -66,37 +66,36 @@ function buildRegisterProps(props: PosRegisterProps, offline: boolean) {
 function PosRegisterWithCatalog(props: PosRegisterProps) {
   const searchParams = useSearchParams();
   const showTour = searchParams.get("tour") === "first_sale";
-  const orgId = props.orgId ?? "";
 
   const [offline, setOffline] = useState(() => !isBrowserOnline());
 
   useEffect(() => {
-    const sync = () => setOffline(!isBrowserOnline());
-    window.addEventListener("online", sync);
-    window.addEventListener("offline", sync);
-    sync();
+    let cancelled = false;
+    const probe = async () => {
+      const online = await probeServerOnline();
+      if (!cancelled) setOffline(!online);
+    };
+    const onOffline = () => {
+      invalidateProbeCache();
+      setOffline(true);
+    };
+    const onOnline = () => {
+      invalidateProbeCache();
+      void probe();
+    };
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+    void probe();
     return () => {
-      window.removeEventListener("online", sync);
-      window.removeEventListener("offline", sync);
+      cancelled = true;
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
     };
   }, []);
 
   const registerProps = useMemo(
     () => buildRegisterProps(props, offline),
-    [
-      props,
-      orgId,
-      offline,
-      props.products,
-      props.categories,
-      props.paymentMethods,
-      props.sgrProduct,
-      props.sgrEnabled,
-      props.vatRateGroupMap,
-      props.defaultVatRate,
-      props.sessionId,
-      props.currency,
-    ],
+    [props, offline],
   );
 
   return (

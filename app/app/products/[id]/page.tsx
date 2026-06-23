@@ -3,10 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleEnabled } from "@/lib/business-modules";
 import { PRODUCT_DETAIL_SELECT } from "@/lib/supabase/product-selects";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -33,9 +34,21 @@ type StockMovement = {
   performed_at: string;
 };
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+function safeProductsReturnTo(value: string | undefined): string {
+  return value?.startsWith("/app/products") ? value : "/app/products";
+}
+
+export default async function ProductDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ returnTo?: string }>;
+}) {
   const { id } = await params;
-  const { supabase, orgId, currency } = await getKitchenOpsContext();
+  const returnTo = safeProductsReturnTo((await searchParams)?.returnTo);
+  const { supabase, orgId, currency, countryCode, profileLocale } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const inventoryVisible = isModuleEnabled(moduleFlags, "inventory");
   const recipeVisible = isModuleEnabled(moduleFlags, "recipe_costing");
@@ -163,7 +176,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href="/app/products" className="text-sm text-slate-500 hover:text-slate-700">← Products</Link>
+            <Link href={returnTo} className="text-sm text-slate-500 hover:text-slate-700">← Products</Link>
           </div>
           <h1 className="text-2xl font-semibold text-slate-950">{product.name}</h1>
           <div className="flex flex-wrap gap-2 mt-2">
@@ -183,7 +196,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             </div>
           )}
           <div className="flex flex-col gap-2">
-            <Link href={`/app/products/${product.id}/edit`}><Button size="sm">Edit product</Button></Link>
+            <Link href={`/app/products/${product.id}/edit?returnTo=${encodeURIComponent(returnTo)}`}><Button size="sm">Edit product</Button></Link>
             <Link href="/app/products/new" className="text-sm text-blue-600 hover:underline">+ Add product</Link>
           </div>
         </div>
@@ -299,7 +312,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {[
               { label: "Unit of measure", value: product.unit_of_measure ?? "each" },
               { label: "Cost price", value: product.cost_price ? money(Number(product.cost_price), currency) : "—" },
-              { label: "VAT rate", value: `${product.vat_rate ?? 0}%` },
+              { label: t.tables.vatRate, value: `${product.vat_rate ?? 0}%` },
               { label: "SKU", value: product.sku ?? "—" },
               { label: "Category", value: cat?.name ?? "—" },
               { label: "Supplier", value: supplier?.name ?? "—" },
