@@ -270,6 +270,8 @@ export function PurchaseForm({
 }) {
   const { t, locale } = useAppI18n();
   const isRO = locale === "ro";
+  const supplierInvoiceDateLabel = isRO ? "Data factură furnizor" : t.purchases.form.invoiceDate;
+  const observationsLabel = isRO ? "Observații / diferențe" : t.purchases.form.notes;
   const taxLabel = t.purchases.form.vat;
   const defaultVatRate = String(getDefaultVatRateValue(vatRates));
   const umOptions = units.length ? units : ["each"];
@@ -418,7 +420,7 @@ export function PurchaseForm({
                 />
               </div>
               <div>
-                <Label>{t.purchases.form.invoiceDate}</Label>
+                <Label>{supplierInvoiceDateLabel}</Label>
                 <Input
                   name="supplier_invoice_date"
                   type="date"
@@ -567,7 +569,7 @@ export function PurchaseForm({
             </div>
 
             <div>
-              <Label>{t.purchases.form.notes}</Label>
+              <Label>{observationsLabel}</Label>
               <Input
                 name="notes"
                 defaultValue={initialDraft?.notes ?? ""}

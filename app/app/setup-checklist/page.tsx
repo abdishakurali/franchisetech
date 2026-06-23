@@ -11,7 +11,7 @@ import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleEnabled } from "@/lib/business-modules";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
-function Step({ done, num, title, text, href, label, status, stepLabel }: { done: boolean; num: number; title: string; text: string; href: string; label: string; status?: string; stepLabel: string }) {
+function Step({ done, title, text, href, label, status, stepLabel }: { done: boolean; title: string; text: string; href: string; label: string; status?: string; stepLabel: string }) {
   return (
     <div className={`flex items-start gap-4 rounded-xl border p-4 ${done ? "border-green-200 bg-green-50" : "border-slate-200 bg-white"}`}>
       <div className="mt-0.5">{done ? <CheckCircle2 className="h-5 w-5 text-green-600" /> : <Circle className="h-5 w-5 text-slate-300" />}</div>
@@ -30,7 +30,9 @@ function Step({ done, num, title, text, href, label, status, stepLabel }: { done
   );
 }
 
-export default async function SetupChecklistPage() {
+export default async function SetupChecklistPage({ searchParams }: { searchParams?: Promise<{ welcome?: string }> }) {
+  const params = await searchParams;
+  const isWelcome = params?.welcome === "1";
   const { countryCode, profileLocale, supabase, orgId } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const [
@@ -97,6 +99,12 @@ export default async function SetupChecklistPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
+      {isWelcome && (
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+          <p className="font-semibold">Bun venit la franchisetech!</p>
+          <p className="mt-1">Casa ta este deschisă. Urmează pașii de mai jos — în 15 minute ești operațional.</p>
+        </div>
+      )}
       <div>
         <h1 className="text-2xl font-semibold text-slate-950">{t.setupChecklist.title}</h1>
         <p className="mt-1 text-sm text-slate-500">{profileSubtitle}</p>
@@ -119,7 +127,7 @@ export default async function SetupChecklistPage() {
         </CardContent>
       </Card>
       <div className="space-y-3">
-        {coreSteps.map((step, index) => <Step key={step.id} num={index + 1} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
+        {coreSteps.map((step, index) => <Step key={step.id} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
       </div>
       {multiSiteSteps.length > 0 ? (
         <div className="space-y-3 pt-4">
@@ -127,7 +135,7 @@ export default async function SetupChecklistPage() {
             <h2 className="text-lg font-semibold text-slate-950">{t.setupChecklist.multiSiteTitle}</h2>
             <p className="mt-1 text-sm text-slate-500">{t.setupChecklist.multiSiteDesc}</p>
           </div>
-          {multiSiteSteps.map((step, index) => <Step key={step.id} num={index + 1} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
+          {multiSiteSteps.map((step, index) => <Step key={step.id} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
         </div>
       ) : null}
       {showAdvanced ? (
@@ -140,7 +148,7 @@ export default async function SetupChecklistPage() {
                 : t.setupChecklist.advancedOptional}
             </p>
           </div>
-          {advancedSteps.map((step, index) => <Step key={step.id} num={index + 1} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
+          {advancedSteps.map((step, index) => <Step key={step.id} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />)}
         </div>
       ) : showInventoryPrompt ? (
         <Card>
@@ -162,7 +170,7 @@ export default async function SetupChecklistPage() {
             <p className="mt-1 text-sm text-slate-500">{t.setupChecklist.billingDesc}</p>
           </div>
           {billingSteps.map((step, index) => (
-            <Step key={step.id} num={index + 1} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />
+            <Step key={step.id} stepLabel={t.setupChecklist.step(index + 1)} done={step.done} title={step.title} text={step.text} href={step.href} label={step.label} status={step.status} />
           ))}
         </div>
       ) : null}

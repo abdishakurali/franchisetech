@@ -62,6 +62,7 @@ const ingredientOptions: { value: IngredientTrackingIntent; label: string }[] = 
 export default function OnboardingPage() {
   const [step, setStep] = useState(0);
   const [pending, startTransition] = useTransition();
+  const [cifResolved, setCifResolved] = useState(false);
   const [form, setForm] = useState({
     name: "",
     anafCif: "",
@@ -105,10 +106,12 @@ export default function OnboardingPage() {
     startTransition(async () => {
       const result = await lookupAnafCompany(form.anafCif);
       if (!result) {
+        setCifResolved(false);
         toast.error("Firma nu a fost găsită în ANAF.");
         return;
       }
       update({ name: result.name, anafCif: result.cui, anafVatRegistered: result.vatRegistered });
+      setCifResolved(true);
       toast.success("Date preluate din ANAF.");
     });
   };
@@ -207,7 +210,13 @@ export default function OnboardingPage() {
                     <Input
                       id="anafCif"
                       value={form.anafCif}
-                      onChange={(e) => update({ anafCif: e.target.value })}
+                      onChange={(e) => {
+                        setCifResolved(false);
+                        update({ anafCif: e.target.value });
+                      }}
+                      onBlur={() => {
+                        if (form.anafCif.trim().length >= 4 && !form.name) void lookupCui();
+                      }}
                       placeholder="ex: 12345678"
                     />
                     <Button type="button" variant="outline" onClick={lookupCui} disabled={pending}>
@@ -223,39 +232,37 @@ export default function OnboardingPage() {
                     />
                     Plătitor de TVA
                   </label>
+                  {cifResolved && (
+                    <p className="mt-1 text-xs text-green-600">✓ {form.name} — date preluate din ANAF</p>
+                  )}
                 </div>
               )}
-              <details className="rounded-lg border border-slate-200 p-3 text-sm">
-                <summary className="cursor-pointer font-medium text-slate-700">Optional details</summary>
-                <div className="mt-3 space-y-3">
-                  <div>
-                    <Label htmlFor="userName">Your name</Label>
-                    <Input
-                      id="userName"
-                      value={form.userName}
-                      onChange={(e) => update({ userName: e.target.value })}
-                      placeholder="Owner or manager name"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="businessType">Industry</Label>
-                    <Select value={form.businessType || "__none__"} onValueChange={(value) => update({ businessType: value === "__none__" ? "" : value })}>
-                      <SelectTrigger id="businessType" className="mt-1 w-full">
-                        <SelectValue placeholder="Select type…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__none__">Select type…</SelectItem>
-                        {businessTypes.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </details>
+              <div>
+                <Label htmlFor="userName">Your name</Label>
+                <Input
+                  id="userName"
+                  value={form.userName}
+                  onChange={(e) => update({ userName: e.target.value })}
+                  placeholder="Owner or manager name"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="businessType">Industry</Label>
+                <Select value={form.businessType || "__none__"} onValueChange={(value) => update({ businessType: value === "__none__" ? "" : value })}>
+                  <SelectTrigger id="businessType" className="mt-1 w-full">
+                    <SelectValue placeholder="Select type…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Select type…</SelectItem>
+                    {businessTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                 onClick={() => {

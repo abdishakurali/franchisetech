@@ -82,6 +82,14 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
   const orgCui = org?.fiscalnet_cif?.trim() || null;
   const nirDate = formatDateDisplay(purchase.nir_date ?? purchase.purchase_date, locale);
   const invoiceDate = formatDateDisplay(purchase.supplier_invoice_date, locale);
+  const supplierInvoiceLabel = locale === "ro" ? "Nr. factură furnizor" : f.invoiceNo;
+  const observationsLabel = locale === "ro" ? "Diferențe / Observații" : p.observations;
+  const receivedByLabel = locale === "ro" ? "Recepționat de" : p.receivedBy;
+  const receivingCommitteeLabel = locale === "ro" ? "Comisie recepție" : p.receivingCommittee;
+  const legacyNote = locale === "ro" ? "Cumpărare veche fără număr NIR. Document informativ." : p.legacyNote;
+  const footerDisclaimer = locale === "ro"
+    ? "Document generat de franchisetech pentru evidență operațională. Nu reprezintă certificare legală sau contabilă."
+    : p.footerDisclaimer;
 
   const docTitle = hasNirNumber
     ? locale === "ro"
@@ -115,7 +123,7 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
             </p>
           </div>
         ) : (
-          <p className="text-sm text-slate-500 mt-2">{p.legacyNote}</p>
+          <p className="text-sm text-slate-500 mt-2">{legacyNote}</p>
         )}
       </header>
 
@@ -144,7 +152,7 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
           <p className="font-medium">{supplierName}</p>
           {invoiceNo && (
             <p className="mt-2">
-              <span className="text-slate-500">{f.invoiceNo}: </span>
+              <span className="text-slate-500">{supplierInvoiceLabel}: </span>
               {invoiceNo}
             </p>
           )}
@@ -208,7 +216,7 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
 
       {purchase.notes && (
         <section className="mb-6 rounded border border-slate-200 p-3 text-sm">
-          <p className="text-xs font-semibold uppercase text-slate-500 mb-1">{p.observations}</p>
+          <p className="text-xs font-semibold uppercase text-slate-500 mb-1">{observationsLabel}</p>
           <p className="text-slate-800 whitespace-pre-wrap">{purchase.notes}</p>
         </section>
       )}
@@ -216,7 +224,7 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
       <footer className="mt-8 border-t border-slate-300 pt-6 text-sm">
         <div className="grid gap-8 sm:grid-cols-3">
           <div>
-            <p className="text-xs font-semibold uppercase text-slate-500 mb-6">{p.receivedBy}</p>
+            <p className="text-xs font-semibold uppercase text-slate-500 mb-6">{receivedByLabel}</p>
             <p className="font-medium min-h-[1.25rem]">{receivedByName ?? ""}</p>
             <div className="mt-8 border-b border-slate-400 w-full" />
             <p className="text-xs text-slate-500 mt-1">{p.signature}</p>
@@ -227,13 +235,13 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
             <p className="text-xs text-slate-500 mt-1">{p.signature}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase text-slate-500 mb-6">{p.receivingCommittee}</p>
+            <p className="text-xs font-semibold uppercase text-slate-500 mb-6">{receivingCommitteeLabel}</p>
             <div className="mt-14 border-b border-slate-400 w-full" />
             <p className="text-xs text-slate-500 mt-1">{p.signature}</p>
           </div>
         </div>
         <p className="mt-8 text-[10px] text-slate-400 leading-relaxed print:text-[9px]">
-          {p.footerDisclaimer}
+          {footerDisclaimer}
         </p>
       </footer>
     </div>

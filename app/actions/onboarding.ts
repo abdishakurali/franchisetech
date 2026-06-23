@@ -216,7 +216,7 @@ export async function completePosOnboarding(input: {
 
   revalidatePath("/app");
   revalidatePath("/onboarding");
-  redirect("/app/pos?tour=first_sale");
+  redirect("/app/setup-checklist?welcome=1");
 }
 
 

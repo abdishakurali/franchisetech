@@ -15,11 +15,30 @@ import { SearchableSelect } from "@/components/app/SearchableSelect";
 import { ANAF_UNIT_OPTIONS } from "@/lib/anaf/unit-codes";
 
 type LineItem = {
+  productId: string;
   name: string;
   unitCode: string;
   quantity: string;
   unitPrice: string;
   vatRate: string;
+};
+
+export type InvoiceProductOption = {
+  id: string;
+  name: string;
+  unitCode: string;
+  unitPrice: number;
+  vatRate: number | null;
+};
+
+export type InitialInvoiceDraft = {
+  invoiceNumber?: string;
+  issueDate?: string;
+  dueDate?: string;
+  buyerCif?: string;
+  buyerName?: string;
+  buyerAddress?: string;
+  lines?: Array<Partial<LineItem>>;
 };
 
 function round2(n: number): number {
@@ -41,7 +60,15 @@ function computeTotals(lines: LineItem[]) {
   return { exclVat, vat, inclVat: round2(exclVat + vat) };
 }
 
-export function InvoiceDraftForm({ vatRates }: { vatRates: OrgVatRate[] }) {
+export function InvoiceDraftForm({
+  vatRates,
+  products = [],
+  initialDraft,
+}: {
+  vatRates: OrgVatRate[];
+  products?: InvoiceProductOption[];
+  initialDraft?: InitialInvoiceDraft;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isLooking, setIsLooking] = useState(false);
@@ -49,15 +76,23 @@ export function InvoiceDraftForm({ vatRates }: { vatRates: OrgVatRate[] }) {
   const defaultVatRate = String(getDefaultVatRateValue(vatRates));
 
   const today = new Date().toISOString().slice(0, 10);
-  const [invoiceNumber, setInvoiceNumber] = useState(`FACTURA-${new Date().getFullYear()}-001`);
-  const [issueDate, setIssueDate] = useState(today);
-  const [dueDate, setDueDate] = useState("");
-  const [buyerCif, setBuyerCif] = useState("");
-  const [buyerName, setBuyerName] = useState("");
-  const [buyerAddress, setBuyerAddress] = useState("");
-  const [lines, setLines] = useState<LineItem[]>([
-    { name: "", unitCode: "C62", quantity: "1", unitPrice: "", vatRate: defaultVatRate },
-  ]);
+  const [invoiceNumber, setInvoiceNumber] = useState(initialDraft?.invoiceNumber ?? `FACTURA-${new Date().getFullYear()}-001`);
+  const [issueDate, setIssueDate] = useState(initialDraft?.issueDate ?? today);
+  const [dueDate, setDueDate] = useState(initialDraft?.dueDate ?? "");
+  const [buyerCif, setBuyerCif] = useState(initialDraft?.buyerCif ?? "");
+  const [buyerName, setBuyerName] = useState(initialDraft?.buyerName ?? "");
+  const [buyerAddress, setBuyerAddress] = useState(initialDraft?.buyerAddress ?? "");
+  const initialLines = initialDraft?.lines?.length
+    ? initialDraft.lines.map((line) => ({
+        productId: line.productId ?? "",
+        name: line.name ?? "",
+        unitCode: line.unitCode ?? "C62",
+        quantity: line.quantity ?? "1",
+        unitPrice: line.unitPrice ?? "",
+        vatRate: line.vatRate ?? defaultVatRate,
+      }))
+    : [{ productId: "", name: "", unitCode: "C62", quantity: "1", unitPrice: "", vatRate: defaultVatRate }];
+  const [lines, setLines] = useState<LineItem[]>(initialLines);
 
   const totals = computeTotals(lines);
 
@@ -81,7 +116,7 @@ export function InvoiceDraftForm({ vatRates }: { vatRates: OrgVatRate[] }) {
   }
 
   function addLine() {
-    setLines((prev) => [...prev, { name: "", unitCode: "C62", quantity: "1", unitPrice: "", vatRate: defaultVatRate }]);
+    setLines((prev) => [...prev, { productId: "", name: "", unitCode: "C62", quantity: "1", unitPrice: "", vatRate: defaultVatRate }]);
   }
 
   function removeLine(i: number) {
@@ -90,6 +125,24 @@ export function InvoiceDraftForm({ vatRates }: { vatRates: OrgVatRate[] }) {
 
   function updateLine(i: number, field: keyof LineItem, value: string) {
     setLines((prev) => prev.map((l, idx) => idx === i ? { ...l, [field]: value } : l));
+  }
+
+  function selectProduct(i: number, productId: string) {
+    const product = products.find((p) => p.id === productId);
+    if (!product) {
+      updateLine(i, "productId", "");
+      return;
+    }
+    setLines((prev) => prev.map((line, idx) => idx === i
+      ? {
+          ...line,
+          productId,
+          name: product.name,
+          unitCode: product.unitCode,
+          unitPrice: product.unitPrice ? String(product.unitPrice) : line.unitPrice,
+          vatRate: product.vatRate === null ? line.vatRate : String(product.vatRate),
+        }
+      : line));
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -188,15 +241,28 @@ export function InvoiceDraftForm({ vatRates }: { vatRates: OrgVatRate[] }) {
         <Card>
           <CardHeader><CardTitle className="text-base">Produse / servicii</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <div className="hidden sm:grid sm:grid-cols-[1fr_90px_80px_100px_minmax(120px,160px)_32px] gap-2 text-xs font-medium text-slate-500 px-1">
-              <span>Denumire</span><span>UM</span><span>Cantitate</span><span>Preț fără TVA</span><span>Cotă TVA</span><span></span>
+            <div className="hidden sm:grid sm:grid-cols-[minmax(150px,1fr)_minmax(160px,1fr)_90px_80px_100px_minmax(120px,160px)_32px] gap-2 text-xs font-medium text-slate-500 px-1">
+              <span>Produs</span><span>Denumire</span><span>UM</span><span>Cantitate</span><span>Preț fără TVA</span><span>Cotă TVA</span><span></span>
             </div>
             {lines.map((line, i) => (
-              <div key={i} className="grid sm:grid-cols-[1fr_90px_80px_100px_minmax(120px,160px)_32px] gap-2 items-center">
+              <div key={i} className="grid sm:grid-cols-[minmax(150px,1fr)_minmax(160px,1fr)_90px_80px_100px_minmax(120px,160px)_32px] gap-2 items-center">
+                <SearchableSelect
+                  key={`product-${i}-${line.productId}`}
+                  name={`product_${i}`}
+                  options={products.map((product) => ({
+                    value: product.id,
+                    label: `${product.name} · ${product.unitPrice.toFixed(2)} RON`,
+                  }))}
+                  defaultValue={line.productId}
+                  placeholder="Manual"
+                  searchPlaceholder="Caută produs..."
+                  onValueChange={(value) => selectProduct(i, value)}
+                />
                 <Input placeholder="Denumire produs/serviciu" value={line.name} onChange={(e) => updateLine(i, "name", e.target.value)} required />
                 <SearchableSelect
+                  key={`unit-${i}-${line.unitCode}`}
                   name={`unit_code_${i}`}
-                          options={ANAF_UNIT_OPTIONS}
+                  options={ANAF_UNIT_OPTIONS}
                   defaultValue={line.unitCode}
                   required
                   searchPlaceholder="UM"
