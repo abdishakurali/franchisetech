@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Package,
   LogOut, Menu, X, ChevronDown, Archive,
   CreditCard, ListChecks, Truck, ShoppingBag,
-  Gift, BookOpen, ChefHat,
+  Gift, BookOpen, ChefHat, FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -99,10 +99,15 @@ function resolveNavItems(
 ) {
   const limited = userRole === "cashier" || userRole === "kitchen";
 
+  const isRO = activeOrg?.country_code === "RO";
+
   const mainNav = [
     ...buildMainNav(userRole, t).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
     ...(activeOrg?.kitchen_display_enabled
       ? [{ href: "/app/kitchen", label: t.nav.kitchen, icon: ChefHat, exact: false }]
+      : []),
+    ...(isRO && !limited
+      ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }]
       : []),
   ]
     .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
