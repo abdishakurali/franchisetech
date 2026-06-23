@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import {
-  LayoutDashboard, Package,
+  LayoutDashboard, Package, BarChart3,
   LogOut, Menu, X, ChevronDown, Archive,
   CreditCard, ListChecks, Truck, ShoppingBag,
   Gift, BookOpen, ChefHat, FileText,
@@ -64,10 +64,19 @@ type NavItem = {
 
 function buildMainNav(userRole: string | null, t: AppT): NavItem[] {
   const limited = userRole === "cashier" || userRole === "kitchen";
+  const accountant = userRole === "accountant";
+
   if (limited) {
     return [
       { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
       { href: "/app/pos", label: t.nav.pos, icon: CreditCard, exact: false },
+    ];
+  }
+
+  if (accountant) {
+    return [
+      { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
+      { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
     ];
   }
 
@@ -98,8 +107,20 @@ function resolveNavItems(
   activeOrg: AppShellProps["activeOrg"],
 ) {
   const limited = userRole === "cashier" || userRole === "kitchen";
+  const accountant = userRole === "accountant";
 
   const isRO = activeOrg?.country_code === "RO";
+
+  if (accountant) {
+    const accountantNav: NavItem[] = [
+      { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
+      { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: FileText, exact: false },
+      { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
+      { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck, exact: false },
+      ...(isRO ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }] : []),
+    ];
+    return { mainNav: accountantNav, stockNav: [], showStock: false, limited: false };
+  }
 
   const mainNav = [
     ...buildMainNav(userRole, t).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),

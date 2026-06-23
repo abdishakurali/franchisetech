@@ -10,6 +10,7 @@ import {
   Scale,
   ShoppingBag,
   TrendingUp,
+  Users,
   Warehouse,
 } from "lucide-react";
 import type { AppT } from "@/lib/app-i18n";
@@ -120,6 +121,14 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
       icon: FileDown,
       color: "bg-violet-50 text-violet-700",
       tag: t.reports.auditExport.tag,
+    },
+    {
+      href: "/app/reports/staff",
+      title: t.reports.staff?.title ?? "Staff performance",
+      desc: t.reports.staff?.desc ?? "Transactions, discounts, and tips by cashier.",
+      icon: Users,
+      color: "bg-sky-50 text-sky-700",
+      tag: t.reports.staff?.tag ?? null,
     },
   ];
 }
