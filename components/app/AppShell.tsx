@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import {
-  LayoutDashboard, Package, BarChart3, Plug,
+  LayoutDashboard, Package, BarChart3,
   LogOut, Menu, X, ChevronDown, Archive,
   CreditCard, ListChecks, Truck, ShoppingBag,
   Gift, BookOpen, ChefHat, FileText,
@@ -129,9 +129,6 @@ function resolveNavItems(
       : []),
     ...(isRO && !limited
       ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }]
-      : []),
-    ...(!limited
-      ? [{ href: "/app/settings?tab=integrations", label: isRO ? "Integrări" : "Integrations", icon: Plug, exact: false }]
       : []),
   ]
     .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
@@ -374,7 +371,6 @@ function AppHeader({
                   {t.shell.inviteTitle}
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={onSettings}>{t.nav.settings}</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onLogout} className="text-red-600">
                 <LogOut className="h-4 w-4 mr-2" />
