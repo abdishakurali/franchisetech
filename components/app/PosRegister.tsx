@@ -46,10 +46,6 @@ import {
 import {
   enqueueOfflineSale,
   formDataToPayload,
-  isBrowserOnline,
-  probeServerOnline,
-  invalidateProbeCache,
-  isRetryableNetworkError,
   listOfflineQueue,
   listPendingSync,
   markOfflineSaleSynced,
@@ -645,7 +641,8 @@ function PosRegisterInner({
   const [heldSales, setHeldSales] = useState<HeldSale[]>(() => listHeldSales());
   const [heldOpen, setHeldOpen] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<QueuedSale[]>(() => listOfflineQueue());
-  const [browserOffline, setBrowserOffline] = useState(() => !isBrowserOnline());
+  // Offline detection disabled — always treat as online; legacy queue items can still be dismissed/retried
+  const [browserOffline] = useState(false);
   const [syncingOffline, setSyncingOffline] = useState(false);
   const [quickAccessOpen, setQuickAccessOpen] = useState(false);
   const [addProductOpen, setAddProductOpen] = useState(false);
@@ -660,34 +657,7 @@ function PosRegisterInner({
     [offlineQueue]
   );
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function runProbe() {
-      const online = await probeServerOnline();
-      if (!cancelled) setBrowserOffline(!online);
-    }
-
-    // Immediately offline when adapter disconnects; probe to confirm when it reconnects
-    const onOffline = () => { invalidateProbeCache(); setBrowserOffline(true); };
-    const onOnline = () => { invalidateProbeCache(); void runProbe(); };
-
-    window.addEventListener("offline", onOffline);
-    window.addEventListener("online", onOnline);
-
-    // Initial probe on mount
-    void runProbe();
-
-    // Re-probe every 45 s to catch silent connectivity loss
-    const interval = setInterval(() => void runProbe(), 45_000);
-
-    return () => {
-      cancelled = true;
-      window.removeEventListener("offline", onOffline);
-      window.removeEventListener("online", onOnline);
-      clearInterval(interval);
-    };
-  }, []);
+  // Offline probe removed — unreliable on slow connections and caused false offline detection.
 
   function resetCartAfterSale() {
     setCart([]);
@@ -821,13 +791,11 @@ function PosRegisterInner({
         const errMsg = res.ok
           ? t.saleSaveFailed
           : friendlySaleError(res.error, locale);
-        enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
-        setOfflineQueue(listOfflineQueue());
         clearCartBackupFromStorage();
         setLastCompletedSale((prev) =>
           prev
-            ? { ...prev, status: "queued", errorMsg: errMsg }
-            : { amountLabel, status: "queued" },
+            ? { ...prev, status: "failed", errorMsg: errMsg, retryPayload: payload }
+            : { amountLabel, status: "failed", errorMsg: errMsg, retryPayload: payload },
         );
         return;
       }
@@ -855,18 +823,12 @@ function PosRegisterInner({
         });
       }
     } catch (err) {
-      enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
-      setOfflineQueue(listOfflineQueue());
+      const errMsg = err instanceof Error ? err.message : t.saleSaveFailed;
       clearCartBackupFromStorage();
       setLastCompletedSale((prev) =>
         prev
-          ? {
-              ...prev,
-              status: "queued",
-              retryPayload: payload,
-              errorMsg: isRetryableNetworkError(err) ? undefined : t.saleSaveFailed,
-            }
-          : { amountLabel, status: "queued", retryPayload: payload },
+          ? { ...prev, status: "failed", retryPayload: payload, errorMsg: errMsg }
+          : { amountLabel, status: "failed", retryPayload: payload, errorMsg: errMsg },
       );
     }
   }
@@ -1051,7 +1013,6 @@ function PosRegisterInner({
 
   async function flushAllPending() {
     if (syncingOfflineRef.current) return;
-    if (!(await probeServerOnline())) return;
     const pending = listPendingSync();
     if (!pending.length) return;
     syncingOfflineRef.current = true;
@@ -1087,6 +1048,7 @@ function PosRegisterInner({
   useEffect(() => {
     const onOnline = () => { void flushAllPending(); };
     window.addEventListener("online", onOnline);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async fn, setState runs after await, not synchronously in the effect body
     void flushAllPending();
     const timer = setInterval(() => { void flushAllPending(); }, 60_000);
     return () => {
@@ -1371,11 +1333,6 @@ function PosRegisterInner({
         const amountLabel = money(checkoutTotalDue);
         const cartSnapshot = checkoutCart;
 
-        if (browserOffline) {
-          queueCurrentSale(cartSnapshot, checkoutTotalDue);
-          return;
-        }
-
         resetCartAfterSale();
         setPaymentCartSnapshot(null);
         setLastFiscalTxt(null);
@@ -1393,6 +1350,7 @@ function PosRegisterInner({
           onQueueChange={() => setOfflineQueue(listOfflineQueue())}
           onSyncAll={() => void flushAllPending()}
           onResend={(id) => void resendQueuedSale(id)}
+          onDismiss={(id) => { removeOfflineSale(id); setOfflineQueue(listOfflineQueue()); }}
         />
         <div className={`flex min-h-0 flex-1 flex-col overflow-hidden ${focusedCheckout ? (checkoutStep === "payment" ? "mx-auto w-full max-w-md px-3 sm:px-4" : "mx-auto w-full max-w-xl px-6") : ""}`}>
         {checkoutStep === "complete" && lastCompletedSale ? (
