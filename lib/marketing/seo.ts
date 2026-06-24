@@ -125,29 +125,6 @@ export const featurePages: SeoPage[] = [
     image: "/showcase/z-report.png",
   },
   {
-    slug: "food-safety-records",
-    path: "/features/food-safety-records",
-    eyebrow: "Food safety records",
-    title: "Food Safety Records for Food Businesses",
-    metaTitle: "Food Safety Records App — Temperature Logs, Checks & Corrective Actions",
-    description: "franchisetech supports food-safety record keeping with checks, failed-check actions, reminders, and reports.",
-    h1: "Food-safety records for small food businesses",
-    intro: "franchisetech can support record keeping for temperature checks, failed checks, corrective actions, reminders, and reports.",
-    bullets: ["Record checks", "Track failed checks", "Corrective actions", "Reminders and reports"],
-    sections: [
-      { title: "Keep records in one workspace", body: "Food-safety records can sit beside POS, stock, suppliers, and products so owners are not switching between notebooks and spreadsheets." },
-      { title: "Follow up failed checks", body: "When a check needs action, franchisetech can help record what was done and when." },
-      { title: "Legal-safe support", body: "franchisetech supports record keeping. It does not replace professional food-safety advice or the operator’s legal responsibilities." },
-    ],
-    faqs: [
-      { question: "Does franchisetech certify food-safety compliance?", answer: "No. franchisetech helps keep organised records and does not claim certified compliance." },
-      { question: "Can I log temperature checks?", answer: "Yes. The food-safety module can support checks, follow-ups, reminders, and reports." },
-      { question: "Can I add this later?", answer: "Yes. Food-safety records can be used alongside POS and stock when the business is ready." },
-    ],
-    related: [{ label: "Food trucks", href: "/industries/food-trucks" }, { label: "Stock management", href: "/features/stock-management" }, { label: "Legal disclaimer", href: "/legal-disclaimer" }],
-    image: "/marketing/sc-reports.png",
-  },
-  {
     slug: "kitchen-display",
     path: "/features/kitchen-display",
     eyebrow: "Kitchen display",
@@ -192,26 +169,225 @@ export const featurePages: SeoPage[] = [
     image: "/showcase/suppliers.png",
   },
   {
+    slug: "nir",
+    path: "/features/nir",
+    eyebrow: "NIR / Purchases",
+    title: "Digital NIR for Restaurants and Cafes",
+    metaTitle: "NIR Digital for Restaurants — Goods Receipt Notes in franchisetech",
+    description:
+      "Record supplier NIR (Notă de intrare-recepție), track purchase VAT, and update stock when goods are issued — in the same workspace as POS.",
+    h1: "NIR and supplier purchases without a separate spreadsheet",
+    intro:
+      "Romanian food businesses need clear goods-in records. franchisetech links suppliers, purchase lines, draft vs issued NIR, and stock updates in one place.",
+    bullets: [
+      "Create NIR with supplier and line items",
+      "Draft vs issued — stock updates only when issued",
+      "Purchase VAT totals for review",
+      "Import purchases from CSV",
+      "Supplier directory with CUI/VAT and spend tracking",
+    ],
+    sections: [
+      { title: "Draft first, issue when goods arrive", body: "Save a purchase as draft while you verify the delivery. When you issue the NIR, stock levels update — no duplicate stock movements from drafts." },
+      { title: "Supplier spend in one view", body: "See total purchases and VAT per supplier alongside daily sales — useful for owners and accountants at month-end." },
+      { title: "Connected to stock and recipes", body: "Issued purchases increase ingredient stock. Recipe costing and margin reports use the same product and cost data." },
+    ],
+    faqs: [
+      { question: "What is NIR in franchisetech?", answer: "A purchase / goods receipt record (Notă de intrare-recepție) with supplier, lines, quantities, costs, and VAT — linked to stock when issued." },
+      { question: "Does draft change stock?", answer: "No. Only issued NIR updates stock quantities." },
+      { question: "Can I import old purchase data?", answer: "Yes. CSV import is available for purchases when migrating from Excel or another system." },
+      { question: "Is this a replacement for Saga or SmartBill invoicing?", answer: "No. franchisetech handles operational purchases and stock. Your accountant may still use Saga/SmartBill for fiscal invoicing — many operators run both." },
+    ],
+    related: [
+      { label: "Stock management", href: "/features/stock-management" },
+      { label: "Purchases & suppliers", href: "/features/purchases-suppliers" },
+      { label: "Romania", href: "/industries/romania" },
+    ],
+    image: "/showcase/suppliers.png",
+  },
+  {
+    slug: "offline",
+    path: "/features/offline",
+    eyebrow: "Offline POS",
+    title: "POS with Offline Mode — Sell When Internet Drops",
+    metaTitle: "Offline POS for Cafes and Restaurants | franchisetech",
+    description:
+      "Keep selling when Wi-Fi fails: franchisetech saves sales locally and syncs when the connection returns — browser-based, no installed POS lock-in.",
+    h1: "Sell through a connection drop — sync when you're back online",
+    intro:
+      "Unstable internet is normal in Romanian HoReCa. franchisetech queues sales locally during offline periods and syncs them when connectivity returns, so service does not stop at the till.",
+    bullets: [
+      "Local save when offline",
+      "Automatic sync when internet returns",
+      "Cash, card, and split payments recorded",
+      "Works in the browser on tablet or till PC",
+      "No per-seat fees — unlimited staff",
+    ],
+    sections: [
+      { title: "Service keeps moving", body: "Staff can complete sales during short outages. Transactions are stored locally and uploaded when the browser reconnects." },
+      { title: "Clear sync status", body: "The till shows when you are offline and when queued sales have synced — so managers know records are complete." },
+      { title: "Not a separate offline app", body: "Same browser POS you use every day — no second installed program or duplicate product catalogue." },
+    ],
+    faqs: [
+      { question: "Does offline mode work without installing software?", answer: "Yes. franchisetech runs in the browser. Offline queuing is built into the POS — no separate APK required for basic offline sales." },
+      { question: "Will FiscalNet print offline?", answer: "Fiscal receipts depend on your local FiscalNet setup and fiscal device. Operational sale recording can queue offline; fiscal printing follows your configured hardware path." },
+      { question: "What happens if sync fails?", answer: "Queued sales stay in the browser until sync succeeds. Staff should avoid clearing browser data during an outage. Contact support if sync does not complete after reconnecting." },
+    ],
+    related: [
+      { label: "POS", href: "/features/pos" },
+      { label: "Z-report", href: "/features/z-report" },
+      { label: "Romania", href: "/industries/romania" },
+    ],
+    image: "/showcase/pos-cart.png",
+  },
+  {
     slug: "setup-onboarding",
     path: "/features/setup-onboarding",
     eyebrow: "Setup guide",
     title: "Guided Setup for New Businesses",
-    metaTitle: "Guided Setup — Products, Till, First Sale, Reports",
-    description: "A built-in setup guide walks new owners through products, payment methods, opening the till, first sale, and reports.",
-    h1: "Get live faster with a step-by-step setup guide",
-    intro: "The in-app setup guide tracks progress from business details through first sale so new teams are not guessing what to configure next.",
-    bullets: ["Business, currency, and receipt settings", "Products and payment methods", "Open till and first test sale", "Review daily reports"],
+    metaTitle: "From New Account to First Sale in Under an Hour | franchisetech",
+    description: "Free in-app setup: demo products, open till, and first test sale — most cafes finish core steps in under an hour. Optional premium setup for large migrations.",
+    h1: "From new account to first sale in under an hour",
+    intro: "The in-app setup guide walks you from signup through demo products, opening the till, and your first test sale — step by step, at no cost. Optional premium setup (€199) is available for large catalog migrations or FiscalNet hand-holding.",
+    bullets: ["0–15 min: signup and business settings", "15–45 min: demo products and payment methods", "45–60 min: open till and first test sale", "Optional premium setup for 200+ SKU imports"],
     sections: [
       { title: "Clear milestones", body: "Each step links to the right screen — settings, POS, or reports — so setup stays focused." },
-      { title: "Assisted trial support", body: "The 15-day trial includes help setting up products, staff, and a first sale walkthrough." },
-      { title: "Owner visibility", body: "Progress is visible in the dashboard so managers know what is still outstanding." },
+      { title: "Free self-serve by default", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — no card required to open the till." },
+      { title: "Premium setup when you need it", body: "Large catalog migration, multi-site rollout, or FiscalNet configuration? Optional assisted setup (€199) covers training and hand-holding — typically 1–2 days, not the core path." },
     ],
     faqs: [
-      { question: "How long does setup take?", answer: "Many cafes complete core setup in one session — products, till, and a test sale." },
+      { question: "How long does setup take?", answer: "Core path (signup → demo products → open till → first sale): most cafes finish in under an hour. Full catalog migration with 200+ products may take 1–2 days — use optional premium setup or spread it over your trial." },
+      { question: "What does the timeline look like?", answer: "0–15 min: account and settings. 15–45 min: products and payments. 45–60 min: open till and first test sale. Stock and recipes can wait until after the till is working." },
       { question: "Can I skip steps?", answer: "Yes. The guide is a checklist, not a blocker. You can return to any step later." },
     ],
     related: [{ label: "POS", href: "/features/pos" }, { label: "Pricing", href: "/pricing" }],
     image: "/showcase/setup-guide.png",
+  },
+  {
+    slug: "qr-code-receipts",
+    path: "/features/qr-code-receipts",
+    eyebrow: "Fiscal compliance",
+    title: "QR Code on Fiscal Receipts — Romania ANAF Ready",
+    metaTitle: "QR Code Bon Fiscal România | ANAF November 2026 | franchisetech",
+    description: "franchisetech supports QR codes on fiscal receipts for Romanian businesses. Ready for ANAF November 2026 deadline via FiscalNet integration.",
+    h1: "QR code on fiscal receipts — ready for Romania's 2026 requirement",
+    intro: "Romania mandates QR codes on fiscal receipts from November 1, 2026. franchisetech is ready — our FiscalNet integration supports QR-enabled fiscal devices so your business stays compliant without last-minute scrambling.",
+    bullets: [
+      "QR code printed on every fiscal receipt",
+      "ANAF-compliant data format in the QR",
+      "Works with QR-capable fiscal printers (Datecs, Tremol, etc.)",
+      "No extra configuration — enabled via FiscalNet driver",
+      "November 2026 deadline ready today",
+    ],
+    sections: [
+      {
+        title: "What is the QR code requirement?",
+        body: "Starting November 1, 2026, Romanian fiscal receipts (bonuri fiscale) must include a QR code containing transaction data: CIF, receipt number, date, total, and VAT breakdown. The QR code allows ANAF to verify receipts instantly. Businesses without compliant systems face fines of 8,000–10,000 RON.",
+      },
+      {
+        title: "How franchisetech handles it",
+        body: "franchisetech sends sale data to your FiscalNet-connected fiscal printer. The QR code generation happens in the certified fiscal device firmware — not in our software. This means the QR is generated by the ANAF-approved hardware, ensuring compliance. Your fiscal printer must support the latest firmware update for QR generation.",
+      },
+      {
+        title: "What you need to do",
+        body: "1) Ensure your fiscal printer (casa de marcat) has QR-capable firmware — contact your authorized service provider. 2) Verify FiscalNet driver is updated. 3) Continue using franchisetech POS normally. The QR appears automatically on receipts once firmware and driver are ready.",
+      },
+    ],
+    faqs: [
+      {
+        question: "When does the QR code become mandatory?",
+        answer: "November 1, 2026. Sanctions for non-compliance were suspended until this date to give businesses time to upgrade firmware and systems.",
+      },
+      {
+        question: "Does franchisetech generate the QR code?",
+        answer: "No. The QR code is generated by your certified fiscal device (casa de marcat) as required by Romanian law. franchisetech sends the sale data; the device prints the compliant receipt with QR.",
+      },
+      {
+        question: "What data is in the QR code?",
+        answer: "The QR contains: business CIF, receipt number, date/time, total amount, VAT breakdown, and a verification hash. ANAF specifies the exact XML structure.",
+      },
+      {
+        question: "Do I need to buy new hardware?",
+        answer: "Most modern fiscal devices (Datecs, Tremol, Daisy, Custom) support QR via firmware update. Check with your authorized distributor. Older devices may need replacement.",
+      },
+      {
+        question: "What happens if I miss the deadline?",
+        answer: "Fines range from 8,000 to 10,000 RON for emitting receipts without the required QR code after November 1, 2026.",
+      },
+    ],
+    related: [
+      { label: "Romania FiscalNet guide", href: "/help/romania-fiscalnet" },
+      { label: "POS for Romania", href: "/industries/romania" },
+      { label: "Z-report and daily closing", href: "/features/z-report" },
+    ],
+    image: "/marketing/reports-zreport.png",
+  },
+  {
+    slug: "accountant-reports",
+    path: "/features/accountant-reports",
+    eyebrow: "Romanian accounting",
+    title: "Accountant Reports for Romanian Businesses — NIR, Consum, Balanță, Saga Export",
+    metaTitle: "Rapoarte Contabilitate România | NIR, Bon de Consum, Balanță, Export Saga | franchisetech",
+    description: "franchisetech generates legally required Romanian accountant reports: Registru de casă, Bon de consum, Balanță cantitativ-valorică, Raport de gestiune, and Saga XML export.",
+    h1: "Romanian accountant reports — NIR, consumption, stock balance, and Saga export",
+    intro: "Romanian businesses need specific accounting documents. franchisetech generates the reports your accountant requires: Registru de casă, Bon de consum, Balanță cantitativ-valorică, Raport de gestiune complet, and XML export for Saga accounting software.",
+    bullets: [
+      "Registru de casă — daily cash register book",
+      "Bon de consum — ingredient consumption from recipes",
+      "Balanță cantitativ-valorică — opening/closing stock by product",
+      "Raport de gestiune — complete inventory movement report with TVA breakdown",
+      "Saga XML export — NIR and sales in Saga-compatible format",
+      "TVA breakdown by rate (19%, 9%, 5%, 0%)",
+    ],
+    sections: [
+      {
+        title: "Registru de casă (Cash Register Book)",
+        body: "Download the legally required daily cash register document showing opening cash, cash movements, sales, expected cash, counted cash, and differences. Available from the Z-report page for Romanian businesses.",
+      },
+      {
+        title: "Bon de consum (Consumption Voucher)",
+        body: "Track raw material consumption from recipes. When products with recipes are sold, franchisetech automatically records ingredient usage. The Bon de consum report aggregates this consumption for any date range.",
+      },
+      {
+        title: "Balanță cantitativ-valorică (Quantitative-Value Balance)",
+        body: "A comprehensive stock balance report showing opening stock, entries (purchases/NIR), exits (sales/consumption), and closing stock. Calculated from actual stock movements, not estimates.",
+      },
+      {
+        title: "Raport de gestiune (Stock Management Report)",
+        body: "The complete inventory report combining all movements in chronological order: opening stock, NIR entries, consumption, Z-report sales values, and closing stock — split by TVA rate columns (19%, 9%, 5%, 0%).",
+      },
+      {
+        title: "Saga XML Export",
+        body: "Export NIR (purchases) and sales data in XML format compatible with Saga accounting software. Available from the Audit Export page for easy import into your accountant's system.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Are these reports legally compliant?",
+        answer: "franchisetech generates reports based on your recorded data. The accuracy depends on correct data entry (products, purchases, sales, stock adjustments). We display actual TVA rates from your product settings — not hardcoded values. Always verify with your accountant.",
+      },
+      {
+        question: "Where do I find these reports?",
+        answer: "Reports are available in the Reports section: Rapoarte → Bon de consum, Balanță, Raport de gestiune. Registru de casă is downloadable from the Z-report page. Saga export is in Audit Export.",
+      },
+      {
+        question: "How is TVA calculated?",
+        answer: "TVA breakdown uses the vat_rate field on each product. Ensure your products have the correct TVA rate configured in Settings → Products.",
+      },
+      {
+        question: "What if reports show empty?",
+        answer: "Reports require data: purchases (for NIR/entries), sales of products with recipes (for consumption), stock movements. Check the selected date range and verify you have recorded transactions.",
+      },
+      {
+        question: "Can I export to Saga?",
+        answer: "Yes. Go to Reports → Audit Export → Saga XML Export. Choose NIR, Sales, or Combined export for the selected period.",
+      },
+    ],
+    related: [
+      { label: "Z-report and cash closing", href: "/features/z-report" },
+      { label: "Stock management", href: "/features/stock-management" },
+      { label: "QR code on receipts", href: "/features/qr-code-receipts" },
+    ],
+    image: "/marketing/reports-zreport.png",
   },
 ];
 
@@ -337,7 +513,7 @@ export const industryPages: SeoPage[] = [
     description: "franchisetech helps food trucks and mobile food businesses run sales, track cash/card totals, manage products, stock, recipes, and food records.",
     h1: "POS and business control for food trucks",
     intro: "Food trucks need a simple register, clear cash/card totals, portable product control, and records owners can review after service.",
-    bullets: ["Simple register for service", "Cash/card and daily close", "Products, recipes, and stock", "Food-safety record support", "Browser-based — works on mobile devices"],
+    bullets: ["Simple register for service", "Cash/card and daily close", "Products, recipes, and stock", "Browser-based — works on mobile devices"],
     sections: [
       { title: "Pain points", body: "Mobile service has limited time and space. Owners need simple tools that keep records organised without slowing the queue." },
       { title: "How franchisetech helps", body: "franchisetech brings POS, products, stock, recipes, suppliers, and reports into one browser-based workspace." },
@@ -345,10 +521,9 @@ export const industryPages: SeoPage[] = [
     ],
     faqs: [
       { question: "Does franchisetech work offline?", answer: "franchisetech is a cloud web app and should be treated as requiring internet access." },
-      { question: "Can it support food-safety records?", answer: "Yes. It can support record keeping, without replacing professional food-safety advice." },
       { question: "Can I see end-of-day cash?", answer: "Yes. The till close and Z-report help review expected cash and differences." },
     ],
-    related: [{ label: "POS", href: "/features/pos" }, { label: "Food-safety records", href: "/features/food-safety-records" }, { label: "Cash-up guide", href: "/resources/cash-up-at-end-of-day" }],
+    related: [{ label: "POS", href: "/features/pos" }, { label: "Z-report", href: "/features/z-report" }, { label: "Cash-up guide", href: "/resources/cash-up-at-end-of-day" }],
     image: "/marketing/industry-food-truck.png",
   },
   {
@@ -415,8 +590,8 @@ export const industryPages: SeoPage[] = [
     ],
     related: [
       { label: "POS register", href: "/features/pos" },
-      { label: "Food-safety records", href: "/features/food-safety-records" },
       { label: "Z-report and till closing", href: "/features/z-report" },
+      { label: "Guided setup", href: "/features/setup-onboarding" },
       { label: "Cafés", href: "/industries/cafes" },
       { label: "Restaurants", href: "/industries/restaurants" },
     ],
@@ -468,6 +643,65 @@ export const industryPages: SeoPage[] = [
       { label: "Restaurante", href: "/industries/restaurants" },
     ],
     image: "/marketing/reports-zreport.png",
+  },
+  {
+    slug: "multi-site",
+    path: "/industries/multi-site",
+    eyebrow: "Multi-location",
+    title: "POS for Multi-Site Food Businesses — €89 per Additional Location",
+    metaTitle: "Multi-Location POS for Restaurants & Cafes | franchisetech",
+    description:
+      "Run 2–5 food locations on one platform: shared product catalogue, per-site till close, stock and reports per location — Scale base + €89/month per additional site, unlimited staff.",
+    h1: "One workspace for every location — without per-seat fees",
+    intro:
+      "Small chains and multi-site operators need the same clarity at each location: till matches drawer, daily Z-report, stock visibility — plus a simple way to add sites as you grow.",
+    bullets: [
+      "Scale base + €89/month per additional location — unlimited staff",
+      "POS, till close, and Z-report at every location",
+      "Stock, purchases, and recipes per site (Operations)",
+      "Kitchen display where prep teams need it",
+      "Browser-based — no locked-in POS hardware contracts",
+      "Assisted setup for new locations (optional €199)",
+    ],
+    sections: [
+      {
+        title: "Add a second location without starting over",
+        body: "When you open site two, you should not rebuild products, payment methods, and workflows from scratch. franchisetech lets each location run daily service with its own till sessions and reports while you keep operational patterns consistent.",
+      },
+      {
+        title: "Per-site truth at close",
+        body: "Each location gets expected cash vs counted, card totals, and Z-report visibility for that site — so owners and managers review the right numbers without blending locations in Excel.",
+      },
+      {
+        title: "Grow when ready — not before",
+        body: "Start on Core at a single site. Upgrade to Operations for stock and recipes, or Scale for the full module set. Add locations on the multi-location add-on when a second shop is real — not during trial setup.",
+      },
+    ],
+    faqs: [
+      {
+        question: "How is multi-location priced?",
+        answer: "Scale plan (€109/month) as the base, then €89/month per additional location. Unlimited staff at each site — no per-user fees.",
+      },
+      {
+        question: "Can I manage products centrally?",
+        answer: "Each organisation runs its site with a consistent product and settings model. For operators with multiple legal entities, contact us — we onboard multi-site setups with assisted setup.",
+      },
+      {
+        question: "Do I need Scale before adding locations?",
+        answer: "Yes — the multi-location add-on requires a Scale base plan. Many operators start on Core or Operations at site one, then upgrade to Scale when ready to expand.",
+      },
+      {
+        question: "Does FiscalNet work at every site?",
+        answer: "FiscalNet runs on the cashier PC at each Romanian location. We walk through connector setup per site during assisted onboarding.",
+      },
+    ],
+    related: [
+      { label: "Pricing", href: "/pricing" },
+      { label: "Restaurants", href: "/industries/restaurants" },
+      { label: "Romania", href: "/industries/romania" },
+      { label: "Z-report", href: "/features/z-report" },
+    ],
+    image: "/showcase/reports-dashboard.png",
   },
   {
     slug: "retail-shops",
@@ -899,6 +1133,104 @@ export const resourcePages: ResourcePage[] = [
       { label: "Checklist alegere POS", href: "/resources/choose-pos-romania" },
       { label: "Ghid FiscalNet", href: "/help/romania-fiscalnet" },
       { label: "Prețuri și trial", href: "/pricing" },
+    ],
+  },
+  {
+    slug: "switch-from-ebriza",
+    path: "/resources/switch-from-ebriza",
+    title: "Cum migrezi de la Ebriza la franchisetech",
+    metaTitle: "Migrare de la Ebriza la franchisetech — ghid practic",
+    description:
+      "Ghid pas cu pas pentru cafenele și restaurante care vor să testeze franchisetech în paralel cu Ebriza: export, import produse, trial 15 zile și comparație cost total.",
+    intro:
+      "Migrarea nu trebuie făcută big-bang. Cel mai sigur mod este să exportați datele, să importați catalogul principal în franchisetech și să rulați 15 zile în paralel înainte să decideți.",
+    sections: [
+      {
+        title: "1. Exportați datele din Ebriza",
+        body: "Începeți cu produsele active, categorii, prețuri, cote TVA și, dacă folosiți gestiune, articole de stoc. Păstrați exportul original ca backup înainte de orice curățare.",
+      },
+      {
+        title: "2. Curățați catalogul înainte de import",
+        body: "Eliminați produse duplicate, produse inactive și denumiri ambigue. Verificați unitatea de măsură, categoria, prețul de vânzare, prețul de cost și cota TVA pentru fiecare produs important.",
+      },
+      {
+        title: "3. Importați produsele în franchisetech",
+        body: "Folosiți importul CSV pentru produse și ingrediente. Începeți cu cele mai vândute articole, nu cu întreg istoricul. Scopul primei zile este o casă funcțională și rapoarte clare.",
+      },
+      {
+        title: "4. Rulați în paralel 15 zile",
+        body: "Faceți aceleași vânzări test, urmăriți raportul Z, TVA, stocul și timpul de închidere. Nu opriți sistemul vechi până când echipa nu poate face o vânzare și o închidere fără ajutor.",
+      },
+      {
+        title: "5. Comparați costul real",
+        body: "Comparați abonamentul, add-on-urile pentru rapoarte, KDS, Saga sau stoc, taxele per terminal/casier și timpul pierdut la reconciliere. Decideți pe cost total lunar, nu doar pe prețul de intrare.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Trebuie să migrez tot istoricul din Ebriza?",
+        answer: "Nu pentru primul trial. Migrați catalogul activ și articolele critice. Istoricul vechi poate rămâne arhivat în sistemul anterior sau în exporturi.",
+      },
+      {
+        question: "Pot rula Ebriza și franchisetech în paralel?",
+        answer: "Da. Recomandarea este să testați 15 zile în paralel, cu aceleași produse principale, pentru a compara raportarea și timpul de închidere.",
+      },
+      {
+        question: "franchisetech înlocuiește contabilul?",
+        answer: "Nu. franchisetech organizează POS, stoc, NIR și rapoarte operaționale. Contabilul rămâne responsabil pentru verificări fiscale și raportări oficiale.",
+      },
+    ],
+    related: [
+      { label: "franchisetech vs Ebriza", href: "/compare/ebriza" },
+      { label: "Checklist alegere POS", href: "/resources/choose-pos-romania" },
+      { label: "Prețuri", href: "/pricing" },
+    ],
+  },
+  {
+    slug: "smartbill-si-franchisetech",
+    path: "/resources/smartbill-si-franchisetech",
+    title: "SmartBill + franchisetech — folosite împreună",
+    metaTitle: "SmartBill și franchisetech împreună — facturare, POS, stoc",
+    description:
+      "Cum pot lucra împreună SmartBill și franchisetech: SmartBill pentru facturare, franchisetech pentru POS, stoc, NIR, rețete și închiderea de zi.",
+    intro:
+      "SmartBill și franchisetech nu trebuie privite ca alegere exclusivă. Pentru multe afaceri HORECA din România, SmartBill rămâne pentru facturare, iar franchisetech acoperă operațiunile zilnice.",
+    sections: [
+      {
+        title: "SmartBill rămâne pentru facturare",
+        body: "Dacă firma folosește deja SmartBill pentru facturi, clienți B2B sau fluxuri contabile, îl puteți păstra. Nu este nevoie să schimbați facturarea doar ca să îmbunătățiți casa și stocul.",
+      },
+      {
+        title: "franchisetech acoperă operațiunile zilnice",
+        body: "franchisetech gestionează vânzările POS, produse, TVA pe produse, stoc, achiziții/NIR, furnizori, rețete și raportul de închidere. Acestea sunt zonele unde Excel și WhatsApp devin fragile.",
+      },
+      {
+        title: "Export/import pentru contabil",
+        body: "La final de zi sau perioadă, exportați rapoartele necesare din franchisetech și le transmiteți contabilului sau le reconciliați cu instrumentele existente. Scopul este claritate, nu dublă muncă.",
+      },
+      {
+        title: "Când are sens combinația",
+        body: "Combinația are sens dacă aveți nevoie de facturare consacrată, dar echipa din locație are nevoie de POS rapid, stoc legat de vânzări și închidere casă verificabilă.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Trebuie să renunț la SmartBill?",
+        answer: "Nu. Dacă SmartBill funcționează bine pentru facturare, îl puteți păstra și folosi franchisetech pentru operațiunile zilnice.",
+      },
+      {
+        question: "Pot exporta date pentru contabil?",
+        answer: "Da. franchisetech oferă rapoarte și exporturi operaționale pentru vânzări, TVA, stoc și achiziții.",
+      },
+      {
+        question: "Care sistem este sursa pentru POS?",
+        answer: "franchisetech trebuie să fie sursa pentru vânzările POS și stocul operațional. SmartBill poate rămâne sursa pentru facturi și fluxuri contabile externe.",
+      },
+    ],
+    related: [
+      { label: "franchisetech vs SmartBill", href: "/compare/smartbill" },
+      { label: "Software POS România", href: "/resources/pos-software-romania" },
+      { label: "Gestiune stoc România", href: "/resources/stock-management-romania" },
     ],
   },
 ];

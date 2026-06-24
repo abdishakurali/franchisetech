@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,6 +55,13 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
     if (!membership) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    try {
+      await assertEntitlement(organisationId, "pos.cash_drawer_connector");
+    } catch (error) {
+      const response = entitlementDeniedResponse(error);
+      if (response) return response;
+      throw error;
     }
 
     const verifiedAtTs = verifiedAt ? new Date(verifiedAt).toISOString() : new Date().toISOString();

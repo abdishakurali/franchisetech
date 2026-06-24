@@ -22,7 +22,7 @@ export function GlobalSeoJsonLd() {
     name: BRAND,
     url: SITE_URL,
     description: DEFAULT_DESCRIPTION,
-    inLanguage: ["en", "ro", "it"],
+    inLanguage: ["en", "ro"],
     potentialAction: {
       "@type": "SearchAction",
       target: `${SITE_URL}/help?q={search_term_string}`,

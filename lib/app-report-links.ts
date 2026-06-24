@@ -2,11 +2,16 @@ import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Calculator,
+  ClipboardList,
+  FileDown,
   FileText,
   Package,
   Receipt,
+  Scale,
   ShoppingBag,
   TrendingUp,
+  Users,
+  Warehouse,
 } from "lucide-react";
 import type { AppT } from "@/lib/app-i18n";
 
@@ -19,6 +24,7 @@ export type AppReportLink = {
   tag: string | null;
   requiresInventory?: boolean;
   requiresRecipe?: boolean;
+  requiresAccountantPack?: boolean;
 };
 
 export function getAppReportLinks(t: AppT): AppReportLink[] {
@@ -82,16 +88,62 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
       color: "bg-indigo-50 text-indigo-700",
       tag: t.reports.transactions.tag,
     },
+    {
+      href: "/app/reports/consum",
+      title: t.reports.consum.title,
+      desc: t.reports.consum.desc,
+      icon: ClipboardList,
+      color: "bg-rose-50 text-rose-700",
+      tag: t.reports.consum.tag,
+      requiresInventory: true,
+    },
+    {
+      href: "/app/reports/balanta",
+      title: t.reports.balanta.title,
+      desc: t.reports.balanta.desc,
+      icon: Scale,
+      color: "bg-cyan-50 text-cyan-700",
+      tag: t.reports.balanta.tag,
+      requiresInventory: true,
+      requiresAccountantPack: true,
+    },
+    {
+      href: "/app/reports/gestiune",
+      title: t.reports.gestiune.title,
+      desc: t.reports.gestiune.desc,
+      icon: Warehouse,
+      color: "bg-slate-100 text-slate-700",
+      tag: t.reports.gestiune.tag,
+      requiresInventory: true,
+      requiresAccountantPack: true,
+    },
+    {
+      href: "/app/reports/audit-export",
+      title: t.reports.auditExport.title,
+      desc: t.reports.auditExport.desc,
+      icon: FileDown,
+      color: "bg-violet-50 text-violet-700",
+      tag: t.reports.auditExport.tag,
+    },
+    {
+      href: "/app/reports/staff",
+      title: t.reports.staff?.title ?? "Staff performance",
+      desc: t.reports.staff?.desc ?? "Transactions, discounts, and tips by cashier.",
+      icon: Users,
+      color: "bg-sky-50 text-sky-700",
+      tag: t.reports.staff?.tag ?? null,
+    },
   ];
 }
 
 export function filterReportLinks(
   t: AppT,
-  input: { inventoryVisible: boolean; recipeVisible: boolean },
+  input: { inventoryVisible: boolean; recipeVisible: boolean; accountantPackVisible?: boolean },
 ): AppReportLink[] {
   return getAppReportLinks(t).filter((link) => {
     if (link.requiresInventory && !input.inventoryVisible) return false;
     if (link.requiresRecipe && !input.recipeVisible) return false;
+    if (link.requiresAccountantPack && !input.accountantPackVisible) return false;
     return true;
   });
 }

@@ -40,6 +40,18 @@ export default async function FeaturesPage() {
           <SectionLabel>{t.featuresIndex.heroLabel}</SectionLabel>
           <h1 className={`mt-4 max-w-3xl ${marketingHeading}`}>{t.featuresIndex.heroTitle}</h1>
           <p className={`mt-4 max-w-2xl ${marketingSubtext}`}>{t.featuresIndex.heroText}</p>
+          <div className="mt-8 rounded-2xl border border-blue-100 bg-blue-50/50 p-6 sm:flex sm:items-center sm:justify-between sm:gap-6">
+            <div>
+              <p className="font-semibold text-slate-900">{t.featuresIndex.compareCallout.title}</p>
+              <p className="mt-1 text-sm text-slate-600">{t.featuresIndex.compareCallout.text}</p>
+            </div>
+            <Link
+              href={t.featuresIndex.compareCallout.href}
+              className="mt-4 inline-flex shrink-0 items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 sm:mt-0"
+            >
+              {t.featuresIndex.compareCallout.cta} <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
       </section>
 

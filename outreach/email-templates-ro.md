@@ -6,7 +6,7 @@
 Merge fields: `{{company}}`, `{{contact_name}}`, `{{hook_line}}`, `{{personalization_line}}`, `{{pain_signal}}`, `{{plan}}`, `{{slug}}`
 
 Links (campanie relansare v2):
-- Partners: `https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content={{slug}}`
+- Partners (waitlist — program în pilot): `https://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-2026-h2&utm_content={{slug}}`
 - Customers: `https://franchisetech.ro/signup?plan={{plan}}&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content={{slug}}`
 
 Opt-out (required): `Răspundeți „stop” dacă nu doriți alte mesaje.`
@@ -22,9 +22,11 @@ Bună ziua{{contact_greeting}},
 
 {{hook_line}}
 
-franchisetech e workspace în browser pentru cafenele și restaurante — nu doar plăți: casă, stoc, NIR (14-3-1A) și rapoarte pentru contabil. Căutăm parteneri HORECA în România: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€) când onboardați un client.
+Clienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.
 
-Merită 10 minute să vedeți dacă se potrivește clienților voștri?
+Comparație: https://franchisetech.ro/compare/ebriza?lang=ro
+
+Parteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Program în pilot — listă de așteptare:
 
 {{partner_link}}
 
@@ -39,7 +41,9 @@ Răspundeți „stop” dacă nu doriți alte mesaje.
 ```
 Bună ziua{{contact_greeting}},
 
-Revin scurt: clienții HORECA pierd timp când casa, stocul și NIR-ul stau în sisteme separate. franchisetech le ține într-un singur workspace — util pentru contabili și reselleri care deja vând case fiscale.
+Revin scurt: clienții HORECA plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights (rapoarte) +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.
+
+Comparație onestă: https://franchisetech.ro/compare/ebriza?lang=ro
 
 Aveți 1–2 clienți care ar beneficia acum?
 
@@ -85,16 +89,16 @@ Segment value lines (after personalization):
 - **takeaway/patiserie:** Stoc pe ingrediente și rețete — fără Excel după program.
 - **multi_location:** Vânzări pe locație, rapoarte centralizate și NIR — ghid FiscalNet când extindeți.
 
-### C1 — Day 0 | Subject: `casa după program`
+### C1 — Day 0 | Subject: `sertarul după program`
+
+**Wedge:** till truth — expected cash vs counted at close tonight.
 
 ```
 Bună ziua{{contact_greeting}},
 
 {{personalization_line}}
 
-{{segment_value_line}}
-
-franchisetech leagă vânzarea, închiderea casei, stocul și rapoartele într-un singur loc — ca să știți la finalul zilei ce s-a întâmplat, nu luna viitoare de la contabil.
+La închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.
 
 V-ar fi util să vedeți cum arată pentru {{company}}?
 
@@ -108,23 +112,23 @@ Răspundeți „stop” dacă nu doriți alte mesaje.
 
 ### C2 — Day 4 | Subject: `trial 15 zile`
 
-**New angle:** link compare page (not “just checking in”). Segment → compare slug:
+**Wedge:** cost shock — Ebriza €49 + €19 Insights vs franchisetech €49 with Z included.
 
 | Segment | Compare page |
 |---------|----------------|
-| cafenea | `/compare/smartbill` |
-| restaurant mic | `/compare/smartbill` |
+| cafenea | `/compare/ebriza` |
+| restaurant mic | `/compare/ebriza` |
 | takeaway/patiserie | `/compare/saga` |
 | multi_location | `/compare/expressoft` |
 
 ```
 Bună ziua{{contact_greeting}},
 
-Revin la {{company}} — nu doar ca reminder: am publicat o comparație onestă franchisetech vs {{compare_name}} pentru operatori din România (trial paralel 15 zile, fără migrare big-bang).
+Revin la {{company}} — nu doar ca reminder: Ebriza Pro e 49€/locație, dar Insights (rapoarte) costă +19€/lună. franchisetech Starter: 49€ cu raport Z inclus — trial paralel 15 zile, aceeași echipă.
 
 {{compare_link}}
 
-Onboarding-ul include produse demo, deschidere casă și ghidare la prima vânzare — nu un cont gol. Plan recomandat: {{plan}} (de la 39€/lună, fără taxă per angajat).
+Onboarding: produse demo, deschidere casă, ghidare la prima vânzare. Plan recomandat: {{plan}} (de la 49€/lună, fără taxă per angajat).
 
 {{customer_link}}
 
@@ -134,10 +138,12 @@ info@franchisetech.ro
 
 ### C3 — Day 10 | Subject: `ultim mesaj`
 
+**Wedge:** parallel trial breakup.
+
 ```
 Bună ziua{{contact_greeting}},
 
-Nu vă mai scriu după acest mesaj. Dacă vreți să testați workspace-ul POS + stoc fără angajament: trial 15 zile asistat.
+Nu vă mai scriu după acest mesaj. Trial paralel 15 zile — aceeași echipă, aceeași închidere de zi — fără angajament.
 
 {{customer_link}}
 
@@ -153,7 +159,7 @@ info@franchisetech.ro
 |----------|---------|
 | Am SmartBill/Saga | Trial 15 zile paralel — POS + stoc + rețete în același flux zilnic |
 | FiscalNet e complicat | Ghid pas cu pas; contabilul verifică; Multi-location |
-| E scump | €79/lună Pro vs timp reconciliere + inventar separat; personal nelimitat |
+| E scump | €49/lună Starter vs Ebriza Pro €49 + Insights €19; personal nelimitat |
 | Nu am timp | Setup asistat €199, prima vânzare ghidată |
 
 ---

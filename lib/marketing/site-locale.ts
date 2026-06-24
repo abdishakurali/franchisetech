@@ -27,7 +27,6 @@ export function localeAlternates(
     languages: {
       en: localizedUrl(path, "en"),
       ro: localizedUrl(path, "ro"),
-      it: localizedUrl(path, "it"),
       "x-default": localizedUrl(path, "x-default"),
     },
   };
@@ -57,6 +56,10 @@ export const MARKETING_KEYWORDS_RO = [
   "POS cloud România",
   "software restaurant",
   "afacere alimentară",
+  "cod QR bon fiscal",
+  "bon fiscal QR ANAF",
+  "casa de marcat QR 2026",
+  "obligatie cod QR noiembrie 2026",
 ] as const;
 
 export const MARKETING_KEYWORDS = MARKETING_KEYWORDS_EN;

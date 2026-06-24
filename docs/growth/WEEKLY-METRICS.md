@@ -43,13 +43,38 @@ node scripts/export-growth-weekly.mjs > growth-export-$(date +%Y%m%d).csv
 
 Requires `SUPABASE_SERVICE_ROLE_KEY` and `NEXT_PUBLIC_SUPABASE_URL` in env.
 
-## Founder activation SLA
+## Founder activation SLA (48h — non-negotiable)
 
-Every signup: founder-led onboard to **first sale within 48h** (plan Phase 1).
+Every RO signup triggers founder-led activation. Track in the spreadsheet above and in PostHog `growth_*` milestones.
 
-Checklist per trial:
+| Deadline | Action |
+|----------|--------|
+| **≤24h** | Personal WhatsApp or call — confirm business type, offer live screen-share |
+| **≤48h** | Guided path to **first real sale** + end-of-day close screen |
 
-1. Business details + currency RON
-2. 5–10 products added
-3. Till opened, one sale, report viewed
-4. FiscalNet only if Multi-location prospect
+Checklist per trial (same session when possible):
+
+1. Signup acknowledged same day (WhatsApp/call)
+2. Business details + currency RON
+3. 5–10 products added (or demo catalog)
+4. Till opened → **one real sale** (not sandbox-only)
+5. End-of-day: show Z-style close — expected cash vs counted
+6. Log `growth_till_opened_at`, `growth_first_sale_at`, `growth_first_report_at`
+7. FiscalNet only if Multi-location prospect — do not block activation on fiscal setup
+
+**If stuck after 48h:** personal re-engage (screen-share), not more product features.
+
+**Daily enforcement:** run `/daily-brief` — uses `STUCK_TRIALS_SQL` in `lib/growth/founder-sla.ts`.
+
+**Ireland re-engagement:** `docs/growth/ireland-reengage.md`
+
+**Partner follow-up:** `docs/growth/partner-followup.md`
+
+## Automated digests (n8n)
+
+| Workflow | Schedule | Output |
+|----------|----------|--------|
+| Growth — Weekly Metrics Digest | Monday 8am Bucharest | Telegram funnel + focus |
+| Outreach — C2 Follow-up Planner | Daily 7am | Telegram when C2 rows queued |
+
+Week-zero baseline: `docs/growth/WEEKLY-DIGEST-BASELINE.md`

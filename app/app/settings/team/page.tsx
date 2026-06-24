@@ -1,9 +1,9 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
-import { requireBusinessModule } from "@/lib/module-guard";
 import Link from "next/link";
 import { TeamClient } from "./TeamClient";
 import { redirect } from "next/navigation";
+import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 
 function makeAdminClient() {
   return createSupabaseClient(
@@ -14,7 +14,6 @@ function makeAdminClient() {
 }
 
 export default async function TeamSettingsPage() {
-  await requireBusinessModule("team_advanced");
   const { membership, orgId } = await getKitchenOpsContext();
 
   // Only owner/manager can see this page
@@ -46,6 +45,7 @@ export default async function TeamSettingsPage() {
     ...m,
     profile: profileMap[m.user_id] ?? null,
   }));
+  const advancedRolesAllowed = await hasEntitlement(orgId, "team.advanced_roles", { write: true });
 
   return (
     <div className="p-6 max-w-5xl">
@@ -63,7 +63,7 @@ export default async function TeamSettingsPage() {
         </div>
       )}
 
-      <TeamClient initialMembers={enrichedMembers} />
+      <TeamClient initialMembers={enrichedMembers} advancedRolesAllowed={advancedRolesAllowed} />
     </div>
   );
 }

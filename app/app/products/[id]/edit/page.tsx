@@ -4,15 +4,25 @@ import { ensurePosDefaults } from "@/app/actions/kitchenops";
 import { ProductEditForm } from "@/components/app/ProductEditForm";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
-import { itemTypeSelectOptions, productModuleVisibility } from "@/lib/product-module-fields";
+import { productModuleVisibility } from "@/lib/product-module-fields";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { listOperationalUnitNames } from "@/lib/units-of-measure";
 
-const DEFAULT_UNITS = ["each", "portion", "kg", "g", "litre", "ml", "cup", "bottle", "box", "case", "pack"];
+function safeProductsReturnTo(value: string | undefined): string | undefined {
+  return value?.startsWith("/app/products") ? value : undefined;
+}
 
-export default async function ProductEditPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProductEditPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ returnTo?: string }>;
+}) {
   const { id } = await params;
-  const { supabase, orgId, membership, currency, countryCode } = await getKitchenOpsContext();
-  const { locale, t } = await getAppLocaleAndText(countryCode);
+  const returnTo = safeProductsReturnTo((await searchParams)?.returnTo);
+  const { supabase, orgId, membership, currency, countryCode, profileLocale } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const currencySymbol = currency === "RON" ? "lei" : "€";
   const orgInfo = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as {
     kitchen_stations_enabled?: boolean | null;
@@ -22,12 +32,12 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
 
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const visibility = productModuleVisibility(moduleFlags);
-  const itemTypes = itemTypeSelectOptions(visibility, locale);
 
-  const [{ data: product }, { data: categories }, { data: units }, { data: suppliers }, vatRates] = await Promise.all([
+  const [{ data: product }, { data: inventoryCategories }, { data: posCategories }, units, { data: suppliers }, vatRates] = await Promise.all([
     supabase.from("products").select("*").eq("id", id).eq("organisation_id", orgId).single(),
-    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).order("sort_order"),
-    supabase.from("units_of_measure").select("name").or(`organisation_id.eq.${orgId},organisation_id.is.null`).order("name"),
+    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "inventory").order("name"),
+    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "pos").order("name"),
+    listOperationalUnitNames(supabase, orgId),
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     listActiveVatRates(supabase, orgId),
   ]);
@@ -36,21 +46,19 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
     return (
       <div className="p-6">
         <p className="text-slate-500">{t.productsForm.productNotFound}</p>
-        <Link href="/app/products" className="mt-2 inline-block text-sm text-blue-600 hover:underline">
+        <Link href={returnTo || "/app/products"} className="mt-2 inline-block text-sm text-blue-600 hover:underline">
           ← {t.productsForm.backToProducts}
         </Link>
       </div>
     );
   }
 
-  const allUnits = [...new Set([...DEFAULT_UNITS, ...((units ?? []).map((u: { name: string }) => u.name))])];
-
   return (
     <div className="mx-auto max-w-[720px] px-4 py-5 sm:px-6 sm:py-6">
       <nav className="mb-5 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
-        <Link href="/app/products" className="hover:text-slate-800">{t.productsForm.backToProducts}</Link>
+        <Link href={returnTo || "/app/products"} className="hover:text-slate-800">{t.productsForm.backToProducts}</Link>
         <span aria-hidden>/</span>
-        <Link href={`/app/products/${id}`} className="truncate max-w-[12rem] hover:text-slate-800">
+        <Link href={`/app/products/${id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`} className="truncate max-w-[12rem] hover:text-slate-800">
           {product.name}
         </Link>
         <span aria-hidden>/</span>
@@ -63,14 +71,15 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
 
       <ProductEditForm
         product={product}
-        categories={categories ?? []}
+        categories={inventoryCategories ?? []}
+        posCategories={posCategories ?? []}
         suppliers={suppliers ?? []}
-        units={allUnits}
+        units={units}
         vatRates={vatRates}
         visibility={visibility}
-        itemTypes={itemTypes}
         currencySymbol={currencySymbol}
         kitchenStationsEnabled={kitchenStationsEnabled}
+        returnTo={returnTo}
       />
     </div>
   );

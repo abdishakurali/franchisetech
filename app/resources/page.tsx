@@ -73,6 +73,24 @@ const GETTING_STARTED: ResourceCard[] = [
     href: "#daily-close",
     cta: "Read checklist",
   },
+  {
+    icon: "🔁",
+    category: "Getting started",
+    title: "Cum migrezi de la Ebriza la franchisetech",
+    summary: "Exportă produsele, importă în franchisetech, rulează 15 zile în paralel și compară costul real.",
+    readTime: "6 min read",
+    href: "/resources/switch-from-ebriza",
+    cta: "Read guide",
+  },
+  {
+    icon: "🧾",
+    category: "Getting started",
+    title: "SmartBill + franchisetech — folosite împreună",
+    summary: "SmartBill rămâne pentru facturare; franchisetech acoperă POS, stoc, NIR și închiderea de zi.",
+    readTime: "4 min read",
+    href: "/resources/smartbill-si-franchisetech",
+    cta: "Read guide",
+  },
 ];
 
 const INDUSTRY_GUIDES: ResourceCard[] = [
@@ -119,11 +137,11 @@ const FAQ = [
   },
   {
     q: "Does franchisetech support cash drawers?",
-    a: "Yes. Manual cash drawer mode works for all businesses with no hardware needed — you manage cash manually and record movements through the app. Automatic drawer opening (triggered by sales) is a beta feature for verified connector setups (Windows or Android) with a LAN ESC/POS receipt printer and the franchisetech Connector.",
+    a: "Yes, on Operations and above. Automatic drawer opening requires a verified connector setup with compatible hardware.",
   },
   {
     q: "What hardware is needed for automatic cash drawer opening?",
-    a: "A Windows or Android till, a LAN-connected ESC/POS receipt printer on the same network (TCP port 9100 for Windows; USB/Bluetooth/WiFi for Android), and the franchisetech Connector app installed on the till. The cash drawer connects to the receipt printer via RJ11/RJ12. iOS automatic opening is not supported — use manual mode on iOS.",
+    a: "A Windows or Android till, a LAN-connected ESC/POS receipt printer on the same network (TCP port 9100 for Windows; USB/Bluetooth/WiFi for Android), and the franchisetech Connector app installed on the till. The cash drawer connects to the receipt printer via RJ11/RJ12. iOS automatic opening is not supported.",
   },
   {
     q: "Does franchisetech work on tablets?",
@@ -140,10 +158,6 @@ const FAQ = [
   {
     q: "Can I import my existing products?",
     a: "Yes. Download a CSV template, fill in your products, and import them. Imports are supported for products, ingredients, suppliers, purchases, recipes, and customers.",
-  },
-  {
-    q: "Is manual cash drawer mode available for all businesses?",
-    a: "Yes. Manual mode is the default and requires no hardware. You open the drawer yourself and record cash in/out movements through the app at any time. Automatic opening is an optional add-on for supported hardware setups.",
   },
 ];
 
@@ -575,7 +589,7 @@ export default function ResourcesPage() {
             <ul className="mt-5 space-y-2">
               {[
                 "Install franchisetech as a PWA on your phone or tablet for portable till access",
-                "Use manual cash drawer mode — no printer or hardware required",
+                "Run browser POS on a phone or tablet without extra installation",
                 "Keep the product list short and focused on your menu for the day",
                 "Use cash in/out to record your opening float and any change movements",
                 "Review your daily total at the end of each event",

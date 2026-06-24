@@ -1,4 +1,5 @@
 import type { BillingPlan } from "@/lib/billing/plans";
+import { normalizePlan, type PlanCode } from "@/lib/billing/plan-codes";
 
 export type BusinessModuleKey =
   | "pos_core"
@@ -8,9 +9,10 @@ export type BusinessModuleKey =
   | "multi_site"
   | "kitchen_ops";
 
-const PLAN_MODULES: Record<BillingPlan, readonly BusinessModuleKey[]> = {
-  starter: ["pos_core"],
-  pro: ["pos_core", "inventory", "recipe_costing", "team_advanced", "kitchen_ops"],
+const PLAN_MODULES: Record<PlanCode | "multi_location", readonly BusinessModuleKey[]> = {
+  core: ["pos_core"],
+  operations: ["pos_core", "inventory", "recipe_costing", "team_advanced", "kitchen_ops"],
+  scale: ["pos_core", "inventory", "recipe_costing", "team_advanced", "kitchen_ops"],
   multi_location: [
     "pos_core",
     "inventory",
@@ -21,25 +23,29 @@ const PLAN_MODULES: Record<BillingPlan, readonly BusinessModuleKey[]> = {
   ],
 };
 
-export function modulesForPlan(plan: BillingPlan | null | undefined): readonly BusinessModuleKey[] {
-  if (!plan) return PLAN_MODULES.starter;
-  return PLAN_MODULES[plan] ?? PLAN_MODULES.starter;
+export function modulesForPlan(plan: BillingPlan | string | null | undefined): readonly BusinessModuleKey[] {
+  if (plan === "multi_location") return PLAN_MODULES.multi_location;
+  const normalized = normalizePlan(plan);
+  if (!normalized) return PLAN_MODULES.core;
+  return PLAN_MODULES[normalized] ?? PLAN_MODULES.core;
 }
 
 export function planAllowsModule(
-  plan: BillingPlan | null | undefined,
+  plan: BillingPlan | string | null | undefined,
   module: BusinessModuleKey
 ): boolean {
   return modulesForPlan(plan).includes(module);
 }
 
-export type EffectiveBillingPlan = BillingPlan | "trial";
+export type EffectiveBillingPlan = BillingPlan | PlanCode | "trial";
 
 export function resolveEffectivePlan(input: {
-  subscriptionPlan?: BillingPlan | null;
+  subscriptionPlan?: BillingPlan | string | null;
   hasTrial?: boolean;
 }): EffectiveBillingPlan {
-  if (input.subscriptionPlan) return input.subscriptionPlan;
+  if (input.subscriptionPlan === "multi_location") return "multi_location";
+  const normalized = normalizePlan(input.subscriptionPlan);
+  if (normalized) return normalized;
   if (input.hasTrial) return "trial";
   return "starter";
 }

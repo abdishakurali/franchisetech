@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getDefaultVatRateValue } from "@/lib/vat-rates";
+import { listActiveVatRates } from "@/lib/vat-rates-server";
+import { listOperationalUnitNames, validateOperationalUnit } from "@/lib/units-of-measure";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 function parseCsvText(raw: string): Record<string, string>[] {
@@ -44,6 +48,13 @@ export async function POST(req: Request) {
     }
 
     const orgId = membership.organisation_id as string;
+    try {
+      await assertEntitlement(orgId, "purchases.nir");
+    } catch (error) {
+      const response = entitlementDeniedResponse(error);
+      if (response) return response;
+      throw error;
+    }
 
     // ── parse body ──────────────────────────────────────────────────────
     let rows: Record<string, string>[] = [];
@@ -92,6 +103,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "All rows failed validation", errors: parseErrors }, { status: 400 });
     }
 
+    const [allowedUnits, vatRates] = await Promise.all([
+      listOperationalUnitNames(supabase, orgId),
+      listActiveVatRates(supabase, orgId),
+    ]);
+    const defaultUnit = allowedUnits[0] ?? "each";
+    const defaultVatRate = getDefaultVatRateValue(vatRates);
+    const unitErrors = validRows.flatMap((row, i) => {
+      const rawUnit = safe(row.unit) || defaultUnit;
+      const validation = validateOperationalUnit(rawUnit, allowedUnits);
+      return validation.ok ? [] : [`Row ${i + 2}: ${validation.error}`];
+    });
+    if (unitErrors.length) {
+      return NextResponse.json({ error: "Invalid unit of measure", errors: unitErrors }, { status: 400 });
+    }
+
     // ── resolve suppliers ───────────────────────────────────────────────
     const supplierNames = [...new Set(validRows.map((r) => safe(r.supplier_name)).filter(Boolean))];
     const { data: existingSuppliers } = await supabase
@@ -118,14 +144,14 @@ export async function POST(req: Request) {
     const productNames = [...new Set(validRows.map((r) => safe(r.product_name)).filter(Boolean))];
     const { data: existingProducts } = await supabase
       .from("products")
-      .select("id, name, current_stock_qty, cost_price")
+      .select("id, name, current_stock_qty, cost_price, unit_of_measure")
       .eq("organisation_id", orgId)
       .in("name", productNames.length ? productNames : ["__never__"]);
 
     const productMap = new Map(
       (existingProducts ?? []).map((p) => [
         p.name.toLowerCase(),
-        { id: p.id as string, current_stock_qty: Number(p.current_stock_qty ?? 0) },
+        { id: p.id as string, current_stock_qty: Number(p.current_stock_qty ?? 0), unit_of_measure: p.unit_of_measure as string | null },
       ])
     );
     let productsCreated = 0;
@@ -133,15 +159,16 @@ export async function POST(req: Request) {
     for (const row of validRows) {
       const name = safe(row.product_name);
       if (!productMap.has(name.toLowerCase())) {
+        const unitOfMeasure = safe(row.unit) || defaultUnit;
         const { data: np } = await supabase
           .from("products")
           .insert({
             organisation_id: orgId,
             name,
-            unit_of_measure: safe(row.unit) || "each",
+            unit_of_measure: unitOfMeasure,
             cost_price: safeNum(row.unit_cost),
             sale_price: 0,
-            vat_rate: 0,
+            vat_rate: defaultVatRate,
             is_ingredient: true,
             is_stock_tracked: true,
             is_sellable: false,
@@ -152,7 +179,7 @@ export async function POST(req: Request) {
           .select("id")
           .single();
         if (np?.id) {
-          productMap.set(name.toLowerCase(), { id: np.id, current_stock_qty: 0 });
+          productMap.set(name.toLowerCase(), { id: np.id, current_stock_qty: 0, unit_of_measure: unitOfMeasure });
           productsCreated++;
         }
       }
@@ -239,6 +266,7 @@ export async function POST(req: Request) {
         const qty = safeNum(row.quantity);
         const unitCost = safeNum(row.unit_cost);
         const totalCost = qty * unitCost;
+        const unitOfMeasure = safe(row.unit) || productEntry.unit_of_measure || defaultUnit;
 
         // Insert purchase item
         await supabase.from("purchase_items").insert({
@@ -250,6 +278,9 @@ export async function POST(req: Request) {
           quantity: qty,
           unit_cost: unitCost,
           total_cost: totalCost,
+          unit_of_measure: unitOfMeasure,
+          tax_rate: defaultVatRate,
+          tax_amount: (totalCost * defaultVatRate) / 100,
         });
 
         // Update product stock and cost
@@ -273,7 +304,7 @@ export async function POST(req: Request) {
           product_id: productEntry.id,
           movement_type: "purchase_received",
           quantity_change: qty,
-          unit_of_measure: safe(row.unit) || "each",
+          unit_of_measure: unitOfMeasure,
           reference_type: "purchase",
           reference_id: purchase.id,
           reason: group.invoiceNumber ? `Invoice ${group.invoiceNumber}` : `Purchase import`,

@@ -17,6 +17,7 @@ import { demoProductsForCountry } from "@/lib/onboarding/demo-products";
 import { saveOrgModuleFlags } from "@/lib/org-module-flags";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { trackLoopsEvent, upsertLoopsContact } from "@/lib/loops";
+import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
 
 const COUNTRY_LABELS: Record<string, string> = {
   RO: "Romania",
@@ -30,6 +31,8 @@ export async function completePosOnboarding(input: {
   businessType?: string;
   userName?: string;
   countryCode: string;
+  anafCif?: string;
+  anafVatRegistered?: boolean;
   locationBand: LocationBand;
   ingredientTracking: IngredientTrackingIntent;
   preferredPlan?: BillingPlan;
@@ -109,6 +112,8 @@ export async function completePosOnboarding(input: {
     business_type: input.businessType || null,
     country: countryLabel,
     country_code: input.countryCode,
+    anaf_cif: input.countryCode === "RO" ? input.anafCif?.trim() || null : null,
+    anaf_vat_registered: input.countryCode === "RO" ? Boolean(input.anafVatRegistered) : false,
     currency_code: currencyCode,
     currency_symbol: currencySymbol,
     trial_started_at: new Date().toISOString(),
@@ -212,7 +217,7 @@ export async function completePosOnboarding(input: {
 
   revalidatePath("/app");
   revalidatePath("/onboarding");
-  redirect("/app/pos?tour=first_sale");
+  redirect("/app/setup-checklist?welcome=1");
 }
 
 
@@ -354,6 +359,24 @@ export async function createSite(
   const client = await createClient();
   const { data: { user } } = await client.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+
+  const { data: membership } = await client
+    .from("organisation_members")
+    .select("role")
+    .eq("organisation_id", orgId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!membership || !["owner", "manager"].includes(membership.role ?? "")) {
+    return { error: "Forbidden" };
+  }
+
+  const { count } = await client
+    .from("sites")
+    .select("*", { count: "exact", head: true })
+    .eq("organisation_id", orgId);
+  if ((count ?? 0) >= 1) {
+    await assertEntitlement(orgId, "multi_site.enabled");
+  }
 
   const { data: site, error } = await client
     .from("sites")

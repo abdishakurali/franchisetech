@@ -1,7 +1,19 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useMemo } from "react";
 import { openPosSession, posCashMovement, closePosSession } from "@/app/actions/kitchenops";
+
+const RON_DENOMS = [0.10, 0.50, 1, 5, 10, 20, 50, 100, 200, 500];
+
+function formatLei(v: number) {
+  return v.toLocaleString("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " lei";
+}
+
+function DenomLabel({ value }: { value: number }) {
+  if (value < 1) return <>{(value * 100).toFixed(0)} bani</>;
+  if (value === 1) return <>1 leu</>;
+  return <>{value} lei</>;
+}
 
 type Session = {
   id: string;
@@ -10,9 +22,6 @@ type Session = {
   cash_sales: number;
 };
 
-function money(v: number) {
-  return new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" }).format(v);
-}
 
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
@@ -68,7 +77,17 @@ export function OpenTillButton() {
 // ─── Session action buttons (till is open) ─────────────────────────────────
 export function SessionActions({ session }: { session: Session }) {
   const [modal, setModal] = useState<"cash_in" | "cash_out" | "close" | null>(null);
-  const closeModal = () => setModal(null);
+  const [denomQty, setDenomQty] = useState<Record<number, number>>({});
+  const [manualTotal, setManualTotal] = useState("");
+  const closeModal = () => { setModal(null); setDenomQty({}); setManualTotal(""); };
+
+  const denomTotal = useMemo(
+    () => RON_DENOMS.reduce((sum, d) => sum + d * (denomQty[d] || 0), 0),
+    [denomQty],
+  );
+
+  const hasDenomEntries = Object.values(denomQty).some((q) => q > 0);
+  const effectiveTotal = hasDenomEntries ? denomTotal : parseFloat(manualTotal) || 0;
 
   return (
     <>
@@ -142,38 +161,86 @@ export function SessionActions({ session }: { session: Session }) {
 
       {/* Close Till modal */}
       {modal === "close" && (
-        <Modal title="Close till" onClose={closeModal}>
+        <Modal title="Închide casa" onClose={closeModal}>
           <form action={closePosSession as unknown as (fd: FormData) => Promise<void>} className="space-y-3">
             <input type="hidden" name="session_id" value={session.id} />
+            <input type="hidden" name="counted_cash" value={effectiveTotal > 0 ? effectiveTotal.toFixed(2) : ""} />
             {/* Summary */}
             <div className="bg-slate-50 rounded-xl p-3 space-y-1.5 text-sm">
               <div className="flex justify-between text-slate-600">
-                <span>Opening float</span>
-                <strong>{money(session.opening_cash)}</strong>
+                <span>Float inițial</span>
+                <strong>{formatLei(session.opening_cash)}</strong>
               </div>
               <div className="flex justify-between text-slate-600">
-                <span>Cash sales</span>
-                <strong>{money(session.cash_sales)}</strong>
+                <span>Vânzări numerar</span>
+                <strong>{formatLei(session.cash_sales)}</strong>
               </div>
               <div className="flex justify-between font-semibold text-green-700 border-t border-slate-200 pt-1.5 mt-1">
-                <span>Expected in drawer</span>
-                <strong>{money(session.expected_cash)}</strong>
+                <span>Așteptat în casă</span>
+                <strong>{formatLei(session.expected_cash)}</strong>
               </div>
             </div>
+
+            {/* Denomination counter */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Counted cash (€)</label>
-              <input name="counted_cash" type="number" step="0.01" min="0"
-                placeholder={session.expected_cash.toFixed(2)}
-                className="h-11 w-full rounded-xl border border-slate-200 px-4 text-lg font-semibold text-center" autoFocus required />
-              <p className="text-xs text-slate-400 mt-1">Count the cash drawer and enter the total.</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Numărare bancnote / monede</p>
+              <div className="space-y-1">
+                {RON_DENOMS.map((d) => {
+                  const qty = denomQty[d] || 0;
+                  const lineTotal = d * qty;
+                  return (
+                    <div key={d} className="grid grid-cols-[80px_1fr_80px] items-center gap-2">
+                      <span className="text-sm text-slate-700 font-medium"><DenomLabel value={d} /></span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        placeholder="0"
+                        value={qty || ""}
+                        onChange={(e) => setDenomQty((prev) => ({ ...prev, [d]: Math.max(0, parseInt(e.target.value) || 0) }))}
+                        className="h-9 w-full rounded-lg border border-slate-200 px-2 text-center text-sm tabular-nums"
+                      />
+                      <span className="text-sm text-slate-500 text-right tabular-nums">
+                        {lineTotal > 0 ? formatLei(lineTotal) : "—"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-2 flex justify-between items-center border-t border-slate-200 pt-2">
+                <span className="text-sm font-semibold text-slate-700">Total numărat</span>
+                <span className="text-base font-bold text-green-700">{formatLei(denomTotal)}</span>
+              </div>
             </div>
+
+            {/* Manual override — only shown when no denominations entered */}
+            {!hasDenomEntries && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Total numerar (lei)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder={session.expected_cash.toFixed(2)}
+                  value={manualTotal}
+                  onChange={(e) => setManualTotal(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-slate-200 px-4 text-lg font-semibold text-center"
+                  autoFocus
+                />
+                <p className="text-xs text-slate-400 mt-1">Sau folosește numărarea pe denominări de mai sus.</p>
+              </div>
+            )}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Notes (optional)</label>
-              <input name="notes" placeholder="End of day notes"
+              <label className="block text-sm font-medium text-slate-700 mb-1">Note (opțional)</label>
+              <input name="notes" placeholder="Note închidere zi"
                 className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm" />
             </div>
-            <button type="submit" className="h-11 w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl">
-              Close till
+            <button
+              type="submit"
+              disabled={effectiveTotal <= 0}
+              className="h-11 w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl"
+            >
+              Închide casa
             </button>
           </form>
         </Modal>

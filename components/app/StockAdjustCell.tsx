@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 export function StockAdjustCell({
   productId,
@@ -11,6 +13,8 @@ export function StockAdjustCell({
   currentQty: number;
   updateStock: (fd: FormData) => Promise<void>;
 }) {
+  const { t } = useAppI18n();
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(String(currentQty));
   const [saving, setSaving] = useState(false);
@@ -23,6 +27,7 @@ export function StockAdjustCell({
       fd.set("quantity", val);
       await updateStock(fd);
       setEditing(false);
+      router.refresh();
     } finally {
       setSaving(false);
     }
@@ -33,7 +38,7 @@ export function StockAdjustCell({
       <button
         type="button"
         onClick={() => setEditing(true)}
-        title="Click to update on-hand quantity"
+        title={t.stock.clickToEditQty}
         className="tabular-nums font-semibold hover:bg-blue-50 hover:text-blue-700 rounded px-1.5 py-0.5 transition-colors"
       >
         {currentQty}

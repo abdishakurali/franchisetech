@@ -6,7 +6,15 @@ export function SectionLabel({ children }: { children: ReactNode }) {
   return <p className={marketingEyebrow}>{children}</p>;
 }
 
-export function Section({ children, tone = "white" }: { children: ReactNode; tone?: "white" | "slate" | "blue" }) {
+export function Section({
+  children,
+  tone = "white",
+  id,
+}: {
+  children: ReactNode;
+  tone?: "white" | "slate" | "blue";
+  id?: string;
+}) {
   const bg =
     tone === "slate"
       ? "bg-slate-50/70"
@@ -14,7 +22,7 @@ export function Section({ children, tone = "white" }: { children: ReactNode; ton
         ? "bg-blue-600/[0.04]"
         : "bg-white";
   return (
-    <section className={`${bg} px-4 ${marketingSectionY} sm:px-6 lg:px-8`}>
+    <section id={id} className={`${bg} px-4 ${marketingSectionY} sm:px-6 lg:px-8`}>
       <div className="mx-auto max-w-6xl">{children}</div>
     </section>
   );

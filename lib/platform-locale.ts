@@ -14,7 +14,7 @@ import {
   type PosLocale,
 } from "@/lib/pos-i18n";
 
-/** App UI + POS use en/ro only; Italian is marketing-site only. */
+/** App UI + POS use en/ro only. */
 export function appLocaleFromMarketing(locale: MarketingLocale): PosLocale {
   return locale === "ro" ? "ro" : "en";
 }
@@ -25,7 +25,7 @@ export function readMarketingLocaleUnified(): MarketingLocale {
     const stored = localStorage.getItem(MARKETING_LOCALE_STORAGE_KEY);
     if (isMarketingLocale(stored)) return stored;
     const match = document.cookie.match(
-      new RegExp(`${MARKETING_LOCALE_COOKIE}=(en|ro|it)`),
+      new RegExp(`${MARKETING_LOCALE_COOKIE}=(en|ro)`),
     );
     if (match && isMarketingLocale(match[1])) return match[1];
   } catch {
@@ -50,7 +50,7 @@ export function readAppLocaleUnified(orgIsRO = false): PosLocale {
   return defaultPosLocale(orgIsRO);
 }
 
-/** Write marketing locale and sync app/POS preference (ro → ro, en/it → en). */
+/** Write marketing locale and sync app/POS preference. */
 export function writePlatformLocale(locale: MarketingLocale): void {
   if (typeof window === "undefined") return;
   try {

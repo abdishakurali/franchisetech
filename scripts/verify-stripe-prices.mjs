@@ -6,7 +6,7 @@
 import Stripe from "stripe";
 
 const PLANS = [
-  { id: "starter", env: "STRIPE_STARTER_PRICE_ID", amountCents: 3900, lookup: "franchisetech_starter_monthly" },
+  { id: "starter", env: "STRIPE_STARTER_PRICE_ID", amountCents: 4900, lookup: "franchisetech_starter_monthly" },
   { id: "pro", env: "STRIPE_PRO_PRICE_ID", amountCents: 7900, lookup: "franchisetech_pro_monthly" },
   { id: "multi_location", env: "STRIPE_MULTI_LOCATION_PRICE_ID", amountCents: 9900, lookup: "franchisetech_multi_location_monthly" },
 ];

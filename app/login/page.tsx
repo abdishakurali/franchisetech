@@ -5,13 +5,14 @@ export const dynamic = "force-dynamic";
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AuthBrand } from "@/components/marketing/AuthBrand";
+import { AuthPageFrame } from "@/components/auth/AuthPageFrame";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GoogleIcon } from "@/components/ui/google-icon";
 import { createClient } from "@/lib/supabase/client";
+import { useAppI18n } from "@/lib/app-i18n-context";
 import { toast } from "sonner";
 
 const googleAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "true";
@@ -20,6 +21,8 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
+  const { t } = useAppI18n();
+  const a = t.auth.login;
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
   const authError = searchParams.get("error");
@@ -35,84 +38,80 @@ function LoginForm() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Logged in successfully");
+      toast.success(a.success);
       router.push("/app");
       router.refresh();
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <AuthBrand />
-
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle>Sign in to your account</CardTitle>
-            <CardDescription>Enter your email and password to access your dashboard.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {authError && (
-              <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                {authError === "google_not_configured" || authError === "oauth_callback_failed"
-                  ? "Google sign-in is not configured yet. Please use email login or configure Google OAuth in Supabase."
-                  : "Authentication failed. Please try again."}
-              </div>
-            )}
-            {googleAuthEnabled && (
-              <>
-                <Link href="/auth/google">
-                  <Button type="button" variant="outline" className="w-full mb-4 gap-2">
-                    <GoogleIcon />
-                    Continue with Google
-                  </Button>
-                </Link>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-px bg-slate-200 flex-1" />
-                  <span className="text-xs text-slate-400">or</span>
-                  <div className="h-px bg-slate-200 flex-1" />
-                </div>
-              </>
-            )}
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="email">Email address</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  placeholder="you@yourbistro.ie"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="••••••••"
-                />
-              </div>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                {loading ? "Signing in…" : "Sign in"}
-              </Button>
-            </form>
-            <p className="text-center text-sm text-slate-500 mt-4">
-              No account yet?{" "}
-              <Link href="/signup" className="text-blue-600 hover:underline font-medium">
-                Sign up free
+    <AuthPageFrame>
+      <Card>
+        <CardHeader className="text-center">
+          <CardTitle>{a.title}</CardTitle>
+          <CardDescription>{a.description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {authError && (
+            <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+              {authError === "google_not_configured" || authError === "oauth_callback_failed"
+                ? a.errors.googleNotConfigured
+                : a.errors.authFailed}
+            </div>
+          )}
+          {googleAuthEnabled && (
+            <>
+              <Link href="/auth/google">
+                <Button type="button" variant="outline" className="w-full mb-4 gap-2">
+                  <GoogleIcon />
+                  {a.google}
+                </Button>
               </Link>
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-px bg-slate-200 flex-1" />
+                <span className="text-xs text-slate-400">{a.or}</span>
+                <div className="h-px bg-slate-200 flex-1" />
+              </div>
+            </>
+          )}
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email">{a.email}</Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="you@yourbistro.ie"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="password">{a.password}</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                placeholder="••••••••"
+              />
+            </div>
+            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
+              {loading ? a.submitting : a.submit}
+            </Button>
+          </form>
+          <p className="text-center text-sm text-slate-500 mt-4">
+            {a.noAccount}{" "}
+            <Link href="/signup" className="text-blue-600 hover:underline font-medium">
+              {a.signUpLink}
+            </Link>
+          </p>
+        </CardContent>
+      </Card>
+    </AuthPageFrame>
   );
 }
 

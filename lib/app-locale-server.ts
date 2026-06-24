@@ -1,22 +1,21 @@
-import { cookies } from "next/headers";
 import { getAppText, type AppLocale, type AppT } from "@/lib/app-i18n";
-import { appLocaleFromMarketing } from "@/lib/platform-locale";
-import { isMarketingLocale } from "@/lib/marketing/locale";
-import { defaultPosLocale } from "@/lib/pos-i18n";
+import { resolveAppLocale, type AppLocaleSource } from "@/lib/app-locale";
 
-export async function getAppLocale(orgCountryCode?: string | null): Promise<AppLocale> {
-  const cookieStore = await cookies();
-  const value = cookieStore.get("franchisetech_locale")?.value;
-  if (isMarketingLocale(value)) {
-    return appLocaleFromMarketing(value);
-  }
-  return defaultPosLocale(orgCountryCode === "RO");
+export function getAppLocale(source: AppLocaleSource = {}): AppLocale {
+  return resolveAppLocale(source);
 }
 
-export async function getAppLocaleAndText(orgCountryCode?: string | null): Promise<{
-  locale: AppLocale;
-  t: AppT;
-}> {
-  const locale = await getAppLocale(orgCountryCode);
+export function getAppLocaleAndText(
+  orgCountryCode?: string | null,
+  profileLocale?: string | null,
+): { locale: AppLocale; t: AppT } {
+  const locale = resolveAppLocale({ orgCountryCode, profileLocale });
   return { locale, t: getAppText(locale) };
+}
+
+export function getAppLocaleAndTextFromContext(ctx: {
+  countryCode?: string | null;
+  profileLocale?: string | null;
+}): { locale: AppLocale; t: AppT } {
+  return getAppLocaleAndText(ctx.countryCode, ctx.profileLocale);
 }

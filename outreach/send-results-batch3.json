@@ -1,0 +1,15 @@
+[
+  {"company": "TED'S Coffee", "type": "partner", "to": "info@tedscoffeecompany.com", "status": "success", "step": 1},
+  {"company": "Tucano Coffee", "type": "partner", "to": "franchise@tucanocoffee.com", "status": "success", "step": 1},
+  {"company": "Hello Donuts", "type": "partner", "to": "office@hellodonuts.com", "status": "success", "step": 1},
+  {"company": "Noe Patisserie", "type": "customer", "to": "comenzi@noe-patisserie.ro", "status": "success", "step": 1},
+  {"company": "Magicake", "type": "customer", "to": "comenzi@magicake.ro", "status": "success", "step": 1},
+  {"company": "Noisette Bakery", "type": "customer", "to": "contact@noisette-bakery.ro", "status": "success", "step": 1},
+  {"company": "House of Cookies", "type": "customer", "to": "comenzi@houseofcookies.ro", "status": "success", "step": 1},
+  {"company": "MamaPan", "type": "customer", "to": "comenzi@mamapan.ro", "status": "success", "step": 1},
+  {"company": "Cofetăria Alice", "type": "customer", "to": "office@cofetariaalice.ro", "status": "success", "step": 1},
+  {"company": "La Dolceria", "type": "customer", "to": "contact@ladolceria.ro", "status": "success", "step": 1},
+  {"company": "Leonidas Ciocolaterie Online", "type": "customer", "to": "contact@ciocolaterieonline.ro", "status": "success", "step": 1},
+  {"company": "La Saveur du Levain", "type": "customer", "to": "office@lasaveur.ro", "status": "success", "step": 1},
+  {"company": "Cofetaria Altfel", "type": "customer", "to": "office@cofetariaaltfel.ro", "status": "success", "step": 1}
+]

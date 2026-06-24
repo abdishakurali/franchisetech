@@ -7,8 +7,8 @@ import { GrowthReportViewTracker } from "@/components/app/GrowthReportViewTracke
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 export default async function SalesReportPage() {
-  const { countryCode, supabase, orgId, currency, membership } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency, membership } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const rp = t.reportPages.sales;
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
@@ -51,7 +51,7 @@ export default async function SalesReportPage() {
   // Payment method breakdown
   const byPayment = new Map<string, number>();
   for (const tx of transactions ?? []) {
-    const methodName = (tx.payment_methods as {name?:string}|null)?.name ?? "Unknown";
+    const methodName = (tx.payment_methods as {name?:string}|null)?.name ?? t.common.unknown;
     byPayment.set(methodName, (byPayment.get(methodName) ?? 0) + Number(tx.total ?? 0));
   }
 

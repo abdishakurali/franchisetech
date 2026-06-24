@@ -29,8 +29,8 @@ export default async function PurchaseDetailPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const { countryCode, supabase, orgId, membership, currency } = await getKitchenOpsContext();
-  const { locale, t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, membership, currency } = await getKitchenOpsContext();
+  const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const d = t.purchases.detail;
   const f = t.purchases.form;
   const taxLabel = f.vat;
@@ -104,6 +104,8 @@ export default async function PurchaseDetailPage({
       ? NIR_RO_TITLE
       : d.printTitleWithNir
     : d.printTitleLegacyFull;
+  const observationsLabel = locale === "ro" ? "Observații / diferențe" : d.observations;
+  const legacyTitle = locale === "ro" ? "Cumpărare veche / fără NIR" : d.legacyTitle;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6 print:max-w-none print:p-4">
@@ -126,6 +128,11 @@ export default async function PurchaseDetailPage({
           </div>
         </div>
         <div className="flex flex-wrap gap-2 justify-end">
+          {canManage && countryCode === "RO" && items.length > 0 && (
+            <Link href={`/app/invoices/new?purchaseId=${id}`}>
+              <Button variant="outline">Creează factură din NIR</Button>
+            </Link>
+          )}
           {(purchase.status === "posted" || purchase.status === "received") && (
             <Link href={`/app/purchases/${id}/print`}>
               <Button variant="outline">{d.printNir}</Button>
@@ -207,7 +214,7 @@ export default async function PurchaseDetailPage({
             </div>
             {(purchase.notes || isDraft) && (
               <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
-                <p className="text-xs text-slate-400 mb-1">{d.observations}</p>
+                <p className="text-xs text-slate-400 mb-1">{observationsLabel}</p>
                 <p className="text-slate-700">{purchase.notes || "—"}</p>
               </div>
             )}
@@ -243,7 +250,7 @@ export default async function PurchaseDetailPage({
                     <TableHead>{d.item}</TableHead>
                     <TableHead className="text-right">{f.qty}</TableHead>
                     <TableHead className="text-right">{d.netCost}</TableHead>
-                    <TableHead className="text-right">{taxLabel} %</TableHead>
+                    <TableHead className="text-right">{taxLabel}</TableHead>
                     <TableHead className="text-right">{d.netTotal}</TableHead>
                     <TableHead className="text-right">{taxLabel}</TableHead>
                     <TableHead className="text-right">{t.purchases.gross}</TableHead>
@@ -317,7 +324,7 @@ export default async function PurchaseDetailPage({
 
       {locked && purchase.status === "received" && !purchase.nir_number && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 print:hidden">
-          <p className="font-medium">{d.legacyTitle}</p>
+          <p className="font-medium">{legacyTitle}</p>
           <p className="mt-1 opacity-90">{d.legacyDesc}</p>
         </div>
       )}

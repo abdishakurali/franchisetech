@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  CAPABILITY_CATEGORIES,
   getCapabilitySuggestions,
+  findCapabilityItem,
 } from "@/lib/business-capabilities";
 import {
   canUseModule,
@@ -23,10 +23,14 @@ import {
   type BusinessProfile,
 } from "@/lib/business-profile";
 import { profileLabel } from "@/lib/business-profile-i18n";
+import {
+  getLocalizedCapabilityCategories,
+  localizeCapabilityLabel,
+} from "@/lib/business-capabilities-i18n";
 import type { RestaurantFeatureKey } from "@/lib/restaurant-features";
-import type { BillingPlan } from "@/lib/billing/plans";
 import { FormSelect } from "@/components/app/FormSelect";
 import { FormCheckbox } from "@/components/app/FormCheckbox";
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 const PROFILE_OPTIONS: { value: BusinessProfile; label: string }[] = [
   { value: "simple", label: BUSINESS_PROFILE_LABELS.simple },
@@ -41,7 +45,7 @@ type Props = {
   org: OrgModuleRow & { business_profile?: string | null };
   featureValues: FeatureValues;
   canEdit: boolean;
-  subscriptionPlan: BillingPlan | null;
+  subscriptionPlan: string | null;
   hasTrial: boolean;
   locale?: string | null;
   lockedModule?: string | null;
@@ -62,18 +66,25 @@ export function BusinessCapabilitiesCard({
   updateAction,
 }: Props) {
   const [pending, startTransition] = useTransition();
+  const { locale: uiLocale, t } = useAppI18n();
   const profile = normaliseBusinessProfile(org.business_profile);
+  const categories = getLocalizedCapabilityCategories(uiLocale);
   const suggestions = getCapabilitySuggestions({ industry, businessProfile: profile });
-  const suggestionLabels = new Set(suggestions.map((s) => s.label));
+  const suggestedEnLabels = new Set(suggestions.map((s) => s.label));
+
+  const isItemSuggested = (itemId: string) => {
+    const original = findCapabilityItem(itemId as never);
+    return original ? suggestedEnLabels.has(original.label) : false;
+  };
 
   function onSubmit(formData: FormData) {
     startTransition(async () => {
       const result = await updateAction(formData);
       if (result && "ok" in result && !result.ok) {
-        toast.error(result.error ?? "Could not save options");
+        toast.error(result.error ?? t.settings.features.couldNotSave);
         return;
       }
-      toast.success("Business options saved");
+      toast.success(t.settings.features.saved);
     });
   }
 
@@ -81,19 +92,18 @@ export function BusinessCapabilitiesCard({
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Features &amp; modules</CardTitle>
+          <CardTitle>{t.settings.features.title}</CardTitle>
           <CardDescription>
-            Choose what this business actually uses. Industry and business level only suggest helpful
-            options — nothing turns on until an owner or manager enables it.
+            {t.settings.features.description}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {lockedModule && lockedMessage ? (
             <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-              <p className="font-medium">A module is locked</p>
+              <p className="font-medium">{t.settings.features.moduleLocked}</p>
               <p className="mt-1">{lockedMessage}</p>
               <Link href="/app/billing" className="mt-2 inline-block text-blue-700 hover:underline">
-                View billing plans
+                {t.settings.features.viewBilling}
               </Link>
             </div>
           ) : null}
@@ -102,8 +112,8 @@ export function BusinessCapabilitiesCard({
             <div className="mb-5 flex gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
               <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
               <p>
-                <span className="font-medium">Suggested for your business:</span>{" "}
-                {suggestions.map((s) => s.label).join(", ")}.
+                <span className="font-medium">{t.settings.features.suggestedFor}</span>{" "}
+                {suggestions.map((s) => localizeCapabilityLabel(s.label, uiLocale)).join(", ")}.
               </p>
             </div>
           ) : null}
@@ -118,10 +128,10 @@ export function BusinessCapabilitiesCard({
             ].join("-")}>
               <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
                 <label htmlFor="business_profile" className="text-sm font-medium text-slate-800">
-                  Business level
+                  {t.settings.features.businessLevel}
                 </label>
                 <p className="mt-0.5 text-xs text-slate-500">
-                  Sets expectations and suggestions — you still choose each feature below.
+                  {t.settings.features.businessLevelHint}
                 </p>
                 <FormSelect
                   name="business_profile"
@@ -129,12 +139,12 @@ export function BusinessCapabilitiesCard({
                   className="mt-2"
                   options={PROFILE_OPTIONS.map((opt) => ({
                     value: opt.value,
-                    label: locale === "ro" ? profileLabel(opt.value, "ro") : opt.label,
+                    label: profileLabel(opt.value, uiLocale),
                   }))}
                 />
               </div>
 
-              {CAPABILITY_CATEGORIES.map((category) => (
+              {categories.map((category) => (
                 <section key={category.id} className="space-y-3">
                   <div>
                     <h3 className="text-sm font-semibold text-slate-900">{category.title}</h3>
@@ -142,7 +152,7 @@ export function BusinessCapabilitiesCard({
                   </div>
                   <div className="space-y-2">
                     {category.items.map((item) => {
-                      const isSuggested = suggestionLabels.has(item.label);
+                      const isSuggested = isItemSuggested(item.id);
 
                       if (item.kind === "module") {
                         const enabled = isModuleEnabled(org, item.moduleKey);
@@ -157,7 +167,7 @@ export function BusinessCapabilitiesCard({
                           module: item.moduleKey,
                           subscriptionPlan,
                           hasTrial,
-                        });
+                        }, uiLocale);
                         const toggleDisabled = !canEdit || (!enabled && !allowed);
 
                         return (
@@ -176,10 +186,10 @@ export function BusinessCapabilitiesCard({
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="font-medium text-slate-900">{item.label}</span>
-                                {isSuggested ? <Badge variant="secondary">Suggested</Badge> : null}
+                                {isSuggested ? <Badge variant="secondary">{t.settings.features.suggested}</Badge> : null}
                                 {!allowed ? (
                                   <Badge variant="outline" className="gap-1 text-[10px]">
-                                    <Lock className="h-3 w-3" /> Pro
+                                    <Lock className="h-3 w-3" /> {t.settings.features.pro}
                                   </Badge>
                                 ) : null}
                               </div>
@@ -209,8 +219,8 @@ export function BusinessCapabilitiesCard({
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="font-medium text-slate-900">{item.label}</span>
-                              {isSuggested ? <Badge variant="secondary">Suggested</Badge> : null}
-                              {!item.ready ? <Badge variant="outline">Coming later</Badge> : null}
+                              {isSuggested ? <Badge variant="secondary">{t.settings.features.suggested}</Badge> : null}
+                              {!item.ready ? <Badge variant="outline">{t.settings.features.comingLater}</Badge> : null}
                             </div>
                             <p className="mt-0.5 text-sm text-slate-500">{item.description}</p>
                           </div>
@@ -223,17 +233,17 @@ export function BusinessCapabilitiesCard({
 
               <div className="flex justify-end border-t border-slate-100 pt-4">
                 <Button type="submit" disabled={!canEdit || pending}>
-                  {pending ? "Saving…" : "Save options"}
+                  {pending ? t.settings.features.saving : t.settings.features.saveOptions}
                 </Button>
               </div>
             </form>
           ) : (
             <div className="space-y-4 text-sm">
               <p>
-                <span className="text-slate-500">Business level:</span>{" "}
-                <span className="font-medium">{profileLabel(profile, locale)}</span>
+                <span className="text-slate-500">{t.settings.features.businessLevel}:</span>{" "}
+                <span className="font-medium">{profileLabel(profile, uiLocale)}</span>
               </p>
-              {CAPABILITY_CATEGORIES.map((category) => (
+              {categories.map((category) => (
                 <div key={category.id}>
                   <p className="font-medium text-slate-800">{category.title}</p>
                   <ul className="mt-1 space-y-0.5 text-slate-600">
@@ -244,7 +254,7 @@ export function BusinessCapabilitiesCard({
                           : Boolean(featureValues[item.id as RestaurantFeatureKey]);
                       return (
                         <li key={item.id}>
-                          {item.label}: {on ? "On" : "Off"}
+                          {item.label}: {on ? t.settings.features.on : t.settings.features.off}
                         </li>
                       );
                     })}

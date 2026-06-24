@@ -2,17 +2,20 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { savePurchaseDraft, postNirPurchase } from "@/app/actions/kitchenops";
+import { createSupplierInline, savePurchaseDraft, postNirPurchase } from "@/app/actions/kitchenops";
+import { lookupAnafCompany } from "@/app/actions/partner-lookup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { VatRateSelect } from "@/components/app/VatRateSelect";
+import { SearchableSelect } from "@/components/app/SearchableSelect";
 import type { OrgVatRate } from "@/lib/vat-rates";
 import { getDefaultVatRateValue } from "@/lib/vat-rates";
 import { Plus, Trash2 } from "lucide-react";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import type { AppT } from "@/lib/app-i18n";
+import { itemTypeLabel } from "@/lib/product-module-fields";
 
 type Supplier = { id: string; name: string };
 type Site = { id: string; name: string };
@@ -51,53 +54,31 @@ export type PurchaseDraftInitial = {
   }>;
 };
 
-const ITEM_TYPE_LABELS: Record<string, string> = {
-  finished_product: "Produs finit",
-  ingredient: "Ingredient",
-  merchandise: "Marfă",
-  supply: "Consumabil",
-  packaging: "Ambalaj",
-  raw_material: "Materie primă",
-};
-
-const ITEM_TYPE_LABELS_EN: Record<string, string> = {
-  finished_product: "Finished product",
-  ingredient: "Ingredient",
-  merchandise: "Goods",
-  supply: "Supply",
-  packaging: "Packaging",
-  raw_material: "Raw material",
-};
-
-const RO_UM_OPTIONS = ["Buc", "kg", "g", "L", "ml", "pachet", "cutie", "bax", "doză", "pungă"];
-const EN_UM_OPTIONS = ["each", "kg", "g", "L", "ml", "pack", "box", "case", "bag"];
-
 function SupplierCombobox({
   suppliers,
   t,
-  initialId,
-  initialName,
+  selectedId,
+  onSelect,
 }: {
   suppliers: Supplier[];
   t: AppT;
-  initialId?: string;
-  initialName?: string;
+  selectedId: string;
+  onSelect: (id: string) => void;
 }) {
-  const [query, setQuery] = useState(initialName ?? "");
+  const [query, setQuery] = useState(() => suppliers.find((s) => s.id === selectedId)?.name ?? "");
   const [open, setOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(initialId ?? "");
 
   const filtered = suppliers
     .filter((s) => s.name.toLowerCase().includes(query.toLowerCase()))
     .slice(0, 10);
 
   function handleSelect(s: Supplier) {
-    setSelectedId(s.id);
+    onSelect(s.id);
     setQuery(s.name);
     setOpen(false);
   }
   function handleClear() {
-    setSelectedId("");
+    onSelect("");
     setQuery("");
     setOpen(false);
   }
@@ -111,7 +92,7 @@ function SupplierCombobox({
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            if (selectedId) setSelectedId("");
+            if (selectedId) onSelect("");
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
@@ -167,13 +148,13 @@ function PurchaseItemCombobox({
   products,
   productId,
   t,
-  itemTypeLabels,
+  locale,
   onSelect,
 }: {
   products: Product[];
   productId: string;
   t: AppT;
-  itemTypeLabels: Record<string, string>;
+  locale: "en" | "ro";
   onSelect: (id: string) => void;
 }) {
   const [query, setQuery] = useState(() => products.find((p) => p.id === productId)?.name ?? "");
@@ -184,8 +165,8 @@ function PurchaseItemCombobox({
     .slice(0, 12);
 
   function getTypeLabel(p: Product) {
-    if (p.item_type && itemTypeLabels[p.item_type]) return itemTypeLabels[p.item_type];
-    if (p.is_ingredient) return itemTypeLabels["ingredient"];
+    if (p.item_type) return itemTypeLabel(p.item_type, locale);
+    if (p.is_ingredient) return itemTypeLabel("ingredient", locale);
     return "";
   }
 
@@ -276,6 +257,7 @@ export function PurchaseForm({
   currentUserId,
   initialDraft,
   vatRates = [],
+  units = [],
 }: {
   suppliers: Supplier[];
   products: Product[];
@@ -284,20 +266,24 @@ export function PurchaseForm({
   currentUserId?: string;
   initialDraft?: PurchaseDraftInitial;
   vatRates?: OrgVatRate[];
+  units?: string[];
 }) {
   const { t, locale } = useAppI18n();
   const isRO = locale === "ro";
+  const supplierInvoiceDateLabel = isRO ? "Data factură furnizor" : t.purchases.form.invoiceDate;
+  const observationsLabel = isRO ? "Observații / diferențe" : t.purchases.form.notes;
   const taxLabel = t.purchases.form.vat;
   const defaultVatRate = String(getDefaultVatRateValue(vatRates));
-  const umOptions = isRO ? RO_UM_OPTIONS : EN_UM_OPTIONS;
-  const itemTypeLabels = isRO ? ITEM_TYPE_LABELS : ITEM_TYPE_LABELS_EN;
-  const defaultUm = isRO ? "Buc" : "each";
+  const umOptions = units.length ? units : ["each"];
+  const defaultUm = umOptions[0] ?? "each";
   const today = new Date().toISOString().slice(0, 10);
   const emptyMsg = t.purchases.form.emptyItems;
-
-  const initialSupplier = initialDraft?.supplier_id
-    ? suppliers.find((s) => s.id === initialDraft.supplier_id)
-    : null;
+  const siteOptions = sites.map((site) => ({ value: site.id, label: site.name }));
+  const [supplierOptions, setSupplierOptions] = useState(suppliers);
+  const [supplierId, setSupplierId] = useState(initialDraft?.supplier_id ?? "");
+  const [showNewSupplier, setShowNewSupplier] = useState(false);
+  const [newSupplier, setNewSupplier] = useState({ tax_id: "", name: "", address: "", vat_registered: false });
+  const [creatingSupplier, setCreatingSupplier] = useState(false);
 
   const nextId = useRef(initialDraft?.items.length ?? 1);
   const [lines, setLines] = useState<LineItem[]>(() => {
@@ -308,7 +294,7 @@ export function PurchaseForm({
         quantity: String(item.quantity),
         unit_cost: String(item.unit_cost),
         tax_rate: String(item.tax_rate),
-        unit_of_measure: item.unit_of_measure || defaultUm,
+        unit_of_measure: item.unit_of_measure && umOptions.includes(item.unit_of_measure) ? item.unit_of_measure : defaultUm,
       }));
     }
     return [{ id: 0, product_id: "", quantity: "", unit_cost: "", tax_rate: defaultVatRate, unit_of_measure: defaultUm }];
@@ -326,9 +312,42 @@ export function PurchaseForm({
   function onProductChange(lineId: number, productId: string) {
     const p = products.find((pr) => pr.id === productId);
     const taxRate = p?.vat_rate != null ? String(p.vat_rate) : defaultVatRate;
+    const unitOfMeasure = p?.unit_of_measure && umOptions.includes(p.unit_of_measure) ? p.unit_of_measure : defaultUm;
     setLines((prev) => prev.map((l) => l.id === lineId
-      ? { ...l, product_id: productId, unit_of_measure: p?.unit_of_measure || defaultUm, tax_rate: taxRate }
+      ? { ...l, product_id: productId, unit_of_measure: unitOfMeasure, tax_rate: taxRate }
       : l));
+  }
+
+  async function lookupNewSupplier() {
+    if (!newSupplier.tax_id.trim()) return;
+    const result = await lookupAnafCompany(newSupplier.tax_id);
+    if (!result) return;
+    setNewSupplier({
+      tax_id: result.cui,
+      name: result.name,
+      address: result.address,
+      vat_registered: result.vatRegistered,
+    });
+  }
+
+  async function createNewSupplier() {
+    if (!newSupplier.name.trim()) return;
+    setCreatingSupplier(true);
+    try {
+      const fd = new FormData();
+      fd.set("tax_id", newSupplier.tax_id);
+      fd.set("name", newSupplier.name);
+      fd.set("address", newSupplier.address);
+      if (newSupplier.vat_registered) fd.set("vat_registered", "on");
+      const result = await createSupplierInline(fd);
+      if (!result.ok) return;
+      setSupplierOptions((current) => [...current, result.supplier].sort((a, b) => a.name.localeCompare(b.name)));
+      setSupplierId(result.supplier.id);
+      setShowNewSupplier(false);
+      setNewSupplier({ tax_id: "", name: "", address: "", vat_registered: false });
+    } finally {
+      setCreatingSupplier(false);
+    }
   }
 
   const lineCalc = lines.map((l) => {
@@ -382,11 +401,14 @@ export function PurchaseForm({
               <div>
                 <Label>{t.purchases.form.supplier}</Label>
                 <SupplierCombobox
-                  suppliers={suppliers}
+                  suppliers={supplierOptions}
                   t={t}
-                  initialId={initialDraft?.supplier_id ?? undefined}
-                  initialName={initialSupplier?.name}
+                  selectedId={supplierId}
+                  onSelect={setSupplierId}
                 />
+                <button type="button" onClick={() => setShowNewSupplier((v) => !v)} className="mt-1 text-xs text-blue-600 hover:underline">
+                  {isRO ? "Adaugă furnizor rapid" : "Add supplier"}
+                </button>
               </div>
               <div>
                 <Label>{t.purchases.form.invoiceNo}</Label>
@@ -398,7 +420,7 @@ export function PurchaseForm({
                 />
               </div>
               <div>
-                <Label>{t.purchases.form.invoiceDate}</Label>
+                <Label>{supplierInvoiceDateLabel}</Label>
                 <Input
                   name="supplier_invoice_date"
                   type="date"
@@ -427,19 +449,22 @@ export function PurchaseForm({
               {sites.length > 0 && (
                 <div>
                   <Label>{t.purchases.form.site}</Label>
-                  <select
-                    name="site_id"
-                    defaultValue={initialDraft?.site_id ?? ""}
-                    className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
-                  >
-                    <option value="">—</option>
-                    {sites.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
+                  <SearchableSelect name="site_id" options={siteOptions} defaultValue={initialDraft?.site_id} placeholder="—" searchPlaceholder={t.purchases.form.site} className="mt-1" />
                 </div>
               )}
             </div>
+
+            {showNewSupplier && (
+              <div className="grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[120px_1fr_1fr_auto]">
+                <Input value={newSupplier.tax_id} onChange={(e) => setNewSupplier((s) => ({ ...s, tax_id: e.target.value }))} placeholder="CUI" />
+                <Input value={newSupplier.name} onChange={(e) => setNewSupplier((s) => ({ ...s, name: e.target.value }))} placeholder={t.purchases.form.supplier} />
+                <Input value={newSupplier.address} onChange={(e) => setNewSupplier((s) => ({ ...s, address: e.target.value }))} placeholder={isRO ? "Adresă" : "Address"} />
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={lookupNewSupplier}>ANAF</Button>
+                  <Button type="button" onClick={createNewSupplier} disabled={creatingSupplier}>{isRO ? "Adaugă" : "Add"}</Button>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -452,34 +477,24 @@ export function PurchaseForm({
                 <span>{t.purchases.form.um}</span>
                 <span>{t.purchases.form.qty}</span>
                 <span>{t.purchases.form.unitCost}</span>
-                <span>{taxLabel} %</span>
+                <span>{taxLabel}</span>
                 <span>{t.purchases.gross}</span>
                 <span />
               </div>
 
               {lines.map((line, idx) => {
                 const calc = lineCalc[idx];
-                const selectedProduct = products.find((p) => p.id === line.product_id);
+                const unitOptions = umOptions.map((unit) => ({ value: unit, label: unit }));
                 return (
                   <div key={line.id} className="grid grid-cols-[1fr_80px_90px_90px_80px_80px_36px] gap-2 items-center">
                     <PurchaseItemCombobox
                       products={products}
                       productId={line.product_id}
                       t={t}
-                      itemTypeLabels={itemTypeLabels}
+                      locale={isRO ? "ro" : "en"}
                       onSelect={(id) => onProductChange(line.id, id)}
                     />
-                    <select
-                      name="unit_of_measure"
-                      value={line.unit_of_measure}
-                      onChange={(e) => updateLine(line.id, "unit_of_measure", e.target.value)}
-                      className="h-10 rounded-md border border-slate-200 bg-white px-2 text-sm"
-                    >
-                      {selectedProduct?.unit_of_measure && !umOptions.includes(selectedProduct.unit_of_measure) && (
-                        <option value={selectedProduct.unit_of_measure}>{selectedProduct.unit_of_measure}</option>
-                      )}
-                      {umOptions.map((u) => <option key={u} value={u}>{u}</option>)}
-                    </select>
+                    <SearchableSelect name="unit_of_measure" options={unitOptions} defaultValue={line.unit_of_measure} required searchPlaceholder={t.purchases.form.um} />
                     <Input
                       name="quantity"
                       type="number" step="0.001" min="0"
@@ -554,7 +569,7 @@ export function PurchaseForm({
             </div>
 
             <div>
-              <Label>{t.purchases.form.notes}</Label>
+              <Label>{observationsLabel}</Label>
               <Input
                 name="notes"
                 defaultValue={initialDraft?.notes ?? ""}

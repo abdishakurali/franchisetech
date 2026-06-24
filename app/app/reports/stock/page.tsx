@@ -7,8 +7,8 @@ import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 export default async function StockReportPage() {
   await requireBusinessModule("inventory");
-  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const sp = t.reportPages.stock;
   const { data: stock } = await supabase.from("stock_items").select("*").eq("organisation_id", orgId).order("name");
   const estimatedValue = (stock ?? []).reduce((total, item) => total + Number(item.current_qty ?? 0) * Number(item.cost_per_unit ?? 0), 0);

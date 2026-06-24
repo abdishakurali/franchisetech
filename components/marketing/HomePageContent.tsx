@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight, LayoutGrid, ShoppingBag, ChefHat, BarChart3, Monitor, MapPin } from "lucide-react";
 import { CtaRow, FinalCta } from "@/components/marketing/MarketingCta";
 import { Faq, Section, SectionLabel } from "@/components/marketing/MarketingShell.primitives";
 import { HeroVisualCollage } from "@/components/marketing/HeroVisualCollage";
@@ -11,10 +13,17 @@ import { pricingPlans } from "@/lib/billing/plans";
 import { HomeCompareStrip } from "@/components/marketing/HomeCompareStrip";
 import { showcaseAssets } from "@/lib/marketing/showcase";
 
+const panelImages = [
+  "/marketing/pos-hero.png",
+  "/marketing/recipe-costing-hero.png",
+  "/marketing/reports-zreport.png",
+];
+
 export function HomePageContent() {
   const { t } = useMarketingLocaleContext();
-  const starterPrice = pricingPlans.find((p) => p.id === "starter")?.price ?? "€39";
+  const starterPrice = pricingPlans.find((p) => p.id === "starter")?.price ?? "€49";
   const proPrice = pricingPlans.find((p) => p.id === "pro")?.price ?? "€79";
+  const multiPrice = pricingPlans.find((p) => p.id === "multi_location")?.price ?? "€99";
   const teaserText = t.pricing.homeTeaser.text
     .replace("{starter}", starterPrice)
     .replace("{pro}", proPrice);
@@ -52,6 +61,91 @@ export function HomePageContent() {
           />
         </div>
       </section>
+
+      <Section tone="slate">
+        <div className="text-center">
+          <h2 className={marketingHeading}>{t.home.panels.heading}</h2>
+        </div>
+        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+          {t.home.panels.items.map((panel, i) => (
+            <div key={i} className={`flex flex-col gap-4 overflow-hidden p-0 ${marketingCard}`}>
+              <div className="overflow-hidden rounded-t-xl bg-slate-100">
+                <Image
+                  src={panelImages[i]}
+                  alt={panel.label}
+                  width={480}
+                  height={300}
+                  className="w-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col gap-2 px-5 pb-5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-blue-600">{panel.label}</span>
+                <h3 className="text-base font-semibold text-slate-900">{panel.title}</h3>
+                <p className="text-sm text-slate-600">{panel.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section>
+        <div className="max-w-2xl">
+          <SectionLabel>{t.home.features.label}</SectionLabel>
+          <h2 className={`mt-3 ${marketingHeading}`}>{t.home.features.title}</h2>
+        </div>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {t.home.features.items.map((item, i) => {
+            const icons = [LayoutGrid, Monitor, ShoppingBag, ChefHat, BarChart3, MapPin];
+            const Icon = icons[i] ?? LayoutGrid;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`group flex flex-col p-5 transition hover:border-blue-200 hover:shadow-sm ${marketingCard}`}
+              >
+                <Icon className="h-5 w-5 text-blue-600" aria-hidden />
+                <h3 className="mt-3 text-base font-semibold text-slate-900 group-hover:text-blue-700">{item.title}</h3>
+                <p className="mt-1 flex-1 text-sm text-slate-600">{item.text}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-blue-600">
+                  {t.cta.learnMore} <ArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+        <p className="mt-6">
+          <Link href="/features" className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline">
+            {t.home.features.viewAll} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </p>
+      </Section>
+
+      <Section tone="slate">
+        <div className="mx-auto max-w-4xl text-center">
+          <SectionLabel>{t.home.pricingStrip.label}</SectionLabel>
+          <h2 className={`mt-3 ${marketingHeading}`}>{t.home.pricingStrip.title}</h2>
+          <p className={`mx-auto mt-3 max-w-2xl ${marketingSubtext}`}>{t.home.pricingStrip.subtitle}</p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            {[
+              { name: t.home.pricingStrip.starter, price: starterPrice },
+              { name: t.home.pricingStrip.pro, price: proPrice },
+              { name: t.home.pricingStrip.multi, price: multiPrice },
+            ].map((plan) => (
+              <div key={plan.name} className={`p-5 text-center ${marketingCard}`}>
+                <p className="text-sm font-semibold text-slate-500">{plan.name}</p>
+                <p className="mt-1 text-3xl font-bold tabular-nums text-slate-900">{plan.price}</p>
+                <p className="text-sm text-slate-500">/mo</p>
+              </div>
+            ))}
+          </div>
+          <Link
+            href="/pricing"
+            className="mt-8 inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            {t.home.pricingStrip.cta} <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </Section>
 
       <Section>
         <IndustryTabs />

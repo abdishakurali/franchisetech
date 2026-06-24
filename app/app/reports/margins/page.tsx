@@ -14,8 +14,8 @@ function firstJoined<T>(value: T | T[] | null | undefined): T | null {
 
 export default async function MarginReportPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
   await requireBusinessModule("recipe_costing");
-  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const mp = t.reportPages.margins;
   const params = await searchParams;
   const q = (params?.q ?? "").trim().toLowerCase();

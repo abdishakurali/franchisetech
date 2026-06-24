@@ -1,0 +1,77 @@
+[
+  {
+    "type": "partner",
+    "company": "Q Retail",
+    "step": 1,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@qretail.ro",
+      "subject": "workspace HORECA",
+      "content": "Bună ziua,\n\nCa distribuitor FiscalNet puteți oferi franchisetech — POS stoc NIR integrat fiscal cu 20% recurent.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=q-retail\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Anzi Soft",
+    "step": 1,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "vanzari@anzisoft.ro",
+      "subject": "workspace HORECA",
+      "content": "Bună ziua,\n\nSoluțiile voastre fiscale se completează cu franchisetech POS+stoc+NIR — 20% recurent per client HoReCa.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=anzi-soft\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Vlarox Fiscal",
+    "step": 1,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@vlarox.ro",
+      "subject": "workspace HORECA",
+      "content": "Bună ziua Vlad Lembrău,\n\nRecomandați franchisetech ca POS cloud cu stoc și NIR — 20% recurent din abonamente.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=vlarox-fiscal\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "RezoSoft",
+    "step": 1,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@rezosoft.ro",
+      "subject": "workspace HORECA",
+      "content": "Bună ziua,\n\nRezoSoft acoperă facturare — franchisetech adaugă POS HoReCa cu stoc NIR și 20% recurent.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=rezosoft\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "partner",
+    "company": "Selectsoft SRL",
+    "step": 1,
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@selectsoft.ro",
+      "subject": "workspace HORECA",
+      "content": "Bună ziua,\n\nModulele Bar-Restaurant se completează cu franchisetech POS+stoc+NIR — 20% comision recurent.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=selectsoft-srl\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  }
+]

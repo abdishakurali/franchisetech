@@ -11,7 +11,7 @@ export function canManageBilling(role: string | null | undefined) {
 }
 
 export function canManageTeam(role: string | null | undefined) {
-  return role === "owner";
+  return role === "owner" || role === "manager";
 }
 
 export function canUsePos(role: string | null | undefined) {

@@ -20,6 +20,7 @@ function tabItems(
   const multi: IndustryItem = {
     title: multiSiteTab.title,
     text: multiSiteTab.text,
+    bestFor: multiSiteTab.bestFor,
     href: "/pricing",
     image: items.find((i) => i.href.includes("restaurants"))?.image ?? "/marketing/industry-restaurant.png",
   };
@@ -70,6 +71,9 @@ export function IndustryTabs() {
           </div>
           <div className="flex flex-col justify-center p-8">
             <h3 className="text-xl font-semibold text-slate-900">{current.title}</h3>
+            {"bestFor" in current && current.bestFor ? (
+              <p className="mt-1 text-sm font-medium text-blue-600">{current.bestFor}</p>
+            ) : null}
             <p className="mt-2 text-slate-500">{current.text}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link

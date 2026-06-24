@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { X, ArrowRight, ArrowLeft, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { captureClientEvent } from "@/lib/analytics/client-events";
 
 export interface TourStep {
   target: string;          // data-tour attribute value
@@ -106,6 +107,7 @@ export function TourOverlay({ tourId, steps, onComplete, onSkip }: Props) {
     const t = setTimeout(() => {
       setActive(true);
       setStep(0);
+      captureClientEvent("tour_started", { tour_id: tourId, step_count: steps.length });
     }, 600);
     return () => clearTimeout(t);
   }, [tourId]);
@@ -143,9 +145,14 @@ export function TourOverlay({ tourId, steps, onComplete, onSkip }: Props) {
     setActive(false);
     setRect(null);
     localStorage.setItem(STORAGE_KEY(tourId), "1");
+    captureClientEvent(skip ? "tour_skipped" : "tour_completed", {
+      tour_id: tourId,
+      step_count: steps.length,
+      last_step: step + 1,
+    });
     if (skip) onSkip?.();
     else onComplete?.();
-  }, [tourId, onComplete, onSkip]);
+  }, [tourId, onComplete, onSkip, step, steps.length]);
 
   const next = () => {
     if (step >= steps.length - 1) finish(false);

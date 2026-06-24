@@ -4,10 +4,11 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { creditReferralOnFirstPayment } from "@/lib/referrals";
 import { trackLoopsEvent } from "@/lib/loops";
 import type { BillingPlan } from "@/lib/billing/plans";
+import { invalidateEntitlementCache } from "@/lib/billing/entitlement-resolver";
 
 export const dynamic = "force-dynamic";
 
-const VALID_PLANS: BillingPlan[] = ["starter", "pro", "multi_location", "connected" as BillingPlan];
+const VALID_PLANS: BillingPlan[] = ["starter", "core", "pro", "operations", "multi_location", "scale", "connected" as BillingPlan];
 
 function toDate(value?: number | null) {
   return value ? new Date(value * 1000).toISOString() : null;
@@ -63,6 +64,7 @@ async function upsertSubscription(
   }
 
   await supabase.from("billing_subscriptions").upsert(payload, { onConflict: "stripe_subscription_id" });
+  invalidateEntitlementCache(organisationId);
 }
 
 async function applyReferralCreditToStripe(

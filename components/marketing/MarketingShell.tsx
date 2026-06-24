@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooterClient } from "@/components/marketing/MarketingFooter";
 import { MobileStickyCta } from "@/components/marketing/MobileStickyCta";
+import { MarketingChatwoot } from "@/components/marketing/MarketingChatwoot";
 import { BrowserFrame } from "@/components/marketing/DeviceFrames";
 import { marketingSectionY } from "@/lib/marketing/tokens";
 import { socialLinks } from "@/components/marketing/social";
@@ -72,6 +73,7 @@ export async function PageShell({ children, schema }: { children: ReactNode; sch
         <Suspense fallback={null}>
           <MobileStickyCta />
         </Suspense>
+        <MarketingChatwoot />
       </div>
     </MarketingLocaleProvider>
   );
@@ -103,6 +105,7 @@ export const featureLinks = [
 export const industryLinks = [
   ["/industries/cafes", "Cafes"],
   ["/industries/restaurants", "Restaurants"],
+  ["/industries/multi-site", "Multi-location"],
   ["/industries/takeaways", "Takeaways"],
   ["/industries/food-trucks", "Food trucks"],
   ["/industries/health-bars", "Health bars"],

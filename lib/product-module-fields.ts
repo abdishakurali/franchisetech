@@ -52,18 +52,24 @@ export function itemTypeSelectOptions(
   visibility: ProductModuleVisibility,
   locale: PosLocale = "en",
 ): { value: string; label: string }[] {
-  const labels: Record<string, { en: string; ro: string }> = {
-    finished_product: { en: "Finished product", ro: "Produs finit" },
-    ingredient: { en: "Ingredient", ro: "Ingredient" },
-    merchandise: { en: "Goods", ro: "Marfă" },
-    supply: { en: "Supply", ro: "Consumabil" },
-    packaging: { en: "Packaging", ro: "Ambalaj" },
-    raw_material: { en: "Raw material", ro: "Materie primă" },
-  };
   return allowedItemTypes(visibility).map((value) => ({
     value,
-    label: locale === "ro" ? labels[value].ro : labels[value].en,
+    label: itemTypeLabel(value, locale),
   }));
+}
+
+const ITEM_TYPE_LABELS: Record<string, { en: string; ro: string }> = {
+  finished_product: { en: "Finished product", ro: "Produs finit" },
+  ingredient: { en: "Ingredient", ro: "Ingredient" },
+  merchandise: { en: "Goods", ro: "Marfă" },
+  supply: { en: "Supply", ro: "Consumabil" },
+  packaging: { en: "Packaging", ro: "Ambalaj" },
+  raw_material: { en: "Raw material", ro: "Materie primă" },
+};
+
+export function itemTypeLabel(value: string | null | undefined, locale: PosLocale = "en"): string {
+  if (!value || !ITEM_TYPE_LABELS[value]) return "";
+  return locale === "ro" ? ITEM_TYPE_LABELS[value].ro : ITEM_TYPE_LABELS[value].en;
 }
 
 function normalizeItemType(

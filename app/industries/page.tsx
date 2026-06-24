@@ -13,6 +13,7 @@ const primarySlugs = ["cafes", "restaurants", "takeaways", "food-trucks", "healt
 const primaryIndustries = industryPages.filter((p) =>
   primarySlugs.includes(p.slug as (typeof primarySlugs)[number])
 );
+const multiSitePage = industryPages.find((p) => p.slug === "multi-site");
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getMarketingLocale();
@@ -48,6 +49,26 @@ export default async function IndustriesPage() {
 
       <section className="bg-slate-50 px-4 pb-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
+          {multiSitePage && (
+            <Link
+              href={multiSitePage.path}
+              className="mb-8 block overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md sm:p-8"
+            >
+              {(() => {
+                const page = localizeSeoPage(multiSitePage, locale);
+                return (
+                  <>
+                    <p className="text-sm font-semibold text-blue-700">{page.eyebrow}</p>
+                    <h2 className="mt-2 text-2xl font-bold text-slate-950">{page.h1}</h2>
+                    <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">{page.intro}</p>
+                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">
+                      {t.seoPage.viewIndustry} <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </>
+                );
+              })()}
+            </Link>
+          )}
           <div className="grid gap-8 md:grid-cols-2">
             {primaryIndustries.map((raw) => {
               const page = localizeSeoPage(raw, locale);
@@ -73,6 +94,16 @@ export default async function IndustriesPage() {
                     <p className="text-sm font-semibold text-blue-600">{page.eyebrow}</p>
                     <h2 className="mt-2 text-xl font-bold text-slate-950">{page.h1}</h2>
                     <p className="mt-2 text-sm text-slate-600">{page.intro}</p>
+                    <ul className="mt-3 flex flex-wrap gap-2">
+                      {t.industriesIndex.cardIncludes.map((item) => (
+                        <li
+                          key={item}
+                          className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+                        >
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
                     <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">
                       {t.seoPage.viewIndustry} <ArrowRight className="h-4 w-4" />
                     </span>

@@ -12,30 +12,18 @@ import { Label } from "@/components/ui/label";
 import { deleteProduct, updateProduct } from "@/app/actions/kitchenops";
 import { ImageUploadField } from "@/components/app/ImageUploadField";
 import { ProductVatField } from "@/components/app/ProductVatField";
+import { SearchableSelect } from "@/components/app/SearchableSelect";
 import type { OrgVatRate } from "@/lib/vat-rates";
 import type { ProductModuleVisibility } from "@/lib/product-module-fields";
-import { showProductTypeSection } from "@/lib/product-module-fields";
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/lib/app-i18n-context";
-
-const PLACEHOLDER_TYPES = ["coffee", "drink", "food", "snack", "ingredient", "other"];
-const KITCHEN_STATIONS = [
-  { value: "bar", label: "Bar" },
-  { value: "starters", label: "Starters" },
-  { value: "mains", label: "Mains" },
-  { value: "vegetables", label: "Vegetables" },
-  { value: "desserts", label: "Desserts" },
-  { value: "cold_prep", label: "Cold Prep" },
-  { value: "hot_kitchen", label: "Hot Kitchen" },
-];
-
-const selectClass =
-  "h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm shadow-sm transition-colors focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100";
+import { KITCHEN_STATIONS } from "@/lib/kitchen-stations";
 
 type ProductRecord = {
   id: string;
   name: string;
   category_id: string | null;
+  pos_category_id?: string | null;
   sale_price: number | null;
   cost_price: number | null;
   vat_rate: number | null;
@@ -55,13 +43,14 @@ type ProductRecord = {
 type Props = {
   product: ProductRecord;
   categories: { id: string; name: string }[];
+  posCategories: { id: string; name: string }[];
   suppliers: { id: string; name: string }[];
   units: string[];
   vatRates: OrgVatRate[];
   visibility: ProductModuleVisibility;
-  itemTypes: { value: string; label: string }[];
   kitchenStationsEnabled: boolean;
   currencySymbol: string;
+  returnTo?: string;
 };
 
 function OptionToggle({
@@ -70,12 +59,14 @@ function OptionToggle({
   description,
   defaultChecked,
   accent = "blue",
+  onChange,
 }: {
   name: string;
   title: string;
   description: string;
   defaultChecked: boolean;
   accent?: "blue" | "green";
+  onChange?: (on: boolean) => void;
 }) {
   const [on, setOn] = useState(defaultChecked);
   const activeRing = accent === "green" ? "border-green-300 bg-green-50/60" : "border-blue-300 bg-blue-50/60";
@@ -93,7 +84,7 @@ function OptionToggle({
         name={name}
         value="on"
         checked={on}
-        onChange={(e) => setOn(e.target.checked)}
+        onChange={(e) => { setOn(e.target.checked); onChange?.(e.target.checked); }}
         className="sr-only"
       />
       <span
@@ -121,13 +112,14 @@ function OptionToggle({
 export function ProductEditForm({
   product,
   categories,
+  posCategories,
   suppliers,
   units,
   vatRates,
   visibility,
-  itemTypes,
   kitchenStationsEnabled,
   currencySymbol,
+  returnTo,
 }: Props) {
   const router = useRouter();
   const { t: i18n } = useAppI18n();
@@ -136,6 +128,12 @@ export function ProductEditForm({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDanger, setShowDanger] = useState(false);
+  const [availableInPos, setAvailableInPos] = useState(product.available_in_pos !== false);
+  const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
+  const posCategoryOptions = posCategories.map((c) => ({ value: c.id, label: c.name }));
+  const unitOptions = units.map((u) => ({ value: u, label: u }));
+  const supplierOptions = suppliers.map((s) => ({ value: s.id, label: s.name }));
+  const stationOptions = KITCHEN_STATIONS.map((s) => ({ value: s.value, label: s.label }));
 
   const t = {
     basics: pf.basics,
@@ -155,13 +153,14 @@ export function ProductEditForm({
     ingredientHint: pf.ingredientHint,
     purchase: pf.purchase,
     purchaseHint: pf.purchaseHint,
-    itemType: pf.itemType,
     supplier: pf.supplier,
     saved: pf.saved,
     deleted: pf.deleted,
     deleteConfirm: pf.deleteConfirm,
     deleteBtn: pf.deleteBtn,
     finishedHint: pf.finishedHint,
+    posCategory: pf.posCategory,
+    manageCategories: pf.manageCategories,
   };
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
@@ -176,7 +175,7 @@ export function ProductEditForm({
         return;
       }
       toast.success(t.saved);
-      router.push(`/app/products/${product.id}`);
+      router.push(returnTo || `/app/products/${product.id}`);
       router.refresh();
     } finally {
       setSaving(false);
@@ -202,11 +201,6 @@ export function ProductEditForm({
       setDeleting(false);
     }
   }
-
-  const showFinishedHint =
-    visibility.inventory &&
-    ((product.item_type === "finished_product") ||
-      (!product.item_type && !product.is_ingredient));
 
   return (
     <div className="pb-24">
@@ -236,19 +230,21 @@ export function ProductEditForm({
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <Label htmlFor="product-category">Category</Label>
-                    <select
-                      id="product-category"
-                      name="category_id"
-                      defaultValue={product.category_id ?? ""}
-                      className={cn(selectClass, "mt-1.5")}
-                    >
-                      <option value="">— none —</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="product-category">{pf.category}</Label>
+                      <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{t.manageCategories}</Link>
+                    </div>
+                    <SearchableSelect name="category_id" options={categoryOptions} defaultValue={product.category_id} placeholder="— none —" searchPlaceholder={pf.category} className="mt-1.5" />
                   </div>
+                  {availableInPos && (
+                    <div className="sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <Label>{t.posCategory}</Label>
+                        <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{t.manageCategories}</Link>
+                      </div>
+                      <SearchableSelect name="pos_category_id" options={posCategoryOptions} defaultValue={product.pos_category_id ?? null} placeholder="— none —" searchPlaceholder={t.posCategory} className="mt-1.5" />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -285,23 +281,14 @@ export function ProductEditForm({
                 />
               </div>
               <div>
-                <Label>VAT rate</Label>
+                <Label>{pf.vatRate}</Label>
                 <div className="mt-1.5">
                   <ProductVatField rates={vatRates} defaultRate={Number(product.vat_rate ?? 0)} />
                 </div>
               </div>
               <div>
                 <Label htmlFor="unit">Unit</Label>
-                <select
-                  id="unit"
-                  name="unit_of_measure"
-                  defaultValue={product.unit_of_measure ?? "each"}
-                  className={cn(selectClass, "mt-1.5")}
-                >
-                  {units.map((u) => (
-                    <option key={u} value={u}>{u}</option>
-                  ))}
-                </select>
+                <SearchableSelect name="unit_of_measure" options={unitOptions} defaultValue={product.unit_of_measure ?? "each"} required searchPlaceholder="Unit" className="mt-1.5" />
               </div>
             </div>
           </CardContent>
@@ -316,6 +303,7 @@ export function ProductEditForm({
                 title={t.pos}
                 description={t.posHint}
                 defaultChecked={product.available_in_pos !== false}
+                onChange={setAvailableInPos}
               />
               {visibility.inventory && (
                 <OptionToggle
@@ -344,40 +332,10 @@ export function ProductEditForm({
               )}
             </div>
 
-            {showProductTypeSection(visibility) && itemTypes.length > 1 && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label htmlFor="item-type">{t.itemType}</Label>
-                  <select
-                    id="item-type"
-                    name="item_type"
-                    defaultValue={product.item_type ?? (product.is_ingredient ? "ingredient" : "finished_product")}
-                    className={cn(selectClass, "mt-1.5 max-w-xs")}
-                  >
-                    {itemTypes.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  {showFinishedHint && (
-                    <p className="mt-1.5 text-xs text-amber-700">{t.finishedHint}</p>
-                  )}
-                </div>
-                {visibility.inventory && suppliers.length > 0 && (
-                  <div>
-                    <Label htmlFor="supplier">{t.supplier}</Label>
-                    <select
-                      id="supplier"
-                      name="supplier_id"
-                      defaultValue={product.supplier_id ?? ""}
-                      className={cn(selectClass, "mt-1.5")}
-                    >
-                      <option value="">— none —</option>
-                      {suppliers.map((s) => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+            {visibility.inventory && suppliers.length > 0 && (
+              <div>
+                <Label htmlFor="supplier">{t.supplier}</Label>
+                <SearchableSelect name="supplier_id" options={supplierOptions} defaultValue={product.supplier_id} placeholder="— none —" searchPlaceholder={t.supplier} className="mt-1.5" />
               </div>
             )}
           </CardContent>
@@ -389,40 +347,14 @@ export function ProductEditForm({
             <ChevronDown className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180" />
           </summary>
           <div className="space-y-4 border-t border-slate-100 px-4 py-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <Label htmlFor="sku">SKU</Label>
-                <Input id="sku" name="sku" defaultValue={product.sku ?? ""} placeholder="optional" className="mt-1.5" />
-              </div>
-              <div>
-                <Label htmlFor="placeholder-type">Placeholder type</Label>
-                <select
-                  id="placeholder-type"
-                  name="placeholder_type"
-                  defaultValue={product.placeholder_type ?? ""}
-                  className={cn(selectClass, "mt-1.5")}
-                >
-                  <option value="">— auto —</option>
-                  {PLACEHOLDER_TYPES.map((pt) => (
-                    <option key={pt} value={pt}>{pt}</option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <Label htmlFor="sku">SKU</Label>
+              <Input id="sku" name="sku" defaultValue={product.sku ?? ""} placeholder="optional" className="mt-1.5 max-w-md" />
             </div>
             {kitchenStationsEnabled && (
               <div>
                 <Label htmlFor="kitchen-station">Kitchen station</Label>
-                <select
-                  id="kitchen-station"
-                  name="kitchen_station"
-                  defaultValue={product.kitchen_station ?? ""}
-                  className={cn(selectClass, "mt-1.5 max-w-md")}
-                >
-                  <option value="">— all stations —</option>
-                  {KITCHEN_STATIONS.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
-                  ))}
-                </select>
+                <SearchableSelect name="kitchen_station" options={stationOptions} defaultValue={product.kitchen_station} placeholder="— all stations —" searchPlaceholder="Kitchen station" className="mt-1.5 max-w-md" />
               </div>
             )}
           </div>
@@ -431,7 +363,7 @@ export function ProductEditForm({
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         <div className="mx-auto flex max-w-[720px] items-center justify-between gap-3">
-          <Link href={`/app/products/${product.id}`}>
+          <Link href={returnTo || `/app/products/${product.id}`}>
             <Button variant="outline" type="button" disabled={saving}>
               {t.cancel}
             </Button>

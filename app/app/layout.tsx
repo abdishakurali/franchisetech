@@ -5,13 +5,15 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app/AppShell";
 import { AppI18nProvider } from "@/lib/app-i18n-context";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { SupportChat } from "@/components/app/SupportChat";
+import { chatwootIdentifierHash } from "@/lib/chatwoot/identity";
 import { PostHogIdentify } from "@/components/app/PostHogIdentify";
 import { ensureReferralCode } from "@/lib/referrals";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { listAccessibleSites, getActiveSiteId } from "@/lib/site-context";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
-import { isModuleEnabled } from "@/lib/business-modules";
+import { isModuleNavVisible } from "@/lib/business-modules";
 import { requireModuleForPathname } from "@/lib/module-guard";
 import type { SubscriptionStatus } from "@/lib/billing/subscription";
 
@@ -68,6 +70,7 @@ export default async function AppLayout({
     recipeCosting: false,
     teamAdvanced: false,
     multiSite: false,
+    kitchenOps: false,
   };
 
   if (activeOrg?.id) {
@@ -80,12 +83,14 @@ export default async function AppLayout({
     const moduleFlags = await fetchOrgModuleFlags(supabase, activeOrg.id);
 
     setupComplete = (txCount ?? 0) > 0;
+    const hasTrial = subStatus?.state === "trialing" || subStatus?.state === "soft_trial";
 
     moduleVisibility = {
-      inventory: isModuleEnabled(moduleFlags, "inventory"),
-      recipeCosting: isModuleEnabled(moduleFlags, "recipe_costing"),
-      teamAdvanced: isModuleEnabled(moduleFlags, "team_advanced"),
-      multiSite: isModuleEnabled(moduleFlags, "multi_site"),
+      inventory: isModuleNavVisible({ org: moduleFlags, module: "inventory", subscriptionPlan: subStatus?.plan, hasTrial }),
+      recipeCosting: isModuleNavVisible({ org: moduleFlags, module: "recipe_costing", subscriptionPlan: subStatus?.plan, hasTrial }),
+      teamAdvanced: isModuleNavVisible({ org: moduleFlags, module: "team_advanced", subscriptionPlan: subStatus?.plan, hasTrial }),
+      multiSite: isModuleNavVisible({ org: moduleFlags, module: "multi_site", subscriptionPlan: subStatus?.plan, hasTrial }),
+      kitchenOps: isModuleNavVisible({ org: moduleFlags, module: "kitchen_ops", subscriptionPlan: subStatus?.plan, hasTrial }),
     };
   }
 
@@ -106,8 +111,15 @@ export default async function AppLayout({
 
   const isWorkstationRoute = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen") || pathname.startsWith("/app/settings");
 
+  const chatwootHash = chatwootIdentifierHash(user.id);
+
+  const { locale: appLocale } = getAppLocaleAndText(
+    activeOrg?.country_code ?? null,
+    (profile?.locale as string | null) ?? null,
+  );
+
   return (
-    <AppI18nProvider orgIsRO={activeOrg?.country_code === "RO"}>
+    <AppI18nProvider key={appLocale} orgIsRO={activeOrg?.country_code === "RO"} initialLocale={appLocale}>
     <AppShell
       user={user}
       profile={profile}
@@ -133,6 +145,7 @@ export default async function AppLayout({
           userId={user.id}
           userName={profile?.full_name}
           userEmail={user.email}
+          identifierHash={chatwootHash}
         />
       )}
     </AppShell>

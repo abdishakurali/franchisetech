@@ -17,7 +17,7 @@ import type { PosLocale } from "@/lib/pos-i18n";
 import { APP_LOCALE_CHANGE_EVENT } from "@/lib/pos-i18n";
 
 const appLocaleOptions = [
-  { code: "en" as const, flag: "🇬🇧", label: "English" },
+  { code: "en" as const, flag: "🌐", label: "English" },
   { code: "ro" as const, flag: "🇷🇴", label: "Română" },
 ];
 

@@ -10,8 +10,8 @@ import { addCustomer, importCustomersCsv } from "@/app/actions/kitchenops";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 export default async function CustomersPage() {
-  const { countryCode, supabase, orgId } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
 
   const [{ data: customers }, { data: txCounts }] = await Promise.all([
     supabase

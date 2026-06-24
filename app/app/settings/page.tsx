@@ -1,4 +1,6 @@
 import { addCategory, updateCategory, deleteCategory, addUnit, updateUnit, deleteUnit, updateOrgCountry, updateOrgCurrency, updateOrganisationIndustry, updateBusinessCapabilities, addPaymentMethod, updatePaymentMethod, deletePaymentMethod, addVatRate, updateVatRate, deleteVatRate, seedDefaultVatRates } from "@/app/actions/kitchenops";
+import { AnafSettingsCard } from "@/components/app/AnafSettingsCard";
+import { IntegrationCards } from "@/components/app/IntegrationCards";
 import { PaymentMethodsCard } from "@/components/app/PaymentMethodsCard";
 import { VatRatesCard } from "@/components/app/VatRatesCard";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 import Link from "next/link";
 import { CopyReferralButton } from "@/components/app/CopyReferralButton";
 import { ensureReferralCode } from "@/lib/referrals";
@@ -17,17 +20,15 @@ import type { CashDrawerMode } from "@/lib/cash-drawer";
 import { BusinessCapabilitiesCard } from "@/components/app/BusinessCapabilitiesCard";
 import { FormSelect } from "@/components/app/FormSelect";
 import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
+import { OwnerDigestCard } from "@/components/app/OwnerDigestCard";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
-import type { BillingPlan } from "@/lib/billing/plans";
+import { hasEntitlement, normalizePlan } from "@/lib/billing/entitlement-resolver";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
-import {
-  INDUSTRY_OPTIONS,
-  RESTAURANT_FEATURE_KEYS,
-  getSuggestedFeaturesForIndustry,
-} from "@/lib/restaurant-features";
+import { industryLabel, industryOptions } from "@/lib/restaurant-features-i18n";
+import { RESTAURANT_FEATURE_KEYS, getSuggestedFeaturesForIndustry } from "@/lib/restaurant-features";
+import { DEFAULT_OPERATIONAL_UNITS } from "@/lib/units-of-measure";
 
-const DEFAULT_UNITS = ["each","portion","kg","g","litre","ml","cup","bottle","box","case","pack"];
 const DEFAULT_CASH_DRAWER = {
   cash_drawer_mode: "manual" as CashDrawerMode,
   cash_drawer_connector_port: 17878,
@@ -75,7 +76,7 @@ export default async function SettingsPage({
   const lockedModule = params?.locked ?? null;
   const lockedMessage = params?.msg ? decodeURIComponent(params.msg) : null;
 
-  const { supabase, orgId, membership, user } = await getKitchenOpsContext();
+  const { supabase, orgId, membership, user, profileLocale } = await getKitchenOpsContext();
 
   // ── Org row (from membership join) ───────────────────────────────────
   const orgRow = (
@@ -91,7 +92,7 @@ export default async function SettingsPage({
   const rawCode     = (orgRow?.country_code as string) ?? null;
   const legacyText  = (orgRow?.country as string) ?? null;
   const countryCode = resolveCountryCode(rawCode, legacyText);
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { locale, t } = getAppLocaleAndText(countryCode, profileLocale);
   const isRO        = countryCode === "RO";
   const currencyCode = (orgRow?.currency_code as string) ?? "EUR";
 
@@ -102,11 +103,27 @@ export default async function SettingsPage({
     { data: paymentMethods },
     { data: vatRates },
   ] = await Promise.all([
-    supabase.from("product_categories").select("*").eq("organisation_id", orgId).order("sort_order"),
+    supabase.from("product_categories").select("*").eq("organisation_id", orgId).order("name"),
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("payment_methods").select("*").eq("organisation_id", orgId).order("created_at"),
     supabase.from("vat_rates").select("*").eq("organisation_id", orgId).order("sort_order"),
   ]);
+
+  // ANAF connection status (RO only) — non-blocking
+  let anafConnected = false;
+  const anafCif = (orgRow?.anaf_cif as string | null) ?? "";
+  const anafVatRegistered = Boolean(orgRow?.anaf_vat_registered ?? false);
+  if (isRO) {
+    const { count } = await supabase
+      .from("anaf_oauth_tokens")
+      .select("*", { count: "exact", head: true })
+      .eq("organisation_id", orgId);
+    anafConnected = (count ?? 0) > 0;
+  }
+
+  const anafAuthUrl = isRO && process.env.ANAF_CLIENT_ID
+    ? `https://logincert.anaf.ro/anaf-oauth2/v1/authorize?response_type=code&client_id=${process.env.ANAF_CLIENT_ID}&redirect_uri=${encodeURIComponent((process.env.NEXT_PUBLIC_SITE_URL ?? "https://franchisetech.ro") + "/api/anaf/auth/callback")}&token_content_type=jwt&state=${orgId}`
+    : null;
 
   const fiscalnetEnabled = Boolean(orgRow?.fiscalnet_enabled ?? false);
 
@@ -135,7 +152,7 @@ export default async function SettingsPage({
   const customUnits = unitsResult.data.filter((u) => u.organisation_id === orgId);
   const customUnitNames = new Set(customUnits.map((u) => u.name));
   const globalUnitNames = unitsResult.data.filter((u) => u.organisation_id === null).map((u) => u.name);
-  const defaultUnits = [...new Set([...DEFAULT_UNITS, ...globalUnitNames].filter((u) => !customUnitNames.has(u)))];
+  const defaultUnits = [...new Set([...DEFAULT_OPERATIONAL_UNITS, ...globalUnitNames].filter((u) => !customUnitNames.has(u)))];
 
   // Referrals
   const referral = await ensureReferralCode(orgId).catch(() => ({
@@ -143,12 +160,19 @@ export default async function SettingsPage({
   }));
 
   const sub = await getSubscriptionStatus(orgId).catch(() => null);
-  const subscriptionPlan = (sub?.plan === "starter" || sub?.plan === "pro" || sub?.plan === "multi_location")
-    ? sub.plan as BillingPlan
-    : null;
+  const subscriptionPlan = sub?.plan === "multi_location" ? "multi_location" : normalizePlan(sub?.plan);
   const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
   const appLocale = (profile?.locale as string | null) ?? null;
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
+
+  const { data: digestOrg } = await supabase
+    .from("organisations")
+    .select(
+      "owner_digest_enabled,owner_digest_frequency,owner_digest_day_of_week,owner_digest_time_of_day,owner_digest_timezone,owner_digest_recipients"
+    )
+    .eq("id", orgId)
+    .maybeSingle();
+  const ownerDigestVisible = await hasEntitlement(orgId, "owner_digest.enabled", { write: false });
 
   // ── Tab list ─────────────────────────────────────────────────────────
   const tabs = [
@@ -157,6 +181,9 @@ export default async function SettingsPage({
     { id: "products",  label: t.settings.tabProducts  },
     { id: "hardware",  label: t.settings.tabHardware  },
     ...(isRO ? [{ id: "fiscal", label: t.settings.tabReceipts }] : []),
+    ...(isRO ? [{ id: "anaf", label: "e-Factura" }] : []),
+    { id: "integrations", label: isRO ? "Integrări" : "Integrations" },
+    { id: "notifications", label: t.settings.tabNotifications },
     { id: "billing",   label: t.settings.tabBilling   },
   ];
 
@@ -175,58 +202,58 @@ export default async function SettingsPage({
         <div className="space-y-6">
           {/* Business profile */}
           <Card>
-            <CardHeader><CardTitle>Business profile</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t.settings.business.profileTitle}</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-sm text-slate-500">Business name</p>
+                  <p className="text-sm text-slate-500">{t.settings.business.businessName}</p>
                   <p className="font-medium">{org?.name ?? "—"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Business type</p>
-                  <p className="font-medium capitalize">{org?.business_type ?? "—"}</p>
+                  <p className="text-sm text-slate-500">{t.settings.business.businessType}</p>
+                  <p className="font-medium capitalize">{industryLabel(org?.business_type, locale)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Your name</p>
+                  <p className="text-sm text-slate-500">{t.settings.business.yourName}</p>
                   <p className="font-medium">{profile?.full_name ?? "—"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Email</p>
+                  <p className="text-sm text-slate-500">{t.settings.business.email}</p>
                   <p className="font-medium">{user.email}</p>
                 </div>
               </div>
               <Link href="/app/profile" className="inline-flex text-sm text-blue-600 hover:underline">
-                Edit profile &rarr;
+                {t.settings.business.editProfile}
               </Link>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Business type</CardTitle>
-              <CardDescription>Used for setup suggestions only. It never turns features on automatically.</CardDescription>
+              <CardTitle>{t.settings.business.businessTypeTitle}</CardTitle>
+              <CardDescription>{t.settings.business.businessTypeDesc}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {canEdit ? (
                 <form action={updateOrganisationIndustry as unknown as (fd: FormData) => Promise<void>} className="flex flex-wrap items-end gap-4">
                   <div>
-                    <Label htmlFor="business_type">Industry</Label>
+                    <Label htmlFor="business_type">{t.settings.business.industry}</Label>
                     <FormSelect
                       name="business_type"
                       defaultValue={org?.business_type ?? "other"}
                       className="mt-1"
-                      options={INDUSTRY_OPTIONS.map((opt) => ({ value: opt.value, label: opt.label }))}
+                      options={industryOptions(locale)}
                     />
                   </div>
-                  <Button type="submit" variant="outline">Save business type</Button>
+                  <Button type="submit" variant="outline">{t.settings.business.saveBusinessType}</Button>
                 </form>
               ) : (
-                <p className="text-sm font-medium">{INDUSTRY_OPTIONS.find((o) => o.value === org?.business_type)?.label ?? org?.business_type ?? "Other"}</p>
+                <p className="text-sm font-medium">{industryLabel(org?.business_type, locale)}</p>
               )}
               <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
                 {getSuggestedFeaturesForIndustry(org?.business_type).length
-                  ? `Suggested options for your industry are highlighted in Features. Nothing turns on automatically.`
-                  : "Open Features to choose stock, kitchen, payments, and other options for this business."}
+                  ? t.settings.business.suggestedFeaturesHighlight
+                  : t.settings.business.openFeaturesHint}
               </div>
             </CardContent>
           </Card>
@@ -234,10 +261,9 @@ export default async function SettingsPage({
           {/* Business country — editable by owner/manager */}
           <Card>
             <CardHeader>
-              <CardTitle>Business country</CardTitle>
+              <CardTitle>{t.settings.business.countryTitle}</CardTitle>
               <p className="text-sm text-slate-500 mt-1">
-                Used to determine which local features are available.
-                Enable receipt settings only for businesses that need local receipt workflows.
+                {t.settings.business.countryDesc}
               </p>
             </CardHeader>
             <CardContent>
@@ -247,7 +273,7 @@ export default async function SettingsPage({
                   className="flex flex-wrap items-end gap-4"
                 >
                   <div>
-                    <Label htmlFor="country_code">Country</Label>
+                    <Label htmlFor="country_code">{t.settings.business.country}</Label>
                     <FormSelect
                       name="country_code"
                       defaultValue={countryCode}
@@ -256,18 +282,18 @@ export default async function SettingsPage({
                     />
                   </div>
                   <Button type="submit" variant="outline" className="mb-0.5">
-                    Save country
+                    {t.settings.business.saveCountry}
                   </Button>
                 </form>
               ) : (
                 <p className="text-sm font-medium">
                   {COUNTRY_OPTIONS.find((o) => o.code === countryCode)?.label ?? countryCode}
-                  <span className="ml-2 text-xs text-slate-400">(contact your account owner to change)</span>
+                  <span className="ml-2 text-xs text-slate-400">{t.settings.business.contactOwner}</span>
                 </p>
               )}
               {isRO && (
                 <p className="mt-3 text-xs text-green-700 bg-green-50 rounded px-3 py-2">
-                  Receipt settings are now visible for this business.
+                  {t.settings.business.receiptsVisible}
                 </p>
               )}
             </CardContent>
@@ -276,9 +302,9 @@ export default async function SettingsPage({
           {/* Currency */}
           <Card>
             <CardHeader>
-              <CardTitle>Currency</CardTitle>
+              <CardTitle>{t.settings.business.currencyTitle}</CardTitle>
               <p className="text-sm text-slate-500 mt-1">
-                The currency shown across the entire app — POS, reports, products, and transactions.
+                {t.settings.business.currencyDesc}
               </p>
             </CardHeader>
             <CardContent>
@@ -288,7 +314,7 @@ export default async function SettingsPage({
                   className="flex flex-wrap items-end gap-4"
                 >
                   <div>
-                    <Label htmlFor="currency_code">Currency</Label>
+                    <Label htmlFor="currency_code">{t.settings.business.currencyTitle}</Label>
                     <FormSelect
                       name="currency_code"
                       defaultValue={currencyCode}
@@ -309,21 +335,21 @@ export default async function SettingsPage({
                     />
                   </div>
                   <Button type="submit" variant="outline" className="mb-0.5">
-                    Save currency
+                    {t.settings.business.saveCurrency}
                   </Button>
                 </form>
               ) : (
                 <p className="text-sm font-medium">{currencyCode}
-                  <span className="ml-2 text-xs text-slate-400">(contact your account owner to change)</span>
+                  <span className="ml-2 text-xs text-slate-400">{t.settings.business.contactOwner}</span>
                 </p>
               )}
 
               <div className="mt-6 border-t border-slate-100 pt-5 space-y-2">
-                <Label>Language</Label>
+                <Label>{t.settings.business.language}</Label>
                 <p className="text-sm text-slate-500">
-                  POS and register interface language for this device.
+                  {t.settings.business.languageDesc}
                 </p>
-                <AppLocaleSwitcher orgIsRO={isRO} />
+                <AppLocaleSwitcher key={locale} initialLocale={locale} />
               </div>
             </CardContent>
           </Card>
@@ -338,12 +364,16 @@ export default async function SettingsPage({
             deleteAction={deletePaymentMethod as unknown as (fd: FormData) => Promise<void>}
           />
 
-          {/* VAT Rates */}
-          {canEdit && (vatRates ?? []).length === 0 && (
+          {/* VAT Rates — show seed button when at least one default is missing */}
+          {canEdit && (() => {
+            const defaults = VAT_DEFAULTS_BY_COUNTRY[countryCode] ?? [];
+            const existing = new Set((vatRates ?? []).map((r) => Number(r.rate)));
+            return defaults.some((d) => !existing.has(d.rate));
+          })() && (
             <form action={seedDefaultVatRates as unknown as (fd: FormData) => Promise<void>} className="mb-2">
               <input type="hidden" name="country_code" value={countryCode} />
               <Button type="submit" variant="outline" size="sm">
-                Add standard tax rates
+                {t.settings.business.addStandardTax}
               </Button>
             </form>
           )}
@@ -359,12 +389,12 @@ export default async function SettingsPage({
           {/* Team */}
           <Card>
             <CardHeader>
-              <CardTitle>Team</CardTitle>
-              <CardDescription>Add staff, assign roles, and control access for your business.</CardDescription>
+              <CardTitle>{t.settings.business.teamTitle}</CardTitle>
+              <CardDescription>{t.settings.business.teamDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/app/settings/team">
-                <Button variant="outline">Manage team &rarr;</Button>
+                <Button variant="outline">{t.settings.business.manageTeam}</Button>
               </Link>
             </CardContent>
           </Card>
@@ -397,32 +427,26 @@ export default async function SettingsPage({
       {/* ── PRODUCTS TAB ─────────────────────────────────────────────── */}
       {activeTab === "products" && (
         <div className="space-y-6">
-          <Card>
-            <CardHeader><CardTitle>Product categories</CardTitle></CardHeader>
+          {(["inventory", "pos"] as const).map((scope) => {
+            const scopeCats = (categories ?? []).filter((c) => (c as { category_type?: string }).category_type === scope || ((c as { category_type?: string }).category_type === "both" && scope === "pos"));
+            const title = scope === "inventory" ? (t.settings.categoryInventory ?? "Inventory categories") : (t.settings.categoryPos ?? "POS categories");
+            const placeholder = scope === "inventory" ? "e.g. MATERIA PRIMA" : "e.g. Hot Drinks";
+            return (
+          <Card key={scope}>
+            <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
             <CardContent>
               <form
                 action={addCategory as unknown as (fd: FormData) => Promise<void>}
                 className="flex flex-wrap gap-3 items-end mb-4"
               >
-                <div><Label>Name</Label><Input name="name" required placeholder="e.g. Hot Drinks" className="w-40" /></div>
+                <input type="hidden" name="category_type" value={scope} />
+                <div><Label>Name</Label><Input name="name" required placeholder={placeholder} className="w-40" /></div>
                 <div><Label>Colour</Label><Input name="color" type="color" defaultValue="#2563eb" className="h-10 w-16 p-1" /></div>
                 <div><Label>Sort order</Label><Input name="sort_order" type="number" placeholder="1" className="w-20" /></div>
-                <div>
-                  <Label>{t.settings.categoryType}</Label>
-                  <FormSelect
-                    name="category_type"
-                    defaultValue="both"
-                    options={[
-                      { value: "both", label: t.settings.categoryBoth },
-                      { value: "pos", label: t.settings.categoryPos },
-                      { value: "inventory", label: t.settings.categoryInventory },
-                    ]}
-                  />
-                </div>
                 <Button type="submit" variant="outline" size="sm">Add category</Button>
               </form>
               <div className="space-y-2">
-                {(categories ?? []).map((c) => (
+                {scopeCats.map((c) => (
                   <form
                     key={c.id}
                     action={updateCategory as unknown as (fd: FormData) => Promise<void>}
@@ -436,9 +460,8 @@ export default async function SettingsPage({
                       <Label>{t.settings.type}</Label>
                       <FormSelect
                         name="category_type"
-                        defaultValue={(c as {category_type?: string}).category_type ?? "both"}
+                        defaultValue={(c as {category_type?: string}).category_type === "both" ? scope : ((c as {category_type?: string}).category_type ?? scope)}
                         options={[
-                          { value: "both", label: t.settings.categoryBoth },
                           { value: "pos", label: t.settings.categoryPos },
                           { value: "inventory", label: t.settings.categoryInventory },
                         ]}
@@ -451,6 +474,8 @@ export default async function SettingsPage({
               </div>
             </CardContent>
           </Card>
+            );
+          })}
 
           <Card>
             <CardHeader><CardTitle>Units of measurement</CardTitle></CardHeader>
@@ -531,6 +556,55 @@ export default async function SettingsPage({
             vatGroups={(orgRow?.fiscalnet_vat_groups as import('@/lib/fiscalnet/types').VatGroup[]) ?? []}
             paymentTypeMap={(orgRow?.fiscalnet_payment_type_map as Record<string, import('@/lib/fiscalnet/types').FiscalPaymentCode>) ?? {}}
           />
+        </div>
+      )}
+
+      {/* ── ANAF / e-FACTURA TAB (RO only) ──────────────────────────── */}
+      {activeTab === "anaf" && isRO && (
+        <div className="space-y-6">
+          <AnafSettingsCard
+            canEdit={canEdit}
+            anafConnected={anafConnected}
+            anafCif={anafCif}
+            anafVatRegistered={anafVatRegistered}
+            anafAuthUrl={anafAuthUrl}
+          />
+        </div>
+      )}
+
+      {/* ── INTEGRATIONS TAB ─────────────────────────────────────────── */}
+      {activeTab === "integrations" && (
+        <div className="space-y-2">
+          <p className="text-sm text-slate-500 mb-4">
+            {isRO
+              ? "Conectează franchisetech cu instrumentele pe care le folosești deja."
+              : "Connect franchisetech with the tools you already use."}
+          </p>
+          <IntegrationCards orgId={orgId} countryCode={countryCode} />
+        </div>
+      )}
+
+      {/* ── NOTIFICATIONS TAB ───────────────────────────────────────── */}
+      {activeTab === "notifications" && (
+        <div className="space-y-6">
+          {ownerDigestVisible && (
+            <OwnerDigestCard
+              locale={locale}
+              canEdit={canEdit}
+              ownerEmail={user.email ?? ""}
+              initial={{
+                enabled: Boolean(digestOrg?.owner_digest_enabled ?? false),
+                frequency: (() => {
+                  const f = String(digestOrg?.owner_digest_frequency ?? "off");
+                  return f === "daily" || f === "weekly" ? f : "off";
+                })(),
+                dayOfWeek: Number(digestOrg?.owner_digest_day_of_week ?? 1),
+                timeOfDay: String(digestOrg?.owner_digest_time_of_day ?? "08:00:00").slice(0, 5),
+                timezone: String(digestOrg?.owner_digest_timezone ?? "Europe/Bucharest"),
+                recipients: (digestOrg?.owner_digest_recipients as string[] | undefined) ?? [],
+              }}
+            />
+          )}
         </div>
       )}
 

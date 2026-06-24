@@ -222,5 +222,430 @@
     "status": "success",
     "step": 1,
     "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "ExpertPos EconMedia",
+    "type": "partner",
+    "to": "office@econmedia.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Q Retail",
+    "type": "partner",
+    "to": "office@qretail.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Anzi Soft",
+    "type": "partner",
+    "to": "vanzari@anzisoft.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Vlarox Fiscal",
+    "type": "partner",
+    "to": "office@vlarox.ro",
+    "status": "opted_out",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "reply_message_id": "1782049777269004300",
+    "error": "Stop !"
+  },
+  {
+    "company": "RezoSoft",
+    "type": "partner",
+    "to": "contact@rezosoft.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Express Caffe",
+    "type": "customer",
+    "to": "office@expresscaffe.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Urbanistic Coffee",
+    "type": "customer",
+    "to": "contact@urbanistic.coffee",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Habitat Coffee Studio",
+    "type": "customer",
+    "to": "hello@ourhabitat.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Ch9 Specialty Coffee",
+    "type": "customer",
+    "to": "vio@spired.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Book Coffee Shop",
+    "type": "customer",
+    "to": "shop@bookcoffee.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Mica Elvetie",
+    "type": "customer",
+    "to": "office@micaelvetie.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Restaurant Minish",
+    "type": "customer",
+    "to": "restaurant.minish@outlook.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Restaurant Vulturul",
+    "type": "customer",
+    "to": "contact@restaurantvulturul.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Rispetto Cucina Italiana",
+    "type": "customer",
+    "to": "rezervari@rispettorestaurant.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "KIMU",
+    "type": "customer",
+    "to": "rezervari@kimu.ro",
+    "status": "failed_bounce",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "reply_message_id": "1782050558093005600",
+    "error": "rezervari@kimu.ro 550 No Such User Here"
+  },
+  {
+    "company": "Osho Restaurant",
+    "type": "customer",
+    "to": "rezervari@osho-restaurant.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Baracca",
+    "type": "customer",
+    "to": "rezervari@baracca.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "DaVinci Ristorante",
+    "type": "customer",
+    "to": "rezervari@davinciristorante.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Kupaj Wine Bar",
+    "type": "customer",
+    "to": "rezervari@kupaj.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "My Thai",
+    "type": "customer",
+    "to": "rezervari@mythai.ro",
+    "status": "opted_out",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "reply_message_id": "1782057029629014300",
+    "error": "Stop"
+  },
+  {
+    "company": "Restaurant Nativ",
+    "type": "customer",
+    "to": "contact@restaurantnativ.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Panoramic Cetățuie",
+    "type": "customer",
+    "to": "office@panoramic-cluj.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Restaurant Valahia",
+    "type": "customer",
+    "to": "rezervari@restaurant-valahia.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Tied",
+    "type": "customer",
+    "to": "contact@tied.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Restaurant Insula",
+    "type": "customer",
+    "to": "office@restaurant-insula.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Selectsoft SRL",
+    "type": "partner",
+    "to": "contact@selectsoft.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "tiny.ERP",
+    "type": "partner",
+    "to": "office@tinyerp.app",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "ExpertAccounts",
+    "type": "partner",
+    "to": "sales@expertaccounts.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Salad Box",
+    "type": "partner",
+    "to": "contact@saladbox.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Tassei Sushi Robata",
+    "type": "customer",
+    "to": "office@tasseifamily.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Vinto Gastro Wine Bar",
+    "type": "customer",
+    "to": "office@vinto.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Trai Restaurant",
+    "type": "customer",
+    "to": "contact@trairestaurant.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "FOOM",
+    "type": "customer",
+    "to": "contact@foom.ro",
+    "status": "failed_bounce",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "reply_message_id": "1782050718871005600",
+    "error": "contact@foom.ro Disabled recipient address"
+  },
+  {
+    "company": "Creveteria",
+    "type": "customer",
+    "to": "contact@creveteria.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "La Conac",
+    "type": "customer",
+    "to": "contact@laconac-traditie.ro",
+    "status": "failed_bounce",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "error": "Yahoo 550 5.7.9: domain forwards to gabi_histo@yahoo.com via best-hosting.ro; forwarder breaks DMARC/DKIM"
+  },
+  {
+    "company": "Veranda Restaurant",
+    "type": "customer",
+    "to": "contact@verandarestaurant.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Brukenhalle",
+    "type": "customer",
+    "to": "rezervari@brukenhalle.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Restaurant Prato",
+    "type": "customer",
+    "to": "eat@prato.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Bistro Aha",
+    "type": "customer",
+    "to": "contact@ahabistro.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "TED'S Coffee",
+    "type": "partner",
+    "to": "info@tedscoffeecompany.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Tucano Coffee",
+    "type": "partner",
+    "to": "franchise@tucanocoffee.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Hello Donuts",
+    "type": "partner",
+    "to": "office@hellodonuts.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Noe Patisserie",
+    "type": "customer",
+    "to": "comenzi@noe-patisserie.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Magicake",
+    "type": "customer",
+    "to": "comenzi@magicake.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Noisette Bakery",
+    "type": "customer",
+    "to": "contact@noisette-bakery.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "House of Cookies",
+    "type": "customer",
+    "to": "comenzi@houseofcookies.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "MamaPan",
+    "type": "customer",
+    "to": "comenzi@mamapan.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Cofetăria Alice",
+    "type": "customer",
+    "to": "office@cofetariaalice.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "La Dolceria",
+    "type": "customer",
+    "to": "contact@ladolceria.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Leonidas Ciocolaterie Online",
+    "type": "customer",
+    "to": "contact@ciocolaterieonline.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "La Saveur du Levain",
+    "type": "customer",
+    "to": "office@lasaveur.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Cofetaria Altfel",
+    "type": "customer",
+    "to": "office@cofetariaaltfel.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech"
   }
 ]

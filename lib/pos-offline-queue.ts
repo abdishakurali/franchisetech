@@ -21,6 +21,7 @@ export type QueuedSale = {
   /** Human-readable summary, e.g. "2 items · €6.30" */
   label: string;
   transactionId?: string;
+  lastError?: string;
 };
 
 const STORAGE_KEY = "pos_offline_sale_queue";
@@ -56,6 +57,59 @@ export function isBrowserOnline(): boolean {
   return navigator.onLine;
 }
 
+/**
+ * Probes the server with a real HEAD request so we detect "connected to network
+ * but can't reach the server" (e.g. mobile data with no routing, captive portal).
+ * Falls back to navigator.onLine when running server-side.
+ * Result is cached for PROBE_TTL_MS to avoid hammering on rapid calls.
+ */
+const PROBE_URL = "/favicon.ico";
+const PROBE_TIMEOUT_MS = 5_000;
+const PROBE_TTL_MS = 15_000;
+let _probeCache: { online: boolean; ts: number } | null = null;
+
+export async function probeServerOnline(): Promise<boolean> {
+  if (typeof window === "undefined") return true;
+  // Fast: if navigator says offline, skip the fetch
+  if (!navigator.onLine) {
+    _probeCache = { online: false, ts: Date.now() };
+    return false;
+  }
+  // Use cached result if fresh
+  if (_probeCache && Date.now() - _probeCache.ts < PROBE_TTL_MS) {
+    return _probeCache.online;
+  }
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT_MS);
+    await fetch(PROBE_URL, { method: "HEAD", cache: "no-store", signal: controller.signal });
+    clearTimeout(timer);
+    _probeCache = { online: true, ts: Date.now() };
+    return true;
+  } catch {
+    _probeCache = { online: false, ts: Date.now() };
+    return false;
+  }
+}
+
+/** Invalidates the probe cache so the next call always re-probes. */
+export function invalidateProbeCache() {
+  _probeCache = null;
+}
+
+/** True when the browser reports offline or a sale failed due to connectivity. */
+export function isRetryableNetworkError(err: unknown): boolean {
+  if (!isBrowserOnline()) return true;
+  const msg = err instanceof Error ? err.message : String(err ?? "");
+  return /failed to fetch|networkerror|load failed|fetch|unexpected response|from the server|timeout|econnrefused/i.test(
+    msg,
+  );
+}
+
+export function removeOfflineSale(id: string) {
+  writeQueue(readQueue().filter((q) => q.id !== id));
+}
+
 export function formDataToPayload(fd: FormData): QueuedSalePayload {
   const payload: QueuedSalePayload = {};
   fd.forEach((value, key) => {
@@ -88,8 +142,16 @@ export function markOfflineSaleSynced(id: string, transactionId: string) {
   writeQueue(
     readQueue().map((entry) =>
       entry.id === id
-        ? { ...entry, status: "pending_fiscal" as const, transactionId }
+        ? { ...entry, status: "pending_fiscal" as const, transactionId, lastError: undefined }
         : entry
+    )
+  );
+}
+
+export function markOfflineSaleSyncFailed(id: string, error: string) {
+  writeQueue(
+    readQueue().map((entry) =>
+      entry.id === id ? { ...entry, lastError: error.slice(0, 200) } : entry
     )
   );
 }

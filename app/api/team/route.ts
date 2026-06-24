@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { DB_ROLES, canManageTeam, type DbRole } from "@/lib/access-control";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 
 const VALID_ROLES = DB_ROLES;
 type Role = DbRole;
+const ADVANCED_ROLES = new Set<Role>(["manager", "auditor", "kitchen"]);
 
 function makeAdminClient() {
   return createClient(
@@ -76,6 +78,15 @@ export async function POST(req: NextRequest) {
     }
     if (role === "owner" && membership.role !== "owner") {
       return NextResponse.json({ error: "Only owners can add other owners" }, { status: 403 });
+    }
+    if (ADVANCED_ROLES.has(role)) {
+      try {
+        await assertEntitlement(orgId, "team.advanced_roles");
+      } catch (error) {
+        const response = entitlementDeniedResponse(error);
+        if (response) return response;
+        throw error;
+      }
     }
 
     const admin = makeAdminClient();

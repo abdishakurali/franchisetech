@@ -4,6 +4,7 @@ import { listAccessibleSites } from "@/lib/site-context";
 import { PurchaseForm, type PurchaseDraftInitial } from "@/components/app/PurchaseForm";
 import { ensurePosDefaults } from "@/app/actions/kitchenops";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
+import { listOperationalUnitNames } from "@/lib/units-of-measure";
 
 export default async function PurchaseEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -19,7 +20,7 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
 
   if (!purchase || purchase.status !== "draft") redirect(`/app/purchases/${id}`);
 
-  const [suppRes, prodRes, sites, vatRates] = await Promise.all([
+  const [suppRes, prodRes, sites, vatRates, units] = await Promise.all([
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     supabase
       .from("products")
@@ -30,6 +31,7 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
       .order("name"),
     listAccessibleSites(supabase, orgId, membership.id, membership.role),
     listActiveVatRates(supabase, orgId),
+    listOperationalUnitNames(supabase, orgId),
   ]);
 
   type ItemRow = {
@@ -61,6 +63,7 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
       currentUserId={user?.id}
       initialDraft={initialDraft}
       vatRates={vatRates}
+      units={units}
     />
   );
 }

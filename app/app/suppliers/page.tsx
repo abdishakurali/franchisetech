@@ -13,8 +13,8 @@ type PurchaseRow = { supplier_id: string | null; total_amount: number | null };
 
 export default async function SuppliersPage() {
   await requireBusinessModule("inventory");
-  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const [suppRes, purchRes] = await Promise.all([
     supabase.from("suppliers").select("*").eq("organisation_id", orgId).eq("active", true).order("name"),
     supabase.from("purchases").select("supplier_id,total_amount").eq("organisation_id", orgId),

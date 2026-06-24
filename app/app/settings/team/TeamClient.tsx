@@ -26,17 +26,16 @@ interface Member {
   profile: Profile | null;
 }
 
-const VALID_ROLES = ["owner","manager","cashier","kitchen","stock","accountant","support","readonly"];
+const VALID_ROLES = ["owner","manager","staff","cashier","kitchen","auditor"];
+const ADVANCED_ROLES = new Set(["manager", "kitchen", "auditor"]);
 
 const ROLE_LABELS: Record<string, string> = {
   owner: "Owner",
   manager: "Manager",
+  staff: "Staff",
   cashier: "Cashier",
   kitchen: "Kitchen",
-  stock: "Stock",
-  accountant: "Accountant",
-  support: "Support",
-  readonly: "Read-only",
+  auditor: "Auditor",
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -47,7 +46,13 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-export function TeamClient({ initialMembers }: { initialMembers: Member[] }) {
+export function TeamClient({
+  initialMembers,
+  advancedRolesAllowed,
+}: {
+  initialMembers: Member[];
+  advancedRolesAllowed: boolean;
+}) {
   const [members, setMembers] = useState<Member[]>(initialMembers);
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -55,6 +60,8 @@ export function TeamClient({ initialMembers }: { initialMembers: Member[] }) {
   const [addForm, setAddForm] = useState({ email: "", fullName: "", role: "cashier", phone: "", temporaryPassword: "", sendInvite: false });
   const [addResult, setAddResult] = useState<{ resetLink?: string | null; error?: string } | null>(null);
   const [resetResults, setResetResults] = useState<Record<string, string>>({});
+  const [actionError, setActionError] = useState<string | null>(null);
+  const visibleRoles = VALID_ROLES.filter((role) => advancedRolesAllowed || !ADVANCED_ROLES.has(role));
 
   async function refreshMembers() {
     const res = await fetch("/api/team");
@@ -96,12 +103,17 @@ export function TeamClient({ initialMembers }: { initialMembers: Member[] }) {
 
   async function handleRoleChange(memberId: string, newRole: string) {
     setActionLoading(memberId + "-role");
+    setActionError(null);
     try {
-      await fetch(`/api/team/${memberId}`, {
+      const res = await fetch(`/api/team/${memberId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: newRole }),
       });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setActionError(data?.error ?? "Could not update role");
+      }
       await refreshMembers();
     } finally {
       setActionLoading(null);
@@ -110,8 +122,11 @@ export function TeamClient({ initialMembers }: { initialMembers: Member[] }) {
 
   async function handleToggleDisable(memberId: string) {
     setActionLoading(memberId + "-disable");
+    setActionError(null);
     try {
-      await fetch(`/api/team/${memberId}/disable`, { method: "POST" });
+      const res = await fetch(`/api/team/${memberId}/disable`, { method: "POST" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) setActionError(data?.error ?? "Could not update member");
       await refreshMembers();
     } finally {
       setActionLoading(null);
@@ -146,6 +161,11 @@ export function TeamClient({ initialMembers }: { initialMembers: Member[] }) {
         </div>
         <Button onClick={() => { setShowAddModal(true); setAddResult(null); }}>Add team member</Button>
       </div>
+      {actionError && (
+        <div className="rounded bg-red-50 px-4 py-3 text-sm text-red-700">
+          {actionError}
+        </div>
+      )}
 
       {/* Members table */}
       <Card>
@@ -177,7 +197,10 @@ export function TeamClient({ initialMembers }: { initialMembers: Member[] }) {
                         disabled={actionLoading === m.id + "-role"}
                         className="h-7 rounded border border-slate-200 px-2 text-xs"
                       >
-                        {VALID_ROLES.map((r) => (
+                        {(visibleRoles.includes(m.role)
+                          ? visibleRoles
+                          : [m.role, ...visibleRoles].filter((role, index, arr) => arr.indexOf(role) === index)
+                        ).map((r) => (
                           <option key={r} value={r}>{ROLE_LABELS[r] ?? r}</option>
                         ))}
                       </select>
@@ -254,7 +277,7 @@ export function TeamClient({ initialMembers }: { initialMembers: Member[] }) {
                     onChange={(e) => setAddForm({ ...addForm, role: e.target.value })}
                     className="mt-1 w-full h-10 rounded-md border border-slate-200 px-3 text-sm"
                   >
-                    {VALID_ROLES.filter((r) => r !== "owner").map((r) => (
+                    {visibleRoles.filter((r) => r !== "owner").map((r) => (
                       <option key={r} value={r}>{ROLE_LABELS[r] ?? r}</option>
                     ))}
                   </select>

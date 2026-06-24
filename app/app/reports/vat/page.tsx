@@ -5,8 +5,8 @@ import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 export default async function VatReportPage({ searchParams }: { searchParams?: Promise<{from?:string;to?:string}> }) {
-  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const vp = t.reportPages.vat;
   const params = await searchParams;
   const today = new Date().toISOString().slice(0,10);

@@ -1,100 +1,16 @@
 [
-  {
-    "company": "Zeus Service SRL",
-    "type": "partner",
-    "to": "vanzari@zeusservice.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "ADPOS Retail Systems",
-    "type": "partner",
-    "to": "comenzi@adpos.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "AMEF Constalaris",
-    "type": "partner",
-    "to": "office@amef.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Sedona ALM",
-    "type": "partner",
-    "to": "contact@aparaturafiscala.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Wake Cup Coffee & Bar",
-    "type": "customer",
-    "to": "office@wake-cup.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Planetarium Café",
-    "type": "customer",
-    "to": "office@plani.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Next Quarter Coffee",
-    "type": "customer",
-    "to": "contact@nextquartercoffe.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Kintsu Coffee",
-    "type": "customer",
-    "to": "contact@kintsu.coffee",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Mokum Specialty Coffee",
-    "type": "customer",
-    "to": "office@mokum.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Metaphor Coffee Roasters",
-    "type": "customer",
-    "to": "metaphorcoffee@gmail.com",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Nori Specialty Coffee",
-    "type": "customer",
-    "to": "contact@noricoffeeshop.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "True Fine Coffee",
-    "type": "customer",
-    "to": "office@truefinecoffee.ro",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Ecce Coffee Roasters",
-    "type": "customer",
-    "to": "ecceroasters@gmail.com",
-    "step": 1,
-    "status": "success"
-  },
-  {
-    "company": "Baristas.ro",
-    "type": "customer",
-    "to": "cafeabaristas@gmail.com",
-    "step": 1,
-    "status": "success"
-  }
+  {"company": "Selectsoft SRL", "type": "partner", "to": "contact@selectsoft.ro", "status": "success", "step": 1},
+  {"company": "tiny.ERP", "type": "partner", "to": "office@tinyerp.app", "status": "success", "step": 1},
+  {"company": "ExpertAccounts", "type": "partner", "to": "sales@expertaccounts.com", "status": "success", "step": 1},
+  {"company": "Salad Box", "type": "partner", "to": "contact@saladbox.ro", "status": "success", "step": 1},
+  {"company": "Tassei Sushi Robata", "type": "customer", "to": "office@tasseifamily.ro", "status": "success", "step": 1},
+  {"company": "Vinto Gastro Wine Bar", "type": "customer", "to": "office@vinto.ro", "status": "success", "step": 1},
+  {"company": "Trai Restaurant", "type": "customer", "to": "contact@trairestaurant.ro", "status": "success", "step": 1},
+  {"company": "FOOM", "type": "customer", "to": "contact@foom.ro", "status": "success", "step": 1},
+  {"company": "Creveteria", "type": "customer", "to": "contact@creveteria.ro", "status": "success", "step": 1},
+  {"company": "La Conac", "type": "customer", "to": "contact@laconac-traditie.ro", "status": "success", "step": 1},
+  {"company": "Veranda Restaurant", "type": "customer", "to": "contact@verandarestaurant.ro", "status": "success", "step": 1},
+  {"company": "Brukenhalle", "type": "customer", "to": "rezervari@brukenhalle.ro", "status": "success", "step": 1},
+  {"company": "Restaurant Prato", "type": "customer", "to": "eat@prato.ro", "status": "success", "step": 1},
+  {"company": "Bistro Aha", "type": "customer", "to": "contact@ahabistro.ro", "status": "success", "step": 1}
 ]

@@ -2,16 +2,17 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDate, formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { formatAppDate } from "@/lib/app-locale";
 
 function firstJoined<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
 }
 
 export default async function TransactionsPage() {
-  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t, locale } = await getAppLocaleAndText(countryCode, profileLocale);
   const { data: transactions } = await supabase
     .from("pos_transactions")
     .select("id,transaction_number,sold_at,total,discount_total,status,payment_methods(name),profiles(full_name,email),pos_transaction_items(id,discount_pct)")
@@ -27,7 +28,7 @@ export default async function TransactionsPage() {
         const profile = firstJoined(tx.profiles as { full_name?: string | null; email?: string | null } | { full_name?: string | null; email?: string | null }[]);
         const discountTotal = Number(tx.discount_total ?? 0);
         const itemDiscounts = (tx.pos_transaction_items ?? []).some((i: { discount_pct?: number | null }) => Number(i.discount_pct ?? 0) > 0);
-        return <TableRow key={tx.id}><TableCell>{tx.transaction_number}</TableCell><TableCell>{formatDate(tx.sold_at)}</TableCell><TableCell>{profile?.full_name || profile?.email || "-"}</TableCell><TableCell>{method?.name ?? "-"}</TableCell><TableCell>{tx.pos_transaction_items?.length ?? 0}</TableCell><TableCell><div>{formatMoney(tx.total, currency)}</div>{(discountTotal > 0 || itemDiscounts) && <div className="text-xs text-blue-600 font-medium">−{formatMoney(discountTotal > 0 ? discountTotal : 0, currency)} {t.transactions.disc}</div>}</TableCell><TableCell><Badge variant="secondary">{tx.status}</Badge></TableCell><TableCell><Link className="font-medium text-blue-600 hover:underline" href={`/app/transactions/${tx.id}`}>{t.transactions.view}</Link></TableCell></TableRow>;
+        return <TableRow key={tx.id}><TableCell>{tx.transaction_number}</TableCell><TableCell>{formatAppDate(tx.sold_at, locale)}</TableCell><TableCell>{profile?.full_name || profile?.email || "-"}</TableCell><TableCell>{method?.name ?? "-"}</TableCell><TableCell>{tx.pos_transaction_items?.length ?? 0}</TableCell><TableCell><div>{formatMoney(tx.total, currency)}</div>{(discountTotal > 0 || itemDiscounts) && <div className="text-xs text-blue-600 font-medium">−{formatMoney(discountTotal > 0 ? discountTotal : 0, currency)} {t.transactions.disc}</div>}</TableCell><TableCell><Badge variant="secondary">{tx.status === "voided" ? t.transactions.statusVoided : tx.status === "completed" ? t.transactions.statusCompleted : (tx.status ?? "-")}</Badge></TableCell><TableCell><Link className="font-medium text-blue-600 hover:underline" href={`/app/transactions/${tx.id}`}>{t.transactions.view}</Link></TableCell></TableRow>;
       })}</TableBody></Table></CardContent></Card>
     </div>
   );

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RecipesFilterForm } from "@/components/app/RecipesFilterForm";
@@ -17,8 +16,8 @@ import {
 
 export default async function RecipesPage({ searchParams }: { searchParams?: Promise<{ q?: string; status?: string }> }) {
   await requireBusinessModule("recipe_costing");
-  const { countryCode, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode);
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
   const q = (params?.q ?? "").trim().toLowerCase();
   const status = params?.status ?? "all";
@@ -129,13 +128,12 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t.recipes.recipe}</TableHead>
                   <TableHead>{t.tables.product}</TableHead>
                   <TableHead className="text-right">{t.recipes.ingredients}</TableHead>
-                  <TableHead className="text-right">{t.recipes.salePrice}</TableHead>
-                  <TableHead className="text-right">{t.recipes.costPerPortion}</TableHead>
+                  <TableHead className="text-right hidden sm:table-cell">{t.recipes.salePrice}</TableHead>
+                  <TableHead className="text-right hidden md:table-cell">{t.recipes.costPerPortion}</TableHead>
                   <TableHead className="text-right">{t.tables.margin}</TableHead>
-                  <TableHead className="text-right">{t.recipes.canMake}</TableHead>
+                  <TableHead className="text-right hidden lg:table-cell">{t.recipes.canMake}</TableHead>
                   <TableHead />
                 </TableRow>
               </TableHeader>
@@ -153,37 +151,29 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
                     limitingIngName,
                   }) => (
                     <TableRow key={recipe.id}>
-                      <TableCell className="font-medium">{recipe.name}</TableCell>
-                      <TableCell className="text-slate-600">{product?.name ?? "—"}</TableCell>
+                      <TableCell className="font-medium max-w-[220px]">
+                        <Link href={`/app/recipes/${recipe.id}`} className="block truncate hover:text-blue-600">
+                          {product?.name ?? recipe.name}
+                        </Link>
+                      </TableCell>
                       <TableCell className="text-right tabular-nums text-slate-600">{ingredientCount}</TableCell>
-                      <TableCell className="text-right tabular-nums">{formatRecipeMoney(salePrice, currency)}</TableCell>
-                      <TableCell className="text-right tabular-nums text-slate-600">
+                      <TableCell className="text-right tabular-nums hidden sm:table-cell">{formatRecipeMoney(salePrice, currency)}</TableCell>
+                      <TableCell className="text-right tabular-nums text-slate-600 hidden md:table-cell">
                         {formatRecipeMoney(costPerUnit, currency)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <span
-                            className={`tabular-nums font-medium ${
-                              marginPct >= 60 ? "text-green-700" : marginPct >= 30 ? "text-amber-600" : "text-red-600"
-                            }`}
-                          >
-                            {marginPct.toFixed(1)}%
-                          </span>
-                          <Badge
-                            variant="secondary"
-                            className={
-                              marginPct >= 60
-                                ? "bg-green-100 text-green-700"
-                                : marginPct >= 30
-                                  ? "bg-amber-100 text-amber-700"
-                                  : "bg-red-100 text-red-700"
-                            }
-                          >
-                            {formatRecipeMoney(margin, currency)}
-                          </Badge>
-                        </div>
+                        <span
+                          className={`tabular-nums font-medium ${
+                            marginPct >= 60 ? "text-green-700" : marginPct >= 30 ? "text-amber-600" : "text-red-600"
+                          }`}
+                        >
+                          {marginPct.toFixed(1)}%
+                        </span>
+                        <span className="ml-2 hidden tabular-nums text-xs text-slate-500 sm:inline">
+                          ({formatRecipeMoney(margin, currency)})
+                        </span>
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right hidden lg:table-cell">
                         {canMake !== null ? (
                           <div>
                             <span

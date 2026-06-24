@@ -15,6 +15,12 @@ import {
 } from "@/lib/marketing/seo";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
+import {
+  compareSignupHref,
+  compareUi,
+  localizeComparisonPage,
+} from "@/lib/marketing/compare-locale";
+import { CompareStickyTrialBar } from "@/components/marketing/CompareStickyTrialBar";
 
 export function generateStaticParams() {
   return comparisonPages.map((page) => ({ slug: page.slug }));
@@ -33,16 +39,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ComparePage({ params }: { params: Promise<{ slug: string }> }) {
   const locale = await getMarketingLocale();
   const t = getMarketingMessages(locale);
-  const page = findPage(comparisonPages, (await params).slug);
-  if (!page) notFound();
+  const ui = compareUi(locale);
+  const raw = findPage(comparisonPages, (await params).slug);
+  if (!raw) notFound();
+  const page = localizeComparisonPage(raw, locale);
 
   return (
     <MarketingShell>
       <JsonLd data={faqJsonLd(page.faqs)} />
       <JsonLd
         data={breadcrumbSchema([
-          { name: "Home", path: "/" },
-          { name: "Compare", path: "/compare" },
+          { name: ui.breadcrumbHome, path: "/" },
+          { name: ui.breadcrumbCompare, path: "/compare" },
           { name: `vs ${page.competitor}`, path: page.path },
         ])}
       />
@@ -65,13 +73,13 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <Link href="/compare" className="text-sm font-medium text-blue-600 hover:underline">
-            ← {locale === "ro" ? "Toate comparațiile" : "All comparisons"}
+            ← {ui.allComparisons}
           </Link>
           <div className="mt-6">
             <CompareBrandLogosLabeled competitorSlug={page.slug} />
           </div>
           <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-600">
-            {page.market === "ro" ? "Comparație România" : "Comparison"}
+            {page.market === "ro" ? ui.comparisonRo : ui.comparison}
           </p>
           <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
             {page.h1}
@@ -82,7 +90,7 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              href="/signup"
+              href={compareSignupHref(page.slug, locale)}
               className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
             >
               {t.cta.startTrial}
@@ -127,8 +135,8 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
       <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="grid grid-cols-3 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-950">
-            <span>Area</span>
-            <span>franchisetech</span>
+            <span>{ui.tableArea}</span>
+            <span>{ui.tableFranchisetech}</span>
             <span>{page.competitor}</span>
           </div>
           {page.rows.map((row) => (
@@ -142,9 +150,7 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
             </div>
           ))}
         </div>
-        <p className="mx-auto mt-5 max-w-6xl text-xs text-slate-500">
-          Information may change. Verify each provider&apos;s current pricing, fiscal modules, and features before buying.
-        </p>
+        <p className="mx-auto mt-5 max-w-6xl text-xs text-slate-500">{ui.disclaimer}</p>
       </section>
 
       {page.sections.length > 0 ? (
@@ -162,7 +168,7 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
 
       <section className="border-t border-slate-100 bg-white px-4 py-14 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-xl font-bold text-slate-950">FAQ</h2>
+          <h2 className="text-xl font-bold text-slate-950">{ui.faq}</h2>
           <dl className="mt-6 space-y-6">
             {page.faqs.map((faq) => (
               <div key={faq.question}>
@@ -185,6 +191,8 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
       </section>
 
       <CTASection />
+      <CompareStickyTrialBar competitorSlug={page.slug} locale={locale} />
+      <div className="h-20 print:hidden" aria-hidden />
     </MarketingShell>
   );
 }

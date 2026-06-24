@@ -5,7 +5,9 @@ import { CashDrawerNotice } from "@/components/app/CashDrawerNotice";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatDate, formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { formatAppDate } from "@/lib/app-locale";
 import {
   lineDiscountPctStored,
   lineGrossAfterStored,
@@ -25,11 +27,11 @@ function money(value: number | string | null | undefined, cur = "EUR") {
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: cur || "EUR" }).format(amount);
 }
 
-function safeDate(value: string | null | undefined) {
+function safeDate(value: string | null | undefined, locale: "ro" | "en") {
   if (!value) return "-";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "-";
-  return formatDate(value);
+  return formatAppDate(value, locale);
 }
 
 type ReceiptItem = {
@@ -63,7 +65,9 @@ export default async function TransactionDetailPage({
 }) {
   const { id } = await params;
   const query = await searchParams;
-  const { supabase, orgId, membership, currency } = await getKitchenOpsContext();
+  const { countryCode, profileLocale, supabase, orgId, membership, currency } = await getKitchenOpsContext();
+  const { t, locale } = await getAppLocaleAndText(countryCode, profileLocale);
+  const r = t.transactions.receipt;
   let cashDrawerSettings = {
     mode: "manual" as const,
     port: 17878,
@@ -97,7 +101,7 @@ export default async function TransactionDetailPage({
     .eq("id", id)
     .single();
 
-  if (!tx) return <div className="p-6 text-slate-500">Transaction not found.</div>;
+  if (!tx) return <div className="p-6 text-slate-500">{t.transactions.notFound}</div>;
 
   // Cash received / change due from sale_payments metadata
   let cashPaymentMeta: { cash_received?: number; change_due?: number } | null = null;
@@ -126,8 +130,12 @@ export default async function TransactionDetailPage({
   const org = firstJoined(membership.organisations as { name?: string | null } | { name?: string | null }[]);
   const method = firstJoined(tx.payment_methods as { name?: string | null } | { name?: string | null }[]);
   const items = Array.isArray(tx.pos_transaction_items) ? (tx.pos_transaction_items as ReceiptItem[]) : [];
-  const customerName = typeof tx.customer_name === "string" && tx.customer_name.trim() ? tx.customer_name.trim() : "Walk-in customer";
-  const paymentName = method?.name || "Payment";
+  const customerName =
+    typeof tx.customer_name === "string" && tx.customer_name.trim()
+      ? tx.customer_name.trim()
+      : t.common.walkInCustomer;
+  const paymentName = method?.name || r.payment;
+  const statusVoided = tx.status === "voided";
 
   const canVoid = membership.role === "owner" || membership.role === "manager";
 
@@ -154,15 +162,19 @@ export default async function TransactionDetailPage({
       <div className="flex items-start justify-between gap-4 flex-wrap print:hidden">
         <div>
           <h1 className="text-2xl font-semibold text-slate-950">
-            Receipt {tx.transaction_number}
+            {r.title(tx.transaction_number)}
           </h1>
           <p className="text-sm text-slate-500">
-            {safeDate(tx.sold_at)} · {paymentName} · {customerName}
-            {tx.status === "voided" && <span className="ml-2 text-red-600 font-medium">[VOIDED]</span>}
+            {safeDate(tx.sold_at, locale)} · {paymentName} · {customerName}
+            {statusVoided && (
+              <span className="ml-2 text-red-600 font-medium">[{t.transactions.statusVoided.toUpperCase()}]</span>
+            )}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <Link href="/app/pos" className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-slate-50">New sale</Link>
+          <Link href="/app/pos" className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-slate-50">
+            {r.newSale}
+          </Link>
           <PrintButton />
           {canVoid && <VoidTransactionButton transactionId={tx.id} status={tx.status ?? "completed"} />}
         </div>
@@ -172,20 +184,24 @@ export default async function TransactionDetailPage({
       <Card className="mx-auto max-w-xl print:border-0 print:shadow-none">
         <CardHeader>
           <CardTitle>{((org as { name?: string | null } | null)?.name) ?? "franchisetech"}</CardTitle>
-          <p className="text-sm text-slate-500">{safeDate(tx.sold_at)} · {paymentName}</p>
-          <p className="text-sm text-slate-600">Customer: {customerName}</p>
-          {tx.status === "voided" && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700 font-medium">VOIDED</div>
+          <p className="text-sm text-slate-500">{safeDate(tx.sold_at, locale)} · {paymentName}</p>
+          <p className="text-sm text-slate-600">
+            {r.customer}: {customerName}
+          </p>
+          {statusVoided && (
+            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700 font-medium">
+              {t.transactions.statusVoided.toUpperCase()}
+            </div>
           )}
         </CardHeader>
         <CardContent className="space-y-4">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Item</TableHead>
-                <TableHead className="text-right">Qty</TableHead>
-                <TableHead className="text-right">Unit</TableHead>
-                <TableHead className="text-right">Total</TableHead>
+                <TableHead>{r.item}</TableHead>
+                <TableHead className="text-right">{r.qty}</TableHead>
+                <TableHead className="text-right">{r.unit}</TableHead>
+                <TableHead className="text-right">{r.total}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -196,14 +212,14 @@ export default async function TransactionDetailPage({
                 return (
                 <TableRow key={item.id}>
                   <TableCell>
-                    <div>{item.product_name || "Item"}</div>
+                    <div>{item.product_name || r.item}</div>
                     {lineHasDiscount(item) && (
                       <Badge variant="secondary" className="mt-1 text-[10px] font-semibold text-blue-700">
                         −{linePct}%
                       </Badge>
                     )}
                     {Number(item.vat_rate ?? 0) > 0 && (
-                      <div className="text-xs text-slate-400">VAT {item.vat_rate}%</div>
+                      <div className="text-xs text-slate-400">{r.vatShort(Number(item.vat_rate))}</div>
                     )}
                   </TableCell>
                   <TableCell className="text-right">{Number(item.quantity ?? 0)}</TableCell>
@@ -211,14 +227,16 @@ export default async function TransactionDetailPage({
                   <TableCell className="text-right">
                     <div className="font-medium">{money(lineAfter, currency)}</div>
                     {lineHasDiscount(item) && lineBefore > lineAfter + 0.001 && (
-                      <div className="text-xs text-slate-400">{money(lineBefore, currency)} before discount</div>
+                      <div className="text-xs text-slate-400">
+                        {money(lineBefore, currency)} {r.beforeDiscount}
+                      </div>
                     )}
                   </TableCell>
                 </TableRow>
               );}) : (
                 <TableRow>
                   <TableCell colSpan={4} className="py-6 text-center text-sm text-slate-500">
-                    No items saved for this receipt.
+                    {r.noItems}
                   </TableCell>
                 </TableRow>
               )}
@@ -228,15 +246,15 @@ export default async function TransactionDetailPage({
           {discountSummary.hasDiscount && (
             <div className="space-y-1 border-t pt-3 text-sm">
               <div className="flex justify-between text-slate-500">
-                <span>Subtotal before discount</span>
+                <span>{r.subtotalBeforeDiscount}</span>
                 <span>{money(discountSummary.subtotalBefore, currency)}</span>
               </div>
               <div className="flex justify-between text-blue-700 font-medium">
-                <span>Discount total</span>
+                <span>{r.discountTotal}</span>
                 <span>−{money(discountSummary.discountTotal, currency)}</span>
               </div>
               <div className="flex justify-between font-semibold text-slate-900">
-                <span>Total after discount</span>
+                <span>{r.totalAfterDiscount}</span>
                 <span>{money(discountSummary.totalAfter, currency)}</span>
               </div>
             </div>
@@ -246,24 +264,24 @@ export default async function TransactionDetailPage({
           <div className="space-y-1 border-t pt-3 text-sm">
             {Array.from(vatByRate.entries()).map(([rate, v]) => (
               <div key={rate} className="flex justify-between text-slate-500">
-                <span>VAT {rate}% ({money(v.net, currency)} net)</span>
+                <span>{r.vatLine(rate, money(v.net, currency))}</span>
                 <span>{money(v.vat, currency)}</span>
               </div>
             ))}
           </div>
           <div className="space-y-1 border-t pt-3 text-sm">
-            <div className="flex justify-between text-slate-500"><span>Net (excl. VAT)</span><span>{money(totalNet || (totalGross - totalVat), currency)}</span></div>
-            <div className="flex justify-between text-slate-500"><span>VAT total</span><span>{money(totalVat, currency)}</span></div>
-            <div className="flex justify-between text-lg font-bold"><span>Total (incl. VAT)</span><span>{money(totalGross, currency)}</span></div>
+            <div className="flex justify-between text-slate-500"><span>{r.netExclVat}</span><span>{money(totalNet || (totalGross - totalVat), currency)}</span></div>
+            <div className="flex justify-between text-slate-500"><span>{r.vatTotal}</span><span>{money(totalVat, currency)}</span></div>
+            <div className="flex justify-between text-lg font-bold"><span>{r.totalInclVat}</span><span>{money(totalGross, currency)}</span></div>
             {cashPaymentMeta?.cash_received && (
               <>
                 <div className="flex justify-between text-slate-500 border-t pt-2">
-                  <span>{currency === "RON" ? "Numerar primit" : "Cash received"}</span>
+                  <span>{r.cashReceived}</span>
                   <span>{money(cashPaymentMeta.cash_received, currency)}</span>
                 </div>
                 {(cashPaymentMeta.change_due ?? 0) > 0.005 && (
                   <div className="flex justify-between font-semibold text-green-700">
-                    <span>{currency === "RON" ? "Rest de dat" : "Change due"}</span>
+                    <span>{r.changeDue}</span>
                     <span>{money(cashPaymentMeta.change_due ?? 0, currency)}</span>
                   </div>
                 )}
@@ -276,19 +294,19 @@ export default async function TransactionDetailPage({
       {/* Audit trail */}
       {(auditEvents && auditEvents.length > 0) && (
         <Card className="mx-auto max-w-xl print:hidden">
-          <CardHeader><CardTitle className="text-base">Audit trail</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-base">{r.auditTrail}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {auditEvents.map((event) => {
               const profile = firstJoined(event.profiles as { full_name?: string | null; email?: string | null } | null);
-              const who = profile?.full_name || profile?.email || "Unknown";
+              const who = profile?.full_name || profile?.email || t.common.unknown;
               return (
                 <div key={event.id} className="flex items-start gap-3 text-sm">
-                  <Badge variant={event.event_type === "voided" ? "destructive" : "secondary"} className="mt-0.5 capitalize">
-                    {event.event_type}
+                  <Badge variant={event.event_type === "voided" ? "destructive" : "secondary"} className="mt-0.5">
+                    {r.auditEvent(event.event_type)}
                   </Badge>
                   <div>
-                    <p className="text-slate-700">{who} · {safeDate(event.performed_at)}</p>
-                    {event.reason && <p className="text-slate-500 mt-0.5">Reason: {event.reason}</p>}
+                    <p className="text-slate-700">{who} · {safeDate(event.performed_at, locale)}</p>
+                    {event.reason && <p className="text-slate-500 mt-0.5">{r.reason(event.reason)}</p>}
                   </div>
                 </div>
               );
