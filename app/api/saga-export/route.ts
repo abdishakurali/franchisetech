@@ -12,6 +12,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateNirXml, generateSalesXml, generateCombinedXml, type SagaNir, type SagaVanzare } from "@/lib/ro-accounting/saga-xml";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 
 type PurchaseRow = {
   id: string;
@@ -64,6 +65,13 @@ export async function GET(req: Request) {
     .single();
   if (!membership) return new NextResponse("No org", { status: 403 });
   const orgId = membership.organisation_id;
+  try {
+    await assertEntitlement(orgId, "reports.accountant_pack");
+  } catch (error) {
+    const response = entitlementDeniedResponse(error);
+    if (response) return response;
+    throw error;
+  }
 
   const { data: org } = await supabase
     .from("organisations")

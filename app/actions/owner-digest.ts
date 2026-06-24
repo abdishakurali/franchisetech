@@ -2,8 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getActiveOrg } from "@/lib/kitchenops/data";
-import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
-import { isModuleEnabled } from "@/lib/business-modules";
+import { assertEntitlement, EntitlementDeniedError } from "@/lib/billing/entitlement-resolver";
 
 export type OwnerDigestSettingsResult = { ok: true } | { ok: false; error: string };
 
@@ -22,10 +21,11 @@ export async function saveOwnerDigestSettings(formData: FormData): Promise<Owner
     if (!["owner", "manager"].includes(membership.role ?? "")) {
       return { ok: false, error: "Forbidden" };
     }
-
-    const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
-    if (!isModuleEnabled(moduleFlags, "inventory")) {
-      return { ok: false, error: "inventory_required" };
+    try {
+      await assertEntitlement(orgId, "owner_digest.enabled");
+    } catch (error) {
+      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+      throw error;
     }
 
     const enabledCheckbox = formData.get("owner_digest_enabled") === "on";

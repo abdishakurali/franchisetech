@@ -27,10 +27,9 @@ export default async function PricingPage() {
   const locale = await getMarketingLocale();
   const market = marketFromMarketingLocale(locale);
   const t = getMarketingMessages(locale);
-  const starterPrice = pricingPlans.find((p) => p.id === "starter")?.price ?? "€49";
 
   const heroStats = [
-    t.pricing.heroStatFrom.replace("{price}", starterPrice),
+    t.pricing.heroStatFrom,
     t.pricing.heroStatTrial,
     t.pricing.heroStatTill,
   ];
@@ -72,10 +71,10 @@ export default async function PricingPage() {
           <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">{t.pricing.heroTitle}</h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">{t.pricing.heroText}</p>
 
-          <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-3">
+          <div className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
             {heroStats.map((stat) => (
-              <div key={stat} className="rounded-2xl border border-slate-200 bg-white px-4 py-6">
-                <p className="text-xl font-bold text-slate-900 sm:text-2xl">{stat}</p>
+              <div key={stat} className="rounded-lg border border-slate-200 bg-white px-3 py-3">
+                <p className="text-sm font-medium leading-5 text-slate-700">{stat}</p>
               </div>
             ))}
           </div>

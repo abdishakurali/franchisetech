@@ -43,7 +43,7 @@ export function getPlanFeatureCategories(
   const tax = taxLabelForMarket(market);
   const tillClose = tillCloseLabelForMarket(market);
 
-  if (plan === "starter") {
+  if (plan === "starter" || plan === "core") {
     const tillItems =
       market === "RO"
         ? [
@@ -72,19 +72,40 @@ export function getPlanFeatureCategories(
         title: "Reports",
         items: ["Sales report", tillClose, `${tax} report`],
       },
+      ...(market === "RO"
+        ? [
+            {
+              title: "Romanian compliance",
+              items: [
+                "FiscalNet fiscal receipts",
+                "Fiscal Z-report (daily close)",
+                "Fiscal X-report (interim)",
+                "TVA groups",
+                "ANAF e-Factura support",
+              ],
+            },
+          ]
+        : []),
       {
         title: "Included",
-        items: ["Manual cash drawer mode", "Unlimited staff", "15-day assisted trial"],
+        items: ["Owner and staff roles", "Unlimited staff", "15-day assisted trial"],
       },
     ];
   }
 
-  if (plan === "pro") {
+  if (plan === "pro" || plan === "operations") {
+    const accountingItems =
+      market === "RO"
+        ? [
+            "Bon de consum (materii prime consumate din rețete)",
+            "Export audit CSV pentru contabil",
+          ]
+        : ["Ingredient consumption record", "Audit CSV export"];
     return [
       {
         title: "Till & sales",
         items: [
-          "Everything in Starter",
+          "Everything in Core",
           "Split payments & tips (optional)",
           "Cash drawer connector support",
         ],
@@ -103,6 +124,10 @@ export function getPlanFeatureCategories(
         ],
       },
       {
+        title: market === "RO" ? "Contabilitate" : "Accounting",
+        items: accountingItems,
+      },
+      {
         title: "Kitchen & orders",
         items: [
           "Kitchen display (optional)",
@@ -118,11 +143,40 @@ export function getPlanFeatureCategories(
     ];
   }
 
+  if (plan === "scale") {
+    return [
+      {
+        title: "Operations",
+        items: [
+          "Everything in Operations",
+          "Priority support (same-day response)",
+          "Dedicated onboarding call",
+          "All future modules included",
+        ],
+      },
+      {
+        title: "Kitchen",
+        items: ["Unlimited kitchen screens", "All kitchen workflow features"],
+      },
+      {
+        title: market === "RO" ? "Contabilitate" : "Accounting",
+        items:
+          market === "RO"
+            ? [
+                "Export XML Saga pentru contabil",
+                "Pachete CSV audit complet",
+                "Owner digest email zilnic",
+              ]
+            : ["Full accountant export pack (CSV + XML)", "Daily owner digest email"],
+      },
+    ];
+  }
+
   const countryCategory = multiLocationCountryCategory(market);
   return [
     {
       title: "Operations",
-      items: ["Everything in Pro", "Multiple sites", "Site switching"],
+      items: ["Everything in Operations", "Multiple sites", "Site switching"],
     },
     ...(countryCategory ? [countryCategory] : []),
     {

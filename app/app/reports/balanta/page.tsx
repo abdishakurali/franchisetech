@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
 import { BalantaDownloadButton } from "./BalantaDownloadButton";
 import type { BalantaItem, BalantaIntegrityStatus } from "@/lib/ro-accounting/balanta";
 import {
@@ -45,6 +46,7 @@ export default async function BalantaReportPage({
   await requireBusinessModule("inventory");
   const { countryCode, profileLocale, supabase, orgId, currency, membership } =
     await getKitchenOpsContext();
+  await assertEntitlement(orgId, "reports.accountant_pack", { write: false });
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
   const canManage = ["owner", "manager"].includes(membership.role ?? "");

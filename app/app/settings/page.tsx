@@ -23,9 +23,8 @@ import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
 import { OwnerDigestCard } from "@/components/app/OwnerDigestCard";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
-import type { BillingPlan } from "@/lib/billing/plans";
+import { hasEntitlement, normalizePlan } from "@/lib/billing/entitlement-resolver";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
-import { isModuleEnabled } from "@/lib/business-modules";
 import { industryLabel, industryOptions } from "@/lib/restaurant-features-i18n";
 import { RESTAURANT_FEATURE_KEYS, getSuggestedFeaturesForIndustry } from "@/lib/restaurant-features";
 import { DEFAULT_OPERATIONAL_UNITS } from "@/lib/units-of-measure";
@@ -161,9 +160,7 @@ export default async function SettingsPage({
   }));
 
   const sub = await getSubscriptionStatus(orgId).catch(() => null);
-  const subscriptionPlan = (sub?.plan === "starter" || sub?.plan === "pro" || sub?.plan === "multi_location")
-    ? sub.plan as BillingPlan
-    : null;
+  const subscriptionPlan = sub?.plan === "multi_location" ? "multi_location" : normalizePlan(sub?.plan);
   const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
   const appLocale = (profile?.locale as string | null) ?? null;
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
@@ -175,6 +172,7 @@ export default async function SettingsPage({
     )
     .eq("id", orgId)
     .maybeSingle();
+  const ownerDigestVisible = await hasEntitlement(orgId, "owner_digest.enabled", { write: false });
 
   // ── Tab list ─────────────────────────────────────────────────────────
   const tabs = [
@@ -589,23 +587,24 @@ export default async function SettingsPage({
       {/* ── NOTIFICATIONS TAB ───────────────────────────────────────── */}
       {activeTab === "notifications" && (
         <div className="space-y-6">
-          <OwnerDigestCard
-            locale={locale}
-            canEdit={canEdit}
-            inventoryEnabled={isModuleEnabled(moduleFlags, "inventory")}
-            ownerEmail={user.email ?? ""}
-            initial={{
-              enabled: Boolean(digestOrg?.owner_digest_enabled ?? false),
-              frequency: (() => {
-                const f = String(digestOrg?.owner_digest_frequency ?? "off");
-                return f === "daily" || f === "weekly" ? f : "off";
-              })(),
-              dayOfWeek: Number(digestOrg?.owner_digest_day_of_week ?? 1),
-              timeOfDay: String(digestOrg?.owner_digest_time_of_day ?? "08:00:00").slice(0, 5),
-              timezone: String(digestOrg?.owner_digest_timezone ?? "Europe/Bucharest"),
-              recipients: (digestOrg?.owner_digest_recipients as string[] | undefined) ?? [],
-            }}
-          />
+          {ownerDigestVisible && (
+            <OwnerDigestCard
+              locale={locale}
+              canEdit={canEdit}
+              ownerEmail={user.email ?? ""}
+              initial={{
+                enabled: Boolean(digestOrg?.owner_digest_enabled ?? false),
+                frequency: (() => {
+                  const f = String(digestOrg?.owner_digest_frequency ?? "off");
+                  return f === "daily" || f === "weekly" ? f : "off";
+                })(),
+                dayOfWeek: Number(digestOrg?.owner_digest_day_of_week ?? 1),
+                timeOfDay: String(digestOrg?.owner_digest_time_of_day ?? "08:00:00").slice(0, 5),
+                timezone: String(digestOrg?.owner_digest_timezone ?? "Europe/Bucharest"),
+                recipients: (digestOrg?.owner_digest_recipients as string[] | undefined) ?? [],
+              }}
+            />
+          )}
         </div>
       )}
 

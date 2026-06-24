@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getDefaultVatRateValue } from "@/lib/vat-rates";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { listOperationalUnitNames, validateOperationalUnit } from "@/lib/units-of-measure";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 
 // ── helpers ────────────────────────────────────────────────────────────────
 function parseCsvText(raw: string): Record<string, string>[] {
@@ -47,6 +48,13 @@ export async function POST(req: Request) {
     }
 
     const orgId = membership.organisation_id as string;
+    try {
+      await assertEntitlement(orgId, "purchases.nir");
+    } catch (error) {
+      const response = entitlementDeniedResponse(error);
+      if (response) return response;
+      throw error;
+    }
 
     // ── parse body ──────────────────────────────────────────────────────
     let rows: Record<string, string>[] = [];

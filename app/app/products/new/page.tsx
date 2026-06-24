@@ -33,8 +33,9 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
 
   if (wantsIngredient && !defaultIngredient) redirect("/app/products/new");
 
-  const [{ data: inventoryCategories }, units, { data: suppliers }, vatRates] = await Promise.all([
+  const [{ data: inventoryCategories }, { data: posCategories }, units, { data: suppliers }, vatRates] = await Promise.all([
     supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "inventory").order("name"),
+    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "pos").order("name"),
     listOperationalUnitNames(supabase, orgId),
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     listActiveVatRates(supabase, orgId),
@@ -42,6 +43,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
 
   const defaultVatRate = getDefaultVatRateValue(vatRates);
   const categoryOptions = (inventoryCategories ?? []).map((c: { id: string; name: string }) => ({ value: c.id, label: c.name }));
+  const posCategoryOptions = (posCategories ?? []).map((c: { id: string; name: string }) => ({ value: c.id, label: c.name }));
   const unitOptions = units.map((u) => ({ value: u, label: u }));
   const supplierOptions = (suppliers ?? []).map((s: { id: string; name: string }) => ({ value: s.id, label: s.name }));
   const stationOptions = KITCHEN_STATIONS.map((s) => ({ value: s.value, label: s.label }));
@@ -75,9 +77,21 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <Label>{pf.category}</Label>
+                    <div className="flex items-center justify-between">
+                      <Label>{pf.category}</Label>
+                      <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{pf.manageCategories}</Link>
+                    </div>
                     <SearchableSelect name="category_id" options={categoryOptions} placeholder={pf.none} searchPlaceholder={pf.category} className="mt-1.5" />
                   </div>
+                  {posCategoryOptions.length > 0 && (
+                    <div className="sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <Label>{pf.posCategory}</Label>
+                        <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{pf.manageCategories}</Link>
+                      </div>
+                      <SearchableSelect name="pos_category_id" options={posCategoryOptions} placeholder={pf.none} searchPlaceholder={pf.posCategory} className="mt-1.5" />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

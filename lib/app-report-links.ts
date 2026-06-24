@@ -24,6 +24,7 @@ export type AppReportLink = {
   tag: string | null;
   requiresInventory?: boolean;
   requiresRecipe?: boolean;
+  requiresAccountantPack?: boolean;
 };
 
 export function getAppReportLinks(t: AppT): AppReportLink[] {
@@ -104,6 +105,7 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
       color: "bg-cyan-50 text-cyan-700",
       tag: t.reports.balanta.tag,
       requiresInventory: true,
+      requiresAccountantPack: true,
     },
     {
       href: "/app/reports/gestiune",
@@ -113,6 +115,7 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
       color: "bg-slate-100 text-slate-700",
       tag: t.reports.gestiune.tag,
       requiresInventory: true,
+      requiresAccountantPack: true,
     },
     {
       href: "/app/reports/audit-export",
@@ -135,11 +138,12 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
 
 export function filterReportLinks(
   t: AppT,
-  input: { inventoryVisible: boolean; recipeVisible: boolean },
+  input: { inventoryVisible: boolean; recipeVisible: boolean; accountantPackVisible?: boolean },
 ): AppReportLink[] {
   return getAppReportLinks(t).filter((link) => {
     if (link.requiresInventory && !input.inventoryVisible) return false;
     if (link.requiresRecipe && !input.recipeVisible) return false;
+    if (link.requiresAccountantPack && !input.accountantPackVisible) return false;
     return true;
   });
 }

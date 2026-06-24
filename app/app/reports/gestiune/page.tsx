@@ -5,6 +5,7 @@ import { PrintButton } from "@/components/app/PrintButton";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
 import {
   fetchStockMovements,
   stockMovementQty,
@@ -57,6 +58,7 @@ export default async function GestiuneReportPage({
 }) {
   await requireBusinessModule("inventory");
   const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  await assertEntitlement(orgId, "reports.accountant_pack", { write: false });
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
 

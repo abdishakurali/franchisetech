@@ -648,17 +648,17 @@ export const industryPages: SeoPage[] = [
     slug: "multi-site",
     path: "/industries/multi-site",
     eyebrow: "Multi-location",
-    title: "POS for Multi-Site Food Businesses — €99 per Location",
+    title: "POS for Multi-Site Food Businesses — €89 per Additional Location",
     metaTitle: "Multi-Location POS for Restaurants & Cafes | franchisetech",
     description:
-      "Run 2–5 food locations on one platform: shared product catalogue, per-site till close, stock and reports per location — €99/month per site, unlimited staff.",
+      "Run 2–5 food locations on one platform: shared product catalogue, per-site till close, stock and reports per location — Scale base + €89/month per additional site, unlimited staff.",
     h1: "One workspace for every location — without per-seat fees",
     intro:
       "Small chains and multi-site operators need the same clarity at each location: till matches drawer, daily Z-report, stock visibility — plus a simple way to add sites as you grow.",
     bullets: [
-      "€99/month per active location — unlimited staff at each site",
+      "Scale base + €89/month per additional location — unlimited staff",
       "POS, till close, and Z-report at every location",
-      "Stock, purchases, and recipes per site (Pro)",
+      "Stock, purchases, and recipes per site (Operations)",
       "Kitchen display where prep teams need it",
       "Browser-based — no locked-in POS hardware contracts",
       "Assisted setup for new locations (optional €199)",
@@ -674,21 +674,21 @@ export const industryPages: SeoPage[] = [
       },
       {
         title: "Grow when ready — not before",
-        body: "Start on Starter at a single site. Upgrade to Pro for stock and recipes. Add locations on the multi-location plan when a second shop is real — not during trial setup.",
+        body: "Start on Core at a single site. Upgrade to Operations for stock and recipes, or Scale for the full module set. Add locations on the multi-location add-on when a second shop is real — not during trial setup.",
       },
     ],
     faqs: [
       {
         question: "How is multi-location priced?",
-        answer: "€99/month per active location on the multi-location plan. Unlimited staff at each site — no per-user fees.",
+        answer: "Scale plan (€109/month) as the base, then €89/month per additional location. Unlimited staff at each site — no per-user fees.",
       },
       {
         question: "Can I manage products centrally?",
         answer: "Each organisation runs its site with a consistent product and settings model. For operators with multiple legal entities, contact us — we onboard multi-site setups with assisted setup.",
       },
       {
-        question: "Do I need Pro before adding locations?",
-        answer: "Many operators start Starter at site one, then add Pro when stock and recipes matter. Multi-location billing applies when you run more than one active site on the platform.",
+        question: "Do I need Scale before adding locations?",
+        answer: "Yes — the multi-location add-on requires a Scale base plan. Many operators start on Core or Operations at site one, then upgrade to Scale when ready to expand.",
       },
       {
         question: "Does FiscalNet work at every site?",

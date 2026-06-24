@@ -34,6 +34,7 @@ import {
   linesToFileContent,
   safePath,
 } from "@/lib/fiscalnet";
+import { assertEntitlement, EntitlementDeniedError } from "@/lib/billing/entitlement-resolver";
 
 function canManage(role: string): boolean {
   return ["owner", "manager"].includes(role);
@@ -89,6 +90,12 @@ function fiscalDownload(label: string, prefix: string, lines: string[]): FiscalA
 export async function saveFiscalNetSettings(formData: FormData) {
   const { supabase, orgId, membership } = await getActiveOrg();
   if (!canManage(membership.role)) return { error: "Permission denied" };
+  try {
+    await assertEntitlement(orgId, "fiscal.fiscalnet", { write: false });
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { error: error.body.error };
+    throw error;
+  }
 
   const enabled          = formData.get("fiscalnet_enabled") === "true";
   const mockMode         = formData.get("fiscalnet_mock_mode") !== "false";
@@ -187,6 +194,12 @@ export async function testFiscalNetConnection(): Promise<{ ok: boolean; message:
 export async function fiscalCashInAction(formData: FormData): Promise<FiscalActionResult> {
   const { supabase, orgId, membership, user } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, message: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "fiscal.fiscalnet", { write: false });
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, message: error.body.error };
+    throw error;
+  }
 
   const org = await getOrgWithFiscal(supabase, orgId);
   if (!org || org.country_code !== "RO" || !org.fiscalnet_enabled) {
@@ -213,6 +226,12 @@ export async function fiscalCashInAction(formData: FormData): Promise<FiscalActi
 export async function fiscalCashOutAction(formData: FormData): Promise<FiscalActionResult> {
   const { supabase, orgId, membership, user } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, message: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "fiscal.fiscalnet", { write: false });
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, message: error.body.error };
+    throw error;
+  }
 
   const org = await getOrgWithFiscal(supabase, orgId);
   if (!org || org.country_code !== "RO" || !org.fiscalnet_enabled) {
@@ -239,6 +258,12 @@ export async function fiscalCashOutAction(formData: FormData): Promise<FiscalAct
 export async function fiscalVoidLastAction(): Promise<{ ok: boolean; message: string }> {
   const { supabase, orgId, membership, user } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, message: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "fiscal.fiscalnet", { write: false });
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, message: error.body.error };
+    throw error;
+  }
 
   const org = await getOrgWithFiscal(supabase, orgId);
   if (!org || org.country_code !== "RO" || !org.fiscalnet_enabled) {
@@ -254,6 +279,12 @@ export async function fiscalVoidLastAction(): Promise<{ ok: boolean; message: st
 export async function fiscalDrawerAction(): Promise<FiscalActionResult> {
   const { supabase, orgId, membership, user } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, message: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "fiscal.fiscalnet", { write: false });
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, message: error.body.error };
+    throw error;
+  }
 
   const org = await getOrgWithFiscal(supabase, orgId);
   if (!org || org.country_code !== "RO" || !org.fiscalnet_enabled) {
@@ -273,6 +304,12 @@ export async function fiscalDrawerAction(): Promise<FiscalActionResult> {
 export async function runXReport(): Promise<FiscalActionResult> {
   const { supabase, orgId, membership, user } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, message: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "fiscal.x_report", { write: false });
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, message: error.body.error };
+    throw error;
+  }
 
   const org = await getOrgWithFiscal(supabase, orgId);
   if (!org || org.country_code !== "RO" || !org.fiscalnet_enabled) {
@@ -294,6 +331,12 @@ export async function runXReport(): Promise<FiscalActionResult> {
 export async function runZReport(formData: FormData): Promise<FiscalActionResult> {
   const { supabase, orgId, membership, user } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, message: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "fiscal.z_report", { write: false });
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, message: error.body.error };
+    throw error;
+  }
 
   const org = await getOrgWithFiscal(supabase, orgId);
   if (!org || org.country_code !== "RO" || !org.fiscalnet_enabled) {

@@ -12,7 +12,7 @@ export const BILLING_MARKET_LABELS: Record<BillingMarket, string> = {
 
 export function marketFromMarketingLocale(locale: MarketingLocale): BillingMarket {
   if (locale === "ro") return "RO";
-  return "IE";
+  return "RO";
 }
 
 export function marketFromCountryCode(code: string | null | undefined): BillingMarket {
@@ -40,7 +40,7 @@ export function purchaseReceivingLabelForMarket(market: BillingMarket): string {
 
 export function pricingNotIncludedText(market: BillingMarket): string {
   if (market === "RO") {
-    return "Achiziția hardware, integrări contabile, comenzi online, loialitate și servire la masă nu fac parte din pachetul de bază. FiscalNet este disponibil pe planul Multi-location.";
+    return "You are responsible for purchasing and registering a compatible fiscal printer. franchisetech connects to it via FiscalNet and handles fiscal receipts, Z-reports, and ANAF e-Factura automatically.";
   }
   const fiscalNote =
     market === "IE" || market === "UK"

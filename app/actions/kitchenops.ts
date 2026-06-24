@@ -36,6 +36,11 @@ import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
 import { nearestVatRate, ratesMatch, validateVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 import { listOperationalUnitNames, validateOperationalUnit } from "@/lib/units-of-measure";
+import {
+  assertEntitlement,
+  hasEntitlement,
+  EntitlementDeniedError,
+} from "@/lib/billing/entitlement-resolver";
 
 function canTransact(role: string | null) { return ["owner","manager","staff","cashier"].includes(role ?? ""); }
 function canManage(role: string | null) { return ["owner","manager"].includes(role ?? ""); }
@@ -184,6 +189,7 @@ async function createKitchenOrderIfEnabled({
       enabled = Boolean(featureRow?.kitchen_display_enabled);
     }
     if (!enabled) return;
+    await assertEntitlement(orgId, "kitchen.enabled");
 
     const productIds = [...new Set(items.map((item) => item.product_id).filter(Boolean))];
     const { data: products } = productIds.length
@@ -356,6 +362,9 @@ export async function updateCashDrawerSettings(formData: FormData) {
 
   const mode = stringValue(formData, "cash_drawer_mode");
   const safeMode = ["off", "manual", "local_connector", "android_connector"].includes(mode) ? mode : "manual";
+  if (safeMode === "local_connector" || safeMode === "android_connector") {
+    await assertEntitlement(orgId, "pos.cash_drawer_connector");
+  }
   const existingToken = stringValue(formData, "existing_token");
   const rawToken = stringValue(formData, "cash_drawer_connector_token");
   const token = rawToken || existingToken || null;
@@ -598,6 +607,7 @@ export async function deleteProduct(
 export async function openPosSession(formData: FormData) {
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "pos.till_sessions");
   const openingCash = numberValue(formData, "opening_cash", 0);
   // Resolve active site server-side — client cannot spoof site_id
   const { siteId } = await requireActiveSite(supabase, orgId, membership.id, membership.role);
@@ -703,6 +713,7 @@ export async function closePosSession(formData: FormData) {
 export async function completeSale(formData: FormData) {
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canTransact(membership.role)) return;
+  await assertEntitlement(orgId, "pos.enabled");
   // Resolve active site server-side — client cannot spoof site_id
   const { siteId } = await requireActiveSite(supabase, orgId, membership.id, membership.role);
 
@@ -717,6 +728,9 @@ export async function completeSale(formData: FormData) {
   const customerName = stringValue(formData, "customer_name") || null;
   const legacyCartPct = numberValue(formData, "discount_pct", 0);
   const cartDiscountLei = numberValue(formData, "discount_lei", 0);
+  if (legacyCartPct > 0 || cartDiscountLei > 0 || cart.some((item) => Number(item.discount_pct ?? 0) > 0)) {
+    await assertEntitlement(orgId, "pos.discounts");
+  }
 
   const itemCalcs = buildPosItemCalcs(cart, legacyCartPct, cartDiscountLei);
   const txDiscountPct = transactionDiscountPct(cart, legacyCartPct);
@@ -946,6 +960,7 @@ export async function voidTransaction(formData: FormData) {
 export async function addSupplier(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "purchases.suppliers");
   const name = stringValue(formData, "name");
   if (!name) return;
   await supabase.from("suppliers").insert({
@@ -966,6 +981,12 @@ export async function addSupplier(formData: FormData) {
 export async function createSupplierInline(formData: FormData): Promise<{ ok: true; supplier: { id: string; name: string } } | { ok: false; error: string }> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "purchases.suppliers");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
   const name = stringValue(formData, "name");
   if (!name) return { ok: false, error: "Supplier name is required." };
   const { data, error } = await supabase.from("suppliers").insert({
@@ -989,6 +1010,7 @@ export async function createSupplierInline(formData: FormData): Promise<{ ok: tr
 export async function updateSupplier(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "purchases.suppliers");
   const id = stringValue(formData, "id");
   if (!id) return;
   await supabase.from("suppliers").update({
@@ -1208,6 +1230,7 @@ async function loadDraftPurchaseItems(
 export async function savePurchaseDraft(formData: FormData) {
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "purchases.nir");
 
   const purchaseId = stringValue(formData, "purchase_id") || null;
   const header = parsePurchaseHeaderFromForm(formData);
@@ -1250,6 +1273,7 @@ export async function savePurchaseDraft(formData: FormData) {
 export async function postNirPurchase(formData: FormData) {
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "purchases.nir");
 
   const draftId = await ensureDraftPurchaseForPost(supabase, orgId, user.id, formData);
   if (!draftId) {
@@ -1283,6 +1307,7 @@ export async function addPurchase(formData: FormData) {
 export async function addRecipe(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "recipes.enabled");
   const productId = stringValue(formData, "product_id");
   const ingredientNames = formData.getAll("ingredient_name").map((v) => String(v).trim());
   if (!productId || !ingredientNames.some(Boolean)) return;
@@ -1310,6 +1335,7 @@ export async function addRecipe(formData: FormData) {
 export async function addRecipeFromProducts(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "recipes.enabled");
   const productId = stringValue(formData, "product_id");
   if (!productId) return;
   const recipeName = stringValue(formData, "name") || "Recipe";
@@ -1592,6 +1618,12 @@ export async function deleteSuppliers(ids: string[]) {
 export async function createIngredientInline(formData: FormData): Promise<{ id: string; name: string; unit_of_measure: string | null; cost_price: number | null; current_stock_qty: number | null } | { error: string }> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { error: "Permission denied" };
+  try {
+    await assertEntitlement(orgId, "recipes.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { error: error.body.error };
+    throw error;
+  }
 
   const name = stringValue(formData, "name");
   if (!name) return { error: "Name is required" };
@@ -1622,6 +1654,7 @@ export async function createIngredientInline(formData: FormData): Promise<{ id: 
 export async function updateProductStock(formData: FormData): Promise<void> {
   const { supabase, membership, orgId, user } = await getActiveOrg();
   if (!canManage(membership.role)) throw new Error("Permission denied");
+  await assertEntitlement(orgId, "inventory.enabled");
   const productId = stringValue(formData, "product_id");
   if (!productId) throw new Error("Product ID required");
   const qty = numberValue(formData, "quantity", 0);
@@ -1666,6 +1699,12 @@ export async function updateProductStock(formData: FormData): Promise<void> {
 export async function bulkUpdateProductStock(formData: FormData): Promise<{ ok: boolean; error?: string; updated?: number }> {
   const { supabase, membership, orgId, user } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied" };
+  try {
+    await assertEntitlement(orgId, "inventory.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
 
   const raw = stringValue(formData, "items_json");
   if (!raw) return { ok: false, error: "No items to update" };
@@ -1795,6 +1834,12 @@ export async function updateRestaurantFeatureFlags(formData: FormData): Promise<
     RESTAURANT_FEATURE_KEYS.map((key) => [key, formData.get(key) === "on"])
   ) as Record<RestaurantFeatureKey, boolean>;
 
+  if (updates.payment_split_enabled) await assertEntitlement(orgId, "pos.split_payments");
+  if (updates.tips_enabled) await assertEntitlement(orgId, "pos.tips");
+  if (updates.kitchen_display_enabled || updates.restaurant_order_flow_enabled) await assertEntitlement(orgId, "kitchen.enabled");
+  if (updates.kitchen_stations_enabled) await assertEntitlement(orgId, "kitchen.stations");
+  if (updates.order_types_enabled) await assertEntitlement(orgId, "kitchen.order_types");
+
   await supabase.from("organisations").update(updates).eq("id", orgId);
 
   for (const key of RESTAURANT_FEATURE_KEYS) {
@@ -1819,6 +1864,7 @@ export async function updateKitchenOrderStatus(formData: FormData): Promise<void
   "use server";
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canUpdateKitchen(membership.role)) return;
+  await assertEntitlement(orgId, "kitchen.enabled");
 
   const id = stringValue(formData, "kitchen_order_id");
   const status = stringValue(formData, "status");
@@ -1863,6 +1909,12 @@ export type CompleteSaleResult =
 export async function completeSaleReturn(formData: FormData): Promise<CompleteSaleResult> {
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canTransact(membership.role)) return { ok: false, error: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "pos.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
   // Resolve active site server-side — client cannot spoof site_id
   const { siteId } = await requireActiveSite(supabase, orgId, membership.id, membership.role);
 
@@ -1896,6 +1948,38 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const txDiscountPct = transactionDiscountPct(cart, legacyCartPct);
 
   const itemCalcs = buildPosItemCalcs(cart, legacyCartPct, cartDiscountLei);
+  if (legacyCartPct > 0 || cartDiscountLei > 0 || cart.some((item) => Number(item.discount_pct ?? 0) > 0)) {
+    try {
+      await assertEntitlement(orgId, "pos.discounts");
+    } catch (error) {
+      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+      throw error;
+    }
+  }
+  if (splitEnabled && stringValue(formData, "split_payments_json")) {
+    try {
+      await assertEntitlement(orgId, "pos.split_payments");
+    } catch (error) {
+      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+      throw error;
+    }
+  }
+  if (tipsEnabled && numberValue(formData, "tip_amount", 0) > 0) {
+    try {
+      await assertEntitlement(orgId, "pos.tips");
+    } catch (error) {
+      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+      throw error;
+    }
+  }
+  if ((kitchenEnabled || restaurantFlowEnabled) && cart.length > 0) {
+    try {
+      await assertEntitlement(orgId, "kitchen.enabled");
+    } catch (error) {
+      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+      throw error;
+    }
+  }
 
   const subtotalNet = itemCalcs.reduce((s, i) => s + i.net_amount, 0);
   const taxTotal    = itemCalcs.reduce((s, i) => s + i.vat_amount, 0);
@@ -1989,7 +2073,8 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
 
   // Stock reduction (non-fatal)
   try {
-    const soldProductIds = [...new Set(cart.map((i) => i.product_id).filter(Boolean))];
+    const stockDepletionAllowed = await hasEntitlement(orgId, "recipes.stock_depletion", { write: true });
+    const soldProductIds = stockDepletionAllowed ? [...new Set(cart.map((i) => i.product_id).filter(Boolean))] : [];
     if (soldProductIds.length > 0) {
       const { data: recipes } = await supabase
         .from("recipes")

@@ -33,9 +33,10 @@ export default async function ProductEditPage({
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const visibility = productModuleVisibility(moduleFlags);
 
-  const [{ data: product }, { data: inventoryCategories }, units, { data: suppliers }, vatRates] = await Promise.all([
+  const [{ data: product }, { data: inventoryCategories }, { data: posCategories }, units, { data: suppliers }, vatRates] = await Promise.all([
     supabase.from("products").select("*").eq("id", id).eq("organisation_id", orgId).single(),
     supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "inventory").order("name"),
+    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "pos").order("name"),
     listOperationalUnitNames(supabase, orgId),
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     listActiveVatRates(supabase, orgId),
@@ -71,6 +72,7 @@ export default async function ProductEditPage({
       <ProductEditForm
         product={product}
         categories={inventoryCategories ?? []}
+        posCategories={posCategories ?? []}
         suppliers={suppliers ?? []}
         units={units}
         vatRates={vatRates}

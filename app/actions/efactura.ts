@@ -10,6 +10,7 @@ import { getOrgAccessToken, hasAnafCredentials, storeOrgTokens, revokeOrgTokens,
 import type { UblLineItem, UblAddress } from "@/lib/anaf/ubl-builder";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { ratesMatch } from "@/lib/vat-rates";
+import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
 
 export type EfacturaLineInput = {
   name: string;
@@ -43,6 +44,7 @@ function canManage(role: string | null | undefined) {
 export async function createInvoiceDraft(input: CreateInvoiceDraftInput): Promise<{ id: string }> {
   const { supabase, orgId, membership, user } = await getKitchenOpsContext();
   if (!canManage(membership.role)) redirect("/app/invoices");
+  await assertEntitlement(orgId, "fiscal.efactura");
   const activeVatRates = await listActiveVatRates(supabase, orgId);
   if (activeVatRates.length > 0) {
     const invalid = input.lines.find((line) => !activeVatRates.some((rate) => ratesMatch(rate.rate, line.vatRate)));
@@ -93,6 +95,7 @@ export async function generateInvoiceXml(invoiceId: string): Promise<{
   errors: string[];
 }> {
   const { supabase, orgId } = await getKitchenOpsContext();
+  await assertEntitlement(orgId, "fiscal.efactura");
 
   const { data: inv, error } = await supabase
     .from("efactura_invoices")
@@ -154,6 +157,7 @@ export async function generateInvoiceXml(invoiceId: string): Promise<{
 
 export async function submitInvoiceToAnaf(invoiceId: string): Promise<{ indexIncarcare: number }> {
   const { supabase, orgId } = await getKitchenOpsContext();
+  await assertEntitlement(orgId, "fiscal.efactura");
 
   const { data: inv } = await supabase
     .from("efactura_invoices")
@@ -226,6 +230,7 @@ export async function connectAnafAccount(
 export async function disconnectAnaf(): Promise<void> {
   const { orgId, membership } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "fiscal.efactura");
   await revokeOrgTokens(orgId);
   revalidatePath("/app/settings");
 }
@@ -248,6 +253,7 @@ export async function lookupBuyerByCif(cif: string): Promise<{
 export async function saveAnafSettings(formData: FormData): Promise<void> {
   const { supabase, orgId, membership } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "fiscal.efactura");
 
   const anaf_cif = (formData.get("anaf_cif") as string ?? "").trim();
   const anaf_vat_registered = formData.get("anaf_vat_registered") === "on";

@@ -7,7 +7,7 @@ import {
   type BusinessModuleKey,
   type EffectiveBillingPlan,
 } from "@/lib/billing/entitlements";
-import type { BillingPlan } from "@/lib/billing/plans";
+import { normalizePlan } from "@/lib/billing/plan-codes";
 
 export type { BusinessModuleKey } from "@/lib/billing/entitlements";
 
@@ -102,11 +102,14 @@ export function isModuleEnabled(org: OrgModuleRow | null | undefined, key: Busin
 export function canUseModule(input: {
   org: OrgModuleRow | null | undefined;
   module: BusinessModuleKey;
-  subscriptionPlan?: BillingPlan | null;
+  subscriptionPlan?: string | null;
   hasTrial?: boolean;
 }): boolean {
   if (input.module === "pos_core") return true;
   if (!isModuleEnabled(input.org, input.module)) return false;
+  if (input.module === "multi_site") {
+    return input.subscriptionPlan === "multi_location" || normalizePlan(input.subscriptionPlan) === "scale";
+  }
   const effectivePlan = resolveEffectivePlan({
     subscriptionPlan: input.subscriptionPlan,
     hasTrial: input.hasTrial,
@@ -117,18 +120,18 @@ export function canUseModule(input: {
 export function isModuleNavVisible(input: {
   org: OrgModuleRow | null | undefined;
   module: BusinessModuleKey;
-  subscriptionPlan?: BillingPlan | null;
+  subscriptionPlan?: string | null;
   hasTrial?: boolean;
 }): boolean {
   if (!isModuleEnabled(input.org, input.module)) return false;
-  if (input.module === "pos_core" || input.module === "kitchen_ops") return true;
+  if (input.module === "pos_core") return true;
   return canUseModule(input);
 }
 
 export function moduleBlockReason(input: {
   org: OrgModuleRow | null | undefined;
   module: BusinessModuleKey;
-  subscriptionPlan?: BillingPlan | null;
+  subscriptionPlan?: string | null;
   hasTrial?: boolean;
 }, locale: AppLocale = "en"): string | null {
   const t = getAppText(locale);
@@ -164,6 +167,10 @@ export function pathnameRequiresModule(pathname: string): BusinessModuleKey | nu
 export function effectivePlanLabel(plan: EffectiveBillingPlan): string {
   if (plan === "trial") return "Trial";
   if (plan === "multi_location") return "Multi-location";
-  if (plan === "pro") return "Pro";
-  return "Starter";
+  if (plan === "scale") return "Scale";
+  if (plan === "operations") return "Operations";
+  if (plan === "core") return "Core";
+  if (plan === "pro") return "Operations";
+  if (plan === "starter") return "Core";
+  return "Core";
 }

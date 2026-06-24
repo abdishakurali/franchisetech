@@ -24,7 +24,6 @@ export type OwnerDigestInitial = {
 type Props = {
   locale: AppLocale;
   canEdit: boolean;
-  inventoryEnabled?: boolean;
   ownerEmail: string;
   initial: OwnerDigestInitial;
 };
@@ -67,9 +66,7 @@ export function OwnerDigestCard({
     startTransition(async () => {
       const result = await saveOwnerDigestSettings(formData);
       if (!result.ok) {
-        toast.error(
-          result.error === "inventory_required" ? t.inventoryRequired : t.couldNotSave
-        );
+        toast.error(t.couldNotSave);
         return;
       }
       toast.success(t.saved);

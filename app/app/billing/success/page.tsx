@@ -23,8 +23,7 @@ export default async function BillingSuccessPage({
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-slate-900">You&rsquo;re all set!</h1>
           <p className="text-slate-500 text-base">
-            Your franchisetech subscription is now active. Your 15-day free trial has started —
-            you won&rsquo;t be charged until it ends.
+            Your franchisetech subscription is now active. You can continue using the workspace.
           </p>
         </div>
 

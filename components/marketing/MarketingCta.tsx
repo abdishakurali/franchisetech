@@ -12,7 +12,7 @@ export function CtaRow({
 }: {
   secondaryHref?: string;
   secondaryLabel?: string;
-  plan?: "starter" | "pro" | "multi_location";
+  plan?: "starter" | "pro" | "scale" | "multi_location";
 }) {
   const t = useMarketingMessages();
   const secondary = secondaryLabel ?? t.cta.seePricing;

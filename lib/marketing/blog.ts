@@ -232,7 +232,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Prețuri reale în 2026 pentru cafenele mici",
-        body: "Prețurile afișate public pentru soluțiile uzuale din România:\n\n- **Noxta**: plan gratuit cu funcționalități limitate; planul complet ~€25–30/lună\n- **Franchisetech Starter**: €49/lună — POS, raport Z, rapoarte vânzări, personal nelimitat\n- **Franchisetech Pro**: €79/lună — adaugă stoc, rețete, KDS, export Saga\n- **Ebriza Pro**: €49/lună bază, dar stocul, KDS și Saga sunt add-on-uri separate care duc totalul la €107+/lună\n- **RezoSoft**: ~600 lei taxă instalare + 75 lei/lună; soluție locală, nu cloud\n\nPentru o cafenea mică care vrea stoc + export Saga inclus fără calcule, planul Pro la €79/lună este cel mai predictibil din punct de vedere al costului total lunar.",
+        body: "Prețurile afișate public pentru soluțiile uzuale din România:\n\n- **Noxta**: plan gratuit cu funcționalități limitate; planul complet ~€25–30/lună\n- **Franchisetech Core**: €49/lună — POS, raport Z, rapoarte vânzări, personal nelimitat\n- **Franchisetech Operations**: €79/lună — adaugă stoc, rețete, KDS, export Saga\n- **Franchisetech Scale**: €109/lună — tot ce include Operations + suport prioritar, toate modulele viitoare incluse\n- **Ebriza Pro**: €49/lună bază, dar stocul, KDS și Saga sunt add-on-uri separate care duc totalul la €107+/lună\n- **RezoSoft**: ~600 lei taxă instalare + 75 lei/lună; soluție locală, nu cloud\n\nPentru o cafenea mică care vrea stoc + export Saga inclus fără calcule, planul Operations la €79/lună este cel mai predictibil din punct de vedere al costului total lunar.",
       },
       {
         heading: "Cum testezi corect în trial",

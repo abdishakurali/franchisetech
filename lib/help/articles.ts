@@ -90,7 +90,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       { title: "Check sales by day", body: "Look for busy and quiet days so you understand the trading pattern." },
       { title: "Clean the product list", body: "Rename unclear products, remove duplicates, and put products into the right categories." },
       { title: "Decide on stock and recipes", body: "If margins or stock control matter now, start the stock/margin checklist. If not, keep selling first." },
-      { title: "Choose a plan", body: "Open **Billing** and choose Starter or Pro before the trial ends." },
+      { title: "Choose a plan", body: "Open **Billing** and choose Core or Operations before the trial ends." },
     ],
     relatedSlugs: ["manage-stock-levels", "recipe-costing-intro", "manage-settings"],
   },

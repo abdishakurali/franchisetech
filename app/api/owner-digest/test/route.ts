@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { fetchOwnerDigestData } from "@/lib/owner-digest/fetch";
 import { sendOwnerDigestEmail } from "@/lib/email/owner-digest";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 // POST /api/owner-digest/test
 // Owner/manager only. Sends a test digest to the caller's email (or a provided address).
 export async function POST(req: NextRequest) {
@@ -52,6 +53,13 @@ export async function POST(req: NextRequest) {
 
   const org = Array.isArray(orgs) ? orgs[0] : orgs;
   const orgId = org?.id ?? membership.organisation_id;
+  try {
+    await assertEntitlement(orgId, "owner_digest.enabled");
+  } catch (error) {
+    const response = entitlementDeniedResponse(error);
+    if (response) return response;
+    throw error;
+  }
   const orgName = org?.name ?? "Your business";
   const countryCode = org?.country_code ?? null;
   const currency = org?.currency_code ?? "EUR";

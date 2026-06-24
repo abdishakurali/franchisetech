@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Check, ChevronDown, Coffee, Droplets, LayoutGrid, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
+import { Banknote, Check, ChevronDown, Coffee, Droplets, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
 import { cn } from "@/lib/utils";
 import {
@@ -461,8 +461,12 @@ function CloseTillDialog({
   const intlLocale = posIntlLocale(locale);
   const currencySymbol = currency === "RON" ? "lei" : "€";
   const [internalOpen, setInternalOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
   const open = controlledOpen ?? internalOpen;
-  const setOpen = controlledOnOpenChange ?? setInternalOpen;
+  const setOpen = (nextOpen: boolean) => {
+    if (isClosing && !nextOpen) return;
+    (controlledOnOpenChange ?? setInternalOpen)(nextOpen);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -474,6 +478,7 @@ function CloseTillDialog({
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{t.closeTill}</DialogTitle></DialogHeader>
         <form action={async (fd: FormData) => {
+          setIsClosing(true);
           await (closePosSession as unknown as (fd: FormData) => Promise<void>)(fd);
         }} className="space-y-3">
           <input type="hidden" name="session_id" value={sessionId ?? ""} />
@@ -516,13 +521,21 @@ function CloseTillDialog({
           )}
           <div>
             <Label>{t.countedCashLabel} ({currencySymbol})</Label>
-            <Input name="counted_cash" type="number" step="0.01" min="0" required />
+            <Input name="counted_cash" type="number" step="0.01" min="0" required disabled={isClosing} />
             <p className="mt-1 text-xs text-slate-500">{t.howMuchInDrawer}</p>
           </div>
-          <div><Label>{t.notes}</Label><Input name="notes" /></div>
+          <div><Label>{t.notes}</Label><Input name="notes" disabled={isClosing} /></div>
+          {isClosing && (
+            <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-800">
+              {t.closingTill}
+            </div>
+          )}
           <DialogFooter>
-            <DialogClose render={<Button type="button" variant="outline" />}>{t.cancel}</DialogClose>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">{t.closeTill}</Button>
+            <DialogClose render={<Button type="button" variant="outline" disabled={isClosing} />}>{t.cancel}</DialogClose>
+            <Button type="submit" disabled={isClosing} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {isClosing && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isClosing ? t.closingTill : t.closeTill}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

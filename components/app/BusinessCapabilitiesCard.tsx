@@ -28,7 +28,6 @@ import {
   localizeCapabilityLabel,
 } from "@/lib/business-capabilities-i18n";
 import type { RestaurantFeatureKey } from "@/lib/restaurant-features";
-import type { BillingPlan } from "@/lib/billing/plans";
 import { FormSelect } from "@/components/app/FormSelect";
 import { FormCheckbox } from "@/components/app/FormCheckbox";
 import { useAppI18n } from "@/lib/app-i18n-context";
@@ -46,7 +45,7 @@ type Props = {
   org: OrgModuleRow & { business_profile?: string | null };
   featureValues: FeatureValues;
   canEdit: boolean;
-  subscriptionPlan: BillingPlan | null;
+  subscriptionPlan: string | null;
   hasTrial: boolean;
   locale?: string | null;
   lockedModule?: string | null;

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { canManageTeam, isDbRole } from "@/lib/access-control";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
+
+const ADVANCED_ROLES = new Set(["manager", "auditor", "kitchen"]);
 
 function makeAdminClient() {
   return createClient(
@@ -27,6 +30,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ me
     if (role === "owner" && membership.role !== "owner") {
       return NextResponse.json({ error: "Only owners can assign the owner role" }, { status: 403 });
     }
+    if (role && ADVANCED_ROLES.has(role)) {
+      try {
+        await assertEntitlement(orgId, "team.advanced_roles");
+      } catch (error) {
+        const response = entitlementDeniedResponse(error);
+        if (response) return response;
+        throw error;
+      }
+    }
 
     const admin = makeAdminClient();
     const { data: member } = await admin
@@ -37,10 +49,20 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ me
       .maybeSingle();
 
     if (!member) return NextResponse.json({ error: "Member not found" }, { status: 404 });
+    if (member.role === "owner" && membership.role !== "owner") {
+      return NextResponse.json({ error: "Only owners can change another owner" }, { status: 403 });
+    }
 
     const updates: Record<string, unknown> = {};
     if (role) updates.role = role;
-    await admin.from("organisation_members").update(updates).eq("id", memberId).eq("organisation_id", orgId);
+    const { error: updateError } = await admin
+      .from("organisation_members")
+      .update(updates)
+      .eq("id", memberId)
+      .eq("organisation_id", orgId);
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
+    }
 
     if (role && role !== member.role) {
       await admin.from("team_audit_events").insert({

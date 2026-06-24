@@ -41,6 +41,7 @@ interface AppShellProps {
     recipeCosting: boolean;
     teamAdvanced: boolean;
     multiSite: boolean;
+    kitchenOps: boolean;
   };
   trialDaysLeft?: number;
   referral?: {
@@ -124,7 +125,7 @@ function resolveNavItems(
 
   const mainNav = [
     ...buildMainNav(userRole, t).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
-    ...(activeOrg?.kitchen_display_enabled
+    ...(activeOrg?.kitchen_display_enabled && moduleVisibility?.kitchenOps === true
       ? [{ href: "/app/kitchen", label: t.nav.kitchen, icon: ChefHat, exact: false }]
       : []),
     ...(isRO && !limited
@@ -334,7 +335,7 @@ function AppHeader({
         </nav>
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
-          {accessibleSites.length >= 2 && activeSiteId && (
+          {moduleVisibility?.multiSite === true && accessibleSites.length >= 2 && activeSiteId && (
             <div className="hidden md:block">
               <SiteSwitcher sites={accessibleSites} activeSiteId={activeSiteId} />
             </div>
@@ -399,7 +400,7 @@ function AppHeader({
           className="lg:hidden border-t border-slate-100 bg-white px-3 py-3 space-y-1 max-h-[min(70vh,28rem)] overflow-y-auto"
           aria-label={t.shell.mainNav}
         >
-          {accessibleSites.length >= 2 && activeSiteId && (
+          {moduleVisibility?.multiSite === true && accessibleSites.length >= 2 && activeSiteId && (
             <div className="mb-2 px-1 sm:hidden">
               <SiteSwitcher sites={accessibleSites} activeSiteId={activeSiteId} />
             </div>

@@ -12,6 +12,7 @@
     "verify-pos-cart-restore": "node scripts/verify-pos-cart-restore.mjs",
     "verify-pos-line-discount": "node scripts/verify-pos-line-discount.mjs",
     "verify-nir-purchase-flow": "node scripts/verify-nir-purchase-flow.mjs",
+    "verify-owner-digest": "node scripts/verify-owner-digest.mjs",
     "verify-nir-staging-schema": "node scripts/verify-staging-nir-schema.mjs",
     "check-prod-nir-schema": "node scripts/check-prod-nir-schema.mjs",
     "check-prod-module-flags-schema": "node scripts/check-prod-module-flags-schema.mjs",

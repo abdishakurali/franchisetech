@@ -9,11 +9,11 @@ import {
   pathnameRequiresModule,
 } from "@/lib/business-modules";
 import type { BusinessModuleKey } from "@/lib/billing/entitlements";
-import type { BillingPlan } from "@/lib/billing/plans";
+import { normalizePlan } from "@/lib/billing/entitlement-resolver";
 
-function subscriptionPlan(plan: string | null | undefined): BillingPlan | null {
-  if (plan === "starter" || plan === "pro" || plan === "multi_location") return plan;
-  return null;
+function subscriptionPlan(plan: string | null | undefined): string | null {
+  if (plan === "multi_location") return plan;
+  return normalizePlan(plan);
 }
 
 export async function requireBusinessModule(module: BusinessModuleKey): Promise<void> {

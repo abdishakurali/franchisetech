@@ -13,7 +13,7 @@ import { ensureReferralCode } from "@/lib/referrals";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { listAccessibleSites, getActiveSiteId } from "@/lib/site-context";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
-import { isModuleEnabled } from "@/lib/business-modules";
+import { isModuleNavVisible } from "@/lib/business-modules";
 import { requireModuleForPathname } from "@/lib/module-guard";
 import type { SubscriptionStatus } from "@/lib/billing/subscription";
 
@@ -70,6 +70,7 @@ export default async function AppLayout({
     recipeCosting: false,
     teamAdvanced: false,
     multiSite: false,
+    kitchenOps: false,
   };
 
   if (activeOrg?.id) {
@@ -82,12 +83,14 @@ export default async function AppLayout({
     const moduleFlags = await fetchOrgModuleFlags(supabase, activeOrg.id);
 
     setupComplete = (txCount ?? 0) > 0;
+    const hasTrial = subStatus?.state === "trialing" || subStatus?.state === "soft_trial";
 
     moduleVisibility = {
-      inventory: isModuleEnabled(moduleFlags, "inventory"),
-      recipeCosting: isModuleEnabled(moduleFlags, "recipe_costing"),
-      teamAdvanced: isModuleEnabled(moduleFlags, "team_advanced"),
-      multiSite: isModuleEnabled(moduleFlags, "multi_site"),
+      inventory: isModuleNavVisible({ org: moduleFlags, module: "inventory", subscriptionPlan: subStatus?.plan, hasTrial }),
+      recipeCosting: isModuleNavVisible({ org: moduleFlags, module: "recipe_costing", subscriptionPlan: subStatus?.plan, hasTrial }),
+      teamAdvanced: isModuleNavVisible({ org: moduleFlags, module: "team_advanced", subscriptionPlan: subStatus?.plan, hasTrial }),
+      multiSite: isModuleNavVisible({ org: moduleFlags, module: "multi_site", subscriptionPlan: subStatus?.plan, hasTrial }),
+      kitchenOps: isModuleNavVisible({ org: moduleFlags, module: "kitchen_ops", subscriptionPlan: subStatus?.plan, hasTrial }),
     };
   }
 

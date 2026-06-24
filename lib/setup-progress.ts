@@ -174,7 +174,7 @@ export function buildSetupSteps(signals: SetupSignals): SetupStep[] {
   const billing: SetupStep = {
     id: "choose_plan",
     title: "Choose plan",
-    text: "Pick Starter or Pro before the trial ends. Setup support is handled separately.",
+    text: "Pick Core, Operations, or Scale before the trial ends. Setup support is handled separately.",
     href: "/app/billing",
     label: "Choose plan",
     done: Boolean(signals.subscription),

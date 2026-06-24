@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 
 const REASONS   = new Set(["cash_sale","cash_in","cash_out","test","connector_check","setup_test","pairing"]);
 const MODES     = new Set(["off","manual","local_connector","android_connector"]);
@@ -42,6 +43,13 @@ export async function POST(request: Request) {
     .limit(1)
     .single();
   if (!membership?.organisation_id) return NextResponse.json({ ok: false }, { status: 403 });
+  try {
+    await assertEntitlement(membership.organisation_id, "pos.cash_drawer_connector");
+  } catch (error) {
+    const response = entitlementDeniedResponse(error);
+    if (response) return response;
+    throw error;
+  }
 
   const body = await request.json().catch(() => ({}));
 

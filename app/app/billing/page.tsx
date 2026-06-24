@@ -4,7 +4,7 @@ import { isBillingConfigured } from "@/lib/billing/plans";
 import { PricingPlansSection } from "@/components/billing/PricingPlansSection";
 import { BillingPortalButton } from "@/components/app/BillingPortalButton";
 import { modulesForPlan } from "@/lib/billing/entitlements";
-import { BUSINESS_MODULE_DEFINITIONS } from "@/lib/business-modules";
+import { BUSINESS_MODULE_DEFINITIONS, effectivePlanLabel } from "@/lib/business-modules";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { marketFromCountryCode } from "@/lib/billing/market";
 import { AlertCircle, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
@@ -94,7 +94,7 @@ export default async function BillingPage({
               )}
               {sub.state === "soft_trial" && sub.trialDaysLeft != null && (
                 <p className="mt-0.5 text-sm opacity-80">
-                  Assisted trial: {sub.trialDaysLeft} day{sub.trialDaysLeft === 1 ? "" : "s"} left with Pro access. Subscribe anytime — no checkout required until you choose a plan.
+                  Assisted trial: {sub.trialDaysLeft} day{sub.trialDaysLeft === 1 ? "" : "s"} left with Operations access. Subscribe anytime — no checkout required until you choose a plan.
                 </p>
               )}
               {sub.state === "past_due_expired" && (
@@ -125,7 +125,7 @@ export default async function BillingPage({
                 </p>
               )}
               {sub.plan && sub.state !== "incomplete" && (
-                <p className="mt-1 text-xs font-medium opacity-70 uppercase tracking-wide">Plan: {sub.plan}</p>
+                <p className="mt-1 text-xs font-medium opacity-70 uppercase tracking-wide">Plan: {effectivePlanLabel(sub.plan as Parameters<typeof effectivePlanLabel>[0])}</p>
               )}
             </div>
             {sub.stripeCustomerId && (
@@ -150,9 +150,9 @@ export default async function BillingPage({
           <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4">
             <p className="text-sm font-semibold text-slate-800">What each plan unlocks</p>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              {(["starter", "pro"] as BillingPlan[]).map((planId) => (
+              {(["starter", "pro", "scale"] as BillingPlan[]).map((planId) => (
                 <div key={planId} className="rounded-lg bg-slate-50 p-3 text-sm">
-                  <p className="font-medium capitalize">{planId}</p>
+                  <p className="font-medium">{effectivePlanLabel(planId)}</p>
                   <ul className="mt-2 space-y-1 text-slate-600">
                     {modulesForPlan(planId).map((key) => {
                       const def = BUSINESS_MODULE_DEFINITIONS.find((d) => d.key === key);
@@ -173,7 +173,7 @@ export default async function BillingPage({
           <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm sm:grid-cols-4">
             <div>
               <dt className="text-xs font-semibold uppercase text-slate-400">Plan</dt>
-              <dd className="mt-0.5 font-medium capitalize">{sub.plan ?? "—"}</dd>
+              <dd className="mt-0.5 font-medium">{sub.plan ? effectivePlanLabel(sub.plan as Parameters<typeof effectivePlanLabel>[0]) : "—"}</dd>
             </div>
             <div>
               <dt className="text-xs font-semibold uppercase text-slate-400">Status</dt>

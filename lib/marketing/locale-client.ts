@@ -5,7 +5,7 @@ export const MARKETING_LOCALE_STORAGE_KEY = "franchisetech:marketingLocale";
 export const MARKETING_LOCALE_CHANGE_EVENT = "franchisetech:marketingLocaleChange";
 
 export const marketingLocaleOptions = [
-  { code: "en" as const, flag: "🇬🇧", label: "English" },
+  { code: "en" as const, flag: "🌐", label: "English" },
   { code: "ro" as const, flag: "🇷🇴", label: "Română" },
 ];
 

@@ -60,7 +60,7 @@ export function defaultModulesForProfile(profile: BusinessProfile): {
   }
 }
 
-export function recommendedPlanForProfile(profile: BusinessProfile): "starter" | "pro" | "multi_location" {
+export function recommendedPlanForProfile(profile: BusinessProfile): "starter" | "pro" | "scale" | "multi_location" {
   if (profile === "multi_site") return "multi_location";
   if (profile === "standard") return "pro";
   return "starter";

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 
 function toCsv(headers: string[], rows: Record<string, unknown>[]): string {
   const escape = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
@@ -31,6 +32,13 @@ export async function GET(req: Request) {
     .single();
   if (!membership) return new NextResponse("No org", { status: 403 });
   const orgId = membership.organisation_id;
+  try {
+    await assertEntitlement(orgId, "reports.audit", { write: false });
+  } catch (error) {
+    const response = entitlementDeniedResponse(error);
+    if (response) return response;
+    throw error;
+  }
 
   let csv = "";
 

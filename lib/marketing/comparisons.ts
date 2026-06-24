@@ -255,8 +255,8 @@ export const comparisonPages: ComparisonPage[] = [
       "Module de gestiune comercială pentru IMM-uri care nu sunt doar HoReCa",
     ],
     franchisetechStrengths: [
-      "POS în browser orientat pe serviciu zilnic — coș rapid, sesiune casă, raport Z inclus în Starter",
-      "Stoc, furnizori, achiziții/NIR (14-3-1A) și rețete cu marjă brută pe Pro",
+      "POS în browser orientat pe serviciu zilnic — coș rapid, sesiune casă, raport Z inclus în Core",
+      "Stoc, furnizori, achiziții/NIR (14-3-1A) și rețete cu marjă brută pe Operations",
       "Coexistă cu Saga/SmartBill/Oblio — facturare separată, operațiuni zilnice în același workspace",
       "Personal nelimitat pe planurile plătite — fără taxă per casier",
       "FiscalNet când este activat și configurat pe stația de casă",
@@ -333,8 +333,8 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     franchisetechStrengths: [
       "Rulează în browser — fără server local de menținut pentru fluxul zilnic",
-      "Raport Z, vânzări și TVA incluse în Starter (49€) — fără add-on doar pentru raportare",
-      "Stoc, NIR, rețete și marjă brută pe Pro — legate de vânzările POS",
+      "Raport Z, vânzări și TVA incluse în Core (49€) — fără add-on doar pentru raportare",
+      "Stoc, NIR, rețete și marjă brută pe Operations — legate de vânzările POS",
       "Personal nelimitat pe planurile plătite — fără taxă per casier",
       "Trial 15 zile fără card; FiscalNet când este activat și configurat",
     ],
@@ -349,7 +349,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Comparați costul total, nu doar licența",
-        body: "Adunați licențe, terminale, taxe per casier, ore de reconciliere manuală și suport. franchisetech listează prețul pe site (Starter 49€, Pro 79€) cu personal nelimitat. Rulați trial paralel 15 zile: aceeași echipă, aceeași închidere de zi — măsurați timpul până la raport clar.",
+        body: "Adunați licențe, terminale, taxe per casier, ore de reconciliere manuală și suport. franchisetech listează prețul pe site (Core 49€, Operations 79€) cu personal nelimitat. Rulați trial paralel 15 zile: aceeași echipă, aceeași închidere de zi — măsurați timpul până la raport clar.",
       },
     ],
     faqs: [
@@ -411,7 +411,7 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     franchisetechStrengths: [
       "Time-to-first-sale în zile — trial 15 zile, setup checklist, onboarding ghidat",
-      "Preț listat pe site (Starter 49€, Pro 79€) — personal nelimitat",
+      "Preț listat pe site (Core 49€, Operations 79€) — personal nelimitat",
       "Raport Z, vânzări și TVA incluse în Starter — fără add-on doar pentru raportare",
       "Multi-location 99€/locație — fără suite enterprise obligatorie",
       "Coexistă cu SmartBill/Oblio/Saga pentru facturare și e-Factura",
@@ -488,7 +488,7 @@ export const comparisonPages: ComparisonPage[] = [
     franchisetechStrengths: [
       "POS + stoc + rețete + raport Z în același workspace browser",
       "Personal nelimitat pe plan plătit — fără taxă per casier",
-      "Raport Z și TVA incluse în Starter (49€) — fără add-on raportare",
+      "Raport Z și TVA incluse în Core (49€) — fără add-on raportare",
       "Trial 15 zile fără card; ghiduri și resurse în română",
       "Coexistă cu SmartBill/Oblio pentru facturare",
     ],
@@ -631,7 +631,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Comparație franchisetech vs Ebriza: același preț de intrare (~49€/locație), dar rapoarte Z, vânzări și TVA incluse — fără add-on Insights (+19€/lună) și fără taxe ascunse pe raportare.",
     h1: "franchisetech vs Ebriza — preț pe hârtie vs cost real",
     intro:
-      "Ebriza afișează Pro de la 49€/locație/lună — același nivel de preț ca franchisetech Starter. Diferența pe care mulți operatori o descoperă târziu: rapoartele personalizate (Insights) sunt add-on separat (+19€/lună), iar KDS, Saga sau comenzile delivery pot adăuga zeci de euro în plus. franchisetech include raport vânzări, raport Z și raport TVA în planul de bază — fără upsell doar ca să vedeți ce s-a vândut ieri.",
+      "Ebriza afișează Pro de la 49€/locație/lună — același nivel de preț ca franchisetech Core. Diferența pe care mulți operatori o descoperă târziu: rapoartele personalizate (Insights) sunt add-on separat (+19€/lună), iar KDS, Saga sau comenzile delivery pot adăuga zeci de euro în plus. franchisetech include raport vânzări, raport Z și raport TVA în planul de bază — fără upsell doar ca să vedeți ce s-a vândut ieri.",
     betterFor:
       "Ebriza poate fi potrivită dacă aveți nevoie de ecosistemul lor complet (Premium/Titanium, integrări delivery la volum). franchisetech merită evaluat dacă vreți casă + rapoarte zilnice clare la 49€, fără să plătiți extra doar pentru Insights.",
     competitorStrengths: [
@@ -641,9 +641,9 @@ export const comparisonPages: ComparisonPage[] = [
       "Ecosistem matur pentru restaurante cu volum mare",
     ],
     franchisetechStrengths: [
-      "Raport vânzări, raport Z și raport TVA incluse în Starter (49€) — fără add-on Insights",
+      "Raport vânzări, raport Z și raport TVA incluse în Core (49€) — fără add-on Insights",
       "Fără taxă per angajat; personal nelimitat pe plan",
-      "Stoc, NIR, rețete și rapoarte marjă pe Pro (79€) — fără salt la 99€+ doar pentru gestiune",
+      "Stoc, NIR, rețete și rapoarte marjă pe Operations (79€) — fără salt la 99€+ doar pentru gestiune",
       "Browser POS — trial 15 zile fără card; FiscalNet când este configurat",
     ],
     sections: [
@@ -653,7 +653,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Comparație onestă pe funcții, nu pe marketing",
-        body: "Ebriza Premium (99€) și Titanium (179€) adaugă gestiune, NIR automat și rapoarte avansate. franchisetech Pro (79€) acoperă stoc, furnizori, achiziții/NIR și cost rețete pentru majoritatea cafenelelor și restaurantelor mici — cu rapoarte incluse, nu ca add-on.",
+        body: "Ebriza Premium (99€) și Titanium (179€) adaugă gestiune, NIR automat și rapoarte avansate. franchisetech Operations (79€) acoperă stoc, furnizori, achiziții/NIR și cost rețete pentru majoritatea cafenelelor și restaurantelor mici — cu rapoarte incluse, nu ca add-on.",
       },
       {
         title: "Cum să testați în 15 zile",
@@ -662,9 +662,9 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     faqs: [
       {
-        question: "Ebriza Pro și franchisetech Starter costă la fel — care e diferența?",
+        question: "Ebriza Pro și franchisetech Core costă la fel — care e diferența?",
         answer:
-          "Ambele pornesc de la circa 49€/locație/lună. franchisetech Starter include raport vânzări, raport Z (închidere casă) și raport TVA. Pe pagina publică Ebriza, Insights (rapoarte personalizate) este listat ca add-on de 19€/lună — verificați factura voastră actuală dacă folosiți Ebriza.",
+          "Ambele pornesc de la circa 49€/locație/lună. franchisetech Core include raport vânzări, raport Z (închidere casă) și raport TVA. Pe pagina publică Ebriza, Insights (rapoarte personalizate) este listat ca add-on de 19€/lună — verificați factura voastră actuală dacă folosiți Ebriza.",
       },
       {
         question: "Am auzit că raportarea costă extra — e adevărat?",
@@ -691,12 +691,12 @@ export const comparisonPages: ComparisonPage[] = [
     rows: [
       ["Cost configurare self-serve", "0€ — ghid în aplicație", "Taxe implementare / training — contact comercial"],
       ["Timp până la prima vânzare", "Sub o oră (cale ghidată)", "Zile–săptămâni (implementare tipică)"],
-      ["Preț intrare / locație", "Starter 49€/lună (rapoarte incluse)", "Pro 49€/locație/lună (+ TVA)"],
+      ["Preț intrare / locație", "Core 49€/lună (rapoarte incluse)", "Pro 49€/locație/lună (+ TVA)"],
       ["Raport vânzări zilnic", "Inclus în Starter", "Raportare timp real pe plan; Insights personalizate +19€/lună (add-on)"],
       ["Raport Z / închidere casă", "Inclus în Starter", "Registru de casă pe plan — verificați dacă rapoarte avansate necesită add-on"],
       ["Raport TVA", "Inclus în Starter", "Facturare & e-Factura pe plan — detaliu raport TVA vs add-on Insights"],
-      ["Stoc & NIR", "Pro 79€ — stoc, furnizori, achiziții/NIR", "Premium 99€+ sau module gestiune separate"],
-      ["Kitchen Display", "Opțional (KDS pe Pro)", "+19€/lună add-on"],
+      ["Stoc & NIR", "Operations 79€ — stoc, furnizori, achiziții/NIR", "Premium 99€+ sau module gestiune separate"],
+      ["Kitchen Display", "Opțional (KDS pe Operations)", "+19€/lună add-on"],
       ["Integrări contabilitate (Saga)", "Export rapoarte — fără add-on Saga", "+39€/lună add-on integrare Saga"],
       ["Comenzi delivery / meniu digital", "Nu în pachet de bază", "0,06€/comandă sau incluse pe tier superior"],
       ["Personal / utilizatori", "Nelimitat pe plan plătit", "Nelimitat"],
@@ -727,7 +727,7 @@ export const comparisonPages: ComparisonPage[] = [
     franchisetechStrengths: [
       "POS browser orientat pe serviciu zilnic — nu doar emitere document",
       "Sesiune casă, numerar așteptat vs numărat, raport Z incluse în Starter",
-      "Rețete, cost porție și marjă brută pe Pro",
+      "Rețete, cost porție și marjă brută pe Operations",
       "Kitchen display și flux bucătărie pentru restaurante",
       "Personal nelimitat; trial 15 zile asistat",
     ],
@@ -742,7 +742,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Comparați costul total al zilei",
-        body: "Oblio poate costa sub 3€/lună pentru facturare. franchisetech Starter (49€) include rapoarte de vânzări, Z și TVA — comparați timpul pierdut reconciliind Excel vs prețul abonamentului operațional.",
+        body: "Oblio poate costa sub 3€/lună pentru facturare. franchisetech Core (49€) include rapoarte de vânzări, Z și TVA — comparați timpul pierdut reconciliind Excel vs prețul abonamentului operațional.",
       },
     ],
     faqs: [
@@ -768,10 +768,10 @@ export const comparisonPages: ComparisonPage[] = [
       { label: "Prețuri franchisetech", href: "/pricing" },
     ],
     rows: [
-      ["Preț public tipic", "Starter 49€/lună (operațiuni zilnice)", "~2,49€/lună (29€/an facturare nelimitată)"],
+      ["Preț public tipic", "Core 49€/lună (operațiuni zilnice)", "~2,49€/lună (29€/an facturare nelimitată)"],
       ["e-Factura / SPV", "Nu este produs de facturare — coexistă cu Oblio", "Integrat — punct forte Oblio"],
       ["POS register zilnic", "Browser POS cu coș, plăți, sesiune casă", "Casă de marcat + documente — nu POS HoReCa complet"],
-      ["Rețete & marje", "Pro 79€ — cost porție, marjă brută", "Modul producție pentru retetar general"],
+      ["Rețete & marje", "Operations 79€ — cost porție, marjă brută", "Modul producție pentru retetar general"],
       ["Raport Z / închidere casă", "Inclus în Starter", "Nu este focusul principal"],
       ["Kitchen display", "Pro — KDS", "Nu listat ca modul HoReCa"],
       ["Personal", "Nelimitat pe plan plătit", "Nelimitat"],
@@ -799,7 +799,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Multi-proprietate în timp real pentru rețele",
     ],
     franchisetechStrengths: [
-      "Preț public: Starter 49€, Pro 79€, Multi 99€/locație",
+      "Preț public: Core 49€, Operations 79€, Multi 89€/locație suplimentară",
       "Self-serve: trial 15 zile, prima vânzare în sub o oră — nu luni de implementare",
       "Browser POS — fără licențe Oracle sau proiect integrator",
       "Rapoarte Z, vânzări, TVA incluse fără add-on",
@@ -849,7 +849,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["POS", "Browser — laptop/tablet", "Breeze mobil + ecosistem Bit-Soft"],
       ["KDS / bucătărie", "Pro", "Breeze KDS — modul enterprise"],
       ["Delivery / call center", "Nu în pachet de bază", "Dispatch, call center, app șofer — punct forte Bit-Soft"],
-      ["Multi-location", "Multi 99€/locație", "Multi-proprietate timp real — rețele mari"],
+      ["Multi-location", "Multi 89€/locație suplimentară", "Multi-proprietate timp real — rețele mari"],
       ["Oracle Simphony", "Nu", "Partener Oracle — Simphony Cloud"],
       ["Cel mai potrivit pentru", "Cafenea/restaurant independent 1–3 locații", "Lanțuri, hoteluri, franciză națională"],
     ],

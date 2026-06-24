@@ -43,6 +43,7 @@ type ProductRecord = {
 type Props = {
   product: ProductRecord;
   categories: { id: string; name: string }[];
+  posCategories: { id: string; name: string }[];
   suppliers: { id: string; name: string }[];
   units: string[];
   vatRates: OrgVatRate[];
@@ -58,12 +59,14 @@ function OptionToggle({
   description,
   defaultChecked,
   accent = "blue",
+  onChange,
 }: {
   name: string;
   title: string;
   description: string;
   defaultChecked: boolean;
   accent?: "blue" | "green";
+  onChange?: (on: boolean) => void;
 }) {
   const [on, setOn] = useState(defaultChecked);
   const activeRing = accent === "green" ? "border-green-300 bg-green-50/60" : "border-blue-300 bg-blue-50/60";
@@ -81,7 +84,7 @@ function OptionToggle({
         name={name}
         value="on"
         checked={on}
-        onChange={(e) => setOn(e.target.checked)}
+        onChange={(e) => { setOn(e.target.checked); onChange?.(e.target.checked); }}
         className="sr-only"
       />
       <span
@@ -109,6 +112,7 @@ function OptionToggle({
 export function ProductEditForm({
   product,
   categories,
+  posCategories,
   suppliers,
   units,
   vatRates,
@@ -124,7 +128,9 @@ export function ProductEditForm({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDanger, setShowDanger] = useState(false);
+  const [availableInPos, setAvailableInPos] = useState(product.available_in_pos !== false);
   const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
+  const posCategoryOptions = posCategories.map((c) => ({ value: c.id, label: c.name }));
   const unitOptions = units.map((u) => ({ value: u, label: u }));
   const supplierOptions = suppliers.map((s) => ({ value: s.id, label: s.name }));
   const stationOptions = KITCHEN_STATIONS.map((s) => ({ value: s.value, label: s.label }));
@@ -153,6 +159,8 @@ export function ProductEditForm({
     deleteConfirm: pf.deleteConfirm,
     deleteBtn: pf.deleteBtn,
     finishedHint: pf.finishedHint,
+    posCategory: pf.posCategory,
+    manageCategories: pf.manageCategories,
   };
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
@@ -222,9 +230,21 @@ export function ProductEditForm({
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <Label htmlFor="product-category">{pf.category}</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="product-category">{pf.category}</Label>
+                      <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{t.manageCategories}</Link>
+                    </div>
                     <SearchableSelect name="category_id" options={categoryOptions} defaultValue={product.category_id} placeholder="— none —" searchPlaceholder={pf.category} className="mt-1.5" />
                   </div>
+                  {availableInPos && (
+                    <div className="sm:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <Label>{t.posCategory}</Label>
+                        <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{t.manageCategories}</Link>
+                      </div>
+                      <SearchableSelect name="pos_category_id" options={posCategoryOptions} defaultValue={product.pos_category_id ?? null} placeholder="— none —" searchPlaceholder={t.posCategory} className="mt-1.5" />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -283,6 +303,7 @@ export function ProductEditForm({
                 title={t.pos}
                 description={t.posHint}
                 defaultChecked={product.available_in_pos !== false}
+                onChange={setAvailableInPos}
               />
               {visibility.inventory && (
                 <OptionToggle

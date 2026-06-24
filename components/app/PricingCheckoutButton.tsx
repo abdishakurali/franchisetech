@@ -11,10 +11,12 @@ export function PricingCheckoutButton({
   plan,
   loggedIn,
   configured,
+  interval = "month",
 }: {
   plan: BillingPlan;
   loggedIn: boolean;
   configured: boolean;
+  interval?: "month" | "year";
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ export function PricingCheckoutButton({
     return (
       <Link href={`/signup?plan=${plan}`}>
         <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
-          Start 15-day trial <ArrowRight className="ml-2 h-4 w-4" />
+          Create account <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </Link>
     );
@@ -43,7 +45,7 @@ export function PricingCheckoutButton({
       const response = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, interval }),
       });
       const payload = await response.json();
       if (!response.ok || !payload.url) throw new Error(payload.error || "Checkout failed");
@@ -57,7 +59,7 @@ export function PricingCheckoutButton({
 
   return (
     <Button onClick={startCheckout} disabled={loading} className="w-full bg-blue-600 text-white hover:bg-blue-700">
-      {loading ? "Opening checkout..." : "Start 15-day trial"}
+      {loading ? "Opening checkout..." : "Subscribe now"}
     </Button>
   );
 }
