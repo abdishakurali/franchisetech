@@ -290,7 +290,7 @@ export async function POST(req: Request) {
           .eq("id", productEntry.id)
           .single();
 
-        const newQty = Number(currentProduct?.current_stock_qty ?? 0) + qty;
+        const newQty = Number((Number(currentProduct?.current_stock_qty ?? 0) + qty).toFixed(3));
 
         await supabase
           .from("products")

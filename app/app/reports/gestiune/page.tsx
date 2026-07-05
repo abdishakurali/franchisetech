@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +6,7 @@ import { PrintButton } from "@/components/app/PrintButton";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
-import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
+import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 import {
   fetchStockMovements,
   stockMovementQty,
@@ -17,29 +18,24 @@ import type { GestiuneMovement } from "@/lib/ro-accounting/gestiune";
 type PurchaseRow = {
   id: string;
   purchase_date: string;
-  supplier_name: string | null;
+  supplier: string | null;
   invoice_number: string | null;
-  total_gross: number | null;
-  total_vat: number | null;
+  total_amount: number | null;
+  tax_total: number | null;
   purchase_items: Array<{
-    vat_rate: number | null;
-    total_price: number | null;
+    tax_rate: number | null;
+    total_cost: number | null;
   }>;
 };
 
-type TransactionItemRow = {
-  vat_rate: number | null;
-  gross_amount: number | null;
-  line_total: number | null;
-  pos_transactions: {
-    sold_at: string;
-    status: string;
-    transaction_number: string | null;
-  } | {
-    sold_at: string;
-    status: string;
-    transaction_number: string | null;
-  }[] | null;
+type TransactionRow = {
+  sold_at: string;
+  status: string;
+  pos_transaction_items: Array<{
+    vat_rate: number | null;
+    gross_amount: number | null;
+    line_total: number | null;
+  }>;
 };
 
 const DOCUMENT_TYPE_COLORS: Record<string, string> = {
@@ -58,7 +54,7 @@ export default async function GestiuneReportPage({
 }) {
   await requireBusinessModule("inventory");
   const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
-  await assertEntitlement(orgId, "reports.accountant_pack", { write: false });
+  if (!await hasEntitlement(orgId, "reports.gestiune")) redirect("/app/billing?reason=gestiune_requires_pro");
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
 
@@ -84,15 +80,20 @@ export default async function GestiuneReportPage({
     before: periodStart,
   });
 
+  // Opening stock is a NET running balance: purchases/opening entries add
+  // (positive quantity_change), consumption subtracts (negative
+  // quantity_change). Using Math.abs() here would treat consumption as if
+  // it were inbound stock and wildly overstate the balance -- every
+  // movement type before the period must keep its real sign.
   const openingStock = { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0 };
   for (const m of movementsBeforePeriod) {
     const qty = stockMovementQty(m);
-    const value = Math.abs(qty) * stockMovementUnitCost(m);
+    const value = qty * stockMovementUnitCost(m);
     const prod = stockMovementProduct(m);
-    const vatRate = Number(prod?.vat_rate ?? 19);
+    const vatRate = Number(prod?.vat_rate ?? 21);
 
-    if (vatRate === 19) openingStock.tva19 += value;
-    else if (vatRate === 9) openingStock.tva9 += value;
+    if (vatRate === 21) openingStock.tva19 += value;
+    else if (vatRate === 11) openingStock.tva9 += value;
     else if (vatRate === 5) openingStock.tva5 += value;
     else openingStock.tva0 += value;
     openingStock.total += value;
@@ -112,11 +113,11 @@ export default async function GestiuneReportPage({
     .select(`
       id,
       purchase_date,
-      supplier_name,
+      supplier,
       invoice_number,
-      total_gross,
-      total_vat,
-      purchase_items(vat_rate, total_price)
+      total_amount,
+      tax_total,
+      purchase_items(tax_rate, total_cost)
     `)
     .eq("organisation_id", orgId)
     .in("status", ["posted", "received"])
@@ -127,10 +128,10 @@ export default async function GestiuneReportPage({
   for (const p of (purchases ?? []) as PurchaseRow[]) {
     const nirByVat = { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0 };
     for (const item of p.purchase_items ?? []) {
-      const value = Number(item.total_price ?? 0);
-      const vatRate = Number(item.vat_rate ?? 19);
-      if (vatRate === 19) nirByVat.tva19 += value;
-      else if (vatRate === 9) nirByVat.tva9 += value;
+      const value = Number(item.total_cost ?? 0);
+      const vatRate = Number(item.tax_rate ?? 21);
+      if (vatRate === 21) nirByVat.tva19 += value;
+      else if (vatRate === 11) nirByVat.tva9 += value;
       else if (vatRate === 5) nirByVat.tva5 += value;
       else nirByVat.tva0 += value;
       nirByVat.total += value;
@@ -141,7 +142,7 @@ export default async function GestiuneReportPage({
         date: p.purchase_date,
         documentType: "nir",
         documentNumber: p.invoice_number ?? undefined,
-        description: p.supplier_name ?? labels.unknownSupplier,
+        description: p.supplier ?? labels.unknownSupplier,
         ...nirByVat,
       });
     }
@@ -161,10 +162,10 @@ export default async function GestiuneReportPage({
     const qty = Math.abs(stockMovementQty(m));
     const value = qty * stockMovementUnitCost(m);
     const prodConsum = stockMovementProduct(m);
-    const vatRate = Number(prodConsum?.vat_rate ?? 19);
+    const vatRate = Number(prodConsum?.vat_rate ?? 21);
 
-    if (vatRate === 19) existing.tva19 += value;
-    else if (vatRate === 9) existing.tva9 += value;
+    if (vatRate === 21) existing.tva19 += value;
+    else if (vatRate === 11) existing.tva9 += value;
     else if (vatRate === 5) existing.tva5 += value;
     else existing.tva0 += value;
     existing.total += value;
@@ -183,36 +184,40 @@ export default async function GestiuneReportPage({
     }
   }
 
-  const { data: transactionItems } = await supabase
-    .from("pos_transaction_items")
+  // Filtered on pos_transactions.sold_at (the real business date), not
+  // pos_transaction_items.created_at (row-insert time). For migrated
+  // historical sales, created_at is the bulk-import timestamp -- identical
+  // for all ~2,147 rows -- which silently pulled in every historical
+  // transaction regardless of the selected date range while still
+  // displaying its true (often out-of-range) sold_at date.
+  const { data: transactions } = await supabase
+    .from("pos_transactions")
     .select(`
-      vat_rate,
-      gross_amount,
-      line_total,
-      pos_transactions(sold_at, status, transaction_number)
+      sold_at,
+      status,
+      pos_transaction_items(vat_rate, gross_amount, line_total)
     `)
     .eq("organisation_id", orgId)
-    .gte("created_at", periodStart)
-    .lte("created_at", periodEnd);
+    .gte("sold_at", periodStart)
+    .lte("sold_at", periodEnd);
 
   const salesByDate = new Map<string, { tva19: number; tva9: number; tva5: number; tva0: number; total: number; count: number }>();
-  for (const item of (transactionItems ?? []) as TransactionItemRow[]) {
-    const txRaw = item.pos_transactions;
-    const tx = Array.isArray(txRaw) ? txRaw[0] : txRaw;
-    if (!tx || tx.status === "voided") continue;
-
+  for (const tx of (transactions ?? []) as TransactionRow[]) {
+    if (tx.status === "voided") continue;
     const dateKey = tx.sold_at.slice(0, 10);
     const existing = salesByDate.get(dateKey) ?? { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0, count: 0 };
 
-    const value = Number(item.gross_amount ?? item.line_total ?? 0);
-    const vatRate = Number(item.vat_rate ?? 19);
+    for (const item of tx.pos_transaction_items ?? []) {
+      const value = Number(item.gross_amount ?? item.line_total ?? 0);
+      const vatRate = Number(item.vat_rate ?? 21);
 
-    if (vatRate === 19) existing.tva19 += value;
-    else if (vatRate === 9) existing.tva9 += value;
-    else if (vatRate === 5) existing.tva5 += value;
-    else existing.tva0 += value;
-    existing.total += value;
-    existing.count += 1;
+      if (vatRate === 21) existing.tva19 += value;
+      else if (vatRate === 11) existing.tva9 += value;
+      else if (vatRate === 5) existing.tva5 += value;
+      else existing.tva0 += value;
+      existing.total += value;
+      existing.count += 1;
+    }
 
     salesByDate.set(dateKey, existing);
   }
@@ -232,9 +237,12 @@ export default async function GestiuneReportPage({
     }
   }
 
+  // intrari* accumulates ONLY period NIR (goods actually received in this
+  // date range) -- opening stock is a separate starting balance, not a
+  // period inflow, and must not be double-counted as "Total intrari".
   const totals = movements.reduce(
     (acc, m) => {
-      if (m.documentType === "stoc_initial" || m.documentType === "nir") {
+      if (m.documentType === "nir") {
         acc.intrari19 += m.tva19;
         acc.intrari9 += m.tva9;
         acc.intrari5 += m.tva5;
@@ -253,11 +261,11 @@ export default async function GestiuneReportPage({
   );
 
   const closingStock = {
-    tva19: totals.intrari19 - totals.iesiri19,
-    tva9: totals.intrari9 - totals.iesiri9,
-    tva5: totals.intrari5 - totals.iesiri5,
-    tva0: totals.intrari0 - totals.iesiri0,
-    total: totals.intrariTotal - totals.iesiriTotal,
+    tva19: openingStock.tva19 + totals.intrari19 - totals.iesiri19,
+    tva9: openingStock.tva9 + totals.intrari9 - totals.iesiri9,
+    tva5: openingStock.tva5 + totals.intrari5 - totals.iesiri5,
+    tva0: openingStock.tva0 + totals.intrari0 - totals.iesiri0,
+    total: openingStock.total + totals.intrariTotal - totals.iesiriTotal,
   };
 
   movements.sort((a, b) => {

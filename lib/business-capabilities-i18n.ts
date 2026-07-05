@@ -12,25 +12,9 @@ const CATEGORY_RO: Record<
   CapabilityCategoryId,
   { title: string; description: string }
 > = {
-  stock_costing: {
-    title: "Stoc și costuri",
-    description: "Urmărește livrări, costuri ingrediente, rețete și marje. Dezactivează pentru un meniu simplu.",
-  },
-  kitchen_orders: {
-    title: "Bucătărie și comenzi",
-    description: "Pentru businessuri care prepară la comandă și au nevoie de un flux clar de la casă la bucătărie.",
-  },
   payments_till: {
     title: "Plăți și casă",
     description: "Cum încasează personalul și gestionează bacșișul la casă.",
-  },
-  products_menu: {
-    title: "Produse și meniu",
-    description: "Opțiuni extra pe produse când meniul are variante sau note.",
-  },
-  team_locations: {
-    title: "Echipă și locații",
-    description: "Mai mult control pentru personal sau mai multe sucursale.",
   },
   workstation: {
     title: "Layout stație de lucru",

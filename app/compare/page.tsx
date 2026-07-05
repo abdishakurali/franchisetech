@@ -161,7 +161,7 @@ export default async function CompareHubPage() {
                 ? "Ebriza, Bit-Soft, RezoSoft și altele — operațiuni zilnice, delivery, multi-locație."
                 : "Daily operations, delivery, and multi-site POS alternatives."}
             </p>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid gap-4 grid-cols-1 lg:grid-cols-3">
               {roHoreca.map((p) => (
                 <CompareCard
                   key={p.slug}
@@ -185,7 +185,7 @@ export default async function CompareHubPage() {
                 ? "SmartBill, Oblio, Saga — e-Factura și documente. franchisetech le completează pentru casă zilnică."
                 : "e-Factura and invoicing tools — franchisetech complements them for daily till operations."}
             </p>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid gap-4 grid-cols-1 lg:grid-cols-3">
               {roInvoicing.map((p) => (
                 <CompareCard
                   key={p.slug}
@@ -205,7 +205,7 @@ export default async function CompareHubPage() {
               <h2 className="text-2xl font-bold text-slate-950">
                 {locale === "ro" ? "Alte alternative POS România" : "Other Romania POS alternatives"}
               </h2>
-              <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-8 grid gap-4 grid-cols-1 lg:grid-cols-3">
                 {roOther.map((p) => (
                   <CompareCard
                     key={p.slug}
@@ -228,7 +228,7 @@ export default async function CompareHubPage() {
           <h2 className="text-2xl font-bold text-slate-950">
             {locale === "ro" ? "Internațional — plăți și POS global" : "International — payments & global POS"}
           </h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid gap-4 grid-cols-1 lg:grid-cols-3">
             {globalPages.map((p) => (
               <CompareCard
                 key={p.slug}

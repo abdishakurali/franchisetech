@@ -1,0 +1,1 @@
+start "" .\jdk-11\bin\javaw -jar verifsignature.jar

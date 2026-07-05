@@ -1,0 +1,46 @@
+[
+  {
+    "slug": "rossell",
+    "legal_name": "SC Rossell & Co SRL",
+    "brand_name": "Rossell",
+    "cui": "14284948",
+    "category": "alcoholic_beverages",
+    "subcategories": ["spirtoase", "vinuri", "prosecco"],
+    "description": "Distribuitor de băuturi alcoolice premium (spirtoase, vinuri, prosecco) și accesorii pentru HoReCa, cu livrare în toată România.",
+    "website_url": "https://www.rossell.ro",
+    "hq_city": "Livada",
+    "counties": ["satu-mare"],
+    "serves_all_counties": true,
+    "logo_source_url": "https://www.rossell.ro/wp-content/uploads/2020/07/Rossell-LOGO-38height.png",
+    "contact_email": "office@rossell.ro",
+    "contact_phone": "+40 770 764 964",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.rossell.ro/termeni-si-conditii/", "note": "legal name, CUI 14284948, Reg. Com. J/30/467/2001 stated directly by the vendor", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://www.rossell.ro/", "note": "'livrare rapidă în toată România' claim on homepage/footer", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "zeus-service",
+    "legal_name": "ZEUS SERVICE SRL",
+    "brand_name": "Zeus Service",
+    "cui": "9843830",
+    "category": "pos_fiscal_hardware",
+    "subcategories": ["case de marcat", "sisteme POS", "cititoare coduri de bare"],
+    "description": "Importator și distribuitor de case de marcat fiscale, sisteme POS, cititoare de coduri de bare și echipamente conexe.",
+    "website_url": "https://www.zeusservice.ro",
+    "hq_city": "București",
+    "counties": ["bucuresti"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://www.zeusservice.ro/skin/frontend/blugento/default/images/var_page_brand_logo.png",
+    "contact_email": "vanzari@zeusservice.ro",
+    "contact_phone": "+40731554555",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.zeusservice.ro/termeni-si-conditii/", "note": "legal name, CUI 9843830, Reg. Com. J40/7708/1997 stated directly by the vendor", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://www.zeusservice.ro/livrare/", "note": "delivery page mentions only courier logistics (Fun Courier/Urgent Cargus), no explicit nationwide claim — serves_all_counties left false", "checked_at": "2026-07-04"}
+    ]
+  }
+]

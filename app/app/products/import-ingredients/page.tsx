@@ -13,11 +13,11 @@ import { Download } from "lucide-react";
 const HEADERS = ["name","unit","cost_price","current_stock_qty","reorder_level"];
 const TEMPLATE = [
   HEADERS.join(","),
-  "Chicken,g,0.012,2400,500",
+  "Pui,g,0.012,2400,500",
   "Bacon,g,0.018,1200,200",
-  "Cos Lettuce,head,1.20,10,2",
-  "Caesar Dressing,ml,0.010,900,200",
-  "Parmesan,g,0.025,600,100",
+  "Salată,cap,1.20,10,2",
+  "Sos Caesar,ml,0.010,900,200",
+  "Parmezan,g,0.025,600,100",
 ].join("\n");
 
 // Maps simplified headers to the full product CSV expected by importProductsCsv
@@ -65,11 +65,11 @@ function IngredientsImportContent() {
   const [csv, setCsv] = useState(TEMPLATE);
   const rows = useMemo(() => parseRows(csv), [csv]);
   const errors = rows.flatMap((r, i) =>
-    !r.name ? [`Row ${i + 1}: name is required`] :
-    r.cost_price && isNaN(Number(r.cost_price)) ? [`Row ${i + 1}: cost_price must be a number`] : []
+    !r.name ? [`Rândul ${i + 1}: numele este obligatoriu`] :
+    r.cost_price && isNaN(Number(r.cost_price)) ? [`Rândul ${i + 1}: cost_price trebuie să fie un număr`] : []
   );
   const imported = searchParams.get("imported");
-  const summary = imported ? `✓ ${imported} imported, ${searchParams.get("skipped") ?? "0"} skipped` : null;
+  const summary = imported ? `✓ ${imported} importate, ${searchParams.get("skipped") ?? "0"} omise` : null;
 
   // When submitting, transform to full product CSV format
   const [submitting, setSubmitting] = useState(false);
@@ -95,28 +95,28 @@ function IngredientsImportContent() {
     <div className="mx-auto max-w-3xl space-y-6 p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <Link href="/app/products" className="text-sm text-slate-500 hover:text-slate-700">← Back to products</Link>
-          <h1 className="text-2xl font-semibold text-slate-950 mt-1">Import ingredients</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Use this to add stock items you buy and use in recipes.</p>
+          <Link href="/app/products" className="text-sm text-slate-500 hover:text-slate-700">← Înapoi la produse</Link>
+          <h1 className="text-2xl font-semibold text-slate-950 mt-1">Importă ingrediente</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Folosește asta pentru a adăuga articole de stoc pe care le cumperi și le folosești în rețete.</p>
         </div>
         <Button variant="outline" type="button" onClick={() => downloadCsv(TEMPLATE, "franchisetech-ingredients-template.csv")}>
-          <Download className="h-4 w-4 mr-2" />Download template
+          <Download className="h-4 w-4 mr-2" />Descarcă șablon
         </Button>
       </div>
 
       <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
-        <p className="font-semibold mb-1">Ingredient cost tip</p>
-        <p>Set cost_price to the cost <strong>per unit</strong>. Examples:</p>
+        <p className="font-semibold mb-1">Sfat cost ingrediente</p>
+        <p>Setează cost_price la costul <strong>per unitate</strong>. Exemple:</p>
         <p className="mt-1 font-mono text-xs bg-blue-100 rounded p-2">
-          Chicken, g, 0.012, 2400, 500 → €0.012 per gram, 2400g in stock, reorder at 500g<br/>
-          Cos Lettuce, head, 1.20, 10, 2 → €1.20 per head, 10 heads in stock
+          Pui, g, 0,012, 2400, 500 → 0,012€ per gram, 2400g în stoc, reaprovizionare la 500g<br/>
+          Salată, cap, 1,20, 10, 2 → 1,20€ per cap, 10 capete în stoc
         </p>
       </div>
 
       {summary && <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">{summary}</div>}
 
       <Card>
-        <CardHeader><CardTitle>Upload CSV</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Încarcă CSV</CardTitle></CardHeader>
         <CardContent>
           {/* Hidden form that uses the full product import action */}
           <form
@@ -125,7 +125,7 @@ function IngredientsImportContent() {
             className="space-y-4"
           >
             <Input name="csv_file" type="file" accept=".csv,text/csv" className="hidden" />
-            <p className="text-xs text-slate-400 font-medium">Paste your ingredient list below (name, unit, cost_price, stock_qty, reorder_level):</p>
+            <p className="text-xs text-slate-400 font-medium">Lipește lista de ingrediente mai jos (name, unit, cost_price, stock_qty, reorder_level):</p>
             <textarea
               name="csv_text"
               value={mapToProductCsv(rows)}
@@ -154,7 +154,7 @@ function IngredientsImportContent() {
                 if (ta) { ta.value = mapToProductCsv(rows); form.requestSubmit(); }
               }}
             >
-              Import {rows.length} ingredient{rows.length !== 1 ? "s" : ""}
+              Importă {rows.length} {rows.length === 1 ? "ingredient" : "ingrediente"}
             </Button>
           </form>
         </CardContent>
@@ -162,17 +162,17 @@ function IngredientsImportContent() {
 
       {rows.length > 0 && (
         <Card>
-          <CardHeader><CardTitle>Preview ({rows.length} rows)</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Previzualizare ({rows.length} rânduri)</CardTitle></CardHeader>
           <CardContent>
             <div className="overflow-x-auto text-sm">
               <table className="w-full">
                 <thead>
                   <tr className="border-b text-left text-xs text-slate-400">
-                    <th className="py-2 pr-4">Name</th>
-                    <th className="py-2 pr-4">Unit</th>
-                    <th className="py-2 pr-4">Cost/unit</th>
-                    <th className="py-2 pr-4">Stock</th>
-                    <th className="py-2">Reorder at</th>
+                    <th className="py-2 pr-4">Nume</th>
+                    <th className="py-2 pr-4">Unitate</th>
+                    <th className="py-2 pr-4">Cost/unitate</th>
+                    <th className="py-2 pr-4">Stoc</th>
+                    <th className="py-2">Reaprovizionare la</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -197,7 +197,7 @@ function IngredientsImportContent() {
 
 export default function IngredientsImportPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-slate-400">Loading…</div>}>
+    <Suspense fallback={<div className="p-6 text-sm text-slate-400">Se încarcă…</div>}>
       <IngredientsImportContent />
     </Suspense>
   );

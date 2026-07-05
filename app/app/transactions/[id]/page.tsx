@@ -96,7 +96,7 @@ export default async function TransactionDetailPage({
 
   const { data: tx } = await supabase
     .from("pos_transactions")
-    .select("*,payment_methods(name),pos_transaction_items(*)")
+    .select("*,payment_methods(name),pos_transaction_items(*),table_tabs(restaurant_tables(name))")
     .eq("organisation_id", orgId)
     .eq("id", id)
     .single();
@@ -126,6 +126,14 @@ export default async function TransactionDetailPage({
       .order("performed_at", { ascending: true });
     auditEvents = ae as AuditEvent[] | null;
   } catch { auditEvents = null; }
+
+  const tableTabRow = firstJoined(
+    tx.table_tabs as { restaurant_tables?: { name?: string | null } | { name?: string | null }[] | null } | { restaurant_tables?: { name?: string | null } | { name?: string | null }[] | null }[] | null
+  );
+  const tableFromTab = firstJoined(
+    tableTabRow?.restaurant_tables as { name?: string | null } | { name?: string | null }[] | null
+  );
+  const tableName = tableFromTab?.name?.trim() || null;
 
   const org = firstJoined(membership.organisations as { name?: string | null } | { name?: string | null }[]);
   const method = firstJoined(tx.payment_methods as { name?: string | null } | { name?: string | null }[]);
@@ -188,6 +196,9 @@ export default async function TransactionDetailPage({
           <p className="text-sm text-slate-600">
             {r.customer}: {customerName}
           </p>
+          {tableName && (
+            <p className="text-sm font-medium text-slate-700">Masa: {tableName}</p>
+          )}
           {statusVoided && (
             <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700 font-medium">
               {t.transactions.statusVoided.toUpperCase()}

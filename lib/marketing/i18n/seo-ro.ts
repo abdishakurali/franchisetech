@@ -1,7 +1,9 @@
 import type { SeoRoOverrides } from "./types";
+import { seoRoIndustryOverrides } from "./seo-ro-industries";
 
 /** Romanian copy for SEO pages — merged over English at render time. */
 export const seoRoOverrides: Record<string, SeoRoOverrides> = {
+  ...seoRoIndustryOverrides,
   pos: {
     eyebrow: "Casă de marcat",
     title: "POS simplu pentru cafenele și afaceri alimentare",
@@ -214,98 +216,6 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     h1: "De la cont nou la prima vânzare în sub o oră",
     intro: "Checklist în aplicație de la înregistrare la produse demo, deschiderea casei și prima vânzare — ghidat pas cu pas, fără cost. Configurare premium opțională (199€) pentru migrări mari sau FiscalNet.",
   },
-  cafes: {
-    eyebrow: "Cafenele",
-    title: "Sistem POS pentru cafenele",
-    metaTitle: "Sistem POS pentru cafenele | franchisetech",
-    description:
-      "franchisetech ajută cafenelele cu vânzări POS, numerar/card, produse, stoc, rețete și personal — fără taxe per loc.",
-    h1: "POS și control operațional pentru cafenele",
-    intro:
-      "Cafenelele au nevoie de vânzări rapide, închidere clară, marje pe rețete și management simplu al echipei — fără sisteme complicate sau contracte blocate.",
-  },
-  restaurants: {
-    eyebrow: "Restaurante",
-    title: "POS restaurant — stoc, rețete, personal",
-    metaTitle: "POS restaurant | cost rețete, personal, display bucătărie",
-    description:
-      "franchisetech ajută restaurantele mici cu POS, stoc, furnizori, rețete, personal și rapoarte zilnice.",
-    h1: "POS, stoc și control rețete pentru restaurante mici",
-    intro:
-      "Restaurante mici au nevoie de vânzări clare, stoc ingrediente, cost alimentar vizibil și management al echipei — fără complexitate enterprise.",
-  },
-  "multi-site": {
-    eyebrow: "Multi-locație",
-    title: "POS multi-locație pentru restaurante și cafenele — 99€/locație",
-    metaTitle: "POS multi-locație HORECA | franchisetech",
-    description:
-      "2–5 locații pe o platformă: casă, raport Z și stoc per site — 99€/lună per locație activă, personal nelimitat.",
-    h1: "Un singur workspace pentru fiecare locație — fără taxă per angajat",
-    intro:
-      "Lanțuri mici și operatori cu 2–3 locații au nevoie de aceeași claritate la fiecare punct: casă vs sertar, raport Z zilnic, stoc vizibil — plus o cale simplă de a adăuga locații pe măsură ce creșteți.",
-    bullets: [
-      "99€/lună per locație activă — personal nelimitat la fiecare site",
-      "POS, închidere casă și raport Z la fiecare locație",
-      "Stoc, achiziții și rețete per locație (Pro)",
-      "Display bucătărie unde e nevoie",
-      "În browser — fără contracte blocate de hardware POS",
-      "Setup asistat pentru locații noi (opțional 199€)",
-    ],
-    sections: [
-      {
-        title: "A doua locație fără să o luați de la zero",
-        body: "Când deschideți site-ul doi, nu ar trebui să reconstruiți produsele, metodele de plată și fluxurile. Fiecare locație rulează serviciul zilnic cu sesiuni de casă și rapoarte proprii, cu modele operaționale consistente.",
-      },
-      {
-        title: "Adevărul casei per locație",
-        body: "Fiecare locație are numerar așteptat vs numărat, totaluri card și raport Z pentru acel site — fără amestec în Excel între locații.",
-      },
-      {
-        title: "Creșteți când sunteți gata",
-        body: "Începeți pe Starter la o locație. Treceți la Pro când contează stocul și rețetele. Adăugați locații pe planul multi-locație când a doua unitate este reală — nu în trial.",
-      },
-    ],
-    faqs: [
-      {
-        question: "Cum se prețuiește multi-locația?",
-        answer: "99€/lună per locație activă pe planul multi-locație. Personal nelimitat la fiecare site — fără taxă per utilizator.",
-      },
-      {
-        question: "Pot gestiona produsele central?",
-        answer: "Fiecare organizație rulează site-ul cu un model consistent de produse și setări. Pentru mai multe entități juridice, contactați-ne — onboarding multi-site cu setup asistat.",
-      },
-      {
-        question: "Am nevoie de Pro înainte de a adăuga locații?",
-        answer: "Mulți operatori încep Starter la locația 1, apoi Pro când contează stocul. Facturarea multi-locație se aplică când rulați mai multe site-uri active.",
-      },
-      {
-        question: "FiscalNet funcționează la fiecare locație?",
-        answer: "FiscalNet rulează pe PC-ul de casă la fiecare locație din România. Parcurgem connectorul per site la onboarding asistat.",
-      },
-    ],
-    related: [
-      { label: "Prețuri", href: "/pricing" },
-      { label: "Restaurante", href: "/industries/restaurants" },
-      { label: "România", href: "/industries/romania" },
-      { label: "Raport Z", href: "/features/z-report" },
-    ],
-  },
-  takeaways: {
-    eyebrow: "Livrare la pachet",
-    title: "POS și stoc pentru takeaway",
-    metaTitle: "POS takeaway, gestionare stoc și rapoarte",
-    description: "Vânzări rapide, prețuri clare, totaluri numerar/card și stoc ușor de întreținut.",
-    h1: "POS și stoc simplu pentru takeaway",
-    intro: "Takeaway-urile au nevoie de viteză la casă, prețuri clare și înregistrări ușor de revizuit după serviciu.",
-  },
-  "food-trucks": {
-    eyebrow: "Food truck",
-    title: "POS și control pentru food truck",
-    metaTitle: "POS food truck, numerar/card, stoc",
-    description: "Casă simplă, totaluri clare și produse portabile pentru afaceri mobile.",
-    h1: "POS și control operațional pentru food truck",
-    intro: "Food truck-urile au nevoie de o casă simplă, totaluri clare și înregistrări pe care proprietarul le poate revizui după serviciu.",
-  },
   "health-bars": {
     eyebrow: "Health bar",
     title: "POS și cost rețete pentru health bar",
@@ -316,19 +226,19 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
   },
   "qr-code-receipts": {
     eyebrow: "Conformitate fiscală",
-    title: "Cod QR pe Bonul Fiscal — Gata pentru ANAF Noiembrie 2026",
-    metaTitle: "Cod QR Bon Fiscal România | Obligație ANAF 2026 | Casa de Marcat QR",
+    title: "Cod QR pe Bonul Fiscal — Obligația ANAF din Noiembrie 2026",
+    metaTitle: "Cod QR Bon Fiscal România | Obligație ANAF Noiembrie 2026 | franchisetech",
     description:
-      "franchisetech suportă cod QR pe bonurile fiscale pentru afaceri din România. Pregătit pentru termenul ANAF din noiembrie 2026 prin integrare FiscalNet. Casa de marcat cu cod QR obligatoriu.",
-    h1: "Cod QR pe bonul fiscal — pregătit pentru obligația din 2026",
+      "România obligă codul QR pe bonurile fiscale de la 1 noiembrie 2026. Ce înseamnă obligația și de ce depinde de firmware-ul casei de marcat, nu de software-ul POS.",
+    h1: "Cod QR pe bonul fiscal — ce înseamnă obligația din 2026 pentru casa dvs.",
     intro:
-      "România obligă codul QR pe bonurile fiscale de la 1 noiembrie 2026. franchisetech este pregătit — integrarea noastră FiscalNet suportă case de marcat cu QR, astfel încât afacerea dvs. rămâne conformă fără panică de ultim moment.",
+      "România obligă codul QR pe bonurile fiscale de la 1 noiembrie 2026. Codul QR este generat de firmware-ul casei de marcat certificate, nu de franchisetech sau de orice alt software POS — deci conformitatea depinde de furnizorul dispozitivului fiscal, care trebuie să livreze un update de firmware capabil QR, nu de programul POS folosit.",
     bullets: [
-      "Cod QR tipărit pe fiecare bon fiscal",
-      "Format de date conform cerințelor ANAF",
-      "Funcționează cu imprimante fiscale cu QR (Datecs, Tremol, Daisy, Custom)",
-      "Fără configurare suplimentară — activat prin driver FiscalNet",
-      "Gata astăzi pentru termenul din noiembrie 2026",
+      "Obligația vine din firmware-ul certificat al casei de marcat, nu de la franchisetech",
+      "Verificați cu furnizorul casei de marcat dacă dispozitivul dvs. suportă (sau va suporta) firmware capabil QR",
+      "franchisetech trimite datele vânzării către casa de marcat exact ca astăzi — nu e nevoie de nicio schimbare în POS",
+      "Funcționează cu imprimante fiscale cu QR (Datecs, Tremol, Daisy, Custom) odată ce firmware-ul le suportă",
+      "Vă vom semnala acest lucru în dashboard pe măsură ce se apropie termenul — dar soluția depinde de furnizorul casei de marcat",
     ],
     sections: [
       {
@@ -337,7 +247,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         title: "Cum gestionează franchisetech această cerință",
-        body: "franchisetech trimite datele vânzării către imprimanta fiscală conectată prin FiscalNet. Generarea codului QR are loc în firmware-ul dispozitivului fiscal certificat — nu în software-ul nostru. Astfel, codul QR este generat de hardware-ul avizat ANAF, asigurând conformitatea. Casa de marcat trebuie să aibă cel mai recent update de firmware pentru generarea QR.",
+        body: "franchisetech trimite datele vânzării către imprimanta fiscală conectată prin FiscalNet, exact cum face astăzi pentru fiecare bon. Codul QR în sine este generat de firmware-ul dispozitivului fiscal certificat — nu de software-ul nostru. Asta înseamnă că respectarea obligației depinde de instalarea unui firmware capabil QR pe casa dvs. de marcat; franchisetech nu controlează și nu garantează acest update de firmware.",
       },
       {
         title: "Ce trebuie să faceți",
@@ -392,7 +302,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       "Balanță cantitativ-valorică — stoc inițial/final per produs",
       "Raport de gestiune — raport complet mișcări stoc cu defalcare TVA",
       "Export Saga XML — NIR și vânzări în format compatibil Saga",
-      "Defalcare TVA pe cote (19%, 9%, 5%, 0%)",
+      "Defalcare TVA pe cote (21%, 11%, 5%, 0%)",
     ],
     sections: [
       {
@@ -409,7 +319,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         title: "Raport de gestiune",
-        body: "Raportul complet de inventar care combină toate mișcările în ordine cronologică: stoc inițial, intrări NIR, consum, valori vânzări din Raport Z și stoc final — defalcat pe coloane TVA (19%, 9%, 5%, 0%).",
+        body: "Raportul complet de inventar care combină toate mișcările în ordine cronologică: stoc inițial, intrări NIR, consum, valori vânzări din Raport Z și stoc final — defalcat pe coloane TVA (21%, 11%, 5%, 0%).",
       },
       {
         title: "Export Saga XML",
@@ -453,13 +363,13 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     title: "Program de gestiune HoReCa România — FiscalNet, TVA, rapoarte contabile",
     metaTitle: "POS România | FiscalNet, NIR, Bon consum, Balanță, Export Saga | franchisetech",
     description:
-      "franchisetech pentru cafenele și restaurante din România: POS în lei, FiscalNet, NIR, Bon de consum, Balanță cantitativ-valorică, Raport de gestiune și export Saga XML — fără add-on-uri separate.",
+      "franchisetech pentru cafenele și restaurante din România: POS în lei, FiscalNet, NIR, Bon de consum, Balanță cantitativ-valorică, Raport de gestiune și export Saga XML în planurile eligibile.",
     h1: "POS și rapoarte contabile pentru afaceri din România",
     intro:
       "franchisetech este configurat pentru piața românească: monedă lei (RON), cote TVA standard, integrare FiscalNet și pachetul complet de rapoarte pentru contabil — Bon de consum, Balanță, Raport de gestiune și export Saga.",
     bullets: [
       "Afișaj în lei (RON) — POS, rapoarte, bonuri",
-      "Cote TVA românești: 19%, 9%, 5%, 0%",
+      "Cote TVA românești: 21%, 11%, 5%, 0%",
       "Integrare FiscalNet pentru bonuri fiscale",
       "Registru de casă din Raport Z",
       "Bon de consum, Balanță cantitativ-valorică, Raport de gestiune",
@@ -469,7 +379,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     sections: [
       {
         title: "Monedă și TVA pentru România",
-        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 19%, TVA Redus 9%, TVA Super-redus 5% și Scutit 0%. Cotele sunt editabile oricând.",
+        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 21%, TVA Redus 11%, TVA Super-redus 5% și Scutit 0%. Cotele sunt editabile oricând.",
       },
       {
         title: "Integrare FiscalNet completă",
@@ -498,7 +408,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       {
         question: "Pot exporta către Saga?",
         answer:
-          "Da. Export Saga XML pentru NIR și vânzări este inclus — fără add-on de €39/lună ca la unii competitori.",
+          "Da. Export Saga XML pentru NIR și vânzări este inclus în planurile eligibile.",
       },
       {
         question: "Există limită de utilizatori?",

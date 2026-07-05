@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { BillingPlan } from "@/lib/billing/plans";
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 export function PricingCheckoutButton({
   plan,
@@ -19,13 +20,27 @@ export function PricingCheckoutButton({
   interval?: "month" | "year";
 }) {
   const router = useRouter();
+  const { locale } = useAppI18n();
   const [loading, setLoading] = useState(false);
+  const text = locale === "ro"
+    ? {
+        createAccount: "Creează cont",
+        notConfigured: "Facturarea nu este configurată încă",
+        opening: "Se deschide checkout-ul...",
+        subscribe: "Abonează-te acum",
+      }
+    : {
+        createAccount: "Create account",
+        notConfigured: "Billing is not configured yet",
+        opening: "Opening checkout...",
+        subscribe: "Subscribe now",
+      };
 
   if (!loggedIn) {
     return (
       <Link href={`/signup?plan=${plan}`}>
         <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
-          Create account <ArrowRight className="ml-2 h-4 w-4" />
+          {text.createAccount} <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </Link>
     );
@@ -34,7 +49,7 @@ export function PricingCheckoutButton({
   if (!configured) {
     return (
       <Button disabled className="w-full">
-        Billing is not configured yet
+        {text.notConfigured}
       </Button>
     );
   }
@@ -59,7 +74,7 @@ export function PricingCheckoutButton({
 
   return (
     <Button onClick={startCheckout} disabled={loading} className="w-full bg-blue-600 text-white hover:bg-blue-700">
-      {loading ? "Opening checkout..." : "Subscribe now"}
+      {loading ? text.opening : text.subscribe}
     </Button>
   );
 }

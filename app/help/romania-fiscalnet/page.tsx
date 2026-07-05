@@ -4,7 +4,7 @@ import { CheckCircle2, AlertCircle } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
 
 export const metadata: Metadata = {
-  title: "Romania FiscalNet Setup Guide — franchisetech",
+  title: "Romania FiscalNet Setup Guide",
   description: "How to configure franchisetech for Romanian organisations: FiscalNet fiscal receipts, TVA rates, payment code mapping, and owner go-live checklist.",
   alternates: { canonical: "/help/romania-fiscalnet" },
 };
@@ -20,7 +20,7 @@ const steps = [
   },
   {
     title: "Assign TVA rates to products",
-    body: "Romanian TVA rates — 19% (standard), 9% (food/hospitality), 5% (reduced), and 0% (exempt) — are pre-loaded. Go to Products, edit each product, and assign the correct TVA rate. Your accountant can confirm which rate applies to each product type.",
+    body: "Romanian TVA rates — 21% (standard), 11% (food/hospitality), 5% (reduced), and 0% (exempt) — are pre-loaded. Go to Products, edit each product, and assign the correct TVA rate. Your accountant can confirm which rate applies to each product type.",
   },
   {
     title: "Configure FiscalNet credentials",

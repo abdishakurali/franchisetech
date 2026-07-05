@@ -21,6 +21,9 @@ export function localizeSeoPage(page: SeoPage, locale: MarketingLocale): SeoPage
     sections: override.sections ?? page.sections,
     faqs: override.faqs ?? page.faqs,
     related: override.related ?? page.related,
+    painPoints: override.painPoints ?? page.painPoints,
+    featureRows: override.featureRows ?? page.featureRows,
+    competitorRows: override.competitorRows ?? page.competitorRows,
   };
 }
 

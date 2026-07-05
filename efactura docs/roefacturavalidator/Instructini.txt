@@ -1,0 +1,8 @@
+1) Pentru interfata grafica lansati aplicatia prin apelul ROeFacturaValidator.bat
+
+2) Din linie de comanda rulati
+jre11\bin\java -jar ROeFacturaValidator.jar -t <tip> -f <cale-fisier> -d <cale-director>
+-t - specificati tipul de validarea. FACT1 pentru factura (Invoice) si FCN pentru nota de creditare (CreditNote)
+-f - specificati calea fisierului xml. Pot fi validate mai multe fisiere prin repetarea sintaxei -f <cale-fisier> 
+-d - specificati calea directorului
+-h - help

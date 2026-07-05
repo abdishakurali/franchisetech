@@ -4,19 +4,19 @@ import {
   trigger,
 } from '@n8n/workflow-sdk';
 
-// Fires every hour at :00. isOwnerDigestDue() inside the route decides
-// whether each org's scheduled window has arrived -- so hourly is correct.
-const hourlySchedule = trigger({
+// Fires every 5 minutes because the app route only sends inside a 15-minute
+// window after each organisation's configured time.
+const fiveMinuteSchedule = trigger({
   type: 'n8n-nodes-base.scheduleTrigger',
   version: 1.2,
   config: {
-    name: 'Every Hour',
+    name: 'Every 5 Minutes',
     parameters: {
       rule: {
         interval: [
           {
             field: 'cronExpression',
-            expression: '0 * * * *',
+            expression: '*/5 * * * *',
           },
         ],
       },
@@ -54,8 +54,8 @@ if (res.statusCode !== 200) {
   throw new Error('Digest cron failed: HTTP ' + res.statusCode + ' -- ' + JSON.stringify(res.body));
 }
 
-const { checked = 0, sent = 0, failed = 0, skipped = 0 } = res.body || {};
-return [{ json: { checked, sent, failed, skipped, ok: failed === 0 } }];
+const { checked = 0, due = 0, sent = 0, failed = 0, skipped = 0, recipientsSent = 0, recipientsFailed = 0 } = res.body || {};
+return [{ json: { checked, due, sent, failed, skipped, recipientsSent, recipientsFailed, ok: failed === 0 } }];
 `,
     },
   },
@@ -70,15 +70,15 @@ const telegramAlert = node({
       resource: 'message',
       operation: 'sendMessage',
       chatId: '8505337023',
-      text: "={{ '\u2709\ufe0f Owner digest: ' + $json.sent + ' sent, ' + $json.failed + ' failed, ' + $json.skipped + ' skipped (checked: ' + $json.checked + ')' }}",
+      text: "={{ '\u2709\ufe0f Owner digest: ' + $json.sent + ' orgs sent / ' + $json.recipientsSent + ' recipients, ' + $json.failed + ' failed, ' + $json.skipped + ' skipped, ' + $json.due + ' due (checked: ' + $json.checked + ')' }}",
       additionalFields: { appendAttribution: false },
     },
     credentials: { telegramApi: { name: 'My Telegram' } },
   },
 });
 
-export default workflow('owner-digest-cron', 'Owner Digest -- Hourly Cron')
-  .add(hourlySchedule)
+export default workflow('owner-digest-cron', 'Owner Digest -- 5 Minute Cron')
+  .add(fiveMinuteSchedule)
   .to(callDigestCron)
   .to(telegramAlert)
   .add(manualTrigger)

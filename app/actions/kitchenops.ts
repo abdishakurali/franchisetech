@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getActiveOrg, numberValue, stringValue } from "@/lib/kitchenops/data";
 import { requireActiveSite } from "@/lib/site-context";
+import { validateTableTabForSale, settleTabAndClose } from "@/lib/table-service/sale-link";
 import { normaliseIndustry, RESTAURANT_FEATURE_KEYS, type RestaurantFeatureKey } from "@/lib/restaurant-features";
 import {
   cartUsesPctDiscount,
@@ -276,6 +277,7 @@ export async function ensurePosDefaults() {
 export async function addCategory(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "products.enabled");
   const name = stringValue(formData, "name");
   if (!name) return;
   await supabase.from("product_categories").insert({
@@ -291,6 +293,7 @@ export async function addCategory(formData: FormData) {
 export async function updateCategory(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
   const name = stringValue(formData, "name");
   if (!id || !name) return;
@@ -309,6 +312,7 @@ export async function updateCategory(formData: FormData) {
 export async function deleteCategory(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
   if (!id) return;
   await supabase.from("products").update({ category_id: null }).eq("organisation_id", orgId).eq("category_id", id);
@@ -322,6 +326,7 @@ export async function deleteCategory(formData: FormData) {
 export async function addUnit(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "products.enabled");
   const name = stringValue(formData, "name");
   if (!name) return;
   await supabase.from("units_of_measure").insert({
@@ -335,6 +340,7 @@ export async function addUnit(formData: FormData) {
 export async function updateUnit(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
   const name = stringValue(formData, "name");
   if (!id || !name) return;
@@ -349,6 +355,7 @@ export async function updateUnit(formData: FormData) {
 export async function deleteUnit(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
   if (!id) return;
   await supabase.from("units_of_measure").delete().eq("id", id).eq("organisation_id", orgId);
@@ -387,6 +394,7 @@ export async function updateCashDrawerSettings(formData: FormData) {
 export async function addProduct(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "products.enabled");
   const name = stringValue(formData, "name");
   if (!name) return;
   const availableInPos = formData.get("available_in_pos") === "on";
@@ -467,6 +475,12 @@ export async function addProduct(formData: FormData) {
 export async function addProductFromPos(formData: FormData): Promise<{ ok: boolean; error?: string }> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "products.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
   const name = stringValue(formData, "name");
   if (!name) return { ok: false, error: "Product name is required." };
   const salePrice = numberValue(formData, "sale_price", 0);
@@ -505,6 +519,12 @@ export async function updateProduct(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "products.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
   const id = stringValue(formData, "id");
   if (!id) return { ok: false, error: "Product not found." };
   const availableInPos = formData.get("available_in_pos") === "on";
@@ -593,6 +613,12 @@ export async function deleteProduct(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "products.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
   const id = stringValue(formData, "id");
   if (!id) return { ok: false, error: "Product not found." };
   const { error } = await supabase.from("products").update({ active: false }).eq("id", id).eq("organisation_id", orgId);
@@ -639,6 +665,7 @@ export async function openPosSession(formData: FormData) {
 export async function posCashMovement(formData: FormData) {
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "pos.till_sessions");
   const sessionId = stringValue(formData, "session_id");
   const movementType = stringValue(formData, "movement_type"); // "cash_in" | "cash_out"
   const amount = numberValue(formData, "amount", 0);
@@ -669,10 +696,22 @@ export async function posCashMovement(formData: FormData) {
 export async function closePosSession(formData: FormData) {
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "pos.till_sessions");
   const sessionId = stringValue(formData, "session_id");
   const countedCash = numberValue(formData, "counted_cash", 0);
   const notes = stringValue(formData, "notes") || null;
   if (!sessionId) return;
+
+  // Optional RON denomination breakdown — supplementary detail only, never
+  // used to derive countedCash/difference (those stay driven by counted_cash).
+  let cashBreakdown: Record<string, number> | null = null;
+  const cashBreakdownRaw = stringValue(formData, "cash_breakdown_json");
+  if (cashBreakdownRaw) {
+    try {
+      const parsed = JSON.parse(cashBreakdownRaw);
+      if (parsed && typeof parsed === "object") cashBreakdown = parsed;
+    } catch { /* ignore malformed breakdown, counted_cash total still applies */ }
+  }
 
   const { data: session } = await supabase.from("pos_sessions").select("expected_cash").eq("id", sessionId).single();
   const expectedCash = Number(session?.expected_cash ?? 0);
@@ -684,6 +723,7 @@ export async function closePosSession(formData: FormData) {
     closed_at: new Date().toISOString(),
     counted_cash: countedCash,
     cash_difference: difference,
+    cash_breakdown: cashBreakdown,
     notes,
     updated_at: new Date().toISOString(),
   }).eq("id", sessionId).eq("organisation_id", orgId);
@@ -700,6 +740,7 @@ export async function closePosSession(formData: FormData) {
     expected_cash: expectedCash,
     counted_cash: countedCash,
     cash_difference: difference,
+    cash_breakdown: cashBreakdown,
     notes,
     closed_by: user.id,
   }).then(() => null, () => null);
@@ -1032,6 +1073,7 @@ export async function updateSupplier(formData: FormData) {
 export async function deleteSupplier(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "purchases.suppliers");
   const id = stringValue(formData, "id");
   if (!id) return;
   await supabase.from("suppliers").update({ active: false }).eq("id", id).eq("organisation_id", orgId);
@@ -1455,6 +1497,7 @@ async function csvText(formData: FormData) {
 export async function importProductsCsv(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "products.enabled");
   const rows = parseCsv(await csvText(formData));
   let imported = 0, skipped = 0;
   const { data: existingCats } = await supabase.from("product_categories").select("id,name,category_type").eq("organisation_id", orgId);
@@ -1536,6 +1579,7 @@ export async function importProductsCsv(formData: FormData) {
 export async function importSuppliersCsv(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "purchases.suppliers");
   const rows = parseCsv(await csvText(formData));
   const payload = rows.filter((r) => r.name).map((r) => ({
     organisation_id: orgId, name: r.name, contact_name: r.contact_name || null,
@@ -1563,6 +1607,7 @@ export async function importCustomersCsv(formData: FormData) {
 export async function cancelPurchase(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "purchases.nir");
   const purchaseId = stringValue(formData, "purchase_id");
   if (!purchaseId) return;
   const { data: purchase } = await supabase
@@ -1585,6 +1630,7 @@ export async function cancelPurchase(formData: FormData) {
 export async function deleteProducts(ids: string[]) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "products.enabled");
   if (!ids.length) return;
   await supabase.from("products").update({ active: false }).in("id", ids).eq("organisation_id", orgId);
   revalidatePath("/app/products");
@@ -1595,6 +1641,7 @@ export async function deleteProducts(ids: string[]) {
 export async function deletePurchases(ids: string[]) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "purchases.nir");
   if (!ids.length) return;
   const { data: rows } = await supabase
     .from("purchases")
@@ -1610,6 +1657,7 @@ export async function deletePurchases(ids: string[]) {
 export async function deleteSuppliers(ids: string[]) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "purchases.suppliers");
   if (!ids.length) return;
   await supabase.from("suppliers").update({ active: false }).in("id", ids).eq("organisation_id", orgId);
   revalidatePath("/app/suppliers");
@@ -1941,8 +1989,9 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const restaurantFlowEnabled = Boolean(orgRow?.restaurant_order_flow_enabled);
   const orderTypesEnabled = Boolean(orgRow?.order_types_enabled);
   const tableServiceEnabled = Boolean(orgRow?.table_service_enabled);
-  const orderType = orderTypesEnabled ? stringValue(formData, "order_type") : "";
-  const tableLabel = tableServiceEnabled ? stringValue(formData, "table_label") : "";
+  const tableTabId = tableServiceEnabled ? (stringValue(formData, "table_tab_id") || null) : null;
+  let orderType = orderTypesEnabled ? stringValue(formData, "order_type") : "";
+  let tableLabel = tableServiceEnabled ? stringValue(formData, "table_label") : "";
   const kitchenNote = (kitchenEnabled || restaurantFlowEnabled) ? stringValue(formData, "kitchen_note") : "";
   const customerNote = restaurantFlowEnabled ? stringValue(formData, "customer_note") : "";
   const txDiscountPct = transactionDiscountPct(cart, legacyCartPct);
@@ -1979,6 +2028,13 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
       if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
       throw error;
     }
+  }
+
+  if (tableServiceEnabled && tableTabId) {
+    const tabCheck = await validateTableTabForSale(supabase, orgId, tableTabId, membership.role);
+    if (!tabCheck.ok) return { ok: false, error: tabCheck.error };
+    if (tabCheck.tableName) tableLabel = tabCheck.tableName;
+    if (!orderType) orderType = "dine-in";
   }
 
   const subtotalNet = itemCalcs.reduce((s, i) => s + i.net_amount, 0);
@@ -2088,16 +2144,26 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
         const yieldQty = Math.max(Number(recipe.yield_qty ?? 1), 1);
         for (const ri of recipeItems) {
           if (!ri.ingredient_product_id) continue;
-          const useQty = (Number(ri.quantity) / yieldQty) * soldItem.quantity;
-          const { data: prod } = await supabase.from("products").select("current_stock_qty").eq("id", ri.ingredient_product_id).single();
-          if (prod) {
-            await supabase.from("products").update({ current_stock_qty: Number(prod.current_stock_qty ?? 0) - useQty }).eq("id", ri.ingredient_product_id);
-            await supabase.from("stock_movements").insert({ organisation_id: orgId, product_id: ri.ingredient_product_id, movement_type: "sale_used", quantity_change: -useQty, unit_of_measure: ri.unit_of_measure ?? "each", reference_type: "sale", reference_id: transactionId, performed_by: user.id }).then(() => null, () => null);
+          try {
+            const useQty = (Number(ri.quantity) / yieldQty) * soldItem.quantity;
+            const { data: prod } = await supabase.from("products").select("current_stock_qty").eq("id", ri.ingredient_product_id).single();
+            if (prod) {
+              await supabase.from("products").update({ current_stock_qty: Number(prod.current_stock_qty ?? 0) - useQty }).eq("id", ri.ingredient_product_id);
+              const { error: movementError } = await supabase.from("stock_movements").insert({ organisation_id: orgId, product_id: ri.ingredient_product_id, movement_type: "sale_used", quantity_change: -useQty, unit_of_measure: ri.unit_of_measure ?? "each", reference_type: "sale", reference_id: transactionId, performed_by: user.id });
+              if (movementError) {
+                console.error("[stock-depletion] failed to insert stock_movements", { orgId, transactionId, ingredientProductId: ri.ingredient_product_id, error: movementError.message });
+              }
+            }
+          } catch (itemErr) {
+            // Isolated per-ingredient: one bad lookup must not skip deduction for the rest of the cart.
+            console.error("[stock-depletion] failed to deplete ingredient, continuing with remaining ingredients", { orgId, transactionId, ingredientProductId: ri.ingredient_product_id, error: itemErr instanceof Error ? itemErr.message : String(itemErr) });
           }
         }
       }
     }
-  } catch { /* non-fatal */ }
+  } catch (err) {
+    console.error("[stock-depletion] non-fatal failure during recipe stock reduction", { orgId, transactionId, error: err instanceof Error ? err.message : String(err) });
+  }
 
   // Cash session tracking
   await supabase.from("sale_payments").insert(
@@ -2133,22 +2199,28 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   // Audit event
   await supabase.from("pos_audit_events").insert({ organisation_id: orgId, transaction_id: transactionId, event_type: "created", performed_by: user.id }).then(() => null, () => null);
 
-  await createKitchenOrderIfEnabled({
-    supabase,
-    orgId,
-    userId: user.id,
-    orgRow,
-    transactionId,
-    transactionNumber,
-    items: cart,
-    orderType,
-    tableLabel,
-    note: kitchenNote,
-  });
+  if (!tableTabId) {
+    await createKitchenOrderIfEnabled({
+      supabase,
+      orgId,
+      userId: user.id,
+      orgRow,
+      transactionId,
+      transactionNumber,
+      items: cart,
+      orderType,
+      tableLabel,
+      note: kitchenNote,
+    });
+  }
+
+  if (tableServiceEnabled && tableTabId) {
+    await settleTabAndClose(supabase, orgId, tableTabId, transactionId);
+    revalidatePath("/app/pos");
+  }
 
   // ── FiscalNet: for API mode, mark pending — browser will fire the call ──
   const countryCode = (orgRow?.country_code as string) ?? null;
-  const isRO = countryCode === "RO";
   const fnEnabled = isFiscalNetActive(countryCode, orgRow?.fiscalnet_enabled as boolean | null | undefined);
   const fnMock    = (orgRow?.fiscalnet_mock_mode as boolean) !== false;
   const connMode  = (orgRow?.fiscalnet_connection_mode as string) ?? "api";
@@ -2193,6 +2265,7 @@ export async function addPaymentMethod(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "vat.enabled");
   const name = stringValue(formData, "name");
   const type = stringValue(formData, "type") || "other";
   const fiscalnetCode = formData.get("fiscalnet_code") ? Number(formData.get("fiscalnet_code")) : null;
@@ -2211,6 +2284,7 @@ export async function updatePaymentMethod(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "vat.enabled");
   const id = stringValue(formData, "id");
   const name = stringValue(formData, "name");
   const type = stringValue(formData, "type");
@@ -2231,6 +2305,7 @@ export async function deletePaymentMethod(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "vat.enabled");
   const id = stringValue(formData, "id");
   if (!id) return;
   await supabase.from("payment_methods").delete().eq("id", id).eq("organisation_id", orgId);
@@ -2243,6 +2318,7 @@ export async function addVatRate(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "vat.enabled");
   const name = stringValue(formData, "name");
   const rate = numberValue(formData, "rate");
   const fgRaw = formData.get("fiscalnet_vat_group");
@@ -2268,6 +2344,7 @@ export async function updateVatRate(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "vat.enabled");
   const id = stringValue(formData, "id");
   if (!id) return;
   const name = stringValue(formData, "name");
@@ -2287,6 +2364,7 @@ export async function deleteVatRate(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "vat.enabled");
   const id = stringValue(formData, "id");
   if (!id) return;
   await supabase.from("vat_rates").delete().eq("id", id).eq("organisation_id", orgId);
@@ -2299,6 +2377,7 @@ export async function seedDefaultVatRates(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "vat.enabled");
   const countryCode = (stringValue(formData, "country_code") ?? "IE").toUpperCase();
   const defaults = VAT_DEFAULTS_BY_COUNTRY[countryCode] ?? VAT_DEFAULTS_BY_COUNTRY.IE;
   const { data: existing } = await supabase
@@ -2344,15 +2423,21 @@ export async function updateBusinessCapabilities(formData: FormData): Promise<{ 
     return { ok: false, error: moduleResult.error };
   }
 
+  const settingsManagedFeatureKeys: RestaurantFeatureKey[] = [
+    "payment_split_enabled",
+    "tips_enabled",
+    "compact_workstation_nav_enabled",
+  ];
+
   const { data: before } = await supabase
     .from("organisations")
-    .select(RESTAURANT_FEATURE_KEYS.join(","))
+    .select(settingsManagedFeatureKeys.join(","))
     .eq("id", orgId)
     .maybeSingle();
   const beforeFlags = (before ?? {}) as Partial<Record<RestaurantFeatureKey, boolean | null>>;
 
   const featureUpdates = Object.fromEntries(
-    RESTAURANT_FEATURE_KEYS.map((key) => [key, formCheckboxEnabled(formData, key)])
+    settingsManagedFeatureKeys.map((key) => [key, formCheckboxEnabled(formData, key)])
   ) as Record<RestaurantFeatureKey, boolean>;
 
   const { error: featureError } = await supabase.from("organisations").update(featureUpdates).eq("id", orgId);
@@ -2361,7 +2446,7 @@ export async function updateBusinessCapabilities(formData: FormData): Promise<{ 
     return { ok: false, error: "Module settings saved, but feature toggles could not be updated." };
   }
 
-  for (const key of RESTAURANT_FEATURE_KEYS) {
+  for (const key of settingsManagedFeatureKeys) {
     const oldValue = Boolean(beforeFlags[key]);
     const newValue = featureUpdates[key];
     if (oldValue === newValue) continue;

@@ -4,7 +4,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
 
 export const metadata: Metadata = {
-  title: "Resources for POS, Cash Drawer Setup & Business Operations | franchisetech",
+  title: "Resources for POS, Cash Drawer Setup & Business Operations",
   description:
     "Practical guides and checklists for setting up POS, cash drawer workflows, receipt printers, staff permissions, daily close, and reporting with franchisetech.",
   alternates: { canonical: "/resources" },

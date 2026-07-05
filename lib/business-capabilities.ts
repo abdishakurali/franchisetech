@@ -8,11 +8,7 @@ import {
 } from "@/lib/restaurant-features";
 
 export type CapabilityCategoryId =
-  | "stock_costing"
-  | "kitchen_orders"
   | "payments_till"
-  | "products_menu"
-  | "team_locations"
   | "workstation";
 
 export type ModuleCapabilityId = "inventory" | "recipe_costing" | "team_advanced" | "multi_site";
@@ -46,104 +42,9 @@ export type CapabilityCategory = {
 
 export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
-    id: "stock_costing",
-    title: "Stock & costing",
-    description: "Track deliveries, ingredient costs, recipes, and margins. Turn off to keep the menu simple.",
-    items: [
-      {
-        kind: "module",
-        id: "inventory",
-        moduleKey: "inventory",
-        fieldName: "inventory_enabled",
-        label: "Stock & purchases",
-        description: "Stock levels, suppliers, purchases, and receiving.",
-        planGated: true,
-      },
-      {
-        kind: "module",
-        id: "recipe_costing",
-        moduleKey: "recipe_costing",
-        fieldName: "recipe_costing_enabled",
-        label: "Recipe costing",
-        description: "Recipes, ingredient costs, and margin reports.",
-        planGated: true,
-      },
-    ],
-  },
-  {
-    id: "kitchen_orders",
-    title: "Kitchen & orders",
-    description: "For businesses that prepare food to order and need a clear path from till to kitchen.",
-    items: [
-      {
-        kind: "feature",
-        id: "kitchen_display_enabled",
-        fieldName: "kitchen_display_enabled",
-        label: RESTAURANT_FEATURES.kitchen_display_enabled.label,
-        description: RESTAURANT_FEATURES.kitchen_display_enabled.description,
-        ready: RESTAURANT_FEATURES.kitchen_display_enabled.ready,
-        planGated: false,
-      },
-      {
-        kind: "feature",
-        id: "restaurant_order_flow_enabled",
-        fieldName: "restaurant_order_flow_enabled",
-        label: RESTAURANT_FEATURES.restaurant_order_flow_enabled.label,
-        description: RESTAURANT_FEATURES.restaurant_order_flow_enabled.description,
-        ready: RESTAURANT_FEATURES.restaurant_order_flow_enabled.ready,
-        planGated: false,
-      },
-      {
-        kind: "feature",
-        id: "order_types_enabled",
-        fieldName: "order_types_enabled",
-        label: RESTAURANT_FEATURES.order_types_enabled.label,
-        description: RESTAURANT_FEATURES.order_types_enabled.description,
-        ready: RESTAURANT_FEATURES.order_types_enabled.ready,
-        planGated: false,
-      },
-      {
-        kind: "feature",
-        id: "kitchen_stations_enabled",
-        fieldName: "kitchen_stations_enabled",
-        label: RESTAURANT_FEATURES.kitchen_stations_enabled.label,
-        description: RESTAURANT_FEATURES.kitchen_stations_enabled.description,
-        ready: RESTAURANT_FEATURES.kitchen_stations_enabled.ready,
-        planGated: false,
-      },
-      {
-        kind: "feature",
-        id: "table_service_enabled",
-        fieldName: "table_service_enabled",
-        label: RESTAURANT_FEATURES.table_service_enabled.label,
-        description: RESTAURANT_FEATURES.table_service_enabled.description,
-        ready: RESTAURANT_FEATURES.table_service_enabled.ready,
-        planGated: false,
-      },
-      {
-        kind: "feature",
-        id: "courses_enabled",
-        fieldName: "courses_enabled",
-        label: RESTAURANT_FEATURES.courses_enabled.label,
-        description: RESTAURANT_FEATURES.courses_enabled.description,
-        ready: RESTAURANT_FEATURES.courses_enabled.ready,
-        planGated: false,
-      },
-      {
-        kind: "feature",
-        id: "kitchen_printing_enabled",
-        fieldName: "kitchen_printing_enabled",
-        label: RESTAURANT_FEATURES.kitchen_printing_enabled.label,
-        description: RESTAURANT_FEATURES.kitchen_printing_enabled.description,
-        ready: RESTAURANT_FEATURES.kitchen_printing_enabled.ready,
-        planGated: false,
-      },
-    ],
-  },
-  {
     id: "payments_till",
     title: "Payments & till",
-    description: "How staff take payment and handle tips at the till.",
+    description: "Simple POS behaviour that does not install a separate module.",
     items: [
       {
         kind: "feature",
@@ -166,50 +67,9 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
     ],
   },
   {
-    id: "products_menu",
-    title: "Products & menu",
-    description: "Extra choices on products when your menu needs variants or notes.",
-    items: [
-      {
-        kind: "feature",
-        id: "product_modifiers_enabled",
-        fieldName: "product_modifiers_enabled",
-        label: RESTAURANT_FEATURES.product_modifiers_enabled.label,
-        description: RESTAURANT_FEATURES.product_modifiers_enabled.description,
-        ready: RESTAURANT_FEATURES.product_modifiers_enabled.ready,
-        planGated: false,
-      },
-    ],
-  },
-  {
-    id: "team_locations",
-    title: "Team & locations",
-    description: "More staff control or multiple branches.",
-    items: [
-      {
-        kind: "module",
-        id: "team_advanced",
-        moduleKey: "team_advanced",
-        fieldName: "team_advanced_enabled",
-        label: "Team & audit",
-        description: "Team roles, permissions, and cash audit trail.",
-        planGated: true,
-      },
-      {
-        kind: "module",
-        id: "multi_site",
-        moduleKey: "multi_site",
-        fieldName: "multi_site_ops_enabled",
-        label: "Multi-site operations",
-        description: "Multiple locations and site switching.",
-        planGated: true,
-      },
-    ],
-  },
-  {
     id: "workstation",
     title: "Workstation layout",
-    description: "Screen layout for busy tills and kitchen displays.",
+    description: "Screen layout for busy tills and installed kitchen displays.",
     items: [
       {
         kind: "feature",
@@ -228,6 +88,17 @@ export type CapabilitySuggestion = {
   label: string;
   reason: "industry" | "profile";
 };
+
+const ADDON_FEATURE_KEYS = new Set<RestaurantFeatureKey>([
+  "kitchen_display_enabled",
+  "restaurant_order_flow_enabled",
+  "table_service_enabled",
+  "order_types_enabled",
+  "kitchen_stations_enabled",
+  "courses_enabled",
+  "kitchen_printing_enabled",
+  "product_modifiers_enabled",
+]);
 
 function moduleSuggestionsForIndustry(industry: string | null | undefined): ModuleCapabilityId[] {
   switch (industry) {
@@ -273,6 +144,7 @@ export function getCapabilitySuggestions(input: {
   const out: CapabilitySuggestion[] = [];
 
   for (const key of getSuggestedFeaturesForIndustry(input.industry)) {
+    if (ADDON_FEATURE_KEYS.has(key)) continue;
     const label = RESTAURANT_FEATURES[key].label;
     if (!seen.has(label)) {
       seen.add(label);

@@ -130,8 +130,8 @@ export function VatRateSelect({
         autoComplete="off"
         className={
           compact
-            ? "h-10 w-full min-w-0 truncate rounded-md border border-slate-200 bg-white px-2 text-sm"
-            : "h-10 w-full min-w-0 truncate rounded-md border border-slate-200 bg-white px-3 text-sm"
+            ? "h-10 w-full min-w-0 truncate rounded-md border border-slate-200 bg-white px-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            : "h-10 w-full min-w-0 truncate rounded-md border border-slate-200 bg-white px-3 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
         }
       />
       {open && portalTarget && createPortal(

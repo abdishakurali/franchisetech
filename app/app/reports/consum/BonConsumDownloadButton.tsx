@@ -12,6 +12,7 @@ type Props = {
   date: string;
   items: ConsumptionItem[];
   userName?: string;
+  primitor?: string;
   label?: string;
 };
 
@@ -22,6 +23,7 @@ export function BonConsumDownloadButton({
   date,
   items,
   userName,
+  primitor,
   label = "Descarcă Bon de Consum",
 }: Props) {
   const handleDownload = () => {
@@ -32,6 +34,7 @@ export function BonConsumDownloadButton({
       date,
       items,
       predator: userName,
+      primitor,
     });
     downloadSlipAsTxt(text, filename);
   };

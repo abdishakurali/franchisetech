@@ -44,8 +44,8 @@ export function DashboardModulePrompts({
             </Button>
           </form>
         ) : null}
-        <Link href="/app/settings?tab=features" className="text-sm text-blue-700 hover:underline self-center">
-          Settings → features
+        <Link href="/app/settings?tab=operations" className="text-sm text-blue-700 hover:underline self-center">
+          Settings → operations
         </Link>
       </CardContent>
     </Card>

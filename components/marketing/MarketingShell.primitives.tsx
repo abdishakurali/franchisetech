@@ -17,13 +17,13 @@ export function Section({
 }) {
   const bg =
     tone === "slate"
-      ? "bg-slate-50/70"
+      ? "bg-slate-50"
       : tone === "blue"
-        ? "bg-blue-600/[0.04]"
+        ? "bg-blue-50/30"
         : "bg-white";
   return (
     <section id={id} className={`${bg} px-4 ${marketingSectionY} sm:px-6 lg:px-8`}>
-      <div className="mx-auto max-w-6xl">{children}</div>
+      <div className="mx-auto max-w-7xl">{children}</div>
     </section>
   );
 }

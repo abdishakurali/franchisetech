@@ -5,6 +5,7 @@ import {
   tillCloseLabelForMarket,
   type BillingMarket,
 } from "@/lib/billing/market";
+import { addonPriceLabel, PAID_ADDONS } from "@/lib/billing/catalog";
 
 export type PlanFeatureCategory = {
   title: string;
@@ -42,6 +43,7 @@ export function getPlanFeatureCategories(
 ): readonly PlanFeatureCategory[] {
   const tax = taxLabelForMarket(market);
   const tillClose = tillCloseLabelForMarket(market);
+  const kitchenDisplayPrice = addonPriceLabel(PAID_ADDONS.kitchen_display, market === "RO" ? "ro" : "en");
 
   if (plan === "starter" || plan === "core") {
     const tillItems =
@@ -128,17 +130,19 @@ export function getPlanFeatureCategories(
         items: accountingItems,
       },
       {
-        title: "Kitchen & orders",
+        title: "Optional modules",
         items: [
-          "Kitchen display (optional)",
-          "Order workflow (optional)",
-          "Prep stations (optional)",
-          "Dine-in / takeaway labels (optional)",
+          `Kitchen Display add-on (${kitchenDisplayPrice})`,
+          "FiscalNet included in FranchiseTech; provider subscription paid separately",
         ],
       },
       {
         title: "Team & controls",
-        items: ["Staff roles & permissions", "Cash drawer audit trail"],
+        items: [
+          "Staff roles & permissions",
+          "Cash drawer audit trail",
+          "Owner digest email: sales, cash status, voids, refunds, VAT and stock",
+        ],
       },
     ];
   }
@@ -151,12 +155,14 @@ export function getPlanFeatureCategories(
           "Everything in Operations",
           "Priority support (same-day response)",
           "Dedicated onboarding call",
-          "All future modules included",
+          "Advanced operations support",
         ],
       },
       {
-        title: "Kitchen",
-        items: ["Unlimited kitchen screens", "All kitchen workflow features"],
+        title: "Optional modules",
+        items: [
+          `Kitchen Display add-on (${kitchenDisplayPrice})`,
+        ],
       },
       {
         title: market === "RO" ? "Contabilitate" : "Accounting",
@@ -165,9 +171,8 @@ export function getPlanFeatureCategories(
             ? [
                 "Export XML Saga pentru contabil",
                 "Pachete CSV audit complet",
-                "Owner digest email zilnic",
               ]
-            : ["Full accountant export pack (CSV + XML)", "Daily owner digest email"],
+            : ["Full accountant export pack (CSV + XML)"],
       },
     ];
   }

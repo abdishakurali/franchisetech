@@ -1,12 +1,23 @@
+import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { AuditExportButtons } from "@/components/app/AuditExportButtons";
 import { SagaExportButtons } from "@/components/app/SagaExportButtons";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 
 export default async function AuditExportPage({ searchParams }: { searchParams?: Promise<{ from?: string; to?: string }> }) {
-  const { orgId, countryCode, profileLocale } = await getKitchenOpsContext();
+  const { orgId, countryCode, profileLocale, supabase } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
+  const { data: orgSettings } = await supabase
+    .from("organisations")
+    .select("saga_export_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
+
+  if (!orgSettings?.saga_export_enabled) redirect("/app/settings?tab=integrations");
+  if (!await hasEntitlement(orgId, "reports.accountant_pack")) redirect("/app/billing?reason=saga_requires_scale");
+
   const ae = t.reportPages.auditExport;
   const params = await searchParams;
   const today = new Date().toISOString().slice(0, 10);

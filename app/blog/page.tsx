@@ -8,7 +8,7 @@ import { blogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
 
 export const metadata: Metadata = {
-  title: "Blog — Resurse pentru cafenele și restaurante | franchisetech",
+  title: "Blog — Resurse pentru cafenele și restaurante",
   description:
     "Ghiduri practice pentru proprietarii de cafenele și restaurante din România: raport Z, NIR, rețete, contabilitate, gestiune stoc.",
   alternates: { canonical: `${SITE_URL}/blog` },

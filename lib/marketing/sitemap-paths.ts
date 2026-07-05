@@ -6,12 +6,18 @@ import {
   publicPaths,
   resourcePages,
 } from "@/lib/marketing/seo";
+import { PRIMARY_INDUSTRY_SLUGS } from "@/lib/marketing/industry-verticals";
 
 export type SitemapPathEntry = {
   path: string;
   priority: number;
   changeFrequency: "weekly" | "monthly" | "yearly";
 };
+
+/** Help guide pages are single-language reference content — no ?lang= variant needed. */
+export function isLocalizedPath(path: string): boolean {
+  return !path.startsWith("/help/") && path !== "/help";
+}
 
 const PRIORITY: Record<string, number> = {
   "/": 1,
@@ -25,11 +31,10 @@ function priorityFor(path: string): number {
   if (path.startsWith("/compare/")) return 0.75;
   if (path === COMPARE_HUB_PATH) return 0.8;
   if (path.startsWith("/industries/romania")) return 0.85;
-  if (path.startsWith("/industries/multi-site")) return 0.85;
+  if (PRIMARY_INDUSTRY_SLUGS.some((slug) => path === `/industries/${slug}`)) return 0.85;
   if (path.startsWith("/resources/")) return 0.7;
   if (path.startsWith("/features/")) return 0.75;
   if (path.startsWith("/help/")) return 0.65;
-  if (path === "/partners") return 0.6;
   return 0.6;
 }
 
@@ -44,12 +49,12 @@ export function allSitemapPaths(): SitemapPathEntry[] {
   const paths = new Set<string>([
     ...publicPaths,
     COMPARE_HUB_PATH,
-    "/partners",
     "/help",
     "/login",
     "/signup",
     ...HELP_ARTICLES.map((a) => `/help/${a.slug}`),
     "/help/romania-fiscalnet",
+    "/help/romania-efactura",
   ]);
 
   return [...paths]

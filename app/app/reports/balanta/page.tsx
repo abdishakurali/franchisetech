@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
-import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
+import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 import { BalantaDownloadButton } from "./BalantaDownloadButton";
 import type { BalantaItem, BalantaIntegrityStatus } from "@/lib/ro-accounting/balanta";
 import {
@@ -46,7 +47,13 @@ export default async function BalantaReportPage({
   await requireBusinessModule("inventory");
   const { countryCode, profileLocale, supabase, orgId, currency, membership } =
     await getKitchenOpsContext();
-  await assertEntitlement(orgId, "reports.accountant_pack", { write: false });
+  const { data: orgSettings } = await supabase
+    .from("organisations")
+    .select("saga_export_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
+  if (!orgSettings?.saga_export_enabled) redirect("/app/settings?tab=integrations");
+  if (!await hasEntitlement(orgId, "reports.accountant_pack")) redirect("/app/billing?reason=saga_requires_scale");
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
   const canManage = ["owner", "manager"].includes(membership.role ?? "");

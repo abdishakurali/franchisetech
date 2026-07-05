@@ -299,7 +299,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       },
       {
         title: "Set your TVA rates on products",
-        body: "Romanian TVA rates — 19% (standard), 9% (food/hospitality), 5% (reduced), and 0% (exempt) — are pre-loaded. Go to **Products**, edit each product, and assign the correct TVA rate. Your accountant can confirm which rate applies to each product type.",
+        body: "Romanian TVA rates — 21% (standard), 11% (food/hospitality), 5% (reduced), and 0% (exempt) — are pre-loaded. Go to **Products**, edit each product, and assign the correct TVA rate. Your accountant can confirm which rate applies to each product type.",
         screenshot: "products-new.png",
       },
       {

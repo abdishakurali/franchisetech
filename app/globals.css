@@ -198,3 +198,60 @@ body.hide-chatwoot iframe[title="Chatwoot"] {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* Marketing hero — staggered entrance */
+@keyframes marketing-hero-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.marketing-hero-rise {
+  animation: marketing-hero-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+}
+
+.marketing-hero-delay-1 {
+  animation-delay: 0.05s;
+}
+.marketing-hero-delay-2 {
+  animation-delay: 0.12s;
+}
+.marketing-hero-delay-3 {
+  animation-delay: 0.2s;
+}
+.marketing-hero-delay-4 {
+  animation-delay: 0.28s;
+}
+.marketing-hero-delay-5 {
+  animation-delay: 0.36s;
+}
+.marketing-hero-delay-6 {
+  animation-delay: 0.44s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marketing-hero-rise {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Lift Chatwoot bubble above marketing sticky bars on mobile */
+body.marketing-mobile-cta #woot-widget-holder,
+body.marketing-mobile-cta .woot-widget-bubble,
+body.marketing-mobile-cta .woot--bubble-holder {
+  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body.marketing-partners-sticky #woot-widget-holder,
+body.marketing-partners-sticky .woot-widget-bubble,
+body.marketing-partners-sticky .woot--bubble-holder {
+  bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px)) !important;
+}

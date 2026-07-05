@@ -1,0 +1,1 @@
+jre11\bin\java.exe -jar ROeFacturaValidator.jar

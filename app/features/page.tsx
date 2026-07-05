@@ -35,11 +35,11 @@ export default async function FeaturesPage() {
         }}
       />
 
-      <section className="bg-gradient-to-b from-slate-50/80 to-white px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
+      <section className="bg-gradient-to-b from-slate-50/80 to-white px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+        <div className="mx-auto max-w-6xl text-center lg:text-left">
           <SectionLabel>{t.featuresIndex.heroLabel}</SectionLabel>
-          <h1 className={`mt-4 max-w-3xl ${marketingHeading}`}>{t.featuresIndex.heroTitle}</h1>
-          <p className={`mt-4 max-w-2xl ${marketingSubtext}`}>{t.featuresIndex.heroText}</p>
+          <h1 className={`mx-auto mt-4 max-w-3xl lg:mx-0 ${marketingHeading}`}>{t.featuresIndex.heroTitle}</h1>
+          <p className={`mx-auto mt-4 max-w-2xl lg:mx-0 ${marketingSubtext}`}>{t.featuresIndex.heroText}</p>
           <div className="mt-8 rounded-2xl border border-blue-100 bg-blue-50/50 p-6 sm:flex sm:items-center sm:justify-between sm:gap-6">
             <div>
               <p className="font-semibold text-slate-900">{t.featuresIndex.compareCallout.title}</p>

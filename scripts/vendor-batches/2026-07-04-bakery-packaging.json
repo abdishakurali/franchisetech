@@ -1,0 +1,90 @@
+[
+  {
+    "slug": "cin-grup",
+    "legal_name": "Cin Grup Srl",
+    "brand_name": "CinGrup",
+    "cui": "19939437",
+    "category": "bakery_pastry_ingredients",
+    "subcategories": ["cofetărie", "gelaterie", "panificație"],
+    "description": "Importator/distribuitor de materii prime pentru cofetărie, gelaterie și panificație (ciocolată, creme, paste aromatizante, ambalaje cofetărie).",
+    "website_url": "https://cingrup.ro",
+    "hq_city": "Sibiu",
+    "counties": ["sibiu"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://cingrup.ro/domains2/cingrup.ro/files/company/og-image2364.jpg",
+    "contact_email": "office@cingrup.ro",
+    "contact_phone": "0771 187 215",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://cingrup.ro", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://cingrup.ro/despre-noi", "note": "legal name, CUI 19939437, Reg. Com. J2006001925324, ~20 years registered stated directly by the vendor", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "expertarom-food-ingredients",
+    "legal_name": "EXPERTAROM FOOD INGREDIENTS SRL",
+    "brand_name": "Expertarom",
+    "cui": "7308203",
+    "category": "bakery_pastry_ingredients",
+    "subcategories": ["cofetărie", "patiserie"],
+    "description": "Producător/distribuitor de creme și umpluturi gata de utilizat pentru patiserie și cofetărie.",
+    "website_url": "https://efigroup.ro",
+    "hq_city": "Sibiu",
+    "counties": ["sibiu"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://efigroup.ro/image/catalog/0001fonturi/expertarom_big-1.svg",
+    "contact_email": "contact@efigroup.ro",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://efigroup.ro", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://efigroup.ro/index.php?route=information/contact", "note": "legal name, CUI 7308203, Reg. Com. J32/284/1995 stated directly by the vendor. Site's own published phone number ('021 921 9') is only 7 digits and appears truncated — omitted rather than publish a probably-incomplete number", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "ultra-plast-ultrapack",
+    "legal_name": "S.C. ULTRA PLAST SRL",
+    "brand_name": "UltraPack",
+    "cui": "15212591",
+    "category": "packaging_disposables",
+    "subcategories": ["ambalaje unică folosință", "consumabile curățenie"],
+    "description": "Distribuitor de ambalaje alimentare, veselă de unică folosință și consumabile HoReCa.",
+    "website_url": "https://ultrapack.ro",
+    "hq_city": "Piatra Neamț",
+    "counties": ["neamt"],
+    "serves_all_counties": true,
+    "logo_source_url": "https://ultrapack.ro/wp-content/uploads/2024/04/Logo-Ultra-Pack.png",
+    "contact_email": "contact@ultrapack.ro",
+    "contact_phone": "+40 738 943 638",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://ultrapack.ro/termeni-conditii/", "note": "legal name, CUI 15212591, Reg. Com. J27/176/2003 stated directly by the vendor", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://ultrapack.ro/politica-de-livrare/", "note": "'livrează pe întreg teritoriul României' — explicit nationwide claim", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "horeca-distribution",
+    "legal_name": "S.C. HORECA DISTRIBUTION S.R.L.",
+    "brand_name": "Horeca Distribution",
+    "cui": "17391892",
+    "category": "packaging_disposables",
+    "subcategories": ["ambalaje biodegradabile", "ambalaje street food"],
+    "description": "Importator și distribuitor de ambalaje de unică folosință (biodegradabile, street food, termosudare) pentru HoReCa.",
+    "website_url": "https://www.horecadistribution.ro",
+    "hq_city": "București",
+    "counties": ["bucuresti"],
+    "serves_all_counties": true,
+    "logo_background": "dark",
+    "logo_source_url": "https://www.horecadistribution.ro/wp-content/uploads/2021/10/sigla-horeca-2.png",
+    "contact_email": "office@horecadistribution.ro",
+    "contact_phone": "0722 600 577",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.horecadistribution.ro", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://www.horecadistribution.ro/termeni-si-conditii/", "note": "legal name, CUI 17391892, Reg. Com. J40/5471/2005, 'livrări la nivel național în maxim 48h' stated directly by the vendor", "checked_at": "2026-07-04"}
+    ]
+  }
+]

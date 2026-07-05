@@ -54,7 +54,8 @@ done
 # ── 3. Homepage must contain franchisetech ────────────────────
 echo "Checking homepage branding..."
 if [ -f "$SOURCE/app/page.tsx" ]; then
-  COUNT=$(grep -c 'franchisetech' "$SOURCE/app/page.tsx" 2>/dev/null || echo "0")
+  COUNT=$(grep -c 'franchisetech' "$SOURCE/app/page.tsx" 2>/dev/null || true)
+  COUNT="${COUNT:-0}"
   if [ "$COUNT" -eq 0 ]; then
     fail "app/page.tsx does not contain 'franchisetech' — wrong file or stale source"
   fi

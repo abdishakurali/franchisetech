@@ -20,20 +20,32 @@ export default async function SalesReportPage() {
   const siteIds = accessibleSites.map((s) => s.id);
 
   // Build queries — if user has accessible sites, filter to them; else return empty
+  // Items are embedded on the transaction and filtered via the transaction's
+  // own sold_at (the real sale date), not pos_transaction_items.created_at --
+  // for migrated historical sales, created_at is the bulk-import timestamp
+  // (identical for every migrated row), which would silently include or
+  // exclude the wrong period depending on where the import date falls.
   const hasSites = siteIds.length > 0;
   const txBaseQuery = supabase.from("pos_transactions")
-    .select("*,payment_methods(name)")
+    .select("*,payment_methods(name),pos_transaction_items(product_name,quantity,line_total,vat_rate,net_amount,vat_amount,gross_amount)")
     .eq("organisation_id", orgId)
     .neq("status", "voided")
     .gte("sold_at", month);
-  const itemsBaseQuery = supabase.from("pos_transaction_items")
-    .select("product_name,quantity,line_total,vat_rate,net_amount,vat_amount,gross_amount,created_at")
-    .eq("organisation_id", orgId)
-    .gte("created_at", month);
 
+  type SalesReportItem = {
+    product_name: string;
+    quantity: number | null;
+    line_total: number | null;
+    vat_rate: number | null;
+    net_amount: number | null;
+    vat_amount: number | null;
+    gross_amount: number | null;
+  };
   const txQuery = hasSites ? txBaseQuery.in("site_id", siteIds) : txBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000");
-  const itemsQuery = hasSites ? itemsBaseQuery.in("site_id", siteIds) : itemsBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000");
-  const [{ data: transactions }, { data: items }] = await Promise.all([txQuery, itemsQuery]);
+  const { data: transactions } = await txQuery;
+  const items: SalesReportItem[] = (transactions ?? []).flatMap(
+    (tx) => (tx as unknown as { pos_transaction_items?: SalesReportItem[] }).pos_transaction_items ?? []
+  );
 
   const todayTx = (transactions ?? []).filter((tx) => String(tx.sold_at) >= today);
   const weekTx = (transactions ?? []).filter((tx) => String(tx.sold_at) >= week);

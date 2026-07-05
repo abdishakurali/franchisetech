@@ -10,13 +10,13 @@ export { isFiscalNetActive, isFiscalNetClientActive } from "@/lib/fiscalnet/elig
 // ── VAT group (one row per fiscal VAT code) ──────────────────────────────
 export interface VatGroup {
   code:  number;   // FiscalNet group code: 1=A, 2=B, 3=C, 4=D, etc.
-  rate:  number;   // Percentage, e.g. 19 or 9
-  label: string;   // Human label, e.g. "TVA standard 19% (A)"
+  rate:  number;   // Percentage, e.g. 21 or 11
+  label: string;   // Human label, e.g. "TVA standard 21% (A)"
 }
 
 export const DEFAULT_VAT_GROUPS: VatGroup[] = [
-  { code: 1, rate: 19, label: "TVA standard 19% (A)" },
-  { code: 2, rate:  9, label: "TVA redus 9% (B)" },
+  { code: 1, rate: 21, label: "TVA standard 21% (A)" },
+  { code: 2, rate: 11, label: "TVA redus 11% (B)" },
   { code: 3, rate:  5, label: "TVA super-redus 5% (C)" },
   { code: 4, rate:  0, label: "Scutit TVA 0% (D)" },
 ];

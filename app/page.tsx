@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { HomePageContent } from "@/components/marketing/HomePageContent";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { JsonLd } from "@/components/marketing/JsonLd";
+import { TestimonialCarousel } from "@/components/marketing/TestimonialCarousel";
 import { faqJsonLd, SITE_URL } from "@/lib/marketing/seo";
 import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
@@ -14,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t.home.meta.title,
     description: t.home.meta.description,
+    applicationName: "franchisetech",
     keywords: marketingKeywords(locale),
     alternates: localeAlternates("/", locale),
     openGraph: {
@@ -32,21 +34,9 @@ export default async function HomePage() {
 
   return (
     <MarketingShell>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "SoftwareApplication",
-          name: "franchisetech",
-          applicationCategory: "BusinessApplication",
-          operatingSystem: "Web",
-          inLanguage: locale,
-          description: t.home.meta.description,
-          url: SITE_URL,
-          offers: { "@type": "Offer", price: "49", priceCurrency: "EUR" },
-        }}
-      />
       <JsonLd data={faqJsonLd([...t.home.faq.items])} />
       <HomePageContent />
+      <TestimonialCarousel label={t.home.socialProof.label} />
     </MarketingShell>
   );
 }

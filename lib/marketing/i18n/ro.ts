@@ -4,7 +4,8 @@ export const ro: MarketingMessages = {
   nav: {
     features: "Funcționalități",
     industries: "Industrii",
-    partners: "Parteneri",
+    businessTypes: "Tip afacere",
+    partners: "Furnizori",
     pricing: "Prețuri",
     resources: "Resurse",
     blog: "Blog",
@@ -18,6 +19,10 @@ export const ro: MarketingMessages = {
     closeMenu: "Închide meniul",
     language: "Limbă",
   },
+  announcement: {
+    text: "Trial 15 zile — fără card. Configurare asistată inclusă.",
+    cta: "Începe acum",
+  },
   footer: {
     tagline: "POS în cloud și control operațional pentru cafenele, restaurante și afaceri alimentare.",
     subtagline: "Vindeți, urmăriți stocul, închideți casa și vedeți cifre reale — fără contracte POS blocate sau taxe per loc.",
@@ -27,7 +32,7 @@ export const ro: MarketingMessages = {
     features: "Funcționalități",
     industries: "Industrii",
     company: "Companie",
-    partners: "Parteneri",
+    partners: "Furnizori",
     pricing: "Prețuri",
     resources: "Resurse",
     help: "Centru de ajutor",
@@ -35,6 +40,9 @@ export const ro: MarketingMessages = {
     romania: "România",
     privacy: "Confidențialitate",
     terms: "Termeni",
+    copyright: "© {year} franchisetech. Toate drepturile rezervate.",
+    secureCheckout: "Plăți securizate prin Stripe",
+    sslSecured: "Conexiune SSL securizată",
     featureLinks: {
       pos: "Casă de marcat",
       kitchen: "Display bucătărie",
@@ -64,6 +72,7 @@ export const ro: MarketingMessages = {
     partnerWithUs: "Devino partener",
     setupHelp: "Ajutor la configurare: produse, personal, plăți și prima vânzare.",
     finalTitle: "Gata să începi?",
+    bookDemo: "Programează un demo",
   },
   seoPage: {
     getStarted: "Începe",
@@ -80,17 +89,53 @@ export const ro: MarketingMessages = {
     industriesBreadcrumb: "Industrii",
     relevantFeatures: "Funcționalități relevante",
   },
+  industryLanding: {
+    painTitle: "Ce rezolvăm pentru {industry}",
+    featuresTitle: "Funcționalități pentru fluxul tău",
+    compareTitle: "De ce nu alternativa?",
+    compareLink: "Comparație completă",
+  },
+  whyOwners: {
+    heading: "Ce rezolvăm în fiecare seară",
+    screenshotCaption: "Panou proprietar și raport Z — aceleași cifre pe care le verifici la închidere.",
+    items: [
+      {
+        title: "Închizi ziua cu încredere",
+        text: "Numerar așteptat vs sertar real, rapoarte zilnice și reconciliere precisă. Știi cifrele înainte să închizi ușa.",
+      },
+      {
+        title: "Conformitate fiscală românească inclusă",
+        text: "FiscalNet, Raport Z, ANAF e-Factura și TVA sunt native — nu adăugate ulterior ca opțiuni extra.",
+      },
+      {
+        title: "Funcționează pe hardware existent",
+        text: "Rulează în browser. Nu este nevoie de terminal POS proprietar scump — folosești laptopurile și tabletele deja din business.",
+      },
+      {
+        title: "Un singur sistem pentru operațiunile zilnice",
+        text: "POS, stoc, achiziții, rețete, raportare și date pentru proprietar — toate conectate într-o platformă cloud.",
+      },
+      {
+        title: "Onboarding asistat",
+        text: "Noi configurăm business-ul, instruim personalul și îi ajutăm să fie live. Clientul tău nu este niciodată lăsat să se descurce singur.",
+      },
+    ],
+  },
   home: {
     meta: {
-      title: "franchisetech — Program de gestiune HoReCa: POS, Stoc, Rețete, Rapoarte",
+      title: "franchisetech — Închizi ziua cu sertarul la casă",
       description:
-        "Program de gestiune pentru cafenele și restaurante din România: POS, stoc, NIR, rețete și rapoarte de la 49€/lună. Personal nelimitat, fără contract POS blocat.",
+        "POS, stoc și raport Z pentru cafenele și restaurante din România. Setup gratuit în sub o oră, de la 49€/lună, personal nelimitat, 15 zile fără card.",
     },
     hero: {
-      label: "Pentru cafenele și restaurante din România",
-      title: "Știi ce ai vândut, ce ai cheltuit și cât ai câștigat — în fiecare zi.",
-      subtitle: "POS, stoc, rețete și rapoarte într-un singur workspace. De la €49/lună, 15 zile gratuit, fără card necesar.",
-      trialNote: "Fără card pentru deschiderea casei · 99,99% uptime · Suport instant",
+      label: "Pentru cafenele, restaurante și takeaway din România",
+      title: "Închizi ziua știind că sertarul bate cu casa.",
+      titleBefore: "Închizi ziua știind că ",
+      titleHighlight: "sertarul bate cu casa",
+      titleAfter: ".",
+      subtitle: "Tot ce ai nevoie pentru ziua de azi, într-un singur loc.",
+      socialProof: "Printre primii proprietari din România care închid ziua cu franchisetech.",
+      trialNote: "Fără card la început · Setup ghidat în aplicație · Anulezi oricând",
       trustSignals: [
         { title: "Configurare gratuită", text: "Cont nou, produse demo, deschidere casă și prima vânzare — ghidat în aplicație, fără cost." },
         { title: "Sub o oră la prima vânzare", text: "Majoritatea cafenelelor termină pașii de bază într-o singură sesiune." },
@@ -98,8 +143,15 @@ export const ro: MarketingMessages = {
         { title: "Personal nelimitat", text: "Creșteți echipa fără taxe per loc." },
       ],
       posAlt: "franchisetech POS — grilă produse, coș și încasare",
-      cafeAlt: "Proprietar de cafenea folosind franchisetech pe tabletă",
-      kitchenAlt: "franchisetech display bucătărie — coloane Nou, În pregătire, Gata și Finalizat",
+      cafeAlt: "Casa de marcat fiscală compatibilă cu franchisetech",
+      kitchenAlt: "franchisetech raport Z zilnic — numerar, card și TVA la închidere",
+      dashboardAlt:
+        "Panou franchisetech — vânzări azi, numerar așteptat și status casă",
+      zReportAlt: "Raport Z franchisetech — încasări cash și card, TVA defalcat",
+      tableFloorAlt:
+        "Plan sală franchisetech — alege masa din Sală, Terasă sau Bar",
+      tableOrderAlt:
+        "POS masă — Trimite comanda la bucătărie și Încasează total la final",
     },
     panels: {
       heading: "Toată ziua de lucru, într-un singur loc.",
@@ -131,6 +183,29 @@ export const ro: MarketingMessages = {
         { title: "Contracte POS blocate", text: "POS în browser cu personal nelimitat. Începeți pe dispozitivele pe care le aveți deja." },
       ],
     },
+    outcomeCards: [
+      {
+        headline: "Sertarul bate cu casa",
+        body: "Numerar așteptat, card și diferența — vizibile înainte să închizi ușa.",
+        href: "/features/z-report",
+        img: "/showcase/reports-dashboard.png",
+        imgAlt: "Panou franchisetech — numerar așteptat și status casă",
+      },
+      {
+        headline: "Vinzi rapid la casă",
+        body: "Grilă produse, încasare cash sau card, bon fiscal — personal nou vinde din prima zi.",
+        href: "/features/pos",
+        img: "/showcase/pos-table-order.png",
+        imgAlt: "POS franchisetech — Trimite comanda și Încasează total la masă",
+      },
+      {
+        headline: "Plan sală și comenzi la masă",
+        body: "Alege masa, trimite runde la bucătărie, încasezi o singură dată la final.",
+        href: "/features/pos",
+        img: "/showcase/table-floor.png",
+        imgAlt: "Plan sală franchisetech — mese și secțiuni Sală, Terasă, Bar",
+      },
+    ],
     dashboard: {
       label: "Panou proprietar",
       title: "Astăzi dintr-o privire.",
@@ -158,7 +233,9 @@ export const ro: MarketingMessages = {
       subtitle: "Personal nelimitat. Fără taxă per loc. Raport vânzări, Z și TVA în Core.",
       starter: "Core",
       pro: "Operations",
-      multi: "Multi-locație",
+      multi: "Scale",
+      month: "/lună",
+      ownerDigest: "Operations include emailul rezumat pentru manager: vânzări, status casă, anulări, retururi, TVA și stoc trimise automat.",
       cta: "Vezi prețurile complete",
     },
     industries: {
@@ -195,30 +272,49 @@ export const ro: MarketingMessages = {
       beforeTitle: "Înainte de franchisetech",
       afterTitle: "Cu franchisetech",
       beforeItems: [
-        "Casa nu se potrivește cu sertarul după închidere",
-        "Marje ascunse în foi de calcul",
-        "Surprize de stoc în timpul serviciului",
-        "Contracte POS blocate",
+        "Am mai încercat 2–3 softuri și niciunul nu s-a potrivit cu afacerea mea",
+        "Înregistrare manuală a comenzilor Glovo și Bolt în casa de marcat",
+        "Casa nu bate cu sertarul la sfârșitul zilei",
+        "Marjele ascunse în foi de calcul — nu știu dacă câștig",
       ],
       afterItems: [
-        "Numerar și card așteptat la închidere",
-        "Cost rețete înainte de schimbarea meniului",
-        "Alerte stoc scăzut lângă POS",
-        "POS în browser, personal nelimitat",
+        "Numerar și card așteptat la orice închidere — sertarul bate",
+        "Costul rețetelor înainte de orice schimbare de meniu",
+        "Știi în orice moment ce s-a vândut și ce zace pe raft",
+        "Export Saga direct pentru contabil — fără transcrierea datelor",
       ],
     },
     socialProof: {
-      label: "Program beta România",
+      label: "Ce spun clienții",
       quotes: [
-        { quote: "Construit pentru operatori care vor casă, stoc și rapoarte într-un singur loc — fără taxă per angajat.", name: "franchisetech", business: "Platformă pentru HORECA", metric: "Trial asistat 15 zile" },
-        { quote: "Onboarding cu oameni reali: produse, personal, prima vânzare — nu doar un cont gol.", name: "Echipa franchisetech", business: "Suport setup", metric: "Prima vânzare ghidată" },
-        { quote: "NIR, TVA pe produs și ghid FiscalNet pentru multi-locație — când contabilul e gata.", name: "Pentru RO", business: "Operatori multi-site", metric: "Ghid pas cu pas" },
+        {
+          title: "Vizibilitate operațională crescută",
+          quote: "FranchiseTech a transformat modul în care gestionăm afacerea noastră cu cafea. De la producție la punct de vânzare, totul este conectat într-un singur sistem. Inventarul este precis, raportarea zilnică este mai rapidă și avem vizibilitate clară asupra operațiunilor.",
+          name: "Sherif A.",
+          business: "CEO, Gourmet Coffee SRL",
+          metric: "✓ Client verificat",
+        },
+        {
+          title: "Soluție fiabilă pentru afaceri",
+          quote: "Aveam nevoie de o platformă care să corespundă cerințelor operaționale fără complexitate inutilă. FranchiseTech a livrat o soluție fiabilă, ușor de utilizat. Echipa a răspuns rapid, a ascultat feedback-ul nostru și ne-a ajutat să simplificăm procesele.",
+          name: "Adam L.",
+          business: "UREP",
+          metric: "✓ Client verificat",
+        },
       ],
+    },
+    productProof: {
+      label: "Start rapid",
+      title: "Vezi cum faci prima vânzare în sub 10 minute",
+      subtitle: "FranchiseTech te duce de la cont nou la casă deschisă, produse demo și prima vânzare — fără configurare complicată.",
+      videoPlaceholder: "Video demo în curând",
+      cta: "Încearcă gratuit",
+      demoCta: "Programează un demo",
     },
     compare: {
       label: "Compară POS",
       title: "Cum se compară franchisetech",
-      subtitle: "Ghiduri oneste față de Ebriza, SmartBill, Saga și altele — inclusiv cost real când raportarea e add-on plătit.",
+      subtitle: "Ghiduri oneste față de Ebriza, SmartBill, Saga și altele — inclusiv cost real când raportarea este modul separat.",
       viewAll: "Toate comparațiile",
       cardCta: "Citește comparația",
     },
@@ -230,6 +326,9 @@ export const ro: MarketingMessages = {
         { question: "Pot vedea marjele pe produsele din meniu?", answer: "Da. Costul rețetelor leagă ingredientele de prețul de vânzare — vedeți costul per porție și marja brută înainte să schimbați meniul." },
         { question: "Există preț per loc?", answer: "Nu. Personal nelimitat fără cost suplimentar per utilizator." },
         { question: "Pot gestiona stocul din același sistem cu POS-ul?", answer: "Da. Achizițiile, furnizorii și nivelurile de stoc stau lângă vânzări — vedeți ce e scăzut înainte de următorul serviciu." },
+        { question: "Funcționează cu Glovo, Bolt Food sau Tazz?", answer: "Glovo se conectează automat — vânzările se înregistrează corect, separat de vânzările din cafenea sau restaurant. Bolt Food și Tazz sunt în lucru; deocamdată introduci comenzile lor manual în POS." },
+        { question: "Se exportă datele în Saga pentru contabilul meu?", answer: "Da. Exportul Saga C (XML) este inclus. Contabilul tău primește fișierul gata de import — fără să transcrieți datele manual din rapoarte." },
+        { question: "Funcționează la mai multe locații sau puncte de lucru?", answer: "Da. Fiecare locație închide propria casă și are raport Z separat. Stocul este comun la nivel de companie, iar contul de proprietar vede toate locațiile dintr-un dashboard." },
       ],
     },
   },
@@ -241,7 +340,7 @@ export const ro: MarketingMessages = {
     heroText: "POS, bucătărie, stoc, furnizori, rețete și rapoarte — un singur spațiu. Fără preț per loc.",
     compareCallout: {
       title: "Evaluați alte soluții?",
-      text: "Comparații oneste vs Ebriza, SmartBill, Oblio, Bit-Soft și altele — inclusiv când raportarea e add-on plătit.",
+      text: "Comparații oneste vs Ebriza, SmartBill, Oblio, Bit-Soft și altele — inclusiv când raportarea este modul separat.",
       cta: "Compară software POS",
       href: "/compare",
     },
@@ -259,10 +358,12 @@ export const ro: MarketingMessages = {
   },
   industriesIndex: {
     title: "Industrii — franchisetech",
-    description: "POS în cloud și control operațional pentru cafenele, restaurante, takeaway, food truck și health bar.",
+    description:
+      "POS în cloud pentru cafenele, restaurante, takeaway, baruri, patiserii, food truck și lanțuri multi-locație în România.",
     label: "Industrii",
     heroTitle: "Construit pentru afaceri alimentare care servesc clienți zilnic.",
-    heroText: "POS, stoc, rețete, display bucătărie și rapoarte zilnice — adaptat modului real de lucru al cafenelelor și restaurantelor.",
+    heroText:
+      "POS, stoc, rețete, display bucătărie și rapoarte zilnice — adaptat modului real de lucru al cafenelelor, restaurantelor și operatorilor mobili.",
     cardIncludes: ["Casă POS", "Stoc & achiziții (Pro)", "Raport Z zilnic"],
   },
   partners: {
@@ -314,7 +415,7 @@ export const ro: MarketingMessages = {
     endCustomers: "Clienți finali:",
     startTrial: "începe trial-ul",
     faqs: [
-      { question: "Cât câștig exact?", answer: "~20% recurent din abonamentul activ al clientului. Exemplu: plan Pro la 79€/lună → circa 15,80€/lună pentru dvs., cât timp clientul plătește. La setup asistat (199€), partenerii care introduc clientul păstrează circa 100–150€ la prima activare." },
+      { question: "Cât câștig exact?", answer: "~20% recurent din abonamentul activ al clientului. Exemplu: plan Operations la 79€/lună → circa 15,80€/lună pentru dvs., cât timp clientul plătește. La setup asistat (199€), partenerii care introduc clientul păstrează circa 100–150€ la prima activare." },
       { question: "Ce fac eu vs ce faceți voi?", answer: "Dvs. recomandați și păstrați încrederea clientului. Noi rulăm platforma, hostingul, actualizările, instalarea asistată și suportul de bază." },
       { question: "De ce contabilii sunt potriviți?", answer: "Fiecare afacere reglementată are contabil. Dvs. verificați NIR, TVA și închideri — recomandarea vine de la advisorul de încredere, nu de la un reseller generic." },
       { question: "Când pot trimite primul client?", answer: "Programul este în pilot. După ce validăm primul lanț complet (recomandare → instalare → plată), invităm partenerii de pe listă. Până atunci, nu trimiteți clienți live prin program." },
@@ -337,12 +438,12 @@ export const ro: MarketingMessages = {
       sending: "Se trimite…",
       successWaitlist: "Ești pe listă — te contactăm când deschidem programul.",
       successApply: "Mulțumim — revenim în 2 zile lucrătoare.",
-      error: "Ceva nu a mers bine. Scrieți la hello@franchisetech.ro sau încercați din nou.",
+      error: "Ceva nu a mers bine. Scrieți la info@franchisetech.ro sau încercați din nou.",
     },
   },
   pricing: {
     title: "Prețuri franchisetech",
-    description: "Prețuri clare pentru afaceri mici care vor POS simplu, configurare produse, control personal și rapoarte zilnice.",
+    description: "Prețuri franchisetech: Starter €49/lună, Pro €79/lună, Multi-locație €109/lună. Include POS, personal nelimitat, raport Z și rapoarte zilnice. Trial gratuit 15 zile, fără card.",
     badge: "Prețuri simple",
     heroTitle: "Prețuri simple pentru cafenele și restaurante în creștere.",
     heroText: "Un preț lunar pe magazin. Fără taxe per loc.",
@@ -428,17 +529,17 @@ export const ro: MarketingMessages = {
       subtitle:
         "Prețul de listă nu e tot ce plătiți. Tabelul arată ce plătește o cafenea pentru POS, stoc, display bucătărie și export Saga.",
       colFeature: "Funcționalitate",
-      colFranchisetech: "franchisetech Operations €79",
+      colFranchisetech: "franchisetech Scale €99",
       colEbrizaPro: "Ebriza Pro €49",
       colEbrizaPremium: "Ebriza Premium €99",
       included: "Inclus",
       excluded: "Nu",
       footnote:
-        "Prețuri Ebriza verificate pe ebriza.com/ro/preturi la 24 iunie 2026. Totalurile presupun Kitchen Display (+€19/lună) și integrare Saga (+€39/lună). POS și rapoarte Z/TVA de la €49 Core; stoc, NIR, rețete și KDS pe Operations (€79).",
+        "Prețuri Ebriza verificate pe ebriza.com/ro/preturi la 24 iunie 2026. Totalurile presupun Kitchen Display (+€19/lună). POS și rapoarte Z/TVA sunt pe Core; stoc, NIR și rețete sunt pe Operations; Saga și rapoartele contabile sunt incluse în planurile eligibile.",
       readComparison: "Citește comparația completă Ebriza",
       compareHref: "/compare/ebriza",
       fallbackText:
-        "Pentru România, franchisetech Operations (€79) include stoc, NIR, rețete, display bucătărie, export Saga și rapoarte contabile (Bon de consum, Balanță) — în timp ce add-on-urile Ebriza pot adăuga €19–€39/lună per modul peste prețul de listă.",
+        "Pentru România, franchisetech include rapoarte Z/TVA pe Core, stoc și NIR pe Operations, iar exportul Saga plus rapoartele contabile în planurile eligibile. Kitchen Display rămâne modul operațional separat.",
       rows: {
         posSales: "POS + vânzări",
         zReport: "Raport Z / închidere casă",

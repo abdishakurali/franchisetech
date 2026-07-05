@@ -35,6 +35,7 @@ rsync -av --delete \
   --exclude='.git' \
   --exclude='*.swp' \
   --exclude='._*' \
+  --exclude='.env' \
   --exclude='.env.local' \
   --exclude='.env.production.local' \
   --exclude='.env.local.example' \
@@ -46,6 +47,10 @@ rsync -av --delete \
   --exclude='kitchenops-pos-qa-screenshots' \
   --exclude='fridgeproof-final-retest-screenshots' \
   --exclude='*.mp4' \
+  --exclude='efactura docs' \
+  --exclude='.cursor' \
+  --exclude='.agents' \
+  --exclude='data' \
   "$SOURCE/" "$REMOTE:$RELEASE_DIR/"
 
 # ── Write RELEASE.json into the release ──────────────────────

@@ -21,7 +21,12 @@ const BRANDS: CompetitorBrand[] = [
   { slug: "vilicorest", name: "VilicoRest", logoSrc: "/compare/logos/vilicorest.svg", accent: "#7C3AED", domain: "vilicorest.ro", market: "ro" },
   { slug: "ebriza", name: "Ebriza", logoSrc: "/compare/logos/ebriza.svg", accent: "#4F46E5", domain: "ebriza.ro", market: "ro" },
   { slug: "oblio", name: "Oblio", logoSrc: "/compare/logos/oblio.svg", accent: "#0F766E", domain: "oblio.eu", market: "ro" },
-  { slug: "bit-soft", name: "Bit-Soft", logoSrc: "/compare/logos/bit-soft.svg", accent: "#1E293B", domain: "bit-soft.ro", market: "ro" },
+  { slug: "bit-soft",  name: "Bit-Soft",  logoSrc: "/compare/logos/bit-soft.svg",  accent: "#1E293B", domain: "bit-soft.ro",  market: "ro" },
+  { slug: "boogit",    name: "Boogit",    logoSrc: "/compare/logos/boogit.png",    accent: "#F97316", domain: "boogit.ro",    market: "ro" },
+  { slug: "freyapos",  name: "FreyaPOS",  logoSrc: "/compare/logos/freyapos.svg",  accent: "#7C3AED", domain: "freyapos.ro",  market: "ro" },
+  { slug: "posnet",    name: "POSnet",    logoSrc: "/compare/logos/posnet.svg",    accent: "#0369A1", domain: "posnet.ro",    market: "ro" },
+  { slug: "rkeeper",   name: "rKeeper",   logoSrc: "/compare/logos/rkeeper.jpg",   accent: "#DC2626", domain: "rkeeper.ro",   market: "ro" },
+  { slug: "nexuserp",  name: "Nexus ERP", logoSrc: "/compare/logos/nexuserp.webp", accent: "#1D4ED8", domain: "nexuserp.ro",  market: "ro" },
 ];
 
 export const FRANCHISETECH_BRAND = {
@@ -43,6 +48,6 @@ export function competitorLogoForOg(slug: string): string {
 }
 
 export function featuredCompareSlugs(locale: "en" | "ro"): string[] {
-  if (locale === "ro") return ["ebriza", "smartbill", "oblio", "saga"];
+  if (locale === "ro") return ["ebriza", "nexuserp", "boogit", "expressoft"];
   return ["square", "sumup", "smartbill"];
 }

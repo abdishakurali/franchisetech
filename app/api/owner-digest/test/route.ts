@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
   const countryCode = org?.country_code ?? null;
   const currency = org?.currency_code ?? "EUR";
   const frequency =
-    org?.owner_digest_frequency === "daily" ? "daily" : "weekly";
+    org?.owner_digest_frequency === "weekly" ? "weekly" : "daily";
   const timeZone = org?.owner_digest_timezone ?? "Europe/Bucharest";
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";

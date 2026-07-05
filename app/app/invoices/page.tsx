@@ -49,6 +49,29 @@ export default async function InvoicesPage() {
     );
   }
 
+  const { data: org } = await supabase
+    .from("organisations")
+    .select("efactura_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
+
+  if (!org?.efactura_enabled) {
+    return (
+      <div className="p-6">
+        <div className="mx-auto max-w-xl rounded-xl border border-slate-200 bg-white p-6">
+          <FileText className="h-9 w-9 text-slate-300" />
+          <h1 className="mt-4 text-xl font-semibold text-slate-950">e-Factura nu este instalată</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Instalează integrarea ANAF e-Factura din Marketplace doar dacă emiți facturi B2B prin SPV.
+          </p>
+          <Link href="/app/settings?tab=integrations" className="mt-5 inline-flex">
+            <Button>Deschide Marketplace</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   const { data: invoices } = await supabase
     .from("efactura_invoices")
     .select("id,invoice_number,issue_date,buyer_name,buyer_cif,total_incl_vat,currency,upload_status,processing_status,created_at")

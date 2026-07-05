@@ -4,17 +4,19 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PosRegister } from "@/components/app/PosRegister";
 import { PosFirstSaleTour } from "@/components/app/PosFirstSaleTour";
+import { resetTour } from "@/components/app/TourOverlay";
 import {
   catalogCacheAgeLabel,
   readPosCatalogCache,
   writePosCatalogCache,
 } from "@/lib/pos-catalog-cache";
-import { invalidateProbeCache, isBrowserOnline, probeServerOnline } from "@/lib/pos-offline-queue";
+import { invalidateProbeCache, probeServerOnline } from "@/lib/pos-offline-queue";
 import type { PosLocale } from "@/lib/pos-i18n";
 
 type PosRegisterProps = React.ComponentProps<typeof PosRegister> & {
   orgId?: string;
   appLocale?: PosLocale;
+  trackActivationSale?: boolean;
 };
 
 function mergeCatalogProps(props: PosRegisterProps, cached: ReturnType<typeof readPosCatalogCache>, offline: boolean) {
@@ -63,11 +65,16 @@ function buildRegisterProps(props: PosRegisterProps, offline: boolean) {
   };
 }
 
+const FIRST_SALE_TOUR_ID = "pos_first_sale";
+
 function PosRegisterWithCatalog(props: PosRegisterProps) {
   const searchParams = useSearchParams();
-  const showTour = searchParams.get("tour") === "first_sale";
+  const welcomeFlow = searchParams.get("welcome") === "1";
+  const tourParam = searchParams.get("tour") === "first_sale";
+  const shouldOfferTour = welcomeFlow || tourParam;
 
-  const [offline, setOffline] = useState(() => !isBrowserOnline());
+  const [offline, setOffline] = useState(false);
+  const [tourNonce, setTourNonce] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,6 +100,15 @@ function PosRegisterWithCatalog(props: PosRegisterProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const onStartTour = () => {
+      resetTour(FIRST_SALE_TOUR_ID);
+      setTourNonce((n) => n + 1);
+    };
+    window.addEventListener("fp-start-first-sale-tour", onStartTour);
+    return () => window.removeEventListener("fp-start-first-sale-tour", onStartTour);
+  }, []);
+
   const registerProps = useMemo(
     () => buildRegisterProps(props, offline),
     [props, offline],
@@ -100,14 +116,16 @@ function PosRegisterWithCatalog(props: PosRegisterProps) {
 
   return (
     <>
-      {showTour ? <PosFirstSaleTour /> : null}
+      {shouldOfferTour ? (
+        <PosFirstSaleTour key={tourNonce} locale={props.appLocale ?? "ro"} />
+      ) : null}
       <PosRegister {...registerProps} />
     </>
   );
 }
 
 export function PosWithTour(props: PosRegisterProps) {
-  const boot = buildRegisterProps(props, typeof navigator !== "undefined" ? !navigator.onLine : false);
+  const boot = buildRegisterProps(props, false);
   return (
     <Suspense fallback={<PosRegister {...boot} />}>
       <PosRegisterWithCatalog {...props} />

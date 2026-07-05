@@ -1,0 +1,102 @@
+{
+  "name": "DB Backup -- Daily 02:00 EET",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 23 * * *"
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-0001-0001-0001-000000000001",
+      "name": "Daily 23:00 UTC",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0002-0002-0002-000000000002",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 460]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const cron = $env.CRON_SECRET;\nif (!cron) throw new Error('CRON_SECRET missing from n8n environment variables');\n\nconst res = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://franchisetech.ro/api/cron/backup-db',\n  headers: { Authorization: 'Bearer ' + cron },\n  json: true,\n  returnFullResponse: true,\n});\n\nif (res.statusCode === 503) {\n  throw new Error('Backup not configured: ' + (res.body?.error ?? 'DIRECT_DB_URL missing on server'));\n}\n\nif (res.statusCode !== 200 || !res.body?.success) {\n  throw new Error('Backup failed: HTTP ' + res.statusCode + ' -- ' + JSON.stringify(res.body));\n}\n\nconst { timestamp = '', sizeBytes = 0, backupsKept = 0 } = res.body;\nconst sizeMB = (sizeBytes / 1024 / 1024).toFixed(1);\nreturn [{ json: { timestamp, sizeBytes, sizeMB, backupsKept } }];"
+      },
+      "id": "a1b2c3d4-0003-0003-0003-000000000003",
+      "name": "Call Backup Cron",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 380]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "8505337023",
+        "text": "={{ '💾 DB backup OK — ' + $json.timestamp + ', ' + $json.sizeMB + ' MB, ' + $json.backupsKept + ' backups kept' }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a1b2c3d4-0004-0004-0004-000000000004",
+      "name": "Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [760, 380],
+      "credentials": {
+        "telegramApi": {
+          "id": "1",
+          "name": "My Telegram"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily 23:00 UTC": {
+      "main": [
+        [
+          {
+            "node": "Call Backup Cron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Call Backup Cron",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Backup Cron": {
+      "main": [
+        [
+          {
+            "node": "Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

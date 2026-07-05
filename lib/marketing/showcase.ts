@@ -35,7 +35,7 @@ export const showcaseAssets = {
   },
   /** Daily Z-report / till close */
   zReport: {
-    src: "/showcase/z-report.png",
+    src: "/showcase/settings-features.png",
     path: "/app/reports/z-report",
   },
   /** In-app setup checklist */
@@ -46,6 +46,16 @@ export const showcaseAssets = {
   /** POS product grid before items are added */
   posGrid: {
     src: "/showcase/pos-grid.png",
+    path: "/app/pos",
+  },
+  /** Table floor picker — Sală / Terasă / Bar */
+  tableFloor: {
+    src: "/showcase/table-floor.png",
+    path: "/app/pos",
+  },
+  /** Table tab checkout — Trimite comanda rounds, Încasează total */
+  posTableOrder: {
+    src: "/showcase/pos-table-order.png",
     path: "/app/pos",
   },
 } as const;

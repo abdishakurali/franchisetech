@@ -1,0 +1,94 @@
+[
+  {
+    "slug": "ro-ma-food",
+    "legal_name": "RO-MA FOOD IMPORT EXPORT SRL",
+    "brand_name": "Ro-Ma Food",
+    "cui": "28969925",
+    "category": "dairy",
+    "subcategories": ["lactate", "preparate din carne", "legume conservă", "uleiuri și sosuri"],
+    "description": "Importator și distribuitor de produse alimentare (lactate, preparate din carne, legume conservă, uleiuri, sosuri) pentru restaurante.",
+    "website_url": "https://www.romafoodimpex.com",
+    "hq_city": "Bacău",
+    "counties": ["bacau"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://www.romafoodimpex.com/images/logo.png",
+    "contact_email": "office@romafoodimpex.com",
+    "contact_phone": "004 0234 586 870",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.romafoodimpex.com/contact.html", "note": "legal name and address; site does not itself disclose CUI, see onrc sources below for CUI 28969925, Reg. Com. J2011000885043", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://termene.ro/firma/28969925", "note": "CUI accepted on the basis that the domain name itself encodes the exact legal entity name (Ro-Ma Food Impex = RO-MA FOOD IMPORT EXPORT), not merely a same-name coincidence", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://www.risco.ro/verifica-firma", "note": "cross-confirmation", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "fruti-united-grup",
+    "legal_name": "FRUTI UNITED GRUP S.R.L.",
+    "brand_name": "Fruti United Grup",
+    "cui": "35276956",
+    "category": "fresh_produce",
+    "subcategories": ["legume", "fructe", "produse importate"],
+    "description": "Distribuitor și importator en gros de legume și fructe proaspete, cu trasabilitate a lanțului de aprovizionare.",
+    "website_url": "https://frutiunitedgrup.ro",
+    "hq_city": "București",
+    "counties": ["bucuresti", "ilfov"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://frutiunitedgrup.ro/wp-content/uploads/2017/01/logo.png",
+    "contact_email": "frutiunited@gmail.com",
+    "contact_phone": "+40 743 915 497",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://frutiunitedgrup.ro/contact-us/", "note": "legal name and address; site does not itself disclose CUI, see onrc sources below for CUI 35276956, Reg. Com. J40/15416/2016", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://www.confidas.ro/profil/fruti-united-grup", "note": "CUI accepted on the basis that the registered address matches the vendor's own disclosed address exactly, not merely a same-name coincidence", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "http://www.firme.info/fruti-united-grup", "note": "cross-confirmation", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "conti-grup",
+    "legal_name": "CONTI GRUP SRL",
+    "brand_name": "Conti Grup",
+    "cui": "13502971",
+    "category": "kitchen_bar_equipment",
+    "subcategories": ["echipamente gătit", "refrigerare", "mobilier inox", "hote ventilație"],
+    "description": "Distribuitor de echipamente profesionale pentru bucătării HoReCa (gătit, refrigerare, mobilier inox), cu livrare în toată țara.",
+    "website_url": "https://contigrup.ro",
+    "hq_city": "București",
+    "counties": ["bucuresti"],
+    "serves_all_counties": true,
+    "logo_background": "dark",
+    "logo_source_url": "https://contigrup.ro/wp-content/uploads/2025/03/logo-conti-white.png.webp",
+    "contact_email": "office@contigrup.ro",
+    "contact_phone": "+40 730 980 369",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://contigrup.ro/termeni-si-conditii/", "note": "legal name, CUI 13502971, Reg. Com. J2000010132407 stated directly by the vendor", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://contigrup.ro/termeni-de-livrare/", "note": "nationwide delivery claim", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "side-grup",
+    "legal_name": "SIDE GRUP SRL",
+    "brand_name": "Side Grup",
+    "cui": "15216895",
+    "category": "cleaning_hygiene",
+    "subcategories": ["detergenți", "dezinfectanți", "consumabile hârtie", "dozatoare", "echipament protecție"],
+    "description": "Distribuitor de produse de igienă, curățenie și menaj pentru HoReCa, retail și industrial, cu acoperire națională prin 11 depozite proprii.",
+    "website_url": "https://www.side.ro",
+    "hq_city": "Felnac",
+    "counties": ["arad"],
+    "serves_all_counties": true,
+    "logo_background": "dark",
+    "logo_source_url": "https://www.side.ro/images/logo/side.svg",
+    "contact_email": "contact@side.ro",
+    "contact_phone": "+40 790 000 257",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.side.ro/termeni-si-conditii.php", "note": "legal name, CUI 15216895, Reg. Com. J2003000200023, and 11-depot national coverage stated directly by the vendor", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://termene.ro/firma/15216895", "note": "cross-confirmation", "checked_at": "2026-07-04"}
+    ]
+  }
+]

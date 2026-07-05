@@ -7,6 +7,7 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import {
   firstJoined,
+  formatQty,
   formatRecipeMoney,
   recipeCanMake,
   recipeCostMetrics,
@@ -59,18 +60,18 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
     <div className="space-y-6 p-6">
       <div>
         <Link href="/app/recipes" className="text-sm text-slate-500 hover:text-slate-700">
-          ← All recipes
+          ← Toate rețetele
         </Link>
         <h1 className="mt-2 text-2xl font-semibold text-slate-950">{recipe.name}</h1>
         <p className="text-sm text-slate-500">
-          {product?.name ?? "—"} · {metrics.yieldQty} portion{metrics.yieldQty !== 1 ? "s" : ""} per batch
+          {product?.name ?? "—"} · {metrics.yieldQty} {metrics.yieldQty === 1 ? "porție" : "porții"} per rețetă
         </p>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <CardTitle className="text-base">Cost summary</CardTitle>
+            <CardTitle className="text-base">Sumar cost</CardTitle>
             <div className="flex flex-wrap items-center gap-4">
               {canMake !== null ? (
                 <div className="min-w-[56px] text-center">
@@ -81,7 +82,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
                   >
                     {canMake}
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-400">can make</p>
+                  <p className="mt-0.5 text-xs text-slate-400">poți prepara</p>
                   {limitingIngName && canMake < 20 ? (
                     <p className="mt-0.5 text-[10px] leading-tight text-red-500">⚠ {limitingIngName}</p>
                   ) : null}
@@ -89,13 +90,13 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
               ) : null}
               <div className="text-center">
                 <p className="text-xl font-bold leading-none">{formatRecipeMoney(salePrice, currency)}</p>
-                <p className="mt-0.5 text-xs text-slate-400">sale price</p>
+                <p className="mt-0.5 text-xs text-slate-400">preț vânzare</p>
               </div>
               <div className="text-center">
                 <p className="text-xl font-bold leading-none text-slate-600">
                   {formatRecipeMoney(metrics.costPerUnit, currency)}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-400">ingredient cost</p>
+                <p className="mt-0.5 text-xs text-slate-400">cost ingrediente</p>
               </div>
               <div className="text-center">
                 <p
@@ -109,7 +110,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
                 >
                   {metrics.marginPct.toFixed(1)}%
                 </p>
-                <p className="mt-0.5 text-xs text-slate-400">margin</p>
+                <p className="mt-0.5 text-xs text-slate-400">marjă</p>
               </div>
               <Badge
                 variant="secondary"
@@ -121,7 +122,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
                       : "bg-red-100 text-red-700"
                 }
               >
-                {formatRecipeMoney(metrics.margin, currency)} margin
+                marjă {formatRecipeMoney(metrics.margin, currency)}
               </Badge>
             </div>
           </div>
@@ -132,12 +133,12 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
               <TableHeader>
                 <TableRow>
                   <TableHead>Ingredient</TableHead>
-                  <TableHead className="text-right">Needed</TableHead>
-                  <TableHead>Unit</TableHead>
-                  <TableHead className="text-right">Cost/unit</TableHead>
-                  <TableHead className="text-right">Line cost</TableHead>
-                  <TableHead className="text-right">Stock on hand</TableHead>
-                  <TableHead className="text-right">Can make</TableHead>
+                  <TableHead className="text-right">Necesar</TableHead>
+                  <TableHead>Unitate</TableHead>
+                  <TableHead className="text-right">Cost/unitate</TableHead>
+                  <TableHead className="text-right">Cost linie</TableHead>
+                  <TableHead className="text-right">Stoc disponibil</TableHead>
+                  <TableHead className="text-right">Poți prepara</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -164,12 +165,12 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
                         {displayName}
                         {isLimiting && canMake !== null && canMake < 20 ? (
                           <span className="ml-2 rounded bg-amber-100 px-1 py-0.5 text-[10px] text-amber-700">
-                            limiting
+                            limitativ
                           </span>
                         ) : null}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{Number(item.quantity)}</TableCell>
-                      <TableCell className="text-slate-500">{item.unit_of_measure ?? "each"}</TableCell>
+                      <TableCell className="text-slate-500">{item.unit_of_measure ?? "buc"}</TableCell>
                       <TableCell className="text-right tabular-nums text-slate-500">
                         {formatRecipeMoney(Number(item.unit_cost ?? 0), currency)}
                       </TableCell>
@@ -183,7 +184,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
                             : "text-slate-500"
                         }`}
                       >
-                        {onHand !== null ? onHand : "—"}
+                        {onHand !== null ? formatQty(onHand) : "—"}
                       </TableCell>
                       <TableCell
                         className={`text-right font-medium tabular-nums ${
@@ -197,7 +198,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
                 })}
                 <TableRow className="bg-slate-50 font-semibold">
                   <TableCell colSpan={4} className="text-right text-slate-600">
-                    Total cost ({metrics.yieldQty} {metrics.yieldQty === 1 ? "portion" : "portions"})
+                    Cost total ({metrics.yieldQty} {metrics.yieldQty === 1 ? "porție" : "porții"})
                   </TableCell>
                   <TableCell className="text-right">{formatRecipeMoney(metrics.totalCost, currency)}</TableCell>
                   <TableCell />
@@ -207,7 +208,7 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
             </Table>
           </CardContent>
         ) : (
-          <CardContent className="text-sm text-slate-500">No ingredients linked to this recipe yet.</CardContent>
+          <CardContent className="text-sm text-slate-500">Niciun ingredient asociat acestei rețete încă.</CardContent>
         )}
       </Card>
     </div>

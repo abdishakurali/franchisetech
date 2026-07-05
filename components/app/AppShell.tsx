@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo, startTransition } from "react";
+import { useState, useEffect, useLayoutEffect, useMemo, startTransition } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import {
@@ -26,14 +27,14 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { SubscriptionStatus } from "@/lib/billing/subscription";
 import { HeaderBillingNotice } from "@/components/billing/HeaderBillingNotice";
-import { resetPosTillOpen, subscribePosTillOpen, readPosTillOpenCookie } from "@/lib/pos-till-state";
+import { resetPosTillOpen, subscribePosTillOpen } from "@/lib/pos-till-state";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import type { AppT } from "@/lib/app-i18n";
 
 interface AppShellProps {
   user: User;
   profile: { full_name: string | null; email: string | null } | null;
-  activeOrg: { id: string; name: string; country_code?: string | null; trial_ends_at?: string | null; referral_credit_months?: number | null; kitchen_display_enabled?: boolean | null; compact_workstation_nav_enabled?: boolean | null; business_profile?: string | null } | null;
+  activeOrg: { id: string; name: string; country_code?: string | null; trial_ends_at?: string | null; referral_credit_months?: number | null; kitchen_display_enabled?: boolean | null; table_service_enabled?: boolean | null; efactura_enabled?: boolean | null; compact_workstation_nav_enabled?: boolean | null; business_profile?: string | null } | null;
   userRole: string | null;
   setupComplete?: boolean;
   moduleVisibility?: {
@@ -62,6 +63,24 @@ type NavItem = {
   icon: React.ComponentType<{ className?: string }>;
   exact: boolean;
 };
+
+function isLegalFallbackRoute(pathname: string): boolean {
+  return (
+    pathname.startsWith("/app/billing") ||
+    pathname.startsWith("/app/transactions") ||
+    pathname.startsWith("/app/reports/z-report") ||
+    pathname.startsWith("/app/reports/vat")
+  );
+}
+
+function isSubscriptionBlockedForClient(subStatus?: SubscriptionStatus): boolean {
+  return (
+    subStatus?.state === "none" ||
+    subStatus?.state === "past_due_expired" ||
+    subStatus?.state === "canceled" ||
+    subStatus?.state === "incomplete"
+  );
+}
 
 function buildMainNav(userRole: string | null, t: AppT): NavItem[] {
   const limited = userRole === "cashier" || userRole === "kitchen";
@@ -110,7 +129,7 @@ function resolveNavItems(
   const limited = userRole === "cashier" || userRole === "kitchen";
   const accountant = userRole === "accountant";
 
-  const isRO = activeOrg?.country_code === "RO";
+  const showEfactura = activeOrg?.country_code === "RO" && activeOrg?.efactura_enabled === true;
 
   if (accountant) {
     const accountantNav: NavItem[] = [
@@ -118,7 +137,7 @@ function resolveNavItems(
       { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
       { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
       { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck, exact: false },
-      ...(isRO ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }] : []),
+      ...(showEfactura ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }] : []),
     ];
     return { mainNav: accountantNav, stockNav: [], showStock: false, limited: false };
   }
@@ -128,7 +147,7 @@ function resolveNavItems(
     ...(activeOrg?.kitchen_display_enabled && moduleVisibility?.kitchenOps === true
       ? [{ href: "/app/kitchen", label: t.nav.kitchen, icon: ChefHat, exact: false }]
       : []),
-    ...(isRO && !limited
+    ...(showEfactura && !limited
       ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }]
       : []),
   ]
@@ -145,7 +164,7 @@ function resolveNavItems(
 }
 
 function FranchiseTechLogo({ className }: { className?: string }) {
-  return <img src="/franchise-tech-logo.png" alt="FranchiseTech" className={className} />;
+  return <Image src="/franchise-tech-logo.png" alt="FranchiseTech" width={180} height={40} className={className} />;
 }
 
 function navIsActive(pathname: string, href: string, exact: boolean) {
@@ -266,7 +285,6 @@ function AppHeader({
   daysLeft,
   mobileOpen,
   onMobileToggle,
-  onSettings,
   onLogout,
   onReferralOpen,
   accessibleSites = [],
@@ -286,7 +304,6 @@ function AppHeader({
   daysLeft: number;
   mobileOpen: boolean;
   onMobileToggle: () => void;
-  onSettings: () => void;
   onLogout: () => void;
   onReferralOpen: () => void;
   accessibleSites?: { id: string; name: string }[];
@@ -448,16 +465,16 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
-  const { t } = useAppI18n();
+  const { t, locale } = useAppI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
-  const [posTillOpen, setPosTillOpenState] = useState(() => readPosTillOpenCookie());
+  const [posTillOpen, setPosTillOpenState] = useState(false);
 
   const isPosRoute = pathname.startsWith("/app/pos");
   const posTillSelling = isPosRoute && posTillOpen;
   const showAppNav = !posTillSelling;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     return subscribePosTillOpen(setPosTillOpenState);
   }, []);
 
@@ -489,6 +506,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   const initials = (profile?.full_name ?? user.email ?? "?")
     .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   const daysLeft = trialDaysLeft;
+  const subscriptionOverlayActive = isSubscriptionBlockedForClient(subStatus) && !isLegalFallbackRoute(pathname);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -496,8 +514,30 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
     router.refresh();
   };
 
+  const billingReason = subStatus?.state === "past_due_expired" ? "past_due_expired" : "trial_expired";
+  const overlayCopy = locale === "ro"
+    ? {
+        eyebrow: subStatus?.state === "past_due_expired" ? "Plată necesară" : "Trial expirat",
+        title: "Plătește ca să continui",
+        body: "Accesul la POS este blocat până când plata este actualizată. Datele tale rămân salvate.",
+        pay: "Plătește acum",
+      }
+    : {
+        eyebrow: subStatus?.state === "past_due_expired" ? "Payment required" : "Trial expired",
+        title: "Pay to continue",
+        body: "POS access is blocked until payment is updated. Your data remains saved.",
+        pay: "Pay now",
+      };
+
   return (
-    <div className={cn("app-shell-h flex flex-col overflow-hidden", isPosRoute ? "bg-white" : "bg-slate-50")}>
+    <div className={cn("app-shell-h relative flex flex-col overflow-hidden", isPosRoute ? "bg-white" : "bg-slate-50")}>
+      <div
+        className={cn(
+          "contents",
+          subscriptionOverlayActive && "pointer-events-none select-none blur-sm opacity-20",
+        )}
+        aria-hidden={subscriptionOverlayActive}
+      >
       {showAppNav && (
         <AppHeader
           pathname={pathname}
@@ -514,7 +554,6 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           daysLeft={daysLeft}
           mobileOpen={mobileOpen}
           onMobileToggle={() => setMobileOpen((v) => !v)}
-          onSettings={() => router.push("/app/settings")}
           onLogout={handleLogout}
           onReferralOpen={() => setReferralOpen(true)}
           accessibleSites={accessibleSites}
@@ -549,6 +588,29 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
       >
         {children}
       </main>
+      </div>
+
+      {subscriptionOverlayActive && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 px-4 backdrop-blur-[2px]">
+          <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 text-center shadow-xl">
+            <p className="text-xs font-semibold uppercase tracking-wide text-red-600">
+              {overlayCopy.eyebrow}
+            </p>
+            <h2 className="mt-2 text-xl font-semibold text-slate-950">
+              {overlayCopy.title}
+            </h2>
+            <p className="mt-2 text-sm text-slate-600">
+              {overlayCopy.body}
+            </p>
+            <Link
+              href={`/app/billing?reason=${billingReason}`}
+              className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            >
+              {overlayCopy.pay}
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

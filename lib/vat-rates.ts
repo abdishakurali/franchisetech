@@ -15,8 +15,8 @@ export const VAT_DEFAULTS_BY_COUNTRY: Record<
   Array<{ name: string; rate: number; fiscalnet_vat_group: number | null; is_default: boolean }>
 > = {
   RO: [
-    { name: "TVA Standard 19%", rate: 19, fiscalnet_vat_group: 1, is_default: true },
-    { name: "TVA Redus 9%", rate: 9, fiscalnet_vat_group: 2, is_default: false },
+    { name: "TVA Standard 21%", rate: 21, fiscalnet_vat_group: 1, is_default: true },
+    { name: "TVA Redus 11%", rate: 11, fiscalnet_vat_group: 2, is_default: false },
     { name: "TVA Super-redus 5%", rate: 5, fiscalnet_vat_group: 3, is_default: false },
     { name: "Scutit 0%", rate: 0, fiscalnet_vat_group: 4, is_default: false },
   ],

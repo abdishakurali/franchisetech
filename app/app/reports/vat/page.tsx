@@ -14,22 +14,30 @@ export default async function VatReportPage({ searchParams }: { searchParams?: P
   const from = params?.from ?? monthStart;
   const to = params?.to ?? today;
 
-  const { data: items } = await supabase
-    .from("pos_transaction_items")
-    .select("vat_rate,net_amount,vat_amount,gross_amount,line_total,transaction_id")
+  // Filtered on pos_transactions.sold_at (the real sale date), not
+  // pos_transaction_items.created_at -- for migrated historical sales,
+  // created_at is the bulk-import timestamp (identical for every migrated
+  // row), which would silently pull in unrelated periods or exclude the
+  // real one depending on where the import date falls relative to the range.
+  const { data: transactions } = await supabase
+    .from("pos_transactions")
+    .select("status,pos_transaction_items(vat_rate,net_amount,vat_amount,gross_amount,line_total,transaction_id)")
     .eq("organisation_id", orgId)
-    .gte("created_at", `${from}T00:00:00Z`)
-    .lte("created_at", `${to}T23:59:59Z`);
+    .gte("sold_at", `${from}T00:00:00Z`)
+    .lte("sold_at", `${to}T23:59:59Z`);
 
   const byRate = new Map<number, { net: number; vat: number; gross: number; count: number }>();
-  for (const item of (items ?? [])) {
-    const rate = Number(item.vat_rate ?? 0);
-    const gross = Number(item.gross_amount ?? item.line_total ?? 0);
-    const vat = Number(item.vat_amount ?? 0);
-    const net = Number(item.net_amount ?? gross - vat);
-    const entry = byRate.get(rate) ?? { net: 0, vat: 0, gross: 0, count: 0 };
-    entry.net += net; entry.vat += vat; entry.gross += gross; entry.count++;
-    byRate.set(rate, entry);
+  for (const tx of (transactions ?? []) as Array<{ status: string; pos_transaction_items: Array<{ vat_rate: number | null; net_amount: number | null; vat_amount: number | null; gross_amount: number | null; line_total: number | null }> }>) {
+    if (tx.status === "voided") continue;
+    for (const item of tx.pos_transaction_items ?? []) {
+      const rate = Number(item.vat_rate ?? 0);
+      const gross = Number(item.gross_amount ?? item.line_total ?? 0);
+      const vat = Number(item.vat_amount ?? 0);
+      const net = Number(item.net_amount ?? gross - vat);
+      const entry = byRate.get(rate) ?? { net: 0, vat: 0, gross: 0, count: 0 };
+      entry.net += net; entry.vat += vat; entry.gross += gross; entry.count++;
+      byRate.set(rate, entry);
+    }
   }
   const totNet = Array.from(byRate.values()).reduce((s,v) => s + v.net, 0);
   const totVat = Array.from(byRate.values()).reduce((s,v) => s + v.vat, 0);

@@ -4,19 +4,24 @@ import { DEFAULT_VAT_GROUPS, DEFAULT_PAYMENT_TYPE_MAP } from "@/lib/fiscalnet/ty
 import { PosWithTour } from "@/components/app/PosWithTour";
 import { PosTillStateSync } from "@/components/app/PosTillStateSync";
 import { OpenTillForm } from "@/components/app/OpenTillForm";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { PageHint } from "@/components/app/PageHint";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
-  ReceiptText, RefreshCcw, LayoutDashboard, Store, Calendar, Banknote, CreditCard,
+  AlertTriangle, ReceiptText, RefreshCcw, LayoutDashboard, Store, Calendar, Banknote, CreditCard,
 } from "lucide-react";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { getDefaultVatRateValue } from "@/lib/vat-rates";
 import { PRODUCT_LIST_WITH_POS_SELECT } from "@/lib/supabase/product-selects";
+import { getSubscriptionStatus, isSubscriptionBlockedForApp } from "@/lib/billing/subscription";
+import { WelcomeBanner } from "@/components/app/WelcomeBanner";
+import { getTabWithTable, getTables, getFloorSections } from "@/app/actions/table-service";
+import { PosTableFloor } from "@/components/app/PosTableFloor";
+import { requireActiveSite } from "@/lib/site-context";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -32,9 +37,58 @@ function formatTime(ts: string | null | undefined, locale: "en" | "ro") {
   return new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", { timeStyle: "short", dateStyle: "short" }).format(new Date(ts));
 }
 
-export default async function PosPage() {
+export default async function PosPage({ searchParams }: { searchParams?: Promise<{ welcome?: string; tabId?: string; quick?: string }> }) {
+  const params = await searchParams;
+  const showWelcome = params?.welcome === "1";
+  const tabIdParam = params?.tabId ?? null;
+  const quickSale = params?.quick === "1";
   const { countryCode, profileLocale, supabase, orgId, currency, currencySymbol, user, membership } = await getKitchenOpsContext();
   const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
+  const subscriptionStatus = await getSubscriptionStatus(orgId).catch(() => null);
+  const subscriptionBlocked = isSubscriptionBlockedForApp(subscriptionStatus);
+  const billingReason = subscriptionStatus?.state === "past_due_expired" ? "past_due_expired" : "trial_expired";
+  if (subscriptionBlocked) {
+    const copy = locale === "ro"
+      ? {
+          eyebrow: subscriptionStatus?.state === "past_due_expired" ? "Plată necesară" : "Trial expirat",
+          title: "POS blocat până la plată",
+          body: "Nu se pot deschide sesiuni, crea comenzi sau încasa vânzări până când plata este actualizată. Datele tale rămân salvate.",
+          cta: "Plătește acum",
+        }
+      : {
+          eyebrow: subscriptionStatus?.state === "past_due_expired" ? "Payment required" : "Trial expired",
+          title: "POS locked until payment",
+          body: "You cannot open a till, create orders, or take payments until billing is updated. Your data remains saved.",
+          cta: "Pay now",
+        };
+
+    return (
+      <div className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-4 py-10">
+        <Card className="w-full max-w-md border-red-100 shadow-sm">
+          <CardContent className="p-6 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600">
+              <AlertTriangle className="h-6 w-6" aria-hidden />
+            </div>
+            <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-red-600">
+              {copy.eyebrow}
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold text-slate-950">
+              {copy.title}
+            </h1>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {copy.body}
+            </p>
+            <Link
+              href={`/app/billing?reason=${billingReason}`}
+              className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+            >
+              {copy.cta}
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   const userRole = membership.role as string;
   const canManage = canManagePos(userRole);
   // Org name for print slips
@@ -50,6 +104,36 @@ export default async function PosPage() {
     splitPayments: Boolean(orgInfo?.payment_split_enabled),
     tips: Boolean(orgInfo?.tips_enabled),
   };
+
+  let activeTab: {
+    id: string;
+    tableId: string;
+    siteId?: string | null;
+    tableName: string;
+    status: "open" | "bill_requested";
+    coverCount?: number | null;
+    openedAt?: string;
+    capacity?: number | null;
+    runningTotal?: number;
+  } | null = null;
+  if (features.tableService && tabIdParam) {
+    const tab = await getTabWithTable(tabIdParam);
+    if (tab && (tab.status === "open" || tab.status === "bill_requested")) {
+      activeTab = {
+        id: tab.id,
+        tableId: tab.table_id,
+        siteId: tab.site_id,
+        tableName: tab.table_name,
+        status: tab.status,
+        coverCount: tab.cover_count,
+        openedAt: tab.opened_at,
+        capacity: tab.table_capacity,
+      };
+    }
+  }
+  if (features.tableService && tabIdParam && !activeTab) {
+    redirect("/app/pos");
+  }
   // Current user name for print slips
   const { data: userProfile } = await supabase
     .from("profiles")
@@ -280,10 +364,16 @@ export default async function PosPage() {
   const { data: methods } = await supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at");
   const vatRates = await listActiveVatRates(supabase, orgId);
   const defaultVatRate = getDefaultVatRateValue(vatRates);
-  const [{ data: customers }, { data: recentTransactions }] = await Promise.all([
+  const [{ data: customers }, { data: recentTransactions }, { count: allTimeCompletedSales }] = await Promise.all([
     supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
     supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
+    supabase
+      .from("pos_transactions")
+      .select("*", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("status", "completed"),
   ]);
+  const trackActivationSale = (allTimeCompletedSales ?? 0) === 0;
 
   // ── CLOSED: show open-till form + last session summary + quick links ──
   if (!openSession) {
@@ -400,12 +490,35 @@ export default async function PosPage() {
 
   // ── OPEN SESSION ──
   const expectedCash = Number(openSession.expected_cash ?? openSession.opening_cash ?? 0);
+
+  // Table service: show floor picker inside POS until a table tab is selected
+  if (features.tableService && !tabIdParam && !quickSale) {
+    const { siteId } = await requireActiveSite(supabase, orgId, membership.id, userRole);
+    const [tables, sections] = await Promise.all([
+      getTables(siteId),
+      getFloorSections(siteId),
+    ]);
+    return (
+      <div className="flex flex-1 flex-col min-h-0">
+        <PosTillStateSync sessionOpen />
+        <PosTableFloor
+          tables={tables}
+          sections={sections}
+          canManage={canManage}
+          currency={currency}
+          siteId={siteId}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-1 flex-col min-h-0 bg-white">
       <PosTillStateSync sessionOpen />
-      {/* POS register */}
+      {showWelcome && (products?.length ?? 0) > 0 && <WelcomeBanner locale={locale} />}
       <PosWithTour
         orgId={orgId}
+        trackActivationSale={trackActivationSale}
         products={(products ?? []) as never}
         categories={categories ?? []}
         paymentMethods={methods ?? []}
@@ -424,6 +537,7 @@ export default async function PosPage() {
         sgrEnabled={sgrEnabled}
         sgrProduct={sgrProduct as never}
         features={features}
+        activeTab={activeTab}
         canManage={canManage}
         defaultVatRate={defaultVatRate}
         summary={{

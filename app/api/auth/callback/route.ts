@@ -6,12 +6,13 @@ export async function GET(request: Request) {
   const appOrigin = process.env.NEXT_PUBLIC_APP_URL ?? origin
   const code = searchParams.get('code')
   const next = searchParams.get('next')
+  const safeNext = next && next.startsWith('/') && !next.startsWith('//') ? next : null
 
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      if (next) return NextResponse.redirect(`${appOrigin}${next}`)
+      if (safeNext) return NextResponse.redirect(`${appOrigin}${safeNext}`)
 
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {

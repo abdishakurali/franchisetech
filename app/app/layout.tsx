@@ -10,7 +10,7 @@ import { SupportChat } from "@/components/app/SupportChat";
 import { chatwootIdentifierHash } from "@/lib/chatwoot/identity";
 import { PostHogIdentify } from "@/components/app/PostHogIdentify";
 import { ensureReferralCode } from "@/lib/referrals";
-import { getSubscriptionStatus } from "@/lib/billing/subscription";
+import { getSubscriptionStatus, isSubscriptionBlockedForApp } from "@/lib/billing/subscription";
 import { listAccessibleSites, getActiveSiteId } from "@/lib/site-context";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleNavVisible } from "@/lib/business-modules";
@@ -47,10 +47,19 @@ export default async function AppLayout({
   const activeOrg = membership?.organisations ?? null;
   const userRole = membership?.role ?? null;
 
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+
+  const subStatus = activeOrg?.id
+    ? await getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null)
+    : null;
+
+  const subscriptionBlocked = isSubscriptionBlockedForApp(subStatus);
+
   // Resolve accessible sites and active site (non-blocking — falls back gracefully)
   let accessibleSites: { id: string; name: string }[] = [];
   let activeSiteId: string | null = null;
-  if (activeOrg?.id && membership?.id) {
+  if (activeOrg?.id && membership?.id && !subscriptionBlocked) {
     try {
       accessibleSites = await listAccessibleSites(supabase, activeOrg.id, membership.id, userRole);
       activeSiteId = await getActiveSiteId(accessibleSites);
@@ -59,10 +68,9 @@ export default async function AppLayout({
     }
   }
 
-  const [referral, subStatus] = await Promise.all([
-    activeOrg?.id ? ensureReferralCode(activeOrg.id) : Promise.resolve(null),
-    activeOrg?.id ? getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null) : Promise.resolve(null),
-  ]);
+  const referral = activeOrg?.id && !subscriptionBlocked
+    ? await ensureReferralCode(activeOrg.id)
+    : null;
 
   let setupComplete = false;
   let moduleVisibility = {
@@ -73,7 +81,7 @@ export default async function AppLayout({
     kitchenOps: false,
   };
 
-  if (activeOrg?.id) {
+  if (activeOrg?.id && !subscriptionBlocked) {
     const { count: txCount } = await supabase
       .from("pos_transactions")
       .select("*", { count: "exact", head: true })
@@ -94,22 +102,11 @@ export default async function AppLayout({
     };
   }
 
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "";
-
-  if (activeOrg?.id && pathname.startsWith("/app/") && !pathname.startsWith("/app/settings") && !pathname.startsWith("/app/billing")) {
+  if (activeOrg?.id && !subscriptionBlocked && pathname.startsWith("/app/") && !pathname.startsWith("/app/settings") && !pathname.startsWith("/app/billing")) {
     await requireModuleForPathname(pathname);
   }
 
-  const blockedStates = ["none", "past_due_expired"];
-  if (subStatus && blockedStates.includes(subStatus.state)) {
-    if (!pathname.startsWith("/app/billing")) {
-      const reason = subStatus.state === "past_due_expired" ? "past_due_expired" : "trial_expired";
-      redirect(`/app/billing?reason=${reason}`);
-    }
-  }
-
-  const isWorkstationRoute = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen") || pathname.startsWith("/app/settings");
+  const isWorkstationRoute = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen") || pathname.startsWith("/app/tables") || pathname.startsWith("/app/settings");
 
   const chatwootHash = chatwootIdentifierHash(user.id);
 

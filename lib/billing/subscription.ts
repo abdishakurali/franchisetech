@@ -51,6 +51,19 @@ export function isAccessAllowed(sub: SubscriptionStatus): boolean {
   );
 }
 
+/**
+ * Returns true when the main app must be blocked and only legal fallback routes
+ * should remain available.
+ */
+export function isSubscriptionBlockedForApp(sub: SubscriptionStatus | null | undefined): boolean {
+  return (
+    sub?.state === "none" ||
+    sub?.state === "past_due_expired" ||
+    sub?.state === "canceled" ||
+    sub?.state === "incomplete"
+  );
+}
+
 function humanLabel(
   state: SubState,
   plan: string | null,

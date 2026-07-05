@@ -1,48 +1,58 @@
 import { createClient } from "@/lib/supabase/server";
+import { setBusinessModuleInstalled } from "@/app/actions/org-settings";
+import { ChatRequestButton } from "@/components/app/ChatRequestButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, Clock, ExternalLink } from "lucide-react";
+import {
+  MARKETPLACE_PRODUCT_ORDER,
+  MARKETPLACE_PRODUCTS,
+  addonPriceLabel,
+  marketplaceAllowsSelfInstall,
+  type CatalogItem,
+  type CatalogLocale,
+  type MarketplaceProductKey,
+} from "@/lib/billing/catalog";
+import { AlertCircle, CheckCircle2, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-type IntegrationStatus = "connected" | "available" | "coming_soon";
+type MarketplaceStatus = "active" | "available";
 
-type IntegrationDef = {
-  id: string;
-  name: string;
-  logo: string;
-  description: string;
-  status: IntegrationStatus;
-  settingsHref?: string;
-  docsHref?: string;
-  category: string;
+type CardDef = {
+  id: MarketplaceProductKey;
+  item: CatalogItem;
+  status: MarketplaceStatus;
+  installKey?: MarketplaceProductKey;
 };
 
 interface IntegrationCardsProps {
   orgId: string;
   countryCode: string | null;
+  installError?: string | null;
+  returnTo?: string;
 }
 
-function StatusBadge({ status, isRO }: { status: IntegrationStatus; isRO: boolean }) {
-  if (status === "connected")
+function StatusBadge({ status, isRO }: { status: MarketplaceStatus; isRO: boolean }) {
+  if (status === "active") {
     return (
       <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">
         <CheckCircle2 className="h-3 w-3 mr-1" />
-        {isRO ? "Conectat" : "Connected"}
+        {isRO ? "Activ" : "Active"}
       </Badge>
     );
-  if (status === "coming_soon")
-    return (
-      <Badge variant="outline" className="text-slate-400">
-        <Clock className="h-3 w-3 mr-1" />
-        {isRO ? "În curând" : "Coming soon"}
-      </Badge>
-    );
+  }
   return <Badge variant="outline">{isRO ? "Disponibil" : "Available"}</Badge>;
 }
 
-function IntegrationLogo({ src, name }: { src: string; name: string }) {
+function ProductLogo({ src, name }: { src?: string; name: string }) {
+  if (!src) {
+    return (
+      <div className="flex h-8 w-32 items-center text-sm font-semibold text-blue-700">
+        FranchiseTech
+      </div>
+    );
+  }
   return (
     <div className="relative h-8 w-32 flex-shrink-0">
       <Image src={src} alt={name} fill className="object-contain object-left" />
@@ -50,195 +60,132 @@ function IntegrationLogo({ src, name }: { src: string; name: string }) {
   );
 }
 
-export async function IntegrationCards({ orgId, countryCode }: IntegrationCardsProps) {
+export async function IntegrationCards({
+  orgId,
+  countryCode,
+  installError,
+  returnTo = "/app/settings?tab=integrations",
+}: IntegrationCardsProps) {
   const supabase = await createClient();
-  const isRO = countryCode === "RO";
+  const locale: CatalogLocale = countryCode === "RO" ? "ro" : "en";
+  const isRO = locale === "ro";
 
-  const [glovoResult, anafResult] = await Promise.all([
-    supabase
-      .from("delivery_integrations")
-      .select("provider,active")
-      .eq("organisation_id", orgId)
-      .eq("provider", "glovo")
-      .eq("active", true)
-      .maybeSingle(),
-    isRO
-      ? supabase
-          .from("organisations")
-          .select("anaf_cif")
-          .eq("id", orgId)
-          .maybeSingle()
-      : Promise.resolve({ data: null, error: null }),
-  ]);
+  const orgSettingsResult = await supabase
+    .from("organisations")
+    .select("kitchen_display_enabled,table_service_enabled,saga_export_enabled,fiscalnet_enabled,efactura_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
+  let orgSettings = orgSettingsResult.data as Record<string, unknown> | null;
+  const orgSettingsError = orgSettingsResult.error;
 
-  const glovoConnected = !!glovoResult.data;
-  const anafConnected = !!(anafResult.data as { anaf_cif?: string | null } | null)?.anaf_cif;
+  if (
+    orgSettingsError?.code === "42703" ||
+    orgSettingsError?.code === "PGRST204" ||
+    (orgSettingsError?.message ?? "").toLowerCase().includes("efactura_enabled")
+  ) {
+    const fallback = await supabase
+      .from("organisations")
+      .select("kitchen_display_enabled,saga_export_enabled,fiscalnet_enabled")
+      .eq("id", orgId)
+      .maybeSingle();
+    orgSettings = fallback.data as Record<string, unknown> | null;
+  }
 
-  const integrations: IntegrationDef[] = [
-    {
-      id: "fiscalnet",
-      name: "FiscalNet",
-      logo: "/integrations/fiscalnet.png",
-      description: isRO
-        ? "Casă fiscală omologată ANAF. Bonuri fiscale, raport Z, deschidere sertar."
-        : "Fiscal printer for compliant receipts, Z-report, cash drawer.",
-      status: "available",
-      settingsHref: "/app/settings?tab=fiscal",
-      docsHref: "/help/romania-fiscalnet",
-      category: isRO ? "Fiscal" : "Hardware",
-    },
-    ...(isRO
-      ? [
-          {
-            id: "anaf-efactura",
-            name: "ANAF e-Factura",
-            logo: "/integrations/anaf.svg",
-            description: "Trimitere automată factură B2B în SPV prin OAuth ANAF.",
-            status: anafConnected ? ("connected" as IntegrationStatus) : ("available" as IntegrationStatus),
-            settingsHref: "/app/settings?tab=anaf",
-            docsHref: "/help",
-            category: "Fiscal",
-          },
-        ]
-      : []),
-    {
-      id: "glovo",
-      name: "Glovo",
-      logo: "/integrations/glovo.svg",
-      description: isRO
-        ? "Comenzile Glovo apar direct în POS fără reintroducere manuală."
-        : "Glovo delivery orders sync directly into POS.",
-      status: glovoConnected ? "connected" : "available",
-      settingsHref: "/app/settings?tab=features",
-      category: isRO ? "Livrare" : "Delivery",
-    },
-    {
-      id: "tazz",
-      name: "Tazz by eMAG",
-      logo: "/integrations/tazz.webp",
-      description: isRO
-        ? "Sincronizare comenzi Tazz în POS. Disponibil curând."
-        : "Tazz orders sync to POS. Coming soon.",
-      status: "coming_soon",
-      category: isRO ? "Livrare" : "Delivery",
-    },
-    {
-      id: "bolt-food",
-      name: "Bolt Food",
-      logo: "/integrations/bolt-food.svg",
-      description: isRO
-        ? "Comenzi Bolt Food direct în POS. Disponibil curând."
-        : "Bolt Food orders to POS. Coming soon.",
-      status: "coming_soon",
-      category: isRO ? "Livrare" : "Delivery",
-    },
-    {
-      id: "smartbill",
-      name: "SmartBill",
-      logo: "/integrations/smartbill.webp",
-      description: isRO
-        ? "Export vânzări și facturi direct în SmartBill pentru contabil."
-        : "Export sales and invoices to SmartBill for your accountant.",
-      status: "coming_soon",
-      category: isRO ? "Contabilitate" : "Accounting",
-    },
-    {
-      id: "saga",
-      name: "Saga",
-      logo: "/integrations/saga.svg",
-      description: isRO
-        ? "Export XML Saga și CSV contabilitate disponibil în Rapoarte → Audit."
-        : "Saga XML export available under Reports → Audit.",
-      status: "available",
-      settingsHref: "/app/reports/audit-export",
-      category: isRO ? "Contabilitate" : "Accounting",
-    },
-    {
-      id: "posthog",
-      name: "PostHog Analytics",
-      logo: "/integrations/posthog.svg",
-      description: "Product analytics, funnel tracking, and session recording.",
-      status: "connected",
-      category: "Analytics",
-    },
-  ];
-
-  const categories = [...new Set(integrations.map((i) => i.category))];
+  const cards: CardDef[] = MARKETPLACE_PRODUCT_ORDER.map((id) => {
+    const item = MARKETPLACE_PRODUCTS[id];
+    let status: MarketplaceStatus = "available";
+    if (id === "kitchen_display" && orgSettings?.kitchen_display_enabled) status = "active";
+    if (id === "table_service" && orgSettings?.table_service_enabled) status = "active";
+    if (id === "saga_export" && orgSettings?.saga_export_enabled) status = "active";
+    if (id === "fiscalnet" && orgSettings?.fiscalnet_enabled) status = "active";
+    if (id === "anaf_efactura" && orgSettings?.efactura_enabled) status = "active";
+    return { id, item, status, installKey: item.installKey ?? id };
+  });
 
   return (
-    <div className="space-y-8">
-      {categories.map((category) => (
-        <div key={category}>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-            {category}
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {integrations
-              .filter((i) => i.category === category)
-              .map((integration) => (
-                <Card
-                  key={integration.id}
-                  className={integration.status === "coming_soon" ? "opacity-60" : ""}
-                >
-                  <CardHeader className="pb-2">
-                    <div className="mb-2.5">
-                      <IntegrationLogo src={integration.logo} name={integration.name} />
-                    </div>
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-sm font-semibold text-slate-800">{integration.name}</CardTitle>
-                      <StatusBadge status={integration.status} isRO={isRO} />
-                    </div>
-                    <CardDescription className="text-xs leading-relaxed mt-1">
-                      {integration.description}
-                    </CardDescription>
-                  </CardHeader>
-                  {integration.status !== "coming_soon" && (
-                    <CardContent className="flex flex-wrap gap-2 pt-0">
-                      {integration.settingsHref && (
-                        <Link href={integration.settingsHref}>
-                          <Button
-                            size="sm"
-                            variant={integration.status === "connected" ? "outline" : "default"}
-                            className="h-7 text-xs"
-                          >
-                            {integration.status === "connected"
-                              ? isRO
-                                ? "Gestionează"
-                                : "Manage"
-                              : isRO
-                                ? "Configurează"
-                                : "Set up"}
-                          </Button>
-                        </Link>
-                      )}
-                      {integration.docsHref && (
-                        <Link href={integration.docsHref} target="_blank">
-                          <Button size="sm" variant="ghost" className="h-7 text-xs gap-1">
-                            <ExternalLink className="h-3 w-3" />
-                            {isRO ? "Ghid" : "Guide"}
-                          </Button>
-                        </Link>
-                      )}
-                    </CardContent>
-                  )}
-                </Card>
-              ))}
-          </div>
-        </div>
-      ))}
-
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-        <p className="text-sm text-slate-600">
+    <div className="space-y-6">
+      <div>
+        <h2 className="mb-1 text-lg font-semibold text-slate-900">
+          {isRO ? "Marketplace" : "Marketplace"}
+        </h2>
+        <p className="mb-4 text-sm text-slate-500">
           {isRO
-            ? "Ai nevoie de o integrare care nu apare aici? Scrie-ne și o adăugăm pe roadmap."
-            : "Need an integration not listed here? Let us know and we'll add it to the roadmap."}
+            ? "Activează integrările și modulele incluse în planul tău. Dezactivarea ascunde meniurile și câmpurile, fără să șteargă datele."
+            : "Enable integrations and modules included in your plan. Turning one off hides menus and fields without deleting data."}
         </p>
-        <Link
-          href="/help"
-          className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline"
-        >
-          {isRO ? "Contactează-ne" : "Contact us"} <ExternalLink className="h-3 w-3" />
-        </Link>
+        {installError ? (
+          <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+            <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+            <p>{installError}</p>
+          </div>
+        ) : null}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {cards.map((card) => {
+            const name = card.item.name[locale];
+            const active = card.status === "active";
+            return (
+              <Card key={card.id}>
+                <CardHeader className="pb-2">
+                  <div className="mb-2.5">
+                    <ProductLogo src={card.item.logo} name={name} />
+                  </div>
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-sm font-semibold text-slate-800">{name}</CardTitle>
+                    <StatusBadge status={card.status} isRO={isRO} />
+                  </div>
+                  <CardDescription className="text-xs leading-relaxed mt-1">
+                    {card.item.description[locale]}
+                  </CardDescription>
+                  <p className="pt-1 text-xs font-semibold text-slate-700">
+                    {addonPriceLabel(card.item, locale)}
+                    {(card.id === "fiscalnet" || card.id === "anaf_efactura") && (
+                      <span className="font-normal text-slate-500">
+                        {" "}
+                        {isRO ? "în FranchiseTech" : "in FranchiseTech"}
+                      </span>
+                    )}
+                  </p>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2 pt-0">
+                  {card.installKey && !active && !marketplaceAllowsSelfInstall(card.item) ? (
+                    <ChatRequestButton label={isRO ? "Contactați-ne" : "Contact us"} />
+                  ) : card.installKey ? (
+                    <form action={setBusinessModuleInstalled}>
+                      <input type="hidden" name="module" value={card.installKey} />
+                      <input type="hidden" name="installed" value={active ? "false" : "true"} />
+                      <input type="hidden" name="returnTo" value={returnTo} />
+                      <Button
+                        type="submit"
+                        size="sm"
+                        variant={active ? "outline" : "default"}
+                        className="h-7 text-xs"
+                      >
+                        {active
+                          ? isRO ? "Dezinstalează" : "Uninstall"
+                          : isRO ? "Activează" : "Enable"}
+                      </Button>
+                    </form>
+                  ) : null}
+                  {card.item.settingsHref && active && (
+                    <Link href={card.item.settingsHref}>
+                      <Button size="sm" variant="outline" className="h-7 text-xs">
+                        {isRO ? "Configurează" : "Configure"}
+                      </Button>
+                    </Link>
+                  )}
+                  {card.item.docsHref && (
+                    <Link href={card.item.docsHref} target="_blank">
+                      <Button size="sm" variant="ghost" className="h-7 text-xs gap-1">
+                        <ExternalLink className="h-3 w-3" />
+                        {isRO ? "Ghid" : "Guide"}
+                      </Button>
+                    </Link>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

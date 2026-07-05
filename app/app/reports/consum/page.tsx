@@ -78,7 +78,13 @@ export default async function ConsumReportPage({
 
   const items = Array.from(aggregated.values()).sort((a, b) => a.name.localeCompare(b.name));
   const totalValue = items.reduce((sum, item) => sum + item.totalCost, 0);
-  const documentNumber = `BC-${fromDate.replace(/-/g, "")}`;
+
+  const { data: bcNum } = await supabase.rpc("assign_bc_number", {
+    p_org_id: orgId,
+    p_from: fromDate,
+    p_to: toDate,
+  });
+  const documentNumber = (bcNum as string | null) ?? `BC-${fromDate.replace(/-/g, "")}`;
 
   return (
     <div className="space-y-6 p-6">
@@ -111,6 +117,7 @@ export default async function ConsumReportPage({
                 totalCost: item.totalCost,
               }))}
               userName={profile?.full_name ?? user.email ?? t.common.unknown}
+              primitor="Bucătărie"
               label={labels.download}
             />
           )}

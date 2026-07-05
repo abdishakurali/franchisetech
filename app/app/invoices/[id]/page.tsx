@@ -61,6 +61,13 @@ export default async function InvoiceDetailPage({
 
   if (countryCode !== "RO") redirect("/app/invoices");
 
+  const { data: org } = await supabase
+    .from("organisations")
+    .select("efactura_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
+  if (!org?.efactura_enabled) redirect("/app/settings?tab=integrations");
+
   const { data: inv } = await supabase
     .from("efactura_invoices")
     .select("*")

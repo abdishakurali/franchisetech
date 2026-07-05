@@ -20,7 +20,7 @@ export default function PrivacyPage() {
           <section><h2 className="font-semibold text-slate-900">7. Your rights</h2><p>You may have rights to access, correction, deletion, restriction, objection, portability, withdrawal of consent where applicable, and to complain to the Irish Data Protection Commission.</p></section>
           <section><h2 className="font-semibold text-slate-900">8. Security</h2><p>We use reasonable security measures to protect the service and data. No internet service can guarantee perfect security.</p></section>
           <section><h2 className="font-semibold text-slate-900">9. International transfers</h2><p>Cloud providers may process data outside Ireland or the EU. Safeguards may be used where required.</p></section>
-          <section><h2 className="font-semibold text-slate-900">10. Contact</h2><p>Contact us at <a className="text-blue-600 hover:underline" href="mailto:hello@franchisetech.ro">hello@franchisetech.ro</a>.</p></section>
+          <section><h2 className="font-semibold text-slate-900">10. Contact</h2><p>Contact us at <a className="text-blue-600 hover:underline" href="mailto:info@franchisetech.ro">info@franchisetech.ro</a>.</p></section>
           <section><h2 className="font-semibold text-slate-900">11. Changes</h2><p>We may update this policy and change the last updated date.</p></section>
         </div>
 

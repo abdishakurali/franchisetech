@@ -1,88 +1,81 @@
 import Image from "next/image";
-
-function BrowserChrome({ path }: { path: string }) {
-  return (
-    <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50/80 px-4 py-2">
-      <span className="h-2 w-2 rounded-full bg-slate-300" />
-      <span className="h-2 w-2 rounded-full bg-slate-300" />
-      <span className="h-2 w-2 rounded-full bg-slate-300" />
-      <div className="mx-2 min-w-0 flex-1 truncate rounded-md bg-white px-2.5 py-0.5 text-[10px] text-slate-500 ring-1 ring-slate-200/80">
-        franchisetech.ro{path}
-      </div>
-    </div>
-  );
-}
-
-function MiniBrowserChrome({ path }: { path: string }) {
-  return (
-    <div className="flex items-center gap-1 border-b border-slate-100 bg-slate-50/90 px-2.5 py-1.5">
-      <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-      <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-      <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-      <div className="min-w-0 flex-1 truncate rounded bg-white px-2 py-0.5 text-[9px] text-slate-500 ring-1 ring-slate-200/80">
-        franchisetech.ro{path}
-      </div>
-    </div>
-  );
-}
+import { HeroPosTableOrderPreview } from "@/components/marketing/HeroPosTableOrderPreview";
+import { HeroTableFloorPreview } from "@/components/marketing/HeroTableFloorPreview";
 
 type HeroVisualCollageProps = {
-  posSrc: string;
-  posAlt: string;
-  posPath: string;
-  cafeSrc: string;
-  cafeAlt: string;
-  kitchenSrc: string;
-  kitchenAlt: string;
-  kitchenPath: string;
+  floorAlt: string;
+  floorSrc?: string;
+  tableOrderAlt: string;
+  tableOrderSrc?: string;
+  dashboardSrc: string;
+  dashboardAlt: string;
   priority?: boolean;
 };
 
-/** POS on top, owner photo bottom-left, kitchen display bottom-right — one unified card. */
+/**
+ * Hero showcase: panou (main) on top, plan sală + POS masă below.
+ * Framed with depth — no fake browser chrome.
+ */
 export function HeroVisualCollage({
-  posSrc,
-  posAlt,
-  posPath,
-  cafeSrc,
-  cafeAlt,
-  kitchenSrc,
-  kitchenAlt,
-  kitchenPath,
+  floorAlt,
+  floorSrc,
+  tableOrderAlt,
+  tableOrderSrc,
+  dashboardSrc,
+  dashboardAlt,
   priority,
 }: HeroVisualCollageProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_80px_-24px_rgba(15,23,42,0.18)]">
-      <BrowserChrome path={posPath} />
-      <Image
-        src={posSrc}
-        alt={posAlt}
-        width={1200}
-        height={750}
-        className="max-h-[200px] w-full object-cover object-top sm:max-h-[240px] lg:max-h-[260px]"
-        priority={priority}
-      />
+    <div className="marketing-hero-rise marketing-hero-delay-4 perspective-[1200px]">
+      <div className="rotate-[1.25deg] transition-transform duration-500 hover:rotate-0 lg:rotate-[1.75deg]">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_64px_-12px_rgba(15,23,42,0.18),0_8px_24px_-8px_rgba(37,99,235,0.12)] ring-1 ring-slate-900/[0.04]">
+          <Image
+            src={dashboardSrc}
+            alt={dashboardAlt}
+            width={1400}
+            height={900}
+            className="w-full object-cover object-top"
+            priority={priority}
+            sizes="(max-width: 1024px) 100vw, 64rem"
+          />
 
-      <div className="grid grid-cols-2 gap-2 border-t border-slate-100 bg-slate-50/60 p-2 sm:gap-2.5 sm:p-2.5">
-        <div className="overflow-hidden rounded-xl border border-slate-200/80 shadow-sm">
-          <Image
-            src={cafeSrc}
-            alt={cafeAlt}
-            width={400}
-            height={300}
-            className="aspect-[4/3] w-full object-cover"
-            unoptimized
-          />
-        </div>
-        <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm">
-          <MiniBrowserChrome path={kitchenPath} />
-          <Image
-            src={kitchenSrc}
-            alt={kitchenAlt}
-            width={400}
-            height={300}
-            className="aspect-[4/3] w-full object-cover object-top"
-            unoptimized
-          />
+          <div className="grid grid-cols-1 gap-3 border-t border-slate-100 bg-white p-3 max-sm:hidden sm:grid-cols-2 sm:gap-3 sm:p-3">
+            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              {floorSrc ? (
+                <Image
+                  src={floorSrc}
+                  alt={floorAlt}
+                  width={700}
+                  height={520}
+                  className="w-full object-cover object-top"
+                  priority={priority}
+                  sizes="(max-width: 1024px) 100vw, 32rem"
+                />
+              ) : (
+                <div className="min-h-[280px] w-full sm:min-h-[320px]" role="img" aria-label={floorAlt}>
+                  <HeroTableFloorPreview />
+                </div>
+              )}
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              {tableOrderSrc ? (
+                <Image
+                  src={tableOrderSrc}
+                  alt={tableOrderAlt}
+                  width={700}
+                  height={520}
+                  className="w-full object-cover object-top"
+                  unoptimized
+                  sizes="(max-width: 1024px) 100vw, 32rem"
+                />
+              ) : (
+                <div className="min-h-[280px] w-full sm:min-h-[320px]" role="img" aria-label={tableOrderAlt}>
+                  <HeroPosTableOrderPreview />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

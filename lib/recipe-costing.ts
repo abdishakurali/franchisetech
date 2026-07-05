@@ -3,6 +3,11 @@ export function formatRecipeMoney(v: number, currency = "EUR") {
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: currency || "EUR" }).format(v);
 }
 
+/** Rounds a stock quantity to 2dp to hide float drift (e.g. 443.24999999999966) without changing the stored value. */
+export function formatQty(v: number) {
+  return Number(v.toFixed(2));
+}
+
 export function firstJoined<T>(v: T | T[] | null | undefined): T | null {
   return Array.isArray(v) ? v[0] ?? null : v ?? null;
 }

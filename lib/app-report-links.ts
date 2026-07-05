@@ -25,6 +25,7 @@ export type AppReportLink = {
   requiresInventory?: boolean;
   requiresRecipe?: boolean;
   requiresAccountantPack?: boolean;
+  requiresGestiune?: boolean;
 };
 
 export function getAppReportLinks(t: AppT): AppReportLink[] {
@@ -115,7 +116,7 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
       color: "bg-slate-100 text-slate-700",
       tag: t.reports.gestiune.tag,
       requiresInventory: true,
-      requiresAccountantPack: true,
+      requiresGestiune: true,
     },
     {
       href: "/app/reports/audit-export",
@@ -124,6 +125,7 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
       icon: FileDown,
       color: "bg-violet-50 text-violet-700",
       tag: t.reports.auditExport.tag,
+      requiresAccountantPack: true,
     },
     {
       href: "/app/reports/staff",
@@ -138,12 +140,18 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
 
 export function filterReportLinks(
   t: AppT,
-  input: { inventoryVisible: boolean; recipeVisible: boolean; accountantPackVisible?: boolean },
+  input: {
+    inventoryVisible: boolean;
+    recipeVisible: boolean;
+    accountantPackVisible?: boolean;
+    gestiuneVisible?: boolean;
+  },
 ): AppReportLink[] {
   return getAppReportLinks(t).filter((link) => {
     if (link.requiresInventory && !input.inventoryVisible) return false;
     if (link.requiresRecipe && !input.recipeVisible) return false;
     if (link.requiresAccountantPack && !input.accountantPackVisible) return false;
+    if (link.requiresGestiune && !input.gestiuneVisible) return false;
     return true;
   });
 }

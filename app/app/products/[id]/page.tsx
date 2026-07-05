@@ -129,7 +129,7 @@ export default async function ProductDetailPage({
   let stockMovements: StockMovement[] = [];
   if (inventoryVisible && (product.is_ingredient || product.is_stock_tracked)) {
     const { data: movements } = await supabase
-      .from("stock_movements")
+      .from("stock_movements_reconciled")
       .select("id,movement_type,quantity_change,unit_of_measure,reason,performed_at")
       .eq("product_id", id)
       .eq("organisation_id", orgId)
@@ -138,17 +138,26 @@ export default async function ProductDetailPage({
     stockMovements = (movements ?? []) as StockMovement[];
   }
 
-  // Sales history (for sellable products)
-  let salesHistory: Array<{ product_name: string; quantity: number; gross_amount: number | null; line_total: number; created_at: string }> = [];
+  // Sales history (for sellable products). Ordered by the parent
+  // transaction's sold_at (real sale date), not
+  // pos_transaction_items.created_at (row-insert time -- for migrated
+  // historical sales, that's the bulk-import timestamp, which would
+  // interleave old migrated sales ahead of genuinely recent ones).
+  let salesHistory: Array<{ product_name: string; quantity: number; gross_amount: number | null; line_total: number; sold_at: string }> = [];
   if (product.available_in_pos !== false || product.is_sellable) {
     const { data: salesItems } = await supabase
       .from("pos_transaction_items")
-      .select("product_name,quantity,gross_amount,line_total,created_at")
+      .select("product_name,quantity,gross_amount,line_total,pos_transactions(sold_at)")
       .eq("product_id", id)
       .eq("organisation_id", orgId)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    salesHistory = (salesItems ?? []) as typeof salesHistory;
+      .limit(500);
+    salesHistory = ((salesItems ?? []) as unknown as Array<{ product_name: string; quantity: number; gross_amount: number | null; line_total: number; pos_transactions: { sold_at: string } | { sold_at: string }[] | null }>)
+      .map((s) => {
+        const tx = Array.isArray(s.pos_transactions) ? s.pos_transactions[0] : s.pos_transactions;
+        return { product_name: s.product_name, quantity: s.quantity, gross_amount: s.gross_amount, line_total: s.line_total, sold_at: tx?.sold_at ?? "" };
+      })
+      .sort((a, b) => b.sold_at.localeCompare(a.sold_at))
+      .slice(0, 20);
   }
 
   // Used in recipes (for ingredient products)
@@ -398,7 +407,7 @@ export default async function ProductDetailPage({
                   {salesHistory.map((s, i) => (
                     <TableRow key={i}>
                       <TableCell className="text-sm text-slate-500">
-                        {new Date(s.created_at).toLocaleDateString("en-IE", { day: "2-digit", month: "short" })}
+                        {new Date(s.sold_at).toLocaleDateString("en-IE", { day: "2-digit", month: "short" })}
                       </TableCell>
                       <TableCell className="text-right">{s.quantity}</TableCell>
                       <TableCell className="text-right font-medium">{money(Number(s.gross_amount ?? s.line_total ?? 0), currency)}</TableCell>

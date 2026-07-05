@@ -78,7 +78,7 @@ export function ProfileForm({
       <Card className="border-slate-100">
         <CardHeader><CardTitle className="text-base">Business</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-1.5"><Label>Business name</Label><Input value={form.businessName} disabled={!canEditBusiness} onChange={(e) => setForm({ ...form, businessName: e.target.value })} /></div>
+          <div className="space-y-1.5"><Label>Brand/shop name</Label><Input value={form.businessName} disabled={!canEditBusiness} onChange={(e) => setForm({ ...form, businessName: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>Business type</Label><Input value={form.businessType} disabled={!canEditBusiness} onChange={(e) => setForm({ ...form, businessType: e.target.value })} /></div>
           {!canEditBusiness && <p className="text-xs text-slate-500">Only owners and managers can edit business details.</p>}
         </CardContent>

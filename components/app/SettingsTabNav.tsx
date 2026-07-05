@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 
 export interface SettingsTab {
   id: string;
   label: string;
+  href?: string; // override the default ?tab=id link
 }
 
 function cn(...classes: (string | boolean | undefined)[]) {
@@ -14,7 +15,11 @@ function cn(...classes: (string | boolean | undefined)[]) {
 
 export function SettingsTabNav({ tabs }: { tabs: SettingsTab[] }) {
   const searchParams = useSearchParams();
-  const active = searchParams.get("tab") ?? "business";
+  const pathname = usePathname();
+  // Detect active from path first (for sub-routes like /app/settings/team),
+  // then fall back to ?tab= search param.
+  const activeFromPath = tabs.find((t) => t.href && pathname === t.href)?.id;
+  const active = activeFromPath ?? searchParams.get("tab") ?? "business";
 
   return (
     <div
@@ -44,7 +49,7 @@ export function SettingsTabNav({ tabs }: { tabs: SettingsTab[] }) {
           return (
             <Link
               key={tab.id}
-              href={`?tab=${tab.id}`}
+              href={tab.href ?? `?tab=${tab.id}`}
               className={cn(
                 "inline-flex items-center whitespace-nowrap border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-t",
                 isActive

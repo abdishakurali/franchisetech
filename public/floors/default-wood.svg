@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <pattern id="planks" width="1200" height="80" patternUnits="userSpaceOnUse">
+      <rect width="1200" height="80" fill="#c9a66b"/>
+      <rect y="0" width="1200" height="2" fill="#a8844f" opacity="0.5"/>
+      <rect y="78" width="1200" height="2" fill="#8b6b3d" opacity="0.35"/>
+      <line x1="0" y1="40" x2="1200" y2="40" stroke="#b89255" stroke-width="1" opacity="0.25"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="800" fill="url(#planks)"/>
+</svg>

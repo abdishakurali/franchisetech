@@ -2,8 +2,10 @@ import { InvoiceDraftForm } from "@/components/app/InvoiceDraftForm";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { mapUnitOfMeasureToAnafCode } from "@/lib/anaf/unit-codes";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
+import { redirect } from "next/navigation";
 
 type PurchaseItemRow = {
+  product_id: string | number | null;
   product_name: string | null;
   item_name: string | null;
   quantity: number | null;
@@ -19,6 +21,13 @@ export default async function NewInvoicePage({
 }) {
   const params = await searchParams;
   const { supabase, orgId } = await getKitchenOpsContext();
+  const { data: org } = await supabase
+    .from("organisations")
+    .select("efactura_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
+  if (!org?.efactura_enabled) redirect("/app/settings?tab=integrations");
+
   const [vatRates, productsResult] = await Promise.all([
     listActiveVatRates(supabase, orgId),
     supabase
@@ -45,7 +54,7 @@ export default async function NewInvoicePage({
       .select(`
         id,invoice_number,purchase_date,supplier_invoice_date,
         suppliers!purchases_supplier_id_fkey(name,tax_id,address),
-        purchase_items(product_name,item_name,quantity,unit_cost,tax_rate,unit_of_measure)
+        purchase_items(product_id,product_name,item_name,quantity,unit_cost,tax_rate,unit_of_measure)
       `)
       .eq("id", params.purchaseId)
       .eq("organisation_id", orgId)
@@ -60,7 +69,10 @@ export default async function NewInvoicePage({
         buyerCif: supplier?.tax_id ?? "",
         buyerName: supplier?.name ?? "",
         buyerAddress: supplier?.address ?? "",
+        sourcePurchaseId: String(purchase.id),
+        sourcePurchaseLabel: purchase.invoice_number ?? String(purchase.id),
         lines: items.map((item) => ({
+          productId: item.product_id === null || item.product_id === undefined ? "" : String(item.product_id),
           name: item.product_name ?? item.item_name ?? "",
           unitCode: mapUnitOfMeasureToAnafCode(item.unit_of_measure),
           quantity: String(item.quantity ?? 1),

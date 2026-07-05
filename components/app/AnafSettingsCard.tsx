@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { saveAnafSettings, disconnectAnaf } from "@/app/actions/efactura";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -93,6 +94,13 @@ export function AnafSettingsCard({
               </ol>
             </div>
           )}
+
+          <Link
+            href="/help/romania-efactura"
+            className="mt-4 inline-block text-xs font-medium text-blue-700 hover:underline"
+          >
+            Vezi ghid pas cu pas pentru e-Factura →
+          </Link>
         </div>
       </CardContent>
     </Card>

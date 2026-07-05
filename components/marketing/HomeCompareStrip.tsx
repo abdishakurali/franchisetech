@@ -23,7 +23,7 @@ export function HomeCompareStrip() {
             {t.home.compare.viewAll} <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {slugs.map((slug) => {
             const brand = getCompetitorBrand(slug);
             if (!brand) return null;

@@ -1,8 +1,13 @@
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { IntegrationCards } from "@/components/app/IntegrationCards";
-import { Plug } from "lucide-react";
+import { Store } from "lucide-react";
 
-export default async function IntegrationsPage() {
+export default async function IntegrationsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ install_error?: string }>;
+}) {
+  const params = await searchParams;
   const { orgId, countryCode } = await getKitchenOpsContext();
   const isRO = countryCode === "RO";
 
@@ -11,21 +16,26 @@ export default async function IntegrationsPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-slate-950">
-            {isRO ? "Integrări" : "Integrations"}
+            Marketplace
           </h1>
           <p className="text-sm text-slate-500 mt-1">
             {isRO
-              ? "Conectează franchisetech cu instrumentele pe care le folosești deja."
-              : "Connect franchisetech with the tools you already use."}
+              ? "Activează integrările și modulele incluse în planul tău. Dezactivarea ascunde meniurile fără să șteargă datele."
+              : "Enable integrations and modules included in your plan. Turning one off hides menus without deleting data."}
           </p>
         </div>
         <div className="flex items-center gap-2 text-sm text-slate-400">
-          <Plug className="h-4 w-4" />
-          {isRO ? "Disponibil și în Setări → Integrări" : "Also available in Settings → Integrations"}
+          <Store className="h-4 w-4" />
+          {isRO ? "Disponibil și în Setări → Marketplace" : "Also available in Settings → Marketplace"}
         </div>
       </div>
 
-      <IntegrationCards orgId={orgId} countryCode={countryCode} />
+      <IntegrationCards
+        orgId={orgId}
+        countryCode={countryCode}
+        installError={params?.install_error ? decodeURIComponent(params.install_error) : null}
+        returnTo="/app/integrations"
+      />
     </div>
   );
 }

@@ -20,6 +20,13 @@ interface Props {
   steps: TourStep[];
   onComplete?: () => void;
   onSkip?: () => void;
+  labels?: {
+    skip: string;
+    back: string;
+    next: string;
+    done: string;
+    skipAria: string;
+  };
 }
 
 const STORAGE_KEY = (id: string) => `fp_tour_${id}_done`;
@@ -69,7 +76,7 @@ function getTooltipPosition(rect: Rect, placement: TourStep["placement"]): Toolt
   return { top, left, arrowSide: side };
 }
 
-export function TourOverlay({ tourId, steps, onComplete, onSkip }: Props) {
+export function TourOverlay({ tourId, steps, onComplete, onSkip, labels }: Props) {
   const [active, setActive] = useState(false);
   const [step,   setStep]   = useState(0);
   const [rect,   setRect]   = useState<Rect | null>(null);
@@ -164,6 +171,13 @@ export function TourOverlay({ tourId, steps, onComplete, onSkip }: Props) {
 
   const cur = steps[step];
   const PADDING = 6;
+  const L = labels ?? {
+    skip: "Skip",
+    back: "Back",
+    next: "Next",
+    done: "Done",
+    skipAria: "Skip tour",
+  };
 
   return (
     <>
@@ -190,7 +204,7 @@ export function TourOverlay({ tourId, steps, onComplete, onSkip }: Props) {
 
       {/* Tooltip card */}
       <div
-        className="fixed z-[9002] w-80 bg-white rounded-xl shadow-2xl border border-slate-200 p-4"
+        className="fixed z-[9002] w-[min(20rem,calc(100vw-24px))] max-w-sm bg-white rounded-xl shadow-2xl border border-slate-200 p-4"
         style={{ top: tipPos.top, left: tipPos.left, transition: "top 200ms, left 200ms" }}
       >
         {/* Progress dots */}
@@ -205,7 +219,7 @@ export function TourOverlay({ tourId, steps, onComplete, onSkip }: Props) {
           <button
             onClick={() => finish(true)}
             className="ml-2 text-slate-400 hover:text-slate-600"
-            aria-label="Skip tour"
+            aria-label={L.skipAria}
           >
             <X className="h-4 w-4" />
           </button>
@@ -219,16 +233,16 @@ export function TourOverlay({ tourId, steps, onComplete, onSkip }: Props) {
             onClick={() => finish(true)}
             className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"
           >
-            <SkipForward className="h-3 w-3" /> Skip
+            <SkipForward className="h-3 w-3" /> {L.skip}
           </button>
           <div className="flex gap-2">
             {step > 0 && (
               <Button size="sm" variant="outline" onClick={prev} className="gap-1 h-8 text-xs">
-                <ArrowLeft className="h-3 w-3" /> Back
+                <ArrowLeft className="h-3 w-3" /> {L.back}
               </Button>
             )}
             <Button size="sm" onClick={next} className="gap-1 h-8 text-xs bg-blue-600 hover:bg-blue-700 text-white">
-              {step === steps.length - 1 ? "Done" : "Next"}
+              {step === steps.length - 1 ? L.done : L.next}
               {step < steps.length - 1 && <ArrowRight className="h-3 w-3" />}
             </Button>
           </div>

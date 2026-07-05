@@ -63,7 +63,8 @@ export function bonConsumTxt(data: BonConsumData): { text: string; filename: str
     centre(orgName.toUpperCase()),
     orgCui ? centre(`CUI: ${orgCui}`) : "",
     LINE,
-    centre("BON DE CONSUM"),
+    centre("BON DE CONSUM (COLECTIV)"),
+    centre("Formular 14-3-4/aA"),
     centre(`Nr. ${documentNumber}`),
     DASH,
     padRow("Data:", formattedDate),
@@ -139,7 +140,8 @@ export function bonConsumHtml(data: BonConsumData): string {
   <h1>${orgName}</h1>
   ${orgCui ? `<div class="subtitle">CUI: ${orgCui}</div>` : ""}
 
-  <h1>BON DE CONSUM</h1>
+  <h1>BON DE CONSUM (COLECTIV)</h1>
+  <div class="subtitle">Formular 14-3-4/aA</div>
   <div class="subtitle">Nr. ${documentNumber}</div>
 
   <div class="header">

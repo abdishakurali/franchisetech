@@ -31,7 +31,7 @@ export default async function KitchenPage() {
           <CardContent className="space-y-4">
             <p className="text-sm text-slate-600">{t.kitchen.notEnabledDesc}</p>
             {canManage(membership.role) && (
-              <Link href="/app/settings?tab=features">
+              <Link href="/app/settings?tab=integrations">
                 <Button>{t.kitchen.enableInSettings}</Button>
               </Link>
             )}
@@ -80,7 +80,7 @@ export default async function KitchenPage() {
           <h1 className="text-2xl font-semibold text-slate-950">{t.kitchen.title}</h1>
           <p className="mt-1 text-sm text-slate-500">{t.kitchen.ordersDesc}</p>
         </div>
-        <Link href="/app/settings?tab=features">
+        <Link href="/app/settings?tab=integrations">
           <Button variant="outline">{t.kitchen.featureSettings}</Button>
         </Link>
       </div>

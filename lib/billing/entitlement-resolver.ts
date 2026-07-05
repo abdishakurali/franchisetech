@@ -39,8 +39,10 @@ export type EntitlementKey =
   | "kitchen.order_flow"
   | "kitchen.stations"
   | "kitchen.order_types"
+  | "kitchen.table_service"
   | "team.advanced_roles"
   | "owner_digest.enabled"
+  | "reports.gestiune"
   | "reports.accountant_pack"
   | "support.priority"
   | "multi_site.enabled"
@@ -108,6 +110,7 @@ const OPERATIONS_ENTITLEMENTS: readonly EntitlementKey[] = [
   "purchases.nir",
   "reports.stock",
   "reports.audit",
+  "reports.gestiune",
   "recipes.enabled",
   "recipes.costing",
   "recipes.stock_depletion",
@@ -115,12 +118,13 @@ const OPERATIONS_ENTITLEMENTS: readonly EntitlementKey[] = [
   "kitchen.order_flow",
   "kitchen.stations",
   "kitchen.order_types",
+  "kitchen.table_service",
   "team.advanced_roles",
+  "owner_digest.enabled",
 ];
 
 const SCALE_ENTITLEMENTS: readonly EntitlementKey[] = [
   ...OPERATIONS_ENTITLEMENTS,
-  "owner_digest.enabled",
   "reports.accountant_pack",
   "support.priority",
 ];
@@ -133,11 +137,6 @@ const MULTI_SITE_ENTITLEMENTS: readonly EntitlementKey[] = [
 ];
 
 const FALLBACK_ENTITLEMENTS: readonly EntitlementKey[] = [
-  "pos.enabled",
-  "pos.till_sessions",
-  "fiscal.fiscalnet",
-  "fiscal.z_report",
-  "fiscal.x_report",
   "reports.till_close",
   "reports.vat",
   "pos.transaction_history",
@@ -179,6 +178,7 @@ const REQUIRED_PLAN: Record<EntitlementKey | EntitlementLimitKey, PlanCode | "mu
   "purchases.nir": "operations",
   "reports.stock": "operations",
   "reports.audit": "operations",
+  "reports.gestiune": "operations",
   "recipes.enabled": "operations",
   "recipes.costing": "operations",
   "recipes.stock_depletion": "operations",
@@ -186,9 +186,10 @@ const REQUIRED_PLAN: Record<EntitlementKey | EntitlementLimitKey, PlanCode | "mu
   "kitchen.order_flow": "operations",
   "kitchen.stations": "operations",
   "kitchen.order_types": "operations",
+  "kitchen.table_service": "operations",
   "kitchen.screen_limit": "operations",
   "team.advanced_roles": "operations",
-  "owner_digest.enabled": "scale",
+  "owner_digest.enabled": "operations",
   "reports.accountant_pack": "scale",
   "support.priority": "scale",
   "multi_site.enabled": "multi_site",
@@ -249,6 +250,18 @@ function resolveStatus(rawStatus: string | null | undefined, currentPeriodEnd: s
   return "expired";
 }
 
+function isMissingSchemaObjectError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  const message = (error.message ?? "").toLowerCase();
+  return (
+    error.code === "42P01" ||
+    error.code === "PGRST205" ||
+    message.includes("schema cache") ||
+    message.includes("could not find the table") ||
+    message.includes("organisation_entitlement_overrides")
+  );
+}
+
 async function applyOverrides(orgId: string, entitlements: Set<EntitlementKey>, limits: Record<EntitlementLimitKey, number | "unlimited">) {
   const service = await createServiceClient();
   const { data, error } = await service
@@ -257,7 +270,7 @@ async function applyOverrides(orgId: string, entitlements: Set<EntitlementKey>, 
     .eq("organisation_id", orgId);
 
   if (error) {
-    if (error.code !== "42P01") console.error("organisation_entitlement_overrides", error.message);
+    if (!isMissingSchemaObjectError(error)) console.error("organisation_entitlement_overrides", error.message);
     return;
   }
 

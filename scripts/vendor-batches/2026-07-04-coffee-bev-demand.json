@@ -1,0 +1,48 @@
+[
+  {
+    "slug": "kfea-zaniat-com",
+    "legal_name": "SC Zaniat Com SRL",
+    "brand_name": "Kfea",
+    "cui": "18646234",
+    "category": "coffee_equipment",
+    "subcategories": ["cafea boabe", "cafea măcinată", "capsule", "espressoare"],
+    "description": "Distribuitor și magazin de cafea boabe/măcinată, capsule și espressoare, cu două showroom-uri proprii în București și livrare națională.",
+    "website_url": "https://www.kfea.ro",
+    "hq_city": "București",
+    "counties": ["bucuresti"],
+    "serves_all_counties": true,
+    "logo_source_url": "https://www.kfea.ro/media/cache/90x93xf/media/logo/stores/1/kfea_logo_3.jpg",
+    "contact_email": "echipa@kfea.ro",
+    "contact_phone": "031 425 49 87",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.kfea.ro/termeni-si-conditii", "note": "legal name 'SC Zaniat Com SRL', CUI 18646234, Reg. Com. J40/20868/2017 stated directly by the vendor", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://www.kfea.ro/cum-comand", "note": "'BUCURESTI SI IN TARA' section describing nationwide courier delivery (Sameday/Fan Courier/Cargus) — explicit nationwide claim", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://www.kfea.ro/contact", "note": "address, email, phone; 2 physical showrooms in București", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "premium-fruct-profructta",
+    "legal_name": "PREMIUM FRUCT SRL",
+    "brand_name": "Profructta",
+    "cui": "22223810",
+    "category": "non_alcoholic_beverages",
+    "subcategories": ["sucuri naturale", "limonadă", "oranjadă"],
+    "description": "Producător român de sucuri naturale presate la rece, limonadă și oranjadă, fabricate la Câmpulung Muscel; livrare personală gratuită în București și Ilfov.",
+    "website_url": "https://www.profructta.ro",
+    "hq_city": "București",
+    "counties": ["bucuresti", "ilfov"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://www.profructta.ro/wp-content/uploads/2022/01/LOGO-PROFRUCTTA_260.png",
+    "contact_email": "comenzi@profructta.ro",
+    "contact_phone": "+40 748 555 444",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.profructta.ro/termene-si-conditii/", "note": "legal name, delivery terms (personal delivery, own reps, not courier)", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://www.profructta.ro/gdpr/", "note": "CUI not stated on the vendor's own site; address (Str. Dr. Frederic Joliot-Curie nr.23, Sector 5, București) published here", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://www.risco.ro", "note": "CUI 22223810 (Reg. Com. J40/14964/2007) corroborated via exact address match across RisCo, Targetare, MetricBiz, and Confidas, consistent with the vendor's own GDPR-page address — not a first-party disclosure, accepted per the unambiguous-secondary-match rule (multiple independent sources agreeing on the same CUI tied to the exact published address)", "checked_at": "2026-07-04"}
+    ]
+  }
+]

@@ -1,9 +1,9 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
-import Link from "next/link";
 import { TeamClient } from "./TeamClient";
 import { redirect } from "next/navigation";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
+import { SettingsTabNav } from "@/components/app/SettingsTabNav";
 
 function makeAdminClient() {
   return createSupabaseClient(
@@ -14,7 +14,7 @@ function makeAdminClient() {
 }
 
 export default async function TeamSettingsPage() {
-  const { membership, orgId } = await getKitchenOpsContext();
+  const { membership, orgId, countryCode } = await getKitchenOpsContext();
 
   // Only owner/manager can see this page
   if (!["owner","manager"].includes(membership.role ?? "")) {
@@ -47,15 +47,34 @@ export default async function TeamSettingsPage() {
   }));
   const advancedRolesAllowed = await hasEntitlement(orgId, "team.advanced_roles", { write: true });
 
+  const isRO = countryCode === "RO";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orgInfo = (membership as any).organisations;
+  const org = Array.isArray(orgInfo) ? orgInfo[0] : orgInfo;
+  const fiscalnetEnabled = Boolean(org?.fiscalnet_enabled);
+  const efacturaEnabled = Boolean(org?.efactura_enabled);
+  const sagaInstalled = Boolean(org?.saga_export_enabled);
+
+  const tabs = [
+    { id: "business",     label: "Business" },
+    { id: "operations",   label: isRO ? "Operațiuni" : "Operations" },
+    ...(isRO && (fiscalnetEnabled || efacturaEnabled || sagaInstalled)
+      ? [{ id: "fiscal", label: "Fiscal" }]
+      : []),
+    { id: "integrations", label: "Marketplace" },
+    { id: "notifications",label: isRO ? "Notificări" : "Notifications" },
+    { id: "billing",      label: isRO ? "Facturare" : "Billing" },
+    { id: "team", label: isRO ? "Echipă" : "Team", href: "/app/settings/team" },
+  ];
+
   return (
-    <div className="p-6 max-w-5xl">
-      <div className="mb-6 flex items-center gap-3">
-        <Link href="/app/settings" className="text-sm text-slate-500 hover:text-slate-700">
-          &larr; Settings
-        </Link>
-        <span className="text-slate-300">/</span>
-        <h1 className="text-2xl font-semibold text-slate-950">Team</h1>
+    <div className="settings-page-wrapper max-w-4xl p-4 sm:p-6">
+      <div className="settings-page-heading mb-6">
+        <h1 className="text-2xl font-semibold text-slate-950">{isRO ? "Setări" : "Settings"}</h1>
+        <p className="text-sm text-slate-500 mt-1">{isRO ? "Configurează contul și organizația ta" : "Configure your account and organization"}</p>
       </div>
+
+      <SettingsTabNav tabs={tabs} />
 
       {error && (
         <div className="mb-4 rounded bg-red-50 px-4 py-3 text-sm text-red-700">

@@ -27,19 +27,23 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
   const dayStart = `${reportDate}T00:00:00.000Z`;
   const dayEnd = `${reportDate}T23:59:59.999Z`;
 
-  const [{ data: transactions }, { data: items }] = await Promise.all([
-    supabase.from("pos_transactions")
-      .select("*,payment_methods(name,type),profiles(full_name,email)")
-      .eq("organisation_id", orgId)
-      .gte("sold_at", dayStart)
-      .lte("sold_at", dayEnd)
-      .order("sold_at"),
-    supabase.from("pos_transaction_items")
-      .select("product_name,quantity,line_total,vat_rate,net_amount,vat_amount,gross_amount,transaction_id,created_at")
-      .eq("organisation_id", orgId)
-      .gte("created_at", dayStart)
-      .lte("created_at", dayEnd),
-  ]);
+  const { data: transactions } = await supabase.from("pos_transactions")
+    .select("*,payment_methods(name,type),profiles(full_name,email)")
+    .eq("organisation_id", orgId)
+    .gte("sold_at", dayStart)
+    .lte("sold_at", dayEnd)
+    .order("sold_at");
+
+  // Scoped by transaction_id (from the already sold_at-filtered transactions
+  // above), not pos_transaction_items.created_at -- for migrated historical
+  // sales, created_at is the bulk-import timestamp, not the real sale date.
+  const transactionIds = (transactions ?? []).map((tx) => tx.id);
+  const { data: items } = transactionIds.length
+    ? await supabase.from("pos_transaction_items")
+        .select("product_name,quantity,line_total,vat_rate,net_amount,vat_amount,gross_amount,transaction_id")
+        .eq("organisation_id", orgId)
+        .in("transaction_id", transactionIds)
+    : { data: [] as Array<{ product_name: string; quantity: number | null; line_total: number | null; vat_rate: number | null; net_amount: number | null; vat_amount: number | null; gross_amount: number | null; transaction_id: string }> };
 
 
   // Cash movements for this day

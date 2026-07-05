@@ -28,20 +28,20 @@ export default async function RecipesNewPage() {
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-6">
       <div className="flex items-center gap-3">
-        <Link href="/app/recipes" className="text-sm text-slate-500 hover:text-slate-700">← Product ingredients</Link>
-        <h1 className="text-2xl font-semibold text-slate-950">Create recipe</h1>
+        <Link href="/app/recipes" className="text-sm text-slate-500 hover:text-slate-700">← Ingrediente produs</Link>
+        <h1 className="text-2xl font-semibold text-slate-950">Creează rețetă</h1>
       </div>
 
       {!hasIngredients && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          <p className="font-medium mb-1">No stock items added yet.</p>
-          <p>Add stock items with a cost per unit (e.g. €0.012/g for chicken) to calculate ingredient costs.</p>
-          <Link href="/app/products/import-ingredients" className="mt-2 inline-flex font-medium underline">Import stock items →</Link>
+          <p className="font-medium mb-1">Niciun articol de stoc adăugat încă.</p>
+          <p>Adaugă articole de stoc cu un cost per unitate (ex. 0,012€/g pentru pui) pentru a calcula costul ingredientelor.</p>
+          <Link href="/app/products/import-ingredients" className="mt-2 inline-flex font-medium underline">Importă articole de stoc →</Link>
         </div>
       )}
 
       <Card>
-        <CardHeader><CardTitle>Ingredient cost calculator</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Calculator cost ingrediente</CardTitle></CardHeader>
         <CardContent>
           <RecipeCostCalculator
             sellableProducts={(sellableProducts ?? []) as { id: string; name: string; sale_price: number | null }[]}

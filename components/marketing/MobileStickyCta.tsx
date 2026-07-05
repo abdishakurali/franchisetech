@@ -11,7 +11,12 @@ export function MobileStickyCta() {
   const plan = searchParams.get("plan");
   const signupHref = plan ? `/signup?plan=${plan}` : "/signup";
 
-  if (pathname?.startsWith("/login") || pathname?.startsWith("/signup") || pathname?.startsWith("/app")) {
+  if (
+    pathname?.startsWith("/login") ||
+    pathname?.startsWith("/signup") ||
+    pathname?.startsWith("/app") ||
+    pathname?.startsWith("/compare")
+  ) {
     return null;
   }
 
@@ -27,12 +32,12 @@ export function MobileStickyCta() {
         >
           {t.cta.getStarted}
         </Link>
-        <Link
-          href="/partners"
+        <a
+          href="mailto:info@franchisetech.ro"
           className="flex flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
         >
           {t.cta.talkToSales}
-        </Link>
+        </a>
       </div>
     </div>
   );

@@ -95,7 +95,7 @@ export default function SignupPage() {
       router.refresh();
     } else {
       toast.success(a.successEmail);
-      router.push("/check-email");
+      router.push(`/check-email?email=${encodeURIComponent(form.email)}`);
     }
   };
 
@@ -145,7 +145,7 @@ export default function SignupPage() {
                 autoComplete="name"
                 value={form.fullName}
                 onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                placeholder="Aoife Murphy"
+                placeholder="Andrei Popescu"
               />
             </div>
             <div className="space-y-1.5">
@@ -157,7 +157,7 @@ export default function SignupPage() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@yourbistro.ie"
+                placeholder="tu@cafeneaua.ro"
               />
             </div>
             <div className="space-y-1.5">

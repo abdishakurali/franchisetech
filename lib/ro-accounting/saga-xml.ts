@@ -1,42 +1,34 @@
 /**
- * Saga XML Export helpers for Romanian accounting software integration.
+ * Saga C XML export — element-based schema matching Saga's actual importer.
  *
- * Saga is one of the most widely used accounting software in Romania.
- * These helpers generate XML files compatible with Saga's import format.
+ * Routing logic (built into Saga):
+ *   FurnizorCIF == own company CIF  →  Ieșiri (sales)
+ *   FurnizorCIF != own company CIF  →  Intrări / NIR (purchases)
+ *
+ * Reference: manual.sagasoft.ro/sagac/topic-76-import-date.html
  */
 
-export type SagaNirArticle = {
-  denumire: string;
-  cantitate: number;
+export type SagaLinie = {
+  descriere: string;
   um: string;
-  pretUnitar: number;
-  cotaTva: number;
+  cantitate: number;
+  pret: number;      // unit price excl. VAT
+  valoare: number;   // line total excl. VAT
+  procTva: number;   // VAT rate as integer (9, 19, 5, 0)
+  tva: number;       // VAT amount
+  // Required for cantitativ-valorică gestiuni: must match the article code in Saga's nomenclature
+  codArticolFurnizor?: string;
 };
 
-export type SagaNir = {
-  data: string;
-  furnizor: string;
-  nrFactura?: string;
-  valoare: number;
-  tva: number;
-  articole: SagaNirArticle[];
-};
-
-export type SagaVanzare = {
-  data: string;
-  valoare: number;
-  tva: number;
-  totalTva19?: number;
-  totalTva9?: number;
-  totalTva5?: number;
-  totalTva0?: number;
-};
-
-export type SagaExportData = {
-  orgName: string;
-  orgCui?: string;
-  nirList?: SagaNir[];
-  vanzariList?: SagaVanzare[];
+export type SagaFactura = {
+  furnizorNume: string;
+  furnizorCif: string;
+  clientNume: string;
+  clientCif: string;
+  facturaNumar: string;
+  facturaData: string; // DD.MM.YYYY
+  gestiune?: string;
+  linii: SagaLinie[];
 };
 
 function escapeXml(str: string): string {
@@ -48,117 +40,53 @@ function escapeXml(str: string): string {
     .replace(/'/g, "&apos;");
 }
 
-function formatDate(date: string | Date): string {
+export function formatSagaDate(date: string | Date): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  const day = d.getDate().toString().padStart(2, "0");
-  const month = (d.getMonth() + 1).toString().padStart(2, "0");
-  const year = d.getFullYear();
+  const day = d.getUTCDate().toString().padStart(2, "0");
+  const month = (d.getUTCMonth() + 1).toString().padStart(2, "0");
+  const year = d.getUTCFullYear();
   return `${day}.${month}.${year}`;
 }
 
-export function generateNirXml(data: { orgName: string; orgCui?: string; nirList: SagaNir[] }): string {
-  const { orgName, orgCui, nirList } = data;
-
-  const nirElements = nirList.map((nir) => {
-    const articoleElements = nir.articole
-      .map(
-        (art) =>
-          `    <ARTICOL DENUMIRE="${escapeXml(art.denumire)}" CANT="${art.cantitate.toFixed(3)}" UM="${escapeXml(art.um)}" PRET="${art.pretUnitar.toFixed(2)}" CTVA="${art.cotaTva}"/>`
-      )
-      .join("\n");
-
-    return `  <NIR DATA="${formatDate(nir.data)}" FURNIZOR="${escapeXml(nir.furnizor)}"${nir.nrFactura ? ` FACTURA="${escapeXml(nir.nrFactura)}"` : ""} VALOARE="${nir.valoare.toFixed(2)}" TVA="${nir.tva.toFixed(2)}">
-${articoleElements}
-  </NIR>`;
-  });
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<!-- Export NIR pentru Saga -->
-<!-- Generat de ${escapeXml(orgName)}${orgCui ? ` (CUI: ${orgCui})` : ""} -->
-<!-- Data export: ${new Date().toISOString()} -->
-<TRANZACTII>
-${nirElements.join("\n")}
-</TRANZACTII>`;
+function renderLinie(linie: SagaLinie, nr: number): string {
+  const codTag = linie.codArticolFurnizor
+    ? `\n          <CodArticolFurnizor>${escapeXml(linie.codArticolFurnizor)}</CodArticolFurnizor>`
+    : "";
+  return `        <Linie>
+          <LinieNrCrt>${nr}</LinieNrCrt>
+          <Descriere>${escapeXml(linie.descriere)}</Descriere>${codTag}
+          <UM>${escapeXml(linie.um)}</UM>
+          <Cantitate>${linie.cantitate.toFixed(3)}</Cantitate>
+          <Pret>${linie.pret.toFixed(2)}</Pret>
+          <Valoare>${linie.valoare.toFixed(2)}</Valoare>
+          <ProcTVA>${linie.procTva}</ProcTVA>
+          <TVA>${linie.tva.toFixed(2)}</TVA>
+        </Linie>`;
 }
 
-export function generateSalesXml(data: { orgName: string; orgCui?: string; vanzariList: SagaVanzare[] }): string {
-  const { orgName, orgCui, vanzariList } = data;
-
-  const vanzareElements = vanzariList.map((v) => {
-    const tvaBreakdown: string[] = [];
-    if (v.totalTva19 && v.totalTva19 > 0) {
-      tvaBreakdown.push(`    <TOTAL_TVA19>${v.totalTva19.toFixed(2)}</TOTAL_TVA19>`);
-    }
-    if (v.totalTva9 && v.totalTva9 > 0) {
-      tvaBreakdown.push(`    <TOTAL_TVA9>${v.totalTva9.toFixed(2)}</TOTAL_TVA9>`);
-    }
-    if (v.totalTva5 && v.totalTva5 > 0) {
-      tvaBreakdown.push(`    <TOTAL_TVA5>${v.totalTva5.toFixed(2)}</TOTAL_TVA5>`);
-    }
-    if (v.totalTva0 && v.totalTva0 > 0) {
-      tvaBreakdown.push(`    <TOTAL_TVA0>${v.totalTva0.toFixed(2)}</TOTAL_TVA0>`);
-    }
-
-    const breakdownContent = tvaBreakdown.length > 0 ? `\n${tvaBreakdown.join("\n")}\n  ` : "";
-
-    return `  <VANZARE DATA="${formatDate(v.data)}" VALOARE="${v.valoare.toFixed(2)}" TVA="${v.tva.toFixed(2)}">${breakdownContent}</VANZARE>`;
-  });
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<!-- Export Vanzari pentru Saga -->
-<!-- Generat de ${escapeXml(orgName)}${orgCui ? ` (CUI: ${orgCui})` : ""} -->
-<!-- Data export: ${new Date().toISOString()} -->
-<TRANZACTII>
-${vanzareElements.join("\n")}
-</TRANZACTII>`;
+function renderFactura(factura: SagaFactura): string {
+  const liniiXml = factura.linii.map((l, i) => renderLinie(l, i + 1)).join("\n");
+  const gestiuneXml = factura.gestiune
+    ? `\n      <Gestiune>${escapeXml(factura.gestiune)}</Gestiune>`
+    : "";
+  return `  <Factura>
+    <Antet>
+      <FurnizorNume>${escapeXml(factura.furnizorNume)}</FurnizorNume>
+      <FurnizorCIF>${escapeXml(factura.furnizorCif)}</FurnizorCIF>
+      <ClientNume>${escapeXml(factura.clientNume)}</ClientNume>
+      <ClientCIF>${escapeXml(factura.clientCif)}</ClientCIF>
+      <FacturaNumar>${escapeXml(factura.facturaNumar)}</FacturaNumar>
+      <FacturaData>${factura.facturaData}</FacturaData>${gestiuneXml}
+    </Antet>
+    <Detalii>
+      <Continut>
+${liniiXml}
+      </Continut>
+    </Detalii>
+  </Factura>`;
 }
 
-export function generateCombinedXml(data: SagaExportData): string {
-  const { orgName, orgCui, nirList = [], vanzariList = [] } = data;
-
-  const nirElements = nirList.map((nir) => {
-    const articoleElements = nir.articole
-      .map(
-        (art) =>
-          `      <ARTICOL DENUMIRE="${escapeXml(art.denumire)}" CANT="${art.cantitate.toFixed(3)}" UM="${escapeXml(art.um)}" PRET="${art.pretUnitar.toFixed(2)}" CTVA="${art.cotaTva}"/>`
-      )
-      .join("\n");
-
-    return `    <NIR DATA="${formatDate(nir.data)}" FURNIZOR="${escapeXml(nir.furnizor)}"${nir.nrFactura ? ` FACTURA="${escapeXml(nir.nrFactura)}"` : ""} VALOARE="${nir.valoare.toFixed(2)}" TVA="${nir.tva.toFixed(2)}">
-${articoleElements}
-    </NIR>`;
-  });
-
-  const vanzareElements = vanzariList.map((v) => {
-    const tvaBreakdown: string[] = [];
-    if (v.totalTva19 && v.totalTva19 > 0) {
-      tvaBreakdown.push(`      <TOTAL_TVA19>${v.totalTva19.toFixed(2)}</TOTAL_TVA19>`);
-    }
-    if (v.totalTva9 && v.totalTva9 > 0) {
-      tvaBreakdown.push(`      <TOTAL_TVA9>${v.totalTva9.toFixed(2)}</TOTAL_TVA9>`);
-    }
-    if (v.totalTva5 && v.totalTva5 > 0) {
-      tvaBreakdown.push(`      <TOTAL_TVA5>${v.totalTva5.toFixed(2)}</TOTAL_TVA5>`);
-    }
-    if (v.totalTva0 && v.totalTva0 > 0) {
-      tvaBreakdown.push(`      <TOTAL_TVA0>${v.totalTva0.toFixed(2)}</TOTAL_TVA0>`);
-    }
-
-    const breakdownContent = tvaBreakdown.length > 0 ? `\n${tvaBreakdown.join("\n")}\n    ` : "";
-
-    return `    <VANZARE DATA="${formatDate(v.data)}" VALOARE="${v.valoare.toFixed(2)}" TVA="${v.tva.toFixed(2)}">${breakdownContent}</VANZARE>`;
-  });
-
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<!-- Export combinat NIR + Vanzari pentru Saga -->
-<!-- Generat de ${escapeXml(orgName)}${orgCui ? ` (CUI: ${orgCui})` : ""} -->
-<!-- Data export: ${new Date().toISOString()} -->
-<EXPORT>
-  <NIR_LIST>
-${nirElements.join("\n")}
-  </NIR_LIST>
-  <VANZARI_LIST>
-${vanzareElements.join("\n")}
-  </VANZARI_LIST>
-</EXPORT>`;
+export function generateFacturiXml(facturi: SagaFactura[]): string {
+  const body = facturi.map(renderFactura).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<Facturi>\n${body}\n</Facturi>`;
 }

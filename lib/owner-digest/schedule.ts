@@ -47,6 +47,33 @@ export function addCalendarDays(year: number, month: number, day: number, delta:
   return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() };
 }
 
+function parseCutoff(time?: string | null) {
+  const match = String(time || "04:00").match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return { hour: 4, minute: 0 };
+  const hour = Math.min(23, Math.max(0, Number(match[1])));
+  const minute = Math.min(59, Math.max(0, Number(match[2])));
+  return { hour, minute };
+}
+
+function zonedDateTimeUtc(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+  timeZone: string
+): Date {
+  const base = Date.UTC(year, month - 1, day, hour, minute, 0);
+  for (let offsetHours = -14; offsetHours <= 14; offsetHours++) {
+    const d = new Date(base + offsetHours * 3_600_000);
+    const p = zonedParts(d, timeZone);
+    if (p.year === year && p.month === month && p.day === day && p.hour === hour && p.minute === minute) {
+      return d;
+    }
+  }
+  return new Date(base);
+}
+
 export type DigestOrgSchedule = {
   organisation_id: string;
   owner_digest_frequency: string;
@@ -56,11 +83,13 @@ export type DigestOrgSchedule = {
   owner_digest_last_sent_at: string | null;
 };
 
+export const OWNER_DIGEST_SEND_WINDOW_MINUTES = 15;
+
 /** True when org is in the send window and has not been sent for this period */
 export function isOwnerDigestDue(org: DigestOrgSchedule, now: Date): boolean {
   const tz = org.owner_digest_timezone || "Europe/Bucharest";
-  const tzNow = new Date(now.toLocaleString("en-US", { timeZone: tz }));
-  const isoDay = tzNow.getDay() === 0 ? 7 : tzNow.getDay();
+  const p = zonedParts(now, tz);
+  const isoDay = isoWeekday(now, tz);
 
   if (org.owner_digest_frequency === "weekly" && isoDay !== org.owner_digest_day_of_week) {
     return false;
@@ -68,34 +97,29 @@ export function isOwnerDigestDue(org: DigestOrgSchedule, now: Date): boolean {
 
   const timeStr = String(org.owner_digest_time_of_day).slice(0, 5);
   const [schHour, schMin] = timeStr.split(":").map(Number);
-  const nowMins = tzNow.getHours() * 60 + tzNow.getMinutes();
+  const nowMins = p.hour * 60 + p.minute;
   const schMins = schHour * 60 + schMin;
-  if (nowMins < schMins || nowMins >= schMins + 60) return false;
+  if (nowMins < schMins || nowMins >= schMins + OWNER_DIGEST_SEND_WINDOW_MINUTES) return false;
 
   if (org.owner_digest_last_sent_at) {
-    const lastTz = new Date(
-      new Date(org.owner_digest_last_sent_at).toLocaleString("en-US", { timeZone: tz })
-    );
+    const lastP = zonedParts(new Date(org.owner_digest_last_sent_at), tz);
     if (org.owner_digest_frequency === "daily") {
-      if (
-        lastTz.getFullYear() === tzNow.getFullYear() &&
-        lastTz.getMonth() === tzNow.getMonth() &&
-        lastTz.getDate() === tzNow.getDate()
-      ) {
+      if (lastP.year === p.year && lastP.month === p.month && lastP.day === p.day) {
         return false;
       }
     } else {
-      const lastWeek = getIsoWeekKey(lastTz);
-      const thisWeek = getIsoWeekKey(tzNow);
-      if (lastWeek === thisWeek) return false;
+      if (isoWeekKey(lastP.year, lastP.month, lastP.day) === isoWeekKey(p.year, p.month, p.day)) {
+        return false;
+      }
     }
   }
 
   return true;
 }
 
-function getIsoWeekKey(d: Date): string {
-  const tmp = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+function isoWeekKey(year: number, month: number, day: number): string {
+  // month is 1-indexed (from zonedParts / Intl.DateTimeFormat)
+  const tmp = new Date(Date.UTC(year, month - 1, day));
   const dayNum = tmp.getUTCDay() || 7;
   tmp.setUTCDate(tmp.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(tmp.getUTCFullYear(), 0, 1));
@@ -105,6 +129,22 @@ function getIsoWeekKey(d: Date): string {
 
 /** Idempotency key: start of digest window in UTC */
 export function ownerDigestWindowStart(
+  frequency: "daily" | "weekly",
+  now: Date,
+  timeZone: string,
+  businessDayCutoffTime?: string | null
+): Date {
+  const p = zonedParts(now, timeZone);
+  const cutoff = parseCutoff(businessDayCutoffTime);
+  const beforeCutoff = p.hour * 60 + p.minute < cutoff.hour * 60 + cutoff.minute;
+  const currentOpDay = beforeCutoff ? addCalendarDays(p.year, p.month, p.day, -1) : p;
+  const delta = frequency === "weekly" ? -7 : -1;
+  const windowDay = addCalendarDays(currentOpDay.year, currentOpDay.month, currentOpDay.day, delta);
+  return zonedDateTimeUtc(windowDay.year, windowDay.month, windowDay.day, cutoff.hour, cutoff.minute, timeZone);
+}
+
+/** Legacy calendar-period key, kept for tests and non-digest callers. */
+export function ownerDigestCalendarWindowStart(
   frequency: "daily" | "weekly",
   now: Date,
   timeZone: string

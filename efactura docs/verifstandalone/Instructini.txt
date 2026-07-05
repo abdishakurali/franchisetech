@@ -1,0 +1,2 @@
+Pentru interfata grafica lansati aplicatia prin apelul start.bat
+

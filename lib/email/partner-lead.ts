@@ -34,7 +34,7 @@ export async function sendPartnerLeadEmail(payload: PartnerLeadPayload): Promise
   const to =
     process.env.PARTNER_LEADS_EMAIL ??
     process.env.SUPPORT_EMAIL ??
-    "hello@franchisetech.ro";
+    "info@franchisetech.ro";
 
   const from = process.env.RESEND_FROM_EMAIL ?? "franchisetech <onboarding@resend.dev>";
 

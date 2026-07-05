@@ -42,7 +42,7 @@ export async function requireBusinessModule(module: BusinessModuleKey): Promise<
     subscriptionPlan: subscriptionPlan(sub?.plan),
     hasTrial,
   }, locale);
-  redirect(`/app/settings?tab=features&locked=${module}&msg=${encodeURIComponent(reason ?? "Module not available")}`);
+  redirect(`/app/settings?tab=integrations&locked=${module}&msg=${encodeURIComponent(reason ?? "Module not available")}`);
 }
 
 export async function requireModuleForPathname(pathname: string): Promise<void> {

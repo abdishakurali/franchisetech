@@ -14,27 +14,19 @@ type ExportConfig = {
 
 const SAGA_EXPORTS: ExportConfig[] = [
   {
-    key: "combined",
-    label: "Full Export",
-    labelRo: "Export complet",
-    description: "NIR + Sales combined XML",
-    descriptionRo: "NIR + Vânzări în format XML",
-    color: "bg-violet-600 hover:bg-violet-700",
-  },
-  {
     key: "nir",
     label: "NIR (Purchases)",
     labelRo: "NIR (Achiziții)",
-    description: "Purchase receipts for Saga",
+    description: "Purchase receipts — routes to Intrări in Saga",
     descriptionRo: "Note de intrare-recepție",
     color: "bg-indigo-600 hover:bg-indigo-700",
   },
   {
-    key: "sales",
-    label: "Sales (Vânzări)",
-    labelRo: "Vânzări",
-    description: "Daily sales with VAT breakdown",
-    descriptionRo: "Vânzări zilnice cu TVA",
+    key: "iesiri",
+    label: "Sales (Ieșiri)",
+    labelRo: "Ieșiri (Vânzări)",
+    description: "Daily sales by product — routes to Ieșiri in Saga",
+    descriptionRo: "Vânzări zilnice pe produs",
     color: "bg-cyan-600 hover:bg-cyan-700",
   },
 ];
@@ -78,10 +70,10 @@ export function SagaExportButtons({
       <CardContent>
         <p className="text-sm text-slate-600 mb-4">
           {isRO
-            ? "Exportă datele în format XML compatibil cu software-ul de contabilitate Saga."
-            : "Export data in XML format compatible with Saga accounting software."}
+            ? "Exportă datele în format XML compatibil cu software-ul de contabilitate Saga C."
+            : "Export data in XML format compatible with Saga C accounting software."}
         </p>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           {SAGA_EXPORTS.map((exp) => (
             <button
               key={exp.key}
@@ -104,8 +96,8 @@ export function SagaExportButtons({
         </div>
         <p className="mt-4 text-xs text-slate-400">
           {isRO
-            ? `Toate exporturile includ date din ${fromDate} până la ${toDate}.`
-            : `All exports include data from ${fromDate} to ${toDate}.`}
+            ? `Exporturile includ date din ${fromDate} până la ${toDate}.`
+            : `Exports include data from ${fromDate} to ${toDate}.`}
         </p>
       </CardContent>
     </Card>

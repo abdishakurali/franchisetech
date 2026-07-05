@@ -61,6 +61,10 @@ export function TeamClient({
   const [addResult, setAddResult] = useState<{ resetLink?: string | null; error?: string } | null>(null);
   const [resetResults, setResetResults] = useState<Record<string, string>>({});
   const [actionError, setActionError] = useState<string | null>(null);
+  const [editMember, setEditMember] = useState<Member | null>(null);
+  const [editForm, setEditForm] = useState({ fullName: "", phone: "", roleTitle: "", email: "", newPassword: "" });
+  const [editError, setEditError] = useState<string | null>(null);
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
   const visibleRoles = VALID_ROLES.filter((role) => advancedRolesAllowed || !ADVANCED_ROLES.has(role));
 
   async function refreshMembers() {
@@ -128,6 +132,64 @@ export function TeamClient({
       const data = await res.json().catch(() => null);
       if (!res.ok) setActionError(data?.error ?? "Could not update member");
       await refreshMembers();
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  function openEditModal(m: Member) {
+    setEditMember(m);
+    setEditForm({
+      fullName: m.profile?.full_name ?? "",
+      phone: m.profile?.phone ?? "",
+      roleTitle: m.profile?.role_title ?? "",
+      email: m.profile?.email ?? "",
+      newPassword: "",
+    });
+    setEditError(null);
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editMember) return;
+    setActionLoading(editMember.id + "-edit");
+    setEditError(null);
+    try {
+      const res = await fetch(`/api/team/${editMember.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: editForm.fullName,
+          phone: editForm.phone,
+          roleTitle: editForm.roleTitle,
+          email: editForm.email || undefined,
+          password: editForm.newPassword || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setEditError(data?.error ?? "Could not save changes");
+        return;
+      }
+      setEditMember(null);
+      await refreshMembers();
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleRemove(memberId: string) {
+    setActionLoading(memberId + "-remove");
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/team/${memberId}`, { method: "DELETE" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        setActionError(data?.error ?? "Could not remove member");
+      } else {
+        setConfirmRemoveId(null);
+        await refreshMembers();
+      }
     } finally {
       setActionLoading(null);
     }
@@ -215,6 +277,14 @@ export function TeamClient({
                           variant="ghost"
                           size="sm"
                           className="h-7 text-xs"
+                          onClick={() => openEditModal(m)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs"
                           disabled={actionLoading === m.id + "-reset"}
                           onClick={() => handleResetPassword(m.id)}
                         >
@@ -229,6 +299,37 @@ export function TeamClient({
                         >
                           {actionLoading === m.id + "-disable" ? "..." : m.status === "disabled" ? "Re-enable" : "Disable"}
                         </Button>
+                        {confirmRemoveId === m.id ? (
+                          <span className="flex items-center gap-1 text-xs">
+                            <span className="text-slate-600">Remove?</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-xs text-red-600 px-2"
+                              disabled={actionLoading === m.id + "-remove"}
+                              onClick={() => handleRemove(m.id)}
+                            >
+                              {actionLoading === m.id + "-remove" ? "..." : "Yes"}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 text-xs px-2"
+                              onClick={() => setConfirmRemoveId(null)}
+                            >
+                              No
+                            </Button>
+                          </span>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs text-slate-400 hover:text-red-500"
+                            onClick={() => setConfirmRemoveId(m.id)}
+                          >
+                            Remove
+                          </Button>
+                        )}
                       </div>
                       {resetResults[m.id] && (
                         <div className="mt-1 text-xs text-left">
@@ -247,6 +348,76 @@ export function TeamClient({
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit member modal */}
+      {editMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <Card className="w-full max-w-md mx-4">
+            <CardHeader>
+              <CardTitle>Edit team member</CardTitle>
+              <CardDescription>{editMember.profile?.email ?? ""}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleEditSave} className="space-y-4">
+                <div>
+                  <Label>Full name</Label>
+                  <Input
+                    value={editForm.fullName}
+                    onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                    placeholder="Maria Popescu"
+                  />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    placeholder="maria@restaurant.ro"
+                  />
+                </div>
+                <div>
+                  <Label>New password <span className="text-slate-400 text-xs">(leave blank to keep current)</span></Label>
+                  <Input
+                    type="password"
+                    value={editForm.newPassword}
+                    onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })}
+                    placeholder="Min. 8 characters"
+                    autoComplete="new-password"
+                  />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    placeholder="+40 7xx xxx xxx"
+                  />
+                </div>
+                <div>
+                  <Label>Job title <span className="text-slate-400 text-xs">(displayed under name)</span></Label>
+                  <Input
+                    value={editForm.roleTitle}
+                    onChange={(e) => setEditForm({ ...editForm, roleTitle: e.target.value })}
+                    placeholder="Barista, Shift manager…"
+                  />
+                </div>
+                {editError && (
+                  <p className="text-sm text-red-600 bg-red-50 rounded px-3 py-2">{editError}</p>
+                )}
+                <div className="flex gap-2 pt-2">
+                  <Button type="submit" disabled={actionLoading === editMember.id + "-edit"} className="flex-1">
+                    {actionLoading === editMember.id + "-edit" ? "Saving..." : "Save changes"}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={() => setEditMember(null)}>
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Add member modal */}
       {showAddModal && (

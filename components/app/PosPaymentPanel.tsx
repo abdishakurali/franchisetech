@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, type Dispatch, type RefObject, type SetStateAction } from "react";
-import { Banknote, CreditCard, Delete } from "lucide-react";
+import { Banknote, CreditCard, Delete, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
@@ -106,11 +106,14 @@ export function PosPaymentPanel({
   const showChange = isCash && !cashUnderPaid && changeAmount > 0.005;
   const quickNotes = useMemo(() => quickNoteTenders(totalDue), [totalDue]);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (isCash) {
       keypadFreshRef.current = true;
       inputStrRef.current = "";
     }
+    scrollRef.current?.scrollTo({ top: 0, behavior: "instant" });
   }, [isCash, paymentMethodId, totalDue]);
 
   function syncFromString(str: string) {
@@ -161,137 +164,146 @@ export function PosPaymentPanel({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col min-h-0 px-1 py-3 sm:py-4">
-      {isOffline && (
-        <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-center text-xs font-medium text-amber-900 sm:text-sm">
-          {t.offlineModeBanner}
-        </p>
-      )}
+    <div className="flex h-full min-h-0 w-full flex-col">
+      <div
+        ref={scrollRef}
+        className={cn(
+          "min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pt-3 pb-2 sm:pt-4",
+          !isCash && "flex flex-col justify-center",
+        )}
+      >
+        {isOffline && (
+          <p className="mb-4 w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-center text-xs font-medium text-amber-900 sm:text-sm">
+            {t.offlineModeBanner}
+          </p>
+        )}
 
-      <div className="mb-5 grid grid-cols-2 gap-2">
-        {paymentMethods.map((m) => {
-          const active = paymentMethodId === m.id;
-          return (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => onSelectMethod(m.id, m.type === "cash")}
-              className={cn(
-                "flex h-14 items-center justify-center gap-2 rounded-xl border text-base font-semibold transition-colors",
-                active
-                  ? "border-blue-600 bg-blue-50 text-blue-800"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
-              )}
-            >
-              <MethodIcon type={m.type} />
-              <span>{paymentTypeLabel(m.type, m.name, locale)}</span>
-            </button>
-          );
-        })}
+        <div className="mb-5 grid w-full grid-cols-2 gap-2">
+          {paymentMethods.map((m) => {
+            const active = paymentMethodId === m.id;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => onSelectMethod(m.id, m.type === "cash")}
+                className={cn(
+                  "flex h-14 items-center justify-center gap-2 rounded-xl border text-base font-semibold transition-colors",
+                  active
+                    ? "border-blue-600 bg-blue-50 text-blue-800"
+                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                )}
+              >
+                <MethodIcon type={m.type} />
+                <span>{paymentTypeLabel(m.type, m.name, locale)}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {showSplitLink && onSplit && (
+          <button
+            type="button"
+            onClick={onSplit}
+            className="mb-4 w-full text-center text-sm font-medium text-blue-600 hover:text-blue-800"
+          >
+            {t.splitAmount}
+          </button>
+        )}
+
+        {isCash ? (
+          <div className="flex w-full flex-col items-center text-center">
+            <p className="text-sm font-medium text-slate-500">
+              {t.totalDueLabel}: <span className="font-bold tabular-nums text-slate-800">{money(totalDue)}</span>
+            </p>
+            <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">{t.cashReceived}</p>
+            <AmountDisplay parts={receivedParts} />
+            {showChange ? (
+              <p className="mt-4 text-lg font-bold tabular-nums text-emerald-700">
+                {t.changeDue}: {money(changeAmount)}
+              </p>
+            ) : cashUnderPaid ? (
+              <p className="mt-4 text-sm font-semibold text-red-600">
+                {t.changeDue}: −{money(Math.abs(changeAmount))} · {t.cashUnderpaidMsg}
+              </p>
+            ) : (
+              <p className="mt-4 text-sm font-medium text-slate-400">{t.changeDue}: {money(0)}</p>
+            )}
+          </div>
+        ) : (
+          <div className="flex w-full flex-col items-center text-center">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.totalDueLabel}</p>
+            <AmountDisplay parts={totalParts} />
+          </div>
+        )}
+
+        {isCash && (
+          <>
+            <div className="mt-5 flex w-full flex-wrap justify-center gap-2">
+              <button
+                type="button"
+                onClick={selectExact}
+                className="rounded-lg border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-800 hover:bg-blue-100"
+              >
+                {t.exact}
+              </button>
+              {quickNotes.map((note) => (
+                <button
+                  key={note}
+                  type="button"
+                  onClick={() => setTender(note)}
+                  className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-bold tabular-nums text-emerald-900 hover:bg-emerald-100"
+                >
+                  {money(note)}
+                </button>
+              ))}
+            </div>
+
+            <div className="mx-auto mt-4 grid w-full max-w-xs grid-cols-3 gap-2">
+              {(["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => pressDigit(key)}
+                  className="h-12 rounded-xl border border-slate-200 bg-white text-xl font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100"
+                >
+                  {key}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => pressDigit(".")}
+                className="h-12 rounded-xl border border-slate-200 bg-white text-xl font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                .
+              </button>
+              <button
+                type="button"
+                onClick={() => pressDigit("0")}
+                className="h-12 rounded-xl border border-slate-200 bg-white text-xl font-semibold text-slate-800 hover:bg-slate-50"
+              >
+                0
+              </button>
+              <button
+                type="button"
+                onClick={() => pressDigit("back")}
+                aria-label="Backspace"
+                className="flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200"
+              >
+                <Delete className="h-5 w-5" />
+              </button>
+            </div>
+          </>
+        )}
+
+        {saleError && <p className="mt-4 w-full text-center text-sm text-red-600">{saleError}</p>}
       </div>
 
-      {showSplitLink && onSplit && (
-        <button
-          type="button"
-          onClick={onSplit}
-          className="mb-4 w-full text-center text-sm font-medium text-blue-600 hover:text-blue-800"
-        >
-          {t.splitAmount}
-        </button>
-      )}
-
-      {isCash ? (
-        <div className="flex flex-col items-center text-center">
-          <p className="text-sm font-medium text-slate-500">
-            {t.totalDueLabel}: <span className="font-bold tabular-nums text-slate-800">{money(totalDue)}</span>
-          </p>
-          <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">{t.cashReceived}</p>
-          <AmountDisplay parts={receivedParts} />
-          {showChange ? (
-            <p className="mt-4 text-lg font-bold tabular-nums text-emerald-700">
-              {t.changeDue}: {money(changeAmount)}
-            </p>
-          ) : cashUnderPaid ? (
-            <p className="mt-4 text-sm font-semibold text-red-600">
-              {t.changeDue}: −{money(Math.abs(changeAmount))} · {t.cashUnderpaidMsg}
-            </p>
-          ) : (
-            <p className="mt-4 text-sm font-medium text-slate-400">{t.changeDue}: {money(0)}</p>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center text-center">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.totalDueLabel}</p>
-          <AmountDisplay parts={totalParts} />
-        </div>
-      )}
-
-      {isCash && (
-        <>
-          <div className="mt-5 flex flex-wrap justify-center gap-2">
-            <button
-              type="button"
-              onClick={selectExact}
-              className="rounded-lg border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-800 hover:bg-blue-100"
-            >
-              {t.exact}
-            </button>
-            {quickNotes.map((note) => (
-              <button
-                key={note}
-                type="button"
-                onClick={() => setTender(note)}
-                className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-bold tabular-nums text-emerald-900 hover:bg-emerald-100"
-              >
-                {money(note)}
-              </button>
-            ))}
-          </div>
-
-          <div className="mx-auto mt-4 grid w-full max-w-xs grid-cols-3 gap-2">
-            {(["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const).map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => pressDigit(key)}
-                className="h-12 rounded-xl border border-slate-200 bg-white text-xl font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100"
-              >
-                {key}
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => pressDigit(".")}
-              className="h-12 rounded-xl border border-slate-200 bg-white text-xl font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              .
-            </button>
-            <button
-              type="button"
-              onClick={() => pressDigit("0")}
-              className="h-12 rounded-xl border border-slate-200 bg-white text-xl font-semibold text-slate-800 hover:bg-slate-50"
-            >
-              0
-            </button>
-            <button
-              type="button"
-              onClick={() => pressDigit("back")}
-              aria-label="Backspace"
-              className="flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200"
-            >
-              <Delete className="h-5 w-5" />
-            </button>
-          </div>
-        </>
-      )}
-
-      {saleError && <p className="mt-4 text-center text-sm text-red-600">{saleError}</p>}
-
-      <div className="mt-auto grid grid-cols-2 gap-2 pt-6">
+      <div className="shrink-0 grid w-full grid-cols-2 gap-2 border-t border-slate-100 bg-white px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-4">
         <Button
           type="button"
           variant="outline"
           className="h-12 border-slate-300 text-base font-semibold text-slate-700"
+          disabled={salePending}
           onClick={onBack}
         >
           {t.backToOrder}
@@ -300,8 +312,9 @@ export function PosPaymentPanel({
           ref={chargeRef}
           type="submit"
           disabled={chargeDisabled}
-          className="h-12 bg-blue-600 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-40"
+          className="h-12 gap-2 bg-blue-600 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-40"
         >
+          {salePending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
           {salePending
             ? t.processing
             : isOffline

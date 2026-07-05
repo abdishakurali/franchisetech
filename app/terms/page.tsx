@@ -20,7 +20,7 @@ export default function TermsPage() {
           <section><h2 className="font-semibold text-slate-900">7. Availability and changes</h2><p>We aim to keep the service available, but we do not guarantee uninterrupted access. We may update, suspend, or change the service as needed.</p></section>
           <section><h2 className="font-semibold text-slate-900">8. Data and records</h2><p>franchisetech stores records entered by users. Customers remain responsible for checking that records are accurate, complete, and suitable for their own operational and legal needs.</p></section>
           <section><h2 className="font-semibold text-slate-900">9. Liability</h2><p>To the fullest extent permitted by law, franchisetech is not liable for indirect losses, missed checks, inaccurate user-entered data, food-safety decisions, or regulatory outcomes.</p></section>
-          <section><h2 className="font-semibold text-slate-900">10. Contact</h2><p>Contact us at <a className="text-blue-600 hover:underline" href="mailto:hello@franchisetech.ro">hello@franchisetech.ro</a>.</p></section>
+          <section><h2 className="font-semibold text-slate-900">10. Contact</h2><p>Contact us at <a className="text-blue-600 hover:underline" href="mailto:info@franchisetech.ro">info@franchisetech.ro</a>.</p></section>
           <section><h2 className="font-semibold text-slate-900">11. Changes</h2><p>We may update these terms and change the last updated date.</p></section>
         </div>
 

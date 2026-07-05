@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ActivationBanner } from "@/components/app/ActivationBanner";
 import { startOfDay, startOfMonth, startOfWeek, subDays, subWeeks, subMonths, endOfDay } from "date-fns";
 import {
   ArrowRight,
@@ -19,6 +20,7 @@ import { isModuleEnabled } from "@/lib/business-modules";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { filterReportLinks } from "@/lib/app-report-links";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 import { Suspense } from "react";
 
 function money(v: number, cur = "EUR") {
@@ -65,14 +67,21 @@ export default async function DashboardPage({ searchParams }: Props) {
   const weekAgo = subDays(now, 7).toISOString();
 
   const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
+  const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const periodLabel =
     period === "week" ? t.period.vsLastWeek : period === "month" ? t.period.vsLastMonth : t.period.vsYesterday;
 
   const orgModules = await fetchOrgModuleFlags(supabase, orgId);
   const inventoryVisible = isModuleEnabled(orgModules, "inventory");
   const recipeVisible = isModuleEnabled(orgModules, "recipe_costing");
-  const visibleReports = filterReportLinks(t, { inventoryVisible, recipeVisible });
+  const { data: orgSettings } = await supabase
+    .from("organisations")
+    .select("saga_export_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
+  const accountantPackVisible = Boolean(orgSettings?.saga_export_enabled);
+  const gestiuneVisible = await hasEntitlement(orgId, "reports.gestiune").catch(() => false);
+  const visibleReports = filterReportLinks(t, { inventoryVisible, recipeVisible, accountantPackVisible, gestiuneVisible });
 
   const [
     currentTxResult,
@@ -84,28 +93,32 @@ export default async function DashboardPage({ searchParams }: Props) {
     lowStockResult,
     purchaseWeekResult,
     todayItemsResult,
+    allTimeTxCountResult,
   ] = await Promise.all([
+    // sold_at is the real sale date; created_at is row-insert time, which for
+    // migrated historical sales is the bulk-import timestamp, not when the
+    // sale actually happened.
     supabase
       .from("pos_transactions")
       .select("total,tip_amount,payment_methods(type)")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
-      .gte("created_at", rangeStart.toISOString()),
+      .gte("sold_at", rangeStart.toISOString()),
     supabase
       .from("pos_transactions")
       .select("total")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
-      .gte("created_at", prevStart.toISOString())
-      .lt("created_at", prevEnd.toISOString()),
+      .gte("sold_at", prevStart.toISOString())
+      .lt("sold_at", prevEnd.toISOString()),
     period === "today"
       ? supabase
           .from("pos_transactions")
           .select("total")
           .eq("organisation_id", orgId)
           .eq("status", "completed")
-          .gte("created_at", sameWeekdayStart.toISOString())
-          .lte("created_at", sameWeekdayEnd.toISOString())
+          .gte("sold_at", sameWeekdayStart.toISOString())
+          .lte("sold_at", sameWeekdayEnd.toISOString())
       : Promise.resolve({ data: [] as { total: number }[], error: null }),
     supabase.from("pos_sessions").select("expected_cash,status").eq("organisation_id", orgId).eq("status", "open").limit(1).maybeSingle(),
     supabase.from("pos_transactions").select("total").eq("organisation_id", orgId).eq("status", "completed").gte("sold_at", monthStart),
@@ -113,14 +126,24 @@ export default async function DashboardPage({ searchParams }: Props) {
     inventoryVisible
       ? supabase.from("products").select("id,name,current_stock_qty,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true")
       : Promise.resolve({ data: [], error: null }),
+    // purchase_date is the real receiving date; created_at is row-insert
+    // time, which for migrated historical purchases doesn't match (54/62
+    // mismatched for this org) -- same class of bug as the sales queries above.
     inventoryVisible
-      ? supabase.from("purchases").select("total_amount,status").eq("organisation_id", orgId).gte("created_at", weekAgo)
+      ? supabase.from("purchases").select("total_amount,status").eq("organisation_id", orgId).gte("purchase_date", weekAgo)
       : Promise.resolve({ data: [], error: null }),
+    // Scoped via the parent transaction's sold_at (see comment above), not
+    // pos_transaction_items.created_at.
     supabase
-      .from("pos_transaction_items")
-      .select("product_name,quantity,gross_amount,line_total")
+      .from("pos_transactions")
+      .select("pos_transaction_items(product_name,quantity,gross_amount,line_total)")
       .eq("organisation_id", orgId)
-      .gte("created_at", rangeStart.toISOString()),
+      .gte("sold_at", rangeStart.toISOString()),
+    supabase
+      .from("pos_transactions")
+      .select("*", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("status", "completed"),
   ]);
 
   const currentTx = currentTxResult.data ?? [];
@@ -131,7 +154,12 @@ export default async function DashboardPage({ searchParams }: Props) {
   const voidedCount = voidedCountResult.count ?? 0;
   const lowStockResultData = lowStockResult.data ?? [];
   const purchaseWeek = purchaseWeekResult.data ?? [];
-  const todayItems = todayItemsResult.data ?? [];
+  type DashboardItem = { product_name: string; quantity: number | null; gross_amount: number | null; line_total: number | null };
+  const todayItems: DashboardItem[] = (todayItemsResult.data ?? []).flatMap(
+    (tx) => (tx as unknown as { pos_transaction_items?: DashboardItem[] }).pos_transaction_items ?? []
+  );
+  const allTimeTxCount = allTimeTxCountResult.count ?? 0;
+  const showActivationBanner = allTimeTxCount === 0;
 
   const currentTotal = currentTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
   const currentTips = currentTx.reduce((s, tx) => s + Number(tx.tip_amount ?? 0), 0);
@@ -175,6 +203,7 @@ export default async function DashboardPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
+      {showActivationBanner && <ActivationBanner locale={locale} />}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-slate-950">{t.dashboard.title}</h1>

@@ -21,11 +21,19 @@ export type OwnerDigestInitial = {
   recipients: string[];
 };
 
+export type OwnerDigestTeamMember = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+};
+
 type Props = {
   locale: AppLocale;
   canEdit: boolean;
   ownerEmail: string;
   initial: OwnerDigestInitial;
+  teamMembers: OwnerDigestTeamMember[];
 };
 
 const DAY_KEYS = [
@@ -43,6 +51,7 @@ export function OwnerDigestCard({
   canEdit,
   ownerEmail,
   initial,
+  teamMembers,
 }: Props) {
   const t = getAppText(locale).settings.notifications;
   const router = useRouter();
@@ -53,9 +62,10 @@ export function OwnerDigestCard({
 
   const formKey = `${initial.enabled}-${initial.frequency}-${initial.dayOfWeek}-${initial.timeOfDay}`;
 
-  const recipientsDisplay = initial.recipients
-    .filter((e) => e.toLowerCase() !== ownerEmail.toLowerCase())
-    .join(", ");
+  const selectedRecipients = new Set(
+    (initial.recipients.length ? initial.recipients : [ownerEmail])
+      .map((email) => email.toLowerCase())
+  );
 
   const dayOptions = DAY_KEYS.map((key, i) => ({
     value: String(i + 1),
@@ -77,9 +87,10 @@ export function OwnerDigestCard({
   const handleTest = async () => {
     setTestLoading(true);
     try {
-      const recipientsInput = document.getElementById("owner_digest_recipients") as HTMLInputElement | null;
-      const extra = recipientsInput?.value?.trim();
-      const testTo = extra?.split(/[,;\s]+/).find((e) => e.includes("@")) ?? ownerEmail;
+      const checkedRecipient = document.querySelector<HTMLInputElement>(
+        "input[name='owner_digest_recipients']:checked"
+      );
+      const testTo = checkedRecipient?.value ?? ownerEmail;
 
       const res = await fetch("/api/owner-digest/test", {
         method: "POST",
@@ -149,15 +160,27 @@ export function OwnerDigestCard({
                   ]}
                 />
               </div>
-              <div>
-                <Label htmlFor="owner_digest_day_of_week">{t.dayOfWeek}</Label>
-                <FormSelect
-                  name="owner_digest_day_of_week"
-                  defaultValue={String(initial.dayOfWeek)}
-                  className="mt-1"
-                  options={dayOptions}
-                />
-              </div>
+              {frequency === "weekly" ? (
+                <div>
+                  <Label htmlFor="owner_digest_day_of_week">{t.dayOfWeek}</Label>
+                  <FormSelect
+                    name="owner_digest_day_of_week"
+                    defaultValue={String(initial.dayOfWeek)}
+                    className="mt-1"
+                    options={dayOptions}
+                  />
+                  <p className="mt-1 text-xs text-slate-500">{t.dayOfWeekHint}</p>
+                </div>
+              ) : (
+                <>
+                  <input type="hidden" name="owner_digest_day_of_week" value={String(initial.dayOfWeek)} />
+                  {frequency === "daily" && (
+                    <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                      {t.dailyPeriodHint}
+                    </div>
+                  )}
+                </>
+              )}
               <div>
                 <Label htmlFor="owner_digest_time_of_day">{t.timeOfDay}</Label>
                 <Input
@@ -181,17 +204,30 @@ export function OwnerDigestCard({
             </div>
 
             <div>
-              <Label htmlFor="owner_digest_recipients">{t.recipients}</Label>
+              <Label>{t.recipients}</Label>
               <p className="text-xs text-slate-500 mt-0.5 mb-1">
-                {t.recipientsHint} ({ownerEmail})
+                {t.recipientsHint}
               </p>
-              <Input
-                id="owner_digest_recipients"
-                name="owner_digest_recipients"
-                defaultValue={recipientsDisplay}
-                placeholder="extra@example.com"
-                className="mt-1"
-              />
+              <div className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-200">
+                {teamMembers.map((member) => (
+                  <label key={member.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+                    <input
+                      type="checkbox"
+                      name="owner_digest_recipients"
+                      value={member.email}
+                      defaultChecked={selectedRecipients.has(member.email.toLowerCase())}
+                      className="h-4 w-4 rounded border-slate-300"
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-medium text-slate-900">{member.name || member.email}</span>
+                      <span className="block truncate text-xs text-slate-500">{member.email} · {member.role}</span>
+                    </span>
+                  </label>
+                ))}
+                {teamMembers.length === 0 && (
+                  <p className="px-3 py-3 text-sm text-slate-500">{ownerEmail}</p>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-2">

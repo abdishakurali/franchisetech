@@ -189,7 +189,7 @@ export function KitchenDisplayClient({
                                 <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize">{order.order_type}</Badge>
                               )}
                               {order.table_label && (
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0">Table {order.table_label}</Badge>
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0">Masa {order.table_label}</Badge>
                               )}
                             </div>
                           </CardHeader>

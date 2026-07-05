@@ -38,6 +38,8 @@ export type InitialInvoiceDraft = {
   buyerCif?: string;
   buyerName?: string;
   buyerAddress?: string;
+  sourcePurchaseId?: string;
+  sourcePurchaseLabel?: string;
   lines?: Array<Partial<LineItem>>;
 };
 
@@ -187,11 +189,17 @@ export function InvoiceDraftForm({
   }
 
   return (
-    <div className="space-y-6 p-6 max-w-3xl">
+    <div className="space-y-6 p-6 max-w-6xl">
       <div>
         <h1 className="text-2xl font-semibold text-slate-950">Factură nouă</h1>
         <p className="text-sm text-slate-500">Emite o e-Factură conformă ANAF/UBL 2.1</p>
       </div>
+
+      {initialDraft?.sourcePurchaseId && (
+        <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          Draft precompletat din NIR{initialDraft.sourcePurchaseLabel ? ` ${initialDraft.sourcePurchaseLabel}` : ""}. Verifică datele furnizorului, produsele, TVA-ul și unitățile înainte de trimitere.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
@@ -238,14 +246,14 @@ export function InvoiceDraftForm({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="overflow-visible">
           <CardHeader><CardTitle className="text-base">Produse / servicii</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
-            <div className="hidden sm:grid sm:grid-cols-[minmax(150px,1fr)_minmax(160px,1fr)_90px_80px_100px_minmax(120px,160px)_32px] gap-2 text-xs font-medium text-slate-500 px-1">
+          <CardContent className="space-y-3 overflow-visible">
+            <div className="hidden lg:grid lg:grid-cols-[minmax(220px,1.25fr)_minmax(240px,1.4fr)_minmax(130px,.8fr)_minmax(110px,.65fr)_minmax(130px,.75fr)_minmax(160px,.9fr)_40px] gap-2 text-xs font-medium text-slate-500 px-1">
               <span>Produs</span><span>Denumire</span><span>UM</span><span>Cantitate</span><span>Preț fără TVA</span><span>Cotă TVA</span><span></span>
             </div>
             {lines.map((line, i) => (
-              <div key={i} className="grid sm:grid-cols-[minmax(150px,1fr)_minmax(160px,1fr)_90px_80px_100px_minmax(120px,160px)_32px] gap-2 items-center">
+              <div key={i} className="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(220px,1.25fr)_minmax(240px,1.4fr)_minmax(130px,.8fr)_minmax(110px,.65fr)_minmax(130px,.75fr)_minmax(160px,.9fr)_40px] lg:items-center">
                 <SearchableSelect
                   key={`product-${i}-${line.productId}`}
                   name={`product_${i}`}
@@ -256,6 +264,7 @@ export function InvoiceDraftForm({
                   defaultValue={line.productId}
                   placeholder="Manual"
                   searchPlaceholder="Caută produs..."
+                  className="min-w-[220px]"
                   onValueChange={(value) => selectProduct(i, value)}
                 />
                 <Input placeholder="Denumire produs/serviciu" value={line.name} onChange={(e) => updateLine(i, "name", e.target.value)} required />
@@ -266,6 +275,7 @@ export function InvoiceDraftForm({
                   defaultValue={line.unitCode}
                   required
                   searchPlaceholder="UM"
+                  className="min-w-[130px]"
                   onValueChange={(value) => updateLine(i, "unitCode", value)}
                 />
                 <Input type="number" min="0.0001" step="any" placeholder="1" value={line.quantity} onChange={(e) => updateLine(i, "quantity", e.target.value)} required />

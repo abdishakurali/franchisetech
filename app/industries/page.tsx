@@ -5,15 +5,14 @@ import { ArrowRight } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { industryPages, SITE_URL } from "@/lib/marketing/seo";
+import { PRIMARY_INDUSTRY_SLUGS } from "@/lib/marketing/industry-verticals";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages, localizeSeoPage } from "@/lib/marketing/i18n";
 import { localeAlternates } from "@/lib/marketing/site-locale";
 
-const primarySlugs = ["cafes", "restaurants", "takeaways", "food-trucks", "health-bars"] as const;
 const primaryIndustries = industryPages.filter((p) =>
-  primarySlugs.includes(p.slug as (typeof primarySlugs)[number])
+  PRIMARY_INDUSTRY_SLUGS.includes(p.slug as (typeof PRIMARY_INDUSTRY_SLUGS)[number])
 );
-const multiSitePage = industryPages.find((p) => p.slug === "multi-site");
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getMarketingLocale();
@@ -49,26 +48,6 @@ export default async function IndustriesPage() {
 
       <section className="bg-slate-50 px-4 pb-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          {multiSitePage && (
-            <Link
-              href={multiSitePage.path}
-              className="mb-8 block overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-6 shadow-sm transition hover:border-blue-300 hover:shadow-md sm:p-8"
-            >
-              {(() => {
-                const page = localizeSeoPage(multiSitePage, locale);
-                return (
-                  <>
-                    <p className="text-sm font-semibold text-blue-700">{page.eyebrow}</p>
-                    <h2 className="mt-2 text-2xl font-bold text-slate-950">{page.h1}</h2>
-                    <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">{page.intro}</p>
-                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">
-                      {t.seoPage.viewIndustry} <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </>
-                );
-              })()}
-            </Link>
-          )}
           <div className="grid gap-8 md:grid-cols-2">
             {primaryIndustries.map((raw) => {
               const page = localizeSeoPage(raw, locale);

@@ -64,33 +64,40 @@ export async function GET(req: Request) {
       csv = toCsv(["transaction_number","sold_at","status","subtotal_net","tax_total","tip_amount","gross_ex_tips","total_gross","payment_method"], rows);
 
     } else if (type === "items") {
+      // Filtered on pos_transactions.sold_at (the real sale date), not
+      // pos_transaction_items.created_at -- for migrated historical sales,
+      // created_at is the bulk-import timestamp, not the real sale date.
       const { data } = await supabase
-        .from("pos_transaction_items")
-        .select("*,pos_transactions(transaction_number,sold_at,status)")
+        .from("pos_transactions")
+        .select("transaction_number,sold_at,status,pos_transaction_items(product_name,quantity,unit_price,vat_rate,net_amount,vat_amount,gross_amount,line_total)")
         .eq("organisation_id", orgId)
-        .gte("created_at", fromTs).lte("created_at", toTs)
-        .order("created_at");
-      const rows = (data ?? []).map((r: any) => ({
-        transaction_number: r.pos_transactions?.transaction_number ?? "",
-        sold_at: r.pos_transactions?.sold_at ?? "",
-        status: r.pos_transactions?.status ?? "",
-        product_name: r.product_name,
-        quantity: r.quantity,
-        unit_price: r.unit_price,
-        vat_rate: r.vat_rate ?? 0,
-        net_amount: r.net_amount ?? "",
-        vat_amount: r.vat_amount ?? "",
-        gross_amount: r.gross_amount ?? r.line_total ?? "",
-        line_total: r.line_total,
-      }));
+        .gte("sold_at", fromTs).lte("sold_at", toTs)
+        .order("sold_at");
+      const rows = (data ?? []).flatMap((tx: any) =>
+        (tx.pos_transaction_items ?? []).map((r: any) => ({
+          transaction_number: tx.transaction_number ?? "",
+          sold_at: tx.sold_at ?? "",
+          status: tx.status ?? "",
+          product_name: r.product_name,
+          quantity: r.quantity,
+          unit_price: r.unit_price,
+          vat_rate: r.vat_rate ?? 0,
+          net_amount: r.net_amount ?? "",
+          vat_amount: r.vat_amount ?? "",
+          gross_amount: r.gross_amount ?? r.line_total ?? "",
+          line_total: r.line_total,
+        }))
+      );
       csv = toCsv(["transaction_number","sold_at","status","product_name","quantity","unit_price","vat_rate","net_amount","vat_amount","gross_amount","line_total"], rows);
 
     } else if (type === "vat_summary") {
-      const { data } = await supabase
-        .from("pos_transaction_items")
-        .select("vat_rate,net_amount,vat_amount,gross_amount,line_total,transaction_id")
+      // Same sold_at vs created_at fix as above.
+      const { data: vatTx } = await supabase
+        .from("pos_transactions")
+        .select("pos_transaction_items(vat_rate,net_amount,vat_amount,gross_amount,line_total,transaction_id)")
         .eq("organisation_id", orgId)
-        .gte("created_at", fromTs).lte("created_at", toTs);
+        .gte("sold_at", fromTs).lte("sold_at", toTs);
+      const data = (vatTx ?? []).flatMap((tx: any) => tx.pos_transaction_items ?? []);
       const byRate = new Map<number, { net: number; vat: number; gross: number; count: number }>();
       for (const item of (data ?? []) as any[]) {
         const rate = Number(item.vat_rate ?? 0);

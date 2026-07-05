@@ -8,7 +8,7 @@
  * - Sales (Z-report values)
  * - Closing inventory value (Stoc final)
  *
- * Split by TVA rate (19%, 9%, 0%)
+ * Split by TVA rate (21%, 11%, 5%, 0%)
  */
 
 export type GestiuneMovement = {
@@ -53,9 +53,11 @@ const DOCUMENT_TYPE_LABELS: Record<GestiuneMovement["documentType"], string> = {
 export function gestiuneHtml(data: GestiuneData): string {
   const { orgName, orgCui, gestiune, dateFrom, dateTo, movements } = data;
 
+  // stoc_initial is a starting balance, not a period inflow -- must not be
+  // folded into "intrari" totals (same fix as app/app/reports/gestiune/page.tsx).
   const totals = movements.reduce(
     (acc, m) => {
-      if (m.documentType === "stoc_initial" || m.documentType === "nir") {
+      if (m.documentType === "nir") {
         acc.intrari19 += m.tva19;
         acc.intrari9 += m.tva9;
         acc.intrari5 += m.tva5;
@@ -146,8 +148,8 @@ export function gestiuneHtml(data: GestiuneData): string {
         <th colspan="5" class="text-center">Valoare (lei)</th>
       </tr>
       <tr>
-        <th style="width: 70px;">TVA 19%</th>
-        <th style="width: 70px;">TVA 9%</th>
+        <th style="width: 70px;">TVA 21%</th>
+        <th style="width: 70px;">TVA 11%</th>
         <th style="width: 70px;">TVA 5%</th>
         <th style="width: 70px;">TVA 0%</th>
         <th style="width: 80px;">TOTAL</th>

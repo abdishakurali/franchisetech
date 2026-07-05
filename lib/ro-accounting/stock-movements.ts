@@ -13,6 +13,7 @@ export type StockMovementQueryRow = {
   product_id: string | null;
   quantity_change?: number | null;
   quantity?: number | null;
+  unit_cost?: number | null;
   unit_of_measure?: string | null;
   movement_type?: string;
   performed_at: string;
@@ -29,6 +30,9 @@ export function stockMovementProduct(row: StockMovementQueryRow): StockMovementP
 }
 
 export function stockMovementUnitCost(row: StockMovementQueryRow): number {
+  // Prefer the cost snapshotted on the movement itself (CMP at time of consumption).
+  // Falls back to the product's current cost_price for legacy rows without unit_cost.
+  if (row.unit_cost != null) return Number(row.unit_cost);
   const prod = stockMovementProduct(row);
   return Number(prod?.cost_price ?? 0);
 }
@@ -37,9 +41,11 @@ export function stockMovementUnit(row: StockMovementQueryRow): string {
   return row.unit_of_measure ?? stockMovementProduct(row)?.unit_of_measure ?? "buc";
 }
 
-/** Production schema: quantity_change on movements; cost from products.cost_price. */
+/** Production schema: quantity_change on movements; unit_cost snapshotted at insert time. */
 export const STOCK_MOVEMENT_SELECT =
-  "id,product_id,quantity_change,unit_of_measure,movement_type,performed_at,reason";
+  "id,product_id,quantity_change,unit_cost,unit_of_measure,movement_type,performed_at,reason";
+
+const PAGE_SIZE = 1000;
 
 export async function fetchStockMovements(
   supabase: SupabaseClient,
@@ -51,18 +57,44 @@ export async function fetchStockMovements(
     before?: string;
   } = {},
 ): Promise<StockMovementQueryRow[]> {
-  let query = supabase
-    .from("stock_movements")
-    .select(STOCK_MOVEMENT_SELECT)
-    .eq("organisation_id", orgId);
+  // Reads from the unified view (observed stock_movements + any historical
+  // reconciliation entries) so reports reflect the complete, corrected
+  // picture from a single source. See supabase/migrations/20260704150000_stock_movement_reconciliations.sql.
+  //
+  // Paginated explicitly: a long-lived organisation can easily exceed
+  // PostgREST's default 1000-row response cap (this org alone has 13,900+
+  // rows before a recent date), and an un-paginated .select() would
+  // silently truncate to the oldest page instead of erroring -- producing a
+  // wrong-but-plausible-looking total with no indication anything was cut.
+  const rows: StockMovementQueryRow[] = [];
+  let page = 0;
+  for (;;) {
+    let query = supabase
+      .from("stock_movements_reconciled")
+      .select(STOCK_MOVEMENT_SELECT)
+      .eq("organisation_id", orgId);
 
-  if (filters.movementType) query = query.eq("movement_type", filters.movementType);
-  if (filters.from) query = query.gte("performed_at", filters.from);
-  if (filters.to) query = query.lte("performed_at", filters.to);
-  if (filters.before) query = query.lt("performed_at", filters.before);
+    if (filters.movementType) query = query.eq("movement_type", filters.movementType);
+    if (filters.from) query = query.gte("performed_at", filters.from);
+    if (filters.to) query = query.lte("performed_at", filters.to);
+    if (filters.before) query = query.lt("performed_at", filters.before);
 
-  const { data: rows, error } = await query.order("performed_at");
-  if (error || !rows?.length) return [];
+    const { data, error } = await query
+      .order("performed_at")
+      .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
+
+    if (error) {
+      console.error("[fetchStockMovements] query failed", { orgId, filters, page, error: error.message });
+      break;
+    }
+    if (!data?.length) break;
+
+    rows.push(...(data as StockMovementQueryRow[]));
+    if (data.length < PAGE_SIZE) break;
+    page += 1;
+  }
+
+  if (!rows.length) return [];
 
   const productIds = [...new Set(rows.map((r) => r.product_id).filter(Boolean))] as string[];
   const productMap = new Map<string, StockMovementProductRef>();

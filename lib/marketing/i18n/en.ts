@@ -2,7 +2,8 @@ export const en = {
   nav: {
     features: "Features",
     industries: "Industries",
-    partners: "Partners",
+    businessTypes: "Business type",
+    partners: "Suppliers",
     pricing: "Pricing",
     resources: "Resources",
     blog: "Blog",
@@ -16,6 +17,10 @@ export const en = {
     closeMenu: "Close menu",
     language: "Language",
   },
+  announcement: {
+    text: "15-day trial — no card required. Assisted setup included.",
+    cta: "Start now",
+  },
   footer: {
     tagline: "Cloud POS and business control for cafes, restaurants, and food businesses.",
     subtagline: "Sell, track stock, close the till, and see real numbers — without POS lock-in or per-seat fees.",
@@ -25,7 +30,7 @@ export const en = {
     features: "Features",
     industries: "Industries",
     company: "Company",
-    partners: "Partners",
+    partners: "Suppliers",
     pricing: "Pricing",
     resources: "Resources",
     help: "Help centre",
@@ -33,6 +38,9 @@ export const en = {
     romania: "Romania",
     privacy: "Privacy",
     terms: "Terms",
+    copyright: "© {year} franchisetech. All rights reserved.",
+    secureCheckout: "Secure payments via Stripe",
+    sslSecured: "SSL secured connection",
     featureLinks: {
       pos: "POS register",
       kitchen: "Kitchen display",
@@ -62,6 +70,7 @@ export const en = {
     partnerWithUs: "Partner with us",
     setupHelp: "Setup help for products, staff, payment methods, and your first sale.",
     finalTitle: "Ready to get started?",
+    bookDemo: "Book a demo",
   },
   seoPage: {
     getStarted: "Get started",
@@ -78,17 +87,53 @@ export const en = {
     industriesBreadcrumb: "Industries",
     relevantFeatures: "Relevant features",
   },
+  industryLanding: {
+    painTitle: "What we solve for {industry}",
+    featuresTitle: "Features for your workflow",
+    compareTitle: "Why not the alternative?",
+    compareLink: "Full comparison",
+  },
+  whyOwners: {
+    heading: "What we solve every night at close",
+    screenshotCaption: "Owner dashboard and daily Z-report — the same numbers you verify at close.",
+    items: [
+      {
+        title: "Close the day with confidence",
+        text: "Expected cash vs actual drawer, daily reports, and accurate reconciliation. Know your numbers before you lock the door.",
+      },
+      {
+        title: "Romanian fiscal compliance built in",
+        text: "FiscalNet, Z-Report, ANAF e-Factura and VAT support are native — not add-ons bolted on later.",
+      },
+      {
+        title: "Works on existing hardware",
+        text: "Runs in the browser. No expensive proprietary POS terminal required — use the laptops and tablets already in the business.",
+      },
+      {
+        title: "One system for daily operations",
+        text: "POS, stock, purchases, recipes, reporting and owner insights — all connected in one cloud platform.",
+      },
+      {
+        title: "Assisted onboarding",
+        text: "We configure the business, train the staff and help them go live. Your client is never left to figure it out alone.",
+      },
+    ],
+  },
   home: {
     meta: {
-      title: "franchisetech — Free setup, live in under an hour",
+      title: "franchisetech — Close the day with till truth",
       description:
-        "Free in-app setup. First sale in under an hour. Till matches the drawer at close. Browser POS for cafes and restaurants — €49/mo, reports included, unlimited staff.",
+        "POS, stock and Z-report for cafes and restaurants in Romania. Free setup in under an hour, from €49/mo, unlimited staff, 15 days no card.",
     },
     hero: {
-      label: "For cafes and restaurants",
-      title: "Know what you sold, what you spent, and what you made — every day.",
-      subtitle: "POS, stock, recipes and reports in one workspace. From €49/mo, 15 days free, no credit card required.",
-      trialNote: "No card to open your till · 99.99% uptime · Instant support",
+      label: "For cafes, restaurants and takeaway in Romania",
+      title: "Close the day knowing the till matches the drawer.",
+      titleBefore: "Close the day knowing ",
+      titleHighlight: "the till matches the drawer",
+      titleAfter: ".",
+      subtitle: "Everything you need for today's service, in one place.",
+      socialProof: "Among the first Romanian owners closing the day with franchisetech.",
+      trialNote: "No card to start · Guided in-app setup · Cancel anytime",
       trustSignals: [
         { title: "Free setup", text: "New account, demo products, open till, and first sale — guided in-app at no cost." },
         { title: "Under an hour to first sale", text: "Most cafes finish the core steps in a single session." },
@@ -96,8 +141,14 @@ export const en = {
         { title: "Unlimited staff", text: "Grow the team without per-seat fees." },
       ],
       posAlt: "franchisetech POS — product grid, cart, and charge",
-      cafeAlt: "Cafe owner using franchisetech on tablet",
-      kitchenAlt: "franchisetech kitchen display — New, Preparing, Ready, and Done columns",
+      cafeAlt: "Fiscal cash register compatible with franchisetech",
+      kitchenAlt: "franchisetech daily Z-report — cash, card and VAT at close",
+      dashboardAlt: "franchisetech dashboard — today's sales, expected cash and till status",
+      zReportAlt: "franchisetech Z-report — cash and card totals with VAT breakdown",
+      tableFloorAlt:
+        "franchisetech floor plan — pick a table in Dining room, Terrace or Bar",
+      tableOrderAlt:
+        "Table POS — send kitchen rounds with Trimite, settle with Încasează",
     },
     panels: {
       heading: "The full operating day, in one workspace.",
@@ -129,6 +180,29 @@ export const en = {
         { title: "Locked-in POS contracts", text: "Browser-based POS with unlimited staff. Start on devices you already own." },
       ],
     },
+    outcomeCards: [
+      {
+        headline: "Till matches the drawer",
+        body: "Expected cash, card totals and the difference — visible before you lock the door.",
+        href: "/features/z-report",
+        img: "/showcase/reports-dashboard.png",
+        imgAlt: "franchisetech dashboard — expected cash and till status",
+      },
+      {
+        headline: "Sell fast at the till",
+        body: "Product grid, cash or card checkout, fiscal receipt — new staff can sell on day one.",
+        href: "/features/pos",
+        img: "/showcase/pos-table-order.png",
+        imgAlt: "franchisetech table POS — send rounds and settle at the end",
+      },
+      {
+        headline: "Floor plan and table tabs",
+        body: "Pick a table, send kitchen rounds, settle once at the end.",
+        href: "/features/pos",
+        img: "/showcase/table-floor.png",
+        imgAlt: "franchisetech floor plan — tables in dining room, terrace and bar",
+      },
+    ],
     dashboard: {
       label: "Owner dashboard",
       title: "Today at a glance.",
@@ -156,7 +230,9 @@ export const en = {
       subtitle: "Unlimited staff. No per-seat fees. Sales, till close, and VAT reports in Core.",
       starter: "Core",
       pro: "Operations",
-      multi: "Multi-location",
+      multi: "Scale",
+      month: "/mo",
+      ownerDigest: "Operations includes the owner digest email: sales, cash status, voids, refunds, VAT and stock sent automatically.",
       cta: "See full pricing",
     },
     industries: {
@@ -193,30 +269,49 @@ export const en = {
       beforeTitle: "Before franchisetech",
       afterTitle: "With franchisetech",
       beforeItems: [
-        "Till doesn't match the drawer after close",
-        "Margins hidden in spreadsheets",
-        "Stock surprises mid-shift",
-        "Locked-in POS contracts",
+        "Tried 2–3 systems — none fit the way my business actually works",
+        "Manually recording Glovo and Bolt orders in the fiscal register",
+        "Till doesn't match the drawer at close",
+        "Margins hidden in spreadsheets — no idea if I'm profitable",
       ],
       afterItems: [
-        "Expected cash and card totals at close",
-        "Recipe costing before menu changes",
-        "Low-stock alerts beside POS",
-        "Browser POS, unlimited staff",
+        "Expected cash and card at every close — drawer matches",
+        "Recipe costing before any menu change",
+        "Know what sold and what's sitting on the shelf, any time",
+        "Saga export ready for your accountant — no manual transcription",
       ],
     },
     socialProof: {
-      label: "Early access program",
+      label: "What customers say",
       quotes: [
-        { quote: "Built for operators who want till, stock, and reports in one place — with no per-seat fees.", name: "franchisetech", business: "HORECA platform", metric: "15-day assisted trial" },
-        { quote: "Human onboarding: products, staff, and your first sale — not an empty account.", name: "franchisetech team", business: "Setup support", metric: "Guided first sale" },
-        { quote: "Romania: NIR, per-product VAT, and FiscalNet guide for multi-site when your accountant is ready.", name: "For RO operators", business: "Multi-site", metric: "Step-by-step guide" },
+        {
+          title: "Increased Operational Visibility",
+          quote: "FranchiseTech has transformed the way we manage our coffee business. From production to point of sale, everything is connected in one system. Inventory is accurate, daily reporting is faster, and we finally have clear visibility into our operations.",
+          name: "Sherif A.",
+          business: "CEO, Gourmet Coffee SRL",
+          metric: "✓ Verified Customer",
+        },
+        {
+          title: "Reliable Custom Business Solution",
+          quote: "We needed a platform that matched our operational requirements without unnecessary complexity. FranchiseTech delivered a reliable, easy-to-use solution. The team responded quickly, listened to our feedback, and helped us streamline our processes.",
+          name: "Adam L.",
+          business: "UREP",
+          metric: "✓ Verified Customer",
+        },
       ],
+    },
+    productProof: {
+      label: "Quick start",
+      title: "See how you make your first sale in under 10 minutes",
+      subtitle: "franchisetech takes you from a new account to an open till, demo products, and your first sale — no complicated setup.",
+      videoPlaceholder: "Demo video coming soon",
+      cta: "Try for free",
+      demoCta: "Book a demo",
     },
     compare: {
       label: "Compare POS",
       title: "See how franchisetech compares",
-      subtitle: "Honest side-by-side guides — including when rivals charge extra for reporting add-ons.",
+      subtitle: "Honest side-by-side guides — including when rivals charge extra for reporting modules.",
       viewAll: "All comparisons",
       cardCta: "Read comparison",
     },
@@ -228,6 +323,9 @@ export const en = {
         { question: "Can I see margins on menu items?", answer: "Yes. Recipe costing links ingredients to sale price so you see cost per portion and gross margin before you change the menu." },
         { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
         { question: "Can I manage stock from the same system as POS?", answer: "Yes. Purchases, suppliers, and stock levels sit beside sales so owners see what is low before the next service." },
+        { question: "Does it work with Glovo, Bolt Food or Tazz?", answer: "Glovo connects automatically — sales are recorded correctly, separately from in-house sales. Bolt Food and Tazz are in progress; for now you enter their orders manually in the POS." },
+        { question: "Can I export data to Saga for my accountant?", answer: "Yes. Saga C (XML) export is included. Your accountant receives the file ready to import — no manual transcription from reports." },
+        { question: "Does it work across multiple locations or sites?", answer: "Yes. Each location closes its own till and has a separate Z-report. Stock is shared company-wide, and one owner account sees all locations from a single dashboard." },
       ],
     },
   },
@@ -257,10 +355,12 @@ export const en = {
   },
   industriesIndex: {
     title: "Industries — franchisetech",
-    description: "franchisetech is cloud POS and business control for cafes, restaurants, takeaways, food trucks, and health bars.",
+    description:
+      "Cloud POS for cafés, restaurants, takeaway, bars, patisseries, food trucks, and multi-location chains in Romania.",
     label: "Industries",
     heroTitle: "Built for food businesses that serve customers every day.",
-    heroText: "POS, stock, recipes, kitchen display, and daily reports — tuned for how cafes, restaurants, and mobile food operators actually work.",
+    heroText:
+      "POS, stock, recipes, kitchen display, and daily reports — tuned for how cafés, restaurants, bars, and mobile food operators actually work.",
     cardIncludes: ["POS register", "Stock & purchases (Pro)", "Daily Z-style till close"],
   },
   partners: {
@@ -335,12 +435,12 @@ export const en = {
       sending: "Sending…",
       successWaitlist: "You're on the list — we'll contact you when the program opens.",
       successApply: "Thanks — we'll be in touch within 2 business days.",
-      error: "Something went wrong. Email hello@franchisetech.ro or try again.",
+      error: "Something went wrong. Email info@franchisetech.ro or try again.",
     },
   },
   pricing: {
     title: "franchisetech Pricing",
-    description: "Clear franchisetech pricing for small businesses that want a simple POS, product setup, staff control, and daily reports.",
+    description: "franchisetech pricing: Starter €49/mo, Pro €79/mo, Multi-location €109/mo. Includes POS, staff, Z-report, and daily reports. 15-day free trial, no credit card required.",
     badge: "Simple pricing",
     heroTitle: "Simple pricing for growing cafés & restaurants.",
     heroText: "One monthly price per shop. No per-seat fees.",
@@ -426,17 +526,17 @@ export const en = {
       subtitle:
         "List price is not what you pay. This table shows what a café needs for POS, stock, kitchen display, and Saga export.",
       colFeature: "Feature",
-      colFranchisetech: "franchisetech Operations €79",
+      colFranchisetech: "franchisetech Scale €99",
       colEbrizaPro: "Ebriza Pro €49",
       colEbrizaPremium: "Ebriza Premium €99",
       included: "Included",
       excluded: "Not included",
       footnote:
-        "Ebriza prices verified from ebriza.com/ro/preturi on 24 June 2026. Totals assume Kitchen Display (+€19/mo) and Saga integration (+€39/mo). POS and Z/TVA reports from €49 Core; stock, NIR, recipes, and KDS on Operations (€79).",
+        "Ebriza prices verified from ebriza.com/ro/preturi on 24 June 2026. Totals assume Kitchen Display (+€19/mo). POS and Z/TVA reports are on Core; stock, NIR, and recipes are on Operations; Saga and accountant reports are included on eligible plans.",
       readComparison: "Read full Ebriza comparison",
       compareHref: "/compare/ebriza",
       fallbackText:
-        "For Romania, franchisetech Operations (€79) includes stock, NIR, recipes, kitchen display, Saga export, and Romanian accounting reports (Bon de consum, Balanță) — while Ebriza add-ons can add €19–€39/mo per module on top of list price.",
+        "For Romania, franchisetech includes Z/TVA reports on Core, stock and NIR on Operations, and Saga export plus Romanian accounting reports on eligible plans. Kitchen Display remains a separate operational module.",
       rows: {
         posSales: "POS + sales",
         zReport: "Z-report / till close",

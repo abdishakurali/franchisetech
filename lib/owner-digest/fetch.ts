@@ -1,8 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { AppLocale } from "@/lib/app-i18n";
 import { resolveAppLocale } from "@/lib/app-locale";
-import type { OwnerDigestAttention, OwnerDigestData } from "@/lib/owner-digest/build";
-import { addCalendarDays, zonedDayStartUtc, zonedParts } from "@/lib/owner-digest/schedule";
+import type { OwnerDigestAttention, OwnerDigestData, OwnerDigestVatBreakdown } from "@/lib/owner-digest/build";
+import { addCalendarDays, zonedParts } from "@/lib/owner-digest/schedule";
 
 type FetchParams = {
   orgId: string;
@@ -11,6 +11,7 @@ type FetchParams = {
   currency: string;
   frequency: "daily" | "weekly";
   timeZone: string;
+  businessDayCutoffTime?: string | null;
   referenceNow?: Date;
 };
 
@@ -23,6 +24,59 @@ type TxRow = {
   status?: string | null;
   payment_methods: { type?: string } | { type?: string }[] | null;
 };
+
+type TxItemRow = {
+  product_name: string | null;
+  quantity: number | string | null;
+  gross_amount: number | string | null;
+  line_total: number | string | null;
+  net_amount: number | string | null;
+  vat_amount: number | string | null;
+  vat_rate: number | string | null;
+};
+
+type ClosedSessionRow = {
+  expected_cash?: number | string | null;
+  counted_cash?: number | string | null;
+  cash_difference?: number | string | null;
+  opened_at?: string | null;
+  closed_at?: string | null;
+  notes?: string | null;
+};
+
+type DailyCloseRow = {
+  close_date?: string | null;
+  expected_cash?: number | string | null;
+  counted_cash?: number | string | null;
+  cash_difference?: number | string | null;
+  notes?: string | null;
+};
+
+function parseCutoff(time: string | null | undefined): { hour: number; minute: number } {
+  const [rawHour, rawMinute] = String(time || "04:00").slice(0, 5).split(":").map(Number);
+  const hour = Number.isFinite(rawHour) ? Math.min(23, Math.max(0, rawHour)) : 4;
+  const minute = Number.isFinite(rawMinute) ? Math.min(59, Math.max(0, rawMinute)) : 0;
+  return { hour, minute };
+}
+
+function zonedDateTimeUtc(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+  timeZone: string
+): Date {
+  const base = Date.UTC(year, month - 1, day, hour, minute, 0);
+  for (let offsetHours = -14; offsetHours <= 14; offsetHours++) {
+    const d = new Date(base + offsetHours * 3_600_000);
+    const p = zonedParts(d, timeZone);
+    if (p.year === year && p.month === month && p.day === day && p.hour === hour && p.minute === minute) {
+      return d;
+    }
+  }
+  return new Date(base);
+}
 
 function formatPeriodLabel(
   frequency: "daily" | "weekly",
@@ -37,45 +91,96 @@ function formatPeriodLabel(
   });
   if (frequency === "daily") {
     const end = new Date(rangeEnd.getTime() - 1);
-    return fmt.format(end);
+    const startLabel = fmt.format(rangeStart);
+    const endLabel = fmt.format(end);
+    return startLabel === endLabel ? startLabel : `${startLabel} – ${endLabel}`;
   }
   const end = new Date(rangeEnd.getTime() - 1);
   return `${fmt.format(rangeStart)} – ${fmt.format(end)}`;
 }
 
+function formatPeriodDetailLabel(
+  rangeStart: Date,
+  rangeEnd: Date,
+  locale: AppLocale,
+  timeZone: string
+): string {
+  const ro = locale === "ro";
+  const dateFmt = new Intl.DateTimeFormat(ro ? "ro-RO" : "en-IE", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone,
+  });
+  const timeFmt = new Intl.DateTimeFormat(ro ? "ro-RO" : "en-IE", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone,
+  });
+  const endInclusive = new Date(rangeEnd.getTime() - 60_000);
+  const start = `${dateFmt.format(rangeStart)} ${timeFmt.format(rangeStart)}`;
+  const end = `${dateFmt.format(endInclusive)} ${timeFmt.format(endInclusive)}`;
+  return `${start} – ${end} (${timeZone})`;
+}
+
 function getSalesRange(
   frequency: "daily" | "weekly",
   timeZone: string,
+  businessDayCutoffTime: string | null | undefined,
   referenceNow: Date
 ): { rangeStart: Date; rangeEnd: Date } {
+  const cutoff = parseCutoff(businessDayCutoffTime);
   const p = zonedParts(referenceNow, timeZone);
-  const todayStart = zonedDayStartUtc(p.year, p.month, p.day, timeZone);
+  const todayCutoff = zonedDateTimeUtc(p.year, p.month, p.day, cutoff.hour, cutoff.minute, timeZone);
+  const currentStartParts =
+    referenceNow.getTime() < todayCutoff.getTime()
+      ? addCalendarDays(p.year, p.month, p.day, -1)
+      : { year: p.year, month: p.month, day: p.day };
+  const currentOperationalStart = zonedDateTimeUtc(
+    currentStartParts.year,
+    currentStartParts.month,
+    currentStartParts.day,
+    cutoff.hour,
+    cutoff.minute,
+    timeZone
+  );
+  const currentStartLocal = zonedParts(currentOperationalStart, timeZone);
 
   if (frequency === "daily") {
-    const y = addCalendarDays(p.year, p.month, p.day, -1);
-    const rangeStart = zonedDayStartUtc(y.year, y.month, y.day, timeZone);
-    return { rangeStart, rangeEnd: todayStart };
+    const startDay = addCalendarDays(currentStartLocal.year, currentStartLocal.month, currentStartLocal.day, -1);
+    return {
+      rangeStart: zonedDateTimeUtc(startDay.year, startDay.month, startDay.day, cutoff.hour, cutoff.minute, timeZone),
+      rangeEnd: currentOperationalStart,
+    };
   }
 
-  const weekStart = addCalendarDays(p.year, p.month, p.day, -7);
-  const rangeStart = zonedDayStartUtc(weekStart.year, weekStart.month, weekStart.day, timeZone);
-  return { rangeStart, rangeEnd: todayStart };
+  const startDay = addCalendarDays(currentStartLocal.year, currentStartLocal.month, currentStartLocal.day, -7);
+  return {
+    rangeStart: zonedDateTimeUtc(startDay.year, startDay.month, startDay.day, cutoff.hour, cutoff.minute, timeZone),
+    rangeEnd: currentOperationalStart,
+  };
 }
 
 function getPriorRange(
   frequency: "daily" | "weekly",
   rangeStart: Date,
+  rangeEnd: Date,
+  businessDayCutoffTime: string | null | undefined,
   timeZone: string
 ): { priorStart: Date; priorEnd: Date } {
+  const cutoff = parseCutoff(businessDayCutoffTime);
   const p = zonedParts(rangeStart, timeZone);
+  const endParts = zonedParts(rangeEnd, timeZone);
   if (frequency === "daily") {
-    const d = addCalendarDays(p.year, p.month, p.day, -7);
-    const priorStart = zonedDayStartUtc(d.year, d.month, d.day, timeZone);
-    const priorEnd = addCalendarDays(p.year, p.month, p.day, -6);
-    return { priorStart, priorEnd: zonedDayStartUtc(priorEnd.year, priorEnd.month, priorEnd.day, timeZone) };
+    const startDay = addCalendarDays(p.year, p.month, p.day, -7);
+    const endDay = addCalendarDays(endParts.year, endParts.month, endParts.day, -7);
+    return {
+      priorStart: zonedDateTimeUtc(startDay.year, startDay.month, startDay.day, cutoff.hour, cutoff.minute, timeZone),
+      priorEnd: zonedDateTimeUtc(endDay.year, endDay.month, endDay.day, cutoff.hour, cutoff.minute, timeZone),
+    };
   }
   const d = addCalendarDays(p.year, p.month, p.day, -7);
-  const priorStart = zonedDayStartUtc(d.year, d.month, d.day, timeZone);
+  const priorStart = zonedDateTimeUtc(d.year, d.month, d.day, cutoff.hour, cutoff.minute, timeZone);
   return { priorStart, priorEnd: rangeStart };
 }
 
@@ -120,17 +225,22 @@ function aggregateSales(transactions: TxRow[]) {
   };
 }
 
-function dayKey(iso: string, timeZone: string): string {
+function dayKey(iso: string, timeZone: string, businessDayCutoffTime?: string | null): string {
   const d = new Date(iso);
-  return d.toLocaleDateString("en-CA", { timeZone });
+  const cutoff = parseCutoff(businessDayCutoffTime);
+  const p = zonedParts(d, timeZone);
+  const mins = p.hour * 60 + p.minute;
+  const cutoffMins = cutoff.hour * 60 + cutoff.minute;
+  const operationalDay = mins < cutoffMins ? addCalendarDays(p.year, p.month, p.day, -1) : p;
+  return `${operationalDay.year}-${String(operationalDay.month).padStart(2, "0")}-${String(operationalDay.day).padStart(2, "0")}`;
 }
 
-function buildDailySales(transactions: TxRow[], timeZone: string) {
+function buildDailySales(transactions: TxRow[], timeZone: string, businessDayCutoffTime?: string | null) {
   const map = new Map<string, { total: number; count: number }>();
   for (const tx of transactions) {
     const ts = txTimestamp(tx);
     if (!ts) continue;
-    const key = dayKey(ts, timeZone);
+    const key = dayKey(ts, timeZone, businessDayCutoffTime);
     const cur = map.get(key) ?? { total: 0, count: 0 };
     cur.total += Number(tx.total ?? 0);
     cur.count += 1;
@@ -146,6 +256,38 @@ function salesChangePct(current: number, prior: number): number | null {
   return ((current - prior) / prior) * 100;
 }
 
+function buildVatBreakdown(items: TxItemRow[]): OwnerDigestVatBreakdown[] {
+  const map = new Map<number, { netAmount: number; vatCollected: number }>();
+  for (const item of items) {
+    const rate = Number(item.vat_rate ?? 0);
+    const gross = Number(item.gross_amount ?? item.line_total ?? 0);
+    const vat = Number(item.vat_amount ?? 0);
+    const net = Number(item.net_amount ?? (gross - vat));
+    const cur = map.get(rate) ?? { netAmount: 0, vatCollected: 0 };
+    cur.netAmount += net;
+    cur.vatCollected += vat;
+    map.set(rate, cur);
+  }
+  return [...map.entries()]
+    .map(([rate, v]) => ({
+      rate,
+      netAmount: Number(v.netAmount.toFixed(2)),
+      vatCollected: Number(v.vatCollected.toFixed(2)),
+    }))
+    .sort((a, b) => a.rate - b.rate);
+}
+
+function formatTimestamp(iso: string | null | undefined, locale: AppLocale, timeZone: string): string | null {
+  if (!iso) return null;
+  return new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone,
+  }).format(new Date(iso));
+}
+
 function buildAttention(params: {
   locale: AppLocale;
   tillOpen: boolean;
@@ -156,6 +298,8 @@ function buildAttention(params: {
   closesInPeriod: number;
   salesCount: number;
   currency: string;
+  voidTotal: number;
+  refundTotal: number;
 }): OwnerDigestAttention[] {
   const ro = params.locale === "ro";
   const items: OwnerDigestAttention[] = [];
@@ -192,8 +336,8 @@ function buildAttention(params: {
     items.push({
       severity: "warning",
       message: ro
-        ? `${params.refundCount} rambursare(i) în perioadă.`
-        : `${params.refundCount} refund(s) in this period.`,
+        ? `${params.refundCount} rambursare(i) în perioadă (${params.refundTotal.toFixed(2)} ${params.currency === "RON" ? "lei" : params.currency}).`
+        : `${params.refundCount} refund(s) in this period (${params.refundTotal.toFixed(2)} ${params.currency}).`,
     });
   }
 
@@ -201,8 +345,8 @@ function buildAttention(params: {
     items.push({
       severity: "warning",
       message: ro
-        ? `${params.voidCount} anulare(i) în perioadă.`
-        : `${params.voidCount} void(s) in this period.`,
+        ? `${params.voidCount} anulare(i) în perioadă (${params.voidTotal.toFixed(2)} ${params.currency === "RON" ? "lei" : params.currency}).`
+        : `${params.voidCount} void(s) in this period (${params.voidTotal.toFixed(2)} ${params.currency}).`,
     });
   }
 
@@ -229,13 +373,15 @@ export async function fetchOwnerDigestData(
     currency,
     frequency,
     timeZone,
+    businessDayCutoffTime = "04:00",
     referenceNow = new Date(),
   } = params;
 
   const locale = resolveAppLocale({ orgCountryCode: countryCode });
-  const { rangeStart, rangeEnd } = getSalesRange(frequency, timeZone, referenceNow);
-  const { priorStart, priorEnd } = getPriorRange(frequency, rangeStart, timeZone);
+  const { rangeStart, rangeEnd } = getSalesRange(frequency, timeZone, businessDayCutoffTime, referenceNow);
+  const { priorStart, priorEnd } = getPriorRange(frequency, rangeStart, rangeEnd, businessDayCutoffTime, timeZone);
   const periodLabel = formatPeriodLabel(frequency, rangeStart, rangeEnd, locale);
+  const periodDetailLabel = formatPeriodDetailLabel(rangeStart, rangeEnd, locale, timeZone);
   const priorPeriodLabel = formatPeriodLabel(frequency, priorStart, priorEnd, locale);
 
   const rangeIso = { start: rangeStart.toISOString(), end: rangeEnd.toISOString() };
@@ -284,7 +430,7 @@ export async function fetchOwnerDigestData(
       .maybeSingle(),
     supabase
       .from("pos_sessions")
-      .select("expected_cash,counted_cash,cash_difference,closed_at,notes")
+      .select("expected_cash,counted_cash,cash_difference,opened_at,closed_at,notes")
       .eq("organisation_id", orgId)
       .eq("status", "closed")
       .gte("closed_at", rangeIso.start)
@@ -316,31 +462,37 @@ export async function fetchOwnerDigestData(
   const refundCount = refundRows.length;
   const refundTotal = refundRows.reduce((s, t) => s + Number(t.total ?? 0), 0);
   const voidCount = voidRows.length;
+  const voidTotal = voidRows.reduce((s, t) => s + Math.abs(Number(t.total ?? 0)), 0);
 
   const session = sessionResult.data;
   const tillOpen = session?.status === "open";
   const expectedCash = Number(session?.expected_cash ?? 0);
 
-  const closedSessions = closedSessionsResult.data ?? [];
-  const dailyCloses = dailyCloseResult.data ?? [];
+  const closedSessions = (closedSessionsResult.data ?? []) as ClosedSessionRow[];
+  const dailyCloses = (dailyCloseResult.data ?? []) as DailyCloseRow[];
   const closesInPeriod = Math.max(closedSessions.length, dailyCloses.length);
 
   const lastCloseSource = closedSessions[0] ?? dailyCloses[0] ?? null;
-  const lastCloseRaw = lastCloseSource as Record<string, unknown> | null;
-  const lastClose = lastCloseRaw
+  const lastClose = lastCloseSource
     ? {
-        date: lastCloseRaw.closed_at
-          ? String(lastCloseRaw.closed_at).slice(0, 10)
-          : lastCloseRaw.close_date
-            ? String(lastCloseRaw.close_date)
+        date: "closed_at" in lastCloseSource && lastCloseSource.closed_at
+          ? String(lastCloseSource.closed_at).slice(0, 10)
+          : "close_date" in lastCloseSource && lastCloseSource.close_date
+            ? String(lastCloseSource.close_date)
             : "",
-        expectedCash: Number(lastCloseRaw.expected_cash ?? 0),
-        countedCash: Number(lastCloseRaw.counted_cash ?? 0),
+        openedAt: "opened_at" in lastCloseSource
+          ? formatTimestamp(lastCloseSource.opened_at, locale, timeZone)
+          : null,
+        closedAt: "closed_at" in lastCloseSource
+          ? formatTimestamp(lastCloseSource.closed_at, locale, timeZone)
+          : null,
+        expectedCash: Number(lastCloseSource.expected_cash ?? 0),
+        countedCash: Number(lastCloseSource.counted_cash ?? 0),
         cashDifference: Number(
-          lastCloseRaw.cash_difference ??
-            Number(lastCloseRaw.counted_cash ?? 0) - Number(lastCloseRaw.expected_cash ?? 0)
+          lastCloseSource.cash_difference ??
+            Number(lastCloseSource.counted_cash ?? 0) - Number(lastCloseSource.expected_cash ?? 0)
         ),
-        notes: (lastCloseRaw.notes as string | null) ?? null,
+        notes: lastCloseSource.notes ?? null,
       }
     : null;
 
@@ -351,15 +503,18 @@ export async function fetchOwnerDigestData(
 
   const txIds = (txResult.data ?? []).map((t) => (t as { id: string }).id).filter(Boolean);
   let topProducts: OwnerDigestData["topProducts"] = [];
+  let vatBreakdown: OwnerDigestVatBreakdown[] = [];
   if (txIds.length > 0) {
     const { data: items } = await supabase
       .from("pos_transaction_items")
-      .select("product_name,quantity,gross_amount,line_total")
+      .select("product_name,quantity,gross_amount,line_total,net_amount,vat_amount,vat_rate")
       .eq("organisation_id", orgId)
       .in("transaction_id", txIds);
 
+    const itemRows = (items ?? []) as TxItemRow[];
+    vatBreakdown = buildVatBreakdown(itemRows);
     const productMap = new Map<string, { qty: number; revenue: number }>();
-    for (const item of items ?? []) {
+    for (const item of itemRows) {
       const name = String(item.product_name ?? "—");
       const cur = productMap.get(name) ?? { qty: 0, revenue: 0 };
       cur.qty += Number(item.quantity ?? 0);
@@ -388,7 +543,7 @@ export async function fetchOwnerDigestData(
   const lowStockItems = allStockRows.filter((r) => r.isLow);
 
   const dailySales =
-    frequency === "weekly" ? buildDailySales(transactions, timeZone) : [];
+    frequency === "weekly" ? buildDailySales(transactions, timeZone, businessDayCutoffTime) : [];
   const tradingDays = dailySales.length;
   const busiestDay = dailySales[0] ?? null;
 
@@ -399,6 +554,8 @@ export async function fetchOwnerDigestData(
     lastCloseDiff: lastClose?.cashDifference ?? null,
     refundCount,
     voidCount,
+    voidTotal,
+    refundTotal,
     closesInPeriod,
     salesCount: current.salesCount,
     currency,
@@ -409,6 +566,7 @@ export async function fetchOwnerDigestData(
     locale,
     currency,
     periodLabel,
+    periodDetailLabel,
     frequency,
     salesTotal: current.salesTotal,
     salesCount: current.salesCount,
@@ -417,6 +575,7 @@ export async function fetchOwnerDigestData(
     onlineTotal: current.onlineTotal,
     otherTotal: current.otherTotal,
     vatTotal: current.vatTotal,
+    vatBreakdown,
     avgTicket: current.avgTicket,
     priorSalesTotal: prior.salesTotal,
     priorSalesCount: prior.salesCount,
@@ -433,6 +592,7 @@ export async function fetchOwnerDigestData(
     refundCount,
     refundTotal,
     voidCount,
+    voidTotal,
     tradingDays,
     busiestDay,
     priorPeriodLabel,

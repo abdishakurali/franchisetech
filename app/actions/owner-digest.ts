@@ -6,18 +6,18 @@ import { assertEntitlement, EntitlementDeniedError } from "@/lib/billing/entitle
 
 export type OwnerDigestSettingsResult = { ok: true } | { ok: false; error: string };
 
-function parseRecipients(raw: string, ownerEmail: string): string[] {
-  const extras = raw
-    .split(/[,;\s]+/)
+function parseRecipients(values: string[]): string[] {
+  const emails = values
+    .flatMap((raw) => raw.split(/[,;\s]+/))
     .map((e) => e.trim().toLowerCase())
     .filter((e) => e.includes("@"));
-  const set = new Set<string>([ownerEmail.toLowerCase(), ...extras]);
+  const set = new Set<string>(emails);
   return [...set];
 }
 
 export async function saveOwnerDigestSettings(formData: FormData): Promise<OwnerDigestSettingsResult> {
   try {
-    const { supabase, orgId, membership, user } = await getActiveOrg();
+    const { supabase, orgId, membership } = await getActiveOrg();
     if (!["owner", "manager"].includes(membership.role ?? "")) {
       return { ok: false, error: "Forbidden" };
     }
@@ -40,12 +40,14 @@ export async function saveOwnerDigestSettings(formData: FormData): Promise<Owner
     const dayOfWeek = Math.min(7, Math.max(1, Number(formData.get("owner_digest_day_of_week") ?? 1)));
     const timeOfDay = String(formData.get("owner_digest_time_of_day") ?? "08:00").slice(0, 5);
     const timezone = String(formData.get("owner_digest_timezone") ?? "Europe/Bucharest").trim() || "Europe/Bucharest";
-    const recipientsRaw = String(formData.get("owner_digest_recipients") ?? "");
-    const ownerEmail = user.email ?? "";
-    if (!ownerEmail) {
-      return { ok: false, error: "No owner email" };
+    const recipientValues = formData
+      .getAll("owner_digest_recipients")
+      .map((value) => String(value));
+    const legacyRecipients = String(formData.get("owner_digest_recipients_legacy") ?? "");
+    const recipients = parseRecipients([...recipientValues, legacyRecipients]);
+    if (active && recipients.length === 0) {
+      return { ok: false, error: "Select at least one recipient" };
     }
-    const recipients = parseRecipients(recipientsRaw, ownerEmail);
 
     const { error } = await supabase
       .from("organisations")

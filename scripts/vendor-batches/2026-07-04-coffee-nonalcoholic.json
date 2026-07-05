@@ -1,0 +1,46 @@
+[
+  {
+    "legal_name": "Marcos Caffe SRL",
+    "brand_name": "MAFI Horeca",
+    "cui": "32083624",
+    "slug": "mafi-horeca",
+    "category": "coffee_equipment",
+    "subcategories": ["cafea boabe", "cafea macinata", "echipamente espresso", "accesorii bar"],
+    "description": "Distribuitor român de cafea boabe/măcinată, echipamente de espresso și accesorii pentru bar, cu magazin online și showroom propriu în Simeria.",
+    "website_url": "https://mafihoreca.ro",
+    "hq_city": "Simeria",
+    "counties": ["hunedoara"],
+    "logo_source_url": "https://mafihoreca.ro/wp-content/uploads/2025/04/WhatsApp-Image-2025-04-14-at-12.59.501.webp",
+    "contact_email": "contact@mafihoreca.ro",
+    "contact_phone": "+40 760 651 260",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://mafihoreca.ro/informatii_legale/", "note": "legal name 'Marcos Caffe' and CUI 32083624 stated directly by the vendor", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://mafihoreca.ro/contact/", "note": "address, email, phone", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://termene.ro", "note": "CUI 32083624 cross-confirmed on independent registry aggregator, consistent with vendor's own disclosure", "checked_at": "2026-07-04"},
+      {"kind": "logo_provenance", "url": "https://mafihoreca.ro/", "note": "logo confirmed same-domain as website_url", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "legal_name": "IPC Trade S.R.L.",
+    "brand_name": "HorecaBar",
+    "cui": "16211900",
+    "slug": "horecabar",
+    "category": "non_alcoholic_beverages",
+    "subcategories": ["siropuri", "topping-uri", "ciocolata calda", "ceai", "bubble tea"],
+    "description": "Importator direct și distribuitor național de siropuri, topping-uri, ciocolată caldă, ceai și ingrediente pentru bubble tea, cu sediul în Iași.",
+    "website_url": "https://horecabar.ro",
+    "hq_city": "Iași",
+    "counties": ["iasi"],
+    "logo_source_url": "https://horecabar.ro/wp-content/uploads/2025/08/Layer_1.svg",
+    "contact_email": "contact@horecabar.ro",
+    "contact_phone": "+40 750 103 086",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://horecabar.ro/termeni-conditii/", "note": "legal name 'IPC Trade S.R.L.', CUI RO16211900, Reg. Com. J22/439/2004 stated directly by the vendor", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://horecabar.ro/despre-noi/", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://horecabar.ro/contact/", "note": "address, email, phone", "checked_at": "2026-07-04"},
+      {"kind": "logo_provenance", "url": "https://horecabar.ro/", "note": "logo confirmed same-domain as website_url", "checked_at": "2026-07-04"}
+    ]
+  }
+]

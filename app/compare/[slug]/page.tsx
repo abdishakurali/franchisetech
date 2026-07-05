@@ -106,7 +106,7 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
       </section>
 
       <section className="px-4 pb-8 sm:px-6 lg:px-8">
-        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-slate-200 bg-white p-6">
             <h2 className="text-lg font-bold text-slate-950">franchisetech</h2>
             <ul className="mt-4 space-y-2">
@@ -133,22 +133,24 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
       </section>
 
       <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <div className="grid grid-cols-3 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-950">
-            <span>{ui.tableArea}</span>
-            <span>{ui.tableFranchisetech}</span>
-            <span>{page.competitor}</span>
-          </div>
-          {page.rows.map((row) => (
-            <div
-              key={row[0]}
-              className="grid grid-cols-3 gap-3 border-t border-slate-100 px-4 py-4 text-sm"
-            >
-              <strong>{row[0]}</strong>
-              <span className="text-slate-600">{row[1]}</span>
-              <span className="text-slate-600">{row[2]}</span>
+        <div className="mx-auto max-w-6xl overflow-x-auto">
+          <div className="min-w-[32rem] overflow-hidden rounded-xl border border-slate-200 bg-white">
+            <div className="grid grid-cols-3 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-950">
+              <span>{ui.tableArea}</span>
+              <span>{ui.tableFranchisetech}</span>
+              <span>{page.competitor}</span>
             </div>
-          ))}
+            {page.rows.map((row) => (
+              <div
+                key={row[0]}
+                className="grid grid-cols-3 gap-3 border-t border-slate-100 px-4 py-4 text-sm"
+              >
+                <strong className="pr-2">{row[0]}</strong>
+                <span className="text-slate-600">{row[1]}</span>
+                <span className="text-slate-600">{row[2]}</span>
+              </div>
+            ))}
+          </div>
         </div>
         <p className="mx-auto mt-5 max-w-6xl text-xs text-slate-500">{ui.disclaimer}</p>
       </section>

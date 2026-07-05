@@ -1,19 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { useMarketingMessages } from "@/lib/marketing/use-marketing-locale";
+import { ArrowRight, Lock, ShieldCheck } from "lucide-react";
+import { useMarketingMessages, useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
 import { MarketingBrand } from "@/components/marketing/MarketingBrand";
 import { socialLinks } from "@/components/marketing/social";
+import { PRIMARY_INDUSTRY_NAV } from "@/lib/marketing/industry-verticals";
 
 export function MarketingFooterClient() {
   const t = useMarketingMessages();
+  const locale = useMarketingLocale();
+  const year = new Date().getFullYear();
+  const copyright = t.footer.copyright.replace("{year}", String(year));
 
   const productLinks = [
     ["/features", t.footer.features],
     ["/pricing", t.footer.pricing],
-    ["/partners", t.footer.partners],
+    ["/resources/suppliers", t.footer.partners],
   ] as const;
+
+  const industryLinks = PRIMARY_INDUSTRY_NAV.map((item) => [
+    item.path,
+    locale === "ro" ? item.labelRo : item.labelEn,
+  ] as const);
 
   const supportLinks = [
     ["/help", t.footer.help],
@@ -43,8 +52,8 @@ export function MarketingFooterClient() {
           </Link>
         </div>
 
-        <div className="mt-12 grid gap-8 md:grid-cols-5">
-          <div className="md:col-span-2">
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="sm:col-span-2">
             <div className="mb-4">
               <MarketingBrand variant="footer" />
             </div>
@@ -65,8 +74,23 @@ export function MarketingFooterClient() {
             </div>
           </div>
           <FooterColumn title={t.footer.features} links={productLinks} />
+          <FooterColumn title={t.footer.industries} links={industryLinks} />
           <FooterColumn title={t.footer.help} links={supportLinks} />
           <FooterColumn title={t.footer.company} links={legalLinks} />
+        </div>
+
+        <div className="mt-10 flex flex-col gap-4 border-t border-slate-800 pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-slate-500">{copyright}</p>
+          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+            <span className="inline-flex items-center gap-1.5">
+              <Lock className="h-3.5 w-3.5" aria-hidden />
+              {t.footer.sslSecured}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden />
+              {t.footer.secureCheckout}
+            </span>
+          </div>
         </div>
       </div>
     </footer>

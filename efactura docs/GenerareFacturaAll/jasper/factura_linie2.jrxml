@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="factura_linie2" language="groovy" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0">
+	<property name="ireport.zoom" value="5.0"/>
+	<property name="ireport.x" value="50"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<parameterDescription><![CDATA[]]></parameterDescription>
+	</parameter>
+	<parameter name="L_NO" class="java.lang.String">
+		<parameterDescription><![CDATA[$F{BT126}]]></parameterDescription>
+		<defaultValueExpression><![CDATA["hello"]]></defaultValueExpression>
+	</parameter>
+	<queryString language="xPath">
+		<![CDATA[/*[local-name()='Invoice']/*[local-name()='InvoiceLine']]]>
+	</queryString>
+	<field name="BT129" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='InvoicedQuantity']]]></fieldDescription>
+	</field>
+	<field name="BT130" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='InvoicedQuantity']/@*[local-name()='unitCode']]]></fieldDescription>
+	</field>
+	<field name="BT1311" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='LineExtensionAmount']/@*[local-name()='currencyID']]]></fieldDescription>
+	</field>
+	<field name="BT131" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='LineExtensionAmount']]]></fieldDescription>
+	</field>
+	<field name="BT153" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='Item']/*[local-name()='Name']]]></fieldDescription>
+	</field>
+	<field name="BT154" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='Item']/*[local-name()='Description']]]></fieldDescription>
+	</field>
+	<field name="BT159" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='Item']/*[local-name()='OriginCountry']/*[local-name()='IdentificationCode']]]></fieldDescription>
+	</field>
+	<field name="BT151" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='Item']/*[local-name()='ClassifiedTaxCategory']/*[local-name()='ID']]]></fieldDescription>
+	</field>
+	<field name="BT152" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='Item']/*[local-name()='ClassifiedTaxCategory']/*[local-name()='Percent']]]></fieldDescription>
+	</field>
+	<field name="BT146" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='Price']/*[local-name()='PriceAmount']]]></fieldDescription>
+	</field>
+	<field name="BT149" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='Price']/*[local-name()='BaseQuantity']]]></fieldDescription>
+	</field>
+	<field name="BT126" class="java.lang.String">
+		<fieldDescription><![CDATA[*[local-name()='ID']]]></fieldDescription>
+	</field>
+	<field name="field1" class="java.lang.String"/>
+	<variable name="v8" class="java.lang.Integer" calculation="Count">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="v7" class="java.lang.Integer" calculation="Count">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="v6" class="java.lang.Integer" calculation="Count">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="v5" class="java.lang.Integer" calculation="Count">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="v4" class="java.lang.Integer" calculation="Count">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="v3" class="java.lang.Integer" calculation="Count">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="v2" class="java.lang.Integer" calculation="Count">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="v1" class="java.lang.Integer" calculation="Count">
+		<initialValueExpression><![CDATA[0]]></initialValueExpression>
+	</variable>
+	<variable name="v0" class="java.lang.String" resetType="None">
+		<variableExpression><![CDATA[$F{BT126}]]></variableExpression>
+		<initialValueExpression><![CDATA["0"]]></initialValueExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<columnHeader>
+		<band splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band splitType="Stretch"/>
+		<band height="5">
+			<subreport isUsingCache="true">
+				<reportElement positionType="Float" x="0" y="0" width="361" height="5" isRemoveLineWhenBlank="true"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="L_NO">
+					<subreportParameterExpression><![CDATA[$F{BT126}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)
+$P{REPORT_DATA_SOURCE}).subDataSource("//*[local-name()='InvoiceLine']/*[local-name()='InvoicePeriod']")]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "//factura_lperioada.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band/>
+		<band/>
+		<band height="5">
+			<subreport isUsingCache="true">
+				<reportElement positionType="Float" x="0" y="0" width="361" height="5" isRemoveLineWhenBlank="true"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="L_NO">
+					<subreportParameterExpression><![CDATA[$F{BT126}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)
+$P{REPORT_DATA_SOURCE}).subDataSource("//*[local-name()='InvoiceLine']/*[local-name()='Note']")]]></dataSourceExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "//factura_lnota.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band height="5">
+			<subreport isUsingCache="true">
+				<reportElement positionType="Float" x="0" y="0" width="361" height="5" isRemoveLineWhenBlank="true"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="L_NO">
+					<subreportParameterExpression><![CDATA[$F{BT126}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)
+$P{REPORT_DATA_SOURCE}).subDataSource("//*[local-name()='InvoiceLine']/*[local-name()='AccountingCost']")]]></dataSourceExpression>
+				<returnValue subreportVariable="REPORT_COUNT" toVariable="v3"/>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "//factura_lrefcontabila.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band/>
+		<band height="5">
+			<subreport isUsingCache="true">
+				<reportElement positionType="Float" x="0" y="0" width="361" height="5" isRemoveLineWhenBlank="true"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="L_NO">
+					<subreportParameterExpression><![CDATA[$F{BT126}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)
+$P{REPORT_DATA_SOURCE}).subDataSource("//*[local-name()='InvoiceLine']/*[local-name()='OrderLineReference']")]]></dataSourceExpression>
+				<returnValue subreportVariable="REPORT_COUNT" toVariable="v4"/>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "//factura_lorderref.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band/>
+		<band height="5">
+			<subreport isUsingCache="true">
+				<reportElement positionType="Float" x="0" y="0" width="361" height="5" isRemoveLineWhenBlank="true"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="L_NO">
+					<subreportParameterExpression><![CDATA[$F{BT126}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)
+$P{REPORT_DATA_SOURCE}).subDataSource("//*[local-name()='InvoiceLine']/*[local-name()='Item']/*[local-name()='SellersItemIdentification']")]]></dataSourceExpression>
+				<returnValue subreportVariable="REPORT_COUNT" toVariable="v5"/>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "//factura_lrefv.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band/>
+		<band/>
+		<band/>
+		<band/>
+		<band height="5">
+			<subreport isUsingCache="true">
+				<reportElement positionType="Float" x="0" y="0" width="361" height="5" isRemoveLineWhenBlank="true"/>
+				<subreportParameter name="SUBREPORT_DIR">
+					<subreportParameterExpression><![CDATA[$P{SUBREPORT_DIR}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="L_NO">
+					<subreportParameterExpression><![CDATA[$F{BT126}]]></subreportParameterExpression>
+				</subreportParameter>
+				<dataSourceExpression><![CDATA[((net.sf.jasperreports.engine.data.JRXmlDataSource)
+$P{REPORT_DATA_SOURCE}).subDataSource("//*[local-name()='InvoiceLine']/*[local-name()='Item']/*[local-name()='BuyersItemIdentification']")]]></dataSourceExpression>
+				<returnValue subreportVariable="REPORT_COUNT" toVariable="v6"/>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "//factura_lrefc.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+		<band/>
+		<band/>
+		<band/>
+		<band/>
+		<band/>
+		<band height="20"/>
+		<band height="1"/>
+	</detail>
+</jasperReport>

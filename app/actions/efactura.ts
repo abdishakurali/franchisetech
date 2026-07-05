@@ -41,9 +41,28 @@ function canManage(role: string | null | undefined) {
   return ["owner", "manager"].includes(role ?? "");
 }
 
+function roTaxId(cui: string | null | undefined, vatRegistered: boolean): string {
+  const clean = (cui ?? "").replace(/^RO/i, "").replace(/[^0-9]/g, "");
+  if (!clean) return "—";
+  return vatRegistered ? `RO${clean}` : clean;
+}
+
+async function assertEfacturaInstalled(
+  supabase: Awaited<ReturnType<typeof getKitchenOpsContext>>["supabase"],
+  orgId: string,
+): Promise<void> {
+  const { data: org } = await supabase
+    .from("organisations")
+    .select("efactura_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
+  if (!org?.efactura_enabled) throw new Error("Instalează e-Factura din Marketplace înainte de a emite facturi.");
+}
+
 export async function createInvoiceDraft(input: CreateInvoiceDraftInput): Promise<{ id: string }> {
   const { supabase, orgId, membership, user } = await getKitchenOpsContext();
   if (!canManage(membership.role)) redirect("/app/invoices");
+  await assertEfacturaInstalled(supabase, orgId);
   await assertEntitlement(orgId, "fiscal.efactura");
   const activeVatRates = await listActiveVatRates(supabase, orgId);
   if (activeVatRates.length > 0) {
@@ -95,6 +114,7 @@ export async function generateInvoiceXml(invoiceId: string): Promise<{
   errors: string[];
 }> {
   const { supabase, orgId } = await getKitchenOpsContext();
+  await assertEfacturaInstalled(supabase, orgId);
   await assertEntitlement(orgId, "fiscal.efactura");
 
   const { data: inv, error } = await supabase
@@ -107,16 +127,17 @@ export async function generateInvoiceXml(invoiceId: string): Promise<{
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("name,anaf_cif,anaf_vat_registered,country_code")
+    .select("name,company_legal_name,company_address,anaf_cif,fiscalnet_cif,anaf_vat_registered,country_code")
     .eq("id", orgId)
     .single();
 
   const sellerAddress: UblAddress = {
-    street: "—",
+    street: org?.company_address ?? "—",
     city: "România",
     countrySubentity: "RO-B",
     countryCode: "RO",
   };
+  const sellerCui = org?.anaf_cif ?? org?.fiscalnet_cif ?? null;
 
   const buyerAddr = inv.buyer_address as UblAddress | null;
   const buyerAddress: UblAddress = buyerAddr ?? {
@@ -131,8 +152,8 @@ export async function generateInvoiceXml(invoiceId: string): Promise<{
     issueDate: inv.issue_date,
     dueDate: inv.due_date ?? undefined,
     seller: {
-      name: org?.name ?? "—",
-      taxId: org?.anaf_vat_registered ? `RO${org.anaf_cif}` : (org?.anaf_cif ?? "—"),
+      name: org?.company_legal_name ?? org?.name ?? "—",
+      taxId: roTaxId(sellerCui, Boolean(org?.anaf_vat_registered)),
       address: sellerAddress,
     },
     buyer: {
@@ -157,6 +178,7 @@ export async function generateInvoiceXml(invoiceId: string): Promise<{
 
 export async function submitInvoiceToAnaf(invoiceId: string): Promise<{ indexIncarcare: number }> {
   const { supabase, orgId } = await getKitchenOpsContext();
+  await assertEfacturaInstalled(supabase, orgId);
   await assertEntitlement(orgId, "fiscal.efactura");
 
   const { data: inv } = await supabase
@@ -172,10 +194,11 @@ export async function submitInvoiceToAnaf(invoiceId: string): Promise<{ indexInc
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("anaf_cif")
+    .select("anaf_cif,fiscalnet_cif")
     .eq("id", orgId)
     .single();
-  if (!org?.anaf_cif) throw new Error("ANAF CIF not configured in settings");
+  const orgCui = org?.anaf_cif ?? org?.fiscalnet_cif ?? null;
+  if (!orgCui) throw new Error("ANAF CIF not configured in settings");
 
   const accessToken = await getOrgAccessToken(orgId);
 
@@ -191,7 +214,7 @@ export async function submitInvoiceToAnaf(invoiceId: string): Promise<{ indexInc
     .update({ upload_status: "pending", updated_at: new Date().toISOString() })
     .eq("id", invoiceId);
 
-  const uploadResult = await uploadDocument(xml, org.anaf_cif, accessToken);
+  const uploadResult = await uploadDocument(xml, orgCui, accessToken);
 
   await supabase
     .from("efactura_invoices")
@@ -221,15 +244,18 @@ export async function connectAnafAccount(
   // Fetch the CIF from the org settings (must have been saved first)
   const supabase = (await import("@/lib/supabase/server")).createClient;
   const sb = await supabase();
-  const { data: org } = await sb.from("organisations").select("anaf_cif").eq("id", orgId).single();
-  if (!org?.anaf_cif) throw new Error("Set your CIF in settings before connecting ANAF");
+  const { data: org } = await sb.from("organisations").select("anaf_cif,fiscalnet_cif").eq("id", orgId).single();
+  const orgCui = org?.anaf_cif ?? org?.fiscalnet_cif ?? null;
+  if (!orgCui) throw new Error("Set your CIF in settings before connecting ANAF");
 
-  await storeOrgTokens(orgId, org.anaf_cif, tokens);
+  await storeOrgTokens(orgId, orgCui, tokens);
 }
 
 export async function disconnectAnaf(): Promise<void> {
   const { orgId, membership } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return;
+  const { supabase } = await getKitchenOpsContext();
+  await assertEfacturaInstalled(supabase, orgId);
   await assertEntitlement(orgId, "fiscal.efactura");
   await revokeOrgTokens(orgId);
   revalidatePath("/app/settings");
@@ -253,6 +279,7 @@ export async function lookupBuyerByCif(cif: string): Promise<{
 export async function saveAnafSettings(formData: FormData): Promise<void> {
   const { supabase, orgId, membership } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return;
+  await assertEfacturaInstalled(supabase, orgId);
   await assertEntitlement(orgId, "fiscal.efactura");
 
   const anaf_cif = (formData.get("anaf_cif") as string ?? "").trim();
@@ -260,7 +287,11 @@ export async function saveAnafSettings(formData: FormData): Promise<void> {
 
   await supabase
     .from("organisations")
-    .update({ anaf_cif: anaf_cif || null, anaf_vat_registered })
+    .update({
+      anaf_cif: anaf_cif || null,
+      fiscalnet_cif: anaf_cif || null,
+      anaf_vat_registered,
+    })
     .eq("id", orgId);
 
   revalidatePath("/app/settings");

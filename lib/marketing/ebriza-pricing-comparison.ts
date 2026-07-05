@@ -64,7 +64,7 @@ export const ebrizaPricingComparisonRows: readonly EbrizaPricingRow[] = [
   },
   {
     featureKey: "kitchenDisplay",
-    franchisetech: "included",
+    franchisetech: { addon: "+€19/lună" },
     ebrizaPro: { addon: "+€19/lună" },
     ebrizaPremium: { addon: "+€19/lună" },
     emphasize: true,
@@ -97,7 +97,7 @@ export const ebrizaPricingComparisonRows: readonly EbrizaPricingRow[] = [
   },
   {
     featureKey: "realMonthlyCost",
-    franchisetech: { total: "€79" },
+    franchisetech: { total: "€118" },
     ebrizaPro: { total: "€107+" },
     ebrizaPremium: { total: "€157+" },
     isTotal: true,

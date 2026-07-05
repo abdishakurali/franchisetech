@@ -1,5 +1,6 @@
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { PRODUCT_EXPORT_SELECT } from "@/lib/supabase/product-selects";
+import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 
 const HEADERS = ["name","category","pos_category","sku","barcode","unit","sale_price_gross","cost_price","vat_rate","available_in_pos","is_ingredient","is_stock_tracked","current_stock_qty","reorder_level","image_url"];
 
@@ -27,6 +28,13 @@ function esc(v: unknown) {
 
 export async function GET() {
   const { supabase, orgId } = await getActiveOrg();
+  try {
+    await assertEntitlement(orgId, "products.csv", { write: false });
+  } catch (error) {
+    const response = entitlementDeniedResponse(error);
+    if (response) return response;
+    throw error;
+  }
   const { data } = await supabase.from("products").select(PRODUCT_EXPORT_SELECT).eq("organisation_id", orgId).order("name");
   const rows = (data ?? []) as unknown as ExportProduct[];
   const body = [HEADERS.join(","), ...rows.map((p) => [

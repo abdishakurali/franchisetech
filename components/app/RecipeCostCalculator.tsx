@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Search, X } from "lucide-react";
 import { addRecipeFromProducts, createIngredientInline } from "@/app/actions/kitchenops";
+import { formatQty } from "@/lib/recipe-costing";
 
 type IngredientProduct = {
   id: string;
@@ -89,7 +90,7 @@ function IngredientPicker({
         className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-left flex items-center justify-between gap-2 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
       >
         <span className={selected ? "text-slate-900" : "text-slate-400"}>
-          {selected ? `${selected.name} (${selected.unit_of_measure ?? "each"})` : "— choose stock item —"}
+          {selected ? `${selected.name} (${selected.unit_of_measure ?? "buc"})` : "— alege articol din stoc —"}
         </span>
         {selected && (
           <span className="text-slate-400 text-xs shrink-0">
@@ -106,7 +107,7 @@ function IngredientPicker({
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search stock items…"
+              placeholder="Caută articole din stoc…"
               className="flex-1 text-sm outline-none bg-transparent"
             />
             {query && (
@@ -124,7 +125,7 @@ function IngredientPicker({
                   onClick={() => selectProduct("")}
                   className="w-full px-3 py-2 text-sm text-left text-slate-400 hover:bg-slate-50"
                 >
-                  — none —
+                  — niciunul —
                 </button>
               </li>
             )}
@@ -135,13 +136,13 @@ function IngredientPicker({
                   onClick={() => selectProduct(p.id)}
                   className={`w-full px-3 py-2 text-sm text-left hover:bg-blue-50 flex justify-between gap-2 ${p.id === value ? "bg-blue-50 font-medium text-blue-700" : "text-slate-700"}`}
                 >
-                  <span>{p.name} <span className="text-slate-400 font-normal">({p.unit_of_measure ?? "each"})</span></span>
-                  <span className="text-slate-400 shrink-0">€{Number(p.cost_price ?? 0).toFixed(4)}/unit</span>
+                  <span>{p.name} <span className="text-slate-400 font-normal">({p.unit_of_measure ?? "buc"})</span></span>
+                  <span className="text-slate-400 shrink-0">€{Number(p.cost_price ?? 0).toFixed(4)}/unitate</span>
                 </button>
               </li>
             ))}
             {!filtered.length && !query.trim() && (
-              <li className="px-3 py-3 text-sm text-slate-400 text-center">No stock items yet.</li>
+              <li className="px-3 py-3 text-sm text-slate-400 text-center">Niciun articol de stoc încă.</li>
             )}
             {/* Inline create option */}
             {query.trim() && !hasExactMatch && (
@@ -155,7 +156,7 @@ function IngredientPicker({
                   }}
                   className="w-full px-3 py-2.5 text-sm text-left text-blue-600 hover:bg-blue-50 font-medium"
                 >
-                  + Create &ldquo;{query.trim()}&rdquo; as new stock item
+                  + Creează &ldquo;{query.trim()}&rdquo; ca articol nou de stoc
                 </button>
               </li>
             )}
@@ -196,44 +197,44 @@ function InlineCreateModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">Create stock item</h3>
-          <p className="text-sm text-slate-500 mt-0.5">This item will be available as an ingredient in all products.</p>
+          <h3 className="text-lg font-semibold text-slate-900">Creează articol de stoc</h3>
+          <p className="text-sm text-slate-500 mt-0.5">Acest articol va fi disponibil ca ingredient în toate produsele.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <Label>Name *</Label>
+            <Label>Nume *</Label>
             <Input name="name" defaultValue={initialName} required autoFocus className="mt-1" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Unit</Label>
+              <Label>Unitate</Label>
               <select
                 name="unit_of_measure"
                 defaultValue="each"
                 className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
               >
-                <option value="each">each</option>
-                <option value="g">grams (g)</option>
-                <option value="kg">kilograms (kg)</option>
-                <option value="ml">millilitres (ml)</option>
-                <option value="l">litres (l)</option>
-                <option value="portion">portion</option>
+                <option value="each">bucată</option>
+                <option value="g">grame (g)</option>
+                <option value="kg">kilograme (kg)</option>
+                <option value="ml">mililitri (ml)</option>
+                <option value="l">litri (l)</option>
+                <option value="portion">porție</option>
               </select>
             </div>
             <div>
-              <Label>Cost per unit (€)</Label>
+              <Label>Cost per unitate (€)</Label>
               <Input name="cost_price" type="number" step="0.0001" min="0" defaultValue="0" className="mt-1" />
             </div>
           </div>
           <div>
-            <Label>Opening stock <span className="text-slate-400 font-normal">(optional)</span></Label>
+            <Label>Stoc inițial <span className="text-slate-400 font-normal">(opțional)</span></Label>
             <Input name="opening_stock" type="number" step="0.01" min="0" defaultValue="0" className="mt-1" />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-3 pt-1">
-            <Button type="button" variant="outline" onClick={onCancel} className="flex-1">Cancel</Button>
+            <Button type="button" variant="outline" onClick={onCancel} className="flex-1">Anulează</Button>
             <Button type="submit" disabled={isPending} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
-              {isPending ? "Creating…" : "Create & select"}
+              {isPending ? "Se creează…" : "Creează și selectează"}
             </Button>
           </div>
         </form>
@@ -326,13 +327,13 @@ export function RecipeCostCalculator({
 
       <form action={addRecipeFromProducts as unknown as (fd: FormData) => Promise<void>} className="space-y-5">
         {/* Hidden recipe name — auto-set to selected product name */}
-        <input type="hidden" name="name" value={recipeName || "Ingredients"} />
+        <input type="hidden" name="name" value={recipeName || "Ingrediente"} />
 
         {/* Finished product + batch size */}
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <Label>Product *</Label>
-            <p className="text-xs text-slate-500 mb-1 mt-0.5">Choose the product you sell.</p>
+            <Label>Produs *</Label>
+            <p className="text-xs text-slate-500 mb-1 mt-0.5">Alege produsul pe care îl vinzi.</p>
             <select
               name="product_id"
               required
@@ -340,7 +341,7 @@ export function RecipeCostCalculator({
               onChange={(e) => setSelectedProductId(e.target.value)}
               className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
             >
-              <option value="">— select product —</option>
+              <option value="">— alege produsul —</option>
               {sellableProducts.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} — €{Number(p.sale_price ?? 0).toFixed(2)}
@@ -349,7 +350,7 @@ export function RecipeCostCalculator({
             </select>
           </div>
           <div>
-            <Label>Portions per batch</Label>
+            <Label>Porții per rețetă</Label>
             <Input
               name="yield_qty"
               type="number"
@@ -359,7 +360,7 @@ export function RecipeCostCalculator({
               onChange={(e) => setYieldQty(e.target.value)}
               className="mt-1"
             />
-            <p className="text-xs text-slate-500 mt-0.5">How many portions this batch makes.</p>
+            <p className="text-xs text-slate-500 mt-0.5">Câte porții rezultă din această rețetă.</p>
           </div>
         </div>
 
@@ -367,27 +368,27 @@ export function RecipeCostCalculator({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Stock items used</Label>
-              <p className="text-xs text-slate-500 mt-0.5">How much of each ingredient goes into one batch.</p>
+              <Label>Articole de stoc folosite</Label>
+              <p className="text-xs text-slate-500 mt-0.5">Câtă cantitate din fiecare ingredient intră într-o rețetă.</p>
             </div>
           </div>
 
           {allIngredients.length === 0 ? (
             <div className="rounded-xl border border-dashed p-8 text-center">
-              <p className="text-sm text-slate-500 mb-3">No stock items yet.</p>
+              <p className="text-sm text-slate-500 mb-3">Niciun articol de stoc încă.</p>
               <p className="text-xs text-slate-400 mb-4">
-                Add stock items with unit and cost price to track ingredient costs.
+                Adaugă articole de stoc cu unitate și preț de cost pentru a urmări costul ingredientelor.
               </p>
               <Link href="/app/recipes/new">
-                <Button type="button" variant="outline" size="sm">Add first stock item</Button>
+                <Button type="button" variant="outline" size="sm">Adaugă primul articol de stoc</Button>
               </Link>
             </div>
           ) : (
             <>
               <div className="grid grid-cols-[1fr_100px_80px_32px] gap-2 px-1 text-xs text-slate-400 font-medium">
-                <span>Stock item</span>
-                <span className="text-right">Qty per batch</span>
-                <span className="text-right">Line cost</span>
+                <span>Articol de stoc</span>
+                <span className="text-right">Cantitate per rețetă</span>
+                <span className="text-right">Cost linie</span>
                 <span />
               </div>
 
@@ -409,7 +410,7 @@ export function RecipeCostCalculator({
                       />
                       {p && (
                         <p className="text-[10px] text-slate-400 mt-0.5 pl-1">
-                          Stock on hand: <span className={stock < qty * 5 ? "text-amber-600 font-medium" : ""}>{stock} {p.unit_of_measure ?? "each"}</span>
+                          Stoc disponibil: <span className={stock < qty * 5 ? "text-amber-600 font-medium" : ""}>{formatQty(stock)} {p.unit_of_measure ?? "buc"}</span>
                         </p>
                       )}
                     </div>
@@ -445,7 +446,7 @@ export function RecipeCostCalculator({
                 onClick={addRow}
                 className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 py-2 text-sm text-slate-500 hover:border-blue-300 hover:text-blue-600 transition-colors"
               >
-                <Plus className="h-4 w-4" />Add stock item
+                <Plus className="h-4 w-4" />Adaugă articol de stoc
               </button>
             </>
           )}
@@ -454,7 +455,7 @@ export function RecipeCostCalculator({
         {/* Live cost + can-make summary */}
         {filledRows.length > 0 && (
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-            <p className="text-sm font-semibold text-slate-700">Cost and margin</p>
+            <p className="text-sm font-semibold text-slate-700">Cost și marjă</p>
 
             <div className="space-y-1">
               {filledRows.map((row, i) => {
@@ -464,7 +465,7 @@ export function RecipeCostCalculator({
                 const cost = qty * Number(p.cost_price ?? 0);
                 return (
                   <div key={i} className="flex justify-between text-sm text-slate-600">
-                    <span>{p.name} × {qty} {p.unit_of_measure ?? "each"}</span>
+                    <span>{p.name} × {qty} {p.unit_of_measure ?? "buc"}</span>
                     <span className="tabular-nums">{money(cost)}</span>
                   </div>
                 );
@@ -473,25 +474,25 @@ export function RecipeCostCalculator({
 
             <div className="border-t border-slate-200 pt-3 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Total ingredient cost ({yieldQty} portions)</span>
+                <span className="text-slate-600">Cost total ingrediente ({yieldQty} porții)</span>
                 <strong className="tabular-nums">{money(totalCost)}</strong>
               </div>
               {Number(yieldQty) > 1 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Cost per portion</span>
+                  <span className="text-slate-600">Cost per porție</span>
                   <strong className="tabular-nums">{money(costPerUnit)}</strong>
                 </div>
               )}
               {salePrice > 0 && (
                 <>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Sale price</span>
+                    <span className="text-slate-600">Preț vânzare</span>
                     <strong className="tabular-nums">{money(salePrice)}</strong>
                   </div>
                   <div className={`flex justify-between text-base font-bold pt-1 border-t border-slate-200 ${
                     marginPct >= 60 ? "text-green-700" : marginPct >= 30 ? "text-amber-600" : "text-red-600"
                   }`}>
-                    <span>Gross margin</span>
+                    <span>Marjă brută</span>
                     <span className="tabular-nums">{money(margin)} ({marginPct.toFixed(1)}%)</span>
                   </div>
                 </>
@@ -501,8 +502,8 @@ export function RecipeCostCalculator({
                 <div className="mt-3 pt-3 border-t border-slate-200 rounded-lg bg-white border p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-700">Can make now</p>
-                      <p className="text-xs text-slate-400">Based on current stock levels</p>
+                      <p className="text-sm font-semibold text-slate-700">Poți prepara acum</p>
+                      <p className="text-xs text-slate-400">Pe baza stocului curent</p>
                     </div>
                     <div className="text-right">
                       <p className={`text-3xl font-bold leading-none ${
@@ -510,17 +511,17 @@ export function RecipeCostCalculator({
                       }`}>
                         {canMakeData.canMake}
                       </p>
-                      <p className="text-xs text-slate-400 mt-0.5">portions</p>
+                      <p className="text-xs text-slate-400 mt-0.5">porții</p>
                     </div>
                   </div>
                   {canMakeData.limitingProduct && canMakeData.canMake < 20 && (
                     <p className="text-xs text-amber-700 mt-2">
-                      ⚠ Limiting item: <strong>{canMakeData.limitingProduct.name}</strong> — only {Number(canMakeData.limitingProduct.current_stock_qty ?? 0)} {canMakeData.limitingProduct.unit_of_measure ?? "units"} left
+                      ⚠ Articol limitativ: <strong>{canMakeData.limitingProduct.name}</strong> — doar {Number(canMakeData.limitingProduct.current_stock_qty ?? 0)} {canMakeData.limitingProduct.unit_of_measure ?? "unități"} rămase
                     </p>
                   )}
                   {canMakeData.canMake === 0 && (
                     <p className="text-xs text-red-600 mt-1">
-                      Not enough stock. Purchase more or reduce batch size.
+                      Stoc insuficient. Achiziționează mai mult sau redu dimensiunea rețetei.
                     </p>
                   )}
                 </div>
@@ -530,13 +531,13 @@ export function RecipeCostCalculator({
         )}
 
         <div className="flex gap-3 pt-2 border-t border-slate-100">
-          <Link href="/app/recipes"><Button variant="outline" type="button">Cancel</Button></Link>
+          <Link href="/app/recipes"><Button variant="outline" type="button">Anulează</Button></Link>
           <Button
             type="submit"
             disabled={allIngredients.length === 0 || !selectedProductId || filledRows.length === 0}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            Save ingredients
+            Salvează ingredientele
           </Button>
         </div>
       </form>

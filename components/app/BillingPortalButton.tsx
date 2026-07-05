@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Loader2 } from "lucide-react";
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 export function BillingPortalButton() {
   const [loading, setLoading] = useState(false);
+  const { locale } = useAppI18n();
 
   async function openPortal() {
     setLoading(true);
@@ -20,7 +22,7 @@ export function BillingPortalButton() {
   return (
     <Button onClick={openPortal} disabled={loading} variant="outline">
       {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ExternalLink className="h-4 w-4 mr-2" />}
-      Manage billing
+      {locale === "ro" ? "Gestionează facturarea" : "Manage billing"}
     </Button>
   );
 }

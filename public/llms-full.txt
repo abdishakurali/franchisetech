@@ -68,8 +68,18 @@
 
 ## Industries
 
-- Cafes: https://franchisetech.ro/industries/cafes
+### Romania verticals (primary SEO)
+
+- Cafés: https://franchisetech.ro/industries/cafes
 - Restaurants: https://franchisetech.ro/industries/restaurants
+- Takeaway & fast food: https://franchisetech.ro/industries/takeaways
+- Bars & pubs: https://franchisetech.ro/industries/bar-pub
+- Patisseries & bakeries: https://franchisetech.ro/industries/patisserie-bakery
+- Food trucks: https://franchisetech.ro/industries/food-trucks
+- Multi-location: https://franchisetech.ro/industries/multi-site
+
+### Markets & other
+
 - Romania: https://franchisetech.ro/industries/romania
 - Ireland: https://franchisetech.ro/industries/ireland
 - Retail shops: https://franchisetech.ro/industries/retail-shops

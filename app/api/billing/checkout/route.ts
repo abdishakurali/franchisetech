@@ -42,6 +42,8 @@ export async function POST(request: Request) {
     .from("organisation_members")
     .select("organisation_id")
     .eq("user_id", user.id)
+    .or("status.is.null,status.eq.active")
+    .order("created_at", { ascending: true })
     .limit(1)
     .maybeSingle();
 
@@ -76,6 +78,7 @@ export async function POST(request: Request) {
     .select("stripe_customer_id")
     .eq("organisation_id", orgId)
     .not("stripe_customer_id", "is", null)
+    .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
@@ -111,6 +114,24 @@ export async function POST(request: Request) {
 
   // Get or create Stripe customer
   let customerId = existingSub?.stripe_customer_id ?? null;
+  let customerWasResetForCurrentStripeMode = false;
+  if (customerId) {
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+      if (customer.deleted) {
+        customerId = null;
+        customerWasResetForCurrentStripeMode = true;
+      }
+    } catch (error) {
+      const stripeError = error as { code?: string };
+      if (stripeError.code === "resource_missing") {
+        customerId = null;
+        customerWasResetForCurrentStripeMode = true;
+      } else {
+        throw error;
+      }
+    }
+  }
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: user.email ?? undefined,
@@ -121,19 +142,35 @@ export async function POST(request: Request) {
       },
     });
     customerId = customer.id;
-    // Persist it immediately so concurrent requests reuse the same customer
-    await service
-      .from("billing_subscriptions")
-      .upsert(
-        {
-          organisation_id: orgId,
-          stripe_customer_id: customerId,
-          plan,
-          status: "incomplete",
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "organisation_id" }
-      );
+    const pendingPayload = {
+      organisation_id: orgId,
+      stripe_customer_id: customerId,
+      plan,
+      status: "incomplete",
+      updated_at: new Date().toISOString(),
+    };
+
+    // Persist it immediately so concurrent requests reuse the same customer.
+    // organisation_id is not unique, so update a pending row or insert explicitly.
+    const { data: pendingSub } = customerWasResetForCurrentStripeMode
+      ? { data: null }
+      : await service
+          .from("billing_subscriptions")
+          .select("id")
+          .eq("organisation_id", orgId)
+          .eq("status", "incomplete")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+    const { error: pendingError } = pendingSub?.id
+      ? await service.from("billing_subscriptions").update(pendingPayload).eq("id", pendingSub.id)
+      : await service.from("billing_subscriptions").insert(pendingPayload);
+
+    if (pendingError) {
+      console.error("[billing] failed to persist checkout customer", pendingError);
+      return NextResponse.json({ error: "Could not prepare billing account. Try again." }, { status: 500 });
+    }
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://franchisetech.ro";

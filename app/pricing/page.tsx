@@ -13,6 +13,8 @@ import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
 import { marketFromMarketingLocale, pricingNotIncludedText } from "@/lib/billing/market";
 
+const demoUrl = process.env.NEXT_PUBLIC_DEMO_BOOKING_URL || null;
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getMarketingLocale();
   const t = getMarketingMessages(locale);
@@ -62,6 +64,17 @@ export default async function PricingPage() {
           })),
         }}
       />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: t.pricing.faqs.map(([q, a]) => ({
+            "@type": "Question",
+            name: q,
+            acceptedAnswer: { "@type": "Answer", text: a },
+          })),
+        }}
+      />
 
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl text-center">
@@ -71,7 +84,7 @@ export default async function PricingPage() {
           <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">{t.pricing.heroTitle}</h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">{t.pricing.heroText}</p>
 
-          <div className="mx-auto mt-8 grid max-w-2xl gap-3 sm:grid-cols-3">
+          <div className="mx-auto mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
             {heroStats.map((stat) => (
               <div key={stat} className="rounded-lg border border-slate-200 bg-white px-3 py-3">
                 <p className="text-sm font-medium leading-5 text-slate-700">{stat}</p>
@@ -79,14 +92,25 @@ export default async function PricingPage() {
             ))}
           </div>
 
-          <div className="mt-10 flex justify-center">
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
             <Link
               href="/signup?plan=pro"
-              className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-8 py-3.5 text-sm font-medium text-white transition hover:bg-blue-700"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-8 py-3.5 text-sm font-medium text-white transition hover:bg-blue-700 sm:w-auto"
             >
               {t.cta.getStarted} <ArrowRight className="h-4 w-4" />
             </Link>
+            {demoUrl && (
+              <a
+                href={demoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-3.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 sm:w-auto"
+              >
+                {t.cta.bookDemo}
+              </a>
+            )}
           </div>
+
         </div>
       </section>
 
@@ -95,6 +119,7 @@ export default async function PricingPage() {
           <PricingPlansSection
             variant="marketing"
             market={market}
+            locale={locale}
             labels={{
               mainPlan: t.pricing.mainPlan,
               seeFeatures: t.pricing.seeFeatures,

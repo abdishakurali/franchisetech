@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import type { CSSProperties } from "react";
 
 type Option = {
   value: string;
@@ -32,6 +34,9 @@ export function SearchableSelect({
   const [value, setValue] = useState(initial);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
+  const portalTarget = typeof document === "undefined" ? null : document.body;
   const selected = options.find((option) => option.value === value);
   const displayValue = open ? query : selected?.label ?? placeholder;
   const filtered = useMemo(() => {
@@ -47,10 +52,40 @@ export function SearchableSelect({
     setOpen(false);
   }
 
+  function updateMenuPosition() {
+    const rect = inputRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const gap = 4;
+    const below = window.innerHeight - rect.bottom - 12;
+    const above = rect.top - 12;
+    const openAbove = below < 180 && above > below;
+    const maxHeight = Math.max(160, Math.min(320, openAbove ? above - gap : below - gap));
+    setMenuStyle({
+      position: "fixed",
+      left: rect.left,
+      top: openAbove ? undefined : rect.bottom + gap,
+      bottom: openAbove ? window.innerHeight - rect.top + gap : undefined,
+      width: Math.max(rect.width, 220),
+      maxHeight,
+    });
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    updateMenuPosition();
+    window.addEventListener("resize", updateMenuPosition);
+    window.addEventListener("scroll", updateMenuPosition, true);
+    return () => {
+      window.removeEventListener("resize", updateMenuPosition);
+      window.removeEventListener("scroll", updateMenuPosition, true);
+    };
+  }, [open]);
+
   return (
     <div className={`relative min-w-0 ${className}`}>
       <input type="hidden" name={name} value={value} required={required} readOnly />
       <input
+        ref={inputRef}
         type="text"
         value={displayValue}
         onChange={(e) => {
@@ -71,8 +106,11 @@ export function SearchableSelect({
         autoComplete="off"
         className="h-10 w-full min-w-0 truncate rounded-lg border border-slate-200 bg-white px-3 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
       />
-      {open && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+      {open && portalTarget && createPortal(
+        <div
+          style={menuStyle}
+          className="z-[9999] overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg"
+        >
           {!required && (
             <button
               type="button"
@@ -103,7 +141,8 @@ export function SearchableSelect({
           {filtered.length === 0 && (
             <div className="px-3 py-2 text-xs text-slate-400">No matching option</div>
           )}
-        </div>
+        </div>,
+        portalTarget,
       )}
     </div>
   );

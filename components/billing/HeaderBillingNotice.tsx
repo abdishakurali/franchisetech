@@ -75,11 +75,19 @@ export function HeaderBillingNotice({ subStatus, daysLeft, t, className }: Props
   }
 
   const effectiveDays = subStatus?.trialDaysLeft ?? daysLeft;
+  if (effectiveDays > 15) return null;
+  const trialUrgent = effectiveDays <= 5;
 
   return (
     <Link
       href="/app/billing"
-      className={cn(chipClass, "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100", className)}
+      className={cn(
+        chipClass,
+        trialUrgent
+          ? "border-red-200 bg-red-50 text-red-800 hover:bg-red-100"
+          : "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100",
+        className,
+      )}
     >
       <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
       <span className="truncate">{t.shell.trialDaysLeft(effectiveDays)}</span>

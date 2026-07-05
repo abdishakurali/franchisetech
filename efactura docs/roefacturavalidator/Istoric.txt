@@ -1,0 +1,12 @@
+01.04.2024 - Versiunea 1.0.0
+  Lansare aplicatie
+07.05.2024 - Versiunea 1.1.0
+  Implementare interactiune din linie de comanda
+05.06.2024 - Versiunea 1.2.0
+  Validare continut director din linie de comanda
+  Generare fisier raspuns individual
+  Actualizare versiune schematron
+27.08.2024 - Versiunea 1.2.1
+  Modificare mesajului pentru fisiere care nu sunt formatate UTF-8
+12.12.2024 - Versiunea 1.3.0
+  Pentru raportarea B2C, se permite utilizarea identificatorului CNP = 13 de 0

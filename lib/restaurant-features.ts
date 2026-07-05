@@ -32,8 +32,8 @@ export const RESTAURANT_FEATURES: Record<RestaurantFeatureKey, { label: string; 
   },
   table_service_enabled: {
     label: "Table management",
-    description: "Add table labels and prepare for table management workflows.",
-    ready: false,
+    description: "Floor plan, table tabs, and checkout from POS.",
+    ready: true,
   },
   kitchen_stations_enabled: {
     label: "Prep stations",

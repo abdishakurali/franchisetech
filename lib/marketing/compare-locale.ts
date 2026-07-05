@@ -65,12 +65,12 @@ export function compareHubFaqs(locale: MarketingLocale): CompareHubFaq[] {
       {
         question: "Care e cea mai bună alternativă POS în România?",
         answer:
-          "Depinde de prioritate: facturare (SmartBill/Oblio/Saga), hardware plăți (Square/SumUp) sau operațiuni zilnice (POS + stoc + rețete + închidere casă). franchisetech țintește ultimul — comparați pe paginile Ebriza, SmartBill, Oblio și Bit-Soft.",
+          "Depinde de prioritate: facturare (SmartBill/Oblio/Saga), hardware plăți (Square/SumUp) sau operațiuni zilnice (POS + stoc + rețete + Glovo/Bolt + închidere casă). franchisetech țintește ultimul — comparați pe paginile Ebriza, NexusERP, Boogit, Expressoft, rKeeper și Bit-Soft.",
       },
       {
         question: "De ce unii vânzători POS taxează extra rapoartele?",
         answer:
-          "Unele platforme listă ~49€/locație, apoi vând Insights sau rapoarte custom ca add-on (~19€/lună). franchisetech include vânzări, raport Z și TVA în Starter — comparați costul lunar total. Vezi /compare/ebriza pentru un exemplu concret.",
+          "Unele platforme listă ~49€/locație, apoi vând Insights sau rapoarte custom ca modul separat (~19€/lună). franchisetech include vânzări, raport Z și TVA în Starter — comparați costul lunar total. Vezi /compare/ebriza pentru un exemplu concret.",
       },
       {
         question: "Pot schimba POS-ul fără să pierd setup-ul fiscal?",
@@ -93,7 +93,7 @@ export function compareHubFaqs(locale: MarketingLocale): CompareHubFaq[] {
     {
       question: "Why do some POS vendors charge extra for reports?",
       answer:
-        "Some platforms list €49/location then sell Insights or custom reporting as a paid add-on (often ~€19/month). franchisetech includes sales, Z-style till close, and VAT reports in Starter — compare total monthly cost. See /compare/ebriza for a worked example.",
+        "Some platforms list €49/location then sell Insights or custom reporting as a separate module (often ~€19/month). franchisetech includes sales, Z-style till close, and VAT reports in Starter — compare total monthly cost. See /compare/ebriza for a worked example.",
     },
     {
       question: "Can I switch POS without losing my fiscal setup?",

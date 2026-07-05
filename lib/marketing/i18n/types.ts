@@ -12,6 +12,18 @@ export type SeoLocaleFields = Pick<
   | "sections"
   | "faqs"
   | "related"
+  | "heroBefore"
+  | "heroHighlight"
+  | "heroAfter"
+  | "heroSubheadline"
+  | "painPoints"
+  | "featureRows"
+  | "competitorSlug"
+  | "competitorRows"
+  | "testimonial"
+  | "showcase"
+  | "ctaTitle"
+  | "ctaSubtitle"
 >;
 
 export type SeoRoOverrides = Partial<SeoLocaleFields>;

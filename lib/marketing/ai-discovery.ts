@@ -1,6 +1,7 @@
 /** Machine-readable entity facts for AI search / answer engines. Keep factual — no fabricated metrics. */
 import { comparisonPages } from "@/lib/marketing/comparisons";
 import { SITE_URL } from "@/lib/marketing/seo";
+import { pricingPlans } from "@/lib/billing/plans";
 
 export const AI_ENTITY = {
   name: "franchisetech",
@@ -20,7 +21,7 @@ export const AI_ENTITY = {
   sitemapUrl: `${SITE_URL}/sitemap.xml`,
   romanianCapabilities: [
     "Display in lei (RON)",
-    "Romanian TVA rates 19%, 9%, 5%, 0%",
+    "Romanian TVA rates 21%, 11%, 5%, 0%",
     "FiscalNet fiscal receipt integration when enabled and configured",
     "Unlimited team members on paid plans",
   ],
@@ -53,12 +54,21 @@ export function aiEntityJsonLd() {
     operatingSystem: "Web browser",
     description: AI_ENTITY.description,
     inLanguage: AI_ENTITY.languages,
-    offers: {
+    offers: pricingPlans.map((plan) => ({
       "@type": "Offer",
-      url: AI_ENTITY.pricingUrl,
-      priceCurrency: "EUR",
-      description: AI_ENTITY.pricingModel,
-    },
+      name: plan.name,
+      price: String(plan.amountCents / 100),
+      priceCurrency: plan.currency.toUpperCase(),
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        price: String(plan.amountCents / 100),
+        priceCurrency: plan.currency.toUpperCase(),
+        unitText: "MONTH",
+        billingDuration: "P1M",
+      },
+      url: `${SITE_URL}/signup?plan=${plan.id}`,
+      availability: "https://schema.org/InStock",
+    })),
     featureList: [
       "Point of sale register",
       "Stock and purchase tracking",

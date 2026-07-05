@@ -1,6 +1,6 @@
 // POST /api/cron/owner-digest
 // Requires: Authorization: Bearer <CRON_SECRET>
-// Schedule via n8n or server crontab every hour (sends within 60-min window after configured time).
+// Schedule via n8n or server crontab every 5 minutes (sends within a tight window after configured time).
 // Uses SUPABASE_SERVICE_ROLE_KEY + SECURITY DEFINER RPCs.
 
 import { NextRequest, NextResponse } from "next/server";
@@ -8,6 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 import { fetchOwnerDigestData } from "@/lib/owner-digest/fetch";
 import { sendOwnerDigestEmail } from "@/lib/email/owner-digest";
 import { isOwnerDigestDue, ownerDigestWindowStart } from "@/lib/owner-digest/schedule";
+import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ type DigestOrgRow = {
   owner_digest_timezone: string;
   owner_digest_recipients: string[];
   owner_digest_last_sent_at: string | null;
+  business_day_cutoff_time: string | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -51,12 +53,22 @@ export async function POST(req: NextRequest) {
   }
 
   let checked = 0;
+  let due = 0;
   let sent = 0;
   let failed = 0;
   let skipped = 0;
+  let locked = 0;
+  let recipientsSent = 0;
+  let recipientsFailed = 0;
 
   for (const row of (orgs as DigestOrgRow[]) ?? []) {
     checked++;
+
+    const entitled = await hasEntitlement(row.organisation_id, "owner_digest.enabled", { write: false });
+    if (!entitled) {
+      skipped++;
+      continue;
+    }
 
     const recipients = row.owner_digest_recipients ?? [];
     if (!recipients.length) {
@@ -78,9 +90,24 @@ export async function POST(req: NextRequest) {
       skipped++;
       continue;
     }
+    due++;
 
     const tz = schedule.owner_digest_timezone;
-    const windowStart = ownerDigestWindowStart(frequency, now, tz);
+    const windowStart = ownerDigestWindowStart(frequency, now, tz, row.business_day_cutoff_time);
+
+    const { data: claimed, error: claimError } = await supabase.rpc("claim_owner_digest_window", {
+      p_organisation_id: row.organisation_id,
+      p_window_start: windowStart.toISOString(),
+    });
+    if (claimError) {
+      failed++;
+      continue;
+    }
+    if (!claimed) {
+      locked++;
+      skipped++;
+      continue;
+    }
 
     try {
       const digestData = await fetchOwnerDigestData(supabase, {
@@ -90,6 +117,7 @@ export async function POST(req: NextRequest) {
         currency: row.currency_code || "EUR",
         frequency,
         timeZone: tz,
+        businessDayCutoffTime: row.business_day_cutoff_time,
         referenceNow: now,
       });
 
@@ -108,28 +136,49 @@ export async function POST(req: NextRequest) {
       }
 
       if (result.success) {
+        await supabase.rpc("log_owner_digest_send", {
+          p_organisation_id: row.organisation_id,
+          p_window_start: windowStart.toISOString(),
+          p_recipient: "__lock__",
+          p_subject: result.subject ?? "",
+          p_status: "sent",
+          p_provider_message_id: result.messageId ?? null,
+          p_error_message: null,
+        });
         await supabase.rpc("mark_owner_digest_sent", {
           p_organisation_id: row.organisation_id,
           p_sent_at: now.toISOString(),
         });
         sent++;
+        recipientsSent += recipients.length;
       } else {
+        await supabase.rpc("log_owner_digest_send", {
+          p_organisation_id: row.organisation_id,
+          p_window_start: windowStart.toISOString(),
+          p_recipient: "__lock__",
+          p_subject: result.subject ?? "",
+          p_status: "failed",
+          p_provider_message_id: result.messageId ?? null,
+          p_error_message: result.error ?? null,
+        });
         failed++;
+        recipientsFailed += recipients.length;
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
       await supabase.rpc("log_owner_digest_send", {
         p_organisation_id: row.organisation_id,
         p_window_start: windowStart.toISOString(),
-        p_recipient: recipients[0] ?? "",
+        p_recipient: "__lock__",
         p_subject: "",
         p_status: "failed",
         p_provider_message_id: null,
         p_error_message: message,
       });
       failed++;
+      recipientsFailed += recipients.length;
     }
   }
 
-  return NextResponse.json({ checked, sent, failed, skipped });
+  return NextResponse.json({ checked, due, sent, failed, skipped, locked, recipientsSent, recipientsFailed });
 }

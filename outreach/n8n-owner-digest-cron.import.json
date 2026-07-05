@@ -1,5 +1,8 @@
 {
-  "name": "Owner Digest — Hourly Cron",
+  "id": "ownerDigestCron01",
+  "name": "Owner Digest — 5 Minute Cron",
+  "active": true,
+  "versionId": "9cdb3a7b-43c8-4b06-9d18-0b78b8210ce1",
   "nodes": [
     {
       "parameters": {
@@ -7,13 +10,13 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "0 * * * *"
+              "expression": "*/5 * * * *"
             }
           ]
         }
       },
       "id": "schedule-trigger",
-      "name": "Every Hour",
+      "name": "Every 5 Minutes",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
@@ -35,7 +38,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const cron = $env.CRON_SECRET;\nif (!cron) throw new Error('CRON_SECRET missing from n8n environment variables');\n\nconst res = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://franchisetech.ro/api/cron/owner-digest',\n  headers: { Authorization: 'Bearer ' + cron },\n  json: true,\n  returnFullResponse: true,\n});\n\nif (res.statusCode !== 200) {\n  throw new Error('Digest cron failed: HTTP ' + res.statusCode + ' — ' + JSON.stringify(res.body));\n}\n\nconst { checked = 0, sent = 0, failed = 0, skipped = 0 } = res.body || {};\nreturn [{ json: { checked, sent, failed, skipped, ok: failed === 0 } }];"
+        "jsCode": "const cron = $env.CRON_SECRET;\nif (!cron) throw new Error('CRON_SECRET missing from n8n environment variables');\n\nconst res = await this.helpers.httpRequest({\n  method: 'POST',\n  url: 'https://franchisetech.ro/api/cron/owner-digest',\n  headers: { Authorization: 'Bearer ' + cron },\n  json: true,\n  returnFullResponse: true,\n});\n\nif (res.statusCode !== 200) {\n  throw new Error('Digest cron failed: HTTP ' + res.statusCode + ' — ' + JSON.stringify(res.body));\n}\n\nconst { checked = 0, due = 0, sent = 0, failed = 0, skipped = 0, recipientsSent = 0, recipientsFailed = 0 } = res.body || {};\nreturn [{ json: { checked, due, sent, failed, skipped, recipientsSent, recipientsFailed, ok: failed === 0 } }];"
       },
       "id": "call-digest",
       "name": "Call Owner Digest Cron",
@@ -51,7 +54,7 @@
         "resource": "message",
         "operation": "sendMessage",
         "chatId": "8505337023",
-        "text": "={{ '✉️ Owner digest: ' + $json.sent + ' sent, ' + $json.failed + ' failed, ' + $json.skipped + ' skipped (checked: ' + $json.checked + ')' }}",
+        "text": "={{ '✉️ Owner digest: ' + $json.sent + ' orgs sent / ' + $json.recipientsSent + ' recipients, ' + $json.failed + ' failed, ' + $json.skipped + ' skipped, ' + $json.due + ' due (checked: ' + $json.checked + ')' }}",
         "additionalFields": {
           "appendAttribution": false
         }
@@ -72,7 +75,7 @@
     }
   ],
   "connections": {
-    "Every Hour": {
+    "Every 5 Minutes": {
       "main": [
         [
           {

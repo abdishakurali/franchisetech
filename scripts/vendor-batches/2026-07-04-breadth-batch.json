@@ -1,0 +1,188 @@
+[
+  {
+    "slug": "golden-provider-distribution",
+    "legal_name": "Golden Provider Distribution SRL",
+    "cui": "28016198",
+    "category": "dairy",
+    "subcategories": ["branzeturi", "lactate"],
+    "description": "Distribuitor român de produse alimentare pentru HoReCa, cu depozite în Ștefăneștii de Jos (Ilfov), Constanța și Ciugud (Alba) — brânzeturi și lactate, carne, vinuri, cafea și peste 1000 de produse pentru bucătării profesionale.",
+    "website_url": "https://gpd.ro",
+    "hq_city": "Ștefăneștii de Jos",
+    "counties": ["ilfov", "constanta", "alba"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://gpd.ro/wp-content/uploads/2020/12/logo_large.png",
+    "contact_email": "contact@gpd.ro",
+    "contact_phone": "+40 722 609 623",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://gpd.ro/contact/", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://termene.ro/firma/28016198", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://www.risco.ro/verifica-firma", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "golden-meat-supplier",
+    "legal_name": "Golden Meat Supplier SRL",
+    "cui": "40065343",
+    "category": "meat_frozen",
+    "description": "Furnizor de carne și produse congelate pentru HoReCa din Constanța, acoperind sud-estul României.",
+    "website_url": "https://goldenmeat.ro",
+    "hq_city": "Constanța",
+    "counties": ["constanta"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://goldenmeat.ro/wp-content/uploads/2021/12/golden-meat-logo-negru.png",
+    "contact_email": "contact@goldenmeat.ro",
+    "contact_phone": "+40-725-569-580",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://goldenmeat.ro/termeni-si-conditii/", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://goldenmeat.ro/contact/", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "tsa-group",
+    "legal_name": "Grup T.S.A. Company SRL",
+    "brand_name": "TSA Group",
+    "cui": "16378500",
+    "category": "fresh_produce",
+    "description": "Distribuitor angro de legume și fructe proaspete pentru HoReCa și retail, cu depozite în Apahida/Dezmir (Cluj) și Târgu Mureș, flotă proprie refrigerată și livrare în toată țara.",
+    "website_url": "https://tsagroup.ro",
+    "hq_city": "Apahida",
+    "counties": ["cluj", "mures"],
+    "serves_all_counties": true,
+    "logo_source_url": "https://tsagroup.ro/assets/tsa-logo-new-0ehD-68S.png",
+    "contact_email": "comenzi.cluj@tsagroup.ro",
+    "contact_phone": "+40 752 766 766",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://tsagroup.ro/", "note": "livrare in toata tara claim on homepage", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://termene.ro/firma/16378500", "note": "OSIM trademark 'TSA Group' registered to this entity", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "sorla-distribution",
+    "legal_name": "Sorla SRL",
+    "brand_name": "Sorla Distribution",
+    "cui": "5782471",
+    "category": "alcoholic_beverages",
+    "description": "Distribuitor român de băuturi alcoolice și nealcoolice înființat în 1994, cu birouri în București și Constanța și un portofoliu de peste 1280 de branduri.",
+    "website_url": "https://sorla.ro",
+    "hq_city": "Constanța",
+    "counties": ["constanta", "bucuresti"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://sorla.ro/components/uploads/2018/09/logo-header.png",
+    "contact_email": "contact@sorla.ro",
+    "contact_phone": "+40 241 510 062",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://sorla.ro/termeni-si-conditii/", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://sorla.ro/contact/", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://termene.ro/firma/5782471", "note": "OSIM trademark 'Sorla Distribution' registered to this entity", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "sofipex",
+    "legal_name": "Sofipex Business Expert SRL",
+    "cui": "36029733",
+    "category": "packaging_disposables",
+    "description": "Producător și distribuitor de ambalaje alimentare și consumabile HoReCa (cutii pizza, caserole, pahare), cu showroom în Ploiești și livrare rapidă în toată țara.",
+    "website_url": "https://sofipex.ro",
+    "hq_city": "Ploiești",
+    "counties": ["prahova"],
+    "serves_all_counties": true,
+    "logo_source_url": "https://sofipex.ro/cdn/shop/files/LOGO_SOFIPEX_transparent_new.png",
+    "contact_email": "contact@sofipex.ro",
+    "contact_phone": "+40747687732",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://sofipex.ro/policies/contact-information", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "crisfoods",
+    "legal_name": "Oana Cristal Com SRL",
+    "brand_name": "CrisFoods",
+    "cui": "10252439",
+    "category": "bakery_pastry_ingredients",
+    "description": "Distribuitor de ingrediente și materii prime pentru cofetării, patiserii, brutării și gelaterii, cu distribuție directă în sud-vestul țării și livrare oriunde în România prin curier.",
+    "website_url": "https://www.crisfoods.ro",
+    "hq_city": "Slatina",
+    "counties": ["bucuresti", "mehedinti", "gorj", "dolj", "olt", "valcea", "arges", "teleorman"],
+    "serves_all_counties": true,
+    "logo_source_url": "https://www.crisfoods.ro/wp-content/uploads/2020/06/image2vector_ec6c44.svg",
+    "contact_email": "office@crisfood.ro",
+    "contact_phone": "0728 240 766",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.crisfoods.ro/", "note": "despre noi + zona de acoperire", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://targetare.ro", "note": "crisfoods.ro domain listed against Oana Cristal Com SRL, CUI 10252439", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "ideal-inox",
+    "legal_name": "Ideal Inox SRL",
+    "cui": "53646577",
+    "category": "kitchen_bar_equipment",
+    "description": "Producător și distribuitor direct de echipamente profesionale de bucătărie pentru HoReCa, cu showroom în Corbeanca (Ilfov) și livrare în toată țara.",
+    "website_url": "https://www.idealinox.ro",
+    "hq_city": "Corbeanca",
+    "counties": ["ilfov"],
+    "serves_all_counties": true,
+    "logo_source_url": "https://www.idealinox.ro/images/logos/1/logo.png",
+    "contact_email": "office@idealinox.ro",
+    "contact_phone": "0745 017 009",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.idealinox.ro/despre-noi/", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://www.idealinox.ro/contact-ideal-inox/", "checked_at": "2026-07-04"},
+      {"kind": "onrc", "url": "https://startup365.ro", "note": "CUI 53646577 matched to exact Str. Balanței nr. 44, Corbeanca address", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "horeca-hygiene",
+    "legal_name": "Horeca Hygiene SRL",
+    "cui": "29233438",
+    "category": "cleaning_hygiene",
+    "description": "Furnizor de produse profesionale de igienă și curățenie pentru HoReCa — detergenți, echipamente de igienă și produse hoteliere, cu sediul în București.",
+    "website_url": "https://horecahygiene.ro",
+    "hq_city": "București",
+    "counties": ["bucuresti"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://horecahygiene.ro/web_personalizare/template-stu/imagini/logo_header.png",
+    "contact_email": "office@horecahygiene.ro",
+    "contact_phone": "0722.567.141",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://horecahygiene.ro/i/detalii-de-contact/100/", "checked_at": "2026-07-04"}
+    ]
+  },
+  {
+    "slug": "datecs",
+    "legal_name": "Danubius Exim SRL",
+    "brand_name": "Datecs",
+    "cui": "6386718",
+    "category": "pos_fiscal_hardware",
+    "description": "Reprezentant oficial Datecs în România din 1996 — case de marcat, imprimante fiscale și echipamente POS, cu o rețea de peste 300 de firme partenere.",
+    "website_url": "https://www.datecs.ro",
+    "hq_city": "București",
+    "counties": ["bucuresti"],
+    "serves_all_counties": false,
+    "logo_source_url": "https://s0.blt.ro/datecs.ro/img/o/media/settings/datecstoplogo.1507273454.png",
+    "contact_email": null,
+    "contact_phone": "0212006000",
+    "verification_status": "listed",
+    "last_checked": "2026-07-04",
+    "sources": [
+      {"kind": "official_site", "url": "https://www.datecs.ro/contact.html", "checked_at": "2026-07-04"},
+      {"kind": "official_site", "url": "https://www.datecs.ro/despre-noi.html", "checked_at": "2026-07-04"}
+    ]
+  }
+]

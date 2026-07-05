@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { generateInvoiceXml, submitInvoiceToAnaf } from "@/app/actions/efactura";
-import { Loader2, FileCode, Send, CheckCircle } from "lucide-react";
+import { Loader2, FileCode, Send, CheckCircle, Download } from "lucide-react";
 
 type Props = {
   invoiceId: string;
@@ -55,6 +55,17 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
         setAction(null);
       }
     });
+  }
+
+  function handleDownloadXml() {
+    if (!xmlResult?.xml) return;
+    const blob = new Blob([xmlResult.xml], { type: "application/xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `efactura-${invoiceId}.xml`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -111,6 +122,13 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
             onClick={() => setShowXml((v) => !v)}
           >
             {showXml ? "Ascunde XML" : "Vizualizează XML"}
+          </Button>
+        )}
+
+        {xmlResult?.xml && (
+          <Button variant="outline" size="sm" onClick={handleDownloadXml}>
+            <Download className="mr-1.5 h-4 w-4" />
+            Descarcă XML
           </Button>
         )}
       </div>

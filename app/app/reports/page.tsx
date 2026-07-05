@@ -16,8 +16,17 @@ export default async function ReportsHubPage() {
   const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
   const inventoryVisible = isModuleNavVisible({ org: orgModules, module: "inventory", subscriptionPlan: sub?.plan, hasTrial });
   const recipeVisible = isModuleNavVisible({ org: orgModules, module: "recipe_costing", subscriptionPlan: sub?.plan, hasTrial });
-  const accountantPackVisible = await hasEntitlement(orgId, "reports.accountant_pack", { write: false });
-  const visibleReports = filterReportLinks(t, { inventoryVisible, recipeVisible, accountantPackVisible });
+  const { data: orgSettings } = await supabase
+    .from("organisations")
+    .select("saga_export_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
+  // reports.gestiune (the on-screen/PDF Raport de Gestiune) is independent of
+  // the Saga XML/DBF connector -- accountantPackVisible below gates only the
+  // Saga-specific features (Balanta, audit export, Saga export itself).
+  const accountantPackVisible = Boolean(orgSettings?.saga_export_enabled);
+  const gestiuneVisible = await hasEntitlement(orgId, "reports.gestiune").catch(() => false);
+  const visibleReports = filterReportLinks(t, { inventoryVisible, recipeVisible, accountantPackVisible, gestiuneVisible });
   const showCoreUpgradePrompt = !inventoryVisible && !hasTrial;
 
   return (

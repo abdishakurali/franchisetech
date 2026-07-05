@@ -5,6 +5,8 @@ import { jsonLd, SITE_URL } from "@/lib/marketing/seo";
 import { createClient } from "@/lib/supabase/server";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooterClient } from "@/components/marketing/MarketingFooter";
+import { MarketingAnnouncementBar } from "@/components/marketing/MarketingAnnouncementBar";
+import { MarketingBodyClasses } from "@/components/marketing/MarketingBodyClasses";
 import { MobileStickyCta } from "@/components/marketing/MobileStickyCta";
 import { MarketingChatwoot } from "@/components/marketing/MarketingChatwoot";
 import { BrowserFrame } from "@/components/marketing/DeviceFrames";
@@ -67,7 +69,9 @@ export async function PageShell({ children, schema }: { children: ReactNode; sch
     <MarketingLocaleProvider key={locale} initialLocale={locale}>
       <div className="min-h-screen bg-white">
         {schema?.map((item, index) => <div key={index}>{jsonLd(item)}</div>)}
+        <MarketingAnnouncementBar />
         <MarketingNav />
+        <MarketingBodyClasses />
         <div className="pb-24 md:pb-0">{children}</div>
         <MarketingFooterClient />
         <Suspense fallback={null}>

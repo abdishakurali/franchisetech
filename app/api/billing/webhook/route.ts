@@ -3,69 +3,9 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { creditReferralOnFirstPayment } from "@/lib/referrals";
 import { trackLoopsEvent } from "@/lib/loops";
-import type { BillingPlan } from "@/lib/billing/plans";
-import { invalidateEntitlementCache } from "@/lib/billing/entitlement-resolver";
+import { syncStripeSubscription } from "@/lib/billing/stripe-sync";
 
 export const dynamic = "force-dynamic";
-
-const VALID_PLANS: BillingPlan[] = ["starter", "core", "pro", "operations", "multi_location", "scale", "connected" as BillingPlan];
-
-function toDate(value?: number | null) {
-  return value ? new Date(value * 1000).toISOString() : null;
-}
-
-type SubscriptionWithPeriods = Stripe.Subscription & {
-  trial_start?: number | null;
-  trial_end?: number | null;
-  current_period_end?: number | null;
-};
-
-async function upsertSubscription(
-  subscription: Stripe.Subscription,
-  opts?: { setGracePeriod?: boolean; clearGracePeriod?: boolean }
-) {
-  const supabase = await createServiceClient();
-  const item = subscription.items.data[0];
-  const metadata = subscription.metadata || {};
-  const organisationId = metadata.organisation_id;
-  const plan = metadata.plan as BillingPlan | undefined;
-
-  if (!organisationId || !plan || !VALID_PLANS.includes(plan)) return;
-
-  const sub = subscription as SubscriptionWithPeriods;
-
-  // Grace period: 3 days from current_period_end when payment fails.
-  // Cleared when payment succeeds or subscription recovers.
-  let gracePeriodEndsAt: string | null | undefined = undefined;
-  if (opts?.setGracePeriod && sub.current_period_end) {
-    gracePeriodEndsAt = new Date(sub.current_period_end * 1000 + 3 * 86_400_000).toISOString();
-    console.info("[billing] grace period set", { organisationId, gracePeriodEndsAt });
-  } else if (opts?.clearGracePeriod) {
-    gracePeriodEndsAt = null;
-    console.info("[billing] grace period cleared", { organisationId });
-  }
-
-  const payload: Record<string, unknown> = {
-    organisation_id: organisationId,
-    stripe_customer_id: String(subscription.customer),
-    stripe_subscription_id: subscription.id,
-    stripe_price_id: item?.price.id ?? null,
-    plan,
-    status: subscription.status,
-    trial_start: toDate(sub.trial_start),
-    trial_end: toDate(sub.trial_end),
-    current_period_end: toDate(sub.current_period_end),
-    cancel_at_period_end: subscription.cancel_at_period_end,
-    updated_at: new Date().toISOString(),
-  };
-
-  if (gracePeriodEndsAt !== undefined) {
-    payload.grace_period_ends_at = gracePeriodEndsAt;
-  }
-
-  await supabase.from("billing_subscriptions").upsert(payload, { onConflict: "stripe_subscription_id" });
-  invalidateEntitlementCache(organisationId);
-}
 
 async function applyReferralCreditToStripe(
   stripe: Stripe,
@@ -88,16 +28,26 @@ async function applyReferralCreditToStripe(
   }
 }
 
-/** Write a billing_events row. Returns true if this event was already processed. */
+type EventRecordStatus = "new" | "retry" | "processed";
+
+/** Write a billing_events row. Processed duplicates are skipped; failed/unprocessed duplicates retry. */
 async function checkAndRecordEvent(
   stripeEventId: string,
   eventType: string,
   organisationId: string | null,
   summary: Record<string, unknown>
-): Promise<boolean> {
+): Promise<EventRecordStatus> {
   const supabase = await createServiceClient();
 
-  // Try to insert — unique constraint on stripe_event_id makes this idempotent
+  const { data: existing } = await supabase
+    .from("billing_events")
+    .select("processed")
+    .eq("stripe_event_id", stripeEventId)
+    .maybeSingle();
+
+  if (existing?.processed) return "processed";
+  if (existing) return "retry";
+
   const { error } = await supabase.from("billing_events").insert({
     stripe_event_id: stripeEventId,
     event_type: eventType,
@@ -107,12 +57,11 @@ async function checkAndRecordEvent(
   });
 
   if (error) {
-    // 23505 = unique_violation — already processed
-    if (error.code === "23505") return true;
+    if (error.code === "23505") return "retry";
     // Other errors: table may not exist yet (migration pending) — log and continue
     console.error("[billing_events] insert error:", error.code, error.message);
   }
-  return false;
+  return "new";
 }
 
 async function markEventProcessed(
@@ -158,11 +107,11 @@ export async function POST(request: Request) {
   }
   // invoice.* events: org ID resolved after subscription lookup below
 
-  const alreadyProcessed = await checkAndRecordEvent(event.id, event.type, orgId, {
+  const eventRecordStatus = await checkAndRecordEvent(event.id, event.type, orgId, {
     livemode: event.livemode,
   });
 
-  if (alreadyProcessed) {
+  if (eventRecordStatus === "processed") {
     // Stripe retries on non-2xx; returning 200 tells Stripe the event was handled.
     return NextResponse.json({ received: true, duplicate: true });
   }
@@ -175,7 +124,12 @@ export async function POST(request: Request) {
       const session = event.data.object as Stripe.Checkout.Session;
       if (session.subscription) {
         const subscription = await stripe.subscriptions.retrieve(String(session.subscription));
-        await upsertSubscription(subscription);
+        const sync = await syncStripeSubscription(subscription, {
+          fallbackOrganisationId: session.metadata?.organisation_id ?? session.client_reference_id,
+          fallbackPlan: session.metadata?.plan,
+          clearGracePeriod: true,
+        });
+        if (!sync.synced) throw new Error(`checkout_subscription_sync_failed:${sync.reason ?? "unknown"}`);
       }
     }
 
@@ -185,7 +139,8 @@ export async function POST(request: Request) {
       event.type === "customer.subscription.deleted"
     ) {
       const subscription = event.data.object as Stripe.Subscription;
-      await upsertSubscription(subscription);
+      const sync = await syncStripeSubscription(subscription);
+      if (!sync.synced) throw new Error(`subscription_sync_failed:${sync.reason ?? "unknown"}`);
 
       if (event.type === "customer.subscription.created") {
         let customerEmail: string | null = null;
@@ -223,10 +178,11 @@ export async function POST(request: Request) {
         const isSuccess = event.type === "invoice.paid" || event.type === "invoice.payment_succeeded";
 
         // Grace period: set on first failure, clear on any success
-        await upsertSubscription(subscription, {
+        const sync = await syncStripeSubscription(subscription, {
           setGracePeriod: isFailure && subscription.status === "past_due",
           clearGracePeriod: isSuccess,
         });
+        if (!sync.synced) throw new Error(`invoice_subscription_sync_failed:${sync.reason ?? "unknown"}`);
 
         // Referral credit on first real payment
         const isRealPayment =
@@ -280,7 +236,9 @@ export async function POST(request: Request) {
     await markEventProcessed(event.id, !processingError, processingError);
   }
 
-  // Always return 200 to Stripe to prevent infinite retries on transient errors.
-  // The error is logged in billing_events for manual inspection.
+  if (processingError) {
+    return NextResponse.json({ received: false, error: processingError }, { status: 500 });
+  }
+
   return NextResponse.json({ received: true });
 }

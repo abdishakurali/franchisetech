@@ -1,5 +1,8 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { addCustomerFromPos, closePosSession, completeSaleReturn, posCashMovement, voidTransaction } from "@/app/actions/kitchenops";
 import { runZReport } from "@/app/actions/fiscalnet";
 import { fiscalBrowserReceipt, fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
@@ -9,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Check, ChevronDown, Coffee, Droplets, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
+import { Banknote, Check, ChevronDown, Coffee, Droplets, Equal, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
 import { cn } from "@/lib/utils";
 import {
@@ -20,7 +23,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PosPaymentPanel } from "@/components/app/PosPaymentPanel";
+import { PosTableContextBar, type PosActiveTable } from "@/components/app/PosTableContextBar";
+import { sendTabOrder, getTabPendingItems, type TabPendingItem } from "@/app/actions/table-service";
+import { PreBillPrintButton } from "@/components/app/PreBillPrintButton";
 import { PosOfflineBar } from "@/components/app/PosOfflineBar";
+import { CashCountModal } from "@/components/app/CashCountModal";
 import { friendlySaleError, paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
 import { PosI18nProvider, usePosI18n, posIntlLocale } from "@/lib/pos-i18n-context";
 import {
@@ -57,6 +64,7 @@ import {
 import { PosQuickAddProduct } from "@/components/app/PosQuickAddProduct";
 import { PosQuickAccessSheet } from "@/components/app/PosQuickAccessSheet";
 import { sortCategoriesByName } from "@/lib/product-categories";
+import { captureClientEvent } from "@/lib/analytics/client-events";
 
 type Product = {
   id: string; name: string; sale_price: number | string; vat_rate?: number | string | null;
@@ -114,6 +122,11 @@ async function downloadFiscalPayload(
 }
 
 function money(v: number, cur = "EUR") { if (cur === "RON") return `${v.toFixed(2)} lei`; return new Intl.NumberFormat("en-IE",{style:"currency",currency: cur || "EUR"}).format(v); }
+
+function isStaleServerActionError(err: unknown) {
+  const message = err instanceof Error ? err.message : String(err ?? "");
+  return message.includes("Failed to find Server Action") || message.includes("failed-to-find-server-action");
+}
 
 type PlaceholderCfg = {
   bg: string;
@@ -436,6 +449,158 @@ function RefundDialog({
 }
 
 // ── Close till dialog ────────────────────────────────────────────────────────
+function CloseTillFormBody({
+  t,
+  summary,
+  currency,
+  intlLocale,
+  sessionId,
+}: {
+  t: ReturnType<typeof usePosI18n>["t"];
+  summary: PosSummary;
+  currency: string;
+  intlLocale: string;
+  sessionId?: string | null;
+}) {
+  const { pending } = useFormStatus();
+  const currencySymbol = currency === "RON" ? "lei" : "€";
+  const isRon = currency === "RON";
+  const [countedCashText, setCountedCashText] = useState("");
+  const [cashBreakdown, setCashBreakdown] = useState<Record<number, number> | null>(null);
+  const [cashCountModalOpen, setCashCountModalOpen] = useState(false);
+
+  const handleManualCountedCash = (value: string) => {
+    setCountedCashText(value);
+    setCashBreakdown(null); // typed directly — any prior denomination breakdown no longer matches the total
+  };
+
+  const handleCashCountConfirm = (total: number, breakdown: Record<number, number>) => {
+    setCountedCashText(total.toFixed(2));
+    setCashBreakdown(breakdown);
+  };
+
+  const handleSetToExpected = () => {
+    setCountedCashText(summary.expectedCash.toFixed(2));
+    setCashBreakdown(null); // no denomination count behind this value — it's a direct match to expected
+  };
+
+  return (
+    <>
+      <input type="hidden" name="session_id" value={sessionId ?? ""} />
+      <div className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm">
+        <div className="flex justify-between"><span>{t.openingCash}</span><strong>{money(summary.openingCash, currency)}</strong></div>
+        {summary.cashInTotal > 0 && (
+          <div className="flex justify-between text-green-700"><span>{t.cashInTotal}</span><strong>{money(summary.cashInTotal, currency)}</strong></div>
+        )}
+        {summary.cashOutTotal > 0 && (
+          <div className="flex justify-between text-red-600"><span>{t.cashOutTotal}</span><strong>{money(summary.cashOutTotal, currency)}</strong></div>
+        )}
+        <div className="flex justify-between"><span>{t.cashSales}</span><strong>{money(summary.cashSales, currency)}</strong></div>
+        <div className="flex justify-between"><span>{t.cardSales}</span><strong>{money(summary.cardSales, currency)}</strong></div>
+        <div className="flex justify-between border-t pt-2"><span className="font-medium">{t.expectedCash}</span><strong className="text-blue-700">{money(summary.expectedCash, currency)}</strong></div>
+      </div>
+      {summary.cashOperations.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t.cashOperations}</p>
+          <div className="max-h-44 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100 bg-white">
+            {summary.cashOperations.map((op) => (
+              <div key={op.id} className="flex items-start justify-between gap-3 px-3 py-2.5 text-sm">
+                <div className="min-w-0 flex-1">
+                  <p className={`font-medium ${op.movement_type === "cash_in" ? "text-green-700" : "text-red-600"}`}>
+                    {op.movement_type === "cash_in" ? `+ ${t.cashIn}` : `− ${t.cashOut}`}
+                  </p>
+                  <p className="truncate text-xs text-slate-500">{op.reason || "—"}</p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="font-semibold tabular-nums text-slate-900">{money(op.amount, currency)}</p>
+                  {op.performedAt && (
+                    <p className="text-[10px] text-slate-400">
+                      {new Intl.DateTimeFormat(intlLocale, { timeStyle: "short" }).format(new Date(op.performedAt))}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div>
+        <Label>{t.countedCashLabel} ({currencySymbol})</Label>
+        <div className="flex gap-2">
+          <Input
+            name="counted_cash"
+            type="number"
+            step="0.01"
+            min="0"
+            required
+            disabled={pending}
+            value={countedCashText}
+            onChange={(e) => handleManualCountedCash(e.target.value)}
+          />
+          <button
+            type="button"
+            disabled={pending}
+            onClick={handleSetToExpected}
+            aria-label={t.setToExpected}
+            title={t.setToExpected}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700 disabled:opacity-50"
+          >
+            <Equal className="h-4 w-4" />
+          </button>
+          {isRon && (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => setCashCountModalOpen(true)}
+              aria-label={t.cashBreakdownLabel}
+              title={t.cashBreakdownLabel}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700 disabled:opacity-50"
+            >
+              <Banknote className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        <p className="mt-1 text-xs text-slate-500">
+          {cashBreakdown ? t.cashBreakdownFromCounter : t.howMuchInDrawer}
+        </p>
+        <input type="hidden" name="cash_breakdown_json" value={cashBreakdown ? JSON.stringify(cashBreakdown) : ""} />
+      </div>
+      {isRon && (
+        <CashCountModal
+          open={cashCountModalOpen}
+          onOpenChange={setCashCountModalOpen}
+          initialBreakdown={cashBreakdown}
+          onConfirm={handleCashCountConfirm}
+          labels={{
+            title: t.cashBreakdownLabel,
+            total: t.cashBreakdownTotal,
+            confirm: t.confirm,
+            cancel: t.cancel,
+          }}
+        />
+      )}
+      <div><Label>{t.notes}</Label><Input name="notes" disabled={pending} /></div>
+      {pending && (
+        <div className="flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2.5 text-sm text-blue-800">
+          <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+          <span>{t.closingTill}</span>
+        </div>
+      )}
+      <DialogFooter>
+        <DialogClose render={<Button type="button" variant="outline" disabled={pending} />}>{t.cancel}</DialogClose>
+        <Button
+          type="submit"
+          disabled={pending}
+          className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
+          {pending ? t.closingTillShort : t.closeTill}
+        </Button>
+      </DialogFooter>
+    </>
+  );
+}
+
 function CloseTillDialog({
   sessionId,
   summary,
@@ -459,7 +624,6 @@ function CloseTillDialog({
 }) {
   const { locale, t } = usePosI18n();
   const intlLocale = posIntlLocale(locale);
-  const currencySymbol = currency === "RON" ? "lei" : "€";
   const [internalOpen, setInternalOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const open = controlledOpen ?? internalOpen;
@@ -477,66 +641,19 @@ function CloseTillDialog({
       ) : null}
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader><DialogTitle>{t.closeTill}</DialogTitle></DialogHeader>
-        <form action={async (fd: FormData) => {
-          setIsClosing(true);
-          await (closePosSession as unknown as (fd: FormData) => Promise<void>)(fd);
-        }} className="space-y-3">
-          <input type="hidden" name="session_id" value={sessionId ?? ""} />
-          <div className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm">
-            <div className="flex justify-between"><span>{t.openingCash}</span><strong>{money(summary.openingCash, currency)}</strong></div>
-            {summary.cashInTotal > 0 && (
-              <div className="flex justify-between text-green-700"><span>{t.cashInTotal}</span><strong>{money(summary.cashInTotal, currency)}</strong></div>
-            )}
-            {summary.cashOutTotal > 0 && (
-              <div className="flex justify-between text-red-600"><span>{t.cashOutTotal}</span><strong>{money(summary.cashOutTotal, currency)}</strong></div>
-            )}
-            <div className="flex justify-between"><span>{t.cashSales}</span><strong>{money(summary.cashSales, currency)}</strong></div>
-            <div className="flex justify-between"><span>{t.cardSales}</span><strong>{money(summary.cardSales, currency)}</strong></div>
-            <div className="flex justify-between border-t pt-2"><span className="font-medium">{t.expectedCash}</span><strong className="text-blue-700">{money(summary.expectedCash, currency)}</strong></div>
-          </div>
-          {summary.cashOperations.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t.cashOperations}</p>
-              <div className="max-h-44 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100 bg-white">
-                {summary.cashOperations.map((op) => (
-                  <div key={op.id} className="flex items-start justify-between gap-3 px-3 py-2.5 text-sm">
-                    <div className="min-w-0 flex-1">
-                      <p className={`font-medium ${op.movement_type === "cash_in" ? "text-green-700" : "text-red-600"}`}>
-                        {op.movement_type === "cash_in" ? `+ ${t.cashIn}` : `− ${t.cashOut}`}
-                      </p>
-                      <p className="truncate text-xs text-slate-500">{op.reason || "—"}</p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="font-semibold tabular-nums text-slate-900">{money(op.amount, currency)}</p>
-                      {op.performedAt && (
-                        <p className="text-[10px] text-slate-400">
-                          {new Intl.DateTimeFormat(intlLocale, { timeStyle: "short" }).format(new Date(op.performedAt))}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          <div>
-            <Label>{t.countedCashLabel} ({currencySymbol})</Label>
-            <Input name="counted_cash" type="number" step="0.01" min="0" required disabled={isClosing} />
-            <p className="mt-1 text-xs text-slate-500">{t.howMuchInDrawer}</p>
-          </div>
-          <div><Label>{t.notes}</Label><Input name="notes" disabled={isClosing} /></div>
-          {isClosing && (
-            <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm text-blue-800">
-              {t.closingTill}
-            </div>
-          )}
-          <DialogFooter>
-            <DialogClose render={<Button type="button" variant="outline" disabled={isClosing} />}>{t.cancel}</DialogClose>
-            <Button type="submit" disabled={isClosing} className="bg-blue-600 hover:bg-blue-700 text-white">
-              {isClosing && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isClosing ? t.closingTill : t.closeTill}
-            </Button>
-          </DialogFooter>
+        <form
+          onSubmit={() => setIsClosing(true)}
+          action={async (fd: FormData) => {
+            try {
+              await (closePosSession as unknown as (fd: FormData) => Promise<void>)(fd);
+              setOpen(false);
+            } finally {
+              setIsClosing(false);
+            }
+          }}
+          className="space-y-3"
+        >
+          <CloseTillFormBody t={t} summary={summary} currency={currency} intlLocale={intlLocale} sessionId={sessionId} />
         </form>
       </DialogContent>
     </Dialog>
@@ -556,10 +673,12 @@ function PosRegisterInner({
   isRO = false, fiscalZReportDone: initialZReportDone = false,
   vatRateGroupMap = {},
   features = {},
+  activeTab = null,
   canManage = false,
   defaultVatRate = 0,
   catalogOffline = false,
   catalogCachedAt = null,
+  trackActivationSale = false,
 }: {
   products: Product[];
   categories: Category[];
@@ -591,10 +710,13 @@ function PosRegisterInner({
     splitPayments?: boolean;
     tips?: boolean;
   };
+  activeTab?: PosActiveTable | null;
   canManage?: boolean;
   defaultVatRate?: number;
   catalogOffline?: boolean;
   catalogCachedAt?: string | null;
+  /** Fire PostHog activation_first_sale on the next successful server save */
+  trackActivationSale?: boolean;
 }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -604,10 +726,13 @@ function PosRegisterInner({
   );
   const [paymentMethodId, setPaymentMethodId] = useState(() => pickDefaultPaymentId(paymentMethods));
   const { locale, t } = usePosI18n();
+  const router = useRouter();
   const intlLocale = posIntlLocale(locale);
   const money = (v: number) =>
     new Intl.NumberFormat(intlLocale, { style: "currency", currency: currency || "EUR" }).format(v);
   const chargeRef = useRef<HTMLButtonElement>(null);
+  const activationTrackedRef = useRef(false);
+  const [showActivationCelebrate, setShowActivationCelebrate] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<"order" | "payment" | "complete">("order");
   /** Frozen cart when entering payment — submit uses this so the sale is never sent with an empty cart. */
   const [paymentCartSnapshot, setPaymentCartSnapshot] = useState<CartItem[] | null>(null);
@@ -640,8 +765,8 @@ function PosRegisterInner({
   const [zReportPending, setZReportPending] = useState(false);
   const [zReportOpen, setZReportOpen] = useState(false);
   const [tipAmount, setTipAmount] = useState(0);
-  const [orderType, setOrderType] = useState("takeaway");
-  const [tableLabel, setTableLabel] = useState("");
+  const [orderType, setOrderType] = useState(() => (activeTab ? "dine-in" : "takeaway"));
+  const [tableLabel, setTableLabel] = useState(() => activeTab?.tableName ?? "");
   const [kitchenNote, setKitchenNote] = useState("");
   const [customerNote, setCustomerNote] = useState("");
   const [splitPayments, setSplitPayments] = useState<SplitPayment[]>([]);
@@ -652,10 +777,102 @@ function PosRegisterInner({
   const [splitOpen, setSplitOpen] = useState(false);
   const [cashReceived, setCashReceived] = useState<number | "">("");
   const [heldSales, setHeldSales] = useState<HeldSale[]>(() => listHeldSales());
+  const [pendingTabItems, setPendingTabItems] = useState<TabPendingItem[]>([]);
+  const [pendingTabSubtotal, setPendingTabSubtotal] = useState(0);
+  const [sendOrderPending, setSendOrderPending] = useState(false);
+  const [orderSentMessage, setOrderSentMessage] = useState<string | null>(null);
+  const [tabPaymentCompleted, setTabPaymentCompleted] = useState(false);
+  const clientMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
+  const tableTabLocked = Boolean(
+    features.tableService && activeTab?.status === "bill_requested" && !canManage
+  );
+
+  const tableTabMode = Boolean(features.tableService && activeTab);
+
+  async function refreshPendingTabItems() {
+    if (!activeTab?.id) {
+      setPendingTabItems([]);
+      setPendingTabSubtotal(0);
+      return;
+    }
+    const data = await getTabPendingItems(activeTab.id);
+    if (data) {
+      setPendingTabItems(data.items);
+      setPendingTabSubtotal(data.subtotal);
+    } else {
+      setPendingTabItems([]);
+      setPendingTabSubtotal(0);
+    }
+  }
+
+  function pendingItemsToCart(items: TabPendingItem[]): CartItem[] {
+    return items.map((item) => ({
+      product_id: item.product_id ?? "",
+      product_name: item.product_name,
+      quantity: item.quantity,
+      unit_price: item.unit_price,
+      vat_rate: item.vat_rate ?? defaultVatRate,
+    }));
+  }
+
+  function mergeTabCheckoutCart(): CartItem[] {
+    const pendingCart = pendingItemsToCart(pendingTabItems);
+    if (!cart.length) return normalizeCartLines(pendingCart, txDiscountPct);
+    if (!pendingCart.length) return normalizeCartLines(cart, txDiscountPct);
+    const merged = [...pendingCart];
+    for (const line of cart) {
+      const existing = merged.find(
+        (m) => m.product_id === line.product_id && m.unit_price === line.unit_price
+      );
+      if (existing) {
+        existing.quantity += line.quantity;
+      } else {
+        merged.push({ ...line });
+      }
+    }
+    return normalizeCartLines(merged, txDiscountPct);
+  }
+
+  async function handleSendTabOrder() {
+    if (!activeTab?.id || !cart.length || sendOrderPending) return;
+    setSendOrderPending(true);
+    setOrderSentMessage(null);
+    try {
+      const result = await sendTabOrder(activeTab.id, JSON.stringify(cart), {
+        orderType,
+        kitchenNote,
+      });
+      if (!result.ok) {
+        setSaleStatus({ ok: false, msg: result.error });
+        return;
+      }
+      setCart([]);
+      setKitchenNote("");
+      clearCartBackupFromStorage();
+      setOrderSentMessage(`Comanda ${result.roundNumber} trimisă la bucătărie.`);
+      await refreshPendingTabItems();
+    } finally {
+      setSendOrderPending(false);
+    }
+  }
+
+  function startTabCheckout() {
+    const merged = mergeTabCheckoutCart();
+    if (!merged.length) return;
+    setPaymentCartSnapshot(merged);
+    setCheckoutStep("payment");
+  }
+
   const [heldOpen, setHeldOpen] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<QueuedSale[]>(() => listOfflineQueue());
   // Offline detection disabled — always treat as online; legacy queue items can still be dismissed/retried
   const [browserOffline] = useState(false);
+  const showCatalogOfflineBanner = clientMounted && catalogOffline && !browserOffline;
   const [syncingOffline, setSyncingOffline] = useState(false);
   const [quickAccessOpen, setQuickAccessOpen] = useState(false);
   const [addProductOpen, setAddProductOpen] = useState(false);
@@ -729,8 +946,11 @@ function PosRegisterInner({
       fd.set("discount_lei", "0");
     }
     fd.set("tip_amount", String(safeTipAmount));
-    fd.set("order_type", features.orderTypes ? orderType : "");
+    fd.set("order_type", features.orderTypes || activeTab ? orderType : "");
     fd.set("table_label", features.tableService ? tableLabel : "");
+    if (features.tableService && activeTab?.id) {
+      fd.set("table_tab_id", activeTab.id);
+    }
     fd.set("kitchen_note", (features.kitchenDisplay || features.restaurantOrderFlow) ? kitchenNote : "");
     fd.set("customer_note", features.restaurantOrderFlow ? customerNote : "");
 
@@ -804,7 +1024,8 @@ function PosRegisterInner({
         const errMsg = res.ok
           ? t.saleSaveFailed
           : friendlySaleError(res.error, locale);
-        clearCartBackupFromStorage();
+        setSaleStatus({ ok: false, msg: errMsg });
+        setSalePending(false);
         setLastCompletedSale((prev) =>
           prev
             ? { ...prev, status: "failed", errorMsg: errMsg, retryPayload: payload }
@@ -813,11 +1034,26 @@ function PosRegisterInner({
         return;
       }
       clearCartBackupFromStorage();
+      resetCartAfterSale();
+      setPaymentCartSnapshot(null);
+      setSaleStatus(null);
+      setSalePending(false);
       setLastCompletedSale({
         amountLabel: money(res.total),
         transactionId: res.transactionId,
         status: "saved",
       });
+      if (trackActivationSale && !activationTrackedRef.current) {
+        activationTrackedRef.current = true;
+        setShowActivationCelebrate(true);
+        captureClientEvent("activation_first_sale", { source: "pos" });
+      }
+      if (tableTabMode && activeTab?.id) {
+        setTabPaymentCompleted(true);
+        setPendingTabItems([]);
+        setPendingTabSubtotal(0);
+      }
+      setCheckoutStep("complete");
       if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
         void fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType).then((fnRes) => {
           if (fiscalActive && fnRes.filename && fnRes.content) {
@@ -837,7 +1073,20 @@ function PosRegisterInner({
       }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : t.saleSaveFailed;
-      clearCartBackupFromStorage();
+      if (isStaleServerActionError(err)) {
+        const reloadMsg = "Programul a fost actualizat. Reîncărcăm POS-ul și păstrăm vânzarea.";
+        setSaleStatus({ ok: false, msg: reloadMsg });
+        setSalePending(false);
+        setLastCompletedSale((prev) =>
+          prev
+            ? { ...prev, status: "failed", retryPayload: payload, errorMsg: reloadMsg }
+            : { amountLabel, status: "failed", retryPayload: payload, errorMsg: reloadMsg },
+        );
+        window.setTimeout(() => window.location.reload(), 900);
+        return;
+      }
+      setSaleStatus({ ok: false, msg: errMsg });
+      setSalePending(false);
       setLastCompletedSale((prev) =>
         prev
           ? { ...prev, status: "failed", retryPayload: payload, errorMsg: errMsg }
@@ -1071,8 +1320,36 @@ function PosRegisterInner({
   // eslint-disable-next-line react-hooks/exhaustive-deps -- flush uses stable sale/fiscal helpers
   }, [t.offlineSyncDone, t.offlineSyncing, fiscalActive, fiscalNet, cashDrawerSettings, locale]);
 
+  useEffect(() => {
+    void refreshPendingTabItems();
+  }, [activeTab?.id]);
+
+  const tabCheckoutTotal = tableTabMode
+    ? Number((pendingTabSubtotal + totalDue).toFixed(2))
+    : totalDue;
+  const showTableOrderActions =
+    tableTabMode && activeTab && checkoutStep === "order";
+  const canSendTabOrder =
+    showTableOrderActions &&
+    activeTab.status === "open" &&
+    cart.length > 0 &&
+    !tableTabLocked;
+  const canPayTabTotal =
+    showTableOrderActions &&
+    (pendingTabItems.length > 0 || cart.length > 0) &&
+    (!tableTabLocked || canManage);
+
   return (
-    <div className="relative grid min-h-0 w-full flex-1 grid-rows-[minmax(0,1fr)_auto] overflow-hidden bg-white lg:flex lg:flex-row">
+    <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white">
+      {features.tableService && activeTab && (
+        <PosTableContextBar
+          activeTab={activeTab}
+          canManage={canManage}
+          pendingSubtotal={pendingTabSubtotal}
+          currency={currency}
+        />
+      )}
+      <div className="relative grid min-h-0 w-full flex-1 grid-rows-[minmax(0,1fr)_auto] overflow-hidden lg:flex lg:flex-row">
       {/* Left: Products column — order step only */}
       {checkoutStep === "order" && (
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white lg:min-h-0 lg:min-w-0">
@@ -1115,7 +1392,7 @@ function PosRegisterInner({
         </div>
         {/* Products toolbar */}
         <div className="shrink-0 space-y-2 border-b border-slate-100 px-3 py-2 sm:px-4">
-          {catalogOffline && !browserOffline && (
+          {showCatalogOfflineBanner && (
             <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900">
               {t.catalogOfflineMenu}
             </p>
@@ -1341,19 +1618,26 @@ function PosRegisterInner({
       {/* Cart / payment / complete */}
       <form onSubmit={(e) => {
         e.preventDefault();
-        if (!checkoutCart.length || checkoutStep !== "payment") return;
+        if (!checkoutCart.length || checkoutStep !== "payment" || salePending) return;
         const fd = buildSaleFormData(checkoutCart, checkoutTotalDue);
         const amountLabel = money(checkoutTotalDue);
         const cartSnapshot = checkoutCart;
 
-        resetCartAfterSale();
-        setPaymentCartSnapshot(null);
         setLastFiscalTxt(null);
-        setLastCompletedSale({ amountLabel, status: "saving" });
-        setCheckoutStep("complete");
-        setSalePending(false);
+        setLastCompletedSale(null);
+        setSaleStatus(null);
+        setSalePending(true);
         void persistSaleInBackground(fd, cartSnapshot, amountLabel);
-      }} className={`flex min-h-0 flex-col bg-white lg:min-h-0 ${focusedCheckout ? "absolute inset-0 z-20" : "w-full max-h-[min(48vh,28rem)] shrink-0 border-t border-slate-200 sm:max-h-[min(52vh,32rem)] lg:max-h-none lg:w-[400px] lg:shrink-0 lg:overflow-hidden lg:border-t-0 lg:border-l lg:border-slate-100"}`} data-tour="pos-cart">
+      }} className={cn(
+        "flex min-h-0 flex-col bg-white",
+        focusedCheckout
+          ? "fixed inset-0 z-[60] flex flex-col bg-white"
+          : tableTabMode
+            ? "w-full max-h-[min(58vh,34rem)] shrink-0 border-t border-slate-200 sm:max-h-[min(62vh,36rem)]"
+            : "w-full max-h-[min(48vh,28rem)] shrink-0 border-t border-slate-200 sm:max-h-[min(52vh,32rem)]",
+        !focusedCheckout && "lg:min-h-0 lg:max-h-none lg:w-[400px] lg:shrink-0 lg:overflow-hidden lg:border-t-0 lg:border-l lg:border-slate-100",
+      )} data-tour="pos-cart">
+        {!focusedCheckout && (
         <PosOfflineBar
           t={t}
           browserOffline={browserOffline}
@@ -1365,15 +1649,34 @@ function PosRegisterInner({
           onResend={(id) => void resendQueuedSale(id)}
           onDismiss={(id) => { removeOfflineSale(id); setOfflineQueue(listOfflineQueue()); }}
         />
-        <div className={`flex min-h-0 flex-1 flex-col overflow-hidden ${focusedCheckout ? (checkoutStep === "payment" ? "mx-auto w-full max-w-md px-3 sm:px-4" : "mx-auto w-full max-w-xl px-6") : ""}`}>
+        )}
+        <div className={cn(
+          "flex min-h-0 flex-1 flex-col overflow-hidden",
+          focusedCheckout && checkoutStep === "complete" && "w-full items-center justify-center px-4",
+          focusedCheckout && checkoutStep === "payment" && "h-full w-full px-3 sm:px-4",
+        )}>
         {checkoutStep === "complete" && lastCompletedSale ? (
-          <div className="flex flex-1 flex-col justify-center px-2 py-8 sm:py-10">
-            <div className="mx-auto w-full max-w-sm text-center">
+          <div className="flex w-full max-w-sm flex-col items-center justify-center py-8 sm:py-10">
+            <div className="w-full text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
                 <Check className="h-8 w-8" strokeWidth={2.5} aria-hidden />
               </div>
               <p className="mt-4 text-sm font-medium text-slate-500">{t.saleComplete}</p>
               <p className="mt-1 text-4xl font-bold tabular-nums text-slate-950">{lastCompletedSale.amountLabel}</p>
+              {showActivationCelebrate && lastCompletedSale.status === "saved" && (
+                <div className="mx-auto mt-4 max-w-xs rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                  <p>{t.firstSaleCelebrate}</p>
+                  <Link
+                    href="/app"
+                    className="mt-2 inline-flex items-center text-sm font-semibold text-green-700 hover:text-green-900"
+                  >
+                    {t.viewDashboard} →
+                  </Link>
+                </div>
+              )}
+              {features.tableService && activeTab && (
+                <p className="mt-2 text-sm font-medium text-blue-800">Masa {activeTab.tableName}</p>
+              )}
               {lastCompletedSale.status === "saving" && (
                 <p className="mt-2 text-sm font-medium text-slate-400">{t.saleSaving}</p>
               )}
@@ -1404,6 +1707,21 @@ function PosRegisterInner({
                   type="button"
                   className="h-12 bg-blue-600 text-white hover:bg-blue-700"
                   onClick={() => {
+                    if (features.tableService && activeTab && tabPaymentCompleted) {
+                      router.push("/app/pos");
+                      return;
+                    }
+                    if (features.tableService && activeTab && !tabPaymentCompleted) {
+                      setCheckoutStep("order");
+                      setPaymentCartSnapshot(null);
+                      setLastCompletedSale(null);
+                      setSaleStatus(null);
+                      setDrawerNotice(null);
+                      setLastFiscalTxt(null);
+                      setTabPaymentCompleted(false);
+                      void refreshPendingTabItems();
+                      return;
+                    }
                     setCheckoutStep("order");
                     setPaymentCartSnapshot(null);
                     setLastCompletedSale(null);
@@ -1412,8 +1730,23 @@ function PosRegisterInner({
                     setLastFiscalTxt(null);
                   }}
                 >
-                  {t.newSaleAfter}
+                  {features.tableService && activeTab && !tabPaymentCompleted
+                    ? "Comandă nouă"
+                    : features.tableService && activeTab
+                      ? "Înapoi la sală"
+                      : t.newSaleAfter}
                 </Button>
+                {features.tableService && activeTab && !tabPaymentCompleted && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-12"
+                    onClick={() => router.push("/app/pos")}
+                  >
+                    Înapoi la sală
+                  </Button>
+                )}
+                {(!features.tableService || !activeTab || tabPaymentCompleted) && (
                 <Button
                   type="button"
                   variant="outline"
@@ -1427,6 +1760,7 @@ function PosRegisterInner({
                 >
                   {lastCompletedSale.transactionId ? t.viewReceiptAfter : t.receiptPending}
                 </Button>
+                )}
               </div>
               {fiscalActive && lastFiscalTxt && (
                 <button
@@ -1440,7 +1774,7 @@ function PosRegisterInner({
             </div>
           </div>
         ) : checkoutStep === "payment" ? (
-          <div className="flex flex-1 flex-col items-center min-h-0 w-full">
+          <div className="mx-auto flex h-full min-h-0 w-full max-w-md flex-col">
             {features.splitPayments && activeSplitPayments.length > 0 && (
               <button
                 type="button"
@@ -1478,7 +1812,11 @@ function PosRegisterInner({
               salePending={salePending}
               saleError={saleStatus && !saleStatus.ok ? saleStatus.msg : null}
               onBack={() => {
+                if (salePending) return;
+                clearCartBackupFromStorage();
                 setPaymentCartSnapshot(null);
+                setSaleStatus(null);
+                setLastCompletedSale(null);
                 setCheckoutStep("order");
               }}
               onSplit={features.splitPayments ? () => setSplitOpen(true) : undefined}
@@ -1656,26 +1994,90 @@ function PosRegisterInner({
                 </div>
               )}
               <div className="space-y-1.5 rounded-xl bg-slate-50 px-3.5 py-3">
+              {showTableOrderActions && pendingTabSubtotal > 0 && (
+                <div className="flex justify-between text-xs text-slate-600 pb-1 border-b border-slate-200/80">
+                  <span>Deja pe masă</span>
+                  <span className="font-semibold tabular-nums">{money(pendingTabSubtotal)}</span>
+                </div>
+              )}
               {discountAmount > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span className="tabular-nums">{money(grossTotal)}</span></div>}
               {discountAmount > 0 && <div className="flex justify-between text-xs text-blue-600"><span>{t.discount}</span><span className="font-medium tabular-nums">−{money(discountAmount)}</span></div>}
               {safeTipAmount > 0 && <div className="flex justify-between text-xs text-emerald-700"><span>{t.tip}</span><span className="font-medium tabular-nums">{money(safeTipAmount)}</span></div>}
               <div className="flex items-baseline justify-between pt-1">
-                <span className="text-sm font-semibold text-slate-700 sm:text-base">{t.total}</span>
-                <span className="text-2xl font-bold tabular-nums text-slate-950 sm:text-3xl">{money(totalDue)}</span>
+                <span className="text-sm font-semibold text-slate-700 sm:text-base">
+                  {showTableOrderActions ? "Total de încasat" : t.total}
+                </span>
+                <span className="text-2xl font-bold tabular-nums text-slate-950 sm:text-3xl">
+                  {money(showTableOrderActions ? tabCheckoutTotal : totalDue)}
+                </span>
               </div>
               </div>
-              <Button
-                type="button"
-                disabled={!cart.length || !paymentMethods.length}
-                data-tour="pos-charge"
-                className="h-12 w-full rounded-xl bg-blue-600 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-40 sm:h-14 sm:text-lg"
-                onClick={() => {
-                  setPaymentCartSnapshot(normalizeCartLines(cart, txDiscountPct));
-                  setCheckoutStep("payment");
-                }}
-              >
-                {!paymentMethods.length ? t.setupPaymentMethods : cart.length === 0 ? t.addItems : t.chargeAmount(money(totalDue))}
-              </Button>
+              {orderSentMessage && showTableOrderActions && (
+                <p className="text-xs font-medium text-emerald-700 text-center">{orderSentMessage}</p>
+              )}
+              {tableTabLocked && (
+                <p className="text-sm text-blue-800 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                  Masa este blocată — nota de plată a fost solicitată. Doar un manager poate încasa.
+                </p>
+              )}
+              {showTableOrderActions ? (
+                <div className="space-y-2">
+                  <div className={`grid gap-2 ${activeTab!.status === "open" ? "grid-cols-2" : "grid-cols-1"}`}>
+                    {activeTab!.status === "open" && (
+                      <Button
+                        type="button"
+                        disabled={!canSendTabOrder || sendOrderPending}
+                        className="h-12 w-full rounded-xl bg-emerald-600 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50 sm:text-base"
+                        onClick={() => void handleSendTabOrder()}
+                      >
+                        {sendOrderPending ? "…" : "Trimite"}
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      disabled={!canPayTabTotal || !paymentMethods.length || sendOrderPending}
+                      data-tour="pos-charge"
+                      className="h-12 w-full rounded-xl bg-blue-600 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50 sm:text-base"
+                      onClick={startTabCheckout}
+                    >
+                      {!paymentMethods.length
+                        ? t.setupPaymentMethods
+                        : "Încasează"}
+                    </Button>
+                  </div>
+                  <PreBillPrintButton
+                    tabId={activeTab!.id}
+                    currency={currency}
+                    requestBillFirst={activeTab!.status === "open"}
+                    compact
+                    disabled={tableTabLocked && !canManage}
+                  />
+                </div>
+              ) : (
+              <div className={features.tableService && activeTab ? "grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,38%)_1fr]" : ""}>
+                {features.tableService && activeTab && (
+                  <PreBillPrintButton
+                    tabId={activeTab.id}
+                    currency={currency}
+                    requestBillFirst={activeTab.status === "open"}
+                    compact
+                    disabled={tableTabLocked && !canManage}
+                  />
+                )}
+                <Button
+                  type="button"
+                  disabled={!cart.length || !paymentMethods.length || tableTabLocked}
+                  data-tour="pos-charge"
+                  className="h-12 w-full rounded-xl bg-blue-600 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-40 sm:h-14 sm:text-lg"
+                  onClick={() => {
+                    setPaymentCartSnapshot(normalizeCartLines(cart, txDiscountPct));
+                    setCheckoutStep("payment");
+                  }}
+                >
+                  {!paymentMethods.length ? t.setupPaymentMethods : cart.length === 0 ? t.addItems : t.chargeAmount(money(totalDue))}
+                </Button>
+              </div>
+              )}
         </div>
         </>
         )}
@@ -1693,6 +2095,9 @@ function PosRegisterInner({
           <input type="hidden" name="tip_amount" value={safeTipAmount} />
           <input type="hidden" name="order_type" value={features.orderTypes ? orderType : ""} />
           <input type="hidden" name="table_label" value={features.tableService ? tableLabel : ""} />
+          {features.tableService && activeTab?.id && (
+            <input type="hidden" name="table_tab_id" value={activeTab.id} />
+          )}
           <input type="hidden" name="kitchen_note" value={(features.kitchenDisplay || features.restaurantOrderFlow) ? kitchenNote : ""} />
           <input type="hidden" name="customer_note" value={features.restaurantOrderFlow ? customerNote : ""} />
 
@@ -1795,6 +2200,7 @@ function PosRegisterInner({
           <Dialog open={splitOpen} onOpenChange={setSplitOpen}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader><DialogTitle>{t.splitPayment}</DialogTitle></DialogHeader>
+              <p className="text-xs text-slate-500">{t.splitVoucherHint}</p>
               <div className="space-y-3">
                 {splitPayments.map((row) => (
                   <div key={row.id} className="grid grid-cols-[1fr_100px_32px] gap-2">
@@ -1924,6 +2330,7 @@ function PosRegisterInner({
             </DialogContent>
           </Dialog>
       </form>
+    </div>
     </div>
   );
 }

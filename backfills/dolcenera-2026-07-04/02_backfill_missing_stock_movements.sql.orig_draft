@@ -1,0 +1,99 @@
+-- Dolce Nera (org b01ce0e0-d01c-4042-0000-000000000042) historical reconciliation
+-- Step 2 of 3: backfill missing sale-driven ingredient consumption.
+--
+-- BATCH_ID = 'dolcenera-backfill-20260704-01'
+--
+-- Root causes covered by this single reconciliation (all three land in the
+-- same "expected vs actual" gap, computed per (transaction, ingredient)):
+--   1. 2,147 historical transactions bulk-imported from Odoo on 2026-06-09
+--      17:07-17:13 never ran through the live sale-completion code path
+--      (app/actions/kitchenops.ts), so zero stock_movements were ever created
+--      for them.
+--   2. The 9 orphaned ingredient links fixed in 01_fix_recipe_ingredient_links.sql
+--      caused every live sale of the 14 affected recipes since 2026-06-09 to
+--      skip that one ingredient's deduction.
+--   3. A handful of scattered live transactions (06-19, 22, 23, 24, 25, 29,
+--      07-01, 07-03) show zero stock_movements at all for the whole sale --
+--      the outer try/catch in kitchenops.ts silently swallowed some other
+--      error. Root cause not fully diagnosed from data alone; logging added
+--      in kitchenops.ts (see accompanying code change) so future occurrences
+--      are visible instead of silent.
+--
+-- THESE ARE NOT ORIGINAL POS DEDUCTIONS. Every inserted row is explicitly
+-- marked:
+--   - reference_type = 'sale_backfill' (real-time rows use 'sale') so they
+--     are trivially distinguishable by a WHERE clause, not just by reading
+--     the reason text.
+--   - reason begins with '[BACKFILL:dolcenera-backfill-20260704-01]'.
+--   - movement_type stays 'sale_used' (correct semantic classification, so
+--     existing reports like lib/ro-accounting/gestiune.ts still categorize
+--     these correctly as "vanzare"/consumption).
+--   - performed_at = the ORIGINAL sale's timestamp (not today), so the
+--     reconstructed history lines up with when the consumption actually
+--     happened.
+--
+-- Quantities are computed strictly from data that exists today: each
+-- product's CURRENT recipe (recipe_items.quantity / yield_qty) applied to
+-- the ACTUAL historical sale quantity from pos_transaction_items. We have no
+-- historical recipe snapshots (the migration didn't carry recipe versioning),
+-- so this is the best available reconstruction, not a guarantee that the
+-- recipe was identical on every past date. This caveat is being passed to
+-- the accountant alongside the corrected figures.
+--
+-- Pre-change snapshot of the full stock_movements table for this org:
+-- snapshot_stock_movements_before.json (2,405 rows before this insert).
+--
+-- Dry run confirmed: 12,138 rows / ~11,390.62 total units missing.
+
+with org as (select 'b01ce0e0-d01c-4042-0000-000000000042'::uuid as id),
+sold as (
+  select i.transaction_id, i.product_id, t.created_at, sum(i.quantity) as qty_sold
+  from pos_transaction_items i
+  join pos_transactions t on t.id = i.transaction_id
+  join org on t.organisation_id = org.id
+  group by i.transaction_id, i.product_id, t.created_at
+),
+recipe_map as (
+  select r.product_id, r.yield_qty, ri.ingredient_product_id, ri.quantity as ri_qty, ri.unit_of_measure
+  from recipes r
+  join recipe_items ri on ri.recipe_id = r.id
+  join org on r.organisation_id = org.id
+  where ri.ingredient_product_id is not null
+),
+expected as (
+  select s.transaction_id, s.created_at, rm.ingredient_product_id,
+         sum((rm.ri_qty / greatest(rm.yield_qty,1)) * s.qty_sold) as expected_qty,
+         max(rm.unit_of_measure) as unit_of_measure
+  from sold s
+  join recipe_map rm on rm.product_id = s.product_id
+  group by s.transaction_id, s.created_at, rm.ingredient_product_id
+),
+existing as (
+  select reference_id as transaction_id, product_id, sum(-quantity_change) as existing_qty
+  from stock_movements sm join org on sm.organisation_id = org.id
+  where sm.movement_type = 'sale_used' and sm.reference_type = 'sale'
+  group by reference_id, product_id
+),
+missing as (
+  select e.transaction_id, e.created_at, e.ingredient_product_id, e.unit_of_measure,
+         (e.expected_qty - coalesce(x.existing_qty,0)) as missing_qty
+  from expected e
+  left join existing x on x.transaction_id = e.transaction_id and x.product_id = e.ingredient_product_id
+  where (e.expected_qty - coalesce(x.existing_qty,0)) > 0.0001
+)
+insert into stock_movements (organisation_id, product_id, movement_type, quantity_change, unit_of_measure, reason, reference_type, reference_id, performed_by, performed_at, unit_cost)
+select
+  'b01ce0e0-d01c-4042-0000-000000000042',
+  m.ingredient_product_id,
+  'sale_used',
+  -m.missing_qty,
+  coalesce(m.unit_of_measure, 'each'),
+  '[BACKFILL:dolcenera-backfill-20260704-01] Historical reconciliation, not an original POS deduction. Reconstructed from current recipe ratio x actual historical sale quantity. Inserted 2026-07-04.',
+  'sale_backfill',
+  m.transaction_id,
+  'b40cba2c-3037-44a8-8578-f7f0fe72cc00',
+  m.created_at,
+  p.cost_price
+from missing m
+left join products p on p.id = m.ingredient_product_id
+returning id, product_id, quantity_change;
