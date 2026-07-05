@@ -50,6 +50,10 @@ export async function completePosOnboarding(input: {
     utm_campaign?: string;
     utm_content?: string;
     utm_medium?: string;
+    gclid?: string;
+    gbraid?: string;
+    wbraid?: string;
+    ga_client_id?: string;
   } | null;
 }) {
   const supabase = await createClient();
@@ -132,6 +136,10 @@ export async function completePosOnboarding(input: {
     acquisition_campaign: input.acquisition?.utm_campaign || null,
     acquisition_content: input.acquisition?.utm_content || null,
     acquisition_medium: input.acquisition?.utm_medium || null,
+    acquisition_gclid: input.acquisition?.gclid || null,
+    acquisition_gbraid: input.acquisition?.gbraid || null,
+    acquisition_wbraid: input.acquisition?.wbraid || null,
+    acquisition_ga_client_id: input.acquisition?.ga_client_id || null,
   }).eq("id", orgId);
 
   if (orgUpdateError) {

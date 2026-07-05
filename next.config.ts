@@ -21,6 +21,15 @@ const nextConfig: NextConfig = {
       { source: "/features/raport-z", destination: "/features/z-report", permanent: true },
       { source: "/compare/hepos", destination: "/compare/ebriza", permanent: true },
       { source: "/our-blog-1/:path*", destination: "/resources", permanent: true },
+      // Pre-pivot paths still referenced by old Ads sitelinks / bookmarks / backlinks — send to live equivalents.
+      { source: "/contact", destination: "/", permanent: true },
+      { source: "/pos-system", destination: "/features/pos", permanent: true },
+      { source: "/franchise-management", destination: "/", permanent: true },
+      { source: "/about", destination: "/", permanent: true },
+      { source: "/demo", destination: "/pricing", permanent: true },
+      { source: "/faq", destination: "/help", permanent: true },
+      { source: "/support", destination: "/help", permanent: true },
+      { source: "/docs", destination: "/help", permanent: true },
     ];
   },
   async rewrites() {

@@ -280,6 +280,10 @@ export default function OnboardingPage() {
               utm_campaign: acquisition.utm_campaign,
               utm_content: acquisition.utm_content,
               utm_medium: acquisition.utm_medium,
+              gclid: acquisition.gclid,
+              gbraid: acquisition.gbraid,
+              wbraid: acquisition.wbraid,
+              ga_client_id: acquisition.ga_client_id,
             }
           : null,
       });

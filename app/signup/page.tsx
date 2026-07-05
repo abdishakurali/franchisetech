@@ -19,6 +19,7 @@ import { isPreferredBillingPlan, writePreferredPlanClient } from "@/lib/billing/
 import {
   hasAcquisitionData,
   parseAcquisitionFromSearchParams,
+  readGaClientIdClient,
   writeAcquisitionClient,
 } from "@/lib/marketing/acquisition";
 import { MARKETING_LOCALE_COOKIE } from "@/lib/marketing/locale";
@@ -46,7 +47,9 @@ export default function SignupPage() {
 
   useEffect(() => {
     const acquisition = parseAcquisitionFromSearchParams(searchParams);
-    if (hasAcquisitionData(acquisition)) {
+    const gaClientId = readGaClientIdClient();
+    if (gaClientId) acquisition.ga_client_id = gaClientId;
+    if (hasAcquisitionData(acquisition) || gaClientId) {
       writeAcquisitionClient(acquisition);
     }
     if (acquisition.lang) {

@@ -9,7 +9,29 @@ export type AcquisitionParams = {
   utm_medium?: string;
   ref?: string;
   lang?: MarketingLocale;
+  /** Google Ads click ID — required for Enhanced Conversions / offline conversion import. */
+  gclid?: string;
+  /** Google Ads click ID for app campaigns routed through Google's ad network. */
+  gbraid?: string;
+  /** Google Ads click ID for iOS web-to-app campaigns (Apple SKAdNetwork/Private Click Measurement flows). */
+  wbraid?: string;
+  /** GA4 client_id read from the `_ga` cookie — required to attribute a server-side Measurement Protocol event back to the original session. */
+  ga_client_id?: string;
 };
+
+/**
+ * Extracts the GA4 client_id from the `_ga` cookie (format `GA1.<domainDepth>.<clientId>`).
+ * Without this, a server-side Measurement Protocol event can't be tied to the
+ * ad-driven browser session that started the trial.
+ */
+export function readGaClientIdClient(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(/(?:^|;\s*)_ga=([^;]+)/);
+  if (!match) return undefined;
+  const parts = decodeURIComponent(match[1]).split(".");
+  if (parts.length < 4) return undefined;
+  return parts.slice(2).join(".");
+}
 
 const MAX_LEN = 120;
 
@@ -30,6 +52,9 @@ export function parseAcquisitionFromSearchParams(
     utm_medium: trim(params.get("utm_medium")),
     ref: trim(params.get("ref")),
     lang: lang === "ro" || lang === "en" ? lang : undefined,
+    gclid: trim(params.get("gclid")),
+    gbraid: trim(params.get("gbraid")),
+    wbraid: trim(params.get("wbraid")),
   };
 }
 
@@ -39,7 +64,10 @@ export function hasAcquisitionData(params: AcquisitionParams): boolean {
       params.utm_campaign ||
       params.utm_content ||
       params.utm_medium ||
-      params.ref
+      params.ref ||
+      params.gclid ||
+      params.gbraid ||
+      params.wbraid
   );
 }
 

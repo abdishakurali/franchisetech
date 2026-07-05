@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { creditReferralOnFirstPayment } from "@/lib/referrals";
 import { trackLoopsEvent } from "@/lib/loops";
 import { syncStripeSubscription } from "@/lib/billing/stripe-sync";
+import { reportPaidConversion } from "@/lib/analytics/server-conversions";
 
 export const dynamic = "force-dynamic";
 
@@ -198,9 +199,26 @@ export async function POST(request: Request) {
 
             const { data: org } = await supabase
               .from("organisations")
-              .select("referred_by_code, referral_credit_months")
+              .select(
+                "referred_by_code, referral_credit_months, acquisition_gclid, acquisition_gbraid, acquisition_wbraid, acquisition_ga_client_id"
+              )
               .eq("id", subOrgId)
               .maybeSingle();
+
+            // "Became a paying customer" is a one-time moment — only report on the
+            // first invoice of the subscription, not on every renewal cycle.
+            if (invoice.billing_reason === "subscription_create") {
+              await reportPaidConversion({
+                organisationId: subOrgId,
+                gclid: org?.acquisition_gclid,
+                gbraid: org?.acquisition_gbraid,
+                wbraid: org?.acquisition_wbraid,
+                gaClientId: org?.acquisition_ga_client_id,
+                amountCents: invoice.amount_paid ?? 0,
+                currency: invoice.currency ?? "eur",
+                transactionId: invoice.id ?? subscription.id,
+              }).catch((err) => console.error("[billing webhook] reportPaidConversion failed", err));
+            }
 
             if (org?.referred_by_code) {
               await creditReferralOnFirstPayment(subOrgId).catch(() => null);
