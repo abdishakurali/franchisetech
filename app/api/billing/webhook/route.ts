@@ -5,6 +5,7 @@ import { creditReferralOnFirstPayment } from "@/lib/referrals";
 import { trackLoopsEvent } from "@/lib/loops";
 import { syncStripeSubscription } from "@/lib/billing/stripe-sync";
 import { reportPaidConversion } from "@/lib/analytics/server-conversions";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,24 @@ async function checkAndRecordEvent(
     console.error("[billing_events] insert error:", error.code, error.message);
   }
   return "new";
+}
+
+/** Resolves the org owner's user id — used as the PostHog distinct_id for webhook-originated events (no browser session available). */
+async function resolveOrgOwnerId(organisationId: string | null | undefined): Promise<string | null> {
+  if (!organisationId) return null;
+  try {
+    const supabase = await createServiceClient();
+    const { data: member } = await supabase
+      .from("organisation_members")
+      .select("user_id")
+      .eq("organisation_id", organisationId)
+      .eq("role", "owner")
+      .limit(1)
+      .maybeSingle();
+    return member?.user_id ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function markEventProcessed(
@@ -159,6 +178,29 @@ export async function POST(request: Request) {
             status: subscription.status,
           });
         }
+        const subOrgId = subscription.metadata?.organisation_id ?? null;
+        const ownerId = await resolveOrgOwnerId(subOrgId);
+        if (ownerId) {
+          captureServerEvent(
+            ownerId,
+            "subscription_created",
+            { organisation_id: subOrgId, plan: subscription.metadata?.plan ?? "", status: subscription.status },
+            subOrgId ? { organisation: subOrgId } : undefined,
+          );
+        }
+      }
+
+      if (event.type === "customer.subscription.deleted") {
+        const subOrgId = subscription.metadata?.organisation_id ?? null;
+        const ownerId = await resolveOrgOwnerId(subOrgId);
+        if (ownerId) {
+          captureServerEvent(
+            ownerId,
+            "subscription_canceled",
+            { organisation_id: subOrgId, plan: subscription.metadata?.plan ?? "", status: subscription.status },
+            subOrgId ? { organisation: subOrgId } : undefined,
+          );
+        }
       }
     }
 
@@ -184,6 +226,19 @@ export async function POST(request: Request) {
           clearGracePeriod: isSuccess,
         });
         if (!sync.synced) throw new Error(`invoice_subscription_sync_failed:${sync.reason ?? "unknown"}`);
+
+        if (isFailure) {
+          const failOrgId = subscription.metadata?.organisation_id ?? null;
+          const ownerId = await resolveOrgOwnerId(failOrgId);
+          if (ownerId) {
+            captureServerEvent(
+              ownerId,
+              "payment_failed",
+              { organisation_id: failOrgId, plan: subscription.metadata?.plan ?? "", amount_due_cents: invoice.amount_paid ?? 0 },
+              failOrgId ? { organisation: failOrgId } : undefined,
+            );
+          }
+        }
 
         // Referral credit on first real payment
         const isRealPayment =

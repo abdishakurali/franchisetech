@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,28 @@ export default async function PurchaseDetailPage({
     .single();
 
   if (!purchase) redirect("/app/purchases");
+
+  // Prev/Next navigation, matching the main purchases list's order
+  // (purchased_at desc) so paging here moves through the same sequence.
+  const currentPurchasedAt = purchase.purchased_at;
+  const [{ data: newer }, { data: older }] = await Promise.all([
+    supabase
+      .from("purchases")
+      .select("id")
+      .eq("organisation_id", orgId)
+      .gt("purchased_at", currentPurchasedAt)
+      .order("purchased_at", { ascending: true })
+      .limit(1),
+    supabase
+      .from("purchases")
+      .select("id")
+      .eq("organisation_id", orgId)
+      .lt("purchased_at", currentPurchasedAt)
+      .order("purchased_at", { ascending: false })
+      .limit(1),
+  ]);
+  const prevId = newer?.[0]?.id as string | undefined;
+  const nextId = older?.[0]?.id as string | undefined;
 
   let siteName: string | null = null;
   if (purchase.site_id) {
@@ -127,7 +150,19 @@ export default async function PurchaseDetailPage({
             <Badge variant="secondary" className={`text-xs border ${badge.className}`}>{badge.label}</Badge>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 justify-end">
+        <div className="flex flex-wrap gap-2 justify-end items-start">
+          <div className="flex gap-1 print:hidden">
+            <Link href={prevId ? `/app/purchases/${prevId}` : "#"} aria-disabled={!prevId} tabIndex={prevId ? undefined : -1}>
+              <Button variant="outline" size="icon" disabled={!prevId} aria-label={d.previous}>
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href={nextId ? `/app/purchases/${nextId}` : "#"} aria-disabled={!nextId} tabIndex={nextId ? undefined : -1}>
+              <Button variant="outline" size="icon" disabled={!nextId} aria-label={d.next}>
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
           {canManage && countryCode === "RO" && items.length > 0 && (
             <Link href={`/app/invoices/new?purchaseId=${id}`}>
               <Button variant="outline">Creează factură din NIR</Button>

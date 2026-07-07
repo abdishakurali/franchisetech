@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { startOfMonth } from "date-fns";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileDown } from "lucide-react";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -102,20 +103,17 @@ export default async function StaffReportPage({ searchParams }: Props) {
         </div>
       </div>
 
-      {/* Date range form */}
-      <form method="GET" className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-slate-600">{t.reports.staff?.from ?? "From"}</label>
-          <input type="date" name="from" defaultValue={from} className="rounded-md border border-slate-200 px-2 py-1 text-sm" />
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-slate-600">{t.reports.staff?.to ?? "To"}</label>
-          <input type="date" name="to" defaultValue={to} className="rounded-md border border-slate-200 px-2 py-1 text-sm" />
-        </div>
-        <button type="submit" className="rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
-          {t.common.apply ?? "Apply"}
-        </button>
-      </form>
+      {/* Date range filter */}
+      <div className="flex flex-wrap items-center gap-3">
+        <ReportDateRangeFilter basePath="/app/reports/staff" from={from} to={to} />
+        <Link
+          href={`/api/reports/staff/pdf?from=${from}&to=${to}`}
+          className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+        >
+          <FileDown className="h-4 w-4" />
+          {t.common.downloadPdf}
+        </Link>
+      </div>
 
       {/* Summary strip */}
       <div className="grid gap-4 sm:grid-cols-3">

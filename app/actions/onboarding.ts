@@ -19,6 +19,7 @@ import type { BillingPlan } from "@/lib/billing/plans";
 import { trackLoopsEvent, upsertLoopsContact } from "@/lib/loops";
 import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 const COUNTRY_LABELS: Record<string, string> = {
   RO: "Romania",
@@ -266,7 +267,7 @@ export async function completePosOnboarding(input: {
   }
 
   // ── Growth milestone: till opened ──────────────────────────────────────
-  await recordGrowthMilestone(supabase, orgId, "till_opened");
+  await recordGrowthMilestone(supabase, orgId, "till_opened", user.id);
   await supabase.from("organisations").update({ onboarding_completed: true }).eq("id", orgId).then(
     () => null,
     (e: unknown) => console.error("onboarding_completed_update_failed", e),
@@ -297,6 +298,17 @@ export async function completePosOnboarding(input: {
       plan: input.preferredPlan ?? "starter",
     }).catch((e: unknown) => console.error("onboarding_loops_event_failed", e));
   }
+  captureServerEvent(
+    user.id,
+    "trial_started",
+    {
+      organisation_id: orgId,
+      country_code: input.countryCode,
+      plan: input.preferredPlan ?? "starter",
+      business_type: input.businessType ?? null,
+    },
+    { organisation: orgId },
+  );
 
   revalidatePath("/app");
   revalidatePath("/onboarding");

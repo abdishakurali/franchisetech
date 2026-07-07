@@ -1,6 +1,8 @@
+import Link from "next/link";
+import { FileDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PrintButton } from "@/components/app/PrintButton";
+import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
@@ -50,13 +52,15 @@ export default async function VatReportPage({ searchParams }: { searchParams?: P
           <h1 className="text-2xl font-semibold">{vp.title}</h1>
           <p className="text-sm text-slate-500">{vp.subtitle}</p>
         </div>
-        <div className="flex gap-3">
-          <form className="flex gap-2 items-end">
-            <div><label className="text-xs text-slate-500 block">{vp.from}</label><input type="date" name="from" defaultValue={from} className="h-9 rounded-md border px-3 text-sm" /></div>
-            <div><label className="text-xs text-slate-500 block">{vp.to}</label><input type="date" name="to" defaultValue={to} className="h-9 rounded-md border px-3 text-sm" /></div>
-            <button type="submit" className="h-9 rounded-md border border-slate-200 bg-white px-3 text-sm hover:bg-slate-50">{vp.apply}</button>
-          </form>
-          <PrintButton />
+        <div className="flex gap-3 items-center flex-wrap">
+          <ReportDateRangeFilter basePath="/app/reports/vat" from={from} to={to} />
+          <Link
+            href={`/api/reports/vat/pdf?from=${from}&to=${to}`}
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+          >
+            <FileDown className="h-4 w-4" />
+            {t.common.downloadPdf}
+          </Link>
         </div>
       </div>
 
@@ -96,6 +100,17 @@ export default async function VatReportPage({ searchParams }: { searchParams?: P
           )}
         </CardContent>
       </Card>
+
+      <div className="grid gap-8 sm:grid-cols-2 pt-8 print:mt-12">
+        <div>
+          <p className="text-xs text-slate-500 mb-8">{vp.preparedBy}</p>
+          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{vp.nameDate}</div>
+        </div>
+        <div>
+          <p className="text-xs text-slate-500 mb-8">{vp.accountantSignature}</p>
+          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{vp.nameDate}</div>
+        </div>
+      </div>
     </div>
   );
 }

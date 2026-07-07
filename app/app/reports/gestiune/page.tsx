@@ -1,42 +1,15 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { PrintButton } from "@/components/app/PrintButton";
+import { FileDown } from "lucide-react";
+import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
-import {
-  fetchStockMovements,
-  stockMovementQty,
-  stockMovementProduct,
-  stockMovementUnitCost,
-} from "@/lib/ro-accounting/stock-movements";
-import type { GestiuneMovement } from "@/lib/ro-accounting/gestiune";
-
-type PurchaseRow = {
-  id: string;
-  purchase_date: string;
-  supplier: string | null;
-  invoice_number: string | null;
-  total_amount: number | null;
-  tax_total: number | null;
-  purchase_items: Array<{
-    tax_rate: number | null;
-    total_cost: number | null;
-  }>;
-};
-
-type TransactionRow = {
-  sold_at: string;
-  status: string;
-  pos_transaction_items: Array<{
-    vat_rate: number | null;
-    gross_amount: number | null;
-    line_total: number | null;
-  }>;
-};
+import { computeGestiuneReport } from "@/lib/ro-accounting/gestiune-data";
 
 const DOCUMENT_TYPE_COLORS: Record<string, string> = {
   stoc_initial: "bg-blue-100 text-blue-800",
@@ -63,216 +36,21 @@ export default async function GestiuneReportPage({
   firstOfMonth.setDate(1);
   const fromDate = params?.from ?? firstOfMonth.toISOString().slice(0, 10);
   const toDate = params?.to ?? today;
-  const periodStart = `${fromDate}T00:00:00.000Z`;
-  const periodEnd = `${toDate}T23:59:59.999Z`;
 
   const labels = t.reportPages.gestiune;
 
-  const { data: org } = await supabase
-    .from("organisations")
-    .select("name,fiscalnet_cif")
-    .eq("id", orgId)
-    .single();
-
-  const movements: GestiuneMovement[] = [];
-
-  const movementsBeforePeriod = await fetchStockMovements(supabase, orgId, {
-    before: periodStart,
-  });
-
-  // Opening stock is a NET running balance: purchases/opening entries add
-  // (positive quantity_change), consumption subtracts (negative
-  // quantity_change). Using Math.abs() here would treat consumption as if
-  // it were inbound stock and wildly overstate the balance -- every
-  // movement type before the period must keep its real sign.
-  const openingStock = { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0 };
-  for (const m of movementsBeforePeriod) {
-    const qty = stockMovementQty(m);
-    const value = qty * stockMovementUnitCost(m);
-    const prod = stockMovementProduct(m);
-    const vatRate = Number(prod?.vat_rate ?? 21);
-
-    if (vatRate === 21) openingStock.tva19 += value;
-    else if (vatRate === 11) openingStock.tva9 += value;
-    else if (vatRate === 5) openingStock.tva5 += value;
-    else openingStock.tva0 += value;
-    openingStock.total += value;
-  }
-
-  if (openingStock.total > 0) {
-    movements.push({
-      date: fromDate,
-      documentType: "stoc_initial",
-      description: labels.openingBalance,
-      ...openingStock,
-    });
-  }
-
-  const { data: purchases } = await supabase
-    .from("purchases")
-    .select(`
-      id,
-      purchase_date,
-      supplier,
-      invoice_number,
-      total_amount,
-      tax_total,
-      purchase_items(tax_rate, total_cost)
-    `)
-    .eq("organisation_id", orgId)
-    .in("status", ["posted", "received"])
-    .gte("purchase_date", periodStart)
-    .lte("purchase_date", periodEnd)
-    .order("purchase_date");
-
-  for (const p of (purchases ?? []) as PurchaseRow[]) {
-    const nirByVat = { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0 };
-    for (const item of p.purchase_items ?? []) {
-      const value = Number(item.total_cost ?? 0);
-      const vatRate = Number(item.tax_rate ?? 21);
-      if (vatRate === 21) nirByVat.tva19 += value;
-      else if (vatRate === 11) nirByVat.tva9 += value;
-      else if (vatRate === 5) nirByVat.tva5 += value;
-      else nirByVat.tva0 += value;
-      nirByVat.total += value;
-    }
-
-    if (nirByVat.total > 0) {
-      movements.push({
-        date: p.purchase_date,
-        documentType: "nir",
-        documentNumber: p.invoice_number ?? undefined,
-        description: p.supplier ?? labels.unknownSupplier,
-        ...nirByVat,
-      });
-    }
-  }
-
-  const consumMovements = await fetchStockMovements(supabase, orgId, {
-    movementType: "sale_used",
-    from: periodStart,
-    to: periodEnd,
-  });
-
-  const consumByDate = new Map<string, { tva19: number; tva9: number; tva5: number; tva0: number; total: number }>();
-  for (const m of consumMovements) {
-    const dateKey = m.performed_at.slice(0, 10);
-    const existing = consumByDate.get(dateKey) ?? { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0 };
-
-    const qty = Math.abs(stockMovementQty(m));
-    const value = qty * stockMovementUnitCost(m);
-    const prodConsum = stockMovementProduct(m);
-    const vatRate = Number(prodConsum?.vat_rate ?? 21);
-
-    if (vatRate === 21) existing.tva19 += value;
-    else if (vatRate === 11) existing.tva9 += value;
-    else if (vatRate === 5) existing.tva5 += value;
-    else existing.tva0 += value;
-    existing.total += value;
-
-    consumByDate.set(dateKey, existing);
-  }
-
-  for (const [dateKey, values] of Array.from(consumByDate.entries()).sort(([a], [b]) => a.localeCompare(b))) {
-    if (values.total > 0) {
-      movements.push({
-        date: dateKey,
-        documentType: "consum",
-        description: labels.rawConsumption,
-        ...values,
-      });
-    }
-  }
-
-  // Filtered on pos_transactions.sold_at (the real business date), not
-  // pos_transaction_items.created_at (row-insert time). For migrated
-  // historical sales, created_at is the bulk-import timestamp -- identical
-  // for all ~2,147 rows -- which silently pulled in every historical
-  // transaction regardless of the selected date range while still
-  // displaying its true (often out-of-range) sold_at date.
-  const { data: transactions } = await supabase
-    .from("pos_transactions")
-    .select(`
-      sold_at,
-      status,
-      pos_transaction_items(vat_rate, gross_amount, line_total)
-    `)
-    .eq("organisation_id", orgId)
-    .gte("sold_at", periodStart)
-    .lte("sold_at", periodEnd);
-
-  const salesByDate = new Map<string, { tva19: number; tva9: number; tva5: number; tva0: number; total: number; count: number }>();
-  for (const tx of (transactions ?? []) as TransactionRow[]) {
-    if (tx.status === "voided") continue;
-    const dateKey = tx.sold_at.slice(0, 10);
-    const existing = salesByDate.get(dateKey) ?? { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0, count: 0 };
-
-    for (const item of tx.pos_transaction_items ?? []) {
-      const value = Number(item.gross_amount ?? item.line_total ?? 0);
-      const vatRate = Number(item.vat_rate ?? 21);
-
-      if (vatRate === 21) existing.tva19 += value;
-      else if (vatRate === 11) existing.tva9 += value;
-      else if (vatRate === 5) existing.tva5 += value;
-      else existing.tva0 += value;
-      existing.total += value;
-      existing.count += 1;
-    }
-
-    salesByDate.set(dateKey, existing);
-  }
-
-  for (const [dateKey, values] of Array.from(salesByDate.entries()).sort(([a], [b]) => a.localeCompare(b))) {
-    if (values.total > 0) {
-      movements.push({
-        date: dateKey,
-        documentType: "vanzare",
-        description: labels.zReportItems(values.count),
-        tva19: values.tva19,
-        tva9: values.tva9,
-        tva5: values.tva5,
-        tva0: values.tva0,
-        total: values.total,
-      });
-    }
-  }
-
-  // intrari* accumulates ONLY period NIR (goods actually received in this
-  // date range) -- opening stock is a separate starting balance, not a
-  // period inflow, and must not be double-counted as "Total intrari".
-  const totals = movements.reduce(
-    (acc, m) => {
-      if (m.documentType === "nir") {
-        acc.intrari19 += m.tva19;
-        acc.intrari9 += m.tva9;
-        acc.intrari5 += m.tva5;
-        acc.intrari0 += m.tva0;
-        acc.intrariTotal += m.total;
-      } else if (m.documentType === "consum" || m.documentType === "vanzare") {
-        acc.iesiri19 += m.tva19;
-        acc.iesiri9 += m.tva9;
-        acc.iesiri5 += m.tva5;
-        acc.iesiri0 += m.tva0;
-        acc.iesiriTotal += m.total;
-      }
-      return acc;
+  const { org, movements, totals, openingStock, closingStock } = await computeGestiuneReport(
+    supabase,
+    orgId,
+    fromDate,
+    toDate,
+    {
+      openingBalance: labels.openingBalance,
+      unknownSupplier: labels.unknownSupplier,
+      rawConsumption: labels.rawConsumption,
+      zReportItems: labels.zReportItems,
     },
-    { intrari19: 0, intrari9: 0, intrari5: 0, intrari0: 0, intrariTotal: 0, iesiri19: 0, iesiri9: 0, iesiri5: 0, iesiri0: 0, iesiriTotal: 0 }
   );
-
-  const closingStock = {
-    tva19: openingStock.tva19 + totals.intrari19 - totals.iesiri19,
-    tva9: openingStock.tva9 + totals.intrari9 - totals.iesiri9,
-    tva5: openingStock.tva5 + totals.intrari5 - totals.iesiri5,
-    tva0: openingStock.tva0 + totals.intrari0 - totals.iesiri0,
-    total: openingStock.total + totals.intrariTotal - totals.iesiriTotal,
-  };
-
-  movements.sort((a, b) => {
-    if (a.documentType === "stoc_initial") return -1;
-    if (b.documentType === "stoc_initial") return 1;
-    return a.date.localeCompare(b.date);
-  });
 
   return (
     <div className="space-y-6 p-6">
@@ -281,17 +59,15 @@ export default async function GestiuneReportPage({
           <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
           <p className="text-sm text-slate-500">{labels.subtitle}</p>
         </div>
-        <div className="flex gap-3 items-center">
-          <form className="flex gap-2 items-center">
-            <label className="text-sm text-slate-600">{labels.from}</label>
-            <input type="date" name="from" defaultValue={fromDate} max={today} className="h-10 rounded-md border border-slate-200 px-3 text-sm" />
-            <label className="text-sm text-slate-600">{labels.to}</label>
-            <input type="date" name="to" defaultValue={toDate} max={today} className="h-10 rounded-md border border-slate-200 px-3 text-sm" />
-            <button type="submit" className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50">
-              {labels.load}
-            </button>
-          </form>
-          <PrintButton />
+        <div className="flex gap-3 items-center flex-wrap">
+          <ReportDateRangeFilter basePath="/app/reports/gestiune" from={fromDate} to={toDate} />
+          <Link
+            href={`/api/reports/gestiune/pdf?from=${fromDate}&to=${toDate}`}
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+          >
+            <FileDown className="h-4 w-4" />
+            {labels.downloadPdf}
+          </Link>
         </div>
       </div>
 
@@ -341,6 +117,7 @@ export default async function GestiuneReportPage({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="text-right">{labels.nrCrt}</TableHead>
                   <TableHead>{labels.date}</TableHead>
                   <TableHead>{labels.docType}</TableHead>
                   <TableHead>{labels.docNo}</TableHead>
@@ -355,6 +132,7 @@ export default async function GestiuneReportPage({
               <TableBody>
                 {movements.map((m, idx) => (
                   <TableRow key={`${m.documentType}-${idx}`} className={m.documentType === "stoc_initial" ? "bg-blue-50" : ""}>
+                    <TableCell className="text-right tabular-nums text-slate-500">{idx + 1}</TableCell>
                     <TableCell className="tabular-nums">{new Date(m.date).toLocaleDateString("ro-RO")}</TableCell>
                     <TableCell>
                       <Badge className={DOCUMENT_TYPE_COLORS[m.documentType] ?? "bg-slate-100 text-slate-800"}>
@@ -371,7 +149,7 @@ export default async function GestiuneReportPage({
                   </TableRow>
                 ))}
                 <TableRow className="bg-green-50 font-semibold">
-                  <TableCell colSpan={4} className="text-right">{labels.totalEntries}:</TableCell>
+                  <TableCell colSpan={5} className="text-right">{labels.totalEntries}:</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(totals.intrari19, currency)}</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(totals.intrari9, currency)}</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(totals.intrari5, currency)}</TableCell>
@@ -379,7 +157,7 @@ export default async function GestiuneReportPage({
                   <TableCell className="text-right tabular-nums">{formatMoney(totals.intrariTotal, currency)}</TableCell>
                 </TableRow>
                 <TableRow className="bg-red-50 font-semibold">
-                  <TableCell colSpan={4} className="text-right">{labels.totalExits}:</TableCell>
+                  <TableCell colSpan={5} className="text-right">{labels.totalExits}:</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(totals.iesiri19, currency)}</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(totals.iesiri9, currency)}</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(totals.iesiri5, currency)}</TableCell>
@@ -387,7 +165,7 @@ export default async function GestiuneReportPage({
                   <TableCell className="text-right tabular-nums">{formatMoney(totals.iesiriTotal, currency)}</TableCell>
                 </TableRow>
                 <TableRow className="bg-blue-100 font-bold">
-                  <TableCell colSpan={4} className="text-right">{labels.closingStock}:</TableCell>
+                  <TableCell colSpan={5} className="text-right">{labels.closingStock}:</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(closingStock.tva19, currency)}</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(closingStock.tva9, currency)}</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(closingStock.tva5, currency)}</TableCell>
@@ -455,6 +233,17 @@ export default async function GestiuneReportPage({
             {labels.negativeStockWarning}
           </p>
         )}
+      </div>
+
+      <div className="grid gap-8 sm:grid-cols-2 pt-8 print:mt-12">
+        <div>
+          <p className="text-xs text-slate-500 mb-8">{labels.preparedBy}</p>
+          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+        </div>
+        <div>
+          <p className="text-xs text-slate-500 mb-8">{labels.accountantSignature}</p>
+          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+        </div>
       </div>
     </div>
   );

@@ -23,3 +23,24 @@ export async function shutdownPostHog(): Promise<void> {
     posthogClient = null;
   }
 }
+
+/**
+ * Fire-and-forget server-side product analytics — never throws, no-ops silently
+ * if PostHog isn't configured. distinctId should match the id used by
+ * posthog.identify() client-side (the Supabase auth user id) so events merge
+ * into the same person timeline.
+ */
+export function captureServerEvent(
+  distinctId: string,
+  event: string,
+  properties?: Record<string, string | number | boolean | null | undefined>,
+  groups?: Record<string, string>,
+): void {
+  try {
+    const client = getPostHogClient();
+    if (!client) return;
+    client.capture({ distinctId, event, properties, groups });
+  } catch {
+    // analytics must not block business flows
+  }
+}

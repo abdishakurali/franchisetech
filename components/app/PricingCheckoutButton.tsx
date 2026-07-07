@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { useAppI18n } from "@/lib/app-i18n-context";
+import { captureClientEvent } from "@/lib/analytics/client-events";
 
 export function PricingCheckoutButton({
   plan,
@@ -56,6 +57,7 @@ export function PricingCheckoutButton({
 
   const startCheckout = async () => {
     setLoading(true);
+    captureClientEvent("checkout_started", { plan, interval });
     try {
       const response = await fetch("/api/billing/checkout", {
         method: "POST",
@@ -66,6 +68,7 @@ export function PricingCheckoutButton({
       if (!response.ok || !payload.url) throw new Error(payload.error || "Checkout failed");
       window.location.href = payload.url;
     } catch {
+      captureClientEvent("checkout_start_failed", { plan, interval });
       router.push("/app/billing?checkout=error");
     } finally {
       setLoading(false);

@@ -19,6 +19,9 @@ export function PostHogIdentify({ userId, email, orgId, orgName }: Props) {
       org_id: orgId ?? undefined,
       org_name: orgName ?? undefined,
     });
+    if (orgId) {
+      posthog.group("organisation", orgId, { name: orgName ?? undefined });
+    }
   }, [userId, email, orgId, orgName]);
 
   return null;

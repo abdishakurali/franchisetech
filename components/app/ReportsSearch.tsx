@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import type { AppReportLink } from "@/lib/app-report-links";
 
-export function ReportsSearch({ reports, searchPlaceholder }: { reports: AppReportLink[]; searchPlaceholder: string }) {
+// icon is a pre-rendered element (not the LucideIcon component itself) --
+// Server Components cannot pass raw component/function references as props
+// into a Client Component like this one, only serializable React elements.
+type SearchableReport = Omit<AppReportLink, "icon"> & { icon: ReactNode };
+
+export function ReportsSearch({ reports, searchPlaceholder }: { reports: SearchableReport[]; searchPlaceholder: string }) {
   const [q, setQ] = useState("");
   const query = q.trim().toLowerCase();
   const filtered = query
@@ -36,7 +41,7 @@ export function ReportsSearch({ reports, searchPlaceholder }: { reports: AppRepo
             >
               <div className="flex items-start gap-3">
                 <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${r.color}`}>
-                  <r.icon className="h-5 w-5" />
+                  {r.icon}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">

@@ -1,28 +1,18 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { FileDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
-import { BalantaDownloadButton } from "./BalantaDownloadButton";
-import type { BalantaItem, BalantaIntegrityStatus } from "@/lib/ro-accounting/balanta";
-import {
-  resolveBalantaIntegrity,
-  sumMovementQty,
-  type BalantaProductMeta,
-} from "@/lib/ro-accounting/balanta-integrity";
-import {
-  fetchStockMovements,
-  stockMovementQty,
-  stockMovementUnitCost,
-} from "@/lib/ro-accounting/stock-movements";
-
-type ProductRow = BalantaProductMeta & {
-  vat_rate: number | null;
-};
+import type { BalantaIntegrityStatus } from "@/lib/ro-accounting/balanta";
+import { computeBalantaReport } from "@/lib/ro-accounting/balanta-data";
+import { sumMovementQty } from "@/lib/ro-accounting/balanta-integrity";
+import { fetchStockMovements } from "@/lib/ro-accounting/stock-movements";
 
 function integrityBadgeClass(status: BalantaIntegrityStatus): string {
   switch (status) {
@@ -47,13 +37,10 @@ export default async function BalantaReportPage({
   await requireBusinessModule("inventory");
   const { countryCode, profileLocale, supabase, orgId, currency, membership } =
     await getKitchenOpsContext();
-  const { data: orgSettings } = await supabase
-    .from("organisations")
-    .select("saga_export_enabled")
-    .eq("id", orgId)
-    .maybeSingle();
-  if (!orgSettings?.saga_export_enabled) redirect("/app/settings?tab=integrations");
-  if (!await hasEntitlement(orgId, "reports.accountant_pack")) redirect("/app/billing?reason=saga_requires_scale");
+  // Balanță cantitativ-valorică is a core accounting document (like Raport
+  // de Gestiune), independent of the Saga XML/DBF connector -- gated on
+  // reports.gestiune (Pro+), not the Saga-specific reports.accountant_pack.
+  if (!await hasEntitlement(orgId, "reports.gestiune")) redirect("/app/billing?reason=gestiune_requires_pro");
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
   const canManage = ["owner", "manager"].includes(membership.role ?? "");
@@ -63,8 +50,6 @@ export default async function BalantaReportPage({
   firstOfMonth.setDate(1);
   const fromDate = params?.from ?? firstOfMonth.toISOString().slice(0, 10);
   const toDate = params?.to ?? today;
-  const periodStart = `${fromDate}T00:00:00.000Z`;
-  const periodEnd = `${toDate}T23:59:59.999Z`;
 
   const labels = t.reportPages.balanta;
   const integrityLabels: Partial<Record<BalantaIntegrityStatus, string>> = {
@@ -80,141 +65,35 @@ export default async function BalantaReportPage({
     .eq("id", orgId)
     .single();
 
-  const { data: products } = await supabase
-    .from("products")
-    .select("id,name,unit_of_measure,current_stock_qty,vat_rate,active,is_stock_tracked,is_ingredient")
-    .eq("organisation_id", orgId);
-
-  const [movementsDuringPeriod, movementsBeforePeriod, allMovements] = await Promise.all([
-    fetchStockMovements(supabase, orgId, { from: periodStart, to: periodEnd }),
-    fetchStockMovements(supabase, orgId, { before: periodStart }),
-    fetchStockMovements(supabase, orgId, {}),
-  ]);
-
-  const productMap = new Map<string, ProductRow>();
-  for (const p of (products ?? []) as ProductRow[]) {
-    productMap.set(p.id, p);
-  }
-
-  const calcOpeningStock = new Map<string, { qty: number; value: number }>();
-  for (const m of movementsBeforePeriod) {
-    if (!m.product_id) continue;
-    const existing = calcOpeningStock.get(m.product_id) ?? { qty: 0, value: 0 };
-    const qty = stockMovementQty(m);
-    const cost = stockMovementUnitCost(m);
-    existing.qty += qty;
-    existing.value += Math.abs(qty) * cost;
-    calcOpeningStock.set(m.product_id, existing);
-  }
-
-  const periodEntries = new Map<string, { qty: number; value: number }>();
-  const periodExits = new Map<string, { qty: number; value: number }>();
-
-  for (const m of movementsDuringPeriod) {
-    if (!m.product_id) continue;
-    const qty = stockMovementQty(m);
-    const cost = stockMovementUnitCost(m);
-
-    const isEntry =
-      m.movement_type === "purchase_received" ||
-      m.movement_type === "return" ||
-      m.movement_type === "opening" ||
-      (m.movement_type === "manual_adjustment" && qty > 0);
-    const isExit =
-      m.movement_type === "sale_used" ||
-      m.movement_type === "wastage" ||
-      (m.movement_type === "manual_adjustment" && qty < 0);
-
-    if (isEntry) {
-      const existing = periodEntries.get(m.product_id) ?? { qty: 0, value: 0 };
-      existing.qty += Math.abs(qty);
-      existing.value += Math.abs(qty) * cost;
-      periodEntries.set(m.product_id, existing);
-    }
-
-    if (isExit) {
-      const existing = periodExits.get(m.product_id) ?? { qty: 0, value: 0 };
-      existing.qty += Math.abs(qty);
-      existing.value += Math.abs(qty) * cost;
-      periodExits.set(m.product_id, existing);
-    }
-  }
-
-  const allProductIds = new Set<string>([
-    ...calcOpeningStock.keys(),
-    ...periodEntries.keys(),
-    ...periodExits.keys(),
-  ]);
-
-  const items: BalantaItem[] = Array.from(allProductIds)
-    .map((productId) => {
-      const product = productMap.get(productId);
-      const opening = calcOpeningStock.get(productId) ?? { qty: 0, value: 0 };
-      const entries = periodEntries.get(productId) ?? { qty: 0, value: 0 };
-      const exits = periodExits.get(productId) ?? { qty: 0, value: 0 };
-
-      const closingQty = opening.qty + entries.qty - exits.qty;
-      const avgCost =
-        opening.value + entries.value > 0
-          ? (opening.value + entries.value) / (opening.qty + entries.qty || 1)
-          : 0;
-      const closingValue = closingQty * avgCost;
-
-      const ledgerQty = sumMovementQty(allMovements, productId);
-      const catalogQty = Number(product?.current_stock_qty ?? 0);
-      const integrityStatus = resolveBalantaIntegrity(product, { ledgerQty, catalogQty });
-
-      return {
-        productId,
-        productName: product?.name ?? t.common.unknown,
-        unit: product?.unit_of_measure ?? "buc",
-        openingQty: opening.qty,
-        openingValue: opening.value,
-        entryQty: entries.qty,
-        entryValue: entries.value,
-        exitQty: exits.qty,
-        exitValue: exits.value,
-        closingQty,
-        closingValue: closingValue > 0 ? closingValue : 0,
-        integrityStatus,
-        catalogQty: product ? catalogQty : undefined,
-        ledgerQty,
-      };
-    })
-    .filter((item) => item.openingQty !== 0 || item.entryQty !== 0 || item.exitQty !== 0)
-    .sort((a, b) => a.productName.localeCompare(b.productName));
-
+  const { items, totals } = await computeBalantaReport(supabase, orgId, fromDate, toDate, t.common.unknown);
   const integrityIssues = items.filter((i) => i.integrityStatus && i.integrityStatus !== "ok");
   const hasArchived = integrityIssues.some((i) => i.integrityStatus === "archived");
 
   const reconcileRows = canManage
-    ? (products ?? [])
-        .filter((p) => p.is_stock_tracked || p.is_ingredient)
-        .map((p) => {
-          const ledgerQty = sumMovementQty(allMovements, p.id);
-          const catalogQty = Number(p.current_stock_qty ?? 0);
-          return {
-            id: p.id,
-            name: p.name ?? t.common.unknown,
-            unit: p.unit_of_measure ?? "buc",
-            catalogQty,
-            ledgerQty,
-            delta: catalogQty - ledgerQty,
-          };
-        })
-        .filter((r) => Math.abs(r.delta) > 0.001)
-        .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta))
+    ? await (async () => {
+        const { data: products } = await supabase
+          .from("products")
+          .select("id,name,unit_of_measure,current_stock_qty,is_stock_tracked,is_ingredient")
+          .eq("organisation_id", orgId);
+        const allMovements = await fetchStockMovements(supabase, orgId, {});
+        return (products ?? [])
+          .filter((p) => p.is_stock_tracked || p.is_ingredient)
+          .map((p) => {
+            const ledgerQty = sumMovementQty(allMovements, p.id);
+            const catalogQty = Number(p.current_stock_qty ?? 0);
+            return {
+              id: p.id,
+              name: p.name ?? t.common.unknown,
+              unit: p.unit_of_measure ?? "buc",
+              catalogQty,
+              ledgerQty,
+              delta: catalogQty - ledgerQty,
+            };
+          })
+          .filter((r) => Math.abs(r.delta) > 0.001)
+          .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+      })()
     : [];
-
-  const totals = items.reduce(
-    (acc, item) => ({
-      openingValue: acc.openingValue + item.openingValue,
-      entryValue: acc.entryValue + item.entryValue,
-      exitValue: acc.exitValue + item.exitValue,
-      closingValue: acc.closingValue + item.closingValue,
-    }),
-    { openingValue: 0, entryValue: 0, exitValue: 0, closingValue: 0 },
-  );
 
   return (
     <div className="space-y-6 p-6">
@@ -223,43 +102,15 @@ export default async function BalantaReportPage({
           <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
           <p className="text-sm text-slate-500">{labels.subtitle}</p>
         </div>
-        <div className="flex gap-3 items-center">
-          <form className="flex gap-2 items-center">
-            <label className="text-sm text-slate-600">{labels.from}</label>
-            <input
-              type="date"
-              name="from"
-              defaultValue={fromDate}
-              max={today}
-              className="h-10 rounded-md border border-slate-200 px-3 text-sm"
-            />
-            <label className="text-sm text-slate-600">{labels.to}</label>
-            <input
-              type="date"
-              name="to"
-              defaultValue={toDate}
-              max={today}
-              className="h-10 rounded-md border border-slate-200 px-3 text-sm"
-            />
-            <button
-              type="submit"
-              className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
-            >
-              {labels.load}
-            </button>
-          </form>
-          {items.length > 0 && (
-            <BalantaDownloadButton
-              orgName={org?.name ?? "franchisetech"}
-              orgCui={org?.fiscalnet_cif ?? undefined}
-              dateFrom={fromDate}
-              dateTo={toDate}
-              currency={currency}
-              items={items}
-              integrityLabels={integrityLabels}
-              label={labels.download}
-            />
-          )}
+        <div className="flex gap-3 items-center flex-wrap">
+          <ReportDateRangeFilter basePath="/app/reports/balanta" from={fromDate} to={toDate} />
+          <Link
+            href={`/api/reports/balanta/pdf?from=${fromDate}&to=${toDate}`}
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+          >
+            <FileDown className="h-4 w-4" />
+            {t.common.downloadPdf}
+          </Link>
         </div>
       </div>
 
@@ -340,6 +191,7 @@ export default async function BalantaReportPage({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead rowSpan={2} className="text-right">{labels.nrCrt}</TableHead>
                   <TableHead rowSpan={2}>{labels.product}</TableHead>
                   <TableHead rowSpan={2}>{labels.unit}</TableHead>
                   <TableHead colSpan={2} className="text-center border-l">
@@ -367,8 +219,9 @@ export default async function BalantaReportPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {items.map((item) => (
+                {items.map((item, idx) => (
                   <TableRow key={item.productId ?? item.productName}>
+                    <TableCell className="text-right tabular-nums text-slate-500">{idx + 1}</TableCell>
                     <TableCell className="font-medium">
                       <div className="flex flex-wrap items-center gap-2">
                         <span>{item.productName}</span>
@@ -410,7 +263,7 @@ export default async function BalantaReportPage({
                   </TableRow>
                 ))}
                 <TableRow className="bg-slate-50 font-bold">
-                  <TableCell colSpan={2} className="text-right">
+                  <TableCell colSpan={3} className="text-right">
                     {labels.total}:
                   </TableCell>
                   <TableCell className="text-right border-l">—</TableCell>
@@ -484,6 +337,17 @@ export default async function BalantaReportPage({
         <p className="text-xs text-slate-500">
           <strong>{labels.dataSourceLabel}</strong> {labels.dataSource}
         </p>
+      </div>
+
+      <div className="grid gap-8 sm:grid-cols-2 pt-8 print:mt-12">
+        <div>
+          <p className="text-xs text-slate-500 mb-8">{labels.preparedBy}</p>
+          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+        </div>
+        <div>
+          <p className="text-xs text-slate-500 mb-8">{labels.accountantSignature}</p>
+          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+        </div>
       </div>
     </div>
   );

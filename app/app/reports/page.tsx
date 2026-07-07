@@ -43,7 +43,10 @@ export default async function ReportsHubPage() {
           </Link>
         </div>
       )}
-      <ReportsSearch reports={visibleReports} searchPlaceholder={t.reports.searchPlaceholder ?? "Caută raport…"} />
+      <ReportsSearch
+        reports={visibleReports.map((r) => ({ ...r, icon: <r.icon className="h-5 w-5" /> }))}
+        searchPlaceholder={t.reports.searchPlaceholder ?? "Caută raport…"}
+      />
     </div>
   );
 }

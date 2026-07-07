@@ -1,0 +1,8 @@
+Roboto-Regular.ttf and Roboto-Bold.ttf are the Roboto typeface by Google,
+licensed under the Apache License, Version 2.0.
+https://github.com/googlefonts/roboto-2/blob/main/LICENSE
+
+Repackaged from @fontsource/roboto (latin + latin-ext subsets merged into a
+single static TTF per weight) so Romanian diacritics render correctly in
+@react-pdf/renderer, which cannot use the built-in Helvetica/Times/Courier
+fonts for non-WinAnsi characters (ă â î ș ț).

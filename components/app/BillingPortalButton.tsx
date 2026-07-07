@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Loader2 } from "lucide-react";
 import { useAppI18n } from "@/lib/app-i18n-context";
+import { captureClientEvent } from "@/lib/analytics/client-events";
 
 export function BillingPortalButton() {
   const [loading, setLoading] = useState(false);
@@ -10,6 +11,7 @@ export function BillingPortalButton() {
 
   async function openPortal() {
     setLoading(true);
+    captureClientEvent("billing_portal_opened");
     try {
       const res = await fetch("/api/billing/portal", { method: "POST" });
       const json = await res.json();

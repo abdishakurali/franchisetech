@@ -5,7 +5,7 @@ import { getActiveOrg } from "@/lib/kitchenops/data";
 
 export async function markGrowthReportViewed(): Promise<void> {
   const { supabase, orgId, user, membership } = await getActiveOrg();
-  await recordGrowthMilestone(supabase, orgId, "first_report");
+  await recordGrowthMilestone(supabase, orgId, "first_report", user.id);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const orgRow = (membership as any).organisations;

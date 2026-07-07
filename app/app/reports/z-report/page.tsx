@@ -1,8 +1,9 @@
+import Link from "next/link";
+import { FileDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { PrintButton } from "@/components/app/PrintButton";
-import { RegistruDeCasaButton } from "@/components/app/RegistruDeCasaButton";
+import { ReportDateFilter } from "@/components/app/ReportDateFilter";
 import { ZReportCashForm } from "@/components/app/ZReportCashForm";
 import { GrowthReportViewTracker } from "@/components/app/GrowthReportViewTracker";
 import { ZReportReferralNudge } from "@/components/app/ZReportReferralNudge";
@@ -55,16 +56,6 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
     .lte('performed_at', dayEnd)
     .order('performed_at');
 
-  // Get opening cash from pos_sessions for this day
-  const { data: sessions } = await supabase
-    .from('pos_sessions')
-    .select('opening_cash')
-    .eq('organisation_id', orgId)
-    .gte('opened_at', dayStart)
-    .lte('opened_at', dayEnd)
-    .order('opened_at', { ascending: true })
-    .limit(1);
-  const openingCash = Number(sessions?.[0]?.opening_cash ?? 0);
 
   const cashInTotal = (cashMovements ?? []).filter((m) => m.movement_type === 'cash_in').reduce((s, m) => s + Number(m.amount ?? 0), 0);
   const cashOutTotal = (cashMovements ?? []).filter((m) => m.movement_type === 'cash_out').reduce((s, m) => s + Number(m.amount ?? 0), 0);
@@ -136,30 +127,15 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
           <h1 className="text-2xl font-semibold text-slate-950">{zp.title}</h1>
           <p className="text-sm text-slate-500">{zp.subtitle}</p>
         </div>
-        <div className="flex gap-3 items-center">
-          <form className="flex gap-2">
-            <input type="date" name="date" defaultValue={reportDate} max={today} className="h-10 rounded-md border border-slate-200 px-3 text-sm" />
-            <button type="submit" className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50">{zp.load}</button>
-          </form>
-          {countryCode === "RO" && (
-            <RegistruDeCasaButton
-              orgName={((org as { name?: string | null } | null)?.name) ?? "franchisetech"}
-              currency={currency}
-              openingCash={openingCash}
-              movements={(cashMovements ?? []).map((m) => ({
-                movement_type: m.movement_type,
-                amount: m.amount,
-                reason: m.reason,
-                performed_at: m.performed_at,
-              }))}
-              cashSales={cashTotal}
-              expectedCash={openingCash + cashTotal + cashInTotal - cashOutTotal}
-              userName={generatedBy}
-              dateStart={dayStart}
-              dateEnd={dayEnd}
-            />
-          )}
-          <PrintButton />
+        <div className="flex gap-3 items-center flex-wrap">
+          <ReportDateFilter basePath="/app/reports/z-report" date={reportDate} />
+          <Link
+            href={`/api/reports/z-report/pdf?date=${reportDate}`}
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+          >
+            <FileDown className="h-4 w-4" />
+            {zp.downloadPdf}
+          </Link>
         </div>
       </div>
 

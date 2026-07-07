@@ -1,8 +1,6 @@
 "use server";
 
 // FiscalNet — Romania-only fiscal receipt integration
-import { printFiscalReceipt, shouldPrintFiscalReceipt } from "@/lib/fiscalnet";
-import { buildFiscalNetConfig } from "@/lib/fiscalnet/config";
 import { isFiscalNetActive } from "@/lib/fiscalnet/eligibility";
 
 import { redirect } from "next/navigation";
@@ -656,7 +654,7 @@ export async function openPosSession(formData: FormData) {
     console.error("openPosSession:", error.message);
     return;
   }
-  await recordGrowthMilestone(supabase, orgId, "till_opened");
+  await recordGrowthMilestone(supabase, orgId, "till_opened", user.id);
   const cookieStore = await cookies();
   cookieStore.set("pos_till_open", "1", { path: "/app", maxAge: 60 * 60 * 24 });
   revalidatePath("/app/pos");
@@ -750,219 +748,6 @@ export async function closePosSession(formData: FormData) {
 }
 
 // ---- POS Sale ----
-
-export async function completeSale(formData: FormData) {
-  const { supabase, membership, user, orgId } = await getActiveOrg();
-  if (!canTransact(membership.role)) return;
-  await assertEntitlement(orgId, "pos.enabled");
-  // Resolve active site server-side — client cannot spoof site_id
-  const { siteId } = await requireActiveSite(supabase, orgId, membership.id, membership.role);
-
-  type CartItem = PosSaleCartItem;
-  const rawCart = stringValue(formData, "cart_json");
-  const cart: CartItem[] = rawCart ? JSON.parse(rawCart) : [];
-  if (!cart.length) return;
-
-  const sessionId = stringValue(formData, "session_id") || null;
-  const paymentMethodId = stringValue(formData, "payment_method_id") || null;
-  const paymentType = stringValue(formData, "payment_type") || "other"; // cash|card|online|other
-  const customerName = stringValue(formData, "customer_name") || null;
-  const legacyCartPct = numberValue(formData, "discount_pct", 0);
-  const cartDiscountLei = numberValue(formData, "discount_lei", 0);
-  if (legacyCartPct > 0 || cartDiscountLei > 0 || cart.some((item) => Number(item.discount_pct ?? 0) > 0)) {
-    await assertEntitlement(orgId, "pos.discounts");
-  }
-
-  const itemCalcs = buildPosItemCalcs(cart, legacyCartPct, cartDiscountLei);
-  const txDiscountPct = transactionDiscountPct(cart, legacyCartPct);
-
-  const subtotalNet = itemCalcs.reduce((s, i) => s + i.net_amount, 0);
-  const taxTotal = itemCalcs.reduce((s, i) => s + i.vat_amount, 0);
-  const totalGross = itemCalcs.reduce((s, i) => s + i.gross_amount, 0);
-  const discountTotal = itemCalcs.reduce((s, i) => s + i.discount_amount, 0);
-  const transactionNumber = `KO-${Date.now().toString(36).toUpperCase()}`;
-
-  const { data: tx, error: txErr } = await supabase.from("pos_transactions").insert({
-    organisation_id: orgId,
-    site_id: siteId,
-    transaction_number: transactionNumber,
-    sold_by: user.id,
-    payment_method_id: paymentMethodId,
-    session_id: sessionId,
-    customer_name: customerName,
-    subtotal: Number(totalGross.toFixed(2)),
-    subtotal_net: Number(subtotalNet.toFixed(2)),
-    tax_total: Number(taxTotal.toFixed(2)),
-    total: Number(totalGross.toFixed(2)),
-    total_gross: Number(totalGross.toFixed(2)),
-    subtotal_gross_before_discount: Number((totalGross + discountTotal).toFixed(2)),
-    discount_total: Number(discountTotal.toFixed(2)),
-    discount_pct: txDiscountPct,
-    status: "completed",
-  }).select("id").single();
-
-  if (txErr || !tx) {
-    return;
-  }
-
-  await recordGrowthMilestone(supabase, orgId, "first_sale");
-
-  const transactionId = tx.id;
-
-  await supabase.from("pos_transaction_items").insert(
-    itemCalcs.map((item) => ({
-      organisation_id: orgId,
-      transaction_id: transactionId,
-      product_id: item.product_id,
-      product_name: item.product_name,
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      unit_price_gross: item.unit_price_gross,
-      vat_rate: item.vat_rate,
-      net_amount: item.net_amount,
-      vat_amount: item.vat_amount,
-      gross_amount: item.gross_amount,
-      line_total: item.line_total,
-      discount_amount: item.discount_amount,
-      discount_pct: item.applied_discount_pct > 0 ? item.applied_discount_pct : 0,
-    }))
-  );
-
-  // Reduce ingredient stock for recipe products (non-fatal)
-  try {
-    const soldProductIds = [...new Set(cart.map((i) => i.product_id).filter(Boolean))];
-    if (soldProductIds.length > 0) {
-      const { data: recipes } = await supabase
-        .from("recipes")
-        .select("id,product_id,yield_qty,recipe_items(ingredient_product_id,quantity,unit_of_measure)")
-        .in("product_id", soldProductIds)
-        .eq("organisation_id", orgId);
-
-      for (const recipe of recipes ?? []) {
-        const soldItem = cart.find((i) => i.product_id === recipe.product_id);
-        if (!soldItem || !soldItem.quantity) continue;
-        const recipeItems = (recipe.recipe_items ?? []) as Array<{ingredient_product_id:string|null;quantity:number;unit_of_measure:string|null}>;
-        const yieldQty = Math.max(Number(recipe.yield_qty ?? 1), 1);
-        for (const ri of recipeItems) {
-          if (!ri.ingredient_product_id) continue;
-          const useQty = (Number(ri.quantity) / yieldQty) * soldItem.quantity;
-          const { data: prod } = await supabase.from("products").select("current_stock_qty").eq("id", ri.ingredient_product_id).single();
-          if (prod) {
-            const newQty = Number(prod.current_stock_qty ?? 0) - useQty;
-            await supabase.from("products").update({ current_stock_qty: newQty }).eq("id", ri.ingredient_product_id);
-            await supabase.from("stock_movements").insert({
-              organisation_id: orgId,
-              product_id: ri.ingredient_product_id,
-              movement_type: "sale_used",
-              quantity_change: -useQty,
-              unit_of_measure: ri.unit_of_measure ?? "each",
-              reference_type: "sale",
-              reference_id: transactionId,
-              performed_by: user.id,
-            }).then(() => null, () => null);
-          }
-        }
-      }
-    }
-  } catch { /* non-fatal — sale is recorded, stock log failed */ }
-
-  // If cash payment and open session: update expected cash
-  if (sessionId && paymentType === "cash") {
-    const { data: session } = await supabase.from("pos_sessions").select("expected_cash").eq("id", sessionId).single();
-    if (session) {
-      const newExpected = Number(session.expected_cash ?? 0) + Number(totalGross.toFixed(2));
-      await supabase.from("pos_sessions").update({ expected_cash: newExpected }).eq("id", sessionId);
-    }
-    // Record cash movement for audit
-    await supabase.from("pos_cash_movements").insert({
-      organisation_id: orgId,
-      session_id: sessionId,
-      movement_type: "sale",
-      amount: Number(totalGross.toFixed(2)),
-      reason: `Sale ${transactionNumber}`,
-      performed_by: user.id,
-    }).then(() => null, () => null);
-  }
-
-  // Audit event (non-fatal)
-  await supabase.from("pos_audit_events").insert({
-    organisation_id: orgId,
-    transaction_id: transactionId,
-    event_type: "created",
-    performed_by: user.id,
-  }).then(() => null, () => null);
-
-  const saleOrgRow = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as unknown as Record<string, unknown> | null;
-  await createKitchenOrderIfEnabled({
-    supabase,
-    orgId,
-    userId: user.id,
-    orgRow: saleOrgRow,
-    transactionId,
-    transactionNumber,
-    items: cart,
-  });
-
-  // ── FiscalNet fiscal receipt (Romania only, non-fatal) ──────────────────
-  // SAFETY: Sale already saved above. Fiscal print failure MUST NOT block
-  // or lose the sale. Runs after save, before redirect only.
-  try {
-    const orgRow = saleOrgRow;
-    const countryCode = (orgRow?.country_code as string) ?? null;
-    const config = buildFiscalNetConfig(orgRow ?? {});
-    if (shouldPrintFiscalReceipt(countryCode, config)) {
-      if (config.connectionMode === "file") {
-        await supabase.from("pos_transactions")
-          .update({
-            fiscal_receipt_required: true,
-            fiscal_receipt_status: "api_pending",
-          })
-          .eq("id", transactionId)
-          .eq("organisation_id", orgId)
-          .then(() => null, () => null);
-        console.info("[FiscalNet] receipt download required", {
-          mode: config.connectionMode,
-          transactionId,
-          bonuriPathNull: !config.bonuriPath,
-          raspunsPathNull: !config.raspunsPath,
-        });
-      } else {
-        await supabase.from("pos_transactions")
-          .update({ fiscal_receipt_required: true })
-          .eq("id", transactionId)
-          .eq("organisation_id", orgId)
-          .then(() => null, () => null);
-
-        const fiscalItems = itemCalcs.map((item) => ({
-          productName:     item.product_name as string,
-          quantity:        Number(item.quantity),
-          unitPrice:       Number(item.unit_price),
-          vatRate:         Number((item as Record<string, unknown>).vat_rate ?? 0),
-          ...(item.applied_discount_pct > 0 ? { discountPercent: item.applied_discount_pct } : {}),
-        }));
-
-        await printFiscalReceipt({
-          supabase,
-          orgId,
-          transactionId,
-          transactionRef: transactionNumber,
-          performedBy: user.id,
-          config,
-          items: fiscalItems,
-          totalGross: Number(totalGross.toFixed(2)),
-          paymentType,
-        });
-      }
-    }
-  } catch { /* non-fatal — fiscal print failure cannot block the sale */ }
-
-  revalidatePath("/app/pos");
-  revalidatePath("/app/transactions");
-  revalidatePath("/app/reports/sales");
-  revalidatePath("/app");
-  const drawerParam = paymentType === "cash" ? "&drawer=cash_sale" : "";
-  redirect(`/app/transactions/${transactionId}?recorded=1${drawerParam}`);
-}
 
 export async function voidTransaction(formData: FormData) {
   const { supabase, membership, user, orgId } = await getActiveOrg();
@@ -2104,7 +1889,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
 
   if (txErr || !tx) return { ok: false, error: txErr?.message ?? "Failed to save transaction." };
 
-  await recordGrowthMilestone(supabase, orgId, "first_sale");
+  await recordGrowthMilestone(supabase, orgId, "first_sale", user.id);
 
   const transactionId = tx.id;
 

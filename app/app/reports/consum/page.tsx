@@ -1,10 +1,11 @@
+import Link from "next/link";
+import { FileDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PrintButton } from "@/components/app/PrintButton";
+import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
-import { BonConsumDownloadButton } from "./BonConsumDownloadButton";
 import {
   fetchStockMovements,
   stockMovementQty,
@@ -19,7 +20,7 @@ export default async function ConsumReportPage({
   searchParams?: Promise<{ from?: string; to?: string }>;
 }) {
   await requireBusinessModule("inventory");
-  const { countryCode, profileLocale, supabase, orgId, currency, user } = await getKitchenOpsContext();
+  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
 
@@ -37,12 +38,6 @@ export default async function ConsumReportPage({
     .from("organisations")
     .select("name,fiscalnet_cif")
     .eq("id", orgId)
-    .single();
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name")
-    .eq("id", user.id)
     .single();
 
   const movements = await fetchStockMovements(supabase, orgId, {
@@ -93,35 +88,15 @@ export default async function ConsumReportPage({
           <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
           <p className="text-sm text-slate-500">{labels.subtitle}</p>
         </div>
-        <div className="flex gap-3 items-center">
-          <form className="flex gap-2 items-center">
-            <label className="text-sm text-slate-600">{labels.from}</label>
-            <input type="date" name="from" defaultValue={fromDate} max={today} className="h-10 rounded-md border border-slate-200 px-3 text-sm" />
-            <label className="text-sm text-slate-600">{labels.to}</label>
-            <input type="date" name="to" defaultValue={toDate} max={today} className="h-10 rounded-md border border-slate-200 px-3 text-sm" />
-            <button type="submit" className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50">
-              {labels.load}
-            </button>
-          </form>
-          {items.length > 0 && (
-            <BonConsumDownloadButton
-              orgName={org?.name ?? "franchisetech"}
-              orgCui={org?.fiscalnet_cif ?? undefined}
-              documentNumber={documentNumber}
-              date={fromDate}
-              items={items.map((item) => ({
-                productName: item.name,
-                unit: item.unit,
-                quantity: item.quantity,
-                unitCost: item.unitCost,
-                totalCost: item.totalCost,
-              }))}
-              userName={profile?.full_name ?? user.email ?? t.common.unknown}
-              primitor="Bucătărie"
-              label={labels.download}
-            />
-          )}
-          <PrintButton />
+        <div className="flex gap-3 items-center flex-wrap">
+          <ReportDateRangeFilter basePath="/app/reports/consum" from={fromDate} to={toDate} />
+          <Link
+            href={`/api/reports/consum/pdf?from=${fromDate}&to=${toDate}`}
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+          >
+            <FileDown className="h-4 w-4" />
+            {t.common.downloadPdf}
+          </Link>
         </div>
       </div>
 

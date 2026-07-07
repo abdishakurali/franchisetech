@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { trackLoopsEvent } from "@/lib/loops";
+import { captureServerEvent } from "@/lib/posthog-server";
 
 export type GrowthMilestone = "till_opened" | "first_sale" | "first_report";
 
@@ -14,6 +15,49 @@ const LOOPS_EVENT: Record<GrowthMilestone, string> = {
   first_sale: "first_sale_recorded",
   first_report: "z_report_viewed",
 };
+
+const POSTHOG_EVENT: Record<GrowthMilestone, string> = {
+  till_opened: "till_session_opened",
+  first_sale: "first_sale_recorded",
+  first_report: "z_report_viewed",
+};
+
+/** Resolves the org owner's user id — used as a PostHog distinct_id fallback when the acting user isn't passed in. */
+async function resolveOrgOwnerId(orgId: string): Promise<string | null> {
+  try {
+    const { createServiceClient } = await import("@/lib/supabase/server");
+    const client = await createServiceClient();
+    const { data: member } = await client
+      .from("organisation_members")
+      .select("user_id")
+      .eq("organisation_id", orgId)
+      .eq("role", "owner")
+      .limit(1)
+      .maybeSingle();
+    return member?.user_id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function trackGrowthMilestonePostHog(
+  orgId: string,
+  milestone: GrowthMilestone,
+  userId?: string,
+): Promise<void> {
+  try {
+    const distinctId = userId ?? (await resolveOrgOwnerId(orgId));
+    if (!distinctId) return;
+    captureServerEvent(
+      distinctId,
+      POSTHOG_EVENT[milestone],
+      { organisation_id: orgId },
+      { organisation: orgId },
+    );
+  } catch {
+    // Non-fatal — PostHog must never block milestone recording
+  }
+}
 
 async function trackGrowthMilestoneLoops(
   orgId: string,
@@ -69,6 +113,7 @@ export async function recordGrowthMilestone(
   supabase: SupabaseClient,
   orgId: string,
   milestone: GrowthMilestone,
+  userId?: string,
 ): Promise<void> {
   try {
     const { data: org, error } = await supabase
@@ -98,6 +143,7 @@ export async function recordGrowthMilestone(
 
     await supabase.from("organisations").update(updates).eq("id", orgId);
     void trackGrowthMilestoneLoops(orgId, milestone);
+    void trackGrowthMilestonePostHog(orgId, milestone, userId);
   } catch {
     // Non-fatal if migration 041 not yet applied
   }
