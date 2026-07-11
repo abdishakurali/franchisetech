@@ -76,6 +76,15 @@ async function validateSubmittedVatRates(
   return { ok: false, error: `VAT rate ${invalid}% is not active in Settings.` };
 }
 
+// Checkout-time guard against garbage vat_rate values (e.g. a stale/tampered cart
+// payload carrying 0.02 instead of 0). Deliberately does NOT require an exact catalog
+// match — some orgs have products carrying a real historical rate that's since been
+// removed/changed in their Settings catalog, and a sale must never be blocked for that
+// reason. Only the (0,1) dead zone (never a real VAT rate anywhere) stops checkout.
+function findInsaneVatRate(rates: number[]): number | null {
+  return rates.find((rate) => !isSaneVatRate(rate)) ?? null;
+}
+
 async function resolveSubmittedUnitOfMeasure(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
@@ -1782,6 +1791,8 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const txDiscountPct = transactionDiscountPct(cart, legacyCartPct);
 
   const itemCalcs = buildPosItemCalcs(cart, legacyCartPct, cartDiscountLei);
+  const insaneVatRate = findInsaneVatRate(itemCalcs.map((i) => i.vat_rate));
+  if (insaneVatRate != null) return { ok: false, error: `VAT rate ${insaneVatRate}% is invalid.` };
   if (legacyCartPct > 0 || cartDiscountLei > 0 || cart.some((item) => Number(item.discount_pct ?? 0) > 0)) {
     try {
       await assertEntitlement(orgId, "pos.discounts");
@@ -2099,6 +2110,13 @@ export async function deletePaymentMethod(formData: FormData): Promise<void> {
 
 // ── VAT Rates Management ─────────────────────────────────────────────────
 
+// No real VAT rate (RO or IE) falls strictly between 0 and 1 — this range only ever
+// appears from a mistyped rate (e.g. "0.02" meant to be "0"). Reject it here so a typo
+// can't enter the catalog and get silently rounded to "0%" everywhere it's displayed.
+function isSaneVatRate(rate: number): boolean {
+  return Number.isFinite(rate) && !(rate > 0 && rate < 1);
+}
+
 export async function addVatRate(formData: FormData): Promise<void> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
@@ -2109,7 +2127,7 @@ export async function addVatRate(formData: FormData): Promise<void> {
   const fgRaw = formData.get("fiscalnet_vat_group");
   const fiscalnetVatGroup = fgRaw && String(fgRaw).trim() !== "" ? Number(fgRaw) : null;
   const isDefault = formData.get("is_default") === "true";
-  if (!name) return;
+  if (!name || !isSaneVatRate(rate)) return;
   if (isDefault) {
     await supabase.from("vat_rates").update({ is_default: false }).eq("organisation_id", orgId);
   }
@@ -2138,6 +2156,7 @@ export async function updateVatRate(formData: FormData): Promise<void> {
   const fiscalnetVatGroup = fgRaw && String(fgRaw).trim() !== "" ? Number(fgRaw) : null;
   const isDefault = formData.get("is_default") === "true";
   const active = formData.get("active") !== "false";
+  if (!isSaneVatRate(rate)) return;
   if (isDefault) {
     await supabase.from("vat_rates").update({ is_default: false }).eq("organisation_id", orgId).neq("id", id);
   }
