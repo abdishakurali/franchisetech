@@ -44,7 +44,13 @@ export default async function AppLayout({
     .limit(1);
 
   const membership = memberships?.[0] ?? null;
-  const activeOrg = membership?.organisations ?? null;
+  const activeOrgFull = membership?.organisations ?? null;
+  // Never forward admin_notes (internal-only) to this client component —
+  // organisations(*) above pulls every column, but this prop reaches the
+  // tenant's own browser via the RSC payload.
+  const activeOrg = activeOrgFull
+    ? (({ admin_notes: _adminNotes, ...rest }) => rest)(activeOrgFull)
+    : null;
   const userRole = membership?.role ?? null;
 
   const headersList = await headers();
@@ -55,6 +61,17 @@ export default async function AppLayout({
     : null;
 
   const subscriptionBlocked = isSubscriptionBlockedForApp(subStatus);
+
+  // New signups must complete the €1 card verification before the trial (and
+  // app access) starts. Existing orgs all have trial_started_at set, and orgs
+  // with a real subscription are never redirected.
+  const hasRealSubscription =
+    subStatus?.state === "active" ||
+    subStatus?.state === "trialing" ||
+    subStatus?.state === "past_due";
+  if (activeOrg?.id && !activeOrg.trial_started_at && !hasRealSubscription) {
+    redirect("/onboarding/verify-card");
+  }
 
   // Resolve accessible sites and active site (non-blocking — falls back gracefully)
   let accessibleSites: { id: string; name: string }[] = [];

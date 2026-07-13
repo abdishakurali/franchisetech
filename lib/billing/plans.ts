@@ -33,6 +33,15 @@ export const STRIPE_CANONICAL_PRICE_IDS: Record<BillingPlan, string> = {
   multi_location: "price_1TgahZQSKBSEqRxEEtIUQ0pU",
 };
 
+/** One-time €1.00 card verification charged before the 15-day trial starts (added 2026-07-10). */
+export const STRIPE_CARD_VERIFICATION_PRICE_ID = "price_1TqythQSKBSEqRxE8y8aX5Ga";
+export const CARD_VERIFICATION_AMOUNT_CENTS = 100;
+
+/** Env override supports test mode; falls back to the canonical live price. */
+export function getCardVerificationPriceId(): string {
+  return process.env.STRIPE_CARD_VERIFICATION_PRICE_ID ?? STRIPE_CARD_VERIFICATION_PRICE_ID;
+}
+
 export type PlanDefinition = {
   readonly id: BillingPlan;
   readonly name: string;

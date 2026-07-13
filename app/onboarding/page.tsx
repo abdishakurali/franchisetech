@@ -1,19 +1,22 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
+  ArrowUpRight,
   Building2,
   FileCheck2,
+  Landmark,
   Loader2,
   MapPin,
+  Receipt,
   Settings2,
   ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -35,6 +38,7 @@ import { readAcquisitionClient } from "@/lib/marketing/acquisition";
 import { readPreferredPlanClient } from "@/lib/billing/preferred-plan";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { OnboardingStepper } from "@/components/app/OnboardingStepper";
+import { OnboardingSidebar } from "@/components/onboarding/OnboardingSidebar";
 import { cn } from "@/lib/utils";
 
 const countryOptions = [
@@ -126,8 +130,15 @@ const UI_STRINGS = {
     stepLabels: ["1. Afacere", "2. Configurare", "3. Fiscal"],
     stepShortLabels: ["Afacere", "Configurare", "Fiscal"],
     stepOf: (current: number, total: number) => `Pasul ${current} din ${total}`,
+    stepEyebrow: (current: number, total: number) => `Pasul ${current} din ${total}`,
     timeEstimate: "~2 minute",
-    trialBadge: "Trial 15 zile · fără card",
+    trialBadge: "Trial 15 zile · verificare card 1 €",
+    sidebarBanner: "Configurează-ți afacerea și casa de marcat ca să poți vinde azi.",
+    sidebarStepDescriptions: [
+      "Numele firmei, țara și tipul activității.",
+      "Locații, stoc și rețete — poți schimba oricând.",
+      "ANAF e-Factura — conectează acum sau mai târziu.",
+    ],
     fiscalLater: "Fac asta mai târziu",
     fiscalConnect: "Conectează ANAF e-Factura",
     fiscalConnecting: "Se conectează…",
@@ -136,6 +147,12 @@ const UI_STRINGS = {
       "Toate firmele românești trebuie să trimită facturile B2B prin ANAF e-Factura. Amenda pentru netransmitere: 1.000–2.500 lei per factură.",
     fiscalHint:
       "Poți conecta ANAF acum sau mai târziu din Setări → Fiscal. Durează ~2 minute cu certificatul digital al firmei.",
+    fiscalGuidanceHeading: "Ghid & resurse",
+    fiscalGuidanceEfacturaTitle: "Ghid ANAF e-Factura",
+    fiscalGuidanceEfacturaDesc: "Cum conectezi certificatul digital al firmei.",
+    fiscalGuidanceFiscalnetTitle: "FiscalNet & bonuri fiscale",
+    fiscalGuidanceFiscalnetDesc: "Cum funcționează conexiunea casei de marcat fiscale.",
+    learnHow: "Vezi ghidul",
     recommended: "Recomandat",
   },
   en: {
@@ -164,8 +181,15 @@ const UI_STRINGS = {
     stepLabels: ["1. Business", "2. Your setup", "3. Fiscal"],
     stepShortLabels: ["Business", "Your setup", "Fiscal"],
     stepOf: (current: number, total: number) => `Step ${current} of ${total}`,
+    stepEyebrow: (current: number, total: number) => `Step ${current} of ${total}`,
     timeEstimate: "~2 minutes",
-    trialBadge: "15-day trial · no card",
+    trialBadge: "15-day trial · €1 card check",
+    sidebarBanner: "Set up your business and till so you can start selling today.",
+    sidebarStepDescriptions: [
+      "Brand name, country, and industry.",
+      "Locations, stock, and recipes — change anytime.",
+      "ANAF e-Invoicing — connect now or later.",
+    ],
     fiscalLater: "I'll do this later",
     fiscalConnect: "Connect ANAF e-Factura",
     fiscalConnecting: "Connecting…",
@@ -173,6 +197,12 @@ const UI_STRINGS = {
     fiscalLegalBody:
       "Romanian businesses must send B2B invoices through ANAF e-Factura. You can connect now or from Settings → Fiscal.",
     fiscalHint: "Takes about 2 minutes with your company's digital certificate.",
+    fiscalGuidanceHeading: "Guidance & resources",
+    fiscalGuidanceEfacturaTitle: "ANAF e-Invoicing guide",
+    fiscalGuidanceEfacturaDesc: "How to connect your company's digital certificate.",
+    fiscalGuidanceFiscalnetTitle: "FiscalNet & fiscal receipts",
+    fiscalGuidanceFiscalnetDesc: "How the fiscal till connection works.",
+    learnHow: "Learn how",
     recommended: "Recommended",
   },
 };
@@ -295,9 +325,18 @@ export default function OnboardingPage() {
   };
 
   const stepShortLabels = isRO ? t.stepShortLabels : t.stepShortLabels.slice(0, 2);
+  const sidebarDescriptions = isRO
+    ? t.sidebarStepDescriptions
+    : t.sidebarStepDescriptions.slice(0, 2);
+  const stepIcons = [Building2, Settings2, FileCheck2];
+  const sidebarSteps = stepShortLabels.map((label, i) => ({
+    icon: stepIcons[i],
+    title: label,
+    description: sidebarDescriptions[i],
+  }));
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-slate-50 to-slate-100/80">
+    <div className="relative min-h-screen bg-slate-100">
       {pending && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
@@ -313,7 +352,7 @@ export default function OnboardingPage() {
       )}
 
       <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-2xl items-center justify-between gap-3 px-4">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
           <img src="/marketing/franchise-tech-logo.png" alt="franchisetech" className="h-8 w-auto" />
           <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-100">
             {t.trialBadge}
@@ -321,264 +360,310 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-8 pb-16">
-        <OnboardingStepper
-          labels={stepShortLabels}
-          current={step}
-          timeEstimate={t.timeEstimate}
-          stepOf={t.stepOf}
-        />
-
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-            {t.stepTitles[step]}
-          </h1>
-          <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">
-            {t.stepSubtitles[step]}
-          </p>
+      <main className="mx-auto max-w-5xl px-4 py-8 pb-16 sm:py-10">
+        <div className="lg:hidden">
+          <OnboardingStepper
+            labels={stepShortLabels}
+            current={step}
+            timeEstimate={t.timeEstimate}
+            stepOf={t.stepOf}
+          />
         </div>
 
-        {/* ── STEP 0: Business ── */}
-        {step === 0 && (
-          <Card className="border-slate-200/80 shadow-sm">
-            <CardContent className="space-y-5 pt-6">
-              <div className="flex items-center gap-3 rounded-xl bg-blue-50/80 px-4 py-3 text-sm text-blue-900">
-                <Building2 className="h-5 w-5 shrink-0 text-blue-600" />
-                <span>{isRO ? "Datele firmei apar pe bonuri și rapoarte." : "Business details appear on receipts and reports."}</span>
-              </div>
-              <div>
-                <Label htmlFor="name">{t.brandName}</Label>
-                <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => update({ name: e.target.value })}
-                  placeholder={t.brandPlaceholder}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="countryCode">{t.country}</Label>
-                <Select value={form.countryCode} onValueChange={(value) => update({ countryCode: value })}>
-                  <SelectTrigger id="countryCode" className="mt-1 w-full">
-                    <SelectValue placeholder={t.selectType} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {countryOptions.map((opt) => (
-                      <SelectItem key={opt.code} value={opt.code}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              {isRO && (
+        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 lg:grid lg:grid-cols-[320px_1fr]">
+          <OnboardingSidebar banner={t.sidebarBanner} steps={sidebarSteps} current={step} />
+
+          <div className="p-6 sm:p-10 lg:p-12">
+            <div className="mb-8 hidden lg:block">
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
+                {t.stepEyebrow(step + 1, stepShortLabels.length)}
+              </p>
+            </div>
+            <div className="mb-8">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
+                {t.stepTitles[step]}
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
+                {t.stepSubtitles[step]}
+              </p>
+            </div>
+
+            {/* ── STEP 0: Business ── */}
+            {step === 0 && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 rounded-xl bg-blue-50/80 px-4 py-3 text-sm text-blue-900">
+                  <Building2 className="h-5 w-5 shrink-0 text-blue-600" />
+                  <span>{isRO ? "Datele firmei apar pe bonuri și rapoarte." : "Business details appear on receipts and reports."}</span>
+                </div>
                 <div>
-                  <Label htmlFor="anafCif">CUI firmă</Label>
-                  <div className="mt-1 flex gap-2">
-                    <Input
-                      id="anafCif"
-                      value={form.anafCif}
-                      onChange={(e) => {
-                        setCifResolved(false);
-                        update({ anafCif: e.target.value });
-                      }}
-                      onBlur={() => {
-                        if (form.anafCif.trim().length >= 4 && !form.name) void lookupCui();
-                      }}
-                      placeholder="ex: 12345678"
-                    />
-                    <Button type="button" variant="outline" onClick={lookupCui} disabled={pending}>
-                      ANAF
-                    </Button>
-                  </div>
-                  <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
-                    <input
-                      type="checkbox"
-                      checked={form.anafVatRegistered}
-                      onChange={(e) => update({ anafVatRegistered: e.target.checked })}
-                      className="h-4 w-4 rounded border-slate-300"
-                    />
-                    Plătitor de TVA
-                  </label>
-                  {cifResolved && (
-                    <p className="mt-1 text-xs text-green-600">✓ {form.name} — date preluate din ANAF</p>
-                  )}
+                  <Label htmlFor="name">{t.brandName}</Label>
+                  <Input
+                    id="name"
+                    value={form.name}
+                    onChange={(e) => update({ name: e.target.value })}
+                    placeholder={t.brandPlaceholder}
+                    className="mt-1"
+                  />
                 </div>
-              )}
-              <div>
-                <Label htmlFor="userName">{t.yourName}</Label>
-                <Input
-                  id="userName"
-                  value={form.userName}
-                  onChange={(e) => update({ userName: e.target.value })}
-                  placeholder={t.namePlaceholder}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="businessType">{t.industry}</Label>
-                <Select
-                  value={form.businessType || "__none__"}
-                  onValueChange={(value) => update({ businessType: value === "__none__" ? "" : value })}
-                >
-                  <SelectTrigger id="businessType" className="mt-1 w-full">
-                    <SelectValue placeholder={t.selectType} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">{t.selectType}</SelectItem>
-                    {businessTypes.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                className="h-11 w-full bg-blue-600 text-base hover:bg-blue-700 text-white"
-                onClick={() => {
-                  if (!form.name.trim()) return toast.error(t.nameRequired);
-                  setStep(1);
-                }}
-              >
-                {t.continueBtn} <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {step === 1 && (
-          <Card className="border-slate-200/80 shadow-sm">
-            <CardContent className="space-y-6 pt-6">
-              <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                <Settings2 className="h-5 w-5 shrink-0 text-slate-500" />
-                <span>{isRO ? "Poți schimba oricând din Setări." : "You can change these anytime in Settings."}</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-700">{t.locationsTitle}</p>
-                <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                  {locationOptions.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => update({ locationBand: opt.value })}
-                      className={cn(
-                        "rounded-xl border p-4 text-left transition-all active:scale-[0.98]",
-                        form.locationBand === opt.value
-                          ? "border-blue-500 bg-blue-50 shadow-sm ring-2 ring-blue-100"
-                          : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm",
-                      )}
-                    >
-                      <MapPin className="mb-1 h-4 w-4 text-blue-600" />
-                      <p className="text-sm font-semibold">{opt.label}</p>
-                      <p className="text-xs text-slate-500">{opt.hint}</p>
-                    </button>
-                  ))}
+                <div>
+                  <Label htmlFor="countryCode">{t.country}</Label>
+                  <Select value={form.countryCode} onValueChange={(value) => update({ countryCode: value })}>
+                    <SelectTrigger id="countryCode" className="mt-1 w-full">
+                      <SelectValue placeholder={t.selectType} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countryOptions.map((opt) => (
+                        <SelectItem key={opt.code} value={opt.code}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-700">{t.ingredientsTitle}</p>
-                <div className="mt-2 space-y-2">
-                  {ingredientOptions.map((opt) => (
-                    <label
-                      key={opt.value}
-                      className={cn(
-                        "flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-all",
-                        form.ingredientTracking === opt.value
-                          ? "border-blue-500 bg-blue-50 shadow-sm ring-2 ring-blue-100"
-                          : "border-slate-200 bg-white hover:border-slate-300",
-                        opt.value === "later" && form.ingredientTracking !== opt.value && "border-dashed",
-                      )}
-                    >
-                      <input
-                        type="radio"
-                        name="ingredientTracking"
-                        checked={form.ingredientTracking === opt.value}
-                        onChange={() => update({ ingredientTracking: opt.value })}
-                        className="h-4 w-4 border-slate-300 text-blue-600"
+                {isRO && (
+                  <div>
+                    <Label htmlFor="anafCif">CUI firmă</Label>
+                    <div className="mt-1 flex gap-2">
+                      <Input
+                        id="anafCif"
+                        value={form.anafCif}
+                        onChange={(e) => {
+                          setCifResolved(false);
+                          update({ anafCif: e.target.value });
+                        }}
+                        onBlur={() => {
+                          if (form.anafCif.trim().length >= 4 && !form.name) void lookupCui();
+                        }}
+                        placeholder="ex: 12345678"
                       />
-                      <span className="flex-1 text-sm">
-                        {opt.label}
-                        {opt.value === "later" ? (
-                          <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-700">
-                            {t.recommended}
-                          </span>
-                        ) : null}
-                      </span>
+                      <Button type="button" variant="outline" onClick={lookupCui} disabled={pending}>
+                        ANAF
+                      </Button>
+                    </div>
+                    <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+                      <input
+                        type="checkbox"
+                        checked={form.anafVatRegistered}
+                        onChange={(e) => update({ anafVatRegistered: e.target.checked })}
+                        className="h-4 w-4 rounded border-slate-300"
+                      />
+                      Plătitor de TVA
                     </label>
-                  ))}
+                    {cifResolved && (
+                      <p className="mt-1 text-xs text-green-600">✓ {form.name} — date preluate din ANAF</p>
+                    )}
+                  </div>
+                )}
+                <div>
+                  <Label htmlFor="userName">{t.yourName}</Label>
+                  <Input
+                    id="userName"
+                    value={form.userName}
+                    onChange={(e) => update({ userName: e.target.value })}
+                    placeholder={t.namePlaceholder}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="businessType">{t.industry}</Label>
+                  <Select
+                    value={form.businessType || "__none__"}
+                    onValueChange={(value) => update({ businessType: value === "__none__" ? "" : value })}
+                  >
+                    <SelectTrigger id="businessType" className="mt-1 w-full">
+                      <SelectValue placeholder={t.selectType} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">{t.selectType}</SelectItem>
+                      {businessTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="border-t border-slate-100 pt-6">
+                  <Button
+                    className="h-11 w-full bg-blue-600 px-8 text-base hover:bg-blue-700 text-white sm:w-auto"
+                    onClick={() => {
+                      if (!form.name.trim()) return toast.error(t.nameRequired);
+                      setStep(1);
+                    }}
+                  >
+                    {t.continueBtn} <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-              <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
-                <span className="font-medium">{t.profileLabel}</span> {BUSINESS_PROFILE_LABELS[profile]}
-                <p className="mt-1 text-xs text-slate-500">{t.planHint}</p>
-              </div>
-              <div className="flex gap-3 pt-1">
-                <Button variant="outline" className="h-11 px-5" onClick={() => setStep(0)} disabled={pending}>
-                  {t.backBtn}
-                </Button>
-                <Button
-                  className="h-11 flex-1 bg-blue-600 text-base hover:bg-blue-700 text-white"
-                  disabled={pending}
-                  onClick={() => {
-                    if (isRO) {
-                      setStep(2);
-                    } else {
-                      handleFinish(false);
-                    }
-                  }}
-                >
-                  {pending ? t.openingTill : isRO ? t.continueBtn : t.openTill}
-                  {!pending && <ArrowRight className="ml-2 h-4 w-4" />}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
 
-        {step === 2 && (
-          <Card className="border-slate-200/80 shadow-sm">
-            <CardContent className="space-y-5 pt-6">
-              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
-                <div className="text-sm text-amber-900">
-                  <p className="font-semibold">{t.fiscalLegalTitle}</p>
-                  <p className="mt-1 leading-relaxed">{t.fiscalLegalBody}</p>
+            {step === 1 && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  <Settings2 className="h-5 w-5 shrink-0 text-slate-500" />
+                  <span>{isRO ? "Poți schimba oricând din Setări." : "You can change these anytime in Settings."}</span>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700">{t.locationsTitle}</p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                    {locationOptions.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => update({ locationBand: opt.value })}
+                        className={cn(
+                          "rounded-xl border p-4 text-left transition-all active:scale-[0.98]",
+                          form.locationBand === opt.value
+                            ? "border-blue-500 bg-blue-50 shadow-sm ring-2 ring-blue-100"
+                            : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm",
+                        )}
+                      >
+                        <MapPin className="mb-1 h-4 w-4 text-blue-600" />
+                        <p className="text-sm font-semibold">{opt.label}</p>
+                        <p className="text-xs text-slate-500">{opt.hint}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-700">{t.ingredientsTitle}</p>
+                  <div className="mt-2 space-y-2">
+                    {ingredientOptions.map((opt) => (
+                      <label
+                        key={opt.value}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-all",
+                          form.ingredientTracking === opt.value
+                            ? "border-blue-500 bg-blue-50 shadow-sm ring-2 ring-blue-100"
+                            : "border-slate-200 bg-white hover:border-slate-300",
+                          opt.value === "later" && form.ingredientTracking !== opt.value && "border-dashed",
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          name="ingredientTracking"
+                          checked={form.ingredientTracking === opt.value}
+                          onChange={() => update({ ingredientTracking: opt.value })}
+                          className="h-4 w-4 border-slate-300 text-blue-600"
+                        />
+                        <span className="flex-1 text-sm">
+                          {opt.label}
+                          {opt.value === "later" ? (
+                            <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-700">
+                              {t.recommended}
+                            </span>
+                          ) : null}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+                  <span className="font-medium">{t.profileLabel}</span> {BUSINESS_PROFILE_LABELS[profile]}
+                  <p className="mt-1 text-xs text-slate-500">{t.planHint}</p>
+                </div>
+                <div className="flex gap-3 border-t border-slate-100 pt-6">
+                  <Button variant="outline" className="h-11 px-5" onClick={() => setStep(0)} disabled={pending}>
+                    {t.backBtn}
+                  </Button>
+                  <Button
+                    className="h-11 flex-1 bg-blue-600 text-base hover:bg-blue-700 text-white sm:flex-none sm:px-8"
+                    disabled={pending}
+                    onClick={() => {
+                      if (isRO) {
+                        setStep(2);
+                      } else {
+                        handleFinish(false);
+                      }
+                    }}
+                  >
+                    {pending ? t.openingTill : isRO ? t.continueBtn : t.openTill}
+                    {!pending && <ArrowRight className="ml-2 h-4 w-4" />}
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
-                <FileCheck2 className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
-                <p>{t.fiscalHint}</p>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-6">
+                <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
+                  <div className="text-sm text-amber-900">
+                    <p className="font-semibold">{t.fiscalLegalTitle}</p>
+                    <p className="mt-1 leading-relaxed">{t.fiscalLegalBody}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                  <FileCheck2 className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
+                  <p>{t.fiscalHint}</p>
+                </div>
+
+                <div>
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    {t.fiscalGuidanceHeading}
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Link
+                      href="/help/romania-efactura"
+                      target="_blank"
+                      className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition-colors hover:border-blue-300 hover:bg-blue-50/50"
+                    >
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-600 ring-1 ring-slate-200">
+                        <Landmark className="h-4 w-4" />
+                      </span>
+                      <span className="text-sm font-semibold text-slate-800">{t.fiscalGuidanceEfacturaTitle}</span>
+                      <span className="text-xs leading-relaxed text-slate-500">{t.fiscalGuidanceEfacturaDesc}</span>
+                      <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-blue-600">
+                        {t.learnHow} <ArrowUpRight className="h-3 w-3" />
+                      </span>
+                    </Link>
+                    <Link
+                      href="/help/romania-fiscalnet"
+                      target="_blank"
+                      className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition-colors hover:border-blue-300 hover:bg-blue-50/50"
+                    >
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-600 ring-1 ring-slate-200">
+                        <Receipt className="h-4 w-4" />
+                      </span>
+                      <span className="text-sm font-semibold text-slate-800">{t.fiscalGuidanceFiscalnetTitle}</span>
+                      <span className="text-xs leading-relaxed text-slate-500">{t.fiscalGuidanceFiscalnetDesc}</span>
+                      <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-blue-600">
+                        {t.learnHow} <ArrowUpRight className="h-3 w-3" />
+                      </span>
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2 border-t border-slate-100 pt-6 sm:flex-row-reverse">
+                  <Button
+                    className="h-11 flex-1 bg-blue-600 text-base hover:bg-blue-700 text-white"
+                    disabled={pending}
+                    onClick={() => handleFinish(true)}
+                  >
+                    {pending && fiscalAction === "anaf" ? t.fiscalConnecting : t.fiscalConnect}
+                    {!(pending && fiscalAction === "anaf") && <ArrowRight className="ml-2 h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-11 flex-1"
+                    disabled={pending}
+                    onClick={() => handleFinish(false)}
+                  >
+                    {pending && fiscalAction === "skip" ? t.openingTill : t.fiscalLater}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="h-11 sm:w-auto"
+                    onClick={() => setStep(1)}
+                    disabled={pending}
+                  >
+                    {t.backBtn}
+                  </Button>
+                </div>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row-reverse">
-                <Button
-                  className="h-11 flex-1 bg-blue-600 text-base hover:bg-blue-700 text-white"
-                  disabled={pending}
-                  onClick={() => handleFinish(true)}
-                >
-                  {pending && fiscalAction === "anaf" ? t.fiscalConnecting : t.fiscalConnect}
-                  {!(pending && fiscalAction === "anaf") && <ArrowRight className="ml-2 h-4 w-4" />}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-11 flex-1"
-                  disabled={pending}
-                  onClick={() => handleFinish(false)}
-                >
-                  {pending && fiscalAction === "skip" ? t.openingTill : t.fiscalLater}
-                </Button>
-                <Button
-                  variant="ghost"
-                  className="h-11 sm:w-auto"
-                  onClick={() => setStep(1)}
-                  disabled={pending}
-                >
-                  {t.backBtn}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </div>
+        </div>
       </main>
     </div>
   );

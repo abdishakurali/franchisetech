@@ -324,7 +324,7 @@ export const comparisonPages: ComparisonPage[] = [
     intro:
       "RezoSoft este un nume cunoscut în POS HoReCa din România, cu instalări tradiționale la restaurante și suport local. franchisetech propune același tip de job — casă, stoc, rapoarte — într-un workspace cloud în browser, cu personal nelimitat și trial rapid. Nu pretindem că RezoSoft e „greșit”; comparăm onest unde fiecare câștigă: investiție locală existentă vs time-to-value și cost predictibil pentru afaceri mici.",
     betterFor:
-      "RezoSoft poate fi potrivit dacă aveți deja investiție în echipamente, training local și contract de suport — și fluxul funcționează. franchisetech merită evaluat dacă doriți browser POS, trial 15 zile fără card, raport Z inclus și cost fără taxă per casier — plus coexistență cu SmartBill/Oblio pentru facturare.",
+      "RezoSoft poate fi potrivit dacă aveți deja investiție în echipamente, training local și contract de suport — și fluxul funcționează. franchisetech merită evaluat dacă doriți browser POS, trial 15 zile (verificare card 1 €), raport Z inclus și cost fără taxă per casier — plus coexistență cu SmartBill/Oblio pentru facturare.",
     competitorStrengths: [
       "Brand local HoReCa — recunoscut de operatori și integratori din România",
       "Instalări tradiționale la restaurante — ecosistem instalat, familiar echipei",
@@ -336,7 +336,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Raport Z, vânzări și TVA incluse în Core (49€) — fără add-on doar pentru raportare",
       "Stoc, NIR, rețete și marjă brută pe Operations — legate de vânzările POS",
       "Personal nelimitat pe planurile plătite — fără taxă per casier",
-      "Trial 15 zile fără card; FiscalNet când este activat și configurat",
+      "Trial 15 zile (verificare card 1 €); FiscalNet când este activat și configurat",
     ],
     sections: [
       {
@@ -489,7 +489,7 @@ export const comparisonPages: ComparisonPage[] = [
       "POS + stoc + rețete + raport Z în același workspace browser",
       "Personal nelimitat pe plan plătit — fără taxă per casier",
       "Raport Z și TVA incluse în Core (49€) — fără add-on raportare",
-      "Trial 15 zile fără card; ghiduri și resurse în română",
+      "Trial 15 zile (verificare card 1 €); ghiduri și resurse în română",
       "Coexistă cu SmartBill/Oblio pentru facturare",
     ],
     sections: [
@@ -566,7 +566,7 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     franchisetechStrengths: [
       "POS + stoc + rețete + raport Z în același sistem browser",
-      "Trial 15 zile fără card — evaluare paralelă fără ruptură",
+      "Trial 15 zile (verificare card 1 €) — evaluare paralelă fără ruptură",
       "Personal nelimitat — fără taxă per casier la creștere echipă",
       "Raport Z, vânzări, TVA incluse Starter — fără add-on Insights",
       "FiscalNet când activat; ghid `/help/romania-fiscalnet`",
@@ -644,7 +644,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Raport vânzări, raport Z și raport TVA incluse în Core (49€) — fără add-on Insights",
       "Fără taxă per angajat; personal nelimitat pe plan",
       "Stoc, NIR, rețete și rapoarte marjă pe Operations (79€) — fără salt la 99€+ doar pentru gestiune",
-      "Browser POS — trial 15 zile fără card; FiscalNet când este configurat",
+      "Browser POS — trial 15 zile (verificare card 1 €); FiscalNet când este configurat",
     ],
     sections: [
       {
@@ -943,7 +943,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Comparație onestă franchisetech vs FreyaPOS: ambele au POS + livrare + gestiune pentru HoReCa România. Diferențele reale: preț listat vs cotație, Saga export, rețete și browser vs instalat.",
     h1: "franchisetech vs FreyaPOS — comparație onestă HoReCa România",
     intro:
-      "FreyaPOS este un POS pentru restaurante și retail din România cu funcții de gestiune, livrare (Glovo/Tazz ca modul opțional), rezervări și loyalty. Nu afișează prețuri publice — obțineți ofertă la sales@freyapos.com. franchisetech acoperă același job cu browser POS, livrare separată pe canale, cost rețete și export Saga — la 49–99€/lună listat pe site, trial 15 zile fără card.",
+      "FreyaPOS este un POS pentru restaurante și retail din România cu funcții de gestiune, livrare (Glovo/Tazz ca modul opțional), rezervări și loyalty. Nu afișează prețuri publice — obțineți ofertă la sales@freyapos.com. franchisetech acoperă același job cu browser POS, livrare separată pe canale, cost rețete și export Saga — la 49–99€/lună listat pe site, trial 15 zile (verificare card 1 €).",
     betterFor:
       "FreyaPOS poate câștiga dacă aveți nevoie de modul de rezervări, loyalty integrat și preferați relație directă cu un furnizor local cu cotație. franchisetech câștigă dacă vreți preț listat transparent, browser POS fără instalare, export Saga pentru contabil și cost rețete inclus în planul Pro.",
     competitorStrengths: [
@@ -960,7 +960,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Export Saga C (XML) inclus — contabilul importă direct, fără transcriere",
       "Cost rețete și marje — știți marja pe preparat înainte de a schimba meniul",
       "Glovo — integrat automat, inclus. Bolt Food și Tazz — în curând.",
-      "Trial 15 zile fără card — prima vânzare în ore, fără proiect de implementare",
+      "Trial 15 zile (verificare card 1 €) — prima vânzare în ore, fără proiect de implementare",
     ],
     sections: [
       {
@@ -985,7 +985,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Care e diferența principală față de FreyaPOS?",
         answer:
-          "Ambele acoperă POS HoReCa + livrare + multi-locație. Diferențele reale: franchisetech listează prețurile pe site (49–99€), include export Saga și cost rețete, funcționează browser fără instalare, cu trial 15 zile fără card. FreyaPOS are loyalty și rezervări integrate — funcții pe care franchisetech nu le include.",
+          "Ambele acoperă POS HoReCa + livrare + multi-locație. Diferențele reale: franchisetech listează prețurile pe site (49–99€), include export Saga și cost rețete, funcționează browser fără instalare, cu trial 15 zile (verificare card 1 €). FreyaPOS are loyalty și rezervări integrate — funcții pe care franchisetech nu le include.",
       },
       {
         question: "FreyaPOS funcționează offline?",
@@ -1009,7 +1009,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Raport Z / închidere", "Inclus Starter — așteptat vs numărat", "Disponibil — verificați claritatea"],
       ["Stoc & NIR", "Inclus Pro (79€/lună)", "Gestiune — verificați modulele incluse"],
       ["Multi-locație", "99€/locație — dashboard unificat", "Scalabil pentru franciză — cotație"],
-      ["Trial gratuit", "15 zile fără card", "Nu este menționat pe site"],
+      ["Trial gratuit", "15 zile (verificare card 1 €)", "Nu este menționat pe site"],
     ],
   },
   // ── NEW: POSnet ───────────────────────────────────────────────────────────
@@ -1023,7 +1023,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Comparație onestă franchisetech vs POSnet: ambele au Glovo auto-import și Saga C. POSnet adaugă Bolt/Wolt automat și licență definitivă; franchisetech adaugă rețete cu marje și preț lunar listat.",
     h1: "franchisetech vs POSnet — comparație onestă pentru HoReCa România",
     intro:
-      "POSnet este un POS puternic pentru restaurante din România: import automat comenzi Glovo, Bolt, Wolt, integrare Saga C, NIR auto, KDS, chioșc self-ordering și funcționare offline. Licență definitivă (fără abonament lunar). franchisetech acoperă aceleași job-uri principale — casă, stoc, livrare, Saga — cu browser cloud (fără instalare), cost rețete pe porție, marje și trial 15 zile fără card la preț lunar listat.",
+      "POSnet este un POS puternic pentru restaurante din România: import automat comenzi Glovo, Bolt, Wolt, integrare Saga C, NIR auto, KDS, chioșc self-ordering și funcționare offline. Licență definitivă (fără abonament lunar). franchisetech acoperă aceleași job-uri principale — casă, stoc, livrare, Saga — cu browser cloud (fără instalare), cost rețete pe porție, marje și trial 15 zile (verificare card 1 €) la preț lunar listat.",
     betterFor:
       "POSnet câștigă dacă preferați licență definitivă fără abonament lunar, aveți nevoie de funcționare offline sau chioșc self-ordering. franchisetech câștigă dacă vreți cloud fără server local de menținut, cost rețete și marje per preparat, preț lunar listat transparent și trial fără angajament.",
     competitorStrengths: [
@@ -1039,7 +1039,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Browser cloud — fără instalare, server local sau mentenanță IT",
       "Cost rețete per porție — știți marja brută înainte de a schimba meniul",
       "Preț lunar listat pe site: 49€ Starter, 79€ Pro, 99€/locație Multi",
-      "Trial 15 zile fără card — prima vânzare în ore, fără proiect de implementare",
+      "Trial 15 zile (verificare card 1 €) — prima vânzare în ore, fără proiect de implementare",
       "Multi-location la 99€/locație — dashboard unificat, rapoarte separate",
       "Glovo — integrat automat. Bolt Food și Tazz — în curând.",
     ],
@@ -1071,7 +1071,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Ce are franchisetech și POSnet nu detaliază?",
         answer:
-          "franchisetech include: cost rețete per porție și marjă brută, preț lunar listat transparent pe site, browser fără instalare și trial 15 zile fără card. POSnet nu detaliază pe site cost rețete sau trial gratuit — verificați cu furnizorul.",
+          "franchisetech include: cost rețete per porție și marjă brută, preț lunar listat transparent pe site, browser fără instalare și trial 15 zile (verificare card 1 €). POSnet nu detaliază pe site cost rețete sau trial gratuit — verificați cu furnizorul.",
       },
     ],
     related: [
@@ -1090,7 +1090,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Chioșc self-ordering", "Nu este inclus", "Da — disponibil la POSnet"],
       ["KDS bucătărie", "Pro", "Da — disponibil la POSnet"],
       ["Deploy", "Browser cloud — fără instalare", "Aplicație locală — necesită instalare și server"],
-      ["Trial gratuit", "15 zile fără card", "Neconfirmat — contactați furnizorul"],
+      ["Trial gratuit", "15 zile (verificare card 1 €)", "Neconfirmat — contactați furnizorul"],
     ],
   },
   // ── NEW: rKeeper ──────────────────────────────────────────────────────────
@@ -1196,7 +1196,7 @@ export const comparisonPages: ComparisonPage[] = [
       "WhatsApp notificări și plăți prin API bancar",
     ],
     franchisetechStrengths: [
-      "Implementare în ore — trial self-serve 15 zile fără card, fără proiect IT",
+      "Implementare în ore — trial self-serve 15 zile (verificare card 1 €), fără proiect IT",
       "Prețuri listate: Starter 49€, Pro 79€, Multi 99€/locație — fără cotație",
       "Glovo — integrat automat, inclus. Bolt Food și Tazz — în curând.",
       "Export Saga C (XML) — contabilul primește fișierul gata de import",
@@ -1257,7 +1257,7 @@ export const comparisonPages: ComparisonPage[] = [
     rows: [
       ["Tip produs", "POS operațional HoReCa — casă, stoc, rețete, raport Z", "ERP complet — facturare, bancă, HR, documente"],
       ["Preț", "49–99€/lună listat pe site", "Cotație — fără preț public"],
-      ["Implementare", "Ore — trial self-serve fără card", "Proiect ERP — săptămâni/luni"],
+      ["Implementare", "Ore — trial self-serve 15 zile", "Proiect ERP — săptămâni/luni"],
       ["Import livrare", "Glovo — automat inclus; Bolt/Tazz în curând", "Neconfirmat pe site — verificați cu furnizorul"],
       ["Export Saga C", "Inclus Pro (79€/lună)", "Neconfirmat pe site — verificați cu furnizorul"],
       ["Import extrase bancare", "Nu este disponibil", "Da — integrare bancară nativă, punct forte"],

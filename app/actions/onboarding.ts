@@ -16,7 +16,7 @@ import { getDefaultThresholds, type AssetType } from "@/lib/temperature";
 import { demoProductsForCountry } from "@/lib/onboarding/demo-products";
 import { saveOrgModuleFlags } from "@/lib/org-module-flags";
 import type { BillingPlan } from "@/lib/billing/plans";
-import { trackLoopsEvent, upsertLoopsContact } from "@/lib/loops";
+import { upsertLoopsContact } from "@/lib/loops";
 import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEvent } from "@/lib/posthog-server";
@@ -118,8 +118,9 @@ export async function completePosOnboarding(input: {
   const modules = defaultModulesForProfile(profile);
   const countryLabel = COUNTRY_LABELS[input.countryCode] ?? COUNTRY_LABELS.OTHER;
   const { code: currencyCode, symbol: currencySymbol } = currencyForCountry(input.countryCode);
-  const trialEndsAt = new Date(Date.now() + 15 * 86400000).toISOString();
 
+  // trial_started_at / trial_ends_at are intentionally NOT set here — the trial
+  // starts only after the €1 card verification payment (see lib/billing/verification.ts).
   const { error: orgUpdateError } = await supabase.from("organisations").update({
     business_type: input.businessType || null,
     country: countryLabel,
@@ -130,8 +131,6 @@ export async function completePosOnboarding(input: {
     anaf_vat_registered: input.countryCode === "RO" ? Boolean(input.anafVatRegistered) : false,
     currency_code: currencyCode,
     currency_symbol: currencySymbol,
-    trial_started_at: new Date().toISOString(),
-    trial_ends_at: trialEndsAt,
     referred_by_code: input.referralCode?.trim() || null,
     acquisition_source: input.acquisition?.utm_source || null,
     acquisition_campaign: input.acquisition?.utm_campaign || null,
@@ -285,22 +284,17 @@ export async function completePosOnboarding(input: {
   }
 
   // ── Loops: non-blocking ────────────────────────────────────────────────
+  // trial_started (Loops + PostHog) now fires when the trial actually starts —
+  // after the €1 card verification — in lib/billing/verification.ts.
   if (user.email) {
-    const trialStartedAt = new Date().toISOString();
     void upsertLoopsContact(user.email, {
       firstName: input.userName?.trim(),
       plan: input.preferredPlan ?? "starter",
-      trialStartedAt,
     }).catch((e: unknown) => console.error("onboarding_loops_contact_failed", e));
-    void trackLoopsEvent(user.email, "trial_started", {
-      businessName: input.orgName.trim(),
-      countryCode: input.countryCode,
-      plan: input.preferredPlan ?? "starter",
-    }).catch((e: unknown) => console.error("onboarding_loops_event_failed", e));
   }
   captureServerEvent(
     user.id,
-    "trial_started",
+    "onboarding_completed",
     {
       organisation_id: orgId,
       country_code: input.countryCode,
@@ -323,7 +317,7 @@ export async function completePosOnboarding(input: {
     }
   }
 
-  redirect("/app/pos?welcome=1");
+  redirect("/onboarding/verify-card");
 }
 
 

@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { creditReferralOnFirstPayment } from "@/lib/referrals";
 import { trackLoopsEvent } from "@/lib/loops";
 import { syncStripeSubscription } from "@/lib/billing/stripe-sync";
+import { startTrialAfterCardVerification } from "@/lib/billing/verification";
 import { reportPaidConversion } from "@/lib/analytics/server-conversions";
 import { captureServerEvent } from "@/lib/posthog-server";
 
@@ -150,6 +151,23 @@ export async function POST(request: Request) {
           clearGracePeriod: true,
         });
         if (!sync.synced) throw new Error(`checkout_subscription_sync_failed:${sync.reason ?? "unknown"}`);
+      } else if (
+        session.mode === "payment" &&
+        session.metadata?.purpose === "card_verification" &&
+        session.payment_status === "paid"
+      ) {
+        // €1 card verification paid — start the 15-day trial. Idempotent: the
+        // success page may have already started it; only the first caller wins.
+        const verifyOrgId = session.metadata?.organisation_id ?? session.client_reference_id;
+        if (verifyOrgId) {
+          await startTrialAfterCardVerification({
+            organisationId: verifyOrgId,
+            paymentIntentId:
+              typeof session.payment_intent === "string"
+                ? session.payment_intent
+                : session.payment_intent?.id ?? null,
+          });
+        }
       }
     }
 

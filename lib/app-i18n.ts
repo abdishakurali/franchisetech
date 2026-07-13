@@ -1150,7 +1150,7 @@ const en = {
     },
     signup: {
       title: "The till matches the drawer — start free",
-      descDefault: "No card. Open your till today. Guided first sale.",
+      descDefault: "Open your till today. Guided first sale. €1 card verification.",
       descPlan: (plan: string) => `15-day assisted trial · ${plan} after setup`,
       businessName: "Brand/shop name",
       yourName: "Your name",
@@ -2338,7 +2338,7 @@ const ro: typeof en = {
     },
     signup: {
       title: "Casa se potrivește cu sertarul — începe gratuit",
-      descDefault: "Fără card. Deschideți casa azi. Prima vânzare ghidată.",
+      descDefault: "Deschideți casa azi. Prima vânzare ghidată. Verificare card 1 €.",
       descPlan: (plan: string) => `Trial asistat 15 zile · ${plan} după configurare`,
       businessName: "Nume brand/magazin",
       yourName: "Numele tău",

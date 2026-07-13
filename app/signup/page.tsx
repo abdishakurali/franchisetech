@@ -35,7 +35,7 @@ export default function SignupPage() {
   const a = t.auth.signup;
   const [loading, setLoading] = useState(false);
   const [, startHydrate] = useTransition();
-  const [form, setForm] = useState({ fullName: "", businessName: "", email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
 
   useEffect(() => {
     if (isPreferredBillingPlan(planParam)) {
@@ -73,19 +73,11 @@ export default function SignupPage() {
       toast.error(a.errors.passwordLength);
       return;
     }
-    if (!form.businessName.trim()) {
-      toast.error(a.errors.businessRequired);
-      return;
-    }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: {
-        data: {
-          full_name: form.fullName,
-          business_name: form.businessName.trim(),
-        },
         emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding`,
       },
     });
@@ -129,29 +121,6 @@ export default function SignupPage() {
           )}
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-1.5">
-              <Label htmlFor="businessName">{a.businessName}</Label>
-              <Input
-                id="businessName"
-                type="text"
-                autoComplete="organization"
-                required
-                value={form.businessName}
-                onChange={(e) => setForm({ ...form, businessName: e.target.value })}
-                placeholder="Café Central"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="fullName">{a.yourName}</Label>
-              <Input
-                id="fullName"
-                type="text"
-                autoComplete="name"
-                value={form.fullName}
-                onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                placeholder="Andrei Popescu"
-              />
-            </div>
-            <div className="space-y-1.5">
               <Label htmlFor="email">{a.email}</Label>
               <Input
                 id="email"
@@ -190,7 +159,7 @@ export default function SignupPage() {
         </CardContent>
       </Card>
       <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-slate-400">
-        <span>✓ Niciun card necesar</span>
+        <span>✓ Verificare card 1 €</span>
         <span>✓ Trial 15 zile</span>
         <span>✓ Live în sub o oră</span>
       </div>

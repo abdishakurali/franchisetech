@@ -33,7 +33,7 @@ Core value: "Close the day with truth" — cash drawer vs expected, margin visib
 
 ## The 5 Activation Events (in order)
 
-1. trial_started — user signs up (completePosOnboarding in app/actions/onboarding.ts ~line 27)
+1. trial_started — trial begins after €1 card verification (startTrialAfterCardVerification in lib/billing/verification.ts; onboarding itself fires onboarding_completed)
 2. till_session_opened — first POS session (openPosSession in app/actions/kitchenops.ts ~line 509)
 3. first_sale_recorded — first transaction saved (completeSaleReturn in app/actions/kitchenops.ts ~line 1713)
 4. z_report_viewed — Z-report viewed (markGrowthReportViewed in app/actions/growth.ts)
@@ -45,7 +45,7 @@ Core value: "Close the day with truth" — cash drawer vs expected, margin visib
 - Pro: €79/mo (restaurant, stock + recipes + kitchen)
 - Multi-location: €99/location/mo
 - Assisted setup: €199 one-time
-- Trial: 15 days, no card required
+- Trial: 15 days, starts after a one-time €1 card verification (Stripe Checkout payment mode, card saved for off-session use; price in lib/billing/plans.ts)
 
 ## ICP (Ideal Customer Profile)
 

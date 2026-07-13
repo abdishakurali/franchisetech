@@ -18,7 +18,7 @@ export const en = {
     language: "Language",
   },
   announcement: {
-    text: "15-day trial — no card required. Assisted setup included.",
+    text: "15-day trial — €1 card verification. Assisted setup included.",
     cta: "Start now",
   },
   footer: {
@@ -123,7 +123,7 @@ export const en = {
     meta: {
       title: "franchisetech — Close the day with till truth",
       description:
-        "POS, stock and Z-report for cafes and restaurants in Romania. Free setup in under an hour, from €49/mo, unlimited staff, 15 days no card.",
+        "POS, stock and Z-report for cafes and restaurants in Romania. Free setup in under an hour, from €49/mo, unlimited staff, 15-day trial.",
     },
     hero: {
       label: "For cafes, restaurants and takeaway in Romania",
@@ -133,7 +133,7 @@ export const en = {
       titleAfter: ".",
       subtitle: "Everything you need for today's service, in one place.",
       socialProof: "Among the first Romanian owners closing the day with franchisetech.",
-      trialNote: "No card to start · Guided in-app setup · Cancel anytime",
+      trialNote: "€1 card verification to start · Guided in-app setup · Cancel anytime",
       trustSignals: [
         { title: "Free setup", text: "New account, demo products, open till, and first sale — guided in-app at no cost." },
         { title: "Under an hour to first sale", text: "Most cafes finish the core steps in a single session." },
@@ -591,7 +591,7 @@ export const en = {
   auth: {
     loginTitle: "Sign in to franchisetech",
     signupTitle: "Start your free account",
-    signupDescription: "No card. Open your till today. Guided first sale.",
+    signupDescription: "Open your till today. Guided first sale. €1 card verification.",
     signupLegal: "By signing up you agree that franchisetech supports your records — it does not replace your legal obligations as a food business operator.",
     email: "Email",
     password: "Password",

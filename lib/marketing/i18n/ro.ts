@@ -20,7 +20,7 @@ export const ro: MarketingMessages = {
     language: "Limbă",
   },
   announcement: {
-    text: "Trial 15 zile — fără card. Configurare asistată inclusă.",
+    text: "Trial 15 zile — verificare card 1 €. Configurare asistată inclusă.",
     cta: "Începe acum",
   },
   footer: {
@@ -125,7 +125,7 @@ export const ro: MarketingMessages = {
     meta: {
       title: "franchisetech — Închizi ziua cu sertarul la casă",
       description:
-        "POS, stoc și raport Z pentru cafenele și restaurante din România. Setup gratuit în sub o oră, de la 49€/lună, personal nelimitat, 15 zile fără card.",
+        "POS, stoc și raport Z pentru cafenele și restaurante din România. Setup gratuit în sub o oră, de la 49€/lună, personal nelimitat, trial 15 zile.",
     },
     hero: {
       label: "Pentru cafenele, restaurante și takeaway din România",
@@ -443,7 +443,7 @@ export const ro: MarketingMessages = {
   },
   pricing: {
     title: "Prețuri franchisetech",
-    description: "Prețuri franchisetech: Starter €49/lună, Pro €79/lună, Multi-locație €109/lună. Include POS, personal nelimitat, raport Z și rapoarte zilnice. Trial gratuit 15 zile, fără card.",
+    description: "Prețuri franchisetech: Starter €49/lună, Pro €79/lună, Multi-locație €109/lună. Include POS, personal nelimitat, raport Z și rapoarte zilnice. Trial 15 zile cu verificare card 1 €.",
     badge: "Prețuri simple",
     heroTitle: "Prețuri simple pentru cafenele și restaurante în creștere.",
     heroText: "Un preț lunar pe magazin. Fără taxe per loc.",
@@ -476,7 +476,7 @@ export const ro: MarketingMessages = {
     fairnessItems: [
       "Echipă nelimitată — fără taxe per utilizator",
       "Fără lock-in hardware sau contracte de terminal",
-      "Trial 15 zile, fără card de credit",
+      "Trial 15 zile, verificare card 1 €",
       "Anulare oricând — fără contract pe termen lung",
       "Abonații existenți păstrează tariful la schimbarea prețurilor",
     ],
@@ -588,7 +588,7 @@ export const ro: MarketingMessages = {
     homeTeaser: {
       label: "Prețuri",
       title: "Un workspace. Un preț pe magazin.",
-      text: "De la {starter}/lună. 15 zile gratuit, fără card necesar. 99,99% uptime și suport instant.",
+      text: "De la {starter}/lună. Trial 15 zile cu verificare card 1 €. 99,99% uptime și suport instant.",
       cta: "Vezi toate planurile",
     },
   },

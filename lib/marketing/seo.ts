@@ -281,7 +281,7 @@ export const featurePages: SeoPage[] = [
     bullets: ["0–15 min: signup and business settings", "15–45 min: demo products and payment methods", "45–60 min: open till and first test sale", "Optional premium setup for 200+ SKU imports"],
     sections: [
       { title: "Clear milestones", body: "Each step links to the right screen — settings, POS, or reports — so setup stays focused." },
-      { title: "Free self-serve by default", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — no card required to open the till." },
+      { title: "Free self-serve by default", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — a one-time €1 card verification starts the trial." },
       { title: "Premium setup when you need it", body: "Large catalog migration, multi-site rollout, or FiscalNet configuration? Optional assisted setup (€199) covers training and hand-holding — typically 1–2 days, not the core path." },
     ],
     faqs: [

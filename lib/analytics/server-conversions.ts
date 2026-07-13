@@ -46,23 +46,31 @@ async function getGoogleAdsAccessToken(): Promise<string | null> {
 
 /**
  * Uploads a click conversion to Google Ads (offline conversion import) using the
- * stored gclid/gbraid/wbraid from signup. Requires a conversion action to already
- * exist in the Google Ads UI (Tools & Settings > Conversions) — its resource name
- * goes in GOOGLE_ADS_CONVERSION_ACTION_ID.
+ * stored gclid/gbraid/wbraid from signup. Requires the conversion action to already
+ * exist in Google Ads — its numeric ID is passed per call site:
+ *   GOOGLE_ADS_CONVERSION_ACTION_ID        → paid subscription (Stripe webhook)
+ *   GOOGLE_ADS_TRIAL_CONVERSION_ACTION_ID  → card-verified trial start
  *
- * Required env vars (all currently unset — this is a documented no-op until provisioned):
+ * Required env vars (no-op until provisioned):
  *   GOOGLE_ADS_OAUTH_CLIENT_ID, GOOGLE_ADS_OAUTH_CLIENT_SECRET, GOOGLE_ADS_OAUTH_REFRESH_TOKEN
- *   GOOGLE_ADS_DEVELOPER_TOKEN, GOOGLE_ADS_CUSTOMER_ID, GOOGLE_ADS_CONVERSION_ACTION_ID
+ *   GOOGLE_ADS_DEVELOPER_TOKEN, GOOGLE_ADS_CUSTOMER_ID
  *   GOOGLE_ADS_LOGIN_CUSTOMER_ID (optional — only needed if the account sits under a manager/MCC account)
  */
-async function uploadGoogleAdsClickConversion(input: ReportPaidConversionInput): Promise<void> {
+async function uploadGoogleAdsClickConversion(input: {
+  gclid?: string | null;
+  gbraid?: string | null;
+  wbraid?: string | null;
+  conversionActionId: string;
+  transactionId: string;
+  /** Omit to use the conversion action's default value (e.g. trial starts). */
+  value?: { amountCents: number; currency: string };
+}): Promise<void> {
   const clickId = input.gclid || input.gbraid || input.wbraid;
   if (!clickId) return;
 
   const developerToken = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
   const customerId = process.env.GOOGLE_ADS_CUSTOMER_ID;
-  const conversionActionId = process.env.GOOGLE_ADS_CONVERSION_ACTION_ID;
-  if (!developerToken || !customerId || !conversionActionId) return;
+  if (!developerToken || !customerId) return;
 
   const accessToken = await getGoogleAdsAccessToken();
   if (!accessToken) return;
@@ -86,10 +94,14 @@ async function uploadGoogleAdsClickConversion(input: ReportPaidConversionInput):
           conversions: [
             {
               [clickIdField]: clickId,
-              conversionAction: `customers/${customerId}/conversionActions/${conversionActionId}`,
+              conversionAction: `customers/${customerId}/conversionActions/${input.conversionActionId}`,
               conversionDateTime: googleAdsDateTime(new Date()),
-              conversionValue: input.amountCents / 100,
-              currencyCode: input.currency.toUpperCase(),
+              ...(input.value
+                ? {
+                    conversionValue: input.value.amountCents / 100,
+                    currencyCode: input.value.currency.toUpperCase(),
+                  }
+                : {}),
               orderId: input.transactionId,
             },
           ],
@@ -155,5 +167,43 @@ async function sendGa4Purchase(input: ReportPaidConversionInput): Promise<void> 
  * callers (the Stripe webhook) must still ack Stripe even if a conversion fails to send.
  */
 export async function reportPaidConversion(input: ReportPaidConversionInput): Promise<void> {
-  await Promise.allSettled([uploadGoogleAdsClickConversion(input), sendGa4Purchase(input)]);
+  const conversionActionId = process.env.GOOGLE_ADS_CONVERSION_ACTION_ID;
+  await Promise.allSettled([
+    conversionActionId
+      ? uploadGoogleAdsClickConversion({
+          gclid: input.gclid,
+          gbraid: input.gbraid,
+          wbraid: input.wbraid,
+          conversionActionId,
+          transactionId: input.transactionId,
+          value: { amountCents: input.amountCents, currency: input.currency },
+        })
+      : Promise.resolve(),
+    sendGa4Purchase(input),
+  ]);
+}
+
+type ReportTrialConversionInput = {
+  organisationId: string;
+  gclid?: string | null;
+  gbraid?: string | null;
+  wbraid?: string | null;
+};
+
+/**
+ * Reports a card-verified trial start to Google Ads (primary bidding signal).
+ * Uses the conversion action's default value — no monetary amount is sent.
+ * No-op unless GOOGLE_ADS_TRIAL_CONVERSION_ACTION_ID is set. Never throws —
+ * called from the card-verification payment flow, which must never break.
+ */
+export async function reportTrialConversion(input: ReportTrialConversionInput): Promise<void> {
+  const conversionActionId = process.env.GOOGLE_ADS_TRIAL_CONVERSION_ACTION_ID;
+  if (!conversionActionId) return;
+  await uploadGoogleAdsClickConversion({
+    gclid: input.gclid,
+    gbraid: input.gbraid,
+    wbraid: input.wbraid,
+    conversionActionId,
+    transactionId: `trial_${input.organisationId}`,
+  });
 }
