@@ -7,13 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { addCustomer, importCustomersCsv } from "@/app/actions/kitchenops";
+import { getRegularsAtRisk } from "@/app/actions/loyalty";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 
 export default async function CustomersPage() {
   const { countryCode, profileLocale, supabase, orgId } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
 
-  const [{ data: customers }, { data: txCounts }] = await Promise.all([
+  const [{ data: customers }, { data: txCounts }, { data: loyaltyOrg }, regularsAtRisk] = await Promise.all([
     supabase
       .from("customers")
       .select("id,name,email,phone,notes,created_at")
@@ -24,7 +25,10 @@ export default async function CustomersPage() {
       .select("customer_id")
       .eq("organisation_id", orgId)
       .not("customer_id", "is", null),
+    supabase.from("organisations").select("loyalty_enabled").eq("id", orgId).maybeSingle(),
+    getRegularsAtRisk(),
   ]);
+  const loyaltyEnabled = Boolean(loyaltyOrg?.loyalty_enabled);
 
   const txByCustomer = new Map<string, number>();
   for (const row of txCounts ?? []) {
@@ -43,6 +47,54 @@ export default async function CustomersPage() {
           <a href="/app/customers/import"><Button variant="outline">{t.common.import}</Button></a>
         </div>
       </div>
+      {loyaltyEnabled ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t.customers.loyaltyRegularsAtRisk}</CardTitle>
+            <p className="text-sm text-slate-500">{t.customers.loyaltyRegularsAtRiskSubtitle}</p>
+          </CardHeader>
+          <CardContent>
+            {!regularsAtRisk.length ? (
+              <p className="py-6 text-center text-sm text-slate-400">{t.customers.loyaltyRegularsAtRiskEmpty}</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t.customers.name}</TableHead>
+                    <TableHead>{t.customers.phone}</TableHead>
+                    <TableHead className="text-right">{t.customers.loyaltyVisits}</TableHead>
+                    <TableHead className="text-right">{t.customers.loyaltyLifetimeSpend}</TableHead>
+                    <TableHead className="text-right">{t.customers.loyaltyDaysSinceVisit}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {regularsAtRisk.map((r) => (
+                    <TableRow key={r.customer_id} className="hover:bg-slate-50">
+                      <TableCell className="font-medium">
+                        <Link className="hover:text-blue-600" href={`/app/customers?selected=${r.customer_id}`}>{r.name}</Link>
+                      </TableCell>
+                      <TableCell className="text-slate-500">{r.phone ?? "—"}</TableCell>
+                      <TableCell className="text-right">{r.visit_count}</TableCell>
+                      <TableCell className="text-right">{Number(r.lifetime_spend).toFixed(2)}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="outline">{r.days_since_last_visit}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <p className="text-sm text-slate-400">
+          {t.customers.loyaltyUpsell}{" "}
+          <Link href="/app/settings?tab=integrations" className="text-blue-600 hover:underline">
+            {t.customers.loyaltyUpsellLink}
+          </Link>
+        </p>
+      )}
+
       <details className="rounded-xl border border-slate-200 bg-white">
         <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-700">{t.customers.importCustomers}</summary>
         <form action={importCustomersCsv as unknown as (fd: FormData) => Promise<void>} className="space-y-3 border-t p-4">

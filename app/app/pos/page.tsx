@@ -96,6 +96,13 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   const orgRow = (membership as any)?.organisations;
   const orgInfo = Array.isArray(orgRow) ? orgRow[0] : orgRow;
   const orgName: string = orgInfo?.name ?? "Your Business";
+  // Own small query rather than extending the membership join, per project constraints
+  // on lib/kitchenops/data.ts.
+  const { data: loyaltyOrgRow } = await supabase
+    .from("organisations")
+    .select("loyalty_enabled")
+    .eq("id", orgId)
+    .maybeSingle();
   const features = {
     kitchenDisplay: Boolean(orgInfo?.kitchen_display_enabled),
     restaurantOrderFlow: Boolean(orgInfo?.restaurant_order_flow_enabled),
@@ -103,6 +110,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     tableService: Boolean(orgInfo?.table_service_enabled),
     splitPayments: Boolean(orgInfo?.payment_split_enabled),
     tips: Boolean(orgInfo?.tips_enabled),
+    loyalty: Boolean(loyaltyOrgRow?.loyalty_enabled),
   };
 
   let activeTab: {

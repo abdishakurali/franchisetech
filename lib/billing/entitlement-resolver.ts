@@ -40,6 +40,7 @@ export type EntitlementKey =
   | "kitchen.stations"
   | "kitchen.order_types"
   | "kitchen.table_service"
+  | "loyalty.enabled"
   | "team.advanced_roles"
   | "owner_digest.enabled"
   | "reports.gestiune"
@@ -119,6 +120,7 @@ const OPERATIONS_ENTITLEMENTS: readonly EntitlementKey[] = [
   "kitchen.stations",
   "kitchen.order_types",
   "kitchen.table_service",
+  "loyalty.enabled",
   "team.advanced_roles",
   "owner_digest.enabled",
 ];
@@ -187,6 +189,7 @@ const REQUIRED_PLAN: Record<EntitlementKey | EntitlementLimitKey, PlanCode | "mu
   "kitchen.stations": "operations",
   "kitchen.order_types": "operations",
   "kitchen.table_service": "operations",
+  "loyalty.enabled": "operations",
   "kitchen.screen_limit": "operations",
   "team.advanced_roles": "operations",
   "owner_digest.enabled": "operations",

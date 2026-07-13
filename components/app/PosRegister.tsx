@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addCustomerFromPos, closePosSession, completeSaleReturn, posCashMovement, voidTransaction } from "@/app/actions/kitchenops";
 import { runZReport } from "@/app/actions/fiscalnet";
+import { getLoyaltyStampStatus, recordLoyaltyRedemption, type LoyaltyStampStatus } from "@/app/actions/loyalty";
 import { fiscalBrowserReceipt, fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
 import { useFiscalNetActive } from "@/lib/fiscalnet/use-fiscalnet-active";
 import { Button } from "@/components/ui/button";
@@ -709,6 +710,7 @@ function PosRegisterInner({
     tableService?: boolean;
     splitPayments?: boolean;
     tips?: boolean;
+    loyalty?: boolean;
   };
   activeTab?: PosActiveTable | null;
   canManage?: boolean;
@@ -759,6 +761,25 @@ function PosRegisterInner({
   const [lastFiscalTxt, setLastFiscalTxt] = useState<{ filename: string; content: string } | null>(null);
   const [salePending, setSalePending] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [loyaltyStatus, setLoyaltyStatus] = useState<LoyaltyStampStatus | null>(null);
+  /** Which customer id the reward was applied for — compared against the current
+   * selection below, so switching customers clears it without a reset-effect. */
+  const [loyaltyRewardAppliedForCustomerId, setLoyaltyRewardAppliedForCustomerId] = useState<string | null>(null);
+  const loyaltyRewardApplied = Boolean(selectedCustomer?.id) && loyaltyRewardAppliedForCustomerId === selectedCustomer?.id;
+
+  useEffect(() => {
+    // No synchronous reset needed here — the badge below only renders when
+    // selectedCustomer is set, so a stale loyaltyStatus for a deselected
+    // customer is never shown.
+    if (!features.loyalty || !selectedCustomer?.id) return;
+    let cancelled = false;
+    void getLoyaltyStampStatus(selectedCustomer.id).then((status) => {
+      if (!cancelled) setLoyaltyStatus(status);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [features.loyalty, selectedCustomer?.id]);
   const [customerSearch, setCustomerSearch] = useState("");
   const [txSearch, setTxSearch] = useState("");
   const [zReportDone, setZReportDone] = useState(initialZReportDone);
@@ -897,6 +918,7 @@ function PosRegisterInner({
     setCashReceived("");
     setCartDiscountLei(0);
     setDiscountMode("pct");
+    setLoyaltyRewardAppliedForCustomerId(null);
     clearCartBackupFromStorage();
   }
 
@@ -938,6 +960,7 @@ function PosRegisterInner({
     fd.set("payment_method_id", paymentMethodId);
     fd.set("payment_type", selectedPaymentType);
     fd.set("customer_name", selectedCustomer?.name ?? "");
+    fd.set("customer_id", selectedCustomer?.id ?? "");
     if (discountMode === "lei" && cartDiscountLei > 0) {
       fd.set("discount_lei", String(cartDiscountLei));
       fd.set("discount_pct", "0");
@@ -1032,6 +1055,14 @@ function PosRegisterInner({
             : { amountLabel, status: "failed", errorMsg: errMsg, retryPayload: payload },
         );
         return;
+      }
+      if (loyaltyRewardApplied && payload.customer_id && loyaltyStatus?.enabled) {
+        void recordLoyaltyRedemption({
+          customerId: payload.customer_id,
+          transactionId: res.transactionId,
+          stampsUsed: loyaltyStatus.required,
+          rewardDescription: loyaltyStatus.rewardDescription,
+        });
       }
       clearCartBackupFromStorage();
       resetCartAfterSale();
@@ -1837,6 +1868,30 @@ function PosRegisterInner({
             >
               {selectedCustomer ? selectedCustomer.name : t.addCustomerBtn}
             </button>
+            {features.loyalty && selectedCustomer && loyaltyStatus?.enabled && (
+              loyaltyStatus.rewardReady && !loyaltyRewardApplied ? (
+                <button
+                  type="button"
+                  title={loyaltyStatus.rewardType === "free_item" ? t.loyaltyFreeItemHint : undefined}
+                  onClick={() => {
+                    if (loyaltyStatus.rewardType === "discount" && loyaltyStatus.rewardDiscountLei) {
+                      setDiscountMode("lei");
+                      setCartDiscountLei(loyaltyStatus.rewardDiscountLei);
+                    }
+                    if (selectedCustomer?.id) setLoyaltyRewardAppliedForCustomerId(selectedCustomer.id);
+                  }}
+                  className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800 hover:bg-amber-200"
+                >
+                  🎁 {loyaltyStatus.rewardDescription || t.loyaltyRewardReady}
+                </button>
+              ) : (
+                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                  {loyaltyRewardApplied
+                    ? (loyaltyStatus.rewardType === "free_item" ? t.loyaltyFreeItemHint : t.loyaltyRewardApplied)
+                    : `${loyaltyStatus.stamps}/${loyaltyStatus.required}`}
+                </span>
+              )
+            )}
           {cart.length > 0 && (
               <button type="button" onClick={() => setCart([])} className="shrink-0 text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
           )}

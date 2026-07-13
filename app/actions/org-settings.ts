@@ -85,6 +85,7 @@ export async function updateNotificationPreference(
 type InstallableBusinessModule =
   | "kitchen_display"
   | "table_service"
+  | "loyalty"
   | "saga_export"
   | "fiscalnet"
   | "anaf_efactura";
@@ -92,6 +93,7 @@ type InstallableBusinessModule =
 const MODULE_COLUMN: Record<InstallableBusinessModule, string> = {
   kitchen_display: "kitchen_display_enabled",
   table_service: "table_service_enabled",
+  loyalty: "loyalty_enabled",
   saga_export: "saga_export_enabled",
   fiscalnet: "fiscalnet_enabled",
   anaf_efactura: "efactura_enabled",
@@ -100,6 +102,7 @@ const MODULE_COLUMN: Record<InstallableBusinessModule, string> = {
 const MODULE_ENTITLEMENT: Partial<Record<InstallableBusinessModule, Parameters<typeof assertEntitlement>[1]>> = {
   kitchen_display: "kitchen.enabled",
   table_service: "kitchen.table_service",
+  loyalty: "loyalty.enabled",
   saga_export: "reports.accountant_pack",
   fiscalnet: "fiscal.fiscalnet",
   anaf_efactura: "fiscal.efactura",
@@ -108,6 +111,7 @@ const MODULE_ENTITLEMENT: Partial<Record<InstallableBusinessModule, Parameters<t
 const MODULE_SETUP_HREF: Record<InstallableBusinessModule, string> = {
   kitchen_display: "/app/kitchen",
   table_service: "/app/settings/tables",
+  loyalty: "/app/settings/loyalty",
   saga_export: "/app/settings/accountant?install=saga",
   fiscalnet: "/app/settings?tab=fiscal",
   anaf_efactura: "/app/settings?tab=fiscal",
@@ -131,7 +135,8 @@ function isMissingModuleSchemaError(error: { code?: string; message?: string } |
     error.code === "PGRST204" ||
     message.includes("schema cache") ||
     message.includes("saga_export_enabled") ||
-    message.includes("efactura_enabled")
+    message.includes("efactura_enabled") ||
+    message.includes("loyalty_enabled")
   );
 }
 

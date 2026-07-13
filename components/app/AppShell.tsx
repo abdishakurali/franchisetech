@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Package, BarChart3,
   LogOut, Menu, X, ChevronDown, Archive,
   CreditCard, ListChecks, Truck, ShoppingBag,
-  Gift, BookOpen, ChefHat, FileText,
+  Gift, BookOpen, ChefHat, FileText, Star,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -34,7 +34,7 @@ import type { AppT } from "@/lib/app-i18n";
 interface AppShellProps {
   user: User;
   profile: { full_name: string | null; email: string | null } | null;
-  activeOrg: { id: string; name: string; country_code?: string | null; trial_ends_at?: string | null; referral_credit_months?: number | null; kitchen_display_enabled?: boolean | null; table_service_enabled?: boolean | null; efactura_enabled?: boolean | null; compact_workstation_nav_enabled?: boolean | null; business_profile?: string | null } | null;
+  activeOrg: { id: string; name: string; country_code?: string | null; trial_ends_at?: string | null; referral_credit_months?: number | null; kitchen_display_enabled?: boolean | null; table_service_enabled?: boolean | null; efactura_enabled?: boolean | null; compact_workstation_nav_enabled?: boolean | null; business_profile?: string | null; loyalty_enabled?: boolean | null } | null;
   userRole: string | null;
   setupComplete?: boolean;
   moduleVisibility?: {
@@ -146,6 +146,9 @@ function resolveNavItems(
     ...buildMainNav(userRole, t).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
     ...(activeOrg?.kitchen_display_enabled && moduleVisibility?.kitchenOps === true
       ? [{ href: "/app/kitchen", label: t.nav.kitchen, icon: ChefHat, exact: false }]
+      : []),
+    ...(activeOrg?.loyalty_enabled === true && !limited
+      ? [{ href: "/app/customers", label: t.nav.customers ?? "Customers", icon: Star, exact: false }]
       : []),
     ...(showEfactura && !limited
       ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }]

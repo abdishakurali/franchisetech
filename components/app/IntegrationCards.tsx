@@ -72,7 +72,7 @@ export async function IntegrationCards({
 
   const orgSettingsResult = await supabase
     .from("organisations")
-    .select("kitchen_display_enabled,table_service_enabled,saga_export_enabled,fiscalnet_enabled,efactura_enabled")
+    .select("kitchen_display_enabled,table_service_enabled,saga_export_enabled,fiscalnet_enabled,efactura_enabled,loyalty_enabled")
     .eq("id", orgId)
     .maybeSingle();
   let orgSettings = orgSettingsResult.data as Record<string, unknown> | null;
@@ -81,7 +81,8 @@ export async function IntegrationCards({
   if (
     orgSettingsError?.code === "42703" ||
     orgSettingsError?.code === "PGRST204" ||
-    (orgSettingsError?.message ?? "").toLowerCase().includes("efactura_enabled")
+    (orgSettingsError?.message ?? "").toLowerCase().includes("efactura_enabled") ||
+    (orgSettingsError?.message ?? "").toLowerCase().includes("loyalty_enabled")
   ) {
     const fallback = await supabase
       .from("organisations")
@@ -99,6 +100,7 @@ export async function IntegrationCards({
     if (id === "saga_export" && orgSettings?.saga_export_enabled) status = "active";
     if (id === "fiscalnet" && orgSettings?.fiscalnet_enabled) status = "active";
     if (id === "anaf_efactura" && orgSettings?.efactura_enabled) status = "active";
+    if (id === "loyalty" && orgSettings?.loyalty_enabled) status = "active";
     return { id, item, status, installKey: item.installKey ?? id };
   });
 

@@ -1,6 +1,6 @@
 export type CatalogLocale = "ro" | "en";
 
-export type PaidAddonKey = "kitchen_display" | "table_service";
+export type PaidAddonKey = "kitchen_display" | "table_service" | "loyalty";
 
 export type ExternalIntegrationKey =
   | "fiscalnet"
@@ -16,8 +16,8 @@ export type CatalogItem = {
   description: Record<CatalogLocale, string>;
   category: "included_module" | "paid_addon" | "external_integration";
   installKey?: InstallableProductKey;
-  featureColumn?: "kitchen_display_enabled" | "table_service_enabled" | "saga_export_enabled" | "fiscalnet_enabled" | "efactura_enabled";
-  entitlement?: "kitchen.enabled" | "kitchen.table_service" | "fiscal.fiscalnet" | "fiscal.efactura" | "reports.accountant_pack";
+  featureColumn?: "kitchen_display_enabled" | "table_service_enabled" | "saga_export_enabled" | "fiscalnet_enabled" | "efactura_enabled" | "loyalty_enabled";
+  entitlement?: "kitchen.enabled" | "kitchen.table_service" | "fiscal.fiscalnet" | "fiscal.efactura" | "reports.accountant_pack" | "loyalty.enabled";
   onboardingHref?: string;
   navHref?: string;
   priceEur?: number;
@@ -105,6 +105,22 @@ export const PAID_ADDONS: Record<PaidAddonKey, CatalogItem> = {
     settingsHref: "/app/settings/tables",
     selfInstall: true,
   },
+  loyalty: {
+    key: "loyalty",
+    category: "paid_addon",
+    installKey: "loyalty",
+    featureColumn: "loyalty_enabled",
+    entitlement: "loyalty.enabled",
+    onboardingHref: "/app/settings/loyalty",
+    navHref: "/app/customers",
+    name: { ro: "Program de fidelizare", en: "Loyalty program" },
+    description: {
+      ro: "Card de ștampile pe număr de telefon, fără aplicație. Vezi și clienții fideli care nu au mai venit de curând. Inclus în planul Operations.",
+      en: "Phone-number stamp card, no customer app needed. Also surfaces regulars who haven't been back in a while. Included in Operations.",
+    },
+    settingsHref: "/app/settings/loyalty",
+    selfInstall: true,
+  },
 };
 
 export const INCLUDED_INTEGRATIONS: Record<"saga_export", CatalogItem> = {
@@ -163,6 +179,7 @@ export const EXTERNAL_INTEGRATIONS: Record<ExternalIntegrationKey, CatalogItem> 
 export const MARKETPLACE_PRODUCTS: Record<MarketplaceProductKey, CatalogItem> = {
   kitchen_display: PAID_ADDONS.kitchen_display,
   table_service: PAID_ADDONS.table_service,
+  loyalty: PAID_ADDONS.loyalty,
   saga_export: INCLUDED_INTEGRATIONS.saga_export,
   fiscalnet: EXTERNAL_INTEGRATIONS.fiscalnet,
   anaf_efactura: EXTERNAL_INTEGRATIONS.anaf_efactura,
@@ -171,6 +188,7 @@ export const MARKETPLACE_PRODUCTS: Record<MarketplaceProductKey, CatalogItem> = 
 export const MARKETPLACE_PRODUCT_ORDER: readonly MarketplaceProductKey[] = [
   "kitchen_display",
   "table_service",
+  "loyalty",
   "saga_export",
   "fiscalnet",
   "anaf_efactura",
