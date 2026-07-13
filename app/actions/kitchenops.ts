@@ -1769,6 +1769,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const paymentMethodId  = stringValue(formData, "payment_method_id") || null;
   const paymentType      = stringValue(formData, "payment_type") || "other";
   const customerName     = stringValue(formData, "customer_name") || null;
+  const customerId       = stringValue(formData, "customer_id") || null;
   const legacyCartPct    = numberValue(formData, "discount_pct", 0);
   const cartDiscountLei  = numberValue(formData, "discount_lei", 0);
   const cashReceivedRaw  = stringValue(formData, "cash_received");
@@ -1885,6 +1886,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     payment_method_id: paymentMethodId,
     session_id: sessionId,
     customer_name: customerName,
+    customer_id: customerId,
     notes: customerNote || null,
     subtotal: Number(totalGross.toFixed(2)),
     subtotal_net: Number(subtotalNet.toFixed(2)),
