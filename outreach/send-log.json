@@ -662,5 +662,145 @@
     "step": 1,
     "campaign": "v2-franchisetech",
     "sent_at": "2026-07-09"
+  },
+  {
+    "company": "Cofetaria Armand",
+    "type": "customer",
+    "to": "comanda@cofetariaarmand.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784033600504001200",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Cofetăria Naomi",
+    "type": "customer",
+    "to": "comenzi@cofetarianaomi.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784033683487001200",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Makis Pizza",
+    "type": "customer",
+    "to": "comenzi@makispizza.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784056576820010900",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Pizza Primavera",
+    "type": "customer",
+    "to": "office@pizzalaprimavera.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784056603572013400",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Rikissimo",
+    "type": "customer",
+    "to": "contact@rikissimo.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784056625111013400",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Cofetaria Madise",
+    "type": "customer",
+    "to": "office@cofetariamadise.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784056652036010900",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Dor de Dulce",
+    "type": "customer",
+    "to": "comenzi@dordedulce.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784056673439010900",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Prăjitură din Natură",
+    "type": "customer",
+    "to": "deliciirawvegane@gmail.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784056704360013400",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Wagner's Loft",
+    "type": "customer",
+    "to": "contact@wagnersloft.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784056757479002100",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Cofetaria Loren",
+    "type": "customer",
+    "to": "contact@cofetaria-loren.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "ro-2026-07-14",
+    "message_id": "1784056805995001200",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Zeus Service SRL",
+    "type": "partner",
+    "to": "vanzari@zeusservice.ro",
+    "status": "success",
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784056854485002100",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "ADPOS Retail Systems",
+    "type": "partner",
+    "to": "comenzi@adpos.ro",
+    "status": "success",
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784056901542010900",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "AMEF Constalaris",
+    "type": "partner",
+    "to": "office@amef.ro",
+    "status": "success",
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784056945478013400",
+    "sent_at": "2026-07-14"
+  },
+  {
+    "company": "Sedona ALM",
+    "type": "partner",
+    "to": "contact@aparaturafiscala.ro",
+    "status": "success",
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784056992430001200",
+    "sent_at": "2026-07-14"
   }
 ]
