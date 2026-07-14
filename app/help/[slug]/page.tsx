@@ -24,12 +24,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function renderBody(text: string) {
   return text
-    .split(/(\*\*[^*]+\*\*)/)
-    .map((part, i) =>
-      part.startsWith("**") && part.endsWith("**")
-        ? <strong key={i} className="font-semibold text-slate-900">{part.slice(2, -2)}</strong>
-        : <span key={i}>{part}</span>
-    );
+    .split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/)
+    .map((part, i) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return <strong key={i} className="font-semibold text-slate-900">{part.slice(2, -2)}</strong>;
+      }
+      const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (link) {
+        return (
+          <Link key={i} href={link[2]} className="font-semibold text-blue-600 hover:underline">
+            {link[1]}
+          </Link>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
 }
 
 export default async function HelpArticlePage({ params }: Props) {
@@ -85,6 +94,14 @@ export default async function HelpArticlePage({ params }: Props) {
                 <div className="flex-1 pb-2">
                   <h2 className="text-lg font-semibold text-slate-900 mb-2 mt-1.5">{step.title}</h2>
                   <p className="text-slate-600 text-sm leading-relaxed mb-4">{renderBody(step.body)}</p>
+                  {step.screenshot && (
+                    // eslint-disable-next-line @next/next/no-img-element -- varying aspect ratios, plain img keeps natural sizing
+                    <img
+                      src={`/help/${step.screenshot}`}
+                      alt={step.title}
+                      className="w-full max-w-xl rounded-lg border border-slate-200 shadow-sm"
+                    />
+                  )}
                 </div>
               </div>
             </li>

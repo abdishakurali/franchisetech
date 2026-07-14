@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Check, ChevronDown, Coffee, Droplets, Equal, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
+import { Banknote, Check, ChevronDown, Coffee, Droplets, Equal, Gift, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
 import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
 import { cn } from "@/lib/utils";
 import {
@@ -1191,11 +1191,11 @@ function PosRegisterInner({
   }
 
   function switchDiscountMode(mode: "pct" | "lei") {
-    setDiscountMode(mode);
     if (mode === "pct") {
+      setDiscountMode("pct");
       setCartDiscountLei(0);
     } else {
-      applyDiscountToAllCurrentItems(0);
+      applyCartDiscountLei(0);
     }
   }
 
@@ -1868,30 +1868,6 @@ function PosRegisterInner({
             >
               {selectedCustomer ? selectedCustomer.name : t.addCustomerBtn}
             </button>
-            {features.loyalty && selectedCustomer && loyaltyStatus?.enabled && (
-              loyaltyStatus.rewardReady && !loyaltyRewardApplied ? (
-                <button
-                  type="button"
-                  title={loyaltyStatus.rewardType === "free_item" ? t.loyaltyFreeItemHint : undefined}
-                  onClick={() => {
-                    if (loyaltyStatus.rewardType === "discount" && loyaltyStatus.rewardDiscountLei) {
-                      setDiscountMode("lei");
-                      setCartDiscountLei(loyaltyStatus.rewardDiscountLei);
-                    }
-                    if (selectedCustomer?.id) setLoyaltyRewardAppliedForCustomerId(selectedCustomer.id);
-                  }}
-                  className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800 hover:bg-amber-200"
-                >
-                  🎁 {loyaltyStatus.rewardDescription || t.loyaltyRewardReady}
-                </button>
-              ) : (
-                <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
-                  {loyaltyRewardApplied
-                    ? (loyaltyStatus.rewardType === "free_item" ? t.loyaltyFreeItemHint : t.loyaltyRewardApplied)
-                    : `${loyaltyStatus.stamps}/${loyaltyStatus.required}`}
-                </span>
-              )
-            )}
           {cart.length > 0 && (
               <button type="button" onClick={() => setCart([])} className="shrink-0 text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
           )}
@@ -1929,15 +1905,84 @@ function PosRegisterInner({
         </div>
         )}
         <div className="shrink-0 space-y-3 border-t border-slate-100 bg-white px-3 pt-3 pb-3 shadow-[0_-6px_16px_rgba(15,23,42,0.06)] sm:px-4 sm:pb-4 lg:shadow-none">
-              {cart.length > 0 && (
-                <div className="rounded-xl border border-blue-100 bg-blue-50/30 p-3">
+              {features.loyalty && selectedCustomer && loyaltyStatus?.enabled && (() => {
+                const rewardReady = loyaltyStatus.rewardReady && !loyaltyRewardApplied;
+                const progressPct = Math.min(100, (loyaltyStatus.stamps / loyaltyStatus.required) * 100);
+                return (
+                  <div className={cn(
+                    "rounded-xl border p-3",
+                    rewardReady || loyaltyRewardApplied ? "border-amber-200 bg-amber-50/50" : "border-slate-200 bg-slate-50/40"
+                  )}>
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                        <Gift className="h-4 w-4 text-amber-600" />
+                        {t.loyaltyPanelTitle}
+                      </span>
+                      {loyaltyRewardApplied ? (
+                        <button
+                          type="button"
+                          title={t.loyaltyRewardUndo}
+                          onClick={() => {
+                            if (loyaltyStatus.rewardType === "discount") setCartDiscountLei(0);
+                            setLoyaltyRewardAppliedForCustomerId(null);
+                          }}
+                          className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-200"
+                        >
+                          ✓ {loyaltyStatus.rewardType === "free_item" ? t.loyaltyFreeItemHint : t.loyaltyRewardApplied}
+                        </button>
+                      ) : rewardReady ? (
+                        <button
+                          type="button"
+                          title={loyaltyStatus.rewardType === "free_item" ? t.loyaltyFreeItemHint : undefined}
+                          onClick={() => {
+                            if (loyaltyStatus.rewardType === "discount" && loyaltyStatus.rewardDiscountLei) {
+                              setDiscountMode("lei");
+                              setCartDiscountLei(loyaltyStatus.rewardDiscountLei);
+                              // Server ignores discount_lei entirely if any line still carries a
+                              // leftover discount_pct (see buildPosItemCalcs' hasPctDiscount check
+                              // in kitchenops.ts) — must clear per-line discounts here too, same as
+                              // the existing manual applyCartDiscountLei path already does.
+                              setCart((items) => syncSgr(items.map((i) => ({ ...i, discount_pct: 0 }))));
+                            }
+                            if (selectedCustomer?.id) setLoyaltyRewardAppliedForCustomerId(selectedCustomer.id);
+                          }}
+                          className="shrink-0 rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white hover:bg-amber-600"
+                        >
+                          🎁 {loyaltyStatus.rewardDescription || t.loyaltyRewardReady}
+                        </button>
+                      ) : (
+                        <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-600">
+                          {loyaltyStatus.stamps}/{loyaltyStatus.required}
+                        </span>
+                      )}
+                    </div>
+                    {!loyaltyRewardApplied && !rewardReady && (
+                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                        <div className="h-full rounded-full bg-amber-400 transition-all" style={{ width: `${progressPct}%` }} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+              {cart.length > 0 && (() => {
+                const loyaltyDiscountActive = loyaltyRewardApplied && discountMode === "lei" && loyaltyStatus?.rewardType === "discount";
+                return (
+                <div className={cn(
+                  "rounded-xl border p-3",
+                  loyaltyDiscountActive ? "border-amber-200 bg-amber-50/40" : "border-blue-100 bg-blue-50/30"
+                )}>
                   <div className="mb-2.5 flex items-center justify-between gap-3">
                     <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
                       <Percent className="h-4 w-4 text-slate-500" />
                       {t.discount}
+                      {loyaltyDiscountActive && (
+                        <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                          🎁 {t.loyaltyRewardApplied}
+                        </span>
+                      )}
                     </span>
                     {discountAmount > 0 && (
-                      <span className="text-sm font-bold tabular-nums text-blue-600">−{money(discountAmount)}</span>
+                      <span className={cn("text-sm font-bold tabular-nums", loyaltyDiscountActive ? "text-amber-700" : "text-blue-600")}>−{money(discountAmount)}</span>
                     )}
                   </div>
                   <div className="mb-2 flex gap-1 rounded-lg bg-slate-100 p-0.5">
@@ -1978,22 +2023,28 @@ function PosRegisterInner({
                       <span className="w-6 shrink-0 text-sm font-semibold text-slate-400">%</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={cartDiscountLei > 0 ? cartDiscountLei : ""}
-                        onChange={(e) => applyCartDiscountLei(Number(e.target.value) || 0)}
-                        placeholder="0"
-                        aria-label={t.discountLeiAria}
-                        className="h-11 flex-1 text-center text-lg font-bold tabular-nums"
-                      />
-                      <span className="w-10 shrink-0 text-right text-sm font-semibold text-slate-400">lei</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={cartDiscountLei > 0 ? cartDiscountLei : ""}
+                          onChange={(e) => applyCartDiscountLei(Number(e.target.value) || 0)}
+                          placeholder="0"
+                          aria-label={t.discountLeiAria}
+                          className="h-11 flex-1 text-center text-lg font-bold tabular-nums"
+                        />
+                        <span className="w-10 shrink-0 text-right text-sm font-semibold text-slate-400">lei</span>
+                      </div>
+                      {cartDiscountLei > discountAmount && (
+                        <p className="mt-1.5 text-xs text-slate-500">{t.discountCappedNote(money(discountAmount))}</p>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
+                );
+              })()}
               {cart.length > 0 && (
                 <div className="space-y-2">
                 <button

@@ -14,6 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { Percent, Gift, Stamp, Users } from "lucide-react";
 
 type LoyaltySettings = {
   stampsRequired: number;
@@ -24,6 +26,21 @@ type LoyaltySettings = {
   regularsMinVisits: number;
   regularsAtRiskDays: number;
 };
+
+const REWARD_TYPES = [
+  {
+    value: "discount" as const,
+    icon: Percent,
+    title: "Discount fix",
+    description: "O sumă fixă în lei, scăzută automat din total la casă.",
+  },
+  {
+    value: "free_item" as const,
+    icon: Gift,
+    title: "Produs gratuit",
+    description: "Casierul primește un indiciu să adauge produsul ales, gratuit.",
+  },
+];
 
 export function LoyaltySettingsClient({
   settings,
@@ -47,43 +64,58 @@ export function LoyaltySettingsClient({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Configurare recompensă</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form action={handleSubmit} className="space-y-5">
-          <div>
-            <Label htmlFor="stamps_required">Ștampile pentru recompensă</Label>
-            <Input
-              id="stamps_required"
-              name="stamps_required"
-              type="number"
-              min={3}
-              max={20}
-              defaultValue={settings.stampsRequired}
-              className="mt-1 max-w-[8rem]"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">Între 3 și 20 vizite finalizate.</p>
-          </div>
+    <form action={handleSubmit} className="space-y-4">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Stamp className="h-4 w-4 text-slate-500" />
+            Cum se câștigă recompensa
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Label htmlFor="stamps_required">Ștampile necesare</Label>
+          <Input
+            id="stamps_required"
+            name="stamps_required"
+            type="number"
+            min={3}
+            max={20}
+            defaultValue={settings.stampsRequired}
+            className="mt-1 max-w-[8rem]"
+          />
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            La fiecare vânzare finalizată, clientul primește o ștampilă. Între 3 și 20 vizite.
+          </p>
+        </CardContent>
+      </Card>
 
-          <div>
-            <Label htmlFor="reward_type">Tip recompensă</Label>
-            <Select
-              name="reward_type"
-              value={rewardType}
-              onValueChange={(value) => setRewardType(value as "discount" | "free_item")}
-            >
-              <SelectTrigger id="reward_type" className="mt-1 max-w-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="discount">Discount fix (lei)</SelectItem>
-                <SelectItem value="free_item">Produs gratuit</SelectItem>
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="reward_type" value={rewardType} />
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Tip recompensă</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {REWARD_TYPES.map((option) => {
+              const Icon = option.icon;
+              const selected = rewardType === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRewardType(option.value)}
+                  className={cn(
+                    "flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-colors",
+                    selected ? "border-amber-300 bg-amber-50/60 ring-1 ring-amber-300" : "border-slate-200 hover:border-slate-300"
+                  )}
+                >
+                  <Icon className={cn("h-5 w-5", selected ? "text-amber-700" : "text-slate-400")} />
+                  <span className="text-sm font-semibold text-slate-900">{option.title}</span>
+                  <span className="text-xs text-muted-foreground">{option.description}</span>
+                </button>
+              );
+            })}
           </div>
+          <input type="hidden" name="reward_type" value={rewardType} />
 
           {rewardType === "discount" ? (
             <div>
@@ -113,9 +145,6 @@ export function LoyaltySettingsClient({
                   ))}
                 </SelectContent>
               </Select>
-              <p className="mt-1 text-xs text-muted-foreground">
-                La casă, casierul va vedea un indiciu să adauge acest produs cu 100% discount.
-              </p>
             </div>
           )}
 
@@ -129,15 +158,21 @@ export function LoyaltySettingsClient({
               className="mt-1"
             />
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="border-t pt-4 space-y-1">
-            <p className="text-sm font-medium">Clienți fideli care nu au mai venit</p>
-            <p className="text-xs text-muted-foreground">
-              Praguri pentru panoul din pagina Clienți — cine numărăm ca „fidel” și după câte zile
-              de absență apare ca „în risc”.
-            </p>
-          </div>
-
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Users className="h-4 w-4 text-slate-500" />
+            Clienți fideli care nu au mai venit
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Praguri pentru panoul din pagina Clienți — cine numărăm ca „fidel” și după câte zile
+            de absență apare ca „în risc”.
+          </p>
           <div className="grid grid-cols-2 gap-4 max-w-md">
             <div>
               <Label htmlFor="regulars_min_visits">Vizite minime</Label>
@@ -162,12 +197,12 @@ export function LoyaltySettingsClient({
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <Button type="submit" disabled={pending}>
-            {pending ? "Se salvează…" : "Salvează"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+      <Button type="submit" disabled={pending}>
+        {pending ? "Se salvează…" : "Salvează"}
+      </Button>
+    </form>
   );
 }

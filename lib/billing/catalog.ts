@@ -119,6 +119,7 @@ export const PAID_ADDONS: Record<PaidAddonKey, CatalogItem> = {
       en: "Phone-number stamp card, no customer app needed. Also surfaces regulars who haven't been back in a while. Included in Operations.",
     },
     settingsHref: "/app/settings/loyalty",
+    docsHref: "/help/loyalty-program-setup",
     selfInstall: true,
   },
 };

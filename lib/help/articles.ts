@@ -346,6 +346,20 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ],
     relatedSlugs: ["setup-your-account"],
   },
+  {
+    slug: "loyalty-program-setup",
+    title: "Set up the loyalty program",
+    description: "Turn on the phone-based stamp card, configure the reward, and see regulars who haven't been back.",
+    category: "settings",
+    icon: "🎁",
+    steps: [
+      { title: "Enable the module", body: "Open [Settings → Integrations](/app/settings?tab=integrations) and find the **Program de fidelizare** card in the Marketplace. Click **Activează**. It's included in the Operations plan, and available as a paid add-on on Starter.", screenshot: "loyalty-marketplace.png" },
+      { title: "Configure the reward", body: "Open [Loyalty settings](/app/settings/loyalty). Choose how many stamps earn a reward (3–20), pick **Discount fix** (a fixed lei amount off the total) or **Produs gratuit** (a free item, applied manually by the cashier), then set the thresholds for the regulars-at-risk panel — minimum visits and days of absence. Click **Salvează**.", screenshot: "loyalty-settings.png" },
+      { title: "How it works at checkout", body: "In [POS](/app/pos), select the customer as usual. A **Fidelizare** panel appears showing stamp progress. Every completed sale adds a stamp automatically — nothing extra for staff to do. Once the reward is ready, tap it to apply the discount; tap again to undo it before charging.", screenshot: "loyalty-pos-reward.png" },
+      { title: "See who's drifting away", body: "Open [Customers](/app/customers). The **Clienți fideli care nu au mai venit** panel lists regulars who used to visit often but haven't been seen recently, ranked by how much they've spent — useful for a personal follow-up.", screenshot: "loyalty-customers.png" },
+    ],
+    relatedSlugs: ["make-a-sale", "manage-settings"],
+  },
 ];
 
 export function getArticlesByCategory(categoryId: string): HelpArticle[] {
