@@ -359,6 +359,45 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       { label: "Cod QR pe bon", href: "/features/qr-code-receipts" },
     ],
   },
+  loyalty: {
+    eyebrow: "Program de fidelizare",
+    title: "Program de fidelizare pentru cafenele și restaurante — fără aplicație",
+    metaTitle: "Program de fidelizare pe număr de telefon — card de ștampile + clienți în risc",
+    description: "Card de ștampile pe numărul de telefon al clientului — fără aplicație, fără card fizic. Plus un panou cu clienții fideli care nu au mai venit de curând.",
+    h1: "Un program de fidelizare fără aplicație pentru clienții fideli",
+    intro: "franchisetech ține evidența ștampilelor pe numărul de telefon al clientului direct la casă — fără aplicație, fără card fizic — și arată proprietarilor care clienți fideli au încetat discret să mai vină.",
+    bullets: [
+      "Card de ștampile pe număr de telefon — fără aplicație sau card fizic",
+      "Casierii îl folosesc direct din selectorul de clienți existent din POS",
+      "Recompensă discount sau produs gratuit, configurabilă per afacere",
+      "Panou clienți în risc: clienți fideli care nu au mai venit",
+    ],
+    sections: [
+      {
+        title: "Fără aplicație, fără card fizic",
+        body: "Clienții sunt identificați la fel cum se întâmplă deja la casă — după nume sau telefon. Ștampilele se acumulează automat la fiecare vânzare finalizată, fără nimic în plus de gestionat pentru personal.",
+      },
+      {
+        title: "Aflați cine se îndepărtează",
+        body: "Majoritatea programelor de fidelizare se opresc la recompensarea vizitelor. franchisetech marchează și clienții care veneau regulat și nu au mai fost văzuți de o vreme, ordonați după cât au cheltuit — ca să știți pe cine merită să sunați personal.",
+      },
+      {
+        title: "Configurabil în câteva minute",
+        body: "Alegeți câte vizite aduc o recompensă, dacă este discount fix sau produs gratuit, și după câte zile de absență considerăm clientul „în risc” — totul din Setări, fără tichet de suport.",
+      },
+    ],
+    faqs: [
+      { question: "Clienții trebuie să instaleze o aplicație?", answer: "Nu. Ștampilele sunt urmărite pe baza numărului de telefon sau numelui deja folosit în selectorul de clienți din POS — nimic de instalat pentru client." },
+      { question: "Pot alege recompensa?", answer: "Da — o sumă fixă de discount sau un produs gratuit anume, configurabil per afacere." },
+      { question: "Ce se întâmplă dacă o vânzare este anulată?", answer: "Vânzările anulate nu contează pentru ștampile — doar vânzările finalizate se acumulează." },
+      { question: "Este inclus în planul meu?", answer: "Este inclus în planurile Operations și Scale, și disponibil ca add-on pentru Starter." },
+    ],
+    related: [
+      { label: "POS", href: "/features/pos" },
+      { label: "Cafenele", href: "/industries/cafes" },
+      { label: "Restaurante", href: "/industries/restaurants" },
+    ],
+  },
   romania: {
     title: "Program de gestiune HoReCa România — FiscalNet, TVA, rapoarte contabile",
     metaTitle: "POS România | FiscalNet, NIR, Bon consum, Balanță, Export Saga | franchisetech",

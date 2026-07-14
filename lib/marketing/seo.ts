@@ -419,6 +419,47 @@ export const featurePages: SeoPage[] = [
     ],
     image: "/showcase/reports-dashboard.png",
   },
+  {
+    slug: "loyalty",
+    path: "/features/loyalty",
+    eyebrow: "Loyalty program",
+    title: "Loyalty Program for Cafes and Restaurants — No App Needed",
+    metaTitle: "Phone-Based Loyalty Program for Cafes — Stamp Card + Regulars at Risk",
+    description: "A phone-number stamp card for cafes and restaurants — no app to download, no plastic cards. Plus a regulars-at-risk view showing which loyal customers haven't been back.",
+    h1: "A loyalty program your regulars don't need an app for",
+    intro: "franchisetech tracks stamps against a customer's phone number at checkout — no app, no plastic card — and shows owners which regulars have quietly stopped coming back.",
+    bullets: [
+      "Phone-number stamp card — no app or physical card required",
+      "Cashiers apply it from the existing POS customer picker",
+      "Discount or free-item rewards, configurable per business",
+      "Regulars-at-risk panel: loyal customers who haven't been back",
+    ],
+    sections: [
+      {
+        title: "No app, no plastic card",
+        body: "Customers are identified the same way they already are at your till — by name or phone number. Stamps accrue automatically on every completed sale; nothing extra for staff to manage.",
+      },
+      {
+        title: "Know who's drifting away",
+        body: "Most loyalty programs stop at rewarding visits. franchisetech also flags customers who used to come regularly and haven't been seen in a while, ranked by how much they've spent — so you know who's worth a personal follow-up.",
+      },
+      {
+        title: "Configurable in minutes",
+        body: "Choose how many visits earn a reward, whether it's a fixed discount or a free item, and how long counts as gone quiet — all from Settings, no support ticket needed.",
+      },
+    ],
+    faqs: [
+      { question: "Do customers need to install an app?", answer: "No. Stamps are tracked against the phone number or name already used in your POS customer picker — nothing for the customer to install." },
+      { question: "Can I choose the reward?", answer: "Yes — a fixed discount amount or a specific free product, configured per business." },
+      { question: "What happens if a sale is voided?", answer: "Voided sales don't count toward stamps — only completed sales accrue." },
+      { question: "Is this included in my plan?", answer: "It's bundled into the Operations and Scale plans, and available as an add-on for Starter." },
+    ],
+    related: [
+      { label: "POS", href: "/features/pos" },
+      { label: "Cafes", href: "/industries/cafes" },
+      { label: "Restaurants", href: "/industries/restaurants" },
+    ],
+  },
 ];
 
 export const industryPages: SeoPage[] = [
