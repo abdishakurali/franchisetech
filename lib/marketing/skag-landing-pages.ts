@@ -43,6 +43,15 @@ export const skagLandingPages: SkagLandingPage[] = [
       "Program de gestiune pentru baruri: POS, stocuri băuturi în timp real, raport Z zilnic. Probă 15 zile, suport în română.",
     trustSignals: ["Configurare în aceeași zi", "Suport în limba română", "Raport Z în 2 minute"],
   },
+  {
+    slug: "soft-cafenea",
+    h1: "Soft Cafenea",
+    subhead:
+      "POS, stocuri și rapoarte zilnice într-o singură platformă. Știi exact banii din casă la finalul zilei.",
+    metaDescription:
+      "Soft de gestiune pentru cafenele: POS, stocuri în timp real, raport Z zilnic. Probă 15 zile, suport în română.",
+    trustSignals: ["Configurare în aceeași zi", "Suport în limba română", "Raport Z în 2 minute"],
+  },
 ];
 
 export function findSkagPage(slug: string): SkagLandingPage | undefined {
