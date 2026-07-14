@@ -1965,7 +1965,7 @@ function PosRegisterInner({
                 );
               })()}
               {cart.length > 0 && (() => {
-                const loyaltyDiscountActive = loyaltyRewardApplied && discountMode === "lei" && loyaltyStatus?.rewardType === "discount";
+                const loyaltyDiscountActive = loyaltyRewardApplied && discountMode === "lei" && loyaltyStatus?.enabled === true && loyaltyStatus.rewardType === "discount";
                 return (
                 <div className={cn(
                   "rounded-xl border p-3",
