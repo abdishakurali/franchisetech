@@ -1,253 +1,270 @@
 {
   "summary": {
-    "date": "2026-06-21",
-    "partner_count": 3,
+    "date": "2026-07-14",
+    "partner_count": 4,
     "customer_count": 10,
-    "total": 13,
+    "total": 14,
     "items": [
-      "STEP1 partner TED'S Coffee <info@tedscoffeecompany.com>",
-      "STEP1 partner Tucano Coffee <franchise@tucanocoffee.com>",
-      "STEP1 partner Hello Donuts <office@hellodonuts.com>",
-      "STEP1 customer Noe Patisserie <comenzi@noe-patisserie.ro>",
-      "STEP1 customer Magicake <comenzi@magicake.ro>",
-      "STEP1 customer Noisette Bakery <contact@noisette-bakery.ro>",
-      "STEP1 customer House of Cookies <comenzi@houseofcookies.ro>",
-      "STEP1 customer MamaPan <comenzi@mamapan.ro>",
-      "STEP1 customer Cofetăria Alice <office@cofetariaalice.ro>",
-      "STEP1 customer La Dolceria <contact@ladolceria.ro>",
-      "STEP1 customer Leonidas Ciocolaterie Online <contact@ciocolaterieonline.ro>",
-      "STEP1 customer La Saveur du Levain <office@lasaveur.ro>",
-      "STEP1 customer Cofetaria Altfel <office@cofetariaaltfel.ro>"
+      "STEP1 customer Cofetaria Armand <comanda@cofetariaarmand.ro>",
+      "STEP1 customer Cofetăria Naomi <comenzi@cofetarianaomi.ro>",
+      "STEP1 customer Makis Pizza <comenzi@makispizza.ro>",
+      "STEP1 customer Pizza Primavera <office@pizzalaprimavera.ro>",
+      "STEP1 customer Rikissimo <contact@rikissimo.ro>",
+      "STEP1 customer Cofetaria Madise <office@cofetariamadise.ro>",
+      "STEP1 customer Dor de Dulce <comenzi@dordedulce.ro>",
+      "STEP1 customer Prăjitură din Natură <deliciirawvegane@gmail.com>",
+      "STEP1 customer Wagner's Loft <contact@wagnersloft.ro>",
+      "STEP1 customer Cofetaria Loren <contact@cofetaria-loren.ro>",
+      "PARTNER step2 Zeus Service SRL <vanzari@zeusservice.ro>",
+      "PARTNER step2 ADPOS Retail Systems <comenzi@adpos.ro>",
+      "PARTNER step2 AMEF Constalaris <office@amef.ro>",
+      "PARTNER step2 Sedona ALM <contact@aparaturafiscala.ro>"
     ]
   },
   "payloads": [
     {
+      "type": "customer",
+      "company": "Cofetaria Armand",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-armand-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "comanda@cofetariaarmand.ro",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nArmand livrează în 24 județe — POS cu rutare livrare ar sincroniza comanda cu flota de transport.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetaria Armand?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-armand\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Cofetăria Naomi",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-naomi-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "comenzi@cofetarianaomi.ro",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nNaomi preia comenzi pe site și social — POS cu validare adresă ar reduce livrările eșuate.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetăria Naomi?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-naomi\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Makis Pizza",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=makis-pizza-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "comenzi@makispizza.ro",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nMakis Pizza din Cristești livrează Mar-Dum — POS comenzi telefon ar scurta timpul la vârfurile de weekend.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Makis Pizza?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=makis-pizza\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Pizza Primavera",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=pizza-primavera-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "office@pizzalaprimavera.ro",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nPrimavera pe Col. Buzoianu 86 are 3 numere comenzi — POS centralizat ar elimina comenzile pierdute între linii.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Pizza Primavera?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=pizza-primavera\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Rikissimo",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rikissimo-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "contact@rikissimo.ro",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nRikissimo din Baia Mare e afacere de familie — POS comenzi cu dată ridicare ar organiza vitrina frigorifică.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Rikissimo?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rikissimo\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Cofetaria Madise",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-madise-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "office@cofetariamadise.ro",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nMadise pe Eminescu 450 din Bontida face torturi de eveniment — POS cu brief client ar standardiza comenzile.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetaria Madise?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-madise\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Dor de Dulce",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=dor-de-dulce-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "comenzi@dordedulce.ro",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nDor de Dulce livrează Mie-Dum cu taxă dinamică — POS cu zonare livrare ar calcula automat costul transport.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Dor de Dulce?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=dor-de-dulce\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Prăjitură din Natură",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=pr-jitur-din-natur-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "deliciirawvegane@gmail.com",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nPrăjitură din Natură pe Pop de Băsești 57 livrează raw — POS cu timp execuție produs ar seta așteptările clientului.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Prăjitură din Natură?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=pr-jitur-din-natur\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Wagner's Loft",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=wagner-s-loft-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "contact@wagnersloft.ro",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nWagner's Loft face takeaway lângă Piața Sfatului — POS separat delivery vs. dine-in ar clarifica bucătăria.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Wagner's Loft?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=wagner-s-loft\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
+      "type": "customer",
+      "company": "Cofetaria Loren",
+      "step": 1,
+      "segment": "takeaway/patiserie",
+      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-loren-compare-saga",
+      "path_variables": {
+        "accountId": "5857436000000002002"
+      },
+      "body": {
+        "fromAddress": "info@franchisetech.ro",
+        "toAddress": "contact@cofetaria-loren.ro",
+        "subject": "sertarul după program",
+        "content": "Bună ziua,\n\nLoren din Piatra Neamț deservește evenimente locale — un POS comenzi tort ar profesionaliza preluarea.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetaria Loren?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-loren\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "mailFormat": "plaintext"
+      },
+      "reason": "step1_customer"
+    },
+    {
       "type": "partner",
-      "company": "TED'S Coffee",
-      "step": 1,
+      "company": "Zeus Service SRL",
+      "step": 2,
       "path_variables": {
         "accountId": "5857436000000002002"
       },
       "body": {
         "fromAddress": "info@franchisetech.ro",
-        "toAddress": "info@tedscoffeecompany.com",
-        "subject": "workspace HORECA",
-        "content": "Bună ziua,\n\nTED'S extinde rețeaua — franchisetech standardizează POS stoc NIR pe francizați.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=ted-s-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "toAddress": "vanzari@zeusservice.ro",
+        "subject": "stoc + NIR",
+        "content": "Bună ziua,\n\nRevin scurt: clienții HORECA plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights (rapoarte) +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație onestă: https://franchisetech.ro/compare/ebriza?lang=ro\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=zeus-service-srl\n\n— Franchise Tech\ninfo@franchisetech.ro",
         "mailFormat": "plaintext"
       },
-      "reason": "step1_partner"
+      "reason": "followup_step2"
     },
     {
       "type": "partner",
-      "company": "Tucano Coffee",
-      "step": 1,
+      "company": "ADPOS Retail Systems",
+      "step": 2,
       "path_variables": {
         "accountId": "5857436000000002002"
       },
       "body": {
         "fromAddress": "info@franchisetech.ro",
-        "toAddress": "franchise@tucanocoffee.com",
-        "subject": "workspace HORECA",
-        "content": "Bună ziua,\n\nTucano coordonează zeci de locații — franchisetech oferă POS cloud stoc NIR centralizat.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=tucano-coffee\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "toAddress": "comenzi@adpos.ro",
+        "subject": "stoc + NIR",
+        "content": "Bună ziua Adrian Merlan,\n\nRevin scurt: clienții HORECA plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights (rapoarte) +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație onestă: https://franchisetech.ro/compare/ebriza?lang=ro\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=adpos-retail-systems\n\n— Franchise Tech\ninfo@franchisetech.ro",
         "mailFormat": "plaintext"
       },
-      "reason": "step1_partner"
+      "reason": "followup_step2"
     },
     {
       "type": "partner",
-      "company": "Hello Donuts",
-      "step": 1,
+      "company": "AMEF Constalaris",
+      "step": 2,
       "path_variables": {
         "accountId": "5857436000000002002"
       },
       "body": {
         "fromAddress": "info@franchisetech.ro",
-        "toAddress": "office@hellodonuts.com",
-        "subject": "workspace HORECA",
-        "content": "Bună ziua,\n\nHello Donuts deschide insule noi — franchisetech le dă POS stoc NIR simplu de la ziua 1.\n\nClienții tăi plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație: https://franchisetech.ro/compare/ebriza?lang=ro\n\nParteneriat: ~20% recurent din abonament și ~100–150€ din setup-ul asistat (199€). Kit parteneri:\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=hello-donuts\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "toAddress": "office@amef.ro",
+        "subject": "stoc + NIR",
+        "content": "Bună ziua,\n\nRevin scurt: clienții HORECA plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights (rapoarte) +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație onestă: https://franchisetech.ro/compare/ebriza?lang=ro\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=amef-constalaris\n\n— Franchise Tech\ninfo@franchisetech.ro",
         "mailFormat": "plaintext"
       },
-      "reason": "step1_partner"
+      "reason": "followup_step2"
     },
     {
-      "type": "customer",
-      "company": "Noe Patisserie",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=noe-patisserie-compare-saga",
+      "type": "partner",
+      "company": "Sedona ALM",
+      "step": 2,
       "path_variables": {
         "accountId": "5857436000000002002"
       },
       "body": {
         "fromAddress": "info@franchisetech.ro",
-        "toAddress": "comenzi@noe-patisserie.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua,\n\nNoe din Dobroești livrează viennoiserie fără adaosuri — POS comenzi tort cu dată livrare ar reduce comenzile ratate.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Noe Patisserie?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=noe-patisserie\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+        "toAddress": "contact@aparaturafiscala.ro",
+        "subject": "stoc + NIR",
+        "content": "Bună ziua,\n\nRevin scurt: clienții HORECA plătesc extra doar ca să vadă raportul Z? Ebriza Pro e 49€/locație — Insights (rapoarte) +19€/lună. franchisetech Starter: 49€ cu raport Z inclus.\n\nComparație onestă: https://franchisetech.ro/compare/ebriza?lang=ro\n\nAveți 1–2 clienți care ar beneficia acum?\n\nhttps://franchisetech.ro/partners?lang=ro&utm_source=zoho&utm_campaign=ro-partner-q2-r2&utm_content=sedona-alm\n\n— Franchise Tech\ninfo@franchisetech.ro",
         "mailFormat": "plaintext"
       },
-      "reason": "step1_customer"
-    },
-    {
-      "type": "customer",
-      "company": "Magicake",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=magicake-compare-saga",
-      "path_variables": {
-        "accountId": "5857436000000002002"
-      },
-      "body": {
-        "fromAddress": "info@franchisetech.ro",
-        "toAddress": "comenzi@magicake.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua,\n\nMagicake pe Moruzzi 4A produce torturi la comandă — POS producție + comenzi ar prioritiza comenzile cu deadline.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Magicake?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=magicake\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
-        "mailFormat": "plaintext"
-      },
-      "reason": "step1_customer"
-    },
-    {
-      "type": "customer",
-      "company": "Noisette Bakery",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=noisette-bakery-compare-saga",
-      "path_variables": {
-        "accountId": "5857436000000002002"
-      },
-      "body": {
-        "fromAddress": "info@franchisetech.ro",
-        "toAddress": "contact@noisette-bakery.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua Anna,\n\nNoisette e atelierul Annei — un POS comenzi cu calendar eveniment ar evita suprapunerile de torturi.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Noisette Bakery?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=noisette-bakery\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
-        "mailFormat": "plaintext"
-      },
-      "reason": "step1_customer"
-    },
-    {
-      "type": "customer",
-      "company": "House of Cookies",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=house-of-cookies-compare-saga",
-      "path_variables": {
-        "accountId": "5857436000000002002"
-      },
-      "body": {
-        "fromAddress": "info@franchisetech.ro",
-        "toAddress": "comenzi@houseofcookies.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua,\n\nHouse of Cookies pe Șerban Vodă confirmă manual comanda — POS online-to-kitchen ar elimina telefonul de confirmare.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru House of Cookies?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=house-of-cookies\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
-        "mailFormat": "plaintext"
-      },
-      "reason": "step1_customer"
-    },
-    {
-      "type": "customer",
-      "company": "MamaPan",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mamapan-compare-saga",
-      "path_variables": {
-        "accountId": "5857436000000002002"
-      },
-      "body": {
-        "fromAddress": "info@franchisetech.ro",
-        "toAddress": "comenzi@mamapan.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua,\n\nMamaPan pe Drumetului 2A limitează comenzile la capacitate — POS cu plafon producție ar opri overselling-ul automat.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru MamaPan?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mamapan\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
-        "mailFormat": "plaintext"
-      },
-      "reason": "step1_customer"
-    },
-    {
-      "type": "customer",
-      "company": "Cofetăria Alice",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-alice-compare-saga",
-      "path_variables": {
-        "accountId": "5857436000000002002"
-      },
-      "body": {
-        "fromAddress": "info@franchisetech.ro",
-        "toAddress": "office@cofetariaalice.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua,\n\nAlice pe Mihai Bravu livrează pe intervale fixe — POS cu sloturi livrare ar evita supra-aglomerarea producției.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetăria Alice?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-alice\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
-        "mailFormat": "plaintext"
-      },
-      "reason": "step1_customer"
-    },
-    {
-      "type": "customer",
-      "company": "La Dolceria",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-dolceria-compare-saga",
-      "path_variables": {
-        "accountId": "5857436000000002002"
-      },
-      "body": {
-        "fromAddress": "info@franchisetech.ro",
-        "toAddress": "contact@ladolceria.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua,\n\nLa Dolceria livrează torturi în București — POS cu flag „urgent” ar tria comenzile pentru laborator.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru La Dolceria?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-dolceria\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
-        "mailFormat": "plaintext"
-      },
-      "reason": "step1_customer"
-    },
-    {
-      "type": "customer",
-      "company": "Leonidas Ciocolaterie Online",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=leonidas-ciocolaterie-online-compare-saga",
-      "path_variables": {
-        "accountId": "5857436000000002002"
-      },
-      "body": {
-        "fromAddress": "info@franchisetech.ro",
-        "toAddress": "contact@ciocolaterieonline.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua,\n\nLeonidas online livrează cadouri în 1–3 zile — inventar centralizat între shop-uri ar reduce rupturile de stoc.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Leonidas Ciocolaterie Online?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=leonidas-ciocolaterie-online\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
-        "mailFormat": "plaintext"
-      },
-      "reason": "step1_customer"
-    },
-    {
-      "type": "customer",
-      "company": "La Saveur du Levain",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-saveur-du-levain-compare-saga",
-      "path_variables": {
-        "accountId": "5857436000000002002"
-      },
-      "body": {
-        "fromAddress": "info@franchisetech.ro",
-        "toAddress": "office@lasaveur.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua,\n\nLa Saveur pe Drumul Taberei 68 coace cu maia — POS cu previziune pe zi ar reduce risipa de patiserie.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru La Saveur du Levain?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-saveur-du-levain\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
-        "mailFormat": "plaintext"
-      },
-      "reason": "step1_customer"
-    },
-    {
-      "type": "customer",
-      "company": "Cofetaria Altfel",
-      "step": 1,
-      "segment": "takeaway/patiserie",
-      "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-altfel-compare-saga",
-      "path_variables": {
-        "accountId": "5857436000000002002"
-      },
-      "body": {
-        "fromAddress": "info@franchisetech.ro",
-        "toAddress": "office@cofetariaaltfel.ro",
-        "subject": "sertarul după program",
-        "content": "Bună ziua,\n\nAltfel pe 1 Decembrie 1918 cere avans la tort — POS cu avans integrat ar înlocui transferul + WhatsApp.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetaria Altfel?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofetaria-altfel\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
-        "mailFormat": "plaintext"
-      },
-      "reason": "step1_customer"
+      "reason": "followup_step2"
     }
   ]
 }

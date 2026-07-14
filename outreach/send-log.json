@@ -3,33 +3,39 @@
     "company": "Orieda",
     "type": "partner",
     "to": "office@orieda.ro",
-    "status": "success",
+    "status": "failed_bounce",
     "step": 1,
-    "campaign": "v2-franchisetech"
+    "campaign": "v2-franchisetech",
+    "reply_message_id": "bounce-orieda-20260711",
+    "error": "550 5.1.1 account does not exist office@orieda.ro (step-2 send)"
   },
   {
     "company": "MDV Consulting",
     "type": "partner",
     "to": "office@mdvconsulting.ro",
     "status": "success",
-    "step": 1,
-    "campaign": "v2-franchisetech"
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "sent_at": "2026-07-11"
   },
   {
     "company": "A&A Accounts",
     "type": "partner",
     "to": "office@accounts.ro",
     "status": "success",
-    "step": 1,
-    "campaign": "v2-franchisetech"
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "sent_at": "2026-07-11"
   },
   {
     "company": "Contab Servicii Smart",
     "type": "partner",
     "to": "office@contabss.ro",
-    "status": "success",
+    "status": "failed_bounce",
     "step": 1,
-    "campaign": "v2-franchisetech"
+    "campaign": "v2-franchisetech",
+    "reply_message_id": "bounce-contabss-20260711",
+    "error": "550 permanent error office@contabss.ro (step-2 send)"
   },
   {
     "company": "Beans and Dots",
@@ -647,5 +653,14 @@
     "status": "success",
     "step": 1,
     "campaign": "v2-franchisetech"
+  },
+  {
+    "company": "Ganesha Caffe",
+    "type": "customer",
+    "to": "ganeshacaffevictoriei@gmail.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "sent_at": "2026-07-09"
   }
 ]

@@ -44,5 +44,41 @@
     "subject": "Undelivered Mail Returned to Sender",
     "snippet": "rezervari@kimu.ro 550 No Such User Here",
     "action": "failed_bounce — do not retry"
+  },
+  {
+    "message_id": "1783063477086004300",
+    "from": "contact@startupbypescobar.ro",
+    "company": "Pescobar",
+    "type": "customer",
+    "classification": "opt_out",
+    "snippet": "Stop",
+    "received_at": "2026-07-03"
+  },
+  {
+    "message_id": "1783052456373004300",
+    "from": "lucian@fivetogo.ro",
+    "company": "5 to go",
+    "type": "partner",
+    "classification": "opt_out",
+    "snippet": "STOP (after 'Multumesc!' reply + OOO until 13 Jul; follow-up sent same night 01:21 cc bianca@fivetogo.ro)",
+    "received_at": "2026-07-03"
+  },
+  {
+    "message_id": "bounce-contabss-20260711",
+    "from": "mailer-daemon@mail.zoho.eu",
+    "company": "Contab Servicii Smart",
+    "type": "partner",
+    "classification": "bounce",
+    "snippet": "550 permanent error office@contabss.ro (step-2 send)",
+    "received_at": "2026-07-11"
+  },
+  {
+    "message_id": "bounce-orieda-20260711",
+    "from": "mailer-daemon@mail.zoho.eu",
+    "company": "Orieda",
+    "type": "partner",
+    "classification": "bounce",
+    "snippet": "550 5.1.1 account does not exist office@orieda.ro (step-2 send)",
+    "received_at": "2026-07-11"
   }
 ]

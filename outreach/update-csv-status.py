@@ -19,7 +19,7 @@ def update(path: Path, email_col: str = "email") -> None:
             if email in BY_EMAIL:
                 entry = BY_EMAIL[email]
                 if entry["status"] == "success":
-                    row["status"] = "sent_step1"
+                    row["status"] = f"sent_step{entry.get('step', 1)}"
                 elif entry["status"] == "failed_bounce":
                     row["status"] = "failed_bounce"
                     if "error" in entry:
