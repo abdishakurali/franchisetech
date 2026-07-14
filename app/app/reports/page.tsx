@@ -18,7 +18,7 @@ export default async function ReportsHubPage() {
   const recipeVisible = isModuleNavVisible({ org: orgModules, module: "recipe_costing", subscriptionPlan: sub?.plan, hasTrial });
   const { data: orgSettings } = await supabase
     .from("organisations")
-    .select("saga_export_enabled")
+    .select("saga_export_enabled,loyalty_enabled")
     .eq("id", orgId)
     .maybeSingle();
   // reports.gestiune (the on-screen/PDF Raport de Gestiune) is independent of
@@ -26,7 +26,12 @@ export default async function ReportsHubPage() {
   // Saga-specific features (Balanta, audit export, Saga export itself).
   const accountantPackVisible = Boolean(orgSettings?.saga_export_enabled);
   const gestiuneVisible = await hasEntitlement(orgId, "reports.gestiune").catch(() => false);
-  const visibleReports = filterReportLinks(t, { inventoryVisible, recipeVisible, accountantPackVisible, gestiuneVisible });
+  // Loyalty ROI requires both the plan entitlement and the owner having
+  // actually turned the stamp-card program on -- otherwise the tile would
+  // show for Operations orgs that never adopted the feature.
+  const loyaltyVisible = Boolean(orgSettings?.loyalty_enabled)
+    && await hasEntitlement(orgId, "loyalty.enabled").catch(() => false);
+  const visibleReports = filterReportLinks(t, { inventoryVisible, recipeVisible, accountantPackVisible, gestiuneVisible, loyaltyVisible });
   const showCoreUpgradePrompt = !inventoryVisible && !hasTrial;
 
   return (

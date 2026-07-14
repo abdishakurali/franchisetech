@@ -5,6 +5,7 @@ import {
   ClipboardList,
   FileDown,
   FileText,
+  Heart,
   ListOrdered,
   Package,
   Receipt,
@@ -27,6 +28,7 @@ export type AppReportLink = {
   requiresRecipe?: boolean;
   requiresAccountantPack?: boolean;
   requiresGestiune?: boolean;
+  requiresLoyalty?: boolean;
 };
 
 export function getAppReportLinks(t: AppT): AppReportLink[] {
@@ -154,6 +156,15 @@ export function getAppReportLinks(t: AppT): AppReportLink[] {
       color: "bg-sky-50 text-sky-700",
       tag: t.reports.staff?.tag ?? null,
     },
+    {
+      href: "/app/reports/loyalty-roi",
+      title: t.reports.loyaltyRoi.title,
+      desc: t.reports.loyaltyRoi.desc,
+      icon: Heart,
+      color: "bg-pink-50 text-pink-700",
+      tag: t.reports.loyaltyRoi.tag,
+      requiresLoyalty: true,
+    },
   ];
 }
 
@@ -164,6 +175,7 @@ export function filterReportLinks(
     recipeVisible: boolean;
     accountantPackVisible?: boolean;
     gestiuneVisible?: boolean;
+    loyaltyVisible?: boolean;
   },
 ): AppReportLink[] {
   return getAppReportLinks(t).filter((link) => {
@@ -171,6 +183,7 @@ export function filterReportLinks(
     if (link.requiresRecipe && !input.recipeVisible) return false;
     if (link.requiresAccountantPack && !input.accountantPackVisible) return false;
     if (link.requiresGestiune && !input.gestiuneVisible) return false;
+    if (link.requiresLoyalty && !input.loyaltyVisible) return false;
     return true;
   });
 }
