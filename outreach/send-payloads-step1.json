@@ -1998,5 +1998,447 @@
       "content": "Bună ziua,\n\nFranco operează mai multe trattorii — raport POS central ar compara performanța pe locație.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Franco?\n\nhttps://franchisetech.ro/signup?plan=multi_location&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=franco\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
       "mailFormat": "plaintext"
     }
+  },
+  {
+    "type": "customer",
+    "company": "Byblos Restaurant",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=byblos-restaurant-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "restaurant@byblos-constanta.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nByblos preia comenzi prin SnapMenu pe două puncte (Tomis + Port) — un POS unificat ar aduna ambele fluxuri într-o singură casă.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Byblos Restaurant?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=byblos-restaurant\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Scoica",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-scoica-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@lascoicalandconstanta.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nLa Scoica vinde fructe de mare pe două locații doar prin telefon — POS cu comenzi telefonice ar lega Mamaia Nord și orașul într-un singur raport.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru La Scoica?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-scoica\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetăria Giorginio",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-giorginio-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "cofetariagiorginio@yahoo.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nGiorginio ia comenzi de torturi prin telefon din 2005, pe două orașe — un POS comenzi ar ține evidența fără caiet.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetăria Giorginio?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-giorginio\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Sophie Patisserie",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=sophie-patisserie-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@sophiepatisserie.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nSophie livrează torturi prin Glovo dar retail-ul din vitrină merge fără POS propriu — cele două fluxuri s-ar vedea într-un singur loc.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Sophie Patisserie?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=sophie-patisserie\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Mio Caffe",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mio-caffe-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@miocaffe.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nMio Caffe vinde și la bar, și capsule online — două stocuri diferite pe care POS-ul cu inventar le-ar ține separate corect.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Mio Caffe?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mio-caffe\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Atelierul Cafelei",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=atelierul-cafelei-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@atelierul-cafelei.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nAtelierul Cafelei rulează bar + shop online cu puncte de fidelitate — stocul de boabe s-ar scădea corect din ambele canale cu un singur sistem.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Atelierul Cafelei?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=atelierul-cafelei\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cuib Cafe",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cuib-cafe-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "cuibcafe@yahoo.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nCuib vinde cafea, cărți și flori sub același acoperiș — trei categorii de produs care merită o singură casă cu raport unificat.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cuib Cafe?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cuib-cafe\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Brutăria Toms",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=brut-ria-toms-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "sctomssrl@yahoo.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua Maria Țogui,\n\nToms coace de 29 de ani și ia comenzi doar la telefon, 7 zile din 7 — POS-ul cu comenzi ar elibera dimineața de caiet.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Brutăria Toms?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=brut-ria-toms\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Restaurant La Stuf",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-la-stuf-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@restaurant-la-stuf.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nLa Stuf jonglează trei structuri de meniu plus pomeni — POS cu meniuri predefinite ar face marcarea mai rapidă la prânz.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Restaurant La Stuf?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=restaurant-la-stuf\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "La Ana și Ion",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-ana-i-ion-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "ovidiucherametli@yahoo.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua Ovidiu Cherametli,\n\nLa Ana și Ion rezervările vin pe Facebook și telefon — o casă care leagă vânzarea de raportul zilnic ar închide seara fără hârtii.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru La Ana și Ion?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=la-ana-i-ion\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Bistro de l'Arte",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=bistro-de-l-arte-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "info@bistrodelarte.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua Oana Coantă,\n\nBistro de l'Arte schimbă meniul sezonier de 20 de ani — rețete cu marjă calculată ar arăta exact ce aduce fiecare fel nou.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Bistro de l'Arte?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=bistro-de-l-arte\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Brutăria Mică",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=brut-ria-mic-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "brutaria.mica.cu.maia@gmail.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nPâinea cu maia de 48 de ore cere producție planificată exact — comenzile din telefon/WhatsApp s-ar aduna într-o singură listă de copt.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Brutăria Mică?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=brut-ria-mic\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Mons Mellis",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mons-mellis-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@monsmellis.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nMons Mellis vinde din cuptorul pe lemne și online în toată țara — vitrina fizică merită aceeași evidență ca shopul online.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Mons Mellis?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mons-mellis\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Engels Bistro",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=engels-bistro-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "bistroengels@yahoo.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nEngels vinde pe Bolt, Glovo și telefon — trei canale care ajung seara în trei totaluri; un POS le-ar închide într-un singur raport Z.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Engels Bistro?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=engels-bistro\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetăria Steaua",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-steaua-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "miatur.maria@gmail.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua Maria Miatur,\n\nSteaua ia comenzi de evenimente pe telefon și email de 20 de ani — un POS comenzi ar ține laboratorul și vitrina în același registru.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetăria Steaua?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-steaua\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Mr. Cake",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mr-cake-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "mr.cakecluj@gmail.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nMr. Cake preia comenzi pe email, Messenger și telefon — fără coș online, o casă cu comenzi ar aduna totul într-un singur flux.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Mr. Cake?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=mr-cake\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Casa Maramureșeană",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=casa-maramure-ean-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@casa-maramureseana.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nCasa Maramureșeană dă prioritate rezervărilor telefonice și găzduiește corporate — POS cu note de masă ar ușura serile aglomerate.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Casa Maramureșeană?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=casa-maramure-ean\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetăria Verona",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-verona-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@cofetaria-verona.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nVerona gestionează torturi, candy bar și evenimente pe trei canale de comandă — un singur sistem le-ar ține evidența fără dubluri.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetăria Verona?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-verona\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetăria Vanilla",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-vanilla-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@cofetariavanillatm.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nVanilla are emailuri separate pentru contact și comenzi — un POS comenzi ar strânge totul într-o singură coadă de lucru.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetăria Vanilla?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-vanilla\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Emotion Cafe & Bar",
+    "step": 1,
+    "segment": "cafenea",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=emotion-cafe-bar-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@emotiontm.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nEmotion ia comenzi pe WhatsApp și social media în Piața Unirii — casa legată de stoc ar arăta seara exact ce s-a vândut.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Emotion Cafe & Bar?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=emotion-cafe-bar\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Casa Bolta Rece",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=casa-bolta-rece-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@casaboltarece.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nBolta Rece are carmangerie proprie și program zilnic 8-22 — stocul pe ingrediente ar lega carmangeria de vânzările din sală.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Casa Bolta Rece?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=casa-bolta-rece\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Hanu' Sărărie 1896",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=hanu-s-r-rie-1896-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "hanusararie1896@gmail.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nHanu' Sărărie rulează FoodPanda, nunți și numere separate pentru livrare vs. rezervări — un POS le-ar aduna în aceeași închidere de zi.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Hanu' Sărărie 1896?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=hanu-s-r-rie-1896\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Rita Restaurant & Pizzerie",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rita-restaurant-pizzerie-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "office@ritafood.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nRita și-a construit propriul app de comenzi — semn că sistemele existente nu v-au ajuns; POS-ul nostru se leagă direct de comenzi și stoc.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Rita Restaurant & Pizzerie?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=rita-restaurant-pizzerie\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Cofetăria Armonia",
+    "step": 1,
+    "segment": "takeaway/patiserie",
+    "compare_url": "https://franchisetech.ro/compare/saga?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-armonia-compare-saga",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "contact@armonia.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nArmonia livrează național cu program de 4 zile — producția pe comenzi ar sta lângă vânzarea din locație, în același stoc.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Cofetăria Armonia?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=cofet-ria-armonia\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Casa Lazar",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=casa-lazar-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "lazar_silviu_ionutz@yahoo.com",
+      "subject": "sertarul după program",
+      "content": "Bună ziua Silviu Ionuț Lazăr,\n\nCasa Lazar ține Rahova pe telefon și email, fără rezervări online — o casă simplă cu raport Z ar închide ziua în 2 minute.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Casa Lazar?\n\nhttps://franchisetech.ro/signup?plan=starter&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=casa-lazar\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
+  },
+  {
+    "type": "customer",
+    "company": "Coltu' Berarilor",
+    "step": 1,
+    "segment": "restaurant mic",
+    "compare_url": "https://franchisetech.ro/compare/ebriza?lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=coltu-berarilor-compare-ebriza",
+    "path_variables": {
+      "accountId": "5857436000000002002"
+    },
+    "body": {
+      "fromAddress": "info@franchisetech.ro",
+      "toAddress": "comenzi@coltu-berarilor.ro",
+      "subject": "sertarul după program",
+      "content": "Bună ziua,\n\nColtu' Berarilor face pizza, ciorbe și evenimente de 60 de persoane pe canale separate — un singur POS le-ar marca fără haos.\n\nLa închidere: numerar așteptat vs numărat în sertar — seara, nu luna viitoare de la contabil. franchisetech leagă vânzarea, casa și raportul Z într-un singur loc.\n\nV-ar fi util să vedeți cum arată pentru Coltu' Berarilor?\n\nhttps://franchisetech.ro/signup?plan=pro&lang=ro&utm_source=zoho&utm_campaign=ro-customer-q2-r2&utm_content=coltu-berarilor\n\n— Franchise Tech\ninfo@franchisetech.ro\n\nRăspundeți „stop” dacă nu doriți alte mesaje.",
+      "mailFormat": "plaintext"
+    }
   }
 ]
