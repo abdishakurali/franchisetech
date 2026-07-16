@@ -4,7 +4,9 @@
     "info@pescobar.world": "opt-out 2026-07-03 (reply from contact@startupbypescobar.ro: Stop)",
     "contact@startupbypescobar.ro": "opt-out 2026-07-03",
     "lucian@fivetogo.ro": "opt-out 2026-07-03 (STOP after polite ack; do not contact 5togo again)",
-    "bianca@fivetogo.ro": "cc on opted-out thread 2026-07-03"
+    "bianca@fivetogo.ro": "cc on opted-out thread 2026-07-03",
+    "rezervari@baracca.ro": "hard bounce DOMAIN_NOT_RESOLVED 2026-07-16 (Jul-11 send, retries exhausted)",
+    "hello@ourhabitat.ro": "hard bounce DOMAIN_NOT_RESOLVED 2026-07-16 (Jul-11 send, retries exhausted)"
   },
   "contacted_external_franchise_campaign_2026-07-02": [
     "contact@mado.ro",

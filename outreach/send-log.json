@@ -802,5 +802,145 @@
     "campaign": "v2-franchisetech",
     "message_id": "1784056992430001200",
     "sent_at": "2026-07-14"
+  },
+  {
+    "company": "La Casa de Turtă Dulce",
+    "type": "customer",
+    "to": "comenzi@lacasadeturtadulce.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784197457465001200",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "La Nadiniere",
+    "type": "customer",
+    "to": "lanadiniere@gmail.com",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784197513913010900",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "La Cocoșatu'",
+    "type": "customer",
+    "to": "office@lacocosatu.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784197585732013400",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "Maroon Experience",
+    "type": "customer",
+    "to": "office@maroonexperience.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784197647679013400",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "Hedone Cafe",
+    "type": "customer",
+    "to": "office@hedonecafe.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784197710542001200",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "Saitos Kürtőskalács",
+    "type": "customer",
+    "to": "office@saitos.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784197764860013400",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "IL TACCHINO",
+    "type": "customer",
+    "to": "office@iltacchino.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784197827384013400",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "Teo's Cafe",
+    "type": "customer",
+    "to": "contact@teoscafe.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784197886578013400",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "Kafea",
+    "type": "customer",
+    "to": "office@kafeabuna.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784197947663010900",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "Delicio Pizza",
+    "type": "customer",
+    "to": "brasov@delicio.ro",
+    "status": "success",
+    "step": 1,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784198015315001200",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "ExpertPos EconMedia",
+    "type": "partner",
+    "to": "office@econmedia.ro",
+    "status": "success",
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784198084603002100",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "Q Retail",
+    "type": "partner",
+    "to": "office@qretail.ro",
+    "status": "success",
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784198136390010900",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "Anzi Soft",
+    "type": "partner",
+    "to": "vanzari@anzisoft.ro",
+    "status": "success",
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784198186320013400",
+    "sent_at": "2026-07-16"
+  },
+  {
+    "company": "RezoSoft",
+    "type": "partner",
+    "to": "contact@rezosoft.ro",
+    "status": "success",
+    "step": 2,
+    "campaign": "v2-franchisetech",
+    "message_id": "1784198243237002100",
+    "sent_at": "2026-07-16"
   }
 ]
