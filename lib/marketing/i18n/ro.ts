@@ -278,7 +278,7 @@ export const ro: MarketingMessages = {
         "Numerar și card așteptat la orice închidere — sertarul bate",
         "Costul rețetelor înainte de orice schimbare de meniu",
         "Știți în orice moment ce s-a vândut și ce zace pe raft",
-        "Export Saga direct pentru contabil — fără transcrierea datelor",
+        "Export Saga pentru contabil, la cerere — fără transcrierea datelor",
       ],
     },
     videoTestimonial: {
@@ -330,7 +330,7 @@ export const ro: MarketingMessages = {
         { question: "Există preț per loc?", answer: "Nu. Personal nelimitat fără cost suplimentar per utilizator." },
         { question: "Pot gestiona stocul din același sistem cu POS-ul?", answer: "Da. Achizițiile, furnizorii și nivelurile de stoc stau lângă vânzări — vedeți ce e scăzut înainte de următorul serviciu." },
         { question: "Ce se întâmplă dacă cade internetul?", answer: "Vânzarea se salvează local și intră în coadă. Vedeți „offline” pe ecran și „sincronizat” când revine legătura." },
-        { question: "Se exportă datele în Saga pentru contabilul meu?", answer: "Da. Exportul Saga C (XML) este inclus. Contabilul dumneavoastră primește fișierul gata de import — fără să transcrieți datele manual din rapoarte." },
+        { question: "Se exportă datele în Saga pentru contabilul meu?", answer: "Exportul Saga C (XML) este disponibil, activat la cerere — contactați-ne pentru a-l configura pentru firma dumneavoastră." },
         { question: "Funcționează la mai multe locații sau puncte de lucru?", answer: "Da. Fiecare locație închide propria casă și are raport Z separat. Stocul este comun la nivel de companie, iar contul de proprietar vede toate locațiile dintr-un dashboard." },
       ],
     },
@@ -495,7 +495,7 @@ export const ro: MarketingMessages = {
     },
     notIncludedTitle: "Ce nu este inclus încă",
     notIncludedText:
-      "Clientul cumpără și înregistrează imprimanta fiscală compatibilă. franchisetech se conectează prin FiscalNet și gestionează bonuri fiscale, rapoarte Z și ANAF e-Factura automat. Comenzile online și loialitatea nu sunt incluse încă.",
+      "Clientul cumpără și înregistrează imprimanta fiscală compatibilă. franchisetech se conectează prin FiscalNet și gestionează automat bonurile fiscale și rapoartele Z; facturile ANAF e-Factura se generează și se trimit din aplicație, per factură. Comenzile online și loialitatea nu sunt incluse încă.",
     faqTitle: "Întrebări prețuri",
     compareCompetitors: {
       title: "Cost total vs competitori (România)",
@@ -518,7 +518,7 @@ export const ro: MarketingMessages = {
         },
         {
           name: "Bit-Soft enterprise",
-          summary: "Bit-Soft Breeze servește lanțuri și hoteluri cu preț la cerere. franchisetech publică 49–99€/lună pentru locații independente 1–3.",
+          summary: "Bit-Soft Breeze servește lanțuri și hoteluri cu preț la cerere. franchisetech publică 49–109€/lună pentru locații independente 1–3.",
           href: "/compare/bit-soft",
         },
       ],
@@ -534,11 +534,11 @@ export const ro: MarketingMessages = {
       included: "Inclus",
       excluded: "Nu",
       footnote:
-        "Prețuri Ebriza verificate pe ebriza.com/ro/preturi la 24 iunie 2026. POS și rapoarte Z/TVA sunt pe Core; stoc, NIR și rețete sunt pe Operations; Saga și rapoartele contabile sunt incluse în planurile eligibile.",
+        "Prețuri Ebriza verificate pe ebriza.com/ro/preturi la 24 iunie 2026. POS și rapoarte Z/TVA sunt pe Core; stoc, NIR și rețete sunt pe Operations; rapoartele contabile sunt incluse în planurile eligibile, iar exportul Saga este disponibil la cerere.",
       readComparison: "Citește comparația completă Ebriza",
       compareHref: "/compare/ebriza",
       fallbackText:
-        "Pentru România, franchisetech include rapoarte Z/TVA pe Core, stoc și NIR pe Operations, iar exportul Saga plus rapoartele contabile în planurile eligibile.",
+        "Pentru România, franchisetech include rapoarte Z/TVA pe Core, stoc și NIR pe Operations și rapoartele contabile pe planurile eligibile; exportul Saga este disponibil la cerere.",
       rows: {
         posSales: "POS + vânzări",
         zReport: "Raport Z / închidere casă",

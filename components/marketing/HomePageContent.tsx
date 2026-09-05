@@ -32,7 +32,7 @@ const RO_FAQ = [
   { question: "Cum începe perioada de probă?", answer: "Trialul asistat durează 15 zile și începe după o verificare unică de 1 € prin Stripe. Cardul este salvat pentru conversie, iar verificarea nu este abonament." },
   { question: "Înlocuiește casa de marcat?", answer: "Nu. franchisetech lucrează cu FiscalNet configurat local și cu echipament fiscal compatibil. FiscalNet și hardware-ul se contractează separat." },
   { question: "Cum se stabilește TVA pe produs?", answer: "Fiecare produs are o cotă TVA setată explicit din catalogul de cote al contului (21% / 11% / 0%), configurabilă din Setări. Nu presupunem noi cota — o setați dumneavoastră sau contabilul, o dată, la fiecare produs." },
-  { question: "Cât costă?", answer: "Starter costă 49 €/lună, Pro 79 €/lună, iar multi-locație 99 €/locație/lună. Configurarea asistată extinsă costă 199 € o singură dată." },
+  { question: "Cât costă?", answer: "Starter costă 49 €/lună, Pro 79 €/lună, Scale 109 €/lună, iar Multi-locație 89 €/locație suplimentară/lună (necesită Scale)." },
 ] as const;
 
 const EN_FAQ = [

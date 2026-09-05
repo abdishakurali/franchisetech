@@ -4,12 +4,12 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
 
 export const metadata: Metadata = {
-  title: "Resources for POS, Cash Drawer Setup & Business Operations",
+  title: "Ghiduri POS și închidere zilnică | franchisetech",
   description:
-    "Practical guides and checklists for setting up POS, cash drawer workflows, receipt printers, staff permissions, daily close, and reporting with franchisetech.",
+    "Ghiduri practice pentru configurarea POS, produse, TVA, FiscalNet, închiderea zilnică și raportare.",
   alternates: { canonical: "/resources" },
   openGraph: {
-    title: "Resources for POS, Cash Drawer Setup & Business Operations | franchisetech",
+    title: "Ghiduri POS și închidere zilnică | franchisetech",
     description:
       "Practical guides and checklists for cafés, restaurants, retail, and service businesses using franchisetech.",
   },
@@ -56,15 +56,6 @@ const GETTING_STARTED: ResourceCard[] = [
     cta: "Read checklist",
   },
   {
-    icon: "💰",
-    category: "Getting started",
-    title: "Cash drawer setup guide",
-    summary: "Manual mode works for everyone. Automatic opening is available for Windows + LAN printer setups.",
-    readTime: "5 min read",
-    href: "#cash-drawer",
-    cta: "Read guide",
-  },
-  {
     icon: "🗓️",
     category: "Getting started",
     title: "Daily close checklist",
@@ -95,7 +86,6 @@ const GETTING_STARTED: ResourceCard[] = [
 
 const INDUSTRY_GUIDES: ResourceCard[] = [
   { icon: "☕", category: "Industry guides", title: "POS guide for cafés",            summary: "How franchisetech fits the daily rhythm of a busy café counter — orders, cash, and close-of-day.",       readTime: "5 min read", href: "#guide-cafes",        cta: "Read guide" },
-  { icon: "🍽️", category: "Industry guides", title: "POS guide for restaurants",     summary: "Order flow, receipts, cash and card tracking, and end-of-day reporting for restaurant teams.",            readTime: "5 min read", href: "#guide-restaurants",  cta: "Read guide" },
   { icon: "🥡", category: "Industry guides", title: "POS guide for takeaways",       summary: "Fast order entry, discounts, refunds, and cash controls for high-volume quick-service businesses.",        readTime: "4 min read", href: "#guide-takeaways",    cta: "Read guide" },
   { icon: "🥐", category: "Industry guides", title: "POS guide for bakeries",        summary: "Sell fresh items, handle morning rushes, track best sellers, and manage opening stock each day.",          readTime: "4 min read", href: "#guide-bakeries",     cta: "Read guide" },
   { icon: "🚚", category: "Industry guides", title: "POS guide for food trucks",     summary: "Compact POS for mobile setups — works as a PWA with manual fallback and simple daily reporting.",          readTime: "4 min read", href: "#guide-foodtrucks",   cta: "Read guide" },
@@ -114,12 +104,9 @@ const OPS_CHECKLISTS: ResourceCard[] = [
 ];
 
 const HARDWARE: ResourceCard[] = [
-  { icon: "🗄️",  category: "Hardware & payments", title: "Cash drawer support overview",  summary: "Manual mode works for all setups. Automatic opening requires Windows, LAN printer, and franchisetech Connector.", readTime: "4 min read", href: "#cash-drawer",   cta: "Read guide" },
   { icon: "🖨️",  category: "Hardware & payments", title: "Receipt printer basics",        summary: "What receipt printers work with franchisetech, and how to configure them for LAN or USB connections.",            readTime: "4 min read", href: "#receipt-printer", cta: "Read guide" },
-  { icon: "🌐",  category: "Hardware & payments", title: "LAN vs USB printers explained", summary: "The difference between LAN and USB receipt printers, and which setup is needed for automatic cash drawer opening.",  readTime: "3 min read", href: "#lan-vs-usb",    cta: "Read guide" },
-  { icon: "🔧",  category: "Hardware & payments", title: "Manual fallback explained",     summary: "How to use franchisetech without any connected hardware — manual cash entry and drawer control.",                  readTime: "2 min read", href: "#manual-fallback", cta: "Read guide" },
   { icon: "💳",  category: "Hardware & payments", title: "Payment terminal planning",     summary: "How to plan for card payment terminals alongside franchisetech — current state and what to expect.",               readTime: "3 min read", href: "#payment-terminals", cta: "Read guide" },
-  { icon: "🔍",  category: "Hardware & payments", title: "Hardware compatibility checklist", summary: "What you need for a full hardware setup — Windows PC, LAN printer, cash drawer, and port 9100.",               readTime: "3 min read", href: "#hardware",      cta: "View checklist" },
+  { icon: "🔍",  category: "Hardware & payments", title: "Hardware compatibility checklist", summary: "How to verify devices and fiscal hardware before going live.", readTime: "3 min read", href: "#hardware", cta: "View checklist" },
 ];
 
 const GROWTH: ResourceCard[] = [
@@ -136,16 +123,8 @@ const FAQ = [
     a: "franchisetech is built for cafés, restaurants, takeaways, bakeries, food trucks, retail shops, salons, barbers, and franchise operators. Any growing local business that needs a practical POS and clear daily records is a good fit.",
   },
   {
-    q: "Does franchisetech support cash drawers?",
-    a: "Yes, on Operations and above. Automatic drawer opening requires a verified connector setup with compatible hardware.",
-  },
-  {
-    q: "What hardware is needed for automatic cash drawer opening?",
-    a: "A Windows or Android till, a LAN-connected ESC/POS receipt printer on the same network (TCP port 9100 for Windows; USB/Bluetooth/WiFi for Android), and the franchisetech Connector app installed on the till. The cash drawer connects to the receipt printer via RJ11/RJ12. iOS automatic opening is not supported.",
-  },
-  {
     q: "Does franchisetech work on tablets?",
-    a: "Yes. The POS is a Progressive Web App (PWA) that works in any modern browser on tablet or desktop. Android tablet setups work well for the POS. iOS is functional but automatic hardware integration (cash drawer, receipt printer) is not supported on iOS.",
+    a: "Yes. The POS is a Progressive Web App (PWA) that works in supported modern browsers on tablet or desktop. Fiscal hardware compatibility must be verified during setup.",
   },
   {
     q: "Is franchisetech suitable for multiple locations?",
@@ -247,9 +226,9 @@ export default function ResourcesPage() {
           />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { href: "/compare", title: "Compare POS software", summary: "SmartBill, Saga, RezoSoft, Square — logos and feature tables.", image: "/showcase/pos-cart.png" },
+              { href: "/compare", title: "Compare POS software", summary: "SmartBill, Saga, RezoSoft, Square — logos and feature tables.", image: "/marketing/pos-hero.png" },
               { href: "/resources/pos-software-romania", title: "Software POS România", summary: "FiscalNet, TVA, stoc și raport Z pentru restaurante.", image: "/marketing/pos-hero.png" },
-              { href: "/resources/choose-pos-romania", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", image: "/showcase/reports-dashboard.png" },
+              { href: "/resources/choose-pos-romania", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", image: "/marketing/reports-zreport.png" },
               { href: "/industries/romania", title: "POS pentru România", summary: "lei, TVA, FiscalNet, echipă nelimitată.", image: "/marketing/reports-zreport.png" },
               { href: "/compare/smartbill", title: "vs SmartBill", summary: "Facturare vs operațiuni zilnice — comparație onestă.", image: "/compare/logos/smartbill.png" },
               { href: "/help/romania-fiscalnet", title: "Ghid FiscalNet", summary: "Configurare pas cu pas pentru bonuri fiscale.", image: "/marketing/reports-zreport.png" },
@@ -367,42 +346,8 @@ export default function ResourcesPage() {
                 "Set up payment methods (Cash, Card, and any custom types you use)",
                 "Configure VAT rates if you sell items at different rates",
                 "Set up receipt preferences if you use a receipt printer",
-                "Choose your cash drawer mode — manual (default) or automatic if hardware is connected",
                 "Run a test sale and process a test refund to confirm everything works",
                 "Check reports after the test sale to confirm data appears correctly",
-              ].map((item) => <CheckItem key={item} text={item} />)}
-            </ul>
-          </article>
-
-          {/* ── CASH DRAWER SETUP ── */}
-          <article id="cash-drawer" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Getting started</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Cash drawer setup guide</h2>
-            <p className="mt-3 text-slate-600">
-              There are two ways to use the cash drawer with franchisetech: manual mode (available for everyone) and automatic mode (beta, requires specific hardware).
-            </p>
-            <h3 className="mt-6 font-semibold text-slate-900">Manual mode (all setups)</h3>
-            <ul className="mt-3 space-y-2">
-              {[
-                "Manual mode works for all businesses with no hardware required",
-                "You open and close the drawer yourself — the app tracks cash in and cash out",
-                "Record each cash movement (cash in, cash out, opening float) through the POS",
-                "The expected cash total is calculated automatically from your movements",
-                "Simulation mode lets you test the cash workflow without a physical drawer",
-              ].map((item) => <CheckItem key={item} text={item} />)}
-            </ul>
-            <h3 className="mt-6 font-semibold text-slate-900">Automatic mode (beta — Windows and Android connector)</h3>
-            <ul className="mt-3 space-y-2">
-              {[
-                "Requires: Windows PC (Windows 10 or newer) or Android till device",
-                "Requires: franchisetech Connector app installed on the till device",
-                "Windows: LAN ESC/POS receipt printer on the same network (TCP port 9100)",
-                "Android: USB, Bluetooth, or WiFi/LAN ESC/POS receipt printer connected to the Android till",
-                "The cash drawer connects to the receipt printer via an RJ11/RJ12 cable",
-                "When a sale is completed, the Connector sends a drawer-open command to the printer",
-                "Diagnostics inside the app help identify connection and printing issues",
-                "iOS automatic drawer opening is not supported — use manual mode on iOS",
-                "Always test automatic mode before using it with customers",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
@@ -473,31 +418,20 @@ export default function ResourcesPage() {
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Hardware & payments</p>
             <h2 className="mt-2 text-2xl font-bold text-slate-900">Hardware compatibility checklist</h2>
             <p className="mt-3 text-slate-600">
-              Use this checklist to confirm your hardware is ready for a full franchisetech setup with automatic cash drawer support.
+              Confirm supported devices and fiscal hardware during setup before using franchisetech with customers.
             </p>
-            <h3 className="mt-6 font-semibold text-slate-900">Required for automatic cash drawer</h3>
+            <h3 className="mt-6 font-semibold text-slate-900">Verify before going live</h3>
             <ul className="mt-3 space-y-2">
               {[
-                "Windows 10 or newer PC or laptop at the till",
-                "LAN-connected ESC/POS receipt printer (not USB-only)",
-                "Printer accessible on the local network at a known IP address",
-                "Printer accepts connections on TCP port 9100",
-                "Cash drawer connected to the receipt printer via RJ11 cable",
-                "franchisetech Connector app installed and running on the till PC",
-                "Connector app configured with the correct printer IP address",
-              ].map((item) => <CheckItem key={item} text={item} />)}
-            </ul>
-            <h3 className="mt-6 font-semibold text-slate-900">Not supported</h3>
-            <ul className="mt-3 space-y-2">
-              {[
-                "USB-only receipt printers (automatic opening not supported)",
-                "iOS devices (automatic hardware opening not supported)",
-                "Android automatic opening (not currently supported)",
-                "Bluetooth printers (not currently supported for automatic opening)",
+                "A supported modern browser on the till device",
+                "Stable local network access where fiscal hardware requires it",
+                "A compatible Romanian fiscal cash register or printer",
+                "FiscalNet installed and tested locally for fiscal receipts",
+                "Correct VAT groups and payment mappings",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
             <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-800">
-              <strong>Note:</strong> All hardware setups should be tested before going live with customers. Use the simulation and diagnostics tools in Settings to verify your setup works correctly.
+              <strong>Note:</strong> franchisetech does not claim compatibility with every device or fiscal register. Confirm your exact setup with support.
             </div>
           </article>
 
@@ -514,29 +448,9 @@ export default function ResourcesPage() {
                 "Add modifiers (e.g. milk type, size) as separate products or variants",
                 "Use the fast product grid to keep popular items in easy reach",
                 "Run cash and card split payments or separate them as different payment methods",
-                "Use the cash drawer workflow to manage your float each day",
+                "Record the opening float and cash movements during the day",
                 "Check daily sales at close to see total revenue, best sellers, and cash balance",
                 "Track ingredients (milk, coffee beans, syrups) for stock visibility and recipe costing",
-              ].map((item) => <CheckItem key={item} text={item} />)}
-            </ul>
-          </article>
-
-          {/* ── INDUSTRY: RESTAURANTS ── */}
-          <article id="guide-restaurants" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Industry guide</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">POS guide for restaurants</h2>
-            <p className="mt-3 text-slate-600">
-              For restaurants, franchisetech handles orders, payments, receipts, and end-of-day reporting in one clear system.
-            </p>
-            <ul className="mt-5 space-y-2">
-              {[
-                "Organise products by meal type: Starters, Mains, Desserts, Drinks",
-                "Add customers to orders for tracking and receipt personalisation",
-                "Use receipts for customer copies and kitchen communication",
-                "Set cash and card as separate payment methods for accurate Z-report splits",
-                "Track recipe costs for your most popular dishes to protect your margins",
-                "Use the daily sales report to see covers, average spend, and best sellers",
-                "Assign staff to till sessions to track individual performance",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
@@ -685,8 +599,6 @@ export default function ResourcesPage() {
               ["/resources/pos-software-romania", "POS România guide"],
               ["/",                          "← Home"],
               ["/features/pos",              "POS register"],
-              ["/features/stock-management", "Stock management"],
-              ["/features/recipe-costing",   "Recipe costing"],
               ["/features/z-report",         "Z-report"],
               ["/pricing",                   "Pricing"],
             ].map(([href, label]) => (

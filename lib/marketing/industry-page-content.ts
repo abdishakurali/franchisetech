@@ -4,15 +4,15 @@ import {
   INDUSTRY_COMPETITOR_SLUGS,
   INDUSTRY_SHOWCASE_DEFAULTS,
 } from "@/lib/marketing/industry-verticals";
+import {
+  OwnerDashboardProof,
+  OwnerPosProof,
+  OwnerRecipeProof,
+  OwnerStockProof,
+  OwnerZReportProof,
+} from "@/components/marketing/OwnerProofScreens";
 
-const pos = showcaseAssets.posCart;
 const floor = showcaseAssets.tableFloor;
-const tableOrder = showcaseAssets.posTableOrder;
-const dashboard = showcaseAssets.ownerDashboard;
-const kitchen = showcaseAssets.kitchenDisplay;
-const recipes = showcaseAssets.recipeCosting;
-const zReport = showcaseAssets.zReport;
-const stock = showcaseAssets.stockLevels;
 
 /** Primary 7 HoReCa vertical pages with extended landing fields (EN base). */
 export const primaryIndustryPages: SeoPage[] = [
@@ -57,23 +57,17 @@ export const primaryIndustryPages: SeoPage[] = [
       {
         title: "Fast counter POS",
         body: "Product grid, cart, and charge on laptop or tablet — no proprietary till required. New baristas can sell from day one with a clear layout.",
-        image: pos.src,
-        imageAlt: "franchisetech POS product grid",
-        path: pos.path,
+        component: OwnerPosProof,
       },
       {
         title: "Recipe costing for every drink",
         body: "Link milk, coffee, syrups, and packaging to menu items. See cost per portion, gross margin, and how many you can make from current stock.",
-        image: recipes.src,
-        imageAlt: "franchisetech recipe costing",
-        path: recipes.path,
+        component: OwnerRecipeProof,
       },
       {
         title: "Z-report when you lock the door",
         body: "Opening float, cash and card totals, cash in/out, expected vs counted — daily close figures owners and accountants can trust.",
-        image: zReport.src,
-        imageAlt: "franchisetech Z-report",
-        path: zReport.path,
+        component: OwnerZReportProof,
       },
     ],
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS.cafes,
@@ -111,7 +105,6 @@ export const primaryIndustryPages: SeoPage[] = [
     ],
     related: [
       { label: "POS", href: "/features/pos" },
-      { label: "Recipe costing", href: "/features/recipe-costing" },
       { label: "Z-report", href: "/features/z-report" },
     ],
     image: "/marketing/industry-cafe.png",
@@ -122,29 +115,28 @@ export const primaryIndustryPages: SeoPage[] = [
     slug: "restaurants",
     path: "/industries/restaurants",
     eyebrow: "Restaurants",
-    title: "Restaurant POS — Floor Plan, Kitchen, Z-Report",
-    metaTitle: "Restaurant POS Romania — Table Service, KDS, FiscalNet | franchisetech",
+    title: "Restaurant POS — Sales, Stock, Z-Report",
+    metaTitle: "Restaurant POS Romania — Sales, Recipes, FiscalNet | franchisetech",
     description:
-      "Restaurant POS in the browser: visual floor plan, send rounds to kitchen, recipe margins, FiscalNet, and Z-report — no dedicated POS hardware required.",
-    h1: "From table order to Z-report — all in one place.",
-    heroBefore: "From table order to ",
+      "Restaurant POS in the browser: fast sales, recipe margins, FiscalNet, and Z-report — no dedicated POS hardware required.",
+    h1: "From first sale to Z-report — all in one place.",
+    heroBefore: "From first sale to ",
     heroHighlight: "Z-report",
     heroAfter: " — all in one place.",
-    heroSubheadline: "Floor plan, kitchen display, and till close on any tablet in the restaurant.",
+    heroSubheadline: "Sales, recipes, stock, and till close on any tablet in the restaurant.",
     intro:
-      "Full-service restaurants need table workflows, kitchen coordination, ingredient control, and fiscal compliance — without enterprise contracts or fixed POS terminals.",
+      "Restaurants need fast checkout, ingredient control, and fiscal compliance — without enterprise contracts or fixed POS terminals.",
     bullets: [
-      "Visual floor plan — pick a table, send rounds",
-      "Kitchen display when enabled",
-      "One fiscal receipt when the table pays",
+      "Fast POS checkout",
+      "One fiscal receipt per sale",
       "Recipe margins per dish",
       "Sections: dining room, terrace, bar",
       "Browser-based — any tablet",
     ],
     painPoints: [
       {
-        title: "Orders lost between floor and kitchen",
-        text: "Waiters shout or scribble tickets. With table service you send rounds from the till; kitchen sees tickets on the display when enabled.",
+        title: "Sales hard to reconcile at close",
+        text: "Cash, card, and VAT need to match quickly without a separate spreadsheet.",
       },
       {
         title: "Food cost you cannot see",
@@ -157,39 +149,26 @@ export const primaryIndustryPages: SeoPage[] = [
     ],
     featureRows: [
       {
-        title: "Floor plan and table tabs",
-        body: "Choose sala, terrace, or bar section. Tap a table, add rounds with Trimite, charge once with Încasează — fiscal receipt on final payment when FiscalNet is enabled.",
-        image: floor.src,
-        imageAlt: "franchisetech restaurant floor plan",
-        path: floor.path,
+        title: "Fast checkout and fiscal receipts",
+        body: "Open the till, add products, take payment, and issue the fiscal receipt when FiscalNet is enabled.",
+        component: OwnerPosProof,
       },
       {
-        title: "Table checkout and fiscal close",
-        body: "Multiple send rounds, one payment at the end. Staff see the running tab; owners see the sale linked to the table session.",
-        image: tableOrder.src,
-        imageAlt: "franchisetech table order POS",
-        path: tableOrder.path,
-      },
-      {
-        title: "Kitchen display",
-        body: "Paid orders flow to a prep board — new, preparing, ready, done — when Kitchen Display is enabled for your organisation.",
-        image: kitchen.src,
-        imageAlt: "franchisetech kitchen display",
-        path: kitchen.path,
+        title: "Daily till close",
+        body: "Owners see cash expected, card totals, TVA breakdown, and the Z-report workflow in one place.",
+        component: OwnerZReportProof,
       },
       {
         title: "Owner dashboard and Z-report",
-        body: "Daily sales, till status, VAT breakdown, and export packs for your accountant — from the same workspace as the floor.",
-        image: dashboard.src,
-        imageAlt: "franchisetech owner dashboard",
-        path: dashboard.path,
+        body: "Daily sales, till status, VAT breakdown, and export packs for your accountant — from the same workspace as POS.",
+        component: OwnerDashboardProof,
       },
     ],
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS.restaurants,
     competitorRows: [
       ["Runs in browser", "Yes — laptop or tablet", "Often dedicated hardware"],
-      ["Table / floor plan", "Visual plan + table tabs", "Varies — may need modules"],
-      ["Kitchen display", "Optional add-on", "Often bundled in enterprise"],
+      ["Stock + recipes", "Included in Operations", "Varies — may need modules"],
+      ["Z-report / VAT report", "Included", "Varies by package"],
       ["Listed monthly price", "From €79/mo Operations", "Often quote-only install"],
       ["Setup time", "Under an hour self-serve", "Often on-site project"],
     ],
@@ -201,16 +180,12 @@ export const primaryIndustryPages: SeoPage[] = [
         answer: "No. franchisetech runs in the browser on tablets you already use. FiscalNet runs on the cashier PC for fiscal receipts.",
       },
       {
-        question: "How does table service work?",
-        answer: "Enable table service in Integrations. Configure your floor plan, tap a table, send rounds to kitchen, then settle and print the fiscal receipt once.",
+        question: "Can I start with counter POS only?",
+        answer: "Yes. The core flow is counter POS: products, cart, payment, fiscal receipt, and Z-report.",
       },
       {
-        question: "Can I separate terrace and dining room?",
-        answer: "Yes. Floor sections (sala, terasa, bar) keep service organised on one plan.",
-      },
-      {
-        question: "Is there a kitchen display?",
-        answer: "Yes, as an optional module. Orders appear on a browser-based board for prep teams.",
+        question: "Can I track recipe costs?",
+        answer: "Yes. Operations includes recipes, ingredients, purchases, and margin reports.",
       },
       {
         question: "VAT breakdown for my accountant?",
@@ -219,77 +194,67 @@ export const primaryIndustryPages: SeoPage[] = [
     ],
     related: [
       { label: "Stock management", href: "/features/stock-management" },
-      { label: "Kitchen display", href: "/features/kitchen-display" },
       { label: "Z-report", href: "/features/z-report" },
     ],
     image: "/marketing/industry-restaurant.png",
     ctaTitle: "Try restaurant POS — 15 days free",
-    ctaSubtitle: "Floor plan, kitchen, and till close — configured for full service.",
+    ctaSubtitle: "Sales, stock, recipes, and till close — configured for daily control.",
   },
   {
     slug: "takeaways",
     path: "/industries/takeaways",
     eyebrow: "Takeaway & fast food",
-    title: "Takeaway POS — Glovo, Bolt, FiscalNet",
-    metaTitle: "Takeaway POS Romania — Glovo Integration, Fast Counter | franchisetech",
+    title: "Takeaway POS — fast counter, FiscalNet",
+    metaTitle: "Takeaway POS Romania — Fast Counter, Till Close | franchisetech",
     description:
-      "Takeaway and fast food POS: Glovo orders in automatically, fast counter grid, separate delivery sales, FiscalNet, and daily Z-report.",
-    h1: "Glovo, Bolt, and Tazz recorded correctly. No ANAF headaches.",
-    heroBefore: "",
-    heroHighlight: "Glovo, Bolt, and Tazz recorded correctly",
-    heroAfter: ". No ANAF headaches.",
-    heroSubheadline: "Delivery and counter sales in one till — separate channels, correct fiscal records.",
+      "Takeaway and fast food POS: fast counter grid, split cash and card, FiscalNet receipts, and daily Z-report.",
+    h1: "Orders out in three taps, not three screens.",
+    heroBefore: "Orders out in ",
+    heroHighlight: "three taps, not three screens",
+    heroAfter: ".",
+    heroSubheadline: "A flat product grid built for peak-hour speed, with a fiscal receipt on every sale.",
     intro:
-      "Takeaway operators juggle counter speed, delivery platforms, and fiscal compliance. franchisetech records in-house and delivery sales separately with Glovo integrated automatically.",
+      "Takeaway operators need queue speed and fiscal compliance, not a feature wall. franchisetech keeps the counter grid flat and fast, and every sale gets a FiscalNet receipt.",
     bullets: [
-      "Glovo — automatic webhook import",
-      "Bolt Food and Tazz — manual in POS today; auto coming",
-      "Fast product grid at counter",
-      "Split cash and card",
-      "Stock updates as you produce",
-      "Z-report for delivery vs in-house",
+      "Flat product grid at counter — no nested menus",
+      "Split cash and card, with change calculated",
+      "Stock updates as you sell, on Operations",
+      "Z-report and sales reports at close",
     ],
     painPoints: [
       {
-        title: "Delivery orders re-typed at the till",
-        text: "Glovo pings the tablet and someone types it again into the fiscal register. Automatic import puts orders in your workspace — ready to record correctly.",
+        title: "Rush hour queues and mis-rung orders",
+        text: "Fixed-price menu items render as tiles that don't move position, so muscle memory takes over at peak.",
       },
       {
-        title: "Payout vs cash drawer",
-        text: "Platform payouts and in-house cash are different animals. Channel-separated sales help you reconcile what you earned vs what is in the drawer.",
+        title: "Different shifts, one shared drawer",
+        text: "Each shift gets its own till open, cash movements, and close, with a named person responsible.",
       },
       {
-        title: "Queue speed at peak",
-        text: "Lunch rush cannot wait for nested menus. A flat product grid and one-tap charge keep the line moving.",
+        title: "Not sure what's actually selling",
+        text: "The sales report shows top items over an explicit date range; Operations adds cost per portion.",
       },
     ],
     featureRows: [
       {
-        title: "Glovo integrated",
-        body: "Orders from Glovo arrive via webhook — no double entry. Record them with the right payment channel for fiscal and reporting.",
-        image: pos.src,
-        imageAlt: "franchisetech POS takeaway",
-        path: pos.path,
-      },
-      {
         title: "Counter speed",
-        body: "Categories, search, and charge — built for high-volume takeaway and fast food service.",
-        image: pos.src,
-        imageAlt: "franchisetech fast checkout",
-        path: pos.path,
+        body: "Fixed-price menu tiles with stable positions, search, and one-tap charge — built for high-volume service.",
+        component: OwnerPosProof,
       },
       {
-        title: "Daily close by channel",
-        body: "Z-report and sales reports show cash, card, and delivery totals so owners know what happened today.",
-        image: dashboard.src,
-        imageAlt: "franchisetech sales dashboard",
-        path: dashboard.path,
+        title: "Fiscal on every sale",
+        body: "FiscalNet issues the fiscal receipt locally, on the cashier device, for every sale.",
+        component: OwnerPosProof,
+      },
+      {
+        title: "Daily close",
+        body: "Z-report and sales reports show cash and card totals so owners know what happened today.",
+        component: OwnerDashboardProof,
       },
     ],
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS.takeaways,
     competitorRows: [
-      ["Glovo auto-import", "Included in plan", "Varies — often optional module"],
-      ["Bolt / Wolt auto", "Bolt/Tazz coming", "POSnet: Glovo/Bolt/Wolt auto"],
+      ["Product grid", "Flat, fixed-position tiles", "Varies"],
       ["Recipe / stock", "Operations plan", "Varies"],
       ["Listed price", "From €49/mo", "Often quote-only"],
       ["Browser POS", "Yes", "Often installed client"],
@@ -298,14 +263,6 @@ export const primaryIndustryPages: SeoPage[] = [
     sections: [],
     faqs: [
       {
-        question: "Is Glovo integrated automatically?",
-        answer: "Yes. Glovo orders arrive via webhook when integration is configured. Bolt Food and Tazz can be recorded in POS; automatic import is on the roadmap.",
-      },
-      {
-        question: "Are delivery sales separate from in-house?",
-        answer: "Yes. Sales can be recorded per channel so reports and fiscal records stay clear.",
-      },
-      {
         question: "Does it work with FiscalNet?",
         answer: "Yes, when FiscalNet is enabled on the cashier PC. Fiscal receipts follow your configured hardware path.",
       },
@@ -313,15 +270,22 @@ export const primaryIndustryPages: SeoPage[] = [
         question: "Can I run from a tablet at the counter?",
         answer: "Yes. franchisetech is browser-based — ideal for compact takeaway counters.",
       },
+      {
+        question: "Can each shift have its own till session?",
+        answer: "Yes. Each shift opens and closes its own till, with cash movements and a named responsible person.",
+      },
+      {
+        question: "Can I track what's actually selling?",
+        answer: "Yes. Sales reports show top items over any date range; Operations adds cost per portion and margin.",
+      },
     ],
     related: [
       { label: "POS", href: "/features/pos" },
-      { label: "Integrations", href: "/app/integrations" },
       { label: "Z-report", href: "/features/z-report" },
     ],
-    image: "/showcase/pos-cart.png",
+    image: "/showcase/pos-grid.png",
     ctaTitle: "Start takeaway POS — 15 days free",
-    ctaSubtitle: "Glovo, counter sales, and Z-report in one setup.",
+    ctaSubtitle: "Fast counter, FiscalNet receipts, and Z-report in one setup.",
   },
   {
     slug: "bar-pub",
@@ -330,7 +294,7 @@ export const primaryIndustryPages: SeoPage[] = [
     title: "POS for Bars and Pubs",
     metaTitle: "Bar POS Romania — Stock, TVA, Till Close | franchisetech",
     description:
-      "Bar and pub POS: table spots on the floor plan, high-value drinks stock, TVA 9% vs 19%, unlimited staff, and fast till close after late service.",
+      "Bar and pub POS: table spots on the floor plan, high-value drinks stock, TVA 21% / 11%, unlimited staff, and fast till close after late service.",
     h1: "Keep tables open. At close, the till matches.",
     heroBefore: "Keep tables open. At close, ",
     heroHighlight: "the till matches",
@@ -339,17 +303,17 @@ export const primaryIndustryPages: SeoPage[] = [
     intro:
       "Bars and pubs need fast pours, organised table spots, accurate drinks inventory, and a till close that works at 2am — without per-seat licensing.",
     bullets: [
-      "Floor plan for bar tables and high tops",
-      "Send rounds before final payment",
+      "Fast browser POS at the bar",
+      "Quick checkout during busy service",
       "Drinks stock and purchase tracking",
-      "TVA 9% and 19% on the right products",
+      "TVA 21% and 11% on the right products",
       "Unlimited bartenders on one plan",
       "Quick Z-report after service",
     ],
     painPoints: [
       {
-        title: "Busy bar, many open tables",
-        text: "When service is table-based, staff pick a spot on the plan, send rounds, and charge once — instead of losing track of open orders.",
+        title: "Busy bar, fast checkout",
+        text: "Staff need a simple product grid, quick payment, and a close that matches after service.",
       },
       {
         title: "Expensive bottles in stock",
@@ -362,31 +326,27 @@ export const primaryIndustryPages: SeoPage[] = [
     ],
     featureRows: [
       {
-        title: "Table spots on the floor",
-        body: "Configure bar and high-top tables on the plan. Send rounds with Trimite, settle with Încasează when the table is done — when table service is enabled.",
+        title: "Fast bar POS",
+        body: "Use a browser POS on the bar tablet or laptop. Add drinks, take payment, and keep each sale ready for daily close.",
         image: floor.src,
         imageAlt: "franchisetech bar floor plan",
         path: floor.path,
       },
       {
         title: "Drinks stock and TVA",
-        body: "Products carry the right TVA rate — 9% or 19% as configured. Stock movements follow purchases and sales when stock tracking is on.",
-        image: stock.src,
-        imageAlt: "franchisetech stock levels",
-        path: stock.path,
+        body: "Products carry the right TVA rate — 21%, 11% or 5% as configured. Stock movements follow purchases and sales when stock tracking is on.",
+        component: OwnerStockProof,
       },
       {
         title: "Till close after late service",
         body: "Cash in drawer, card totals, and difference on one Z-report — so owners trust the number before they leave.",
-        image: zReport.src,
-        imageAlt: "franchisetech till close",
-        path: zReport.path,
+        component: OwnerZReportProof,
       },
     ],
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS["bar-pub"],
     competitorRows: [
       ["Browser POS", "Tablet at the bar", "Often fixed terminals"],
-      ["Table workflow", "Floor plan + tabs", "Varies"],
+      ["Fast checkout", "Browser POS", "Varies"],
       ["Stock / inventory", "Operations plan", "Varies"],
       ["Staff fees", "Unlimited", "Check per-user pricing"],
       ["Listed price", "From €79/mo", "Often quote-only"],
@@ -395,8 +355,8 @@ export const primaryIndustryPages: SeoPage[] = [
     sections: [],
     faqs: [
       {
-        question: "Can I run tabs per table?",
-        answer: "With table service enabled, each table spot can hold open rounds until you settle and print the fiscal receipt once.",
+        question: "Can I run fast counter sales?",
+        answer: "Yes. Use the browser POS for products, payment, fiscal receipt, and daily close.",
       },
       {
         question: "Different TVA on soft drinks vs alcohol?",
@@ -413,10 +373,9 @@ export const primaryIndustryPages: SeoPage[] = [
     ],
     related: [
       { label: "POS", href: "/features/pos" },
-      { label: "Stock management", href: "/features/stock-management" },
       { label: "Z-report", href: "/features/z-report" },
     ],
-    image: "/showcase/pos-cart.png",
+    image: "/showcase/pos-grid.png",
     ctaTitle: "Open the bar POS — 15 days free",
     ctaSubtitle: "Table spots, stock, and till close — no per-seat fees.",
   },
@@ -461,23 +420,17 @@ export const primaryIndustryPages: SeoPage[] = [
       {
         title: "Recipe cost per product",
         body: "Flour, butter, eggs, and packaging on each recipe. Compare cost to shelf price and see gross margin per line.",
-        image: recipes.src,
-        imageAlt: "franchisetech patisserie recipe costing",
-        path: recipes.path,
+        component: OwnerRecipeProof,
       },
       {
         title: "Production from stock",
         body: "Can-make counts show how many pieces today’s stock supports before you schedule the oven.",
-        image: stock.src,
-        imageAlt: "franchisetech bakery stock",
-        path: stock.path,
+        component: OwnerStockProof,
       },
       {
         title: "POS for counter and wholesale",
         body: "Fast grid for retail sales; products can be sold by unit or weight as configured on your menu.",
-        image: pos.src,
-        imageAlt: "franchisetech bakery POS",
-        path: pos.path,
+        component: OwnerPosProof,
       },
     ],
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS["patisserie-bakery"],
@@ -508,11 +461,7 @@ export const primaryIndustryPages: SeoPage[] = [
         answer: "Yes, when enabled on the cashier PC — same path as other food businesses.",
       },
     ],
-    related: [
-      { label: "Recipe costing", href: "/features/recipe-costing" },
-      { label: "Bon consum report", href: "/app/reports/consum" },
-      { label: "Stock management", href: "/features/stock-management" },
-    ],
+    related: [],
     image: "/showcase/recipe-costing.png",
     ctaTitle: "Start patisserie POS — 15 days free",
     ctaSubtitle: "Recipes, bon de consum, and counter sales in one place.",
@@ -558,23 +507,17 @@ export const primaryIndustryPages: SeoPage[] = [
       {
         title: "POS on your tablet",
         body: "No fixed terminal. Run the till from a laptop or Android tablet in the browser.",
-        image: pos.src,
-        imageAlt: "franchisetech food truck POS",
-        path: pos.path,
+        component: OwnerPosProof,
       },
       {
         title: "Offline when you need it",
         body: "Short outages queue sales in the browser. Sync status shows when records are uploaded — do not clear browser data during an outage.",
-        image: pos.src,
-        imageAlt: "franchisetech offline POS",
-        path: pos.path,
+        component: OwnerPosProof,
       },
       {
         title: "Z-report at end of service",
         body: "Counted cash vs expected after the last burger — same close workflow as a fixed location.",
-        image: zReport.src,
-        imageAlt: "franchisetech Z-report food truck",
-        path: zReport.path,
+        component: OwnerZReportProof,
       },
     ],
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS["food-trucks"],
@@ -655,23 +598,17 @@ export const primaryIndustryPages: SeoPage[] = [
       {
         title: "Owner dashboard",
         body: "Today at a glance: sales, till status, and alerts — see which location needs attention first.",
-        image: dashboard.src,
-        imageAlt: "franchisetech multi-site dashboard",
-        path: dashboard.path,
+        component: OwnerDashboardProof,
       },
       {
         title: "Per-site Z-report",
         body: "Each location closes its own till. Expected vs counted cash stays tied to that site — not blended in Excel.",
-        image: zReport.src,
-        imageAlt: "franchisetech per-site Z-report",
-        path: zReport.path,
+        component: OwnerZReportProof,
       },
       {
         title: "Compare locations",
         body: "Reports per site help you see which unit delivers better margins and cleaner closes.",
-        image: dashboard.src,
-        imageAlt: "franchisetech location reports",
-        path: dashboard.path,
+        component: OwnerDashboardProof,
       },
     ],
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS["multi-site"],
@@ -704,7 +641,6 @@ export const primaryIndustryPages: SeoPage[] = [
     ],
     related: [
       { label: "Pricing", href: "/pricing" },
-      { label: "Restaurants", href: "/industries/restaurants" },
       { label: "Romania", href: "/industries/romania" },
     ],
     image: "/showcase/reports-dashboard.png",

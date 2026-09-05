@@ -4,14 +4,11 @@ import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
-  ArrowUpRight,
   Building2,
-  FileCheck2,
-  Landmark,
+  CheckCircle2,
   Loader2,
-  MapPin,
+  Package,
   Receipt,
-  Settings2,
   ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,19 +24,13 @@ import {
 import { toast } from "sonner";
 import { completePosOnboarding } from "@/app/actions/onboarding";
 import { lookupAnafCompany } from "@/app/actions/partner-lookup";
-import {
-  deriveBusinessProfile,
-  BUSINESS_PROFILE_LABELS,
-  type IngredientTrackingIntent,
-  type LocationBand,
-} from "@/lib/business-profile";
+import type { IngredientTrackingIntent, LocationBand } from "@/lib/business-profile";
 import { createClient } from "@/lib/supabase/client";
 import { readAcquisitionClient } from "@/lib/marketing/acquisition";
 import { readPreferredPlanClient } from "@/lib/billing/preferred-plan";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { OnboardingStepper } from "@/components/app/OnboardingStepper";
 import { OnboardingSidebar } from "@/components/onboarding/OnboardingSidebar";
-import { cn } from "@/lib/utils";
 
 const countryOptions = [
   { code: "RO", label: "România" },
@@ -50,56 +41,18 @@ const countryOptions = [
 
 const BUSINESS_TYPES = {
   ro: [
-    "Restaurant",
     "Cafenea",
-    "Servicii alimentare",
-    "Măcelărie",
-    "Pescărie",
-    "Catering",
-    "Bucătărie hotel",
-    "Dark Kitchen",
-    "Cămin de bătrâni",
-    "Bucătărie școlară",
+    "Takeaway",
+    "Patiserie / brutărie",
+    "Magazin mic",
     "Altele",
   ],
   en: [
-    "Restaurant",
     "Café",
-    "Food service",
-    "Butcher",
-    "Fishmonger",
-    "Caterer",
-    "Hotel Kitchen",
-    "Dark Kitchen",
-    "Care Home",
-    "School Kitchen",
+    "Takeaway",
+    "Bakery / patisserie",
+    "Small shop",
     "Other",
-  ],
-};
-
-const LOCATION_OPTIONS = {
-  ro: [
-    { value: "one" as LocationBand, label: "1 locație", hint: "Un singur punct de lucru" },
-    { value: "few" as LocationBand, label: "2–5 locații", hint: "Lanț mic sau franciză" },
-    { value: "many" as LocationBand, label: "6+ locații", hint: "Operator multi-locație" },
-  ],
-  en: [
-    { value: "one" as LocationBand, label: "1 location", hint: "Single shop or café" },
-    { value: "few" as LocationBand, label: "2–5 locations", hint: "Small chain or franchise" },
-    { value: "many" as LocationBand, label: "6+ locations", hint: "Multi-site operator" },
-  ],
-};
-
-const INGREDIENT_OPTIONS = {
-  ro: [
-    { value: "no" as IngredientTrackingIntent, label: "Nu — vând produse finite" },
-    { value: "yes" as IngredientTrackingIntent, label: "Da — urmăresc ingrediente și costuri" },
-    { value: "later" as IngredientTrackingIntent, label: "Mai târziu — încep cu POS" },
-  ],
-  en: [
-    { value: "no" as IngredientTrackingIntent, label: "No — sell finished products only" },
-    { value: "yes" as IngredientTrackingIntent, label: "Yes — track ingredients and costs" },
-    { value: "later" as IngredientTrackingIntent, label: "Later — start with POS first" },
   ],
 };
 
@@ -108,45 +61,43 @@ const UI_STRINGS = {
     brandName: "Numele firmei / brandului",
     brandPlaceholder: "ex: Café Central",
     country: "Țară",
-    yourName: "Numele tău",
+    yourName: "Numele dumneavoastră",
     namePlaceholder: "Proprietar sau manager",
     industry: "Tip activitate",
     selectType: "Selectează tipul…",
     continueBtn: "Continuă",
     nameRequired: "Numele firmei este obligatoriu.",
-    locationsTitle: "Câte locații ai?",
-    ingredientsTitle: "Urmărești ingrediente și stoc?",
-    profileLabel: "Profilul tău:",
-    planHint: "Planurile și facturarea sunt în Setări oricând — nu trebuie să alegi un plan acum.",
+    locationsTitle: "Câte locații aveți?",
+    ingredientsTitle: "Urmăriți ingrediente și stoc?",
+    profileLabel: "Profilul dumneavoastră:",
+    planHint: "Planurile și facturarea sunt în Setări oricând — nu trebuie să alegeți un plan acum.",
     backBtn: "Înapoi",
-    openTill: "Deschide casa",
+    openTill: "Creează produsele și deschide POS",
     openingTill: "Se deschide casa…",
-    stepTitles: ["Configurează-ți afacerea", "Cum vrei să funcționeze?", "Conformitate fiscală română"],
+    stepTitles: ["Configurați-vă afacerea", "Pregătit pentru prima vânzare"],
     stepSubtitles: [
-      "Câteva detalii rapide pentru a-ți deschide casa — poți schimba totul mai târziu din Setări.",
-      "Alege ce ți se potrivește acum. Stocul și rețetele rămân dezactivate până le pornești.",
-      "Conectează ANAF e-Factura acum sau mai târziu din Setări → Fiscal.",
+      "Câteva detalii rapide pentru a vă deschide casa — puteți schimba totul mai târziu din Setări.",
+      "Creăm un catalog de pornire, metodele de plată și casa. FiscalNet se configurează înainte de prima vânzare reală.",
     ],
-    stepLabels: ["1. Afacere", "2. Configurare", "3. Fiscal"],
-    stepShortLabels: ["Afacere", "Configurare", "Fiscal"],
+    stepLabels: ["1. Afacere", "2. Prima vânzare"],
+    stepShortLabels: ["Afacere", "Prima vânzare"],
     stepOf: (current: number, total: number) => `Pasul ${current} din ${total}`,
     stepEyebrow: (current: number, total: number) => `Pasul ${current} din ${total}`,
     timeEstimate: "~2 minute",
-    trialBadge: "Trial 15 zile · verificare card 1 €",
-    sidebarBanner: "Configurează-ți afacerea și casa de marcat ca să poți vinde azi.",
+    trialBadge: "Probă 15 zile · verificare card 1 €",
+    sidebarBanner: "Configurați-vă afacerea și casa de marcat ca să puteți vinde azi.",
     sidebarStepDescriptions: [
       "Numele firmei, țara și tipul activității.",
-      "Locații, stoc și rețete — poți schimba oricând.",
-      "ANAF e-Factura — conectează acum sau mai târziu.",
+      "Produse demo, FiscalNet și casa pregătită pentru prima vânzare.",
     ],
     fiscalLater: "Fac asta mai târziu",
     fiscalConnect: "Conectează ANAF e-Factura",
     fiscalConnecting: "Se conectează…",
-    fiscalLegalTitle: "Obligație legală din ianuarie 2025",
+    fiscalLegalTitle: "Facturare electronică ANAF",
     fiscalLegalBody:
-      "Toate firmele românești trebuie să trimită facturile B2B prin ANAF e-Factura. Amenda pentru netransmitere: 1.000–2.500 lei per factură.",
+      "Firmele românești trebuie să trimită facturile B2B prin ANAF e-Factura; nerespectarea poate atrage amenzi. Confirmați cu contabilul termenele și sumele exacte aplicabile firmei dumneavoastră.",
     fiscalHint:
-      "Poți conecta ANAF acum sau mai târziu din Setări → Fiscal. Durează ~2 minute cu certificatul digital al firmei.",
+      "Puteți conecta ANAF acum sau mai târziu din Setări → Fiscal. Durează ~2 minute cu certificatul digital al firmei.",
     fiscalGuidanceHeading: "Ghid & resurse",
     fiscalGuidanceEfacturaTitle: "Ghid ANAF e-Factura",
     fiscalGuidanceEfacturaDesc: "Cum conectezi certificatul digital al firmei.",
@@ -170,25 +121,23 @@ const UI_STRINGS = {
     profileLabel: "Your profile:",
     planHint: "Billing and plans are in Settings anytime — no plan choice required now.",
     backBtn: "Back",
-    openTill: "Open my till",
+    openTill: "Create products and open POS",
     openingTill: "Opening your till…",
-    stepTitles: ["Set up your business", "How do you want to run things?", "Romanian fiscal compliance"],
+    stepTitles: ["Set up your business", "Ready for the first sale"],
     stepSubtitles: [
       "Quick details so we can open your till — you can change everything later in Settings.",
-      "Choose what fits today. Stock and recipes stay off until you turn them on.",
-      "Connect ANAF e-Factura now or skip and do it later from Settings → Fiscal.",
+      "We create starter products, payment methods, and the till. Configure FiscalNet before the first real sale.",
     ],
-    stepLabels: ["1. Business", "2. Your setup", "3. Fiscal"],
-    stepShortLabels: ["Business", "Your setup", "Fiscal"],
+    stepLabels: ["1. Business", "2. First sale"],
+    stepShortLabels: ["Business", "First sale"],
     stepOf: (current: number, total: number) => `Step ${current} of ${total}`,
     stepEyebrow: (current: number, total: number) => `Step ${current} of ${total}`,
     timeEstimate: "~2 minutes",
-    trialBadge: "15-day trial · €1 card check",
+    trialBadge: "15-day trial · €1 card verification",
     sidebarBanner: "Set up your business and till so you can start selling today.",
     sidebarStepDescriptions: [
       "Brand name, country, and industry.",
-      "Locations, stock, and recipes — change anytime.",
-      "ANAF e-Invoicing — connect now or later.",
+      "Starter products, FiscalNet, and an open till for the first sale.",
     ],
     fiscalLater: "I'll do this later",
     fiscalConnect: "Connect ANAF e-Factura",
@@ -250,22 +199,15 @@ export default function OnboardingPage() {
     });
   }, [step, form.countryCode]);
 
-  const profile = deriveBusinessProfile({
-    locationBand: form.locationBand,
-    ingredientTracking: form.ingredientTracking,
-  });
-
   const isRO = form.countryCode === "RO";
   const locale = isRO ? "ro" : "en";
   const t = UI_STRINGS[locale];
   const businessTypes = BUSINESS_TYPES[locale];
-  const locationOptions = LOCATION_OPTIONS[locale];
-  const ingredientOptions = INGREDIENT_OPTIONS[locale];
 
   const update = (patch: Partial<typeof form>) => setForm((current) => ({ ...current, ...patch }));
 
   const lookupCui = () => {
-    if (!form.anafCif.trim()) return toast.error("Introdu CUI-ul.");
+    if (!form.anafCif.trim()) return toast.error("Introduceți CUI-ul.");
     startTransition(async () => {
       const result = await lookupAnafCompany(form.anafCif);
       if (!result) {
@@ -313,6 +255,7 @@ export default function OnboardingPage() {
               gclid: acquisition.gclid,
               gbraid: acquisition.gbraid,
               wbraid: acquisition.wbraid,
+              fbclid: acquisition.fbclid,
               ga_client_id: acquisition.ga_client_id,
             }
           : null,
@@ -324,11 +267,9 @@ export default function OnboardingPage() {
     });
   };
 
-  const stepShortLabels = isRO ? t.stepShortLabels : t.stepShortLabels.slice(0, 2);
-  const sidebarDescriptions = isRO
-    ? t.sidebarStepDescriptions
-    : t.sidebarStepDescriptions.slice(0, 2);
-  const stepIcons = [Building2, Settings2, FileCheck2];
+  const stepShortLabels = t.stepShortLabels;
+  const sidebarDescriptions = t.sidebarStepDescriptions;
+  const stepIcons = [Building2, Receipt];
   const sidebarSteps = stepShortLabels.map((label, i) => ({
     icon: stepIcons[i],
     title: label,
@@ -499,162 +440,55 @@ export default function OnboardingPage() {
 
             {step === 1 && (
               <div className="space-y-6">
-                <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                  <Settings2 className="h-5 w-5 shrink-0 text-slate-500" />
-                  <span>{isRO ? "Poți schimba oricând din Setări." : "You can change these anytime in Settings."}</span>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-700">{t.locationsTitle}</p>
-                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                    {locationOptions.map((opt) => (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        onClick={() => update({ locationBand: opt.value })}
-                        className={cn(
-                          "rounded-xl border p-4 text-left transition-all active:scale-[0.98]",
-                          form.locationBand === opt.value
-                            ? "border-blue-500 bg-blue-50 shadow-sm ring-2 ring-blue-100"
-                            : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm",
-                        )}
-                      >
-                        <MapPin className="mb-1 h-4 w-4 text-blue-600" />
-                        <p className="text-sm font-semibold">{opt.label}</p>
-                        <p className="text-xs text-slate-500">{opt.hint}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-slate-700">{t.ingredientsTitle}</p>
-                  <div className="mt-2 space-y-2">
-                    {ingredientOptions.map((opt) => (
-                      <label
-                        key={opt.value}
-                        className={cn(
-                          "flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-all",
-                          form.ingredientTracking === opt.value
-                            ? "border-blue-500 bg-blue-50 shadow-sm ring-2 ring-blue-100"
-                            : "border-slate-200 bg-white hover:border-slate-300",
-                          opt.value === "later" && form.ingredientTracking !== opt.value && "border-dashed",
-                        )}
-                      >
-                        <input
-                          type="radio"
-                          name="ingredientTracking"
-                          checked={form.ingredientTracking === opt.value}
-                          onChange={() => update({ ingredientTracking: opt.value })}
-                          className="h-4 w-4 border-slate-300 text-blue-600"
-                        />
-                        <span className="flex-1 text-sm">
-                          {opt.label}
-                          {opt.value === "later" ? (
-                            <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-blue-700">
-                              {t.recommended}
-                            </span>
-                          ) : null}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
-                  <span className="font-medium">{t.profileLabel}</span> {BUSINESS_PROFILE_LABELS[profile]}
-                  <p className="mt-1 text-xs text-slate-500">{t.planHint}</p>
-                </div>
-                <div className="flex gap-3 border-t border-slate-100 pt-6">
-                  <Button variant="outline" className="h-11 px-5" onClick={() => setStep(0)} disabled={pending}>
-                    {t.backBtn}
-                  </Button>
-                  <Button
-                    className="h-11 flex-1 bg-blue-600 text-base hover:bg-blue-700 text-white sm:flex-none sm:px-8"
-                    disabled={pending}
-                    onClick={() => {
-                      if (isRO) {
-                        setStep(2);
-                      } else {
-                        handleFinish(false);
-                      }
-                    }}
-                  >
-                    {pending ? t.openingTill : isRO ? t.continueBtn : t.openTill}
-                    {!pending && <ArrowRight className="ml-2 h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-            )}
+                {[
+                  {
+                    icon: Package,
+                    title: isRO ? "Produse de pornire" : "Starter products",
+                    text: isRO ? "Adăugăm automat un catalog scurt pe baza tipului de activitate." : "We add a short starter catalog based on your business type.",
+                  },
+                  {
+                    icon: Receipt,
+                    title: isRO ? "Numerar, card și TVA" : "Cash, card, and VAT",
+                    text: isRO ? "Metodele de plată și cotele TVA sunt pregătite pentru o vânzare de test." : "Payment methods and tax rates are ready for a test sale.",
+                  },
+                  {
+                    icon: ShieldCheck,
+                    title: "FiscalNet",
+                    text: isRO ? "După creare, conectați casa fiscală înainte de prima vânzare reală." : "After setup, connect the fiscal register before the first real sale.",
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={item.title} className="flex gap-3 rounded-xl border border-slate-200 p-4">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <div>
+                        <p className="font-semibold text-slate-900">{item.title}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-slate-600">{item.text}</p>
+                      </div>
+                      <CheckCircle2 className="ml-auto h-5 w-5 shrink-0 text-emerald-600" />
+                    </div>
+                  );
+                })}
 
-            {step === 2 && (
-              <div className="space-y-6">
-                <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                  <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
-                  <div className="text-sm text-amber-900">
-                    <p className="font-semibold">{t.fiscalLegalTitle}</p>
-                    <p className="mt-1 leading-relaxed">{t.fiscalLegalBody}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
-                  <FileCheck2 className="mt-0.5 h-5 w-5 shrink-0 text-slate-500" />
-                  <p>{t.fiscalHint}</p>
-                </div>
-
-                <div>
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                    {t.fiscalGuidanceHeading}
-                  </p>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Link
-                      href="/help/romania-efactura"
-                      target="_blank"
-                      className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition-colors hover:border-blue-300 hover:bg-blue-50/50"
-                    >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-600 ring-1 ring-slate-200">
-                        <Landmark className="h-4 w-4" />
-                      </span>
-                      <span className="text-sm font-semibold text-slate-800">{t.fiscalGuidanceEfacturaTitle}</span>
-                      <span className="text-xs leading-relaxed text-slate-500">{t.fiscalGuidanceEfacturaDesc}</span>
-                      <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-blue-600">
-                        {t.learnHow} <ArrowUpRight className="h-3 w-3" />
-                      </span>
-                    </Link>
-                    <Link
-                      href="/help/romania-fiscalnet"
-                      target="_blank"
-                      className="group flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-4 transition-colors hover:border-blue-300 hover:bg-blue-50/50"
-                    >
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-600 ring-1 ring-slate-200">
-                        <Receipt className="h-4 w-4" />
-                      </span>
-                      <span className="text-sm font-semibold text-slate-800">{t.fiscalGuidanceFiscalnetTitle}</span>
-                      <span className="text-xs leading-relaxed text-slate-500">{t.fiscalGuidanceFiscalnetDesc}</span>
-                      <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-blue-600">
-                        {t.learnHow} <ArrowUpRight className="h-3 w-3" />
-                      </span>
-                    </Link>
-                  </div>
-                </div>
+                <Link href="/help/romania-fiscalnet" target="_blank" className="inline-flex text-sm font-medium text-blue-700 hover:underline">
+                  {isRO ? "Vezi ghidul FiscalNet" : "Read the FiscalNet guide"}
+                </Link>
 
                 <div className="flex flex-col gap-2 border-t border-slate-100 pt-6 sm:flex-row-reverse">
                   <Button
                     className="h-11 flex-1 bg-blue-600 text-base hover:bg-blue-700 text-white"
                     disabled={pending}
-                    onClick={() => handleFinish(true)}
-                  >
-                    {pending && fiscalAction === "anaf" ? t.fiscalConnecting : t.fiscalConnect}
-                    {!(pending && fiscalAction === "anaf") && <ArrowRight className="ml-2 h-4 w-4" />}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="h-11 flex-1"
-                    disabled={pending}
                     onClick={() => handleFinish(false)}
                   >
-                    {pending && fiscalAction === "skip" ? t.openingTill : t.fiscalLater}
+                    {pending ? t.openingTill : t.openTill}
+                    {!pending && <ArrowRight className="ml-2 h-4 w-4" />}
                   </Button>
                   <Button
                     variant="ghost"
                     className="h-11 sm:w-auto"
-                    onClick={() => setStep(1)}
+                    onClick={() => setStep(0)}
                     disabled={pending}
                   >
                     {t.backBtn}

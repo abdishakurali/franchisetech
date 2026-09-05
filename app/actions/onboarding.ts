@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ensureReferralCode } from "@/lib/referrals";
@@ -19,7 +20,7 @@ import type { BillingPlan } from "@/lib/billing/plans";
 import { upsertLoopsContact } from "@/lib/loops";
 import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
-import { captureServerEvent } from "@/lib/posthog-server";
+import { captureServerEvent, flushPostHog } from "@/lib/posthog-server";
 
 const COUNTRY_LABELS: Record<string, string> = {
   RO: "Romania",
@@ -55,6 +56,7 @@ export async function completePosOnboarding(input: {
     gbraid?: string;
     wbraid?: string;
     ga_client_id?: string;
+    fbclid?: string;
   } | null;
 }) {
   const supabase = await createClient();
@@ -140,6 +142,7 @@ export async function completePosOnboarding(input: {
     acquisition_gbraid: input.acquisition?.gbraid || null,
     acquisition_wbraid: input.acquisition?.wbraid || null,
     acquisition_ga_client_id: input.acquisition?.ga_client_id || null,
+    acquisition_fbclid: input.acquisition?.fbclid || null,
   }).eq("id", orgId);
 
   if (orgUpdateError) {
@@ -203,7 +206,7 @@ export async function completePosOnboarding(input: {
   const vatRate = defaultVat?.rate != null ? Number(defaultVat.rate) : input.countryCode === "RO" ? 21 : 23;
 
   if (category?.id) {
-    const demos = demoProductsForCountry(input.countryCode);
+    const demos = demoProductsForCountry(input.countryCode, input.businessType);
     const { error: productsError } = await supabase.from("products").insert(
       demos.map((item) => ({
         organisation_id: orgId,
@@ -292,6 +295,8 @@ export async function completePosOnboarding(input: {
       plan: input.preferredPlan ?? "starter",
     }).catch((e: unknown) => console.error("onboarding_loops_contact_failed", e));
   }
+  // Fire-and-forget capture; flush before the action's request scope ends.
+  after(flushPostHog);
   captureServerEvent(
     user.id,
     "onboarding_completed",
@@ -303,6 +308,36 @@ export async function completePosOnboarding(input: {
     },
     { organisation: orgId },
   );
+  captureServerEvent(
+    user.id,
+    "location_created",
+    {
+      organisation_id: orgId,
+      country_code: input.countryCode,
+      business_type: input.businessType ?? null,
+      location_band: input.locationBand,
+    },
+    { organisation: orgId },
+  );
+
+  const businessType = input.businessType?.toLocaleLowerCase("ro-RO") ?? "";
+  const isQualifiedLead =
+    input.countryCode === "RO" &&
+    ["cafenea", "café", "takeaway", "patiserie", "brutărie", "bakery", "magazin mic", "small shop"]
+      .some((target) => businessType.includes(target));
+  if (isQualifiedLead) {
+    captureServerEvent(
+      user.id,
+      "qualified_lead",
+      {
+        organisation_id: orgId,
+        country_code: input.countryCode,
+        business_type: input.businessType ?? null,
+        location_band: input.locationBand,
+      },
+      { organisation: orgId },
+    );
+  }
 
   revalidatePath("/app");
   revalidatePath("/onboarding");
@@ -317,7 +352,11 @@ export async function completePosOnboarding(input: {
     }
   }
 
-  redirect("/onboarding/verify-card");
+  // Card verification is no longer required to enter the app — new signups
+  // can open the till and ring up sales first; app/app/layout.tsx only
+  // redirects to /onboarding/verify-card once they've had a real preview
+  // (Z-report view or a few sales).
+  redirect("/app/setup-checklist?welcome=1");
 }
 
 

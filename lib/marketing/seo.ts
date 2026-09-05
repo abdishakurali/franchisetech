@@ -449,12 +449,11 @@ export const featurePages: SeoPage[] = [
       { question: "Do customers need to install an app?", answer: "No. Stamps are tracked against the phone number or name already used in your POS customer picker — nothing for the customer to install." },
       { question: "Can I choose the reward?", answer: "Yes — a fixed discount amount or a specific free product, configured per business." },
       { question: "What happens if a sale is voided?", answer: "Voided sales don't count toward stamps — only completed sales accrue." },
-      { question: "Is this included in my plan?", answer: "It's bundled into the Operations and Scale plans, and available as an add-on for Starter." },
+      { question: "Is this included in my plan?", answer: "It's part of the platform's feature set. Contact us to have it enabled for your organisation." },
     ],
     related: [
       { label: "POS", href: "/features/pos" },
       { label: "Cafes", href: "/industries/cafes" },
-      { label: "Restaurants", href: "/industries/restaurants" },
     ],
   },
 ];
@@ -481,7 +480,7 @@ export const industryPages: SeoPage[] = [
       { question: "Can I track can-make counts?", answer: "Yes. Recipe and stock data can show how many portions can be made." },
       { question: "Can I import product lists?", answer: "Yes. Product import and export are supported by CSV." },
     ],
-    related: [{ label: "Recipe costing", href: "/features/recipe-costing" }, { label: "Stock management", href: "/features/stock-management" }, { label: "Recipe costing guide", href: "/resources/recipe-costing-for-cafes" }],
+    related: [{ label: "Recipe costing guide", href: "/resources/recipe-costing-for-cafes" }],
     image: "/marketing/industry-cafe.png",
   },
   {
@@ -528,7 +527,6 @@ export const industryPages: SeoPage[] = [
       { label: "Z-report and till closing", href: "/features/z-report" },
       { label: "Guided setup", href: "/features/setup-onboarding" },
       { label: "Cafés", href: "/industries/cafes" },
-      { label: "Restaurants", href: "/industries/restaurants" },
     ],
     image: "/showcase/pos-grid.png",
     heroComponent: OwnerPosProof,
@@ -576,7 +574,6 @@ export const industryPages: SeoPage[] = [
       { label: "POS register", href: "/features/pos" },
       { label: "Z-report", href: "/features/z-report" },
       { label: "Cafenele & cofetării", href: "/industries/cafes" },
-      { label: "Restaurante", href: "/industries/restaurants" },
     ],
     image: "/showcase/reports-dashboard.png",
     heroComponent: OwnerDashboardProof,
@@ -621,7 +618,6 @@ export const industryPages: SeoPage[] = [
     ],
     related: [
       { label: "POS register", href: "/features/pos" },
-      { label: "Stock management", href: "/features/stock-management" },
       { label: "Z-report", href: "/features/z-report" },
       { label: "Ireland", href: "/industries/ireland" },
       { label: "Romania", href: "/industries/romania" },
@@ -780,7 +776,7 @@ export const resourcePages: ResourcePage[] = [
       { question: "Ar trebui inclus ambalajul?", answer: "Da. Ambalajul este un cost real și ar trebui inclus când face parte din produs." },
       { question: "Este acesta sfat contabil?", answer: "Nu. Este un ghid operațional. franchisetech ajută la păstrarea unor evidențe organizate și nu înlocuiește consultanța contabilă sau fiscală profesională." },
     ],
-    related: [{ label: "Funcționalitate cost rețete", href: "/features/recipe-costing" }, { label: "Gestiune stoc", href: "/features/stock-management" }, { label: "Baruri de sănătate", href: "/industries/health-bars" }],
+    related: [{ label: "Baruri de sănătate", href: "/industries/health-bars" }],
   },
   {
     slug: "z-report-explained",
@@ -822,7 +818,7 @@ export const resourcePages: ResourcePage[] = [
       { question: "Ce înseamnă câte porții pot face?", answer: "Estimează câte produse finite pot fi făcute din stocul actual de ingrediente." },
       { question: "franchisetech poate importa produse de stoc?", answer: "Da. Importul/exportul de produse este suportat prin CSV." },
     ],
-    related: [{ label: "Gestiune stoc", href: "/features/stock-management" }, { label: "Cost rețete", href: "/features/recipe-costing" }, { label: "Restaurante", href: "/industries/restaurants" }],
+    related: [],
   },
   {
     slug: "cash-up-at-end-of-day",
@@ -921,11 +917,7 @@ export const resourcePages: ResourcePage[] = [
         answer: "Da, când rețetele sunt configurate și legate de produsele POS.",
       },
     ],
-    related: [
-      { label: "Stock feature", href: "/features/stock-management" },
-      { label: "Recipe costing", href: "/features/recipe-costing" },
-      { label: "Restaurante", href: "/industries/restaurants" },
-    ],
+    related: [],
   },
   {
     slug: "choose-pos-romania",

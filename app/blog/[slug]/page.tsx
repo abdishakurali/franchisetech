@@ -8,6 +8,43 @@ import { JsonLd } from "@/components/marketing/JsonLd";
 import { blogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
 
+/**
+ * Posts where a reader arrived anxious about a fine, an inspection, or being
+ * out of compliance — not browsing features. Real traffic data (PostHog,
+ * 2026-08-25) shows this exact cluster is what actually converts: lowest
+ * bounce rates on the site sit on these topics, not on feature pages. Each
+ * gets a CTA naming the specific record-keeping franchisetech actually
+ * provides for that fear — never "we make you compliant" (the product
+ * doesn't interpret law), only the concrete thing it keeps organised that
+ * makes a control or a mistake easier to survive.
+ */
+const REGULATION_FEAR_CTAS: Record<string, { eyebrow: string; body: string; href: string; label: string }> = {
+  "bon-fiscal-obligatoriu-cand-si-cum": {
+    eyebrow: "Din regula fiscală în fluxul de lucru",
+    body: "În franchisetech, bonul fiscal nu este o promisiune generică: vânzarea din POS păstrează produsele, TVA-ul, metoda de plată, statusul FiscalNet și datele pentru raportul Z într-un singur loc.",
+    href: "/features/qr-code-receipts",
+    label: "Vezi fluxul de bon fiscal",
+  },
+  "cum-anulezi-un-bon-fiscal-emis-gresit": {
+    eyebrow: "Anulările rămân în evidență, nu în memorie",
+    body: "O anulare sau un retur greșit gestionat e exact genul de neconcordanță pe care un control fiscal o caută. În franchisetech, fiecare anulare trece prin POS și rămâne înregistrată cu utilizatorul și ora, nu doar notată verbal.",
+    href: "/features/pos",
+    label: "Vezi cum funcționează POS-ul",
+  },
+  "program-legal-de-lucru-horeca-romania": {
+    eyebrow: "Nu ținem evidența legală a orelor — dar simplificăm rotația",
+    body: "franchisetech nu înlocuiește pontajul sau un specialist în legislația muncii. Ce oferă real: personal nelimitat pe plan, fără taxă per angajat, ca rotația de ture să nu coste extra de fiecare dată când adaugi un casier.",
+    href: "/pricing",
+    label: "Vezi planurile cu personal nelimitat",
+  },
+  "conectare-casa-marcat-anaf-erori-frecvente": {
+    eyebrow: "Starea fiecărui bon, vizibilă înainte să devină problemă",
+    body: "franchisetech arată starea fiecărui bon trimis prin FiscalNet — trimis, în așteptare sau eșuat — cu reîncercare directă din POS, nu abia descoperită la o reconciliere de sfârșit de lună.",
+    href: "/features/qr-code-receipts",
+    label: "Vezi statusul bonurilor fiscale",
+  },
+};
+
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
 }
@@ -119,20 +156,48 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             ))}
           </div>
 
-          {post.relatedFeature && (
-            <div className="mt-12 rounded-xl border border-blue-100 bg-blue-50/50 p-6">
-              <p className="text-sm font-semibold text-slate-900">Funcționalitate în franchisetech</p>
-              <p className="mt-1 text-sm text-slate-600">
-                Vrei să gestionezi asta direct din aplicație? franchisetech are această funcționalitate inclusă.
-              </p>
-              <Link
-                href={post.relatedFeature}
-                className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline"
-              >
-                Descoperă funcționalitatea <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          )}
+          {(() => {
+            const fearCta = REGULATION_FEAR_CTAS[post.slug];
+            if (fearCta) {
+              return (
+                <div className="mt-12 rounded-lg border border-blue-100 bg-blue-50/70 p-5 sm:p-6">
+                  <p className="text-sm font-semibold text-slate-900">{fearCta.eyebrow}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">{fearCta.body}</p>
+                  <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                    <Link
+                      href={fearCta.href}
+                      className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                    >
+                      {fearCta.label} <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <Link
+                      href="/signup?plan=starter"
+                      className="inline-flex items-center justify-center rounded-md border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 hover:border-blue-300"
+                    >
+                      Deschide casa gratuit 15 zile
+                    </Link>
+                  </div>
+                </div>
+              );
+            }
+            if (post.relatedFeature) {
+              return (
+                <div className="mt-12 rounded-lg border border-blue-100 bg-blue-50/70 p-5 sm:p-6">
+                  <p className="text-sm font-semibold text-slate-900">Funcționalitate în franchisetech</p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Vrei să gestionezi asta direct din aplicație? franchisetech are această funcționalitate inclusă.
+                  </p>
+                  <Link
+                    href={post.relatedFeature}
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline"
+                  >
+                    Descoperă funcționalitatea <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
       </article>
 

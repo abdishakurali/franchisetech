@@ -386,7 +386,6 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     related: [
       { label: "POS", href: "/features/pos" },
       { label: "Cafenele", href: "/industries/cafes" },
-      { label: "Restaurante", href: "/industries/restaurants" },
     ],
   },
   romania: {
@@ -446,7 +445,6 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       },
     ],
     related: [
-      { label: "Rapoarte contabilitate", href: "/features/accountant-reports" },
       { label: "Comparație Ebriza", href: "/compare/ebriza" },
       { label: "Raport Z", href: "/features/z-report" },
       { label: "Cafenele", href: "/industries/cafes" },

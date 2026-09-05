@@ -53,7 +53,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["nir", "achizitii", "furnizori", "contabilitate"],
     image: "/marketing/pos-hero.png",
-    relatedFeature: "/features/nir",
     sections: [
       {
         heading: "Ce este NIR-ul?",
@@ -86,7 +85,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["retete", "cost-reteta", "marja", "menu-engineering"],
     image: "/marketing/recipe-costing-hero.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce contează costul rețetei?",
@@ -119,7 +117,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["bon-de-consum", "contabilitate", "stoc", "retete"],
     image: "/marketing/reports-zreport.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce este bonul de consum?",
@@ -152,7 +149,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["saga", "export-contabil", "contabilitate", "nir"],
     image: "/marketing/reports-zreport.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce este exportul Saga?",
@@ -280,7 +276,6 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["stoc", "aprovizionare", "operatiuni"],
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Problema reală: afli că ați terminat cafeaua când vine primul client",
@@ -312,7 +307,6 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["marja", "retete", "cost-reteta"],
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Ce este marja brută și de ce e diferită de profit",
@@ -378,7 +372,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["fiscal","control-anaf","amenzi"],
     image: "/marketing/hero-casa-marcat.jpg",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Neemiterea bonului fiscal",
@@ -481,7 +474,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["fiscal","arhivare","contabilitate"],
     image: "/marketing/reports-zreport.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce documente fiscale trebuie arhivate",
@@ -514,7 +506,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["fiscal","control-anaf"],
     image: "/marketing/hero-casa-marcat.jpg",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce declanșează de obicei un control",
@@ -617,7 +608,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["fiscal","pfa","contabilitate"],
     image: "/marketing/dashboard-hero.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce este Declarația Unică și cine o depune",
@@ -650,7 +640,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["fiscal","saf-t","conformitate"],
     image: "/marketing/hero-casa-marcat.jpg",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce este SAF-T",
@@ -757,7 +746,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["fiscal", "factura", "conformitate", "export-contabil"],
     image: "/marketing/dashboard-hero.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce este RO e-Factura, pe scurt",
@@ -794,7 +782,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["fiscal", "control-anaf", "conformitate", "legal"],
     image: "/marketing/hero-casa-marcat.jpg",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Două tipuri de control — nu au aceleași reguli",
@@ -831,7 +818,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["fiscal","contabilitate","conformitate"],
     image: "/marketing/dashboard-hero.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "De ce contează un calendar fiscal clar",
@@ -1239,7 +1225,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","inventar"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Ce înseamnă stoc scriptic și stoc fizic",
@@ -1276,7 +1261,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","fifo","risipa"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Ce este FIFO și de ce contează la perisabile",
@@ -1313,7 +1297,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","scazaminte"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Ce este un scăzământ",
@@ -1350,7 +1333,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","ambalaje"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Problema când ambalajele sunt amestecate cu materiile prime",
@@ -1387,7 +1369,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","multi-locatie"],
     image: "/marketing/industry-restaurant.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "De ce stocul pe mai multe locații devine haos rapid",
@@ -1424,7 +1405,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","alerte"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Ce se întâmplă când pragul de alertă e setat greșit",
@@ -1461,7 +1441,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","materii-prime"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Ce înseamnă, în practică, fiecare tip de stoc",
@@ -1494,7 +1473,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","transfer","multi-locatie"],
     image: "/marketing/industry-restaurant.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Când apare nevoia de transfer între locații",
@@ -1527,7 +1505,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","stoc-negativ"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Ce înseamnă stoc negativ și de ce e un semnal de alarmă",
@@ -1560,7 +1537,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","sezonier","cafenea"],
     image: "/marketing/industry-cafe.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "De ce se schimbă radical consumul între sezoane",
@@ -1593,7 +1569,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","furnizori"],
     image: "/marketing/industry-cafe.png",
-    relatedFeature: "/features/purchases-suppliers",
     sections: [
       {
         heading: "Ce contează cu adevărat, nu doar prețul de listă",
@@ -1626,7 +1601,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","nir","furnizori"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/nir",
     sections: [
       {
         heading: "Situația: marfa a ajuns, factura nu",
@@ -1659,7 +1633,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["retete","pret","marja"],
     image: "/marketing/recipe-costing-hero.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Greșeala de a copia prețul de la vecini",
@@ -1696,7 +1669,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["menu-engineering","marja"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Ce este menu engineering, pe scurt",
@@ -1733,7 +1705,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["retete","portionare"],
     image: "/marketing/recipe-costing-hero.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Ce se întâmplă când nu aveți rețete standardizate",
@@ -1766,7 +1737,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["retete","delivery","cost"],
     image: "/marketing/recipe-costing-hero.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce ambalajul e ignorat frecvent la calculul prețului",
@@ -1799,7 +1769,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["marja","retete"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce o marjă țintă unică pentru tot meniul e o greșeală",
@@ -1836,7 +1805,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["retete","pret","furnizori"],
     image: "/marketing/recipe-costing-hero.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Semnalul de alarmă: cum afli de scumpire înainte să vă lovească la finalul lunii",
@@ -1873,7 +1841,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["retete","sezonier","marja"],
     image: "/marketing/recipe-costing-hero.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce meniul sezonier e cel mai expus la marjă neprevăzută",
@@ -1910,7 +1877,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["alergeni","etichetare","conformitate"],
     image: "/marketing/products-list.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Ce spune legea — informarea despre alergeni nu e opțională",
@@ -1947,7 +1913,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["food-cost","marja"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Ce este food cost percentage și cum se calculează",
@@ -1984,7 +1949,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["risipa","cost"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce risipa alimentară e cheltuiala invizibilă din HoReCa",
@@ -2021,7 +1985,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["retete","pret","combo"],
     image: "/marketing/recipe-costing-hero.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce combo-urile sunt capcana clasică de marjă",
@@ -2058,7 +2021,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["marja","happy-hour"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce happy hour sună bine dar poate să-vă scadă profitul, nu doar prețul",
@@ -2705,7 +2667,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["contabilitate","pos"],
     image: "/marketing/dashboard-hero.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce este registrul jurnal și de ce vă privește",
@@ -2738,7 +2699,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["contabilitate","balanta","stoc"],
     image: "/marketing/reports-sales.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce este, de fapt, balanța cantitativ-valorică",
@@ -2771,7 +2731,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["tva","contabilitate"],
     image: "/marketing/reports-sales.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce rol are POS-ul în decontul de TVA",
@@ -2804,7 +2763,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["contabilitate","export"],
     image: "/marketing/dashboard-hero.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Diferența simplă dintre CSV și XML",
@@ -2837,7 +2795,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["contabilitate","conformitate"],
     image: "/marketing/dashboard-hero.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "De ce nu puteți improviza lista asta",
@@ -2874,7 +2831,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["contabilitate","cheltuieli"],
     image: "/marketing/reports-sales.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "De ce contează distincția, nu doar la control",
@@ -2911,7 +2867,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["contabilitate","banca","numerar"],
     image: "/marketing/reports-zreport.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce este reconcilierea bancă-casă și de ce diverge aproape mereu",
@@ -2944,7 +2899,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["contabilitate","rapoarte"],
     image: "/marketing/dashboard-hero.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "De ce contabilul cere aceleași documente în fiecare lună",
@@ -3088,7 +3042,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["patiserie","stoc","risipa"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "Risipa la patiserie e diferită de risipa la restaurant",
@@ -3125,7 +3078,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["health-bar","marja"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce un juice bar pare profitabil pe hârtie și deseori nu e",
@@ -3265,7 +3217,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["catering","facturare"],
     image: "/marketing/reports-sales.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce e diferit la catering față de o vânzare normală la casă",
@@ -3298,7 +3249,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["terasa","sezonier","cafenea"],
     image: "/marketing/industry-cafe.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "De ce vara schimbă tot modelul de operare",
@@ -3331,7 +3281,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["breakeven","marja","financiar"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Ce este pragul de rentabilitate și de ce trebuie să-l știți",
@@ -3364,7 +3313,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["costuri","financiar"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Ce sunt costurile fixe și ce sunt costurile variabile",
@@ -3397,7 +3345,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["pret","meniu","psihologie"],
     image: "/marketing/products-list.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Ce este pricing psihologic și de ce nu e o păcăleală",
@@ -3430,7 +3377,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["food-cost","marja"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Ce este food cost-ul și de ce crește fără să observați",
@@ -3467,7 +3413,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["profitabilitate","financiar"],
     image: "/marketing/reports-sales.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce profitul pe zi vă poate păcăli",
@@ -3533,7 +3478,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["buget","financiar","cafenea"],
     image: "/marketing/dashboard-hero.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "De ce aveți nevoie de un buget lunar, chiar dacă sunteți mic",
@@ -3570,7 +3514,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["cash-flow","financiar"],
     image: "/marketing/dashboard-hero.png",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Profit pe hârtie vs. bani reali în cont",
@@ -3607,7 +3550,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["stoc","greseli"],
     image: "/marketing/stock-report.png",
-    relatedFeature: "/features/stock-management",
     sections: [
       {
         heading: "De ce gestiunea stocului stă la baza marjei dumneavoastră",
@@ -3718,7 +3660,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["sezonier","craciun","retete"],
     image: "/marketing/industry-restaurant.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce meniul de Crăciun e o capcană de marjă",
@@ -3755,7 +3696,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["sezonier","paste","retete"],
     image: "/marketing/industry-restaurant.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "De ce meniul de Paște are aceleași riscuri ca cel de Crăciun — dar cu alte ingrediente",
@@ -3792,7 +3732,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["black-friday","marja","reduceri"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Black Friday în HoReCa e diferit de Black Friday în retail",
@@ -3829,7 +3768,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["fiscal","control-anaf"],
     image: "/marketing/hero-casa-marcat.jpg",
-    relatedFeature: "/features/accountant-reports",
     sections: [
       {
         heading: "Ce este controlul inopinat și ce vizează în HoReCa",
@@ -3940,7 +3878,6 @@ export const blogPosts: BlogPost[] = [
     locale: "ro",
     tags: ["marja", "food-cost", "cost-reteta", "profitabilitate"],
     image: "/marketing/margins-report.png",
-    relatedFeature: "/features/recipe-costing",
     sections: [
       {
         heading: "Marja nu se pierde dintr-o dată — se erodează",

@@ -86,7 +86,6 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     related: [
       { label: "Funcționalitate POS", href: "/features/pos" },
-      { label: "Cost rețete", href: "/features/recipe-costing" },
       { label: "Comparație SumUp", href: "/compare/sumup" },
     ],
     rows: baseRows("Square", "Square POS — ecosistem de plăți puternic, variază pe regiuni"),
@@ -132,7 +131,6 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     related: [
       { label: "Comparație Square", href: "/compare/square" },
-      { label: "Gestiune stoc", href: "/features/stock-management" },
       { label: "Ghid închidere de zi", href: "/resources/cash-up-at-end-of-day" },
     ],
     rows: baseRows("SumUp", "SumUp POS / plăți — orientat pe acceptare card"),
@@ -171,7 +169,6 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     related: [
       { label: "Prețuri", href: "/pricing" },
-      { label: "Restaurante", href: "/industries/restaurants" },
       { label: "Alternativă Lightspeed (RO)", href: "/compare/expressoft" },
     ],
     rows: baseRows("Lightspeed", "Lightspeed — platformă amplă HoReCa, prețuri pe niveluri"),
@@ -877,7 +874,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Prețuri listate pe site: Core 49€, Operations 79€, Multi-location 89€/locație — fără cotație sau taxă de implementare",
       "Browser POS — fără instalare locală sau taxă de setup",
       "Raport Z zilnic — numerar așteptat vs numărat, fără Excel",
-      "Export Saga C (XML) pentru contabil — fără transcriere manuală",
+      "Export Saga C (XML) pentru contabil, la cerere — fără transcriere manuală",
       "Cost rețete și marje incluse în Pro — știți marja înainte de a schimba meniul",
     ],
     sections: [
@@ -891,7 +888,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Livrare — punct forte Boogit, nu al nostru",
-        body: "Boogit integrează Bolt, Wolt și Glovo, cu comenzile ajungând automat pe KDS. franchisetech nu oferă integrare cu platforme de livrare — ne concentrăm pe casă, stoc, rețete și export Saga C (XML), inclus în planul Pro. Dacă livrarea prin platforme e o cerință centrală, Boogit acoperă acel job direct.",
+        body: "Boogit integrează Bolt, Wolt și Glovo, cu comenzile ajungând automat pe KDS. franchisetech nu oferă integrare cu platforme de livrare — ne concentrăm pe casă, stoc, rețete și export Saga C (XML), disponibil la cerere. Dacă livrarea prin platforme e o cerință centrală, Boogit acoperă acel job direct.",
       },
     ],
     faqs: [
@@ -903,7 +900,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Boogit are export Saga pentru contabil?",
         answer:
-          "Da — site-ul Boogit menționează export automat al vânzărilor și NIR-urilor către Saga. franchisetech include de asemenea export Saga C (XML) în planul Pro la 79€/lună.",
+          "Da — site-ul Boogit menționează export automat al vânzărilor și NIR-urilor către Saga. franchisetech oferă de asemenea export Saga C (XML), disponibil la cerere.",
       },
       {
         question: "Funcționează franchisetech cu platforme de livrare?",
@@ -924,7 +921,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Raport Z / închidere", "Inclus Starter — așteptat vs numărat zilnic", "Neconfirmat pe site — verificați cu furnizorul"],
       ["Stoc & NIR", "Pro — stoc, furnizori, NIR", "Gestiune stoc disponibilă — verificați detaliile cu furnizorul"],
       ["Rețete & marje", "Pro — cost porție, marjă, can-make", "Neconfirmat pe site — verificați cu furnizorul"],
-      ["Export contabilitate", "Saga C (XML) inclus pentru contabil", "Export automat vânzări/NIR către Saga"],
+      ["Export contabilitate", "Saga C (XML) disponibil la cerere", "Export automat vânzări/NIR către Saga"],
       ["Integrare livrare", "Nu oferim", "Bolt, Wolt, Glovo — automat, direct pe KDS"],
       ["Chioșc self-ordering / QR masă", "Nu este inclus", "Disponibil — punct forte Boogit"],
       ["Preț", "49–109€/lună listat pe site, fără taxă de implementare", "Cotație — taxă de implementare + abonament, contact +40 755 111 774"],
@@ -936,14 +933,14 @@ export const comparisonPages: ComparisonPage[] = [
     path: "/compare/freyapos",
     competitor: "FreyaPOS",
     market: "ro",
-    metaTitle: "Alternativă FreyaPOS — POS HoReCa, preț listat, Saga inclus",
+    metaTitle: "Alternativă FreyaPOS — POS HoReCa, preț listat, export Saga la cerere",
     description:
       "Comparație onestă franchisetech vs FreyaPOS: ambele au POS + livrare + gestiune pentru HoReCa România. Diferențele reale: preț listat vs cotație, Saga export, rețete și browser vs instalat.",
     h1: "franchisetech vs FreyaPOS — comparație onestă HoReCa România",
     intro:
       "FreyaPOS este un POS pentru restaurante și retail din România cu funcții de gestiune, livrare (Glovo/Tazz ca modul opțional), rezervări și loyalty. Nu afișează prețuri publice — obțineți ofertă la sales@freyapos.com. franchisetech acoperă operațiunile zilnice cu browser POS, cost rețete și export Saga — la 49–109€/lună listat pe site, trial 15 zile, verificare card 1 €.",
     betterFor:
-      "FreyaPOS poate câștiga dacă aveți nevoie de modul de rezervări, loyalty integrat și preferați relație directă cu un furnizor local cu cotație. franchisetech câștigă dacă vreți preț listat transparent, browser POS fără instalare, export Saga pentru contabil și cost rețete inclus în planul Pro.",
+      "FreyaPOS poate câștiga dacă aveți nevoie de modul de rezervări, loyalty integrat și preferați relație directă cu un furnizor local cu cotație. franchisetech câștigă dacă vreți preț listat transparent, browser POS fără instalare, cost rețete inclus în planul Pro și export Saga la cerere.",
     competitorStrengths: [
       "POS HoReCa și retail — modul restaurant și retail în același sistem",
       "Integrare Glovo și Tazz disponibilă (modul opțional la cerere)",
@@ -957,7 +954,7 @@ export const comparisonPages: ComparisonPage[] = [
     franchisetechStrengths: [
       "Prețuri listate pe site: Core 49€, Operations 79€ — fără cotație",
       "Browser POS — fără instalare locală, funcționează pe orice laptop sau tabletă",
-      "Export Saga C (XML) inclus — contabilul importă direct, fără transcriere",
+      "Export Saga C (XML) la cerere — contabilul importă direct, fără transcriere",
       "Cost rețete și marje — știți marja pe preparat înainte de a schimba meniul",
       "Trial 15 zile, verificare card 1 € — prima vânzare în ore, fără proiect de implementare",
     ],
@@ -972,19 +969,19 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Export Saga și cost rețete",
-        body: "FreyaPOS nu menționează export Saga pe site-ul lor. franchisetech include export Saga C (XML) în planul Pro — contabilul primește fișierul gata de import. Cost rețete (cost/porție, marjă, can-make) este disponibil în planul Pro — FreyaPOS nu detaliază această funcție.",
+        body: "FreyaPOS nu menționează export Saga pe site-ul lor. franchisetech oferă export Saga C (XML) la cerere — contabilul primește fișierul gata de import. Cost rețete (cost/porție, marjă, can-make) este disponibil în planul Pro — FreyaPOS nu detaliază această funcție.",
       },
     ],
     faqs: [
       {
         question: "FreyaPOS are export Saga pentru contabil?",
         answer:
-          "Site-ul FreyaPOS nu menționează export Saga. Contactați-i la sales@freyapos.com pentru confirmare. franchisetech include export Saga C (XML) în planul Pro la 79€/lună — contabilul importă fișierul direct în Saga, fără transcriere.",
+          "Site-ul FreyaPOS nu menționează export Saga. Contactați-i la sales@freyapos.com pentru confirmare. franchisetech oferă export Saga C (XML) la cerere — contabilul importă fișierul direct în Saga, fără transcriere.",
       },
       {
         question: "Care e diferența principală față de FreyaPOS?",
         answer:
-          "Ambele acoperă POS HoReCa + livrare + multi-locație. Diferențele reale: franchisetech listează prețurile pe site (49–109€), include export Saga și cost rețete, funcționează browser fără instalare, cu trial 15 zile, verificare card 1 €. FreyaPOS are loyalty și rezervări integrate — funcții pe care franchisetech nu le include.",
+          "Ambele acoperă POS HoReCa + livrare + multi-locație. Diferențele reale: franchisetech listează prețurile pe site (49–109€), oferă export Saga la cerere și cost rețete inclus, funcționează browser fără instalare, cu trial 15 zile, verificare card 1 €. FreyaPOS are loyalty și rezervări integrate — funcții pe care franchisetech nu le include.",
       },
       {
         question: "FreyaPOS funcționează offline?",
@@ -995,7 +992,6 @@ export const comparisonPages: ComparisonPage[] = [
     related: [
       { label: "Comparație hePOS", href: "/compare/hepos" },
       { label: "Comparație RezoSoft", href: "/compare/rezosoft" },
-      { label: "Cost rețete", href: "/features/recipe-costing" },
       { label: "Prețuri", href: "/pricing" },
     ],
     rows: [
@@ -1059,12 +1055,12 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "POSnet are integrare Saga C?",
         answer:
-          "Da — POSnet include integrare Saga C pentru contabilitate, conform informațiilor de pe site-ul lor. franchisetech include de asemenea export Saga C (XML) în planul Pro la 79€/lună. Ambele sisteme acoperă această cerință.",
+          "Da — POSnet include integrare Saga C pentru contabilitate, conform informațiilor de pe site-ul lor. franchisetech oferă de asemenea export Saga C (XML), disponibil la cerere. Ambele sisteme pot acoperi această cerință.",
       },
       {
         question: "Ce are POSnet și franchisetech nu are?",
         answer:
-          "POSnet are: import automat comenzi Glovo/Bolt/Wolt, licență definitivă (fără abonament lunar), funcționare offline, chioșc self-ordering, import NIR auto din SPV e-Factura. franchisetech nu oferă integrare cu platforme de livrare, nu oferă licență one-time, nu funcționează offline și nu are chioșc. Evaluați dacă aceste funcții sunt critice pentru locația voastră.",
+          "POSnet are: import automat comenzi Glovo/Bolt/Wolt, licență definitivă (fără abonament lunar), chioșc self-ordering, import NIR auto din SPV e-Factura. franchisetech nu oferă integrare cu platforme de livrare, nu oferă licență one-time și nu are chioșc — dar continuă să funcționeze offline, cu vânzările puse în coadă și sincronizate automat la revenirea conexiunii. Evaluați dacă aceste funcții sunt critice pentru locația voastră.",
       },
       {
         question: "Ce are franchisetech și POSnet nu detaliază?",
@@ -1075,13 +1071,12 @@ export const comparisonPages: ComparisonPage[] = [
     related: [
       { label: "Comparație hePOS", href: "/compare/hepos" },
       { label: "Comparație Ebriza", href: "/compare/ebriza" },
-      { label: "Cost rețete", href: "/features/recipe-costing" },
       { label: "Prețuri", href: "/pricing" },
     ],
     rows: [
       ["Model comercial", "Abonament lunar — 49€/79€/109€ listat pe site", "Licență definitivă (one-time) — fără abonament lunar"],
       ["Import livrare", "Nu oferim", "Glovo, Bolt, Wolt auto-import — fără introducere manuală"],
-      ["Export Saga C", "Inclus Pro (79€/lună)", "Da — integrare Saga C inclusă"],
+      ["Export Saga C", "La cerere", "Da — integrare Saga C inclusă"],
       ["NIR auto", "Pro — NIR manual și furnizori", "NIR auto din e-Factura SPV — import direct"],
       ["Cost rețete & marje", "Pro — cost/porție, marjă, can-make", "Nedetaliat pe site — verificați cu furnizorul"],
       ["Funcționare offline", "Nu — necesită internet", "Da — funcționează fără internet"],
@@ -1117,7 +1112,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Prețuri listate: Core 49€, Operations 79€, Multi-location 89€/locație — fără cotație",
       "Implementare self-serve — prima vânzare în ore, fără proiect IT",
       "Browser POS — fără instalare locală sau mentenanță server",
-      "Export Saga C (XML) — contabilul primește fișierul gata de import",
+      "Export Saga C (XML) la cerere — contabilul primește fișierul gata de import",
       "Cost rețete per porție și marjă brută — inclus Pro",
     ],
     sections: [
@@ -1148,7 +1143,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "rKeeper exportă în Saga pentru contabil?",
         answer:
-          "Nu este menționat pe site-ul rKeeper România. Verificați cu furnizorul (+40 741 065 298). franchisetech include export Saga C (XML) în planul Pro la 79€/lună.",
+          "Nu este menționat pe site-ul rKeeper România. Verificați cu furnizorul (+40 741 065 298). franchisetech oferă export Saga C (XML) la cerere.",
       },
     ],
     related: [
@@ -1195,7 +1190,7 @@ export const comparisonPages: ComparisonPage[] = [
     franchisetechStrengths: [
       "Implementare în ore — trial self-serve 15 zile, verificare card 1 €, fără proiect IT",
       "Prețuri listate: Core 49€, Operations 79€, Multi-location 89€/locație — fără cotație",
-      "Export Saga C (XML) — contabilul primește fișierul gata de import",
+      "Export Saga C (XML) la cerere — contabilul primește fișierul gata de import",
       "Cost rețete per porție și marjă — știți rentabilitatea înainte de a schimba meniul",
       "Personal nelimitat pe plan plătit — fără taxă per casier/terminal",
     ],
@@ -1210,7 +1205,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Contabilitate și Saga — ce face fiecare",
-        body: "Nexus ERP nu menționează export Saga pe site-ul lor. Verificați cu echipa NexusERP dacă exportul Saga C este disponibil și în ce plan. franchisetech include export Saga C (XML) în Pro la 79€/lună — contabilul importă direct, fără transcriere. Nexus ERP are integrare bancară nativă (extrase automate) — franchisetech nu are această funcție.",
+        body: "Nexus ERP nu menționează export Saga pe site-ul lor. Verificați cu echipa NexusERP dacă exportul Saga C este disponibil și în ce plan. franchisetech oferă export Saga C (XML) la cerere — contabilul importă direct, fără transcriere. Nexus ERP are integrare bancară nativă (extrase automate) — franchisetech nu are această funcție.",
       },
       {
         title: "Multi-locație — abordare diferită",
@@ -1231,7 +1226,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Nexus ERP exportă în Saga?",
         answer:
-          "Site-ul Nexus ERP nu menționează export Saga C. Verificați direct cu echipa lor. franchisetech include export Saga C (XML) în Pro la 79€/lună — fișierul gata de import pentru contabil.",
+          "Site-ul Nexus ERP nu menționează export Saga C. Verificați direct cu echipa lor. franchisetech oferă export Saga C (XML) la cerere — fișierul gata de import pentru contabil.",
       },
       {
         question: "Nexus ERP are import extrase bancare automat?",

@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { CtaRow, FinalCta } from "@/components/marketing/MarketingCta";
 import { HeroHeadline } from "@/components/marketing/HeroHeadline";
 import { MarketingBrowserShot } from "@/components/marketing/MarketingBrowserShot";
+import { OwnerPosProof } from "@/components/marketing/OwnerProofScreens";
 import { SectionLabel } from "@/components/marketing/MarketingShell.primitives";
 import { marketingCard, marketingHeroBg, marketingHeroRadial, marketingSubtext } from "@/lib/marketing/tokens";
 import type { SeoPage } from "@/lib/marketing/seo";
@@ -71,13 +72,17 @@ export function IndustryLandingPage({ page, ui }: IndustryLandingPageProps) {
           {showcase ? (
             <div className="w-full min-w-0 flex-1 lg:max-w-none">
               <div className="rotate-[1.25deg] transition-transform duration-500 hover:rotate-0 lg:rotate-[1.75deg]">
-                <MarketingBrowserShot
-                  src={showcase.src}
-                  alt={showcase.alt}
-                  path={showcase.path}
-                  chrome
-                  priority
-                />
+                {"component" in showcase ? (
+                  <showcase.component />
+                ) : (
+                  <MarketingBrowserShot
+                    src={showcase.src}
+                    alt={showcase.alt}
+                    path={showcase.path}
+                    chrome
+                    priority
+                  />
+                )}
               </div>
             </div>
           ) : null}
@@ -115,12 +120,16 @@ export function IndustryLandingPage({ page, ui }: IndustryLandingPageProps) {
                   <h3 className="text-xl font-bold text-slate-950 sm:text-2xl">{row.title}</h3>
                   <p className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-base">{row.body}</p>
                 </div>
-                <MarketingBrowserShot
-                  src={row.image}
-                  alt={row.imageAlt}
-                  path={row.path ?? "/app"}
-                  chrome
-                />
+                {"component" in row ? (
+                  <row.component />
+                ) : (
+                  <MarketingBrowserShot
+                    src={row.image}
+                    alt={row.imageAlt}
+                    path={row.path ?? "/app"}
+                    chrome
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -181,21 +190,23 @@ export function IndustryLandingPage({ page, ui }: IndustryLandingPageProps) {
               ))}
             </div>
           </div>
-          <aside className="h-fit rounded-xl border border-slate-200 p-5">
-            <h2 className="font-bold text-slate-950">{ui.relevantFeatures}</h2>
-            <div className="mt-4 space-y-3">
-              {page.related.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="flex items-center justify-between text-sm font-medium text-blue-600 hover:underline"
-                >
-                  {link.label}
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              ))}
-            </div>
-          </aside>
+          {page.related.length > 0 ? (
+            <aside className="h-fit rounded-xl border border-slate-200 p-5">
+              <h2 className="font-bold text-slate-950">{ui.relevantFeatures}</h2>
+              <div className="mt-4 space-y-3">
+                {page.related.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="flex items-center justify-between text-sm font-medium text-blue-600 hover:underline"
+                  >
+                    {link.label}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ))}
+              </div>
+            </aside>
+          ) : null}
         </div>
       </section>
 
@@ -209,30 +220,43 @@ export function IndustryLandingPage({ page, ui }: IndustryLandingPageProps) {
 
 /** Fallback for non-primary industry pages (romania, ireland, health-bars, etc.). */
 function LegacyIndustryLayout({ page, ui }: IndustryLandingPageProps) {
+  const HeroComponent = page.heroComponent;
   return (
     <>
-      {page.image && (
-        <div className="relative h-56 w-full overflow-hidden sm:h-72 lg:h-80">
-          <img src={page.image} alt={page.h1} className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 px-4 pb-8 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-6xl">
-              <p className="text-sm font-semibold uppercase tracking-wide text-blue-200">{page.eyebrow}</p>
-              <h1 className="mt-2 max-w-3xl text-3xl font-bold text-white sm:text-4xl">{page.h1}</h1>
+      {HeroComponent ? (
+        <div className="px-4 pb-2 pt-10 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">{page.eyebrow}</p>
+            <h1 className="mt-2 max-w-3xl text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{page.h1}</h1>
+            <div className="mt-6 max-w-2xl">
+              <HeroComponent />
             </div>
           </div>
         </div>
+      ) : (
+        page.image && (
+          <div className="relative h-56 w-full overflow-hidden sm:h-72 lg:h-80">
+            <img src={page.image} alt={page.h1} className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 px-4 pb-8 sm:px-6 lg:px-8">
+              <div className="mx-auto max-w-6xl">
+                <p className="text-sm font-semibold uppercase tracking-wide text-blue-200">{page.eyebrow}</p>
+                <h1 className="mt-2 max-w-3xl text-3xl font-bold text-white sm:text-4xl">{page.h1}</h1>
+              </div>
+            </div>
+          </div>
+        )
       )}
 
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          {!page.image && (
+          {!page.image && !HeroComponent && (
             <>
               <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">{page.eyebrow}</p>
               <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">{page.h1}</h1>
             </>
           )}
-          <p className={`max-w-2xl text-lg text-slate-600 ${page.image ? "" : "mt-5"}`}>{page.intro}</p>
+          <p className={`max-w-2xl text-lg text-slate-600 ${page.image || HeroComponent ? "" : "mt-5"}`}>{page.intro}</p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <Link
               href="/signup"
@@ -268,7 +292,7 @@ function LegacyIndustryLayout({ page, ui }: IndustryLandingPageProps) {
                 </div>
               ))}
             </div>
-            <MarketingBrowserShot src="/showcase/pos-cart.png" alt={page.eyebrow} path="/app/pos" chrome />
+            <OwnerPosProof />
           </div>
         </section>
       ) : null}

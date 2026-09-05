@@ -48,10 +48,12 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
             <h2 className="text-2xl font-bold text-slate-950">FAQ</h2>
             <div className="mt-6 space-y-5">{page.faqs.map((faq) => <div key={faq.question} className="border-b border-slate-100 pb-5"><h3 className="font-semibold text-slate-950">{faq.question}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p></div>)}</div>
           </section>
-          <section className="mt-12 rounded-xl border border-slate-200 p-5">
-            <h2 className="font-bold text-slate-950">Related reading</h2>
-            <div className="mt-4 space-y-3">{page.related.map((link) => <Link key={link.href} href={link.href} className="flex items-center justify-between text-sm font-medium text-blue-600 hover:underline">{link.label}<ArrowRight className="h-4 w-4" /></Link>)}</div>
-          </section>
+          {page.related.length > 0 ? (
+            <section className="mt-12 rounded-xl border border-slate-200 p-5">
+              <h2 className="font-bold text-slate-950">Related reading</h2>
+              <div className="mt-4 space-y-3">{page.related.map((link) => <Link key={link.href} href={link.href} className="flex items-center justify-between text-sm font-medium text-blue-600 hover:underline">{link.label}<ArrowRight className="h-4 w-4" /></Link>)}</div>
+            </section>
+          ) : null}
         </article>
       </section>
       <CTASection />

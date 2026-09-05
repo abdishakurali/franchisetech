@@ -275,7 +275,7 @@ export const en = {
         "Expected cash and card at every close — drawer matches",
         "Recipe costing before any menu change",
         "Know what sold and what's sitting on the shelf, any time",
-        "Saga export ready for your accountant — no manual transcription",
+        "Saga export for your accountant, on request — no manual transcription",
       ],
     },
     videoTestimonial: {
@@ -327,7 +327,7 @@ export const en = {
         { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
         { question: "Can I manage stock from the same system as POS?", answer: "Yes. Purchases, suppliers, and stock levels sit beside sales so owners see what is low before the next service." },
         { question: "What happens if the internet goes down?", answer: "The sale is saved locally and queued. You see \"offline\" on screen and \"synced\" once the connection is back." },
-        { question: "Can I export data to Saga for my accountant?", answer: "Yes. Saga C (XML) export is included. Your accountant receives the file ready to import — no manual transcription from reports." },
+        { question: "Can I export data to Saga for my accountant?", answer: "Saga C (XML) export is available, enabled on request — contact us to set it up for your organisation." },
         { question: "Does it work across multiple locations or sites?", answer: "Yes. Each location closes its own till and has a separate Z-report. Stock is shared company-wide, and one owner account sees all locations from a single dashboard." },
       ],
     },
@@ -492,7 +492,7 @@ export const en = {
     },
     notIncludedTitle: "What is not included yet",
     notIncludedText:
-      "You are responsible for purchasing and registering a compatible fiscal printer. franchisetech connects to it via FiscalNet and handles fiscal receipts, Z-reports, and ANAF e-Factura automatically. Online ordering and loyalty are not included yet.",
+      "You are responsible for purchasing and registering a compatible fiscal printer. franchisetech connects to it via FiscalNet and handles fiscal receipts and Z-reports automatically; ANAF e-Factura invoices are generated and submitted from the app, per invoice. Online ordering and loyalty are not included yet.",
     faqTitle: "Pricing FAQ",
     compareCompetitors: {
       title: "Total cost vs competitors (Romania)",
@@ -515,7 +515,7 @@ export const en = {
         },
         {
           name: "Bit-Soft enterprise",
-          summary: "Bit-Soft Breeze serves chains and hotels with quote-based pricing. franchisetech publishes €49–€99/month for independent 1–3 location venues.",
+          summary: "Bit-Soft Breeze serves chains and hotels with quote-based pricing. franchisetech publishes €49–€109/month for independent 1–3 location venues.",
           href: "/compare/bit-soft",
         },
       ],
@@ -531,11 +531,11 @@ export const en = {
       included: "Included",
       excluded: "Not included",
       footnote:
-        "Ebriza prices verified from ebriza.com/ro/preturi on 24 June 2026. POS and Z/TVA reports are on Core; stock, NIR, and recipes are on Operations; Saga and accountant reports are included on eligible plans.",
+        "Ebriza prices verified from ebriza.com/ro/preturi on 24 June 2026. POS and Z/TVA reports are on Core; stock, NIR, and recipes are on Operations; accountant reports are included on eligible plans, and Saga export is available on request.",
       readComparison: "Read full Ebriza comparison",
       compareHref: "/compare/ebriza",
       fallbackText:
-        "For Romania, franchisetech includes Z/TVA reports on Core, stock and NIR on Operations, and Saga export plus Romanian accounting reports on eligible plans.",
+        "For Romania, franchisetech includes Z/TVA reports on Core, stock and NIR on Operations, and Romanian accounting reports on eligible plans; Saga export is available on request.",
       rows: {
         posSales: "POS + sales",
         zReport: "Z-report / till close",
