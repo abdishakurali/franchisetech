@@ -14,7 +14,6 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Banknote, Check, ChevronDown, Coffee, Droplets, Equal, Gift, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
-import { openCashDrawer, type CashDrawerSettings } from "@/lib/cash-drawer";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -29,7 +28,8 @@ import { sendTabOrder, getTabPendingItems, type TabPendingItem } from "@/app/act
 import { PreBillPrintButton } from "@/components/app/PreBillPrintButton";
 import { PosOfflineBar } from "@/components/app/PosOfflineBar";
 import { CashCountModal } from "@/components/app/CashCountModal";
-import { friendlySaleError, paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
+import { friendlySaleErrorFromCode, paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
+import { classifySaleFailure } from "@/lib/pos-sale-failure";
 import { PosI18nProvider, usePosI18n, posIntlLocale } from "@/lib/pos-i18n-context";
 import {
   readCartBackupFromStorage,
@@ -123,11 +123,6 @@ async function downloadFiscalPayload(
 }
 
 function money(v: number, cur = "EUR") { if (cur === "RON") return `${v.toFixed(2)} lei`; return new Intl.NumberFormat("en-IE",{style:"currency",currency: cur || "EUR"}).format(v); }
-
-function isStaleServerActionError(err: unknown) {
-  const message = err instanceof Error ? err.message : String(err ?? "");
-  return message.includes("Failed to find Server Action") || message.includes("failed-to-find-server-action");
-}
 
 type PlaceholderCfg = {
   bg: string;
@@ -263,7 +258,6 @@ function pickDefaultPaymentId(methods: PaymentMethod[]) {
 
 function TillDialog({
   sessionId,
-  cashDrawerSettings,
   fiscalNet,
   fiscalActive = false,
   isRO = false,
@@ -275,7 +269,6 @@ function TillDialog({
   showTrigger = true,
 }: {
   sessionId?: string | null;
-  cashDrawerSettings?: CashDrawerSettings;
   fiscalNet?: BrowserFiscalConfig | null;
   fiscalActive?: boolean;
   isRO?: boolean;
@@ -302,7 +295,6 @@ function TillDialog({
     try {
       const amount = Number(formData.get("amount") ?? 0);
       await posCashMovement(formData);
-      const result = await openCashDrawer(movementType, cashDrawerSettings);
       // FiscalNet cash in/out — only when enabled in Settings
       if (fiscalActive && fiscalNet?.enabled && amount > 0) {
         const fnRes = movementType === "cash_in"
@@ -311,9 +303,9 @@ function TillDialog({
         if (fnRes.filename && fnRes.content) setLastTxt({ filename: fnRes.filename, content: fnRes.content });
         console.info("[FiscalNet] cash movement browser result", { type: movementType, ok: fnRes.ok, message: fnRes.message, mode: fiscalNet.connectionMode });
         const fnMsg = fnRes.ok ? ` | FiscalNet: ${fnRes.message}` : ` | ⚠️ FiscalNet: ${fnRes.message}`;
-        setMessage((result.cashierMessage ? `✓ ${result.cashierMessage}` : t.cashMovementSaved) + fnMsg);
+        setMessage(t.cashMovementSaved + fnMsg);
       } else {
-        setMessage(result.cashierMessage ? `✓ ${result.cashierMessage}` : t.cashMovementSaved);
+        setMessage(t.cashMovementSaved);
       }
       setTimeout(() => { setOpen(false); setMessage(null); setPending(false); }, 2000);
     } catch {
@@ -670,7 +662,7 @@ function orderTypeLabel(type: string, t: ReturnType<typeof usePosI18n>["t"]): st
 
 // ── Main PosRegister ─────────────────────────────────────────────────────────
 function PosRegisterInner({
-  products, categories, paymentMethods, sessionId, customers = [], recentTransactions = [], summary, cashDrawerSettings, fiscalNet = null, currency = "EUR", orgName = "", userName = "", sgrEnabled = false, sgrProduct = null,
+  products, categories, paymentMethods, sessionId, customers = [], recentTransactions = [], summary, fiscalNet = null, currency = "EUR", orgName = "", userName = "", sgrEnabled = false, sgrProduct = null,
   isRO = false, fiscalZReportDone: initialZReportDone = false,
   vatRateGroupMap = {},
   features = {},
@@ -688,7 +680,6 @@ function PosRegisterInner({
   customers?: Customer[];
   recentTransactions?: Transaction[];
   summary: PosSummary;
-  cashDrawerSettings?: CashDrawerSettings;
   fiscalNet?: BrowserFiscalConfig | null;
   /** True when org country is Romania — enables txt slip downloads */
   isRO?: boolean;
@@ -744,7 +735,6 @@ function PosRegisterInner({
   const [tillDialogOpen, setTillDialogOpen] = useState(false);
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
   const [closeTillDialogOpen, setCloseTillDialogOpen] = useState(false);
-  const [drawerNotice, setDrawerNotice] = useState<string | null>(null);
   const [lastCompletedSale, setLastCompletedSale] = useState<{
     amountLabel: string;
     transactionId?: string;
@@ -943,7 +933,7 @@ function PosRegisterInner({
   const selectedPaymentType = paymentMethods.find((m) => m.id === paymentMethodId)?.type ?? "other";
   const isCashSingle = selectedPaymentType === "cash" && activeSplitPayments.length === 0 && cart.length > 0;
   const cashUnderPaid = isCashSingle && typeof cashReceived === "number" && cashReceived > 0 && cashReceived < totalDue - 0.005;
-  const txDiscountPct = useMemo(() => transactionDiscountPct(cart), [cart]);
+  const txDiscountPct = transactionDiscountPct(cart);
   const checkoutCart = paymentCartSnapshot ?? cart;
   const checkoutTotalDue = useMemo(() => {
     const base =
@@ -955,6 +945,7 @@ function PosRegisterInner({
 
   function buildSaleFormData(saleCart: CartItem[], dueTotal: number): FormData {
     const fd = new FormData();
+    fd.set("idempotency_key", crypto.randomUUID());
     fd.set("cart_json", JSON.stringify(saleCart));
     fd.set("session_id", sessionId ?? "");
     fd.set("payment_method_id", paymentMethodId);
@@ -1046,7 +1037,7 @@ function PosRegisterInner({
       if (!res.ok || !res.transactionId) {
         const errMsg = res.ok
           ? t.saleSaveFailed
-          : friendlySaleError(res.error, locale);
+          : friendlySaleErrorFromCode(res.code, res.error, locale);
         setSaleStatus({ ok: false, msg: errMsg });
         setSalePending(false);
         setLastCompletedSale((prev) =>
@@ -1095,16 +1086,15 @@ function PosRegisterInner({
             message: fnRes.message,
             mode: fiscalNet.connectionMode,
           });
-        });
-      }
-      if (res.cashSale) {
-        void openCashDrawer("cash_sale", cashDrawerSettings).then((drawerResult) => {
-          if (drawerResult.cashierMessage) setDrawerNotice(drawerResult.cashierMessage);
+          if (fnRes.ok) {
+            captureClientEvent("receipt_issued", { transaction_id: res.transactionId, source: "fiscalnet" });
+          }
         });
       }
     } catch (err) {
       const errMsg = err instanceof Error ? err.message : t.saleSaveFailed;
-      if (isStaleServerActionError(err)) {
+      const action = classifySaleFailure(err);
+      if (action === "reload") {
         const reloadMsg = "Programul a fost actualizat. Reîncărcăm POS-ul și păstrăm vânzarea.";
         setSaleStatus({ ok: false, msg: reloadMsg });
         setSalePending(false);
@@ -1114,6 +1104,17 @@ function PosRegisterInner({
             : { amountLabel, status: "failed", retryPayload: payload, errorMsg: reloadMsg },
         );
         window.setTimeout(() => window.location.reload(), 900);
+        return;
+      }
+      if (action === "queue") {
+        enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
+        clearCartBackupFromStorage();
+        resetCartAfterSale();
+        setPaymentCartSnapshot(null);
+        setOfflineQueue(listOfflineQueue());
+        setLastCompletedSale({ amountLabel, status: "queued" });
+        setCheckoutStep("complete");
+        setSalePending(false);
         return;
       }
       setSaleStatus({ ok: false, msg: errMsg });
@@ -1268,7 +1269,7 @@ function PosRegisterInner({
       if (!res.ok || !res.transactionId) {
         markOfflineSaleSyncFailed(
           entry.id,
-          !res.ok ? friendlySaleError(res.error, locale) : t.saleSaveFailed,
+          !res.ok ? friendlySaleErrorFromCode(res.code, res.error, locale) : t.saleSaveFailed,
         );
         return false;
       }
@@ -1280,6 +1281,9 @@ function PosRegisterInner({
             setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
           }
           fiscalDone = fnRes.ok;
+          if (fnRes.ok) {
+            captureClientEvent("receipt_issued", { transaction_id: res.transactionId, source: "fiscalnet_offline_sync" });
+          }
         } catch {
           fiscalDone = false;
         }
@@ -1288,11 +1292,6 @@ function PosRegisterInner({
         removeOfflineSale(entry.id);
       } else {
         markOfflineSaleSynced(entry.id, res.transactionId);
-      }
-      if (res.cashSale) {
-        void openCashDrawer("cash_sale", cashDrawerSettings).then((drawerResult) => {
-          if (drawerResult.cashierMessage) setDrawerNotice(drawerResult.cashierMessage);
-        });
       }
       return true;
     } catch (err) {
@@ -1349,9 +1348,11 @@ function PosRegisterInner({
       clearInterval(timer);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- flush uses stable sale/fiscal helpers
-  }, [t.offlineSyncDone, t.offlineSyncing, fiscalActive, fiscalNet, cashDrawerSettings, locale]);
+  }, [t.offlineSyncDone, t.offlineSyncing, fiscalActive, fiscalNet, locale]);
 
   useEffect(() => {
+    // State changes occur after the server promise resolves; this is a tab refresh subscription.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshPendingTabItems();
   }, [activeTab?.id]);
 
@@ -1602,7 +1603,7 @@ function PosRegisterInner({
           </SheetContent>
         </Sheet>
         <RefundDialog recentTransactions={recentTransactions} currency={currency} open={refundDialogOpen} onOpenChange={setRefundDialogOpen} showTrigger={false} />
-        <TillDialog sessionId={sessionId} cashDrawerSettings={cashDrawerSettings} fiscalNet={fiscalNet} fiscalActive={fiscalActive} isRO={isRO} currency={currency} orgName={orgName} userName={userName} open={tillDialogOpen} onOpenChange={setTillDialogOpen} showTrigger={false} />
+        <TillDialog sessionId={sessionId} fiscalNet={fiscalNet} fiscalActive={fiscalActive} isRO={isRO} currency={currency} orgName={orgName} userName={userName} open={tillDialogOpen} onOpenChange={setTillDialogOpen} showTrigger={false} />
         <CloseTillDialog sessionId={sessionId} summary={summary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName} open={closeTillDialogOpen} onOpenChange={setCloseTillDialogOpen} showTrigger={false} />
         {fiscalActive && (
           <Dialog open={zReportOpen} onOpenChange={setZReportOpen}>
@@ -1623,12 +1624,14 @@ function PosRegisterInner({
                     const res = await (runZReport as unknown as (fd: FormData) => Promise<FiscalDownloadPayload>)(fd);
                     if (res.status === "browser_api_pending" && fiscalActive && fiscalNet?.enabled) {
                       const fnRes = await fiscalBrowserZReport(fiscalNet);
+                      if (fnRes.ok) captureClientEvent("raport_z_generated", { source: "fiscalnet_browser" });
                       setZReportDone(true);
                       setSaleStatus({ ok: fnRes.ok, msg: fnRes.ok ? t.zReportSent(fnRes.message) : `FiscalNet: ${fnRes.message}` });
                     } else {
                       const downloaded = res.ok && fiscalActive ? await downloadFiscalPayload(res, "z_report", fiscalActive) : false;
                       if (fiscalActive && res.filename && res.content) setLastFiscalTxt({ filename: res.filename, content: res.content });
                       if (res.ok) setZReportDone(true);
+                      if (res.ok) captureClientEvent("raport_z_generated", { source: "fiscalnet_file_or_mock" });
                       setSaleStatus({ ok: res.ok, msg: downloaded ? t.zReportDownloaded : res.message });
                     }
                     setTimeout(() => setSaleStatus(null), 4000);
@@ -1747,7 +1750,6 @@ function PosRegisterInner({
                       setPaymentCartSnapshot(null);
                       setLastCompletedSale(null);
                       setSaleStatus(null);
-                      setDrawerNotice(null);
                       setLastFiscalTxt(null);
                       setTabPaymentCompleted(false);
                       void refreshPendingTabItems();
@@ -1757,7 +1759,6 @@ function PosRegisterInner({
                     setPaymentCartSnapshot(null);
                     setLastCompletedSale(null);
                     setSaleStatus(null);
-                    setDrawerNotice(null);
                     setLastFiscalTxt(null);
                   }}
                 >
@@ -1864,9 +1865,19 @@ function PosRegisterInner({
             <button
               type="button"
               onClick={() => setCustomersSheetOpen(true)}
-              className="max-w-[9rem] truncate text-xs font-medium text-blue-600 hover:text-blue-800 sm:max-w-[12rem] sm:text-sm"
+              className={cn(
+                "flex max-w-[9rem] items-center gap-1 truncate rounded-full text-xs font-medium sm:max-w-[12rem] sm:text-sm",
+                !selectedCustomer && features.loyalty
+                  ? "border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-800 hover:bg-amber-100"
+                  : "text-blue-600 hover:text-blue-800",
+              )}
             >
-              {selectedCustomer ? selectedCustomer.name : t.addCustomerBtn}
+              {!selectedCustomer && features.loyalty ? (
+                <Gift className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              ) : (
+                <UserPlus className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              )}
+              <span className="truncate">{selectedCustomer ? selectedCustomer.name : t.addCustomerBtn}</span>
             </button>
           {cart.length > 0 && (
               <button type="button" onClick={() => setCart([])} className="shrink-0 text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>

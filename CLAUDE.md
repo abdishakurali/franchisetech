@@ -180,16 +180,25 @@ pm2 stop fridgeproof                           # takes site offline
 
 ## Protected files and paths
 
-The following must not change without explicit task scope:
+**Hard-blocked — `scripts/predeploy-guard.sh` mechanically refuses to deploy if these changed:**
 
 ```
 public/downloads/          # APK distribution
 fp-android/                # Android connector source
 android-connector/         # connector
-app/actions/kitchenops.ts  # core business actions
-lib/kitchenops/            # core business logic
-supabase/migrations/       # DB history — only add, never delete
+*.apk                      # any APK binary
 ```
+
+**Migrations — mechanically enforced, but only the append-only part:** `supabase/migrations/` may only ever gain new files. The guard blocks deploy if any already-committed migration file was modified or deleted. Adding new migrations is expected and unblocked.
+
+**Editing discipline — not automated, requires human judgment:**
+
+```
+app/actions/kitchenops.ts  # core business actions — money/payments; read the whole
+lib/kitchenops/            # function before editing, keep changes scoped to task
+```
+
+These are not blocked by the guard (a hard block would prevent legitimate bug fixes — see today's payment-math and offline-queue work, both of which touched `kitchenops.ts`). The rule is: don't touch them incidentally while working on something else, and when you do touch them, keep the diff scoped to what the task actually needs.
 
 ---
 
@@ -280,3 +289,15 @@ If a P0 or P1 issue is detected during any task, stop the current work, escalate
 ## Next.js version note
 
 @AGENTS.md
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as GitHub issues in `abdishakurali/franchisetech`, via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context layout: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.

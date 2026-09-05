@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getActiveOrg, numberValue, stringValue } from "@/lib/kitchenops/data";
+import { computeSaleTotals, resolveSalePayments } from "@/lib/pos-sale-math";
+import type { SaleErrorCode } from "@/lib/pos-i18n";
 import { requireActiveSite } from "@/lib/site-context";
 import { validateTableTabForSale, settleTabAndClose } from "@/lib/table-service/sale-link";
 import { normaliseIndustry, RESTAURANT_FEATURE_KEYS, type RestaurantFeatureKey } from "@/lib/restaurant-features";
@@ -32,6 +34,7 @@ import { listActiveVatRates, seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-serv
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
 import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
+import { captureServerEventAsync } from "@/lib/posthog-server";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
 import { nearestVatRate, ratesMatch, validateVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 import { listOperationalUnitNames, validateOperationalUnit } from "@/lib/units-of-measure";
@@ -330,6 +333,78 @@ export async function deleteCategory(formData: FormData) {
   revalidatePath("/app/pos");
 }
 
+export async function approveProductVat(formData: FormData) {
+  const { supabase, membership, user, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+  const productId = stringValue(formData, "product_id");
+  const vat = await resolveSubmittedVatRate(supabase, orgId, formData, "vat_rate");
+  if (!productId || !vat.ok) return;
+
+  const { data: before } = await supabase
+    .from("products")
+    .select("id,name,vat_rate,vat_status,available_in_pos")
+    .eq("id", productId)
+    .eq("organisation_id", orgId)
+    .maybeSingle();
+  if (!before) return;
+
+  const service = await createServiceClient();
+  const { data: batch } = await service.from("repair_batches").insert({
+    organisation_id: orgId,
+    repair_type: "vat",
+    status: "running",
+    summary: { products: 1, source: "manual_review" },
+    approved_by: user.id,
+    approved_at: new Date().toISOString(),
+    created_by: user.id,
+  }).select("id").single();
+  if (!batch) return;
+
+  const after = {
+    vat_rate: vat.rate,
+    vat_status: "approved",
+    vat_source: "manual_review",
+    vat_approved_at: new Date().toISOString(),
+    vat_approved_by: user.id,
+    available_in_pos: true,
+  };
+  const { error } = await service.from("products").update(after)
+    .eq("id", productId).eq("organisation_id", orgId);
+  await service.from("repair_actions").insert({
+    organisation_id: orgId,
+    batch_id: batch.id,
+    entity_type: "product",
+    entity_id: productId,
+    action_type: "approve_vat",
+    before_data: before,
+    after_data: after,
+    status: error ? "failed" : "applied",
+    error_message: error?.message ?? null,
+    applied_at: error ? null : new Date().toISOString(),
+  });
+  await service.from("repair_batches").update({
+    status: error ? "failed" : "completed",
+    completed_at: new Date().toISOString(),
+  }).eq("id", batch.id);
+
+  revalidatePath("/app/settings/data-repair");
+  revalidatePath("/app/products");
+  revalidatePath("/app/pos");
+}
+
+export async function updateSgrPolicy(formData: FormData) {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+  const policy = stringValue(formData, "sgr_policy");
+  if (!["accountant_approval_required", "outside_vat_scope", "included_in_taxable_base"].includes(policy)) return;
+  await supabase.from("organisations").update({
+    sgr_policy: policy,
+    sgr_deposit_amount: numberValue(formData, "sgr_deposit_amount", 0.5),
+    sgr_vat_rate: numberValue(formData, "sgr_vat_rate", 0),
+  }).eq("id", orgId);
+  revalidatePath("/app/settings/data-repair");
+}
+
 export async function addUnit(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
@@ -370,36 +445,8 @@ export async function deleteUnit(formData: FormData) {
   revalidatePath("/app/settings");
 }
 
-export async function updateCashDrawerSettings(formData: FormData) {
-  const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
-
-  const mode = stringValue(formData, "cash_drawer_mode");
-  const safeMode = ["off", "manual", "local_connector", "android_connector"].includes(mode) ? mode : "manual";
-  if (safeMode === "local_connector" || safeMode === "android_connector") {
-    await assertEntitlement(orgId, "pos.cash_drawer_connector");
-  }
-  const existingToken = stringValue(formData, "existing_token");
-  const rawToken = stringValue(formData, "cash_drawer_connector_token");
-  const token = rawToken || existingToken || null;
-
-  await supabase.from("organisations").update({
-    cash_drawer_mode: safeMode,
-    cash_drawer_connector_port: numberValue(formData, "cash_drawer_connector_port", 17878),
-    cash_drawer_connector_token: token,
-    cash_drawer_trigger_on_cash_sale: formData.get("cash_drawer_trigger_on_cash_sale") === "on",
-    cash_drawer_trigger_on_cash_in: formData.get("cash_drawer_trigger_on_cash_in") === "on",
-    cash_drawer_trigger_on_cash_out: formData.get("cash_drawer_trigger_on_cash_out") === "on",
-    cash_drawer_last_status: "Not checked",
-    cash_drawer_last_checked_at: new Date().toISOString(),
-  }).eq("id", orgId);
-
-  revalidatePath("/app/settings");
-  revalidatePath("/app/pos");
-}
-
 export async function addProduct(formData: FormData) {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
   await assertEntitlement(orgId, "products.enabled");
   const name = stringValue(formData, "name");
@@ -425,6 +472,10 @@ export async function addProduct(formData: FormData) {
     sale_price: numberValue(formData, "sale_price"),
     cost_price: nullableNum(formData, "cost_price"),
     vat_rate: vat.rate,
+    vat_status: "approved",
+    vat_source: "manual_owner_selection",
+    vat_approved_at: new Date().toISOString(),
+    vat_approved_by: user.id,
     placeholder_type: stringValue(formData, "placeholder_type") || null,
     kitchen_station: stringValue(formData, "kitchen_station") || null,
     available_in_pos: availableInPos,
@@ -480,7 +531,7 @@ export async function addProduct(formData: FormData) {
 
 /** Minimal POS quick-add — no redirect; returns result for in-till dialog. */
 export async function addProductFromPos(formData: FormData): Promise<{ ok: boolean; error?: string }> {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
   try {
     await assertEntitlement(orgId, "products.enabled");
@@ -505,6 +556,10 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
     unit_of_measure: unit.unit,
     sale_price: salePrice,
     vat_rate: vat.rate,
+    vat_status: "approved",
+    vat_source: "manual_pos_selection",
+    vat_approved_at: new Date().toISOString(),
+    vat_approved_by: user.id,
     available_in_pos: true,
     is_ingredient: false,
     is_stock_tracked: false,
@@ -524,7 +579,7 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
 export async function updateProduct(
   formData: FormData,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
   try {
     await assertEntitlement(orgId, "products.enabled");
@@ -591,6 +646,10 @@ export async function updateProduct(
     sale_price: numberValue(formData, "sale_price"),
     cost_price: nullableNum(formData, "cost_price"),
     vat_rate: vat.rate,
+    vat_status: "approved",
+    vat_source: "manual_owner_selection",
+    vat_approved_at: new Date().toISOString(),
+    vat_approved_by: user.id,
     ...(imageUrl !== undefined ? { image_url: imageUrl } : {}),
     placeholder_type: hasPlaceholderField
       ? stringValue(formData, "placeholder_type") || null
@@ -664,6 +723,12 @@ export async function openPosSession(formData: FormData) {
     return;
   }
   await recordGrowthMilestone(supabase, orgId, "till_opened", user.id);
+  await captureServerEventAsync(
+    user.id,
+    "till_opened",
+    { organisation_id: orgId, site_id: siteId },
+    { organisation: orgId },
+  );
   const cookieStore = await cookies();
   cookieStore.set("pos_till_open", "1", { path: "/app", maxAge: 60 * 60 * 24 });
   revalidatePath("/app/pos");
@@ -752,6 +817,18 @@ export async function closePosSession(formData: FormData) {
     closed_by: user.id,
   }).then(() => null, () => null);
 
+  await captureServerEventAsync(
+    user.id,
+    "daily_close_completed",
+    {
+      organisation_id: orgId,
+      session_id: sessionId,
+      report_date: today,
+      cash_difference: difference,
+    },
+    { organisation: orgId },
+  );
+
   revalidatePath("/app/pos");
   revalidatePath("/app/reports/z-report");
 }
@@ -790,6 +867,71 @@ export async function voidTransaction(formData: FormData) {
   revalidatePath("/app/transactions");
   revalidatePath("/app/reports/sales");
   redirect(`/app/transactions/${transactionId}`);
+}
+
+export async function returnTransactionLine(formData: FormData) {
+  const { supabase, membership, user, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+
+  const transactionId = stringValue(formData, "transaction_id");
+  const transactionItemId = stringValue(formData, "transaction_item_id");
+  const quantity = numberValue(formData, "quantity", 0);
+  const reason = stringValue(formData, "reason");
+  if (!transactionId || !transactionItemId || quantity <= 0 || !reason) return;
+
+  const { siteId } = await requireActiveSite(supabase, orgId, membership.id, membership.role);
+  const [{ data: item }, { data: payment }, { data: session }] = await Promise.all([
+    supabase
+      .from("pos_transaction_items")
+      .select("id")
+      .eq("id", transactionItemId)
+      .eq("transaction_id", transactionId)
+      .eq("organisation_id", orgId)
+      .maybeSingle(),
+    supabase
+      .from("sale_payments")
+      .select("method,currency")
+      .eq("sale_id", transactionId)
+      .eq("organisation_id", orgId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("pos_sessions")
+      .select("id")
+      .eq("organisation_id", orgId)
+      .eq("site_id", siteId)
+      .eq("status", "open")
+      .order("opened_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  if (!item) return;
+
+  const serviceSupabase = await createServiceClient();
+  const key = crypto.randomUUID();
+  const { error } = await serviceSupabase.rpc("post_pos_return", {
+    p_org_id: orgId,
+    p_actor_id: user.id,
+    p_document: {
+      idempotency_key: key,
+      transaction_id: transactionId,
+      site_id: siteId,
+      session_id: payment?.method === "cash" ? session?.id ?? null : null,
+      return_number: `RET-${Date.now().toString(36).toUpperCase()}`,
+      reason,
+      method: payment?.method ?? "other",
+      currency: payment?.currency ?? "RON",
+      lines: [{ transaction_item_id: transactionItemId, quantity }],
+    },
+  });
+  if (error) redirect(`/app/transactions/${transactionId}?return_error=1`);
+
+  revalidatePath(`/app/transactions/${transactionId}`);
+  revalidatePath("/app/refunds");
+  revalidatePath("/app/reports/sales");
+  revalidatePath("/app/reports/z-report");
+  redirect(`/app/transactions/${transactionId}?returned=1`);
 }
 
 export async function addSupplier(formData: FormData) {
@@ -1168,6 +1310,72 @@ export async function addRecipe(formData: FormData) {
   revalidatePath("/app/recipes");
 }
 
+/** Replaces an existing recipe's product, batch size and ingredient lines.
+ * Items are rewritten wholesale rather than diffed: recipe_items carry no
+ * external references, so a clean replace avoids partial-update states if the
+ * user removes lines. Costs are re-read from products so an edit always
+ * reflects current ingredient prices. */
+export async function updateRecipeFromProducts(formData: FormData) {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "recipes.enabled");
+
+  const recipeId = stringValue(formData, "recipe_id");
+  const productId = stringValue(formData, "product_id");
+  if (!recipeId || !productId) return;
+
+  // Scope the lookup to the org so one tenant can never edit another's recipe.
+  const { data: existing } = await supabase
+    .from("recipes")
+    .select("id")
+    .eq("id", recipeId)
+    .eq("organisation_id", orgId)
+    .maybeSingle();
+  if (!existing) return;
+
+  const recipeName = stringValue(formData, "name") || "Recipe";
+  const yieldQty = numberValue(formData, "yield_qty", 1);
+  const ingredientProductIds = formData.getAll("ingredient_product_id").map((v) => String(v)).filter(Boolean);
+  const quantities = formData.getAll("quantity").map((v) => Number(v || 0));
+
+  // Refuse to save an empty recipe — silently clearing every line would look
+  // like data loss to the user.
+  if (!ingredientProductIds.length || ingredientProductIds.every((id, i) => !id || !(quantities[i] > 0))) return;
+
+  const { data: ingredientProducts } = await supabase
+    .from("products")
+    .select("id,name,unit_of_measure,cost_price")
+    .in("id", ingredientProductIds.filter(Boolean));
+  const productMap = new Map((ingredientProducts ?? []).map((p) => [p.id, p]));
+
+  await supabase
+    .from("recipes")
+    .update({ product_id: productId, name: recipeName, yield_qty: yieldQty })
+    .eq("id", recipeId)
+    .eq("organisation_id", orgId);
+
+  await supabase.from("recipe_items").delete().eq("recipe_id", recipeId).eq("organisation_id", orgId);
+
+  const items = ingredientProductIds.flatMap((pid, i) => {
+    if (!pid || !(quantities[i] > 0)) return [];
+    const p = productMap.get(pid);
+    const quantity = quantities[i];
+    const unitCost = Number(p?.cost_price ?? 0);
+    const totalCost = quantity * unitCost;
+    const unit = p?.unit_of_measure || "each";
+    return [{
+      organisation_id: orgId, recipe_id: recipeId, ingredient_product_id: pid,
+      ingredient_name: p?.name ?? "Ingredient", quantity, unit_of_measure: unit,
+      unit_cost: unitCost, total_cost: totalCost, unit, cost: totalCost,
+    }];
+  });
+  if (items.length) await supabase.from("recipe_items").insert(items);
+
+  revalidatePath("/app/recipes");
+  revalidatePath(`/app/recipes/${recipeId}`);
+  redirect(`/app/recipes/${recipeId}?saved=1`);
+}
+
 export async function addRecipeFromProducts(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
@@ -1289,7 +1497,7 @@ async function csvText(formData: FormData) {
 }
 
 export async function importProductsCsv(formData: FormData) {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
   await assertEntitlement(orgId, "products.enabled");
   const rows = parseCsv(await csvText(formData));
@@ -1342,11 +1550,20 @@ export async function importProductsCsv(formData: FormData) {
     if (posCategoryName) {
       posCategoryId = await ensureCategory(posCategoryName, "pos");
     }
+    // A blank/missing column must never resolve to 0% — nearestVatRate(rates, 0)
+    // always snaps to whichever configured rate sits closest to zero, so an
+    // unspecified value silently became a confident "this item is VAT-exempt"
+    // for every row a source file simply didn't have a VAT column for. Only an
+    // explicit numeric value in the file goes through nearest-rate snapping;
+    // a missing one falls back to the org's own default rate instead.
     const rawVat = row.vat_rate !== "" && row.vat_rate != null ? Number(row.vat_rate) : null;
-    let vatRate = rawVat ?? 0;
-    if (catalogRates.length > 0) {
-      const nearest = nearestVatRate(catalogRates, vatRate);
-      vatRate = nearest?.rate ?? vatRate;
+    const orgDefaultRate = catalogRates.find((r) => r.is_default)?.rate ?? 0;
+    let vatRate = orgDefaultRate;
+    if (rawVat != null && catalogRates.length > 0) {
+      const nearest = nearestVatRate(catalogRates, rawVat);
+      vatRate = nearest?.rate ?? rawVat;
+    } else if (rawVat != null) {
+      vatRate = rawVat;
     }
     const { error } = await supabase.from("products").insert({
       organisation_id: orgId, name, category_id: categoryId, pos_category_id: posCategoryId,
@@ -1355,7 +1572,11 @@ export async function importProductsCsv(formData: FormData) {
       sale_price: Number(row.sale_price_gross || 0),
       cost_price: row.cost_price ? Number(row.cost_price) : null,
       vat_rate: vatRate,
-      available_in_pos: row.available_in_pos ? csvBool(row.available_in_pos) : true,
+      vat_status: rawVat == null ? "ambiguous" : "approved",
+      vat_source: rawVat == null ? "csv_missing_vat" : "csv_explicit_vat",
+      vat_approved_at: rawVat == null ? null : new Date().toISOString(),
+      vat_approved_by: rawVat == null ? null : user.id,
+      available_in_pos: rawVat == null ? false : (row.available_in_pos ? csvBool(row.available_in_pos) : true),
       is_ingredient: csvBool(row.is_ingredient),
       is_stock_tracked: csvBool(row.is_stock_tracked),
       is_sellable: !csvBool(row.is_ingredient),
@@ -1421,15 +1642,88 @@ export async function cancelPurchase(formData: FormData) {
   revalidatePath("/app/purchases");
   redirect("/app/purchases");
 }
-export async function deleteProducts(ids: string[]) {
+export type DeleteProductsResult = {
+  archived: number;
+  deleted: number;
+  blocked: number;
+};
+
+/** Tables that carry product history. A product referenced by any of these must
+ * never be hard-deleted: pos_transaction_items/sale_items/recipe_items/recipes
+ * are declared ON DELETE SET NULL, and stock_movements/purchase_items have no
+ * foreign key to products at all — so Postgres would silently orphan fiscal and
+ * inventory history rather than refusing the delete. The guard has to live here. */
+const PRODUCT_HISTORY_REFS: Array<{ table: string; column: string }> = [
+  { table: "pos_transaction_items", column: "product_id" },
+  { table: "sale_items", column: "product_id" },
+  { table: "stock_movements", column: "product_id" },
+  { table: "purchase_items", column: "product_id" },
+  { table: "recipe_items", column: "ingredient_product_id" },
+  { table: "recipes", column: "product_id" },
+  { table: "stock_movement_reconciliations", column: "product_id" },
+  { table: "table_tab_items", column: "product_id" },
+  { table: "kitchen_order_items", column: "product_id" },
+];
+
+async function productHasHistory(
+  supabase: Awaited<ReturnType<typeof getActiveOrg>>["supabase"],
+  productId: string,
+): Promise<boolean> {
+  for (const ref of PRODUCT_HISTORY_REFS) {
+    const { count, error } = await supabase
+      .from(ref.table)
+      .select("*", { count: "exact", head: true })
+      .eq(ref.column, productId);
+    // On any error, refuse to delete — never treat an unreadable table as empty.
+    if (error) return true;
+    if ((count ?? 0) > 0) return true;
+  }
+  return false;
+}
+
+/** Archives live products; permanently removes already-archived ones that carry
+ * no history. Re-archiving an archived product used to be a silent no-op, which
+ * is why archived rows could never be cleared from the list. */
+export async function deleteProducts(ids: string[]): Promise<DeleteProductsResult> {
+  const empty: DeleteProductsResult = { archived: 0, deleted: 0, blocked: 0 };
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return empty;
   await assertEntitlement(orgId, "products.enabled");
-  if (!ids.length) return;
-  await supabase.from("products").update({ active: false }).in("id", ids).eq("organisation_id", orgId);
+  if (!ids.length) return empty;
+
+  const { data: rows } = await supabase
+    .from("products")
+    .select("id,active")
+    .in("id", ids)
+    .eq("organisation_id", orgId);
+
+  const toArchive = (rows ?? []).filter((r) => r.active !== false).map((r) => r.id);
+  const archivedRows = (rows ?? []).filter((r) => r.active === false);
+
+  if (toArchive.length) {
+    await supabase.from("products").update({ active: false }).in("id", toArchive).eq("organisation_id", orgId);
+  }
+
+  let deleted = 0;
+  let blocked = 0;
+  for (const row of archivedRows) {
+    if (await productHasHistory(supabase, row.id)) {
+      blocked++;
+      continue;
+    }
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", row.id)
+      .eq("organisation_id", orgId);
+    if (error) blocked++;
+    else deleted++;
+  }
+
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
   revalidatePath("/app/stock");
+  return { archived: toArchive.length, deleted, blocked };
 }
 
 export async function deletePurchases(ids: string[]) {
@@ -1735,7 +2029,7 @@ export async function updateKitchenOrderStatus(formData: FormData): Promise<void
 // Used by PosRegister so the client can handle FiscalNet browser API call.
 
 export type CompleteSaleResult =
-  | { ok: false; error: string }
+  | { ok: false; error: string; code: SaleErrorCode }
   | {
       ok: true;
       transactionId: string;
@@ -1750,11 +2044,11 @@ export type CompleteSaleResult =
 
 export async function completeSaleReturn(formData: FormData): Promise<CompleteSaleResult> {
   const { supabase, membership, user, orgId } = await getActiveOrg();
-  if (!canTransact(membership.role)) return { ok: false, error: "Permission denied." };
+  if (!canTransact(membership.role)) return { ok: false, error: "Permission denied.", code: "permission_denied" };
   try {
     await assertEntitlement(orgId, "pos.enabled");
   } catch (error) {
-    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error, code: "entitlement_denied" };
     throw error;
   }
   // Resolve active site server-side — client cannot spoof site_id
@@ -1763,7 +2057,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   type CartItem = PosSaleCartItem;
   const rawCart = stringValue(formData, "cart_json");
   const cart: CartItem[] = rawCart ? JSON.parse(rawCart) : [];
-  if (!cart.length) return { ok: false, error: "Cart is empty." };
+  if (!cart.length) return { ok: false, error: "Cart is empty.", code: "cart_empty" };
 
   const sessionId        = stringValue(formData, "session_id") || null;
   const paymentMethodId  = stringValue(formData, "payment_method_id") || null;
@@ -1793,12 +2087,12 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
 
   const itemCalcs = buildPosItemCalcs(cart, legacyCartPct, cartDiscountLei);
   const insaneVatRate = findInsaneVatRate(itemCalcs.map((i) => i.vat_rate));
-  if (insaneVatRate != null) return { ok: false, error: `VAT rate ${insaneVatRate}% is invalid.` };
+  if (insaneVatRate != null) return { ok: false, error: `VAT rate ${insaneVatRate}% is invalid.`, code: "vat_rate_invalid" };
   if (legacyCartPct > 0 || cartDiscountLei > 0 || cart.some((item) => Number(item.discount_pct ?? 0) > 0)) {
     try {
       await assertEntitlement(orgId, "pos.discounts");
     } catch (error) {
-      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error, code: "entitlement_denied" };
       throw error;
     }
   }
@@ -1806,7 +2100,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     try {
       await assertEntitlement(orgId, "pos.split_payments");
     } catch (error) {
-      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error, code: "entitlement_denied" };
       throw error;
     }
   }
@@ -1814,7 +2108,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     try {
       await assertEntitlement(orgId, "pos.tips");
     } catch (error) {
-      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error, code: "entitlement_denied" };
       throw error;
     }
   }
@@ -1822,25 +2116,30 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     try {
       await assertEntitlement(orgId, "kitchen.enabled");
     } catch (error) {
-      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+      if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error, code: "entitlement_denied" };
       throw error;
     }
   }
 
   if (tableServiceEnabled && tableTabId) {
     const tabCheck = await validateTableTabForSale(supabase, orgId, tableTabId, membership.role);
-    if (!tabCheck.ok) return { ok: false, error: tabCheck.error };
+    if (!tabCheck.ok) return { ok: false, error: tabCheck.error, code: "table_tab_invalid" };
     if (tabCheck.tableName) tableLabel = tabCheck.tableName;
     if (!orderType) orderType = "dine-in";
   }
 
-  const subtotalNet = itemCalcs.reduce((s, i) => s + i.net_amount, 0);
-  const taxTotal    = itemCalcs.reduce((s, i) => s + i.vat_amount, 0);
-  const totalGross  = itemCalcs.reduce((s, i) => s + i.gross_amount, 0);
-  const tipAmount = tipsEnabled ? Math.max(0, Number(numberValue(formData, "tip_amount", 0).toFixed(2))) : 0;
-  const saleTotal = Number((totalGross + tipAmount).toFixed(2));
-  const discountTotal = itemCalcs.reduce((s, i) => s + i.discount_amount, 0);
-  const transactionNumber = `KO-${Date.now().toString(36).toUpperCase()}`;
+  const { subtotalNet, taxTotal, totalGross, discountTotal, tipAmount, saleTotal } = computeSaleTotals(
+    itemCalcs,
+    { tipsEnabled, tipAmountRaw: numberValue(formData, "tip_amount", 0) },
+  );
+  let transactionNumber = `KO-${Date.now().toString(36).toUpperCase()}`;
+
+  await captureServerEventAsync(
+    user.id,
+    "sale_started",
+    { organisation_id: orgId, site_id: siteId, item_count: cart.length },
+    { organisation: orgId },
+  );
 
   type PaymentRow = { method: string; payment_method_id: string | null; amount: number; reference?: string; note?: string };
   let paymentRows: PaymentRow[] = [];
@@ -1858,7 +2157,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
         }))
         .filter((row) => Number.isFinite(row.amount) && row.amount > 0);
     } catch {
-      return { ok: false, error: "Split payments are not valid." };
+      return { ok: false, error: "Split payments are not valid.", code: "split_payments_invalid" };
     }
     if (!paymentRows.length) {
       // No split rows submitted — fall back to the selected payment method
@@ -1868,136 +2167,73 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     paymentRows = [{ method: paymentType, payment_method_id: paymentMethodId, amount: saleTotal }];
   }
 
-  const paidTotal = Number(paymentRows.reduce((sum, row) => sum + row.amount, 0).toFixed(2));
-  const hasCashPayment = paymentRows.some((row) => row.method === "cash");
-  const cashOverpay = splitEnabled && hasCashPayment && paidTotal > saleTotal ? Number((paidTotal - saleTotal).toFixed(2)) : 0;
-  if (paidTotal + 0.0001 < saleTotal) return { ok: false, error: "Payment total is less than the sale total." };
-  if (paidTotal > saleTotal + 0.0001 && !cashOverpay) return { ok: false, error: "Payment total is higher than the sale total." };
-  // Server-side: cash received must cover the sale total if provided
-  if (paymentType === "cash" && !splitEnabled && cashReceivedStored !== null && cashReceivedStored + 0.005 < saleTotal) {
-    return { ok: false, error: "Cash received is less than the total due." };
+  const paymentsResolved = resolveSalePayments({
+    paymentRows,
+    saleTotal,
+    splitEnabled,
+    paymentType,
+    cashReceivedStored,
+  });
+  if (!paymentsResolved.ok) return { ok: false, error: paymentsResolved.error, code: paymentsResolved.code };
+  const { hasCashPayment, cashOverpay, canonicalPayments } = paymentsResolved.result;
+
+  const idempotencyKey = stringValue(formData, "idempotency_key") || crypto.randomUUID();
+  const stockDepletionEnabled = await hasEntitlement(orgId, "recipes.stock_depletion", { write: true });
+
+  const serviceSupabase = await createServiceClient();
+  const { data: posted, error: postError } = await serviceSupabase.rpc("post_pos_document", {
+    p_org_id: orgId,
+    p_actor_id: user.id,
+    p_document: {
+      idempotency_key: idempotencyKey,
+      site_id: siteId,
+      session_id: sessionId,
+      transaction_number: transactionNumber,
+      payment_method_id: paymentMethodId,
+      customer_name: customerName,
+      customer_id: customerId,
+      notes: customerNote || null,
+      subtotal: Number(totalGross.toFixed(2)),
+      subtotal_net: Number(subtotalNet.toFixed(2)),
+      tax_total: Number(taxTotal.toFixed(2)),
+      total: saleTotal,
+      tip_amount: tipAmount,
+      subtotal_gross_before_discount: Number((totalGross + discountTotal).toFixed(2)),
+      discount_total: Number(discountTotal.toFixed(2)),
+      discount_pct: txDiscountPct,
+      currency: ((orgRow?.currency_code as string | undefined) ?? "RON"),
+      stock_depletion_enabled: stockDepletionEnabled,
+      items: itemCalcs.map((item) => ({
+        product_id: item.product_id,
+        product_name: item.product_name,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        unit_price_gross: item.unit_price_gross,
+        vat_rate: item.vat_rate,
+        net_amount: item.net_amount,
+        vat_amount: item.vat_amount,
+        gross_amount: item.gross_amount,
+        line_total: item.line_total,
+        discount_amount: item.discount_amount,
+        discount_pct: item.applied_discount_pct > 0 ? item.applied_discount_pct : 0,
+      })),
+      payments: canonicalPayments,
+    },
+  });
+  if (postError || !posted) {
+    const message = postError?.message ?? "Documentul POS nu a putut fi înregistrat.";
+    if (message.includes("PRODUCT_VAT_REVIEW_REQUIRED")) {
+      return { ok: false, error: "Produsul necesită validarea cotei TVA înainte de vânzare.", code: "vat_review_required" };
+    }
+    return { ok: false, error: message, code: "unknown" };
   }
 
-  const { data: tx, error: txErr } = await supabase.from("pos_transactions").insert({
-    organisation_id: orgId,
-    site_id: siteId,
-    transaction_number: transactionNumber,
-    sold_by: user.id,
-    payment_method_id: paymentMethodId,
-    session_id: sessionId,
-    customer_name: customerName,
-    customer_id: customerId,
-    notes: customerNote || null,
-    subtotal: Number(totalGross.toFixed(2)),
-    subtotal_net: Number(subtotalNet.toFixed(2)),
-    tax_total: Number(taxTotal.toFixed(2)),
-    total: saleTotal,
-    total_gross: saleTotal,
-    tip_amount: tipAmount,
-    subtotal_gross_before_discount: Number((totalGross + discountTotal).toFixed(2)),
-    discount_total: Number(discountTotal.toFixed(2)),
-    discount_pct: txDiscountPct,
-    status: "completed",
-  }).select("id").single();
-
-  if (txErr || !tx) return { ok: false, error: txErr?.message ?? "Failed to save transaction." };
-
+  const postedDocument = posted as { transaction_id: string; transaction_number: string; idempotent?: boolean };
+  const transactionId = postedDocument.transaction_id;
+  transactionNumber = postedDocument.transaction_number;
   await recordGrowthMilestone(supabase, orgId, "first_sale", user.id);
 
-  const transactionId = tx.id;
-
-  await supabase.from("pos_transaction_items").insert(
-    itemCalcs.map((item) => ({
-      organisation_id:  orgId,
-      transaction_id:   transactionId,
-      product_id:       item.product_id,
-      product_name:     item.product_name,
-      quantity:         item.quantity,
-      unit_price:       item.unit_price,
-      unit_price_gross: item.unit_price_gross,
-      vat_rate:         item.vat_rate,
-      net_amount:       item.net_amount,
-      vat_amount:       item.vat_amount,
-      gross_amount:     item.gross_amount,
-      line_total:       item.line_total,
-      discount_amount:  item.discount_amount,
-      discount_pct:     item.applied_discount_pct > 0 ? item.applied_discount_pct : 0,
-    }))
-  );
-
-  // Stock reduction (non-fatal)
-  try {
-    const stockDepletionAllowed = await hasEntitlement(orgId, "recipes.stock_depletion", { write: true });
-    const soldProductIds = stockDepletionAllowed ? [...new Set(cart.map((i) => i.product_id).filter(Boolean))] : [];
-    if (soldProductIds.length > 0) {
-      const { data: recipes } = await supabase
-        .from("recipes")
-        .select("id,product_id,yield_qty,recipe_items(ingredient_product_id,quantity,unit_of_measure)")
-        .in("product_id", soldProductIds)
-        .eq("organisation_id", orgId);
-      for (const recipe of recipes ?? []) {
-        const soldItem = cart.find((i) => i.product_id === recipe.product_id);
-        if (!soldItem) continue;
-        const recipeItems = (recipe.recipe_items ?? []) as Array<{ingredient_product_id:string|null;quantity:number;unit_of_measure:string|null}>;
-        const yieldQty = Math.max(Number(recipe.yield_qty ?? 1), 1);
-        for (const ri of recipeItems) {
-          if (!ri.ingredient_product_id) continue;
-          try {
-            const useQty = (Number(ri.quantity) / yieldQty) * soldItem.quantity;
-            const { data: prod } = await supabase.from("products").select("current_stock_qty").eq("id", ri.ingredient_product_id).single();
-            if (prod) {
-              await supabase.from("products").update({ current_stock_qty: Number(prod.current_stock_qty ?? 0) - useQty }).eq("id", ri.ingredient_product_id);
-              const { error: movementError } = await supabase.from("stock_movements").insert({ organisation_id: orgId, product_id: ri.ingredient_product_id, movement_type: "sale_used", quantity_change: -useQty, unit_of_measure: ri.unit_of_measure ?? "each", reference_type: "sale", reference_id: transactionId, performed_by: user.id });
-              if (movementError) {
-                console.error("[stock-depletion] failed to insert stock_movements", { orgId, transactionId, ingredientProductId: ri.ingredient_product_id, error: movementError.message });
-              }
-            }
-          } catch (itemErr) {
-            // Isolated per-ingredient: one bad lookup must not skip deduction for the rest of the cart.
-            console.error("[stock-depletion] failed to deplete ingredient, continuing with remaining ingredients", { orgId, transactionId, ingredientProductId: ri.ingredient_product_id, error: itemErr instanceof Error ? itemErr.message : String(itemErr) });
-          }
-        }
-      }
-    }
-  } catch (err) {
-    console.error("[stock-depletion] non-fatal failure during recipe stock reduction", { orgId, transactionId, error: err instanceof Error ? err.message : String(err) });
-  }
-
-  // Cash session tracking
-  await supabase.from("sale_payments").insert(
-    paymentRows.map((row) => ({
-      organisation_id: orgId,
-      sale_id: transactionId,
-      method: row.method,
-      payment_method_id: row.payment_method_id,
-      amount: row.amount,
-      currency: ((orgRow?.currency_code as string | undefined) ?? "EUR"),
-      reference: row.reference ?? null,
-      note: row.note ?? null,
-      created_by: user.id,
-      metadata: {
-        ...(splitEnabled ? { split: true } : {}),
-        ...(!splitEnabled && row.method === "cash" && cashReceivedStored !== null ? {
-          cash_received: cashReceivedStored,
-          change_due: Number((cashReceivedStored - saleTotal).toFixed(2)),
-        } : {}),
-      },
-    }))
-  ).then(() => null, () => null);
-
-  if (sessionId && hasCashPayment) {
-    const cashAmount = paymentRows.filter((row) => row.method === "cash").reduce((sum, row) => sum + row.amount, 0) - cashOverpay;
-    const { data: session } = await supabase.from("pos_sessions").select("expected_cash").eq("id", sessionId).single();
-    if (session) {
-      await supabase.from("pos_sessions").update({ expected_cash: Number(session.expected_cash ?? 0) + Number(cashAmount.toFixed(2)) }).eq("id", sessionId);
-    }
-    await supabase.from("pos_cash_movements").insert({ organisation_id: orgId, session_id: sessionId, movement_type: "sale", amount: Number(cashAmount.toFixed(2)), reason: `Sale ${transactionNumber}`, performed_by: user.id }).then(() => null, () => null);
-  }
-
-  // Audit event
-  await supabase.from("pos_audit_events").insert({ organisation_id: orgId, transaction_id: transactionId, event_type: "created", performed_by: user.id }).then(() => null, () => null);
-
-  if (!tableTabId) {
+  if (!postedDocument.idempotent && !tableTabId) {
     await createKitchenOrderIfEnabled({
       supabase,
       orgId,
@@ -2012,7 +2248,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     });
   }
 
-  if (tableServiceEnabled && tableTabId) {
+  if (!postedDocument.idempotent && tableServiceEnabled && tableTabId) {
     await settleTabAndClose(supabase, orgId, tableTabId, transactionId);
     revalidatePath("/app/pos");
   }
@@ -2031,6 +2267,19 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
       .eq("id", transactionId).eq("organisation_id", orgId)
       .then(() => null, () => null);
   }
+
+  await captureServerEventAsync(
+    user.id,
+    "sale_completed",
+    {
+      organisation_id: orgId,
+      site_id: siteId,
+      transaction_id: transactionId,
+      total: saleTotal,
+      payment_type: paymentType,
+    },
+    { organisation: orgId },
+  );
 
   revalidatePath("/app/pos");
   revalidatePath("/app/transactions");

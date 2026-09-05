@@ -42,8 +42,8 @@ export function TransferTableDialog({
 
   useEffect(() => {
     if (!open) return;
-    setError(null);
     void (async () => {
+      setError(null);
       const [t, s] = await Promise.all([getTables(siteId), getFloorSections(siteId)]);
       setTables(t);
       setSections(s);

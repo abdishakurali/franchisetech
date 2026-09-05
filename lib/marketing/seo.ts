@@ -1,10 +1,20 @@
 import type { Metadata } from "next";
-import { createElement } from "react";
+import { createElement, type ComponentType } from "react";
 import type { MarketingLocale } from "@/lib/marketing/locale";
 import { marketingOpenGraphLocale } from "@/lib/marketing/locale";
 import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
 import { comparisonPages } from "@/lib/marketing/comparisons";
 import { primaryIndustryPages } from "@/lib/marketing/industry-page-content";
+import { isLeanPublicFeature } from "@/lib/product-scope";
+import {
+  OwnerDashboardProof,
+  OwnerPosProof,
+  OwnerRecipeProof,
+  OwnerSetupGuideProof,
+  OwnerStockProof,
+  OwnerSuppliersProof,
+  OwnerZReportProof,
+} from "@/components/marketing/OwnerProofScreens";
 
 export type { ComparisonPage } from "@/lib/marketing/comparisons";
 export { comparisonPages, comparisonsByMarket, COMPARE_HUB_PATH } from "@/lib/marketing/comparisons";
@@ -17,19 +27,17 @@ export const DEFAULT_DESCRIPTION =
 
 export type IndustryPainPoint = { title: string; text: string };
 
-export type IndustryFeatureRow = {
-  title: string;
-  body: string;
-  image: string;
-  imageAlt: string;
-  path?: string;
-};
+export type IndustryFeatureRow =
+  | { title: string; body: string; image: string; imageAlt: string; path?: string }
+  | { title: string; body: string; component: ComponentType; imageAlt?: string; path?: string };
 
 export type IndustryCompetitorRow = [area: string, franchisetech: string, competitor: string];
 
 export type IndustryTestimonial = { quote: string; attribution: string };
 
-export type IndustryShowcase = { src: string; path: string; alt: string };
+export type IndustryShowcase =
+  | { src: string; path: string; alt: string }
+  | { component: ComponentType; alt: string };
 
 export type SeoPage = {
   slug: string;
@@ -45,6 +53,8 @@ export type SeoPage = {
   faqs: Array<{ question: string; answer: string }>;
   related: Array<{ label: string; href: string }>;
   image?: string;
+  /** Live-rendered replacement for `image` in page-body hero slots (not OG meta — `image` still feeds pageMetadata()). */
+  heroComponent?: ComponentType;
   /** Industry vertical landing — optional extended fields */
   heroBefore?: string;
   heroHighlight?: string;
@@ -83,7 +93,8 @@ export const featurePages: SeoPage[] = [
       { question: "How many staff can use the register?", answer: "Unlimited. Add cashiers, managers, and kitchen roles at no extra per-user cost." },
     ],
     related: [{ label: "Z-report", href: "/features/z-report" }, { label: "Cafes", href: "/industries/cafes" }, { label: "What cafes need from POS", href: "/resources/pos-system-for-small-cafes" }],
-    image: "/showcase/pos-cart.png",
+    image: "/showcase/pos-grid.png",
+    heroComponent: OwnerPosProof,
   },
   {
     slug: "stock-management",
@@ -107,6 +118,7 @@ export const featurePages: SeoPage[] = [
     ],
     related: [{ label: "Recipe costing", href: "/features/recipe-costing" }, { label: "Stock control article", href: "/resources/food-business-stock-control" }, { label: "Restaurants", href: "/industries/restaurants" }],
     image: "/showcase/stock-levels.png",
+    heroComponent: OwnerStockProof,
   },
   {
     slug: "recipe-costing",
@@ -130,6 +142,7 @@ export const featurePages: SeoPage[] = [
     ],
     related: [{ label: "Recipe costing guide", href: "/resources/recipe-costing-for-cafes" }, { label: "Stock management", href: "/features/stock-management" }, { label: "Health bars", href: "/industries/health-bars" }],
     image: "/showcase/recipe-costing.png",
+    heroComponent: OwnerRecipeProof,
   },
   {
     slug: "z-report",
@@ -153,28 +166,7 @@ export const featurePages: SeoPage[] = [
     ],
     related: [{ label: "Z-report explained", href: "/resources/z-report-explained" }, { label: "POS feature", href: "/features/pos" }, { label: "Cash-up guide", href: "/resources/cash-up-at-end-of-day" }],
     image: "/showcase/reports-dashboard.png",
-  },
-  {
-    slug: "kitchen-display",
-    path: "/features/kitchen-display",
-    eyebrow: "Kitchen display",
-    title: "Kitchen Display System for Restaurants and Cafes",
-    metaTitle: "Kitchen Display (KDS) for Cafes and Restaurants",
-    description: "Send paid POS orders to a clear kitchen board — new, preparing, ready, and done — with franchisetech Kitchen Display.",
-    h1: "Kitchen display that keeps service moving",
-    intro: "When Kitchen Display is enabled, paid POS orders appear on a prep board so kitchen and front-of-house stay aligned without paper tickets.",
-    bullets: ["Orders from POS appear automatically", "New → Preparing → Ready → Done workflow", "Takeaway and dine-in labels", "Optional prep stations"],
-    sections: [
-      { title: "Clear order queue", body: "Staff see order lines, quantities, and timestamps on a large screen instead of shouting across the counter." },
-      { title: "Status at a glance", body: "Move orders through preparing and ready so front-of-house knows when to hand off or pack." },
-      { title: "Optional feature", body: "Kitchen Display is toggled per business in Settings — enable it only when your team is ready." },
-    ],
-    faqs: [
-      { question: "Does Kitchen Display need extra hardware?", answer: "A tablet or monitor with a browser is enough. Many teams use a wall-mounted screen in the kitchen." },
-      { question: "Which orders appear?", answer: "Paid POS orders created after Kitchen Display is enabled for your organisation." },
-    ],
-    related: [{ label: "POS", href: "/features/pos" }, { label: "Restaurants", href: "/industries/restaurants" }, { label: "Takeaways", href: "/industries/takeaways" }],
-    image: "/showcase/kitchen-display.png",
+    heroComponent: OwnerZReportProof,
   },
   {
     slug: "purchases-suppliers",
@@ -197,6 +189,7 @@ export const featurePages: SeoPage[] = [
     ],
     related: [{ label: "Stock management", href: "/features/stock-management" }, { label: "Recipe costing", href: "/features/recipe-costing" }],
     image: "/showcase/suppliers.png",
+    heroComponent: OwnerSuppliersProof,
   },
   {
     slug: "nir",
@@ -233,6 +226,7 @@ export const featurePages: SeoPage[] = [
       { label: "Romania", href: "/industries/romania" },
     ],
     image: "/showcase/suppliers.png",
+    heroComponent: OwnerSuppliersProof,
   },
   {
     slug: "offline",
@@ -267,7 +261,8 @@ export const featurePages: SeoPage[] = [
       { label: "Z-report", href: "/features/z-report" },
       { label: "Romania", href: "/industries/romania" },
     ],
-    image: "/showcase/pos-cart.png",
+    image: "/showcase/pos-grid.png",
+    heroComponent: OwnerPosProof,
   },
   {
     slug: "setup-onboarding",
@@ -275,73 +270,73 @@ export const featurePages: SeoPage[] = [
     eyebrow: "Setup guide",
     title: "Guided Setup for New Businesses",
     metaTitle: "From New Account to First Sale in Under an Hour | franchisetech",
-    description: "Free in-app setup: demo products, open till, and first test sale — most cafes finish core steps in under an hour. Optional premium setup for large migrations.",
+    description: "Free in-app setup: demo products, open till, and first test sale — most cafes finish core steps in under an hour.",
     h1: "From new account to first sale in under an hour",
-    intro: "The in-app setup guide walks you from signup through demo products, opening the till, and your first test sale — step by step, at no cost. Optional premium setup (€199) is available for large catalog migrations or FiscalNet hand-holding.",
-    bullets: ["0–15 min: signup and business settings", "15–45 min: demo products and payment methods", "45–60 min: open till and first test sale", "Optional premium setup for 200+ SKU imports"],
+    intro: "The in-app setup guide walks you from signup through demo products, opening the till, and your first test sale — step by step, at no cost.",
+    bullets: ["0–15 min: signup and business settings", "15–45 min: demo products and payment methods", "45–60 min: open till and first test sale"],
     sections: [
       { title: "Clear milestones", body: "Each step links to the right screen — settings, POS, or reports — so setup stays focused." },
-      { title: "Free self-serve by default", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — a one-time €1 card verification starts the trial." },
-      { title: "Premium setup when you need it", body: "Large catalog migration, multi-site rollout, or FiscalNet configuration? Optional assisted setup (€199) covers training and hand-holding — typically 1–2 days, not the core path." },
+      { title: "Guided self-serve setup", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — the 15-day trial starts after a one-time €1 card verification." },
     ],
     faqs: [
-      { question: "How long does setup take?", answer: "Core path (signup → demo products → open till → first sale): most cafes finish in under an hour. Full catalog migration with 200+ products may take 1–2 days — use optional premium setup or spread it over your trial." },
+      { question: "How long does setup take?", answer: "Core path (signup → demo products → open till → first sale): most cafes finish in under an hour. A full catalog migration with 200+ products may take 1–2 days — spread it over your trial." },
       { question: "What does the timeline look like?", answer: "0–15 min: account and settings. 15–45 min: products and payments. 45–60 min: open till and first test sale. Stock and recipes can wait until after the till is working." },
       { question: "Can I skip steps?", answer: "Yes. The guide is a checklist, not a blocker. You can return to any step later." },
     ],
     related: [{ label: "POS", href: "/features/pos" }, { label: "Pricing", href: "/pricing" }],
     image: "/showcase/setup-guide.png",
+    heroComponent: OwnerSetupGuideProof,
   },
   {
     slug: "qr-code-receipts",
     path: "/features/qr-code-receipts",
-    eyebrow: "Fiscal compliance",
-    title: "QR Code on Fiscal Receipts — Romania's November 2026 Requirement",
-    metaTitle: "QR Code Bon Fiscal România | Cerință ANAF Noiembrie 2026 | franchisetech",
-    description: "Romania requires QR codes on fiscal receipts from November 1, 2026. What the requirement means, and why it depends on your fiscal printer's firmware, not your POS software.",
-    h1: "QR code on fiscal receipts — what Romania's 2026 requirement means for your till",
-    intro: "Romania mandates QR codes on fiscal receipts from November 1, 2026. The QR itself is generated by your certified fiscal device's firmware, not by franchisetech or any POS software — so compliance depends on your fiscal printer provider shipping a QR-capable firmware update, not on which POS you run.",
+    eyebrow: "Bon fiscal & FiscalNet",
+    title: "Bon Fiscal în POS — FiscalNet, Raport Z și Pregătire QR",
+    metaTitle: "Bon Fiscal POS România | FiscalNet, Raport Z, QR ANAF | franchisetech",
+    description: "Cum gestionezi bonurile fiscale în franchisetech: POS, FiscalNet, metode de plată, TVA, raport Z și ce trebuie verificat pentru QR-ul ANAF.",
+    h1: "Bon fiscal din POS, fără pași manuali între vânzare și închiderea zilei",
+    intro: "franchisetech este pentru cafenele și restaurante mici din România care vor ca fiecare vânzare din POS să rămână legată de FiscalNet, TVA, metode de plată și raportul Z. QR-ul ANAF depinde de firmware-ul casei fiscale, dar datele operaționale trebuie să fie corecte înainte să ajungă la imprimantă.",
     bullets: [
-      "The requirement comes from your fiscal printer's certified firmware, not from franchisetech",
-      "Check with your fiscal printer provider whether your device supports (or will support) QR-capable firmware",
-      "franchisetech sends sale data to your fiscal device the same way it does today — no POS-side change needed",
-      "Works with QR-capable fiscal printers (Datecs, Tremol, etc.) once their firmware supports it",
-      "We'll flag this in your dashboard as the deadline approaches — but the fix lives with your fiscal device provider",
+      "Vânzarea se înregistrează în POS și se trimite către FiscalNet când integrarea este activă",
+      "Metodele de plată și grupele TVA sunt mapate în setările fiscale",
+      "Raportul Z și diferențele de numerar rămân în același workspace",
+      "QR-ul de pe bon este generat de casa fiscală certificată, nu de POS",
+      "Verifici firmware-ul QR cu furnizorul casei de marcat înainte de termenul ANAF",
     ],
     sections: [
       {
-        title: "What is the QR code requirement?",
-        body: "Starting November 1, 2026, Romanian fiscal receipts (bonuri fiscale) must include a QR code containing transaction data: CIF, receipt number, date, total, and VAT breakdown. The QR code allows ANAF to verify receipts instantly. Businesses without compliant systems face fines of 8,000–10,000 RON.",
+        title: "Ce face franchisetech în fluxul de bon fiscal",
+        body: "Casierul finalizează vânzarea în POS, cu produse, TVA și metodă de plată. Pentru organizațiile din România cu FiscalNet configurat, franchisetech trimite datele către casa fiscală prin driverul FiscalNet și păstrează tranzacția pentru verificarea zilnică.",
       },
       {
-        title: "How franchisetech handles it",
-        body: "franchisetech sends sale data to your FiscalNet-connected fiscal printer, the same way it does for every receipt today. The QR code itself is generated by the certified fiscal device's firmware — not by our software. That means compliance depends on your fiscal printer having QR-capable firmware installed; franchisetech doesn't control or guarantee that firmware update.",
+        title: "Unde intră QR-ul ANAF",
+        body: "QR-ul de pe bon este responsabilitatea casei fiscale certificate și a firmware-ului instalat de furnizorul autorizat. POS-ul nu desenează QR-ul pe bonul fiscal; POS-ul trebuie să trimită corect liniile, TVA-ul și plata către dispozitiv.",
       },
       {
-        title: "What you need to do",
-        body: "1) Ensure your fiscal printer (casa de marcat) has QR-capable firmware — contact your authorized service provider. 2) Verify FiscalNet driver is updated. 3) Continue using franchisetech POS normally. The QR appears automatically on receipts once firmware and driver are ready.",
+        title: "Ce verifici înainte de go-live",
+        body: "Confirmă cu furnizorul casei fiscale că firmware-ul suportă QR, actualizează FiscalNet, configurează CIF-ul, metodele de plată și grupele TVA, apoi rulează o vânzare de test și un raport Z împreună cu contabilul.",
       },
     ],
     faqs: [
       {
-        question: "When does the QR code become mandatory?",
-        answer: "November 1, 2026. Sanctions for non-compliance were suspended until this date to give businesses time to upgrade firmware and systems.",
+        question: "franchisetech emite bon fiscal?",
+        answer: "Da, pentru organizațiile din România unde FiscalNet este activat și configurat corect. Verificarea fiscală finală rămâne la contabil și furnizorul casei fiscale.",
       },
       {
-        question: "Does franchisetech generate the QR code?",
-        answer: "No. The QR code is generated by your certified fiscal device (casa de marcat) as required by Romanian law. franchisetech sends the sale data; the device prints the compliant receipt with QR.",
+        question: "franchisetech generează QR-ul de pe bon?",
+        answer: "Nu. QR-ul este generat de casa fiscală certificată. franchisetech trimite datele vânzării către FiscalNet; dispozitivul fiscal tipărește bonul conform firmware-ului instalat.",
       },
       {
-        question: "What data is in the QR code?",
-        answer: "The QR contains: business CIF, receipt number, date/time, total amount, VAT breakdown, and a verification hash. ANAF specifies the exact XML structure.",
+        question: "Ce trebuie să verific pentru QR?",
+        answer: "Întreabă furnizorul autorizat dacă modelul casei tale fiscale are firmware QR disponibil, apoi testează o vânzare reală cu FiscalNet înainte de termenul ANAF.",
       },
       {
-        question: "Do I need to buy new hardware?",
-        answer: "Most modern fiscal devices (Datecs, Tremol, Daisy, Custom) support QR via firmware update. Check with your authorized distributor. Older devices may need replacement.",
+        question: "Ce se întâmplă la finalul zilei?",
+        answer: "În franchisetech închizi sesiunea POS cu raport Z, vezi totaluri cash/card, numerar așteptat, numerar numărat și diferențe notate pentru verificare.",
       },
       {
-        question: "What happens if I miss the deadline?",
-        answer: "Fines range from 8,000 to 10,000 RON for emitting receipts without the required QR code after November 1, 2026.",
+        question: "Înlocuiește franchisetech contabilul?",
+        answer: "Nu. franchisetech organizează vânzări, TVA, FiscalNet și rapoarte operaționale. Contabilul verifică obligațiile fiscale și documentele oficiale.",
       },
     ],
     related: [
@@ -349,7 +344,8 @@ export const featurePages: SeoPage[] = [
       { label: "POS for Romania", href: "/industries/romania" },
       { label: "Z-report and daily closing", href: "/features/z-report" },
     ],
-    image: "/showcase/reports-dashboard.png",
+    image: "/showcase/pos-grid.png",
+    heroComponent: OwnerPosProof,
   },
   {
     slug: "accountant-reports",
@@ -418,6 +414,7 @@ export const featurePages: SeoPage[] = [
       { label: "QR code on receipts", href: "/features/qr-code-receipts" },
     ],
     image: "/showcase/reports-dashboard.png",
+    heroComponent: OwnerDashboardProof,
   },
   {
     slug: "loyalty",
@@ -533,7 +530,8 @@ export const industryPages: SeoPage[] = [
       { label: "Cafés", href: "/industries/cafes" },
       { label: "Restaurants", href: "/industries/restaurants" },
     ],
-    image: "/showcase/pos-cart.png",
+    image: "/showcase/pos-grid.png",
+    heroComponent: OwnerPosProof,
   },
   {
     slug: "romania",
@@ -564,7 +562,7 @@ export const industryPages: SeoPage[] = [
       },
       {
         title: "Echipă nelimitată, roluri clare",
-        body: "Adaugă toți angajații fără taxe per utilizator. 8 roluri disponibile: Proprietar, Manager, Casier, Bucătărie, Stoc, Contabil, Suport, Doar citire. Invitații prin email, dezactivare instantă, jurnal de audit complet.",
+        body: "Adăugați toți angajații fără taxe per utilizator. 8 roluri disponibile: Proprietar, Manager, Casier, Bucătărie, Stoc, Contabil, Suport, Doar citire. Invitații prin email, dezactivare instantă, jurnal de audit complet.",
       },
     ],
     faqs: [
@@ -581,6 +579,7 @@ export const industryPages: SeoPage[] = [
       { label: "Restaurante", href: "/industries/restaurants" },
     ],
     image: "/showcase/reports-dashboard.png",
+    heroComponent: OwnerDashboardProof,
   },
   {
     slug: "retail-shops",
@@ -628,6 +627,7 @@ export const industryPages: SeoPage[] = [
       { label: "Romania", href: "/industries/romania" },
     ],
     image: "/showcase/stock-levels.png",
+    heroComponent: OwnerStockProof,
   },
   {
     slug: "salons",
@@ -673,7 +673,8 @@ export const industryPages: SeoPage[] = [
       { label: "Ireland", href: "/industries/ireland" },
       { label: "Romania", href: "/industries/romania" },
     ],
-    image: "/showcase/pos-cart.png",
+    image: "/showcase/pos-grid.png",
+    heroComponent: OwnerPosProof,
   },
   {
     slug: "eu",
@@ -688,7 +689,7 @@ export const industryPages: SeoPage[] = [
       "Configurable currency (EUR, RON, and others via settings)",
       "Configurable VAT rates — set the rates applicable to your country",
       "Configurable timezone — reports reflect your local business day",
-      "Optional workflows: kitchen display, tips, split payments",
+      "Optional workflows: tips and split payments",
       "Hardware connectors: Windows and Android, where verified",
       "Country-specific fiscal integrations only where enabled (e.g. FiscalNet for Romania)",
       "Unlimited staff — no per-user fees",
@@ -700,11 +701,11 @@ export const industryPages: SeoPage[] = [
       },
       {
         title: "Optional workflows — enable what you need",
-        body: "Kitchen display, order types, tips, split payments, and table service can be enabled per organisation in Settings. They are all off by default. Enabling them does not affect unrelated workflows.",
+        body: "Order types, tips, and split payments can be enabled per organisation in Settings. They are all off by default. Enabling them does not affect unrelated workflows.",
       },
       {
-        title: "Hardware connectors — verified setups only",
-        body: "Android and Windows connector apps are available for ESC/POS receipt printers and cash drawer triggers. Automatic drawer opening is sent after verified connector setups. A manual fallback is always present — no hardware is required to use the software.",
+        title: "Hardware compatibility — verified setups only",
+        body: "Fiscal hardware compatibility is checked during setup. franchisetech does not claim support for every printer, cash register, or device.",
       },
     ],
     faqs: [
@@ -719,7 +720,8 @@ export const industryPages: SeoPage[] = [
       { label: "POS register", href: "/features/pos" },
       { label: "VAT report", href: "/features/z-report" },
     ],
-    image: "/showcase/pos-cart.png",
+    image: "/showcase/pos-grid.png",
+    heroComponent: OwnerPosProof,
   },
 ];
 
@@ -740,108 +742,107 @@ export const resourcePages: ResourcePage[] = [
   {
     slug: "pos-system-for-small-cafes",
     path: "/resources/pos-system-for-small-cafes",
-    title: "What Small Cafes Need From a POS System",
-    metaTitle: "What Small Cafes Need From a POS System",
-    description: "A practical guide to POS systems for small cafes, covering till speed, products, cash/card tracking, receipts, refunds, and daily close.",
-    intro: "A small cafe POS should help staff serve quickly, keep records clean, and give owners the numbers they need at the end of the day.",
+    title: "Ce au nevoie cafenelele mici de la un sistem POS",
+    metaTitle: "Ce au nevoie cafenelele mici de la un sistem POS",
+    description: "Ghid practic despre sisteme POS pentru cafenele mici: viteză la casă, produse, evidență numerar/card, bonuri, retururi și închidere zilnică.",
+    intro: "Un POS bun pentru o cafenea mică ajută personalul să servească rapid, ține evidențe curate și dă proprietarului cifrele de care are nevoie la finalul zilei.",
     sections: [
-      { title: "The till must stay simple", body: "Counter service is fast. A POS should make common products easy to find, keep the cart clear, and let staff complete a sale without hunting through back-office menus." },
-      { title: "Cash and card tracking matters", body: "Owners need to compare cash in the drawer, card totals, refunds, voids, and end-of-day records. This is especially important when several staff members use the same till." },
-      { title: "Products are more than buttons", body: "A cafe product list should include categories, VAT rate, sale price, cost, stock behaviour, and whether the item appears in POS." },
-      { title: "The close is where errors show", body: "Open cash, cash sales, cash in/out, expected cash, counted cash, and differences should be recorded in one place so the next day starts cleanly." },
-      { title: "How franchisetech helps", body: "franchisetech combines POS, products, transactions, refunds, customers, stock, recipes, purchases, and reports for small food businesses." },
+      { title: "Casa trebuie să rămână simplă", body: "Servirea la tejghea e rapidă. Un POS bun face produsele uzuale ușor de găsit, ține coșul clar și lasă personalul să finalizeze o vânzare fără să caute prin meniuri de back-office." },
+      { title: "Evidența numerar și card contează", body: "Proprietarii trebuie să compare numerarul din sertar, totalurile pe card, retururile, anulările și evidențele de sfârșit de zi. Contează mai ales când mai mulți angajați folosesc aceeași casă." },
+      { title: "Produsele înseamnă mai mult decât butoane", body: "O listă de produse pentru o cafenea ar trebui să includă categorii, cotă TVA, preț de vânzare, cost, comportament de stoc și dacă articolul apare în POS." },
+      { title: "La închidere se văd greșelile", body: "Numerar de deschidere, vânzări în numerar, intrări/ieșiri numerar, numerar așteptat, numerar numărat și diferențele ar trebui înregistrate într-un singur loc, ca ziua următoare să înceapă curat." },
+      { title: "Cum ajută franchisetech", body: "franchisetech combină POS, produse, tranzacții, retururi, clienți, stoc, rețete, achiziții și rapoarte pentru afaceri alimentare mici." },
     ],
     faqs: [
-      { question: "What is the most important POS feature for a small cafe?", answer: "Speed and clarity. Staff should be able to sell common products quickly and owners should be able to review accurate records later." },
-      { question: "Should a cafe POS track stock?", answer: "For many cafes, yes. Even simple stock visibility helps with purchasing and waste control." },
-      { question: "Does franchisetech include payment hardware?", answer: "franchisetech records payment method today. Hardware and payment terminal integrations should not be assumed unless configured separately." },
+      { question: "Care este cea mai importantă funcție POS pentru o cafenea mică?", answer: "Viteza și claritatea. Personalul trebuie să poată vinde produsele uzuale rapid, iar proprietarul trebuie să poată revizui evidențe corecte mai târziu." },
+      { question: "Ar trebui un POS de cafenea să urmărească stocul?", answer: "Pentru multe cafenele, da. Chiar și o vizibilitate simplă a stocului ajută la achiziții și controlul pierderilor." },
+      { question: "franchisetech include hardware de plată?", answer: "franchisetech înregistrează metoda de plată. Integrarea cu hardware și terminale de plată nu trebuie presupusă decât dacă este configurată separat." },
     ],
-    related: [{ label: "POS feature", href: "/features/pos" }, { label: "Cafes", href: "/industries/cafes" }, { label: "Z-report guide", href: "/resources/z-report-explained" }],
+    related: [{ label: "Funcționalitate POS", href: "/features/pos" }, { label: "Cafenele", href: "/industries/cafes" }, { label: "Ghid raport Z", href: "/resources/z-report-explained" }],
   },
   {
     slug: "recipe-costing-for-cafes",
     path: "/resources/recipe-costing-for-cafes",
-    title: "How to Calculate Recipe Cost and Margin for Cafe Products",
-    metaTitle: "How to Calculate Recipe Cost and Margin for Cafe Products",
-    description: "Learn how to calculate recipe cost, sale price margin, and can-make counts for cafe products using a Chicken Caesar example.",
-    intro: "Recipe costing helps owners understand whether a product is actually profitable after ingredients, portion size, and sale price are considered.",
+    title: "Cum calculați costul rețetei și marja pentru produsele de cafenea",
+    metaTitle: "Cum calculați costul rețetei și marja pentru produsele de cafenea",
+    description: "Aflați cum calculați costul rețetei, marja pe prețul de vânzare și câte porții puteți face, cu exemplul unui sandviș club.",
+    intro: "Costul rețetei îi ajută pe proprietari să înțeleagă dacă un produs este cu adevărat profitabil, ținând cont de ingrediente, mărimea porției și prețul de vânzare.",
     sections: [
-      { title: "Start with ingredients", body: "List every ingredient used in the product. For a Chicken Caesar example, include chicken, lettuce, dressing, parmesan, croutons, wrap or bowl, and packaging." },
-      { title: "Add the quantity used", body: "Each recipe line needs a quantity. If chicken costs EUR 10 per kg and the recipe uses 120g, the chicken cost for one portion is EUR 1.20." },
-      { title: "Calculate recipe cost", body: "Add each ingredient cost together. If chicken is EUR 1.20, lettuce EUR 0.35, dressing EUR 0.25, parmesan EUR 0.30, croutons EUR 0.18, and packaging EUR 0.22, the recipe cost is EUR 2.50." },
-      { title: "Compare with sale price", body: "If the Chicken Caesar sells for EUR 8.95 and costs EUR 2.50 to make, gross profit is EUR 6.45. Margin is gross profit divided by sale price, about 72% before other overheads." },
-      { title: "Use can-make counts", body: "If stock has 2.4kg of chicken and each portion uses 120g, chicken supports 20 portions. The true can-make count is limited by the lowest available ingredient." },
-      { title: "How franchisetech helps", body: "franchisetech lets you build recipes from products, track cost, compare sale price, and connect stock to can-make visibility." },
+      { title: "Porniți de la ingrediente", body: "Listați fiecare ingredient folosit în produs. Pentru un sandviș club, includeți pieptul de pui, salata, sosul, brânza, pâinea și ambalajul." },
+      { title: "Adăugați cantitatea folosită", body: "Fiecare linie de rețetă are nevoie de o cantitate. Dacă pieptul de pui costă 40 lei/kg și rețeta folosește 120g, costul pentru o porție este 4,80 lei." },
+      { title: "Calculați costul rețetei", body: "Adunați costul fiecărui ingredient. Dacă puiul costă 4,80 lei, salata 1,20 lei, sosul 0,80 lei, brânza 1,50 lei, pâinea 1,00 lei și ambalajul 0,90 lei, costul rețetei este 10,20 lei." },
+      { title: "Comparați cu prețul de vânzare", body: "Dacă sandvișul se vinde cu 32 lei și costă 10,20 lei de făcut, profitul brut este 21,80 lei. Marja este profitul brut împărțit la prețul de vânzare, aproximativ 68% înainte de alte cheltuieli." },
+      { title: "Folosiți numărul de porții posibile", body: "Dacă în stoc aveți 2,4 kg de piept de pui și fiecare porție folosește 120g, puiul susține 20 de porții. Numărul real de porții posibile este limitat de ingredientul cel mai puțin disponibil." },
+      { title: "Cum ajută franchisetech", body: "franchisetech vă lasă să construiți rețete din produse, să urmăriți costul, să comparați prețul de vânzare și să legați stocul de câte porții puteți face." },
     ],
     faqs: [
-      { question: "What is recipe margin?", answer: "Recipe margin compares the product sale price with ingredient cost. It helps show how much gross margin remains before overheads." },
-      { question: "Should packaging be included?", answer: "Yes. Packaging is a real cost and should be included when it is part of the product." },
-      { question: "Is this accounting advice?", answer: "No. This is operational guidance. franchisetech helps keep organised records and does not replace professional accounting or tax advice." },
+      { question: "Ce este marja pe rețetă?", answer: "Marja pe rețetă compară prețul de vânzare al produsului cu costul ingredientelor. Arată cât profit brut rămâne înainte de alte cheltuieli." },
+      { question: "Ar trebui inclus ambalajul?", answer: "Da. Ambalajul este un cost real și ar trebui inclus când face parte din produs." },
+      { question: "Este acesta sfat contabil?", answer: "Nu. Este un ghid operațional. franchisetech ajută la păstrarea unor evidențe organizate și nu înlocuiește consultanța contabilă sau fiscală profesională." },
     ],
-    related: [{ label: "Recipe costing feature", href: "/features/recipe-costing" }, { label: "Stock management", href: "/features/stock-management" }, { label: "Health bars", href: "/industries/health-bars" }],
+    related: [{ label: "Funcționalitate cost rețete", href: "/features/recipe-costing" }, { label: "Gestiune stoc", href: "/features/stock-management" }, { label: "Baruri de sănătate", href: "/industries/health-bars" }],
   },
   {
     slug: "z-report-explained",
     path: "/resources/z-report-explained",
-    title: "What Is a Z-report and Why Does It Matter?",
-    metaTitle: "What Is a Z-report and Why Does It Matter?",
-    description: "A plain-language explanation of Z-reports, till closing, cash reconciliation, cash/card totals, and daily sales records.",
-    intro: "A Z-report is an end-of-day till report. It helps owners understand sales, payment totals, and cash differences.",
+    title: "Ce este raportul Z și de ce contează?",
+    metaTitle: "Ce este raportul Z și de ce contează?",
+    description: "O explicație pe înțelesul tuturor despre raportul Z, închiderea casei, reconcilierea numerarului, totalurile numerar/card și evidențele zilnice de vânzări.",
+    intro: "Raportul Z este raportul de casă de la finalul zilei. Îi ajută pe proprietari să înțeleagă vânzările, totalurile pe metodă de plată și diferențele de numerar.",
     sections: [
-      { title: "What a Z-report usually includes", body: "A useful Z-report shows opening cash, cash sales, card sales, cash in, cash out, expected cash, counted cash, and any difference." },
-      { title: "Why it matters", body: "The Z-report creates a closing point for the day. It makes it easier to spot mistakes, review refunds, and compare cash/card totals." },
-      { title: "Cash reconciliation", body: "Expected cash is usually opening cash plus cash sales plus cash in minus cash out. Counted cash is what is physically counted at close." },
-      { title: "VAT-ready records", body: "franchisetech can help keep VAT-ready records, but it does not replace professional tax advice or official requirements." },
-      { title: "How franchisetech helps", body: "franchisetech records till sessions, payment methods, transactions, cash movements, and close-till figures in one place." },
+      { title: "Ce include de obicei un raport Z", body: "Un raport Z util arată numerarul de deschidere, vânzările în numerar, vânzările cu cardul, intrările de numerar, ieșirile de numerar, numerarul așteptat, numerarul numărat și orice diferență." },
+      { title: "De ce contează", body: "Raportul Z creează un punct de închidere pentru zi. Face mai ușor de depistat greșelile, de revizuit retururile și de comparat totalurile numerar/card." },
+      { title: "Reconcilierea numerarului", body: "Numerarul așteptat este de obicei numerarul de deschidere plus vânzările în numerar plus intrările de numerar minus ieșirile de numerar. Numerarul numărat este ce se numără fizic la închidere." },
+      { title: "Evidențe pregătite pentru TVA", body: "franchisetech ajută la păstrarea unor evidențe pregătite pentru TVA, dar nu înlocuiește consultanța fiscală profesională sau cerințele oficiale." },
+      { title: "Cum ajută franchisetech", body: "franchisetech înregistrează sesiunile de casă, metodele de plată, tranzacțiile, mișcările de numerar și cifrele de închidere, într-un singur loc." },
     ],
     faqs: [
-      { question: "Is a Z-report the same as a sales report?", answer: "Not exactly. A sales report focuses on sales activity. A Z-report is usually tied to till close and cash reconciliation." },
-      { question: "Can Z-reports prevent cash mistakes?", answer: "They cannot prevent every mistake, but they make differences visible and easier to review." },
-      { question: "Does franchisetech file tax returns?", answer: "No. franchisetech helps you keep organised records. It does not replace accounting or tax advice." },
+      { question: "Raportul Z este același lucru cu un raport de vânzări?", answer: "Nu chiar. Un raport de vânzări se concentrează pe activitatea de vânzare. Un raport Z este de obicei legat de închiderea casei și reconcilierea numerarului." },
+      { question: "Raportul Z poate preveni greșelile de numerar?", answer: "Nu poate preveni orice greșeală, dar face diferențele vizibile și mai ușor de revizuit." },
+      { question: "franchisetech depune declarații fiscale?", answer: "Nu. franchisetech vă ajută să păstrați evidențe organizate. Nu înlocuiește contabilitatea sau consultanța fiscală." },
     ],
-    related: [{ label: "Z-report feature", href: "/features/z-report" }, { label: "Cash-up guide", href: "/resources/cash-up-at-end-of-day" }, { label: "POS feature", href: "/features/pos" }],
+    related: [{ label: "Funcționalitate raport Z", href: "/features/z-report" }, { label: "Ghid închidere de zi", href: "/resources/cash-up-at-end-of-day" }, { label: "Funcționalitate POS", href: "/features/pos" }],
   },
   {
     slug: "food-business-stock-control",
     path: "/resources/food-business-stock-control",
-    title: "Simple Stock Control for Small Food Businesses",
-    metaTitle: "Simple Stock Control for Small Food Businesses",
-    description: "A practical stock-control guide for cafes, takeaways, food trucks, and small restaurants.",
-    intro: "Small food businesses do not need complicated warehouse software, but they do need a clear stock process.",
+    title: "Control simplu de stoc pentru afaceri alimentare mici",
+    metaTitle: "Control simplu de stoc pentru afaceri alimentare mici",
+    description: "Ghid practic de control al stocului pentru cafenele, takeaway, food truck-uri și restaurante mici.",
+    intro: "Afacerile alimentare mici nu au nevoie de un software complicat de depozit, dar au nevoie de un proces clar de stoc.",
     sections: [
-      { title: "Start with the products that matter", body: "Track the ingredients and products that affect cost, availability, or waste. Not every small item needs the same level of control." },
-      { title: "Record purchases consistently", body: "Supplier, purchase date, product, quantity, unit, and unit cost are enough to build a useful purchase history." },
-      { title: "Use reorder levels", body: "A reorder level gives staff a clear signal that a product needs attention before it runs out." },
-      { title: "Connect recipes to stock", body: "When recipes are connected to ingredients, sales can help explain stock usage and can-make counts." },
-      { title: "How franchisetech helps", body: "franchisetech connects products, ingredients, suppliers, purchases, recipes, and POS sales so stock is easier to review." },
+      { title: "Porniți de la produsele care contează", body: "Urmăriți ingredientele și produsele care afectează costul, disponibilitatea sau pierderile. Nu fiecare articol mic are nevoie de același nivel de control." },
+      { title: "Înregistrați achizițiile constant", body: "Furnizor, dată de achiziție, produs, cantitate, unitate și cost unitar sunt suficiente pentru un istoric util de achiziții." },
+      { title: "Folosiți praguri de reaprovizionare", body: "Un prag de reaprovizionare dă personalului un semnal clar că un produs are nevoie de atenție înainte să se termine." },
+      { title: "Legați rețetele de stoc", body: "Când rețetele sunt legate de ingrediente, vânzările pot ajuta să explice consumul de stoc și câte porții mai puteți face." },
+      { title: "Cum ajută franchisetech", body: "franchisetech leagă produsele, ingredientele, furnizorii, achizițiile, rețetele și vânzările POS, ca stocul să fie mai ușor de revizuit." },
     ],
     faqs: [
-      { question: "How often should a small cafe check stock?", answer: "Fast-moving ingredients should be checked frequently. Slower items can be reviewed less often." },
-      { question: "What is can-make?", answer: "Can-make estimates how many finished products can be made from current ingredient stock." },
-      { question: "Can franchisetech import stock products?", answer: "Yes. Product import/export is supported by CSV." },
+      { question: "Cât de des ar trebui o cafenea mică să verifice stocul?", answer: "Ingredientele care se consumă rapid ar trebui verificate frecvent. Articolele mai lente pot fi revizuite mai rar." },
+      { question: "Ce înseamnă câte porții pot face?", answer: "Estimează câte produse finite pot fi făcute din stocul actual de ingrediente." },
+      { question: "franchisetech poate importa produse de stoc?", answer: "Da. Importul/exportul de produse este suportat prin CSV." },
     ],
-    related: [{ label: "Stock management", href: "/features/stock-management" }, { label: "Recipe costing", href: "/features/recipe-costing" }, { label: "Restaurants", href: "/industries/restaurants" }],
+    related: [{ label: "Gestiune stoc", href: "/features/stock-management" }, { label: "Cost rețete", href: "/features/recipe-costing" }, { label: "Restaurante", href: "/industries/restaurants" }],
   },
   {
     slug: "cash-up-at-end-of-day",
     path: "/resources/cash-up-at-end-of-day",
-    title: "How to Cash Up at the End of the Day",
-    metaTitle: "How to Cash Up at the End of the Day",
-    description: "A simple cash-up process for cafes and small food businesses, including opening cash, sales, cash in/out, counted cash, and differences.",
-    intro: "Cash-up is the daily habit of checking that till records match what is in the drawer and what was paid by card.",
+    title: "Cum închideți casa la finalul zilei",
+    metaTitle: "Cum închideți casa la finalul zilei",
+    description: "Un proces simplu de închidere a casei pentru cafenele și afaceri alimentare mici: numerar de deschidere, vânzări, intrări/ieșiri numerar, numerar numărat și diferențe.",
+    intro: "Închiderea casei este obiceiul zilnic de a verifica dacă evidențele de casă se potrivesc cu ce este în sertar și cu ce s-a plătit prin card.",
     sections: [
-      { title: "Start with opening cash", body: "Opening cash is the float in the till before sales begin. It should be recorded when the till is opened." },
-      { title: "Add cash sales", body: "Cash sales increase the expected cash in the drawer. Card sales should be kept separate because they are not physical cash." },
-      { title: "Record cash in and cash out", body: "Cash added to or removed from the drawer should have an amount and reason so the expected cash stays accurate." },
-      { title: "Count the drawer", body: "At the end of the day, count physical cash and compare it with expected cash. Any difference should be recorded with notes." },
-      { title: "Use the close as a reset point", body: "A clean close means tomorrow starts with a clear opening cash amount and a traceable record of yesterday." },
+      { title: "Porniți de la numerarul de deschidere", body: "Numerarul de deschidere este fondul din casă înainte să înceapă vânzările. Ar trebui înregistrat când se deschide casa." },
+      { title: "Adăugați vânzările în numerar", body: "Vânzările în numerar cresc numerarul așteptat din sertar. Vânzările cu cardul ar trebui ținute separat, pentru că nu sunt numerar fizic." },
+      { title: "Înregistrați intrările și ieșirile de numerar", body: "Numerarul adăugat sau scos din sertar ar trebui să aibă o sumă și un motiv, ca numerarul așteptat să rămână corect." },
+      { title: "Numărați sertarul", body: "La finalul zilei, numărați numerarul fizic și comparați-l cu numerarul așteptat. Orice diferență ar trebui înregistrată cu observații." },
+      { title: "Folosiți închiderea ca punct de resetare", body: "O închidere curată înseamnă că mâine începe cu o sumă clară de numerar de deschidere și o evidență clară a zilei de ieri." },
     ],
     faqs: [
-      { question: "What if counted cash does not match expected cash?", answer: "Record the difference and notes. The goal is a clear record, not hiding the variance." },
-      { question: "Should card totals be included in cash?", answer: "No. Card totals should be tracked separately from physical cash in the drawer." },
-      { question: "Can franchisetech open a cash drawer?", answer: "A cloud app can only attempt this through a configured local connector. Without one, staff should open the drawer manually." },
+      { question: "Ce se întâmplă dacă numerarul numărat nu se potrivește cu cel așteptat?", answer: "Înregistrați diferența și observațiile. Scopul este o evidență clară, nu ascunderea diferenței." },
+      { question: "Totalurile cu cardul ar trebui incluse în numerar?", answer: "Nu. Totalurile cu cardul ar trebui urmărite separat de numerarul fizic din sertar." },
     ],
-    related: [{ label: "Z-report", href: "/features/z-report" }, { label: "POS", href: "/features/pos" }, { label: "Z-report explained", href: "/resources/z-report-explained" }],
+    related: [{ label: "Raport Z", href: "/features/z-report" }, { label: "POS", href: "/features/pos" }, { label: "Raportul Z explicat", href: "/resources/z-report-explained" }],
   },
   {
     slug: "pos-software-romania",
@@ -990,7 +991,7 @@ export const resourcePages: ResourcePage[] = [
       },
       {
         title: "„Nu am timp de migrare”",
-        body: "Nu cerem migrare big-bang. Setup asistat (199€) include produse demo, deschidere casă și ghidare la prima vânzare. Majoritatea trialurilor activează prima vânzare într-o singură sesiune ghidată.",
+        body: "Nu cerem migrare big-bang. Ghidul de configurare din aplicație include produse demo, deschidere casă și ghidare la prima vânzare, fără cost. Majoritatea trialurilor activează prima vânzare într-o singură sesiune ghidată.",
       },
       {
         title: "„E scump față de Excel / POS vechi”",
@@ -1116,10 +1117,12 @@ export const resourcePages: ResourcePage[] = [
 
 export const publicPaths = [
   "/",
+  "/contact",
   "/pricing",
   "/features",
-  ...featurePages.map((p) => p.path),
-  ...industryPages.map((p) => p.path),
+  ...featurePages.filter((page) => isLeanPublicFeature(page.slug)).map((p) => p.path),
+  "/industries",
+  ...industryPages.filter((page) => page.slug !== "restaurants").map((p) => p.path),
   "/compare",
   ...comparisonPages.map((p) => p.path),
   "/resources",
@@ -1140,7 +1143,7 @@ export function pageMetadata(
   },
   locale: MarketingLocale = "en",
 ): Metadata {
-  const image = page.image ?? "/showcase/pos-cart.png";
+  const image = page.image ?? "/showcase/pos-grid.png";
   return {
     title: page.metaTitle,
     description: page.description,
@@ -1193,7 +1196,7 @@ export function seoMeta({
   title,
   description,
   path,
-  image = "/showcase/pos-cart.png",
+  image = "/showcase/pos-grid.png",
   locale = "en" as MarketingLocale,
 }: {
   title: string;

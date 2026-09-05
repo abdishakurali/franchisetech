@@ -84,7 +84,7 @@ export const pricingPlans: readonly PlanDefinition[] = [
     description: "For one shop that needs a legally compliant till with FiscalNet, fiscal receipts, and daily reports.",
     priceEnv: "STRIPE_STARTER_PRICE_ID",
     annualPriceEnv: "STRIPE_STARTER_ANNUAL_PRICE_ID",
-    highlighted: false,
+    highlighted: true,
   }),
   plan({
     id: "pro",
@@ -100,7 +100,7 @@ export const pricingPlans: readonly PlanDefinition[] = [
     description: "For owners who want stock, recipe costing, kitchen flow, and stronger staff controls.",
     priceEnv: "STRIPE_PRO_PRICE_ID",
     annualPriceEnv: "STRIPE_PRO_ANNUAL_PRICE_ID",
-    highlighted: true,
+    highlighted: false,
   }),
   plan({
     id: "scale",
@@ -137,36 +137,6 @@ export const pricingPlans: readonly PlanDefinition[] = [
 ] as const;
 
 export { getPlanFeatureCategories };
-
-export const connectedPlan = {
-  name: "Assisted setup",
-  price: "€199 one-time",
-  description: "Product setup, payment methods, first sale test, and owner dashboard walkthrough.",
-  features: [
-    "Business and till settings",
-    "Product/category setup or import",
-    "Payment method setup",
-    "First sale and report walkthrough",
-  ],
-};
-
-export const setupOptions = [
-  {
-    name: "Single-location setup",
-    price: "€199",
-    description: "Assisted setup for one location — settings, products, first sale, reports walkthrough.",
-  },
-  {
-    name: "Multi-location rollout",
-    price: "€349",
-    description: "Rollout for a chain — all sites configured, staff trained, central reporting verified.",
-  },
-  {
-    name: "Romanian fiscal on-site setup",
-    price: "€499",
-    description: "On-site setup in Romania including FiscalNet configuration, ANAF registration, and first Z-report.",
-  },
-];
 
 /** True if all required Stripe env vars are present (supports both old and new naming conventions). */
 export function isBillingConfigured(): boolean {

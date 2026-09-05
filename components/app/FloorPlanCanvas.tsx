@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TableShape, layoutToStyle } from "@/components/app/TableShape";
 import type { FloorSection, TableWithStatus } from "@/app/actions/table-service";
 import { floorBackgroundUrl } from "@/lib/floor-plan/constants";
@@ -46,15 +46,19 @@ export function FloorPlanCanvas({
   hideSectionTabs = false,
 }: Props) {
   const [internalSectionId, setInternalSectionId] = useState(sections[0]?.id ?? "");
-  const activeSectionId = controlledSectionId ?? internalSectionId;
+  const [prevSections, setPrevSections] = useState(sections);
 
-  useEffect(() => {
-    if (sections.length && !sections.some((s) => s.id === activeSectionId)) {
+  if (sections !== prevSections) {
+    setPrevSections(sections);
+    const current = controlledSectionId ?? internalSectionId;
+    if (sections.length && !sections.some((s) => s.id === current)) {
       const next = sections[0]?.id ?? "";
       setInternalSectionId(next);
       onSectionChange?.(next);
     }
-  }, [sections, activeSectionId, onSectionChange]);
+  }
+
+  const activeSectionId = controlledSectionId ?? internalSectionId;
 
   const sectionLookup = allSections ?? sections;
   const activeSection = sections.find((s) => s.id === activeSectionId) ?? sections[0];

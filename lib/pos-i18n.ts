@@ -577,9 +577,71 @@ export function paymentTypeLabel(type: string, name: string, locale: PosLocale):
   return name || t.paymentGeneric;
 }
 
+/**
+ * Sale error codes are a closed set: adding a new one here without a case
+ * below is a compile error (exhaustive switch), unlike the free-text
+ * matching in friendlySaleError, which silently falls through on drift.
+ */
+export type SaleErrorCode =
+  | "permission_denied"
+  | "entitlement_denied"
+  | "cart_empty"
+  | "table_tab_invalid"
+  | "vat_rate_invalid"
+  | "vat_review_required"
+  | "split_payments_invalid"
+  | "payment_mismatch"
+  | "cash_insufficient"
+  | "unknown";
+
+export function friendlySaleErrorFromCode(
+  code: SaleErrorCode | undefined,
+  error: string,
+  locale: PosLocale,
+): string {
+  const ro = locale === "ro";
+  switch (code) {
+    case "permission_denied":
+      return ro ? "Nu ai permisiunea necesară pentru această acțiune." : "You don't have permission for this action.";
+    case "entitlement_denied":
+      return ro
+        ? "Acțiunea nu este disponibilă pentru planul curent. Reîmprospătează pagina și încearcă din nou; dacă vânzarea tot nu se salvează, contactează suportul."
+        : "This action is not available on the current plan. Refresh the page and try again; if the sale still cannot be saved, contact support.";
+    case "cart_empty":
+      return ro ? "Coșul este gol." : "Cart is empty.";
+    case "table_tab_invalid":
+      return error || (ro ? "Masa selectată nu este validă." : "The selected table is not valid.");
+    case "vat_rate_invalid":
+      return ro ? "Cota de TVA aplicată este invalidă." : "The VAT rate on this sale is invalid.";
+    case "vat_review_required":
+      return ro
+        ? "Produsul necesită validarea cotei TVA înainte de vânzare."
+        : "This product needs its VAT rate reviewed before it can be sold.";
+    case "split_payments_invalid":
+      return ro ? "Plățile împărțite nu sunt valide." : "Split payments are not valid.";
+    case "payment_mismatch":
+      return ro ? "Suma plătită nu corespunde totalului vânzării." : "The amount paid doesn't match the sale total.";
+    case "cash_insufficient":
+      return ro ? "Suma primită este insuficientă." : "Amount received is less than the total due.";
+    case "unknown":
+    default:
+      return friendlySaleError(error, locale);
+  }
+}
+
 export function friendlySaleError(error: string, locale: PosLocale): string {
   const ro = locale === "ro";
   const lower = error.toLowerCase();
+  if (lower.includes("entitlement_denied") || lower.includes("entitlement denied") || lower.includes("pos.enabled")) {
+    return ro
+      ? "Acțiunea nu este disponibilă pentru planul curent. Reîmprospătează pagina și încearcă din nou; dacă vânzarea tot nu se salvează, contactează suportul."
+      : "This action is not available on the current plan. Refresh the page and try again; if the sale still cannot be saved, contact support.";
+  }
+  if (lower.includes("failed to find server action") || lower.includes("older or newer deployment")) {
+    return ro
+      ? "Aplicația a fost actualizată între timp. Reîmprospătează pagina și încearcă din nou."
+      : "The app was updated while this screen was open. Refresh the page and try again.";
+  }
   if (lower.includes("cash received") || lower.includes("less than")) {
     return ro ? "Suma primită este insuficientă." : "Amount received is less than the total due.";
   }

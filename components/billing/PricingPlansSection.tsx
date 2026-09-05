@@ -3,12 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { captureClientEvent } from "@/lib/analytics/client-events";
 import { Button } from "@/components/ui/button";
 import {
   getPlanFeatureCategories,
   planDescriptionForMarket,
   pricingPlans,
-  setupOptions,
   type BillingPlan,
 } from "@/lib/billing/plans";
 import { type BillingMarket } from "@/lib/billing/market";
@@ -21,11 +21,10 @@ type PricingLabels = {
   freeSetupStrip: string;
   setupFreeTitle: string;
   setupFreeText: string;
-  setupTitle: string;
-  setupText: string;
-  setupFeeNote: string;
   multiTitle: string;
   multiText: string;
+  multiBody?: string;
+  multiMinLocations?: string;
 };
 
 type PricingLocale = "en" | "ro";
@@ -81,7 +80,6 @@ const FEATURE_TRANSLATIONS: Record<string, string> = {
   "15-day assisted trial": "Trial asistat 15 zile",
   "Everything in Core": "Tot ce include Core",
   "Split payments & tips (optional)": "Plăți împărțite & bacșiș (opțional)",
-  "Cash drawer connector support": "Suport conector sertar de bani",
   "Stock levels & movements": "Niveluri & mișcări stoc",
   Suppliers: "Furnizori",
   "Stock & purchase reports": "Rapoarte stoc & achiziții",
@@ -91,10 +89,8 @@ const FEATURE_TRANSLATIONS: Record<string, string> = {
   "Margins report": "Raport marje",
   "Ingredient consumption record": "Înregistrare consum ingrediente",
   "Audit CSV export": "Export CSV audit",
-  "Kitchen Display add-on (€19/month)": "Kitchen Display add-on (€19/lună)",
   "FiscalNet included in FranchiseTech; provider subscription paid separately": "FiscalNet este inclus în FranchiseTech; abonamentul furnizorului se plătește separat",
   "Staff roles & permissions": "Roluri & permisiuni personal",
-  "Cash drawer audit trail": "Audit sertar de bani",
   "Owner digest email: sales, cash status, voids, refunds, VAT and stock": "Email rezumat manager: vânzări, status casă, anulări, retururi, TVA și stoc",
   "Everything in Operations": "Tot ce include Operations",
   "Priority support (same-day response)": "Suport prioritar (răspuns în aceeași zi)",
@@ -125,21 +121,6 @@ const PLAN_DESCRIPTIONS_RO: Record<BillingPlan, string> = {
   multi_location: "Pentru afaceri cu două sau mai multe locații. Necesită planul de bază Scale.",
 };
 
-const SETUP_TRANSLATIONS: Record<string, { name: string; description: string }> = {
-  "Single-location setup": {
-    name: "Setup o locație",
-    description: "Setup asistat pentru o locație: setări, produse, prima vânzare și rapoarte.",
-  },
-  "Multi-location rollout": {
-    name: "Lansare multi-locație",
-    description: "Lansare pentru lanț: toate locațiile configurate, personal instruit, raportare centrală verificată.",
-  },
-  "Romanian fiscal on-site setup": {
-    name: "Setup fiscal la locație în România",
-    description: "Setup la locație în România cu FiscalNet, înregistrare ANAF și primul raport Z.",
-  },
-};
-
 const DEFAULT_LABELS: Record<PricingLocale, PricingLabels> = {
   en: {
     mainPlan: "Most popular",
@@ -148,24 +129,22 @@ const DEFAULT_LABELS: Record<PricingLocale, PricingLabels> = {
     freeSetupStrip: "Start free. In-app setup included - under an hour to your first sale.",
     setupFreeTitle: "Free in-app setup",
     setupFreeText: "New account -> demo products -> open till -> first sale. Step-by-step guide, no cost.",
-    setupTitle: "Assisted setup",
-    setupText: "",
-    setupFeeNote: "",
     multiTitle: "Multi-location",
     multiText: "For businesses running 2+ locations.",
+    multiBody: "Everything in Scale, billed per additional location. Central reporting and dedicated support.",
+    multiMinLocations: "Minimum 2 locations",
   },
   ro: {
     mainPlan: "Cel mai popular",
     seeFeatures: "Vezi toate funcțiile",
-    getStarted: "Începe acum",
+    getStarted: "Începeți acum",
     freeSetupStrip: "Începi gratuit. Setup în aplicație inclus - sub o oră până la prima vânzare.",
     setupFreeTitle: "Setup gratuit în aplicație",
     setupFreeText: "Cont nou -> produse demo -> deschidere casă -> prima vânzare. Ghid pas cu pas, fără cost.",
-    setupTitle: "Setup asistat",
-    setupText: "",
-    setupFeeNote: "",
     multiTitle: "Multi-locație",
     multiText: "Pentru afaceri cu 2+ locații.",
+    multiBody: "Tot din Scale, facturat pe locație suplimentară. Raportare centrală și suport dedicat.",
+    multiMinLocations: "Minimum 2 locații",
   },
 };
 
@@ -185,14 +164,6 @@ function localizedCategory(locale: PricingLocale, text: string) {
 
 function localizedPlanDescription(locale: PricingLocale, plan: BillingPlan, market: BillingMarket) {
   return localizedText(locale, planDescriptionForMarket(plan, market), PLAN_DESCRIPTIONS_RO[plan]);
-}
-
-function localizedSetup(locale: PricingLocale, name: string, description: string) {
-  const ro = SETUP_TRANSLATIONS[name];
-  return {
-    name: localizedText(locale, name, ro?.name),
-    description: localizedText(locale, description, ro?.description),
-  };
 }
 
 type Props = {
@@ -246,12 +217,7 @@ export function PricingPlansSection({
   const [interval, setInterval] = useState<"month" | "year">("year");
   const l = labels ?? DEFAULT_LABELS[locale];
 
-  const mainPlans = [...pricingPlans.filter((p) => p.id !== "multi_location")].sort((a, b) => {
-    if (a.highlighted && !b.highlighted) return -1;
-    if (!a.highlighted && b.highlighted) return 1;
-    return 0;
-  });
-  const multiPlan = pricingPlans.find((p) => p.id === "multi_location");
+  const mainPlans = pricingPlans.filter((plan) => plan.id === "starter" || plan.id === "pro");
 
   return (
     <div className="space-y-10">
@@ -292,12 +258,12 @@ export function PricingPlansSection({
 
       {interval === "year" && (
         <p className="text-center text-sm text-slate-500">
-          {localizedText(locale, "Billed annually - pay for 10 months and get 12.", "Facturat anual - plătești 10 luni și primești 12.")}
+          {localizedText(locale, "Billed annually - pay for 10 months and get 12.", "Facturat anual - plătiți 10 luni și primiți 12.")}
         </p>
       )}
 
       {/* Main plan cards */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {mainPlans.map((plan) => {
           const displayPrice = interval === "year" ? plan.annualPrice : plan.price;
           const displayCadence = interval === "year" ? plan.annualCadence : plan.cadence;
@@ -325,7 +291,18 @@ export function PricingPlansSection({
               <p className="mt-4 text-sm leading-6 text-slate-600">{localizedPlanDescription(locale, plan.id, market)}</p>
               <PlanFeaturesAccordion planId={plan.id} market={market} seeFeatures={l.seeFeatures} locale={locale} />
               {variant === "marketing" ? (
-                <Link href={`/signup?plan=${plan.id}`} className="mt-6 block">
+                <Link
+                  href={`/signup?plan=${plan.id}`}
+                  className="mt-6 block"
+                  onClick={() =>
+                    captureClientEvent("pricing_cta_clicked", {
+                      plan: plan.id,
+                      interval,
+                      location: "plan_card",
+                      cta_text: l.getStarted,
+                    })
+                  }
+                >
                   <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">{l.getStarted}</Button>
                 </Link>
               ) : (
@@ -338,74 +315,80 @@ export function PricingPlansSection({
         })}
       </div>
 
-      {/* Setup options + Multi-location row */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Free self-serve setup */}
-        <div className="rounded-2xl border border-green-200 bg-green-50/50 p-6 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">{l.setupFreeTitle}</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            {l.setupFreeText}
-          </p>
-          {variant === "marketing" && (
-            <Link href="/signup?plan=starter" className="mt-6 block">
-              <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">{l.getStarted}</Button>
-            </Link>
-          )}
-        </div>
-
-        {/* Assisted setup options */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">{l.setupTitle}</h2>
-          {l.setupText ? <p className="mt-2 text-sm leading-6 text-slate-600">{l.setupText}</p> : null}
-          <div className="mt-3 space-y-3">
-            {setupOptions.map((opt) => (
-              <div key={opt.name} className="border-b border-slate-100 pb-3 last:border-0 last:pb-0">
-                <p className="text-sm font-semibold text-slate-800">
-                  {localizedSetup(locale, opt.name, opt.description).name} - <span className="text-blue-700">{opt.price}</span>
-                </p>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  {localizedSetup(locale, opt.name, opt.description).description}
-                </p>
-              </div>
-            ))}
-          </div>
-          {l.setupFeeNote ? <p className="mt-4 text-xs text-slate-500">{l.setupFeeNote}</p> : null}
-        </div>
-
-        {/* Multi-location */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-950">{l.multiTitle}</h2>
-          <p className="mt-1 text-xs font-medium uppercase tracking-wide text-slate-400">
-            {localizedText(locale, "Scale plan required", "Necesită plan Scale")}
-          </p>
-          <p className="mt-3 text-3xl font-bold text-slate-950">
-            {interval === "year" ? multiPlan?.annualPrice ?? "€71" : multiPlan?.price ?? "€89"}
-            <span className="text-base font-normal text-slate-500">
-              {localizedText(locale, "/additional location/month", "/locație suplimentară/lună")}
-            </span>
-          </p>
-          {interval === "year" && (
-            <p className="mt-1 text-xs text-slate-400">{localizedText(locale, "billed annually", "facturat anual")}</p>
-          )}
-          <p className="mt-3 text-sm text-slate-600">
-            {multiPlan ? localizedPlanDescription(locale, "multi_location", market) : l.multiText}
-          </p>
-          {multiPlan && <PlanFeaturesAccordion planId="multi_location" market={market} seeFeatures={l.seeFeatures} locale={locale} />}
-          {variant === "marketing" ? (
-            <Link href="/signup?plan=multi_location" className="mt-6 block">
-              <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">{l.getStarted}</Button>
-            </Link>
-          ) : multiPlan ? (
-            <div className="mt-6">
-              <PricingCheckoutButton plan="multi_location" loggedIn={loggedIn} configured={configured} interval={interval} />
+      {/* Scale + Multi-location — for multi-site operators, the segment the brand is named for */}
+      {(() => {
+        const scale = pricingPlans.find((p) => p.id === "scale");
+        const multi = pricingPlans.find((p) => p.id === "multi_location");
+        if (!scale || !multi) return null;
+        const scalePrice = interval === "year" ? scale.annualPrice : scale.price;
+        const multiPrice = interval === "year" ? multi.annualPrice : multi.price;
+        return (
+          <div className="rounded-2xl border-2 border-slate-200 bg-white p-6 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">{l.multiTitle}</p>
+            <div className="mt-3 flex flex-wrap items-baseline gap-x-8 gap-y-2">
+              <p>
+                <span className="text-2xl font-bold text-slate-900">{scalePrice}</span>
+                <span className="text-sm text-slate-500">{localizedText(locale, "/mo base", "/lună bază")}</span>
+              </p>
+              <p>
+                <span className="text-2xl font-bold text-slate-900">+{multiPrice}</span>
+                <span className="text-sm text-slate-500">{localizedText(locale, "/additional location/mo", "/locație suplimentară/lună")}</span>
+              </p>
             </div>
-          ) : null}
-        </div>
+            <p className="mt-3 text-sm leading-6 text-slate-600">{l.multiBody ?? l.multiText}</p>
+            <p className="mt-1 text-xs text-slate-500">{l.multiMinLocations}</p>
+            <PlanFeaturesAccordion planId="scale" market={market} seeFeatures={l.seeFeatures} locale={locale} />
+            {variant === "marketing" ? (
+              <Link
+                href="/contact?topic=multi-location"
+                className="mt-6 block"
+                onClick={() =>
+                  captureClientEvent("pricing_cta_clicked", {
+                    plan: "multi_location",
+                    interval,
+                    location: "multi_location_card",
+                    cta_text: l.getStarted,
+                  })
+                }
+              >
+                <Button variant="outline" className="w-full">{localizedText(locale, "Talk to us about multi-location", "Discutați despre multi-locație")}</Button>
+              </Link>
+            ) : (
+              <div className="mt-6">
+                <PricingCheckoutButton plan="scale" loggedIn={loggedIn} configured={configured} interval={interval} />
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* Free self-serve setup */}
+      <div className="rounded-2xl border border-green-200 bg-green-50/50 p-6 sm:p-8">
+        <h2 className="text-lg font-bold text-slate-950">{l.setupFreeTitle}</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          {l.setupFreeText}
+        </p>
+        {variant === "marketing" && (
+          <Link
+            href="/signup?plan=starter"
+            className="mt-6 block"
+            onClick={() =>
+              captureClientEvent("pricing_cta_clicked", {
+                plan: "starter",
+                interval,
+                location: "free_setup",
+                cta_text: l.getStarted,
+              })
+            }
+          >
+            <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">{l.getStarted}</Button>
+          </Link>
+        )}
       </div>
 
       {interval === "month" && (
         <p className="text-center text-xs text-slate-400">
-          {localizedText(locale, "Switch to annual billing and pay for 10 months, get 12 - saving 20%.", "Treci la facturare anuală și plătești 10 luni, primești 12 - economisești 20%.")}
+          {localizedText(locale, "Switch to annual billing and pay for 10 months, get 12 - saving 20%.", "Treceți la facturare anuală și plătiți 10 luni, primiți 12 - economisiți 20%.")}
         </p>
       )}
     </div>

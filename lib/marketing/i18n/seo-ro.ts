@@ -87,15 +87,6 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     h1: "Raport Z zilnic și reconciliere numerar",
     intro: "franchisetech adună cifrele de închidere zilnică ca să revizuiți vânzările fără să reconstruiți ziua din memorie.",
   },
-  "kitchen-display": {
-    eyebrow: "Display bucătărie",
-    title: "Display bucătărie pentru restaurante și cafenele",
-    metaTitle: "Display bucătărie (KDS) pentru cafenele și restaurante",
-    description: "Comenzile plătite din POS apar pe un panou de preparare — nou, în lucru, gata, finalizat.",
-    h1: "Display bucătărie care menține ritmul serviciului",
-    intro:
-      "Când Display-ul de bucătărie este activ, comenzile plătite apar pe panoul de preparare — bucătăria și sala rămân aliniate fără bonuri pe hârtie.",
-  },
   "purchases-suppliers": {
     eyebrow: "Achiziții și furnizori",
     title: "Achiziții, furnizori și niveluri stoc",
@@ -214,7 +205,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     metaTitle: "De la cont nou la prima vânzare în sub o oră | franchisetech",
     description: "Configurare gratuită în aplicație: produse demo, deschidere casă și prima vânzare de test — majoritatea cafenelelor termină pașii de bază în sub o oră.",
     h1: "De la cont nou la prima vânzare în sub o oră",
-    intro: "Checklist în aplicație de la înregistrare la produse demo, deschiderea casei și prima vânzare — ghidat pas cu pas, fără cost. Configurare premium opțională (199€) pentru migrări mari sau FiscalNet.",
+    intro: "Checklist în aplicație de la înregistrare la produse demo, deschiderea casei și prima vânzare — ghidat pas cu pas, fără cost.",
   },
   "health-bars": {
     eyebrow: "Health bar",
@@ -225,60 +216,60 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     intro: "Health bar-urile depind de ingrediente proaspete, rețete consistente și marje clare pentru băuturi și gustări.",
   },
   "qr-code-receipts": {
-    eyebrow: "Conformitate fiscală",
-    title: "Cod QR pe Bonul Fiscal — Obligația ANAF din Noiembrie 2026",
-    metaTitle: "Cod QR Bon Fiscal România | Obligație ANAF Noiembrie 2026 | franchisetech",
+    eyebrow: "Bon fiscal & FiscalNet",
+    title: "Bon Fiscal în POS — FiscalNet, Raport Z și Pregătire QR",
+    metaTitle: "Bon Fiscal POS România | FiscalNet, Raport Z, QR ANAF | franchisetech",
     description:
-      "România obligă codul QR pe bonurile fiscale de la 1 noiembrie 2026. Ce înseamnă obligația și de ce depinde de firmware-ul casei de marcat, nu de software-ul POS.",
-    h1: "Cod QR pe bonul fiscal — ce înseamnă obligația din 2026 pentru casa dvs.",
+      "Cum gestionezi bonurile fiscale în franchisetech: POS, FiscalNet, metode de plată, TVA, raport Z și ce trebuie verificat pentru QR-ul ANAF.",
+    h1: "Bon fiscal din POS, fără pași manuali între vânzare și închiderea zilei",
     intro:
-      "România obligă codul QR pe bonurile fiscale de la 1 noiembrie 2026. Codul QR este generat de firmware-ul casei de marcat certificate, nu de franchisetech sau de orice alt software POS — deci conformitatea depinde de furnizorul dispozitivului fiscal, care trebuie să livreze un update de firmware capabil QR, nu de programul POS folosit.",
+      "franchisetech este pentru cafenele și restaurante mici din România care vor ca fiecare vânzare din POS să rămână legată de FiscalNet, TVA, metode de plată și raportul Z. QR-ul ANAF depinde de firmware-ul casei fiscale, dar datele operaționale trebuie să fie corecte înainte să ajungă la imprimantă.",
     bullets: [
-      "Obligația vine din firmware-ul certificat al casei de marcat, nu de la franchisetech",
-      "Verificați cu furnizorul casei de marcat dacă dispozitivul dvs. suportă (sau va suporta) firmware capabil QR",
-      "franchisetech trimite datele vânzării către casa de marcat exact ca astăzi — nu e nevoie de nicio schimbare în POS",
-      "Funcționează cu imprimante fiscale cu QR (Datecs, Tremol, Daisy, Custom) odată ce firmware-ul le suportă",
-      "Vă vom semnala acest lucru în dashboard pe măsură ce se apropie termenul — dar soluția depinde de furnizorul casei de marcat",
+      "Vânzarea se înregistrează în POS și se trimite către FiscalNet când integrarea este activă",
+      "Metodele de plată și grupele TVA sunt mapate în setările fiscale",
+      "Raportul Z și diferențele de numerar rămân în același workspace",
+      "QR-ul de pe bon este generat de casa fiscală certificată, nu de POS",
+      "Verifici firmware-ul QR cu furnizorul casei de marcat înainte de termenul ANAF",
     ],
     sections: [
       {
-        title: "Ce este obligația codului QR?",
-        body: "De la 1 noiembrie 2026, bonurile fiscale din România trebuie să conțină un cod QR cu datele tranzacției: CIF, numărul bonului, data, totalul și defalcarea TVA. Codul QR permite ANAF să verifice bonurile instant. Afacerile fără sisteme conforme riscă amenzi de 8.000–10.000 lei.",
+        title: "Ce face franchisetech în fluxul de bon fiscal",
+        body: "Casierul finalizează vânzarea în POS, cu produse, TVA și metodă de plată. Pentru organizațiile din România cu FiscalNet configurat, franchisetech trimite datele către casa fiscală prin driverul FiscalNet și păstrează tranzacția pentru verificarea zilnică.",
       },
       {
-        title: "Cum gestionează franchisetech această cerință",
-        body: "franchisetech trimite datele vânzării către imprimanta fiscală conectată prin FiscalNet, exact cum face astăzi pentru fiecare bon. Codul QR în sine este generat de firmware-ul dispozitivului fiscal certificat — nu de software-ul nostru. Asta înseamnă că respectarea obligației depinde de instalarea unui firmware capabil QR pe casa dvs. de marcat; franchisetech nu controlează și nu garantează acest update de firmware.",
+        title: "Unde intră QR-ul ANAF",
+        body: "QR-ul de pe bon este responsabilitatea casei fiscale certificate și a firmware-ului instalat de furnizorul autorizat. POS-ul nu desenează QR-ul pe bonul fiscal; POS-ul trebuie să trimită corect liniile, TVA-ul și plata către dispozitiv.",
       },
       {
-        title: "Ce trebuie să faceți",
-        body: "1) Asigurați-vă că imprimanta fiscală (casa de marcat) are firmware capabil QR — contactați distribuitorul autorizat. 2) Verificați că driver-ul FiscalNet este actualizat. 3) Continuați să folosiți franchisetech POS normal. Codul QR apare automat pe bonuri odată ce firmware-ul și driver-ul sunt actualizate.",
+        title: "Ce verifici înainte de go-live",
+        body: "Confirmă cu furnizorul casei fiscale că firmware-ul suportă QR, actualizează FiscalNet, configurează CIF-ul, metodele de plată și grupele TVA, apoi rulează o vânzare de test și un raport Z împreună cu contabilul.",
       },
     ],
     faqs: [
       {
-        question: "Când devine obligatoriu codul QR pe bon?",
+        question: "franchisetech emite bon fiscal?",
         answer:
-          "1 noiembrie 2026. Sancțiunile pentru neconformitate au fost suspendate până la această dată pentru a da timp afacerilor să actualizeze firmware-ul și sistemele.",
+          "Da, pentru organizațiile din România unde FiscalNet este activat și configurat corect. Verificarea fiscală finală rămâne la contabil și furnizorul casei fiscale.",
       },
       {
-        question: "franchisetech generează codul QR?",
+        question: "franchisetech generează QR-ul de pe bon?",
         answer:
-          "Nu. Codul QR este generat de dispozitivul fiscal certificat (casa de marcat) conform legii române. franchisetech trimite datele vânzării; dispozitivul tipărește bonul conform cu QR.",
+          "Nu. QR-ul este generat de casa fiscală certificată. franchisetech trimite datele vânzării către FiscalNet; dispozitivul fiscal tipărește bonul conform firmware-ului instalat.",
       },
       {
-        question: "Ce date conține codul QR?",
+        question: "Ce trebuie să verific pentru QR?",
         answer:
-          "Codul QR conține: CIF-ul afacerii, numărul bonului, data/ora, suma totală, defalcarea TVA și un hash de verificare. ANAF specifică structura XML exactă.",
+          "Întreabă furnizorul autorizat dacă modelul casei tale fiscale are firmware QR disponibil, apoi testează o vânzare reală cu FiscalNet înainte de termenul ANAF.",
       },
       {
-        question: "Trebuie să cumpăr hardware nou?",
+        question: "Ce se întâmplă la finalul zilei?",
         answer:
-          "Majoritatea dispozitivelor fiscale moderne (Datecs, Tremol, Daisy, Custom) suportă QR prin update de firmware. Verificați cu distribuitorul autorizat. Dispozitivele mai vechi pot necesita înlocuire.",
+          "În franchisetech închizi sesiunea POS cu raport Z, vezi totaluri cash/card, numerar așteptat, numerar numărat și diferențe notate pentru verificare.",
       },
       {
-        question: "Ce se întâmplă dacă ratez termenul?",
+        question: "Înlocuiește franchisetech contabilul?",
         answer:
-          "Amenzile variază de la 8.000 la 10.000 lei pentru emiterea bonurilor fără codul QR obligatoriu după 1 noiembrie 2026.",
+          "Nu. franchisetech organizează vânzări, TVA, FiscalNet și rapoarte operaționale. Contabilul verifică obligațiile fiscale și documentele oficiale.",
       },
     ],
     related: [

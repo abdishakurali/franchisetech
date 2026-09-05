@@ -18,14 +18,14 @@ export type ComparisonPage = {
 
 function baseRows(competitor: string, competitorPos: string): ComparisonPage["rows"] {
   return [
-    ["POS register", "Browser POS with products, cart, refunds, and till sessions", competitorPos],
-    ["Payments / hardware", "Records payment method; FiscalNet where configured (Romania)", "Varies — often stronger on payment terminals"],
-    ["Stock & purchases", "Products, ingredients, suppliers, purchase records, low stock", "Varies by product — often invoicing-first, not kitchen stock"],
-    ["Recipe costing", "Recipe builder, cost per portion, margin, can-make counts", "Usually limited or absent in invoicing-first tools"],
-    ["Till close / Z-report", "Opening cash, cash in/out, expected vs counted, daily close", "Varies — may need separate cash-up workflow"],
-    ["Fiscal receipts (RO)", "FiscalNet integration when enabled and configured", "Varies — check current fiscal module and setup"],
-    ["Team / pricing", "Unlimited staff on paid plans — no per-seat POS fee", "Check current per-user or terminal pricing"],
-    ["Best fit", "Small food businesses wanting POS + stock + recipes + daily records together", `Businesses whose main need is ${competitor}'s core strength`],
+    ["Casă POS", "POS în browser cu produse, coș, retururi și sesiuni de casă", competitorPos],
+    ["Plăți / hardware", "Înregistrează metoda de plată; FiscalNet când este configurat (România)", "Variază — adesea mai puternic pe terminale de plată"],
+    ["Stoc & achiziții", "Produse, ingrediente, furnizori, evidențe de achiziție, stoc minim", "Variază pe produs — adesea orientat pe facturare, nu pe stoc de bucătărie"],
+    ["Cost rețete", "Constructor de rețete, cost per porție, marjă, câte porții puteți face", "De obicei limitat sau absent în unelte orientate pe facturare"],
+    ["Închidere casă / raport Z", "Numerar de deschidere, intrări/ieșiri numerar, așteptat vs numărat, închidere zilnică", "Variază — poate necesita un flux separat de închidere"],
+    ["Bonuri fiscale (RO)", "Integrare FiscalNet când este activată și configurată", "Variază — verificați modulul fiscal actual și configurarea"],
+    ["Echipă / preț", "Personal nelimitat pe planurile plătite — fără taxă per casier", "Verificați prețul actual per utilizator sau terminal"],
+    ["Potrivire ideală", "Afaceri alimentare mici care vor POS + stoc + rețete + evidențe zilnice în același loc", `Afaceri a căror nevoie principală este punctul forte al ${competitor}`],
   ];
 }
 
@@ -34,147 +34,147 @@ export const comparisonPages: ComparisonPage[] = [
     slug: "square",
     path: "/compare/square",
     competitor: "Square",
-    market: "global",
-    metaTitle: "franchisetech vs Square for Small Food Businesses",
+    market: "ro",
+    metaTitle: "Alternativă Square pentru cafenele și restaurante — POS, stoc, rețete",
     description:
-      "Honest comparison of franchisetech and Square for cafes and restaurants that need POS, stock, purchases, recipes, and daily till records.",
-    h1: "franchisetech vs Square for small food businesses",
+      "Comparație onestă franchisetech vs Square pentru cafenele și restaurante care au nevoie de POS, stoc, achiziții, rețete și raport Z zilnic.",
+    h1: "franchisetech vs Square pentru cafenele și restaurante mici",
     intro:
-      "Square is strong for payments and card acceptance. franchisetech focuses on the operating layer around the till: products, stock, suppliers, purchases, recipe costing, and Z-reports.",
+      "Square este puternic la plăți și acceptare card. franchisetech se concentrează pe stratul operațional din jurul casei: produse, stoc, furnizori, achiziții, cost rețete și raport Z.",
     betterFor:
-      "Square may fit if integrated payment hardware is your top priority today. franchisetech may fit if you want a simple POS with stock, purchases, recipes, and food-business records in one browser workspace.",
+      "Square poate rămâne alegerea principală dacă hardware-ul de plată integrat este prioritatea de azi. franchisetech merită evaluat dacă vreți un POS simplu cu stoc, achiziții, rețete și evidențe pentru afacerea alimentară, într-un singur workspace în browser.",
     competitorStrengths: [
-      "Widely known brand and payment ecosystem",
-      "Card readers and payment hardware options",
-      "Established POS for many retail and hospitality setups",
+      "Brand cunoscut și ecosistem de plăți",
+      "Cititoare de card și opțiuni de hardware pentru plăți",
+      "POS consacrat pentru multe configurații retail și HoReCa",
     ],
     franchisetechStrengths: [
-      "Operations-first: stock, purchases, recipes, and till close together",
-      "Unlimited staff on paid plans — no per-seat POS fee",
-      "Romania-ready with lei, TVA rates, and FiscalNet when configured",
+      "Orientat pe operațiuni: stoc, achiziții, rețete și închidere casă în același loc",
+      "Personal nelimitat pe planurile plătite — fără taxă per casier",
+      "Pregătit pentru România: lei, cote TVA și FiscalNet când este configurat",
     ],
     sections: [
       {
-        title: "When Square is the better starting point",
-        body: "If your main blocker is taking card payments with minimal setup, Square’s payment hardware and ecosystem may solve that faster than switching your whole back office.",
+        title: "Când Square este punctul de plecare mai bun",
+        body: "Dacă blocajul principal este acceptarea plăților cu card cu o configurare minimă, hardware-ul și ecosistemul Square pot rezolva asta mai rapid decât schimbarea întregului back-office.",
       },
       {
-        title: "When franchisetech is worth a look",
-        body: "If you already sell through a till but rebuild stock, margins, and cash-up in spreadsheets, franchisetech connects POS sales to ingredients, purchases, and daily close figures.",
+        title: "Când merită să priviți franchisetech",
+        body: "Dacă vindeți deja printr-o casă, dar reconstruiți stocul, marjele și închiderea de zi în Excel, franchisetech leagă vânzările POS de ingrediente, achiziții și cifrele de închidere zilnică.",
       },
       {
-        title: "Migration mindset",
-        body: "You can run a 15-day trial in parallel with your current till. Products, opening cash, and a test sale take minutes — compare daily records before you switch.",
+        title: "Mentalitatea de migrare",
+        body: "Puteți rula o probă de 15 zile în paralel cu casa actuală. Produsele, numerarul de deschidere și o vânzare test durează minute — comparați evidențele zilnice înainte să schimbați.",
       },
     ],
     faqs: [
       {
-        question: "Is franchisetech a Square replacement?",
+        question: "franchisetech înlocuiește Square?",
         answer:
-          "Not always. franchisetech is an operations workspace (POS, stock, recipes, reports). Payment terminal integration should not be assumed unless configured for your setup.",
+          "Nu întotdeauna. franchisetech este un workspace operațional (POS, stoc, rețete, rapoarte). Integrarea cu un terminal de plată nu trebuie presupusă decât dacă este configurată pentru locația dumneavoastră.",
       },
       {
-        question: "Can I use franchisetech in Ireland and Romania?",
+        question: "Funcționează franchisetech și în afara României?",
         answer:
-          "Yes. Irish organisations use EUR and Irish VAT rates. Romanian organisations use lei (RON), TVA rates, and optional FiscalNet fiscal receipts when enabled.",
+          "Da, dar conținutul, TVA-ul și FiscalNet sunt gândite pentru piața din România. Pentru alte țări, verificați dacă modulele fiscale locale de care aveți nevoie sunt disponibile înainte de a trece pe franchisetech.",
       },
       {
-        question: "Which is cheaper for a 10-person team?",
+        question: "Care este mai ieftin pentru o echipă de 10 persoane?",
         answer:
-          "Compare total cost: Square’s hardware and plan fees vs franchisetech’s flat plan with unlimited staff. Pricing changes — check both sites before deciding.",
+          "Comparați costul total: hardware-ul și taxele de plan Square față de planul fix franchisetech cu personal nelimitat. Prețurile se schimbă — verificați ambele site-uri înainte de decizie.",
       },
     ],
     related: [
-      { label: "POS feature", href: "/features/pos" },
-      { label: "Recipe costing", href: "/features/recipe-costing" },
-      { label: "SumUp comparison", href: "/compare/sumup" },
+      { label: "Funcționalitate POS", href: "/features/pos" },
+      { label: "Cost rețete", href: "/features/recipe-costing" },
+      { label: "Comparație SumUp", href: "/compare/sumup" },
     ],
-    rows: baseRows("Square", "Square POS — strong payments ecosystem, varies by region"),
+    rows: baseRows("Square", "Square POS — ecosistem de plăți puternic, variază pe regiuni"),
   },
   {
     slug: "sumup",
     path: "/compare/sumup",
     competitor: "SumUp",
-    market: "global",
-    metaTitle: "franchisetech vs SumUp for Cafes and Restaurants",
+    market: "ro",
+    metaTitle: "Alternativă SumUp pentru cafenele și restaurante",
     description:
-      "Compare franchisetech and SumUp for food businesses that need simple POS plus stock, purchases, recipes, and end-of-day records.",
-    h1: "franchisetech vs SumUp for cafes and restaurants",
+      "Comparați franchisetech și SumUp pentru afaceri alimentare care au nevoie de POS simplu plus stoc, achiziții, rețete și evidențe de sfârșit de zi.",
+    h1: "franchisetech vs SumUp pentru cafenele și restaurante",
     intro:
-      "SumUp is widely chosen for card acceptance. franchisetech focuses on daily operations after the sale: stock, suppliers, recipe margins, till close, and owner reports.",
+      "SumUp este ales pe scară largă pentru acceptarea de card. franchisetech se concentrează pe operațiunile zilnice de după vânzare: stoc, furnizori, marje pe rețete, închidere casă și rapoarte pentru proprietar.",
     betterFor:
-      "SumUp may fit if payment acceptance is the main job. franchisetech may fit if connecting sales to stock, recipes, and cash-up matters more than the terminal brand.",
-    competitorStrengths: ["Simple card acceptance story", "Portable terminals for small operators", "Low-friction signup for payments"],
+      "SumUp poate rămâne alegerea principală dacă acceptarea plăților este singura nevoie. franchisetech merită evaluat dacă legarea vânzărilor de stoc, rețete și închiderea de zi contează mai mult decât brandul terminalului.",
+    competitorStrengths: ["Poveste simplă de acceptare card", "Terminale portabile pentru operatori mici", "Înscriere rapidă pentru plăți"],
     franchisetechStrengths: [
-      "Full product catalogue with categories and VAT",
-      "Stock and purchase records tied to ingredients",
-      "Z-report style till close with expected vs counted cash",
+      "Catalog complet de produse cu categorii și TVA",
+      "Evidențe de stoc și achiziții legate de ingrediente",
+      "Închidere de tip raport Z, cu numerar așteptat vs numărat",
     ],
     sections: [
       {
-        title: "Payments-first vs operations-first",
-        body: "SumUp often wins the ‘take card payments quickly’ decision. franchisetech wins when owners ask ‘what did we sell, what stock moved, and did the till match the drawer?’",
+        title: "Plăți întâi vs operațiuni întâi",
+        body: "SumUp câștigă adesea decizia „accept plăți cu cardul repede”. franchisetech câștigă când proprietarii întreabă „ce am vândut, ce stoc s-a mișcat și casa s-a potrivit cu sertarul?”.",
       },
       {
-        title: "Food businesses need more than a receipt",
-        body: "Cafes and restaurants track ingredients, waste, and margins. franchisetech links recipes to stock so can-make counts and gross margin are visible before menu changes.",
+        title: "Afacerile alimentare au nevoie de mai mult decât un bon",
+        body: "Cafenelele și restaurantele urmăresc ingrediente, pierderi și marje. franchisetech leagă rețetele de stoc, ca să vedeți câte porții puteți face și marja brută înainte de a schimba meniul.",
       },
     ],
     faqs: [
       {
-        question: "Does franchisetech include a SumUp terminal?",
-        answer: "No. franchisetech records the payment method. Terminal choice remains yours.",
+        question: "franchisetech include un terminal SumUp?",
+        answer: "Nu. franchisetech înregistrează metoda de plată. Alegerea terminalului rămâne a dumneavoastră.",
       },
       {
-        question: "Can I trial franchisetech while keeping SumUp?",
-        answer: "Yes. Many operators parallel-run for 15 days to compare daily records before switching workflows.",
+        question: "Pot testa franchisetech păstrând SumUp?",
+        answer: "Da. Mulți operatori rulează în paralel 15 zile, ca să compare evidențele zilnice înainte de a schimba fluxul de lucru.",
       },
     ],
     related: [
-      { label: "Square comparison", href: "/compare/square" },
-      { label: "Stock management", href: "/features/stock-management" },
-      { label: "Cash-up guide", href: "/resources/cash-up-at-end-of-day" },
+      { label: "Comparație Square", href: "/compare/square" },
+      { label: "Gestiune stoc", href: "/features/stock-management" },
+      { label: "Ghid închidere de zi", href: "/resources/cash-up-at-end-of-day" },
     ],
-    rows: baseRows("SumUp", "SumUp POS / payments — card acceptance focused"),
+    rows: baseRows("SumUp", "SumUp POS / plăți — orientat pe acceptare card"),
   },
   {
     slug: "lightspeed",
     path: "/compare/lightspeed",
     competitor: "Lightspeed",
-    market: "global",
-    metaTitle: "franchisetech vs Lightspeed for Small Food Businesses",
+    market: "ro",
+    metaTitle: "Alternativă Lightspeed pentru afaceri alimentare mici",
     description:
-      "Compare franchisetech and Lightspeed for operators who want POS, stock, suppliers, recipe costing, and records without enterprise complexity.",
-    h1: "franchisetech vs Lightspeed for small food businesses",
+      "Comparați franchisetech și Lightspeed pentru operatori care vor POS, stoc, furnizori, cost rețete și evidențe fără complexitatea unei platforme enterprise.",
+    h1: "franchisetech vs Lightspeed pentru afaceri alimentare mici",
     intro:
-      "Lightspeed offers a broad hospitality and retail platform. franchisetech is built for small food operators who want a focused till-plus-operations workspace.",
+      "Lightspeed oferă o platformă amplă de retail și HoReCa. franchisetech este construit pentru operatori alimentari mici care vor un workspace concentrat pe casă și operațiuni.",
     betterFor:
-      "Lightspeed may fit larger multi-site setups needing deep integrations. franchisetech may fit single-site and small chains wanting clarity without a heavy back office.",
-    competitorStrengths: ["Large feature set and partner ecosystem", "Established brand in hospitality POS", "Many integration options at higher tiers"],
+      "Lightspeed poate fi potrivit pentru configurații multi-locație mai mari, cu nevoie de integrări adânci. franchisetech poate fi potrivit pentru o locație sau un lanț mic care vrea claritate, fără un back-office greoi.",
+    competitorStrengths: ["Set amplu de funcționalități și ecosistem de parteneri", "Brand consacrat în POS pentru HoReCa", "Multe opțiuni de integrare la planurile superioare"],
     franchisetechStrengths: [
-      "Simpler daily workflow for small teams",
-      "Recipe costing and stock connected to POS",
-      "Transparent plans with unlimited staff",
+      "Flux zilnic mai simplu pentru echipe mici",
+      "Cost rețete și stoc conectate la POS",
+      "Planuri transparente, cu personal nelimitat",
     ],
     sections: [
       {
-        title: "Complexity vs clarity",
-        body: "Enterprise platforms carry configuration cost. franchisetech defaults to essentials: sell, track stock, close the till, review reports.",
+        title: "Complexitate vs claritate",
+        body: "Platformele enterprise vin cu un cost de configurare. franchisetech pornește de la esențial: vindeți, urmăriți stocul, închideți casa, revizuiți rapoartele.",
       },
     ],
     faqs: [
       {
-        question: "Is franchisetech an enterprise POS?",
+        question: "franchisetech este un POS enterprise?",
         answer:
-          "No. It targets small food businesses and small chains — not large enterprise warehouse or franchise HQ requirements.",
+          "Nu. Se adresează afacerilor alimentare mici și lanțurilor mici — nu cerințelor de depozit enterprise sau de sediu central de franciză mare.",
       },
     ],
     related: [
-      { label: "Pricing", href: "/pricing" },
-      { label: "Restaurants", href: "/industries/restaurants" },
-      { label: "Lightspeed alternative (RO)", href: "/compare/expressoft" },
+      { label: "Prețuri", href: "/pricing" },
+      { label: "Restaurante", href: "/industries/restaurants" },
+      { label: "Alternativă Lightspeed (RO)", href: "/compare/expressoft" },
     ],
-    rows: baseRows("Lightspeed", "Lightspeed — broad hospitality platform, tiered pricing"),
+    rows: baseRows("Lightspeed", "Lightspeed — platformă amplă HoReCa, prețuri pe niveluri"),
   },
   {
     slug: "smartbill",
@@ -223,7 +223,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         question: "Pot importa produse?",
-        answer: "Da, prin CSV. Setup asistat este disponibil pentru prima configurare.",
+        answer: "Da, prin CSV.",
       },
     ],
     related: [
@@ -324,7 +324,7 @@ export const comparisonPages: ComparisonPage[] = [
     intro:
       "RezoSoft este un nume cunoscut în POS HoReCa din România, cu instalări tradiționale la restaurante și suport local. franchisetech propune același tip de job — casă, stoc, rapoarte — într-un workspace cloud în browser, cu personal nelimitat și trial rapid. Nu pretindem că RezoSoft e „greșit”; comparăm onest unde fiecare câștigă: investiție locală existentă vs time-to-value și cost predictibil pentru afaceri mici.",
     betterFor:
-      "RezoSoft poate fi potrivit dacă aveți deja investiție în echipamente, training local și contract de suport — și fluxul funcționează. franchisetech merită evaluat dacă doriți browser POS, trial 15 zile (verificare card 1 €), raport Z inclus și cost fără taxă per casier — plus coexistență cu SmartBill/Oblio pentru facturare.",
+      "RezoSoft poate fi potrivit dacă aveți deja investiție în echipamente, training local și contract de suport — și fluxul funcționează. franchisetech merită evaluat dacă doriți browser POS, trial 15 zile, verificare card 1 €, raport Z inclus și cost fără taxă per casier — plus coexistență cu SmartBill/Oblio pentru facturare.",
     competitorStrengths: [
       "Brand local HoReCa — recunoscut de operatori și integratori din România",
       "Instalări tradiționale la restaurante — ecosistem instalat, familiar echipei",
@@ -336,12 +336,12 @@ export const comparisonPages: ComparisonPage[] = [
       "Raport Z, vânzări și TVA incluse în Core (49€) — fără add-on doar pentru raportare",
       "Stoc, NIR, rețete și marjă brută pe Operations — legate de vânzările POS",
       "Personal nelimitat pe planurile plătite — fără taxă per casier",
-      "Trial 15 zile (verificare card 1 €); FiscalNet când este activat și configurat",
+      "Trial 15 zile, verificare card 1 €; FiscalNet când este activat și configurat",
     ],
     sections: [
       {
         title: "Local instalat vs cloud browser",
-        body: "POS-urile locale precum RezoSoft pot fi robuste când sunt deja implementate — dar adaugă cost de mentenanță, upgrade-uri și dependență de hardware. franchisetech reduce complexitatea pentru fluxul zilnic: laptop sau tabletă, aceeași casă oriunde. FiscalNet rămâne pe stația configurată, conform ghidului.",
+        body: "RezoSoft nu este doar instalare locală — pe site listează și un abonament cloud lunar propriu (verificat pe rezosoft.ro/preturi), pe lângă plata unică de instalare. Diferența reală este unde rulează interfața zilnică: RezoSoft rămâne legat de aplicația/terminalul instalat, franchisetech rulează integral în browser pe laptop sau tabletă, oriunde. FiscalNet rămâne pe stația configurată, conform ghidului, în ambele cazuri.",
       },
       {
         title: "Facturare separată, casă clară",
@@ -349,7 +349,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Comparați costul total, nu doar licența",
-        body: "Adunați licențe, terminale, taxe per casier, ore de reconciliere manuală și suport. franchisetech listează prețul pe site (Core 49€, Operations 79€) cu personal nelimitat. Rulați trial paralel 15 zile: aceeași echipă, aceeași închidere de zi — măsurați timpul până la raport clar.",
+        body: "RezoSoft afișează prețuri publice pe site (ex. ~850 lei o singură dată + 100 lei/lună cloud pentru restaurant, sau ~600 lei + 75 lei/lună pentru POS standard) — adunați și terminalele suplimentare, taxele per casier și ore de reconciliere manuală. franchisetech listează prețul pe site (Core 49€, Operations 79€) cu personal nelimitat. Rulați trial paralel 15 zile: aceeași echipă, aceeași închidere de zi — comparați costul total real, nu doar cifra de start.",
       },
     ],
     faqs: [
@@ -377,7 +377,7 @@ export const comparisonPages: ComparisonPage[] = [
       { label: "Obiecții POS România", href: "/resources/objections-pos-romania" },
     ],
     rows: [
-      ["Model de deploy", "Browser cloud — laptop/tabletă, fără server local", "Instalare locală tradițională — ecosistem POS instalat"],
+      ["Model de deploy", "Browser cloud — laptop/tabletă, fără server local", "Model hibrid — plată unică + abonament cloud lunar propriu (surse: rezosoft.ro/preturi)"],
       ["Time to first sale", "Zile — trial self-serve, setup checklist", "Săptămâni — implementare, training, hardware"],
       ["POS register", "Coș rapid, categorii, retururi, sesiune casă", "POS HoReCa local — flux familiar operatorilor existenți"],
       ["Raport Z / închidere casă", "Inclus în Starter — așteptat vs numărat", "Disponibil — verificați claritatea raportului în setup-ul vostru"],
@@ -386,7 +386,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Facturare / e-Factura", "Coexistă cu SmartBill/Oblio/Saga", "POS-focused — facturare adesea în alt sistem"],
       ["FiscalNet", "Când este activat pe stația configurată", "Suport local — verificați compatibilitatea hardware"],
       ["Personal / casieri", "Nelimitat pe plan plătit", "Verificați taxă per utilizator sau terminal"],
-      ["Cost tipic echipe mici", "49–79€/lună + personal nelimitat", "Licențe + hardware + suport — ofertă variabilă"],
+      ["Cost tipic echipe mici", "49–79€/lună + personal nelimitat", "Preț public pe site: ~600–850 lei o singură dată + 75–100 lei/lună abonament cloud (TVA inclus) — verificați costul per terminal/locație"],
       ["Cel mai potrivit pentru", "Restaurant mic care vrea trial rapid și cost predictibil", "Operatori cu investiție existentă RezoSoft și suport local mulțumitor"],
     ],
   },
@@ -413,7 +413,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Time-to-first-sale în zile — trial 15 zile, setup checklist, onboarding ghidat",
       "Preț listat pe site (Core 49€, Operations 79€) — personal nelimitat",
       "Raport Z, vânzări și TVA incluse în Starter — fără add-on doar pentru raportare",
-      "Multi-location 99€/locație — fără suite enterprise obligatorie",
+      "Multi-location 89€/locație suplimentară — fără suite enterprise obligatorie",
       "Coexistă cu SmartBill/Oblio/Saga pentru facturare și e-Factura",
     ],
     sections: [
@@ -439,7 +439,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Suport multi-locație la franchisetech?",
         answer:
-          "Da — plan Multi-location (99€/locație/lună). Raport Z și vânzări per locație; verificați pagina de prețuri pentru limitele curente și FiscalNet pe Multi-location.",
+          "Da — plan Multi-location (89€/locație suplimentară/lună, necesită plan Scale la bază). Raport Z și vânzări per locație; verificați pagina de prețuri pentru limitele curente și FiscalNet pe Multi-location.",
       },
       {
         question: "Pot păstra contabilul pe SmartBill?",
@@ -460,7 +460,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Raport Z / închidere", "Inclus Starter — așteptat vs numărat", "Disponibil — verificați claritatea în oferta voastră"],
       ["Stoc & NIR", "Pro — stoc, furnizori, NIR legat de POS", "Module gestiune — adesea parte din suite mai mare"],
       ["Rețete & marje", "Pro — cost porție, marjă, can-make", "Variază — nu focus principal pe marje rețetă"],
-      ["Multi-location", "99€/locație — fără enterprise obligatoriu", "Punct forte la rețele mari — preț la ofertă"],
+      ["Multi-location", "89€/locație suplimentară — fără enterprise obligatoriu", "Punct forte la rețele mari — preț la ofertă"],
       ["Facturare / e-Factura", "Coexistă SmartBill/Oblio/Saga", "POS/gestiune — facturare adesea separat"],
       ["Personal / casieri", "Nelimitat pe plan plătit", "Verificați licențe per terminal/post"],
       ["Cel mai potrivit pentru", "Operator mic care vrea trial rapid și cost listat", "Lanț 5+ locații cu buget implementare"],
@@ -489,7 +489,7 @@ export const comparisonPages: ComparisonPage[] = [
       "POS + stoc + rețete + raport Z în același workspace browser",
       "Personal nelimitat pe plan plătit — fără taxă per casier",
       "Raport Z și TVA incluse în Core (49€) — fără add-on raportare",
-      "Trial 15 zile (verificare card 1 €); ghiduri și resurse în română",
+      "Trial 15 zile, verificare card 1 €; ghiduri și resurse în română",
       "Coexistă cu SmartBill/Oblio pentru facturare",
     ],
     sections: [
@@ -520,7 +520,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Pot importa produsele din hePOS?",
         answer:
-          "Import CSV pentru produse este disponibil. Setup asistat (199€) poate accelera migrarea inițială. Rulați trial paralel înainte de a opri hePOS.",
+          "Import CSV pentru produse este disponibil. Rulați trial paralel înainte de a opri hePOS.",
       },
     ],
     related: [
@@ -566,7 +566,7 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     franchisetechStrengths: [
       "POS + stoc + rețete + raport Z în același sistem browser",
-      "Trial 15 zile (verificare card 1 €) — evaluare paralelă fără ruptură",
+      "Trial 15 zile, verificare card 1 € — evaluare paralelă fără ruptură",
       "Personal nelimitat — fără taxă per casier la creștere echipă",
       "Raport Z, vânzări, TVA incluse Starter — fără add-on Insights",
       "FiscalNet când activat; ghid `/help/romania-fiscalnet`",
@@ -589,7 +589,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Pot migra meniul din VilicoRest?",
         answer:
-          "Import CSV pentru produse este disponibil. Setup asistat (199€) poate ajuta la migrarea inițială. Recomandăm trial paralel înainte de switch complet.",
+          "Import CSV pentru produse este disponibil. Recomandăm trial paralel înainte de switch complet.",
       },
       {
         question: "VilicoRest vs RezoSoft vs franchisetech?",
@@ -637,14 +637,14 @@ export const comparisonPages: ComparisonPage[] = [
     competitorStrengths: [
       "Planuri tiered (Pro / Premium / Titanium) cu multe module HoReCa",
       "Integrări delivery și meniu digital la scară",
-      "Hardware POS inclus pe plan (1–2 dispozitive/locație)",
+      "Licențe incluse pe plan (1 pe Pro, 2 pe Premium/Titanium)",
       "Ecosistem matur pentru restaurante cu volum mare",
     ],
     franchisetechStrengths: [
       "Raport vânzări, raport Z și raport TVA incluse în Core (49€) — fără add-on Insights",
       "Fără taxă per angajat; personal nelimitat pe plan",
       "Stoc, NIR, rețete și rapoarte marjă pe Operations (79€) — fără salt la 99€+ doar pentru gestiune",
-      "Browser POS — trial 15 zile (verificare card 1 €); FiscalNet când este configurat",
+      "Browser POS — trial 15 zile, verificare card 1 €; FiscalNet când este configurat",
     ],
     sections: [
       {
@@ -657,7 +657,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Cum să testați în 15 zile",
-        body: "Rulați paralel: aceleași produse, aceeași echipă, aceeași închidere de zi. Verificați cât plătiți efectiv (plan + add-on-uri) vs cât timp pierdeți reconciliind fără rapoarte clare. franchisetech trial nu cere card pentru deschiderea casei.",
+        body: "Rulați paralel: aceleași produse, aceeași echipă, aceeași închidere de zi. Verificați cât plătiți efectiv (plan + add-on-uri) vs cât timp pierdeți reconciliind fără rapoarte clare. franchisetech nu cere card la înscriere — testați complet întâi și decideți după.",
       },
     ],
     faqs: [
@@ -679,7 +679,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Pot folosi franchisetech doar pentru rapoarte și casă?",
         answer:
-          "Da. Starter este construit pentru casă, produse și rapoarte zilnice. Pro adaugă stoc, rețete și conector sertar când aveți nevoie — fără să treceți automat la un plan de 99€+.",
+          "Da. Core este construit pentru casă, produse și rapoarte zilnice. Operations adaugă stoc, achiziții și rețete.",
       },
     ],
     related: [
@@ -689,18 +689,17 @@ export const comparisonPages: ComparisonPage[] = [
       { label: "Obiecții POS România", href: "/resources/objections-pos-romania" },
     ],
     rows: [
-      ["Cost configurare self-serve", "0€ — ghid în aplicație", "Taxe implementare / training — contact comercial"],
-      ["Timp până la prima vânzare", "Sub o oră (cale ghidată)", "Zile–săptămâni (implementare tipică)"],
+      ["Cost configurare", "0€ self-serve", "0€ — onboarding video gratuit cu consultant"],
+      ["Timp până la prima vânzare", "Sub o oră (cale ghidată în aplicație)", "Self-serve, cu onboarding video gratuit"],
       ["Preț intrare / locație", "Core 49€/lună (rapoarte incluse)", "Pro 49€/locație/lună (+ TVA)"],
       ["Raport vânzări zilnic", "Inclus în Starter", "Raportare timp real pe plan; Insights personalizate +19€/lună (add-on)"],
       ["Raport Z / închidere casă", "Inclus în Starter", "Registru de casă pe plan — verificați dacă rapoarte avansate necesită add-on"],
       ["Raport TVA", "Inclus în Starter", "Facturare & e-Factura pe plan — detaliu raport TVA vs add-on Insights"],
       ["Stoc & NIR", "Operations 79€ — stoc, furnizori, achiziții/NIR", "Premium 99€+ sau module gestiune separate"],
-      ["Kitchen Display", "Opțional (KDS pe Operations)", "+19€/lună add-on"],
       ["Integrări contabilitate (Saga)", "Export rapoarte în plan eligibil", "+39€/lună add-on integrare Saga"],
       ["Comenzi delivery / meniu digital", "Nu în pachet de bază", "0,06€/comandă sau incluse pe tier superior"],
       ["Personal / utilizatori", "Nelimitat pe plan plătit", "Nelimitat"],
-      ["Cost tipic casă + rapoarte clare", "49€ — fără add-on raportare", "49€ + 19€ Insights ≈ 68€+ înainte de alte module"],
+      ["Cost tipic casă + rapoarte zilnice", "49€ — rapoarte zilnice incluse", "49€ — raportare în timp real inclusă; Insights (rapoarte personalizate) +19€"],
       ["Cel mai potrivit pentru", "Cafenea/restaurant mic care vrea casă + rapoarte fără surprize", "Operatori care folosesc deja ecosistem Ebriza complet sau volume delivery mari"],
     ],
   },
@@ -728,7 +727,7 @@ export const comparisonPages: ComparisonPage[] = [
       "POS browser orientat pe serviciu zilnic — nu doar emitere document",
       "Sesiune casă, numerar așteptat vs numărat, raport Z incluse în Starter",
       "Rețete, cost porție și marjă brută pe Operations",
-      "Kitchen display și flux bucătărie pentru restaurante",
+      "FiscalNet local pentru bonuri fiscale din fluxul POS",
       "Personal nelimitat; trial 15 zile asistat",
     ],
     sections: [
@@ -754,7 +753,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Oblio are casă de marcat — înlocuiește POS-ul?",
         answer:
-          "Oblio se conectează la case de marcat compatibile pentru bon fiscal. franchisetech oferă flux complet de casă (produse, coș, plăți, sesiune, raport Z) în browser — plus rețete și kitchen display pe planurile superioare.",
+          "Oblio se conectează la case de marcat compatibile pentru bon fiscal. franchisetech oferă flux complet de casă (produse, coș, plăți, sesiune și raport Z) în browser, cu FiscalNet local când este configurat.",
       },
       {
         question: "Pot folosi ambele?",
@@ -773,7 +772,6 @@ export const comparisonPages: ComparisonPage[] = [
       ["POS register zilnic", "Browser POS cu coș, plăți, sesiune casă", "Casă de marcat + documente — nu POS HoReCa complet"],
       ["Rețete & marje", "Operations 79€ — cost porție, marjă brută", "Modul producție pentru retetar general"],
       ["Raport Z / închidere casă", "Inclus în Starter", "Nu este focusul principal"],
-      ["Kitchen display", "Pro — KDS", "Nu listat ca modul HoReCa"],
       ["Personal", "Nelimitat pe plan plătit", "Nelimitat"],
       ["Cel mai potrivit pentru", "Cafenea/restaurant cu flux zilnic de vânzare", "PFA/SRL care prioritizează facturare ieftină"],
     ],
@@ -812,7 +810,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Preț transparent vs ofertă personalizată",
-        body: "Bit-Soft nu publică tarife — contact comercial și implementare. franchisetech listează planurile pe site; comparați costul total al primului an incluzând setup asistat (199€ opțional) vs proiect enterprise.",
+        body: "Bit-Soft nu publică tarife — contact comercial și implementare. franchisetech listează planurile pe site; comparați costul total al primului an vs proiect enterprise.",
       },
       {
         title: "Funcții overlap",
@@ -833,7 +831,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Pot migra de la Breeze?",
         answer:
-          "Import CSV produse este disponibil. Setup asistat poate ajuta la migrarea inițială. Rulați trial paralel înainte de switch.",
+          "Import CSV produse este disponibil. Rulați trial paralel înainte de switch.",
       },
     ],
     related: [
@@ -844,8 +842,8 @@ export const comparisonPages: ComparisonPage[] = [
     rows: [
       ["Cost configurare self-serve", "0€ — ghid în aplicație", "Proiect integrator — contact comercial"],
       ["Timp până la prima vânzare", "Sub o oră (cale ghidată)", "Săptămâni–luni (implementare enterprise)"],
-      ["Preț", "49–99€/lună public pe site", "Ofertă comercială — fără preț public"],
-      ["Implementare", "Self-serve + setup asistat opțional (199€)", "Proiect integrator, training echipă"],
+      ["Preț", "49–109€/lună public pe site", "Ofertă comercială — fără preț public"],
+      ["Implementare", "Self-serve", "Proiect integrator, training echipă"],
       ["POS", "Browser — laptop/tablet", "Breeze mobil + ecosistem Bit-Soft"],
       ["KDS / bucătărie", "Pro", "Breeze KDS — modul enterprise"],
       ["Delivery / call center", "Nu în pachet de bază", "Dispatch, call center, app șofer — punct forte Bit-Soft"],
@@ -862,55 +860,55 @@ export const comparisonPages: ComparisonPage[] = [
     market: "ro",
     metaTitle: "Boogit vs franchisetech — livrare vs POS operațional",
     description:
-      "Boogit este o platformă de comandă online pentru clienți, nu un POS. Dacă restaurantul tău e pe Boogit, ai nevoie și de un POS pentru a gestiona vânzările, stocul și raportul Z. Comparație onestă.",
+      "Boogit este o platformă de comandă online pentru clienți, nu un POS. Dacă restaurantul dumneavoastră este pe Boogit, aveți nevoie și de un POS pentru a gestiona vânzările, stocul și raportul Z. Comparație onestă.",
     h1: "Boogit vs franchisetech — două produse diferite care fac treabă împreună",
     intro:
-      "Boogit este o platformă de comandă online și livrare prin care clienții comandă mâncare de la restaurante partenere (similar Glovo sau Tazz, dar local în Brașov). Nu este un POS sau software de management restaurant. franchisetech este POS-ul pe care îl folosiți în locație — vânzări, stoc, rețete, raport Z, export Saga. Dacă restaurantul vostru e listat pe Boogit, aveți nevoie în continuare de un sistem de casă. Aceasta nu este o comparație de produse concurente, ci o clarificare.",
+      "Boogit (boogiT Technology, Brașov) a pornit ca platformă de comandă online pentru clienți, dar oferă acum și un sistem POS propriu (pos.boogit.ro) — vânzare, gestiune, KDS, chioșc self-ordering, comandă QR la masă, integrare Bolt/Wolt/Glovo și export Saga C. Nu mai este doar o platformă de livrare — este și un concurent direct pe zona de POS restaurant. franchisetech este workspace-ul operațional: casă browser, stoc, rețete, raport Z și export Saga, la preț listat pe site.",
     betterFor:
-      "Boogit vă aduce comenzi online de la clienți din zona sa de acoperire. franchisetech gestionează operațiunile din locație: casa, stocul, marjele și raportul zilnic. Cele două funcționează împreună — nu se exclud.",
+      "Boogit poate câștiga dacă vreți furnizor local din Brașov cu app proprie de livrare integrată direct în același POS. franchisetech câștigă dacă vreți preț listat transparent (fără cotație), cost rețete și marjă per preparat incluse, și browser POS fără instalare.",
     competitorStrengths: [
-      "Platformă de comandă online pentru clienți — mai multe comenzi de livrare",
-      "Prezență locală în Brașov — clientelă locală captivă",
-      "Aplicație mobilă pentru clienți (iOS și Android)",
-      "Vizibilitate pentru restaurantele partenere listate pe platformă",
+      "Sistem POS propriu — vânzare, gestiune, KDS, chioșc self-ordering, comandă QR la masă",
+      "Integrare Bolt, Wolt și Glovo — comenzile ajung automat pe ecranele de bucătărie (KDS)",
+      "Export automat vânzări și NIR către Saga (contabilitate)",
+      "Aplicație proprie de comandă online + livrare pentru clienți, cu vizibilitate locală în Brașov",
+      "E-Factura și rapoarte de contabilitate incluse",
     ],
     franchisetechStrengths: [
-      "POS în browser — gestionează vânzările din locație și livrările separat",
-      "Glovo — integrat automat prin webhook. Bolt Food și Tazz — în curând.",
+      "Prețuri listate pe site: Core 49€, Operations 79€, Multi-location 89€/locație — fără cotație sau taxă de implementare",
+      "Browser POS — fără instalare locală sau taxă de setup",
       "Raport Z zilnic — numerar așteptat vs numărat, fără Excel",
       "Export Saga C (XML) pentru contabil — fără transcriere manuală",
-      "Stoc și rețete legate de vânzări — știți marja înainte de a schimba meniul",
-      "Multi-location 99€/locație — dacă aveți mai multe puncte de lucru",
+      "Cost rețete și marje incluse în Pro — știți marja înainte de a schimba meniul",
     ],
     sections: [
       {
-        title: "Ce face Boogit și ce nu face",
-        body: "Boogit este o platformă de comandă online prin care clienții finali comandă mâncare de la restaurante partenere din Brașov. Boogit nu oferă: POS pentru casă, gestiune stoc, raport Z, cost rețete sau export contabil. Dacă sunteți parteneri Boogit, aveți nevoie de un sistem de casă separat pentru a gestiona vânzările zilnice.",
+        title: "Boogit nu mai este doar o platformă de livrare",
+        body: "Pe lângă aplicația de comandă online pentru clienți din Brașov, compania boogiT operează și un POS propriu (pos.boogit.ro) cu vânzare, gestiune, KDS, chioșc self-ordering și integrare Bolt/Wolt/Glovo. Dacă evaluați Boogit ca alternativă de POS, comparați-l ca atare — nu doar ca sursă de comenzi online.",
       },
       {
-        title: "Cum înregistrați comenzile Boogit în casa fiscală",
-        body: "Comenzile primite prin Boogit trebuie înregistrate în casa fiscală ca orice altă vânzare. franchisetech înregistrează vânzările per canal separat (în locație vs livrare) — corect fiscal ANAF. Fără un POS care separă canalele, riscați erori la reconciliere și probleme la control.",
+        title: "Preț listat vs. cotație și taxă de implementare",
+        body: "Site-ul Boogit nu afișează prețuri publice pentru POS — FAQ-ul lor menționează o taxă de implementare plus abonament lunar, cu ofertă la cerere. franchisetech listează 49–109€/lună pe site, fără taxă de implementare separată.",
       },
       {
-        title: "Boogit + franchisetech — complementare",
-        body: "Boogit aduce comenzile online. franchisetech gestionează operațiunile din locație: casă, stoc, marje și raport Z. La final de zi, raportul Z și exportul Saga reflectă toate vânzările — inclusiv cele din Boogit — corect înregistrate.",
+        title: "Livrare — punct forte Boogit, nu al nostru",
+        body: "Boogit integrează Bolt, Wolt și Glovo, cu comenzile ajungând automat pe KDS. franchisetech nu oferă integrare cu platforme de livrare — ne concentrăm pe casă, stoc, rețete și export Saga C (XML), inclus în planul Pro. Dacă livrarea prin platforme e o cerință centrală, Boogit acoperă acel job direct.",
       },
     ],
     faqs: [
       {
-        question: "Boogit înlocuiește un POS?",
+        question: "Boogit este doar o platformă de livrare?",
         answer:
-          "Nu. Boogit este o platformă de comandă online pentru clienți — nu un POS sau software de management restaurant. Dacă restaurantul vostru e pe Boogit, aveți nevoie în continuare de un sistem de casă pentru vânzări, stoc, raport Z și export contabil.",
+          "Nu mai este doar atât. Pe lângă aplicația de comandă online pentru clienți din Brașov, boogiT oferă și un sistem POS propriu (pos.boogit.ro) cu gestiune, KDS, chioșc self-ordering și integrare Bolt/Wolt/Glovo. Comparați-l ca alternativă reală de POS, nu doar ca sursă de comenzi.",
       },
       {
-        question: "Cum înregistrez comenzile Boogit în casa fiscală?",
+        question: "Boogit are export Saga pentru contabil?",
         answer:
-          "Comenzile din Boogit trebuie înregistrate ca vânzări în casa de marcat — la fel ca orice altă comandă. franchisetech înregistrează vânzările per canal (în locație, Glovo, Boogit etc.) separat, corect fiscal ANAF. Verificați cu contabilul dvs. modalitatea corectă de înregistrare.",
+          "Da — site-ul Boogit menționează export automat al vânzărilor și NIR-urilor către Saga. franchisetech include de asemenea export Saga C (XML) în planul Pro la 79€/lună.",
       },
       {
-        question: "Funcționează franchisetech cu mai multe platforme de livrare?",
+        question: "Funcționează franchisetech cu platforme de livrare?",
         answer:
-          "Glovo — integrat automat (webhook direct), comenzile apar în sistem fără intervenție manuală. Bolt Food și Tazz — pot fi înregistrate manual în POS; integrare automată în curând. Export Saga inclus pentru contabil.",
+          "Nu. franchisetech nu oferă integrare cu Glovo, Bolt Food sau Tazz — ne concentrăm pe POS la tejghea, stoc, rețete și raport Z. Dacă livrarea prin platforme e centrală pentru afacerea dumneavoastră, Boogit acoperă acel job direct.",
       },
     ],
     related: [
@@ -920,16 +918,16 @@ export const comparisonPages: ComparisonPage[] = [
       { label: "POS", href: "/features/pos" },
     ],
     rows: [
-      ["Ce este", "POS + stoc + rețete + raport Z — management operațional", "Platformă comandă online pentru clienți finali"],
-      ["Cui se adresează", "Proprietarilor de restaurante/cafenele", "Clienților care comandă mâncare online"],
-      ["POS / casă", "Browser POS — sesiune casă, coș, retururi", "Nu oferă POS"],
-      ["Raport Z / închidere", "Inclus Starter — așteptat vs numărat zilnic", "Nu oferă raport Z"],
-      ["Stoc & NIR", "Pro — stoc, furnizori, NIR", "Nu oferă gestiune stoc"],
-      ["Rețete & marje", "Pro — cost porție, marjă, can-make", "Nu oferă rețete"],
-      ["Export contabilitate", "Saga C (XML) inclus pentru contabil", "Nu oferă export contabil"],
-      ["Înregistrare livrare", "Glovo — automat; Bolt/Tazz — în curând", "Comenzile primite trebuie înregistrate în casa voastră"],
-      ["Multi-locație", "99€/locație — dashboard unificat", "Listare per locație pe platformă"],
-      ["Preț pentru restaurant", "49–99€/lună listat pe site", "Comision per comandă — verificați termenii"],
+      ["Ce este", "POS + stoc + rețete + raport Z — management operațional", "POS restaurant (pos.boogit.ro) + app proprie de comandă online"],
+      ["Cui se adresează", "Proprietarilor de restaurante/cafenele", "Restaurantelor (POS) și clienților care comandă online"],
+      ["POS / casă", "Browser POS — sesiune casă, coș, retururi", "Sistem POS propriu — vânzare, gestiune, KDS"],
+      ["Raport Z / închidere", "Inclus Starter — așteptat vs numărat zilnic", "Neconfirmat pe site — verificați cu furnizorul"],
+      ["Stoc & NIR", "Pro — stoc, furnizori, NIR", "Gestiune stoc disponibilă — verificați detaliile cu furnizorul"],
+      ["Rețete & marje", "Pro — cost porție, marjă, can-make", "Neconfirmat pe site — verificați cu furnizorul"],
+      ["Export contabilitate", "Saga C (XML) inclus pentru contabil", "Export automat vânzări/NIR către Saga"],
+      ["Integrare livrare", "Nu oferim", "Bolt, Wolt, Glovo — automat, direct pe KDS"],
+      ["Chioșc self-ordering / QR masă", "Nu este inclus", "Disponibil — punct forte Boogit"],
+      ["Preț", "49–109€/lună listat pe site, fără taxă de implementare", "Cotație — taxă de implementare + abonament, contact +40 755 111 774"],
     ],
   },
   // ── NEW: FreyaPOS ─────────────────────────────────────────────────────────
@@ -943,24 +941,25 @@ export const comparisonPages: ComparisonPage[] = [
       "Comparație onestă franchisetech vs FreyaPOS: ambele au POS + livrare + gestiune pentru HoReCa România. Diferențele reale: preț listat vs cotație, Saga export, rețete și browser vs instalat.",
     h1: "franchisetech vs FreyaPOS — comparație onestă HoReCa România",
     intro:
-      "FreyaPOS este un POS pentru restaurante și retail din România cu funcții de gestiune, livrare (Glovo/Tazz ca modul opțional), rezervări și loyalty. Nu afișează prețuri publice — obțineți ofertă la sales@freyapos.com. franchisetech acoperă același job cu browser POS, livrare separată pe canale, cost rețete și export Saga — la 49–99€/lună listat pe site, trial 15 zile (verificare card 1 €).",
+      "FreyaPOS este un POS pentru restaurante și retail din România cu funcții de gestiune, livrare (Glovo/Tazz ca modul opțional), rezervări și loyalty. Nu afișează prețuri publice — obțineți ofertă la sales@freyapos.com. franchisetech acoperă operațiunile zilnice cu browser POS, cost rețete și export Saga — la 49–109€/lună listat pe site, trial 15 zile, verificare card 1 €.",
     betterFor:
       "FreyaPOS poate câștiga dacă aveți nevoie de modul de rezervări, loyalty integrat și preferați relație directă cu un furnizor local cu cotație. franchisetech câștigă dacă vreți preț listat transparent, browser POS fără instalare, export Saga pentru contabil și cost rețete inclus în planul Pro.",
     competitorStrengths: [
       "POS HoReCa și retail — modul restaurant și retail în același sistem",
       "Integrare Glovo și Tazz disponibilă (modul opțional la cerere)",
       "Modul rezervări și check-in — util pentru restaurante cu locuri rezervate",
-      "Loyalty și promoții — programe de fidelizare integrate",
+      "Loyalty și promoții — aplicație mobilă proprie de fidelizare cu comenzi și notificări (Freya Loyalty)",
+      "Menu Engineering & Food Cost — modul dedicat de analiză profitabilitate meniu",
       "Scalabil pentru franciză — management centralizat multi-locație",
       "e-Factura și facturare incluse",
+      "20 de ani prezență pe piața HoReCa din România",
     ],
     franchisetechStrengths: [
-      "Prețuri listate pe site: Starter 49€, Pro 79€ — fără cotație",
+      "Prețuri listate pe site: Core 49€, Operations 79€ — fără cotație",
       "Browser POS — fără instalare locală, funcționează pe orice laptop sau tabletă",
       "Export Saga C (XML) inclus — contabilul importă direct, fără transcriere",
       "Cost rețete și marje — știți marja pe preparat înainte de a schimba meniul",
-      "Glovo — integrat automat, inclus. Bolt Food și Tazz — în curând.",
-      "Trial 15 zile (verificare card 1 €) — prima vânzare în ore, fără proiect de implementare",
+      "Trial 15 zile, verificare card 1 € — prima vânzare în ore, fără proiect de implementare",
     ],
     sections: [
       {
@@ -968,8 +967,8 @@ export const comparisonPages: ComparisonPage[] = [
         body: "FreyaPOS nu afișează prețuri pe site — obțineți ofertă contactând echipa de vânzări. franchisetech listează 49€/lună (Starter: POS, raport Z, TVA, personal nelimitat) și 79€/lună (Pro: adaugă stoc, NIR, rețete, Saga export). Comparați costul total cu oferta FreyaPOS înainte de a decide.",
       },
       {
-        title: "Livrare — modul opțional vs inclus",
-        body: "FreyaPOS oferă integrare Glovo/Tazz ca modul opțional la cerere. franchisetech integrează Glovo automat — comenzile apar direct în sistem, inclus în plan. Bolt Food și Tazz — în curând. Verificați dacă modulul de livrare FreyaPOS are cost suplimentar.",
+        title: "Livrare — FreyaPOS are un modul, noi nu",
+        body: "FreyaPOS oferă integrare Glovo/Tazz ca modul opțional la cerere. franchisetech nu oferă integrare cu platforme de livrare — nu este un job pe care îl acoperim. Dacă livrarea prin platforme e o cerință centrală, verificați costul modulului FreyaPOS.",
       },
       {
         title: "Export Saga și cost rețete",
@@ -985,7 +984,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Care e diferența principală față de FreyaPOS?",
         answer:
-          "Ambele acoperă POS HoReCa + livrare + multi-locație. Diferențele reale: franchisetech listează prețurile pe site (49–99€), include export Saga și cost rețete, funcționează browser fără instalare, cu trial 15 zile (verificare card 1 €). FreyaPOS are loyalty și rezervări integrate — funcții pe care franchisetech nu le include.",
+          "Ambele acoperă POS HoReCa + livrare + multi-locație. Diferențele reale: franchisetech listează prețurile pe site (49–109€), include export Saga și cost rețete, funcționează browser fără instalare, cu trial 15 zile, verificare card 1 €. FreyaPOS are loyalty și rezervări integrate — funcții pe care franchisetech nu le include.",
       },
       {
         question: "FreyaPOS funcționează offline?",
@@ -1000,16 +999,16 @@ export const comparisonPages: ComparisonPage[] = [
       { label: "Prețuri", href: "/pricing" },
     ],
     rows: [
-      ["Preț", "Starter 49€, Pro 79€, Multi 99€/lună — listat pe site", "Cotație la cerere — sales@freyapos.com"],
+      ["Preț", "Core 49€, Operations 79€, Multi-location 89€/locație — listat pe site", "Cotație la cerere — sales@freyapos.com"],
       ["Model deploy", "Browser cloud — fără instalare", "Aplicație locală — instalare necesară"],
-      ["Integrare livrare", "Glovo automat inclus; Bolt/Tazz în curând", "Glovo/Tazz — modul opțional la cerere"],
+      ["Integrare livrare", "Nu oferim", "Glovo/Tazz — modul opțional la cerere"],
       ["Export Saga", "Inclus Pro (79€/lună)", "Neconfirmat pe site — verificați cu furnizorul"],
       ["Cost rețete & marje", "Inclus Pro — cost/porție, marjă, can-make", "Neconfirmat pe site — verificați cu furnizorul"],
       ["Loyalty & rezervări", "Nu este inclus", "Disponibil — punct forte FreyaPOS"],
       ["Raport Z / închidere", "Inclus Starter — așteptat vs numărat", "Disponibil — verificați claritatea"],
       ["Stoc & NIR", "Inclus Pro (79€/lună)", "Gestiune — verificați modulele incluse"],
-      ["Multi-locație", "99€/locație — dashboard unificat", "Scalabil pentru franciză — cotație"],
-      ["Trial gratuit", "15 zile (verificare card 1 €)", "Nu este menționat pe site"],
+      ["Multi-locație", "89€/locație — dashboard unificat", "Scalabil pentru franciză — cotație"],
+      ["Trial gratuit", "15 zile, verificare card 1 €", "Nu este menționat pe site"],
     ],
   },
   // ── NEW: POSnet ───────────────────────────────────────────────────────────
@@ -1020,10 +1019,10 @@ export const comparisonPages: ComparisonPage[] = [
     market: "ro",
     metaTitle: "Alternativă POSnet — POS cloud, rețete, Saga, preț listat",
     description:
-      "Comparație onestă franchisetech vs POSnet: ambele au Glovo auto-import și Saga C. POSnet adaugă Bolt/Wolt automat și licență definitivă; franchisetech adaugă rețete cu marje și preț lunar listat.",
+      "Comparație onestă franchisetech vs POSnet: ambele au Saga C. POSnet adaugă import automat livrare, licență definitivă și funcționare offline; franchisetech adaugă rețete cu marje și preț lunar listat.",
     h1: "franchisetech vs POSnet — comparație onestă pentru HoReCa România",
     intro:
-      "POSnet este un POS puternic pentru restaurante din România: import automat comenzi Glovo, Bolt, Wolt, integrare Saga C, NIR auto, KDS, chioșc self-ordering și funcționare offline. Licență definitivă (fără abonament lunar). franchisetech acoperă aceleași job-uri principale — casă, stoc, livrare, Saga — cu browser cloud (fără instalare), cost rețete pe porție, marje și trial 15 zile (verificare card 1 €) la preț lunar listat.",
+      "POSnet este un POS puternic pentru restaurante din România: import automat comenzi Glovo, Bolt, Wolt, integrare Saga C, NIR auto, KDS, chioșc self-ordering și funcționare offline. Licență definitivă (fără abonament lunar). franchisetech acoperă aceleași job-uri de bază — casă, stoc, Saga — cu browser cloud (fără instalare), cost rețete pe porție, marje și trial 15 zile, verificare card 1 € la preț lunar listat.",
     betterFor:
       "POSnet câștigă dacă preferați licență definitivă fără abonament lunar, aveți nevoie de funcționare offline sau chioșc self-ordering. franchisetech câștigă dacă vreți cloud fără server local de menținut, cost rețete și marje per preparat, preț lunar listat transparent și trial fără angajament.",
     competitorStrengths: [
@@ -1038,15 +1037,14 @@ export const comparisonPages: ComparisonPage[] = [
     franchisetechStrengths: [
       "Browser cloud — fără instalare, server local sau mentenanță IT",
       "Cost rețete per porție — știți marja brută înainte de a schimba meniul",
-      "Preț lunar listat pe site: 49€ Starter, 79€ Pro, 99€/locație Multi",
-      "Trial 15 zile (verificare card 1 €) — prima vânzare în ore, fără proiect de implementare",
-      "Multi-location la 99€/locație — dashboard unificat, rapoarte separate",
-      "Glovo — integrat automat. Bolt Food și Tazz — în curând.",
+      "Preț lunar listat pe site: 49€ Core, 79€ Operations, 89€/locație Multi-location",
+      "Trial 15 zile, verificare card 1 € — prima vânzare în ore, fără proiect de implementare",
+      "Multi-location la 89€/locație — dashboard unificat, rapoarte separate",
     ],
     sections: [
       {
         title: "Licență definitivă vs abonament lunar — care vă convine?",
-        body: "POSnet funcționează pe model de licență definitivă (one-time purchase) — plătiți odată, folosiți nelimitat (plus suport anual eventual). franchisetech funcționează pe abonament lunar (49–99€/lună). Pentru un restaurant cu 5+ ani activitate, licența POSnet poate fi mai ieftină pe termen lung. Pentru flexibilitate maximă și upgrade automat, abonamentul lunar franchisetech nu necesită investiție inițială.",
+        body: "POSnet funcționează pe model de licență definitivă (one-time purchase) — plătiți odată, folosiți nelimitat (plus suport anual eventual). franchisetech funcționează pe abonament lunar (49–109€/lună). Pentru un restaurant cu 5+ ani activitate, licența POSnet poate fi mai ieftină pe termen lung. Pentru flexibilitate maximă și upgrade automat, abonamentul lunar franchisetech nu necesită investiție inițială.",
       },
       {
         title: "Offline vs cloud — ce contează pentru locația voastră",
@@ -1054,7 +1052,7 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Cost rețete și marje — diferența practică",
-        body: "POSnet nu detaliază pe site funcții de cost rețete sau calculator marjă pe preparat. franchisetech Pro include cost per porție, marjă brută și can-make (câte porții poți face din stocul actual) — direct legat de stocul din sistem. Dacă schimbați periodic meniul sau vreți să vedeți rentabilitatea per preparat, aceasta este o diferență concretă.",
+        body: "POSnet nu detaliază pe site funcții de cost rețete sau calculator marjă pe preparat. franchisetech Pro include cost per porție, marjă brută și can-make (câte porții puteți face din stocul actual) — direct legat de stocul din sistem. Dacă schimbați periodic meniul sau vreți să vedeți rentabilitatea per preparat, aceasta este o diferență concretă.",
       },
     ],
     faqs: [
@@ -1066,12 +1064,12 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Ce are POSnet și franchisetech nu are?",
         answer:
-          "POSnet are: licență definitivă (fără abonament lunar), funcționare offline, chioșc self-ordering, import NIR auto din SPV e-Factura. franchisetech nu oferă licență one-time, nu funcționează offline și nu are chioșc. Evaluați dacă aceste funcții sunt critice pentru locația voastră.",
+          "POSnet are: import automat comenzi Glovo/Bolt/Wolt, licență definitivă (fără abonament lunar), funcționare offline, chioșc self-ordering, import NIR auto din SPV e-Factura. franchisetech nu oferă integrare cu platforme de livrare, nu oferă licență one-time, nu funcționează offline și nu are chioșc. Evaluați dacă aceste funcții sunt critice pentru locația voastră.",
       },
       {
         question: "Ce are franchisetech și POSnet nu detaliază?",
         answer:
-          "franchisetech include: cost rețete per porție și marjă brută, preț lunar listat transparent pe site, browser fără instalare și trial 15 zile (verificare card 1 €). POSnet nu detaliază pe site cost rețete sau trial gratuit — verificați cu furnizorul.",
+          "franchisetech include: cost rețete per porție și marjă brută, preț lunar listat transparent pe site, browser fără instalare și trial 15 zile, verificare card 1 €. POSnet nu detaliază pe site cost rețete sau trial gratuit — verificați cu furnizorul.",
       },
     ],
     related: [
@@ -1081,8 +1079,8 @@ export const comparisonPages: ComparisonPage[] = [
       { label: "Prețuri", href: "/pricing" },
     ],
     rows: [
-      ["Model comercial", "Abonament lunar — 49€/79€/99€ listat pe site", "Licență definitivă (one-time) — fără abonament lunar"],
-      ["Import livrare", "Glovo — automat; Bolt/Tazz în curând", "Glovo, Bolt, Wolt auto-import — fără introducere manuală"],
+      ["Model comercial", "Abonament lunar — 49€/79€/109€ listat pe site", "Licență definitivă (one-time) — fără abonament lunar"],
+      ["Import livrare", "Nu oferim", "Glovo, Bolt, Wolt auto-import — fără introducere manuală"],
       ["Export Saga C", "Inclus Pro (79€/lună)", "Da — integrare Saga C inclusă"],
       ["NIR auto", "Pro — NIR manual și furnizori", "NIR auto din e-Factura SPV — import direct"],
       ["Cost rețete & marje", "Pro — cost/porție, marjă, can-make", "Nedetaliat pe site — verificați cu furnizorul"],
@@ -1090,7 +1088,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Chioșc self-ordering", "Nu este inclus", "Da — disponibil la POSnet"],
       ["KDS bucătărie", "Pro", "Da — disponibil la POSnet"],
       ["Deploy", "Browser cloud — fără instalare", "Aplicație locală — necesită instalare și server"],
-      ["Trial gratuit", "15 zile (verificare card 1 €)", "Neconfirmat — contactați furnizorul"],
+      ["Trial gratuit", "15 zile, verificare card 1 €", "Neconfirmat — contactați furnizorul"],
     ],
   },
   // ── NEW: rKeeper ──────────────────────────────────────────────────────────
@@ -1101,14 +1099,14 @@ export const comparisonPages: ComparisonPage[] = [
     market: "ro",
     metaTitle: "Alternativă rKeeper România — POS simplu, preț listat",
     description:
-      "Comparație franchisetech vs rKeeper: sistem enterprise pentru hoteluri și lanțuri vs workspace operațional pentru HoReCa 1–5 locații — preț listat, implementare în ore, Glovo automat și Saga.",
+      "Comparație franchisetech vs rKeeper: sistem enterprise pentru hoteluri și lanțuri vs workspace operațional pentru HoReCa 1–5 locații — preț listat, implementare în ore și Saga.",
     h1: "franchisetech vs rKeeper — simplitate vs suite enterprise",
     intro:
-      "rKeeper (UCS) este un sistem enterprise de management restaurant și hotelier cu prezență internațională, folosit în hoteluri, lanțuri de restaurante, cluburi și spații de entertainment. Modulele includ: POS, StoreHouse (gestiune stoc), software hotelier, chioșcuri, r_keeper Delivery, CRM loyalty și aplicație chelner mobil. Prețul este la cotație. franchisetech nu concurează la enterprise — țintește operatorul 1–5 locații care vrea POS, stoc, rețete, Glovo integrat automat și Saga la preț listat, cu prima vânzare în ore.",
+      "rKeeper (UCS) este un sistem enterprise de management restaurant și hotelier cu prezență internațională, folosit în hoteluri, lanțuri de restaurante, cluburi și spații de entertainment. Modulele includ: POS, StoreHouse (gestiune stoc), software hotelier, chioșcuri, r_keeper Delivery, CRM loyalty și aplicație chelner mobil. Prețul este la cotație. franchisetech nu concurează la enterprise — țintește operatorul 1–5 locații care vrea POS, stoc, rețete și Saga la preț listat, cu prima vânzare în ore.",
     betterFor:
-      "rKeeper câștigă la lanțuri 10+ locații, hoteluri, cluburi și operatori cu cerințe enterprise: call center, dispatch delivery propriu, CRM avansat, StoreHouse pentru stocuri complexe. franchisetech câștigă pentru cafenea, restaurant sau bistro 1–5 locații care vrea implementare self-serve, preț transparent și Glovo integrat automat fără modul suplimentar.",
+      "rKeeper câștigă la lanțuri 10+ locații, hoteluri, cluburi și operatori cu cerințe enterprise: call center, dispatch delivery propriu, CRM avansat, StoreHouse pentru stocuri complexe. franchisetech câștigă pentru cafenea, restaurant sau bistro 1–5 locații care vrea implementare self-serve și preț transparent, fără proiect IT.",
     competitorStrengths: [
-      "Sistem enterprise matur — prezență internațională, sute de instalări în România",
+      "Sistem enterprise matur — prezență internațională, peste 41.000 de instalări în 47 de țări (declarat de r_keeper)",
       "StoreHouse: gestiune stoc avansată pentru volume mari și rețele",
       "r_keeper Delivery: modul propriu de livrare și dispatch",
       "CRM loyalty integrat — programe de fidelizare pentru lanțuri",
@@ -1116,10 +1114,9 @@ export const comparisonPages: ComparisonPage[] = [
       "Chioșcuri self-ordering și aplicație chelner mobil disponibile",
     ],
     franchisetechStrengths: [
-      "Prețuri listate: Starter 49€, Pro 79€, Multi-location 99€/lună — fără cotație",
+      "Prețuri listate: Core 49€, Operations 79€, Multi-location 89€/locație — fără cotație",
       "Implementare self-serve — prima vânzare în ore, fără proiect IT",
       "Browser POS — fără instalare locală sau mentenanță server",
-      "Glovo — integrat automat, inclus în plan. Bolt Food/Tazz — în curând.",
       "Export Saga C (XML) — contabilul primește fișierul gata de import",
       "Cost rețete per porție și marjă brută — inclus Pro",
     ],
@@ -1130,11 +1127,11 @@ export const comparisonPages: ComparisonPage[] = [
       },
       {
         title: "Preț listat vs cotație — transparență înainte de decizie",
-        body: "rKeeper funcționează exclusiv la cotație comercială — prețul depinde de module, terminale, training și contractul de suport. franchisetech listează 49–99€/lună pe site cu personal nelimitat. Calculați costul total rKeeper (licențe + terminale + training + suport anual) înainte de comparație.",
+        body: "rKeeper funcționează exclusiv la cotație comercială — prețul depinde de module, terminale, training și contractul de suport. franchisetech listează 49–109€/lună pe site cu personal nelimitat. Calculați costul total rKeeper (licențe + terminale + training + suport anual) înainte de comparație.",
       },
       {
-        title: "Delivery integrat — r_keeper Delivery vs Glovo/Bolt separat",
-        body: "rKeeper are r_keeper Delivery, modulul propriu pentru livrare și dispatch. Nu este clar pe site-ul românesc dacă oferă import automat din Glovo/Bolt sau necesită integrare separată. franchisetech integrează Glovo automat prin webhook — comenzile apar în sistem fără intervenție manuală, inclus în plan. Bolt Food și Tazz — în curând.",
+        title: "Delivery — r_keeper Delivery, nu ceva ce oferim",
+        body: "rKeeper are r_keeper Delivery, modulul propriu pentru livrare și dispatch. Nu este clar pe site-ul românesc dacă oferă import automat din Glovo/Bolt sau necesită integrare separată. franchisetech nu oferă integrare cu platforme de livrare — dacă acesta e un job central, verificați direct cu rKeeper.",
       },
     ],
     faqs: [
@@ -1146,7 +1143,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "rKeeper are import automat din Glovo și Bolt?",
         answer:
-          "Site-ul rKeeper Romania nu detaliază integrarea cu Glovo sau Bolt — contactați office@rkeeper.ro pentru clarificare. franchisetech integrează Glovo automat prin webhook — inclus în plan. Bolt Food și Tazz — în curând.",
+          "Site-ul rKeeper Romania nu detaliază integrarea cu Glovo sau Bolt — contactați office@rkeeper.ro pentru clarificare. franchisetech nu oferă integrare cu platforme de livrare.",
       },
       {
         question: "rKeeper exportă în Saga pentru contabil?",
@@ -1163,8 +1160,8 @@ export const comparisonPages: ComparisonPage[] = [
     rows: [
       ["Segment țintă", "HoReCa 1–5 locații, implementare rapidă", "Lanțuri, hoteluri, cluburi — enterprise"],
       ["Implementare", "Ore — self-serve, fără proiect IT", "Săptămâni–luni — proiect dedicat, training"],
-      ["Preț", "49–99€/lună listat pe site", "Cotație comercială — contact office@rkeeper.ro"],
-      ["Import livrare", "Glovo — automat inclus; Bolt/Tazz în curând", "Neconfirmat pe site RO — verificați cu furnizorul"],
+      ["Preț", "49–109€/lună listat pe site", "Cotație comercială — contact office@rkeeper.ro"],
+      ["Import livrare", "Nu oferim", "Neconfirmat pe site RO — verificați cu furnizorul"],
       ["Export Saga", "Inclus Pro (79€/lună)", "Neconfirmat pe site RO — verificați cu furnizorul"],
       ["Gestiune stoc", "Pro — stoc, furnizori, NIR", "StoreHouse — modul enterprise dedicat"],
       ["KDS bucătărie", "Pro", "Disponibil — punct forte rKeeper"],
@@ -1179,26 +1176,25 @@ export const comparisonPages: ComparisonPage[] = [
     path: "/compare/nexuserp",
     competitor: "Nexus ERP",
     market: "ro",
-    metaTitle: "Alternativă Nexus ERP — multi-locație, Glovo, Saga",
+    metaTitle: "Alternativă Nexus ERP — multi-locație, POS, Saga",
     description:
-      "Căutați o alternativă la Nexus ERP pentru 3–5 puncte de lucru în București? Comparație onestă: ce acoperă și ce nu acoperă franchisetech față de Nexus ERP — POS, stoc, livrare, Saga, bancă.",
+      "Căutați o alternativă la Nexus ERP pentru 3–5 puncte de lucru în București? Comparație onestă: ce acoperă și ce nu acoperă franchisetech față de Nexus ERP — POS, stoc, Saga, bancă.",
     h1: "franchisetech vs Nexus ERP — alternativă operațională fără complexitate ERP",
     intro:
-      "Nexus ERP este o soluție ERP completă pentru companii de orice dimensiune din România — 6.291+ clienți. Include: facturare, import extrase bancare automat, SAF-T, e-Factura, API plăți, WhatsApp notificări. Modulul Nexus Retail acoperă restaurant, fast-food și catering. Prețul este la cotație. franchisetech nu este ERP — este workspace operațional pentru HoReCa: POS, stoc, Glovo integrat automat, Saga și raport Z, la 49–99€/lună listat pe site, fără proiect IT.",
+      "Nexus ERP este o soluție ERP completă pentru companii de orice dimensiune din România — 6.345+ clienți (declarat de NexusERP). Include: facturare, import extrase bancare automat, SAF-T, e-Factura, API plăți, WhatsApp notificări. Modulul Nexus Retail acoperă restaurant, fast-food și catering. Prețul este la cotație. franchisetech nu este ERP — este workspace operațional pentru HoReCa: POS, stoc, Saga și raport Z, la 49–109€/lună listat pe site, fără proiect IT.",
     betterFor:
-      "Nexus ERP câștigă pentru companii cu IT intern, cerințe ERP complete (HR, documente, extrase bancare automate, API custom), VPN și bază de date unică pentru rețele mari. franchisetech câștigă pentru operatorul 3–5 locații care vrea POS zilnic + stoc + Glovo (automat) + Saga — fără complexitate ERP și cu prima vânzare în ore, la preț listat.",
+      "Nexus ERP câștigă pentru companii cu IT intern, cerințe ERP complete (HR, documente, extrase bancare automate, API custom), VPN și bază de date unică pentru rețele mari. franchisetech câștigă pentru operatorul 3–5 locații care vrea POS zilnic + stoc + Saga — fără complexitate ERP și cu prima vânzare în ore, la preț listat.",
     competitorStrengths: [
       "ERP complet — facturare, bancă, SAF-T, e-Factura, HR, documente",
       "Import extrase bancare automat — reconciliere bancară nativă",
       "API propriu — integrări custom și rapoarte pe structura DB internă",
-      "6.291+ clienți activi în România — platformă matură",
+      "6.345+ clienți (declarat de NexusERP) — platformă matură",
       "Nexus Retail — modul dedicat restaurant, fast-food și catering",
       "WhatsApp notificări și plăți prin API bancar",
     ],
     franchisetechStrengths: [
-      "Implementare în ore — trial self-serve 15 zile (verificare card 1 €), fără proiect IT",
-      "Prețuri listate: Starter 49€, Pro 79€, Multi 99€/locație — fără cotație",
-      "Glovo — integrat automat, inclus. Bolt Food și Tazz — în curând.",
+      "Implementare în ore — trial self-serve 15 zile, verificare card 1 €, fără proiect IT",
+      "Prețuri listate: Core 49€, Operations 79€, Multi-location 89€/locație — fără cotație",
       "Export Saga C (XML) — contabilul primește fișierul gata de import",
       "Cost rețete per porție și marjă — știți rentabilitatea înainte de a schimba meniul",
       "Personal nelimitat pe plan plătit — fără taxă per casier/terminal",
@@ -1206,11 +1202,11 @@ export const comparisonPages: ComparisonPage[] = [
     sections: [
       {
         title: "Ce acoperă franchisetech din cerințele unui operator 3–5 locații",
-        body: "POS zilnic: da. Stoc și NIR: da (Pro). Glovo — automat: da. Bolt Food/Tazz — în curând. Export Saga: da (Pro). Multi-locație la 99€/locație: da. Raport Z clar la fiecare închidere: da. Cost rețete și marjă per preparat: da (Pro).",
+        body: "POS zilnic: da. Stoc și NIR: da (Pro). Export Saga: da (Pro). Multi-locație la 89€/locație: da. Raport Z clar la fiecare închidere: da. Cost rețete și marjă per preparat: da (Pro).",
       },
       {
         title: "Ce NU acoperă franchisetech față de Nexus ERP",
-        body: "Import extrase bancare automat: nu — Nexus ERP are această funcție nativ; franchisetech nu. API DB direct pentru rapoarte custom: nu în planul standard. Facturare B2B completă (înlocuire SmartBill/Oblio): nu — recomandăm coexistența. Prețuri diferite automat per canal (in-store vs Glovo vs online): nu în planul standard. HR sau documente HR: nu.",
+        body: "Import extrase bancare automat: nu — Nexus ERP are această funcție nativ; franchisetech nu. Integrare cu platforme de livrare (Glovo, Bolt, Tazz): nu — nu oferim. API DB direct pentru rapoarte custom: nu în planul standard. Facturare B2B completă (înlocuire SmartBill/Oblio): nu — recomandăm coexistența. HR sau documente HR: nu.",
       },
       {
         title: "Contabilitate și Saga — ce face fiecare",
@@ -1225,12 +1221,12 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Ești o alternativă bună la Nexus ERP pentru 3–5 locații din București?",
         answer:
-          "Depinde de cerințe. franchisetech acoperă: POS, stoc, Glovo (automat) + Bolt/Tazz (în curând), Saga, multi-locație la 99€ și cost rețete. Nu acoperă: extrase bancare automate, API DB direct, prețuri diferite per canal sau HR. Dacă cerințele principale sunt operațiunile zilnice HoReCa, rulați trial paralel 15 zile și comparați.",
+          "Depinde de cerințe. franchisetech acoperă: POS, stoc, Saga, multi-locație la 89€/locație și cost rețete. Nu acoperă: extrase bancare automate, API DB direct, integrare cu platforme de livrare sau HR. Dacă cerințele principale sunt operațiunile zilnice HoReCa, rulați trial paralel 15 zile și comparați.",
       },
       {
         question: "Nexus ERP are integrare cu Glovo sau Bolt Food?",
         answer:
-          "Site-ul Nexus ERP nu menționează integrare cu Glovo sau Bolt Food. Verificați cu echipa lor la nexuserp.ro. franchisetech integrează Glovo automat prin webhook — inclus în plan. Bolt Food și Tazz — în curând.",
+          "Site-ul Nexus ERP nu menționează integrare cu Glovo sau Bolt Food. Verificați cu echipa lor la nexuserp.ro. franchisetech nu oferă integrare cu platforme de livrare.",
       },
       {
         question: "Nexus ERP exportă în Saga?",
@@ -1256,15 +1252,15 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     rows: [
       ["Tip produs", "POS operațional HoReCa — casă, stoc, rețete, raport Z", "ERP complet — facturare, bancă, HR, documente"],
-      ["Preț", "49–99€/lună listat pe site", "Cotație — fără preț public"],
+      ["Preț", "49–109€/lună listat pe site", "Cotație — fără preț public"],
       ["Implementare", "Ore — trial self-serve 15 zile", "Proiect ERP — săptămâni/luni"],
-      ["Import livrare", "Glovo — automat inclus; Bolt/Tazz în curând", "Neconfirmat pe site — verificați cu furnizorul"],
+      ["Import livrare", "Nu oferim", "Neconfirmat pe site — verificați cu furnizorul"],
       ["Export Saga C", "Inclus Pro (79€/lună)", "Neconfirmat pe site — verificați cu furnizorul"],
       ["Import extrase bancare", "Nu este disponibil", "Da — integrare bancară nativă, punct forte"],
       ["Cost rețete & marje", "Pro — cost/porție, marjă, can-make", "Neconfirmat pe site — verificați cu furnizorul"],
-      ["Multi-locație", "99€/locație — workspace separat, raportare agregată", "Bază de date unică — arhitectură diferită"],
+      ["Multi-locație", "89€/locație — workspace separat, raportare agregată", "Bază de date unică — arhitectură diferită"],
       ["API / acces date", "Contact echipă pentru plan Enterprise", "API propriu, acces DB — punct forte NexusERP"],
-      ["Cel mai potrivit pentru", "HoReCa 1–5 locații: POS + Glovo + Saga + preț listat", "Companie cu IT intern, bancă automată, cerințe ERP"],
+      ["Cel mai potrivit pentru", "HoReCa 1–5 locații: POS + Saga + preț listat", "Companie cu IT intern, bancă automată, cerințe ERP"],
     ],
   },
 ];

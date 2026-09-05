@@ -5,7 +5,6 @@ import { ArrowRight } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { PricingPlansSection } from "@/components/billing/PricingPlansSection";
-import { PricingEbrizaComparisonTable } from "@/components/marketing/PricingEbrizaComparisonTable";
 import { PricingEmailSignup } from "@/components/marketing/PricingEmailSignup";
 import { SITE_URL } from "@/lib/marketing/seo";
 import { pricingPlans } from "@/lib/billing/plans";
@@ -47,7 +46,7 @@ export default async function PricingPage() {
           operatingSystem: "Web",
           description: t.pricing.description,
           url: `${SITE_URL}/pricing`,
-          offers: pricingPlans.map((plan) => ({
+          offers: pricingPlans.filter((plan) => ["starter", "pro"].includes(plan.id)).map((plan) => ({
             "@type": "Offer",
             name: plan.name,
             price: String(plan.amountCents / 100),
@@ -77,25 +76,15 @@ export default async function PricingPage() {
       />
 
       <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl text-center">
-          <p className="mb-4 inline-flex rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
-            {t.pricing.badge}
-          </p>
+        <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">{t.pricing.heroTitle}</h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">{t.pricing.heroText}</p>
+          <p className="mx-auto mt-4 max-w-xl text-sm text-slate-500">{heroStats.join(" · ")}</p>
 
-          <div className="mx-auto mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
-            {heroStats.map((stat) => (
-              <div key={stat} className="rounded-lg border border-slate-200 bg-white px-3 py-3">
-                <p className="text-sm font-medium leading-5 text-slate-700">{stat}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
             <Link
-              href="/signup?plan=pro"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-8 py-3.5 text-sm font-medium text-white transition hover:bg-blue-700 sm:w-auto"
+              href="/signup?plan=starter"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#1a3ab8] px-8 py-3.5 text-sm font-medium text-white transition hover:bg-[#152e93] sm:w-auto"
             >
               {t.cta.getStarted} <ArrowRight className="h-4 w-4" />
             </Link>
@@ -110,7 +99,6 @@ export default async function PricingPage() {
               </a>
             )}
           </div>
-
         </div>
       </section>
 
@@ -127,9 +115,6 @@ export default async function PricingPage() {
               freeSetupStrip: t.pricing.freeSetupStrip,
               setupFreeTitle: t.pricing.setupFreeTitle,
               setupFreeText: t.pricing.setupFreeText,
-              setupTitle: t.pricing.setupTitle,
-              setupText: t.pricing.setupText,
-              setupFeeNote: t.pricing.setupFeeNote,
               multiTitle: t.pricing.multiTitle,
               multiText: t.pricing.multiText,
             }}
@@ -138,14 +123,6 @@ export default async function PricingPage() {
       </section>
 
       <section className="border-t border-slate-100 bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-2xl font-bold text-slate-900">{t.pricing.ebrizaComparison.title}</h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">{t.pricing.ebrizaComparison.subtitle}</p>
-          <PricingEbrizaComparisonTable labels={t.pricing.ebrizaComparison} />
-        </div>
-      </section>
-
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-2xl font-bold text-slate-900">{t.pricing.notIncludedTitle}</h2>
           <p className="mt-3 text-sm leading-6 text-slate-600">{pricingNotIncludedText(market)}</p>

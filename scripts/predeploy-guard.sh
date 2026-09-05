@@ -135,9 +135,41 @@ if [ ! -f "$SOURCE/package.json" ]; then
   fail "package.json missing — source directory may be wrong"
 fi
 
-# ── 9. types/chatwoot.d.ts must exist (TypeScript build requires it) ──
-if [ ! -f "$SOURCE/types/chatwoot.d.ts" ]; then
-  fail "types/chatwoot.d.ts missing — TypeScript build will fail (Chatwoot globals undeclared)"
+# ── 9. TypeScript check must be clean ─────────────────────────
+echo "Running TypeScript check..."
+if [ -f "$SOURCE/package.json" ]; then
+  TSC_OUTPUT=$(cd "$SOURCE" && npx tsc --noEmit 2>&1) || {
+    fail "TypeScript check failed:"
+    while IFS= read -r line; do
+      ERRORS="$ERRORS\n      $line"
+    done <<< "$(echo "$TSC_OUTPUT" | grep -v '^npm warn' | head -30)"
+  }
+fi
+
+# ── 10. Lint check must be clean (errors only; warnings pass) ──
+echo "Running lint check..."
+if [ -f "$SOURCE/package.json" ]; then
+  LINT_OUTPUT=$(cd "$SOURCE" && npm run lint 2>&1) || {
+    fail "Lint check failed:"
+    while IFS= read -r line; do
+      ERRORS="$ERRORS\n      $line"
+    done <<< "$(echo "$LINT_OUTPUT" | grep -v '^npm warn' | head -30)"
+  }
+fi
+
+# ── 11. Migrations: additions only — a committed migration must ──
+#         never be modified or deleted (supabase/migrations/ rule).
+echo "Checking migration history is append-only..."
+if git -C "$SOURCE" rev-parse --git-dir > /dev/null 2>&1; then
+  MIGRATION_CHANGES=$( (git -C "$SOURCE" diff --name-status HEAD -- supabase/migrations/ 2>/dev/null; \
+                        git -C "$SOURCE" diff --name-status --staged -- supabase/migrations/ 2>/dev/null) || true)
+  BAD_MIGRATION_CHANGES=$(echo "$MIGRATION_CHANGES" | grep -E '^(M|D)' || true)
+  if [ -n "$BAD_MIGRATION_CHANGES" ]; then
+    fail "A committed migration was modified or deleted (migrations must only be added):"
+    while IFS= read -r line; do
+      ERRORS="$ERRORS\n      $line"
+    done <<< "$BAD_MIGRATION_CHANGES"
+  fi
 fi
 
 # ── Report ────────────────────────────────────────────────────

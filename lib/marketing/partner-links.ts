@@ -37,7 +37,7 @@ export const PARTNER_LINKS: PartnerLinkConfig[] = [
     labelRo: "Consultant deschidere restaurant",
     utmSource: "partner_consultant_deschidere",
     utmCampaign: "ro-partner-2026-h2",
-    description: "Onboarding locații noi — POS + checklist setup asistat.",
+    description: "Onboarding locații noi — POS + checklist de configurare.",
   },
   {
     id: "reseller_pos",

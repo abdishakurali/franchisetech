@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -49,12 +49,14 @@ export function PosTableFloor({ tables, sections: initialSections, canManage, cu
   }, [initialSections, tables]);
 
   const [activeSectionId, setActiveSectionId] = useState(sections[0]?.id ?? "");
+  const [prevSections, setPrevSections] = useState(sections);
 
-  useEffect(() => {
+  if (sections !== prevSections) {
+    setPrevSections(sections);
     if (sections.length && !sections.some((s) => s.id === activeSectionId)) {
       setActiveSectionId(sections[0]?.id ?? "");
     }
-  }, [sections, activeSectionId]);
+  }
 
   const staticTables = useMemo(
     () => tables.map((t) => ({ ...t, active_tab: editMode ? null : t.active_tab })),

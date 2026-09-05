@@ -9,7 +9,7 @@ import {
   LayoutDashboard, Package, BarChart3,
   LogOut, Menu, X, ChevronDown, Archive,
   CreditCard, ListChecks, Truck, ShoppingBag,
-  Gift, BookOpen, ChefHat, FileText, Star,
+  Gift, BookOpen, FileText, Star, ChefHat,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -30,6 +30,7 @@ import { HeaderBillingNotice } from "@/components/billing/HeaderBillingNotice";
 import { resetPosTillOpen, subscribePosTillOpen } from "@/lib/pos-till-state";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import type { AppT } from "@/lib/app-i18n";
+import { LEAN_PRODUCT_SCOPE_ENABLED } from "@/lib/product-scope";
 
 interface AppShellProps {
   user: User;
@@ -76,35 +77,30 @@ function isLegalFallbackRoute(pathname: string): boolean {
 function isSubscriptionBlockedForClient(subStatus?: SubscriptionStatus): boolean {
   return (
     subStatus?.state === "none" ||
-    subStatus?.state === "past_due_expired" ||
     subStatus?.state === "canceled" ||
     subStatus?.state === "incomplete"
   );
 }
 
-function buildMainNav(userRole: string | null, t: AppT): NavItem[] {
-  const limited = userRole === "cashier" || userRole === "kitchen";
-  const accountant = userRole === "accountant";
-
-  if (limited) {
-    return [
-      { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
-      { href: "/app/pos", label: t.nav.pos, icon: CreditCard, exact: false },
-    ];
-  }
-
-  if (accountant) {
-    return [
-      { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
-      { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
-    ];
-  }
-
+/**
+ * The full, unrestricted nav. Role-based restriction (cashier/kitchen,
+ * accountant) is resolveNavItems' job alone — it either returns its own nav
+ * for a role entirely (accountant) or filters this list down (limited
+ * roles), so this function must not special-case roles itself: doing so
+ * duplicated the same role check in two places with nothing keeping them
+ * in sync.
+ */
+export function buildMainNav(t: AppT): NavItem[] {
   const nav: NavItem[] = [
     { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
     { href: "/app/setup-checklist", label: t.nav.setupGuide, icon: ListChecks, exact: false },
     { href: "/app/pos", label: t.nav.pos, icon: CreditCard, exact: false },
     { href: "/app/products", label: t.nav.products, icon: Package, exact: false },
+    { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
+    // Recipes is a paid Operations module: gate it ONLY on the org's own
+    // recipeCosting visibility (applied in resolveNavItems below), never on the
+    // marketing-scope flag. LEAN_PRODUCT_SCOPE_ENABLED trims what the public
+    // site advertises — it must not decide what a paying customer can reach.
     { href: "/app/recipes", label: t.nav.recipes, icon: BookOpen, exact: false },
   ];
 
@@ -119,7 +115,7 @@ function buildStockNav(t: AppT) {
   ];
 }
 
-function resolveNavItems(
+export function resolveNavItems(
   userRole: string | null,
   t: AppT,
   setupComplete: boolean,
@@ -143,11 +139,11 @@ function resolveNavItems(
   }
 
   const mainNav = [
-    ...buildMainNav(userRole, t).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
-    ...(activeOrg?.kitchen_display_enabled && moduleVisibility?.kitchenOps === true
+    ...buildMainNav(t).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
+    ...(!LEAN_PRODUCT_SCOPE_ENABLED && activeOrg?.kitchen_display_enabled === true && !limited
       ? [{ href: "/app/kitchen", label: t.nav.kitchen, icon: ChefHat, exact: false }]
       : []),
-    ...(activeOrg?.loyalty_enabled === true && !limited
+    ...(!LEAN_PRODUCT_SCOPE_ENABLED && activeOrg?.loyalty_enabled === true && !limited
       ? [{ href: "/app/customers", label: t.nav.customers ?? "Customers", icon: Star, exact: false }]
       : []),
     ...(showEfactura && !limited
@@ -157,9 +153,11 @@ function resolveNavItems(
     .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
     .filter((item) => {
       if (!limited) return true;
-      return item.href === "/app" || item.href === "/app/pos" || item.href === "/app/kitchen";
+      return item.href === "/app" || item.href === "/app/pos";
     });
 
+  // Stock / purchases / suppliers are paid Operations modules — gated on the
+  // org's own inventory visibility only, not on the marketing-scope flag.
   const showStock = moduleVisibility?.inventory === true && !limited;
   const stockNav = showStock ? buildStockNav(t) : [];
 
@@ -488,23 +486,6 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   useEffect(() => {
     startTransition(() => setMobileOpen(false));
   }, [pathname]);
-
-  const hideChatOnPos = pathname.startsWith("/app/pos");
-  useEffect(() => {
-    if (hideChatOnPos) {
-      document.body.classList.add("hide-chatwoot");
-      try {
-        window.$chatwoot?.toggle("close");
-      } catch {
-        /* widget may not be loaded yet */
-      }
-    } else {
-      document.body.classList.remove("hide-chatwoot");
-    }
-    return () => {
-      document.body.classList.remove("hide-chatwoot");
-    };
-  }, [hideChatOnPos]);
 
   const initials = (profile?.full_name ?? user.email ?? "?")
     .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
