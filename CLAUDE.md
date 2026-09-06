@@ -213,8 +213,7 @@ These are not blocked by the guard (a hard block would prevent legitimate bug fi
 | `/industries/cafes` | 200 |
 | `/industries/restaurants` | 200 |
 | `/industries/takeaways` | 200 |
-| `/industries/food-trucks` | 200 |
-| `/industries/health-bars` | 200 |
+| `/industries/patisserie-bakery` | 200 |
 | `/features` | 200 |
 | `/resources` | 200 |
 | `/login` | 200 |
