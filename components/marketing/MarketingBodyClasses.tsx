@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-/** Coordinates body classes for sticky CTAs and Chatwoot bubble position. */
+/** Coordinates body classes used by comparison-page sticky actions. */
 export function MarketingBodyClasses() {
   const pathname = usePathname();
 

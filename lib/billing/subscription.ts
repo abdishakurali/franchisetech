@@ -5,7 +5,7 @@ export type SubState =
   | "soft_trial"         // No Stripe sub yet, within org trial window
   | "active"             // Paid and current
   | "past_due"           // Payment failed, within 3-day grace period
-  | "past_due_expired"   // Grace period elapsed, access should be restricted
+  | "past_due_expired"   // Grace period elapsed, billing is urgent but POS remains available
   | "canceled"           // Subscription ended
   | "incomplete"         // Checkout started but not completed
   | "none";              // No trial, no subscription
@@ -47,7 +47,8 @@ export function isAccessAllowed(sub: SubscriptionStatus): boolean {
     sub.state === "active" ||
     sub.state === "trialing" ||
     sub.state === "soft_trial" ||
-    sub.state === "past_due"   // within grace period — still allowed
+    sub.state === "past_due" ||   // within grace period — still allowed
+    sub.state === "past_due_expired" // overdue, but restaurants must keep selling
   );
 }
 
@@ -58,7 +59,6 @@ export function isAccessAllowed(sub: SubscriptionStatus): boolean {
 export function isSubscriptionBlockedForApp(sub: SubscriptionStatus | null | undefined): boolean {
   return (
     sub?.state === "none" ||
-    sub?.state === "past_due_expired" ||
     sub?.state === "canceled" ||
     sub?.state === "incomplete"
   );
@@ -80,7 +80,7 @@ function humanLabel(
     case "past_due":          return graceDaysLeft !== null
                                 ? `Payment failed — ${graceDaysLeft} day${graceDaysLeft === 1 ? "" : "s"} to update payment`
                                 : "Payment failed — update your card to continue";
-    case "past_due_expired":  return "Payment overdue — access restricted until payment is updated";
+    case "past_due_expired":  return "Payment overdue — update card; POS remains available";
     case "canceled":          return "Subscription ended";
     case "incomplete":        return "Checkout not completed";
     default:                  return "No active plan";
@@ -94,7 +94,7 @@ export async function getSubscriptionStatus(orgId: string): Promise<Subscription
   const [{ data: org }, { data: sub }] = await Promise.all([
     supabase
       .from("organisations")
-      .select("trial_ends_at, referral_credit_months, stripe_customer_id")
+      .select("trial_ends_at, referral_credit_months, stripe_customer_id, created_at")
       .eq("id", orgId)
       .maybeSingle(),
     service
@@ -108,7 +108,24 @@ export async function getSubscriptionStatus(orgId: string): Promise<Subscription
 
   const creditMonths = Number(org?.referral_credit_months ?? 0);
   const stripeCustomerId = sub?.stripe_customer_id ?? org?.stripe_customer_id ?? null;
-  const trialEndsAt = org?.trial_ends_at ?? null;
+  // A brand-new signup has no trial_ends_at at all (nothing writes it — the €1
+  // card-verification flow that used to set it is no longer part of onboarding),
+  // which would resolve to state "none" (blocked, "trial expired") on day zero,
+  // before they'd seen the product. Falling back to created_at + 15 days gives
+  // every new org a fully unrestricted 15-day look before any paywall applies,
+  // without misreporting a new account as an expired one.
+  //
+  // This is THE number the public site quotes as "15 zile" / "15-day trial" in
+  // ~130 places. It is the real trial length for every signup — keep the two in
+  // sync, or the site starts making a false promise again.
+  // (5 → 12 on 2026-08-25 when funnel data showed the card ask was the dominant
+  // drop-off point; 12 → 15 on 2026-08-31 to match the advertised offer once the
+  // card ask was dropped from the marketing entirely.)
+  const SOFT_TRIAL_DAYS = 15;
+  const impliedTrialEndsAt = org?.created_at
+    ? new Date(new Date(org.created_at).getTime() + SOFT_TRIAL_DAYS * 86_400_000).toISOString()
+    : null;
+  const trialEndsAt = org?.trial_ends_at ?? impliedTrialEndsAt;
   const softTrialDays = daysUntil(trialEndsAt);
 
   if (!sub) {

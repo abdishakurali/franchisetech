@@ -56,7 +56,7 @@ const FEATURE_RO: Record<RestaurantFeatureKey, { label: string; description: str
   },
   table_service_enabled: {
     label: "Gestionare mese",
-    description: "Adaugă etichete masă și pregătește fluxuri de servire la masă.",
+    description: "Flux restaurant parcat până există cerere validată.",
   },
   kitchen_stations_enabled: {
     label: "Stații prep",

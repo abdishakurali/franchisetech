@@ -5,7 +5,7 @@
 export const showcaseAssets = {
   /** POS with products in cart and Charge button */
   posCart: {
-    src: "/showcase/pos-cart.png",
+    src: "/showcase/pos-grid.png",
     path: "/app/pos",
   },
   /** Owner dashboard — Today at a glance */
@@ -35,7 +35,7 @@ export const showcaseAssets = {
   },
   /** Daily Z-report / till close */
   zReport: {
-    src: "/showcase/settings-features.png",
+    src: "/showcase/z-report.png",
     path: "/app/reports/z-report",
   },
   /** In-app setup checklist */

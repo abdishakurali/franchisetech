@@ -7,7 +7,7 @@ export function isDbRole(role: string | null | undefined): role is DbRole {
 }
 
 export function canManageBilling(role: string | null | undefined) {
-  return role === "owner";
+  return isDbRole(role);
 }
 
 export function canManageTeam(role: string | null | undefined) {

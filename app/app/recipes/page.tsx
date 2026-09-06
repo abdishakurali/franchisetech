@@ -85,7 +85,18 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
         matchesStatus,
       };
     })
-    .filter((row) => row.matchesSearch && row.matchesStatus);
+    .filter((row) => row.matchesSearch && row.matchesStatus)
+    // Sort on the same value the table renders (product name, falling back to
+    // the recipe name) — ordering by a DB column would sort recipe.name, which
+    // is not what the list shows. Romanian collation so diacritics (ă, â, î,
+    // ș, ț) file correctly, and numeric so "360ml" precedes "480ml".
+    .sort((a, b) =>
+      (a.product?.name ?? a.recipe.name ?? "").localeCompare(
+        b.product?.name ?? b.recipe.name ?? "",
+        "ro",
+        { sensitivity: "base", numeric: true }
+      )
+    );
 
   return (
     <div className="space-y-6 p-6">
@@ -192,12 +203,20 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link
-                          href={`/app/recipes/${recipe.id}`}
-                          className="text-sm font-medium text-blue-600 hover:text-blue-800"
-                        >
-                          {t.recipes.view}
-                        </Link>
+                        <div className="flex items-center justify-end gap-3">
+                          <Link
+                            href={`/app/recipes/${recipe.id}`}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                          >
+                            {t.recipes.view}
+                          </Link>
+                          <Link
+                            href={`/app/recipes/${recipe.id}/edit`}
+                            className="text-sm font-medium text-slate-500 hover:text-slate-800"
+                          >
+                            {t.common.edit}
+                          </Link>
+                        </div>
                       </TableCell>
                     </TableRow>
                   )

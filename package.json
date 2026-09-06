@@ -9,10 +9,15 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "typecheck:app": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:sql": "supabase test db",
     "verify-pos-cart-restore": "node scripts/verify-pos-cart-restore.mjs",
     "verify-pos-line-discount": "node scripts/verify-pos-line-discount.mjs",
     "verify-nir-purchase-flow": "node scripts/verify-nir-purchase-flow.mjs",
     "verify-owner-digest": "node scripts/verify-owner-digest.mjs",
+    "verify-lean-product-scope": "node scripts/verify-lean-product-scope.mjs",
     "verify-nir-staging-schema": "node scripts/verify-staging-nir-schema.mjs",
     "check-prod-nir-schema": "node scripts/check-prod-nir-schema.mjs",
     "check-prod-module-flags-schema": "node scripts/check-prod-module-flags-schema.mjs",
@@ -50,14 +55,21 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
+    "jsdom": "^27.0.1",
     "pg": "^8.16.3",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.11"
   }
 }

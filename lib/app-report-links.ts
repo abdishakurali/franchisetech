@@ -179,6 +179,10 @@ export function filterReportLinks(
   },
 ): AppReportLink[] {
   return getAppReportLinks(t).filter((link) => {
+    // Each link carries its own per-org requirement below (inventory, recipe,
+    // accountant pack, gestiune, loyalty). Those are the real gates. The
+    // marketing-scope flag deliberately does NOT appear here: it trims what the
+    // public site advertises, and must not hide reports a customer pays for.
     if (link.requiresInventory && !input.inventoryVisible) return false;
     if (link.requiresRecipe && !input.recipeVisible) return false;
     if (link.requiresAccountantPack && !input.accountantPackVisible) return false;

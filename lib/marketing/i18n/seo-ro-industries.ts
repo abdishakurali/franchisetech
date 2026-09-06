@@ -8,9 +8,9 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     metaTitle: "POS cafenea România — FiscalNet, cost rețete, raport Z | franchisetech",
     description:
       "Casă de marcat pentru cafenele: vânzare rapidă la tejghea, marje pe rețete, bon fiscal FiscalNet, personal nelimitat și raport Z în câteva minute.",
-    h1: "Cafeneaua ta vinde rapid. Tu știi cifrele la închidere.",
-    heroBefore: "Cafeneaua ta vinde rapid. Tu ",
-    heroHighlight: "știi cifrele la închidere",
+    h1: "Cafeneaua dumneavoastră vinde rapid. Știți cifrele la închidere.",
+    heroBefore: "Cafeneaua dumneavoastră vinde rapid. ",
+    heroHighlight: "știți cifrele la închidere",
     heroAfter: ".",
     heroSubheadline: "POS la tejghea, stoc ingrediente și închidere casă — un singur loc, fără taxă per angajat.",
     intro:
@@ -18,11 +18,11 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     painPoints: [
       {
         title: "Rush hour la tejghea",
-        text: "Coada crește cât timp personalul caută prin meniu. Ai nevoie de o grilă de produse cu o atingere — espresso, patiserie și extra, fără training lung.",
+        text: "Coada crește cât timp personalul caută prin meniu. Aveți nevoie de o grilă de produse cu o atingere — espresso, patiserie și extra, fără training lung.",
       },
       {
         title: "Marje invizibile în meniu",
-        text: "Lapte, sirop și boabe se consumă rapid, dar nu știi ce băuturi chiar plătesc. Costul rețetelor leagă ingredientele de fiecare ceașcă.",
+        text: "Lapte, sirop și boabe se consumă rapid, dar nu știți ce băuturi chiar plătesc. Costul rețetelor leagă ingredientele de fiecare ceașcă.",
       },
       {
         title: "Casa vs sertar la închidere",
@@ -44,7 +44,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Baristele noi pot vinde din prima zi?",
-        answer: "Da. Grila de produse e făcută pentru viteză la tejghea — atingi produsul, încasezi. Rolurile limitează cine poate anula sau închide casa.",
+        answer: "Da. Grila de produse e făcută pentru viteză la tejghea — atingeți produsul, încasați. Rolurile limitează cine poate anula sau închide casa.",
       },
       {
         question: "Urmăresc automat lapte, cafea și siropuri?",
@@ -64,23 +64,23 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
   },
   restaurants: {
     eyebrow: "Restaurante",
-    title: "POS restaurant — plan sală, bucătărie, raport Z",
-    metaTitle: "POS restaurant România — servire la masă, KDS, FiscalNet | franchisetech",
+    title: "POS restaurant — vânzări, stoc, raport Z",
+    metaTitle: "POS restaurant România — vânzări, rețete, FiscalNet | franchisetech",
     description:
-      "POS restaurant în browser: plan sală vizual, runde la bucătărie, marje pe rețete, FiscalNet și raport Z — fără hardware POS dedicat.",
+      "POS restaurant în browser: vânzări rapide, marje pe rețete, FiscalNet și raport Z — fără hardware POS dedicat.",
     h1: "De la comanda la masă până la raportul Z — tot într-un singur loc.",
     heroBefore: "De la comanda la masă până la ",
     heroHighlight: "raportul Z",
     heroAfter: " — tot într-un singur loc.",
-    heroSubheadline: "Plan sală, display bucătărie și închidere casă pe orice tabletă din restaurant.",
+    heroSubheadline: "Vânzări, rețete, stoc și închidere casă pe orice tabletă din restaurant.",
     painPoints: [
       {
-        title: "Comenzi pierdute între sală și bucătărie",
-        text: "Ospătarii strigă sau scriu pe hârtie. Cu servirea la masă trimiți runde din casă; bucătăria vede tichetele pe display când e activat.",
+        title: "Vânzări greu de urmărit la final de zi",
+        text: "Casa, numerarul, cardul și TVA-ul trebuie să se potrivească rapid, fără Excel separat.",
       },
       {
-        title: "Cost alimentar pe care nu îl vezi",
-        text: "Prețurile ingredientelor se mișcă, meniul rămâne la fel. Rețetele leagă achizițiile de porții ca să știi marja pe fiecare fel.",
+        title: "Cost alimentar pe care nu îl vedeți",
+        text: "Prețurile ingredientelor se mișcă, meniul rămâne la fel. Rețetele leagă achizițiile de porții ca să știți marja pe fiecare fel.",
       },
       {
         title: "Închidere cu plăți amestecate",
@@ -89,8 +89,8 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     ],
     competitorRows: [
       ["Rulează în browser", "Da — laptop sau tabletă", "Adesea hardware dedicat"],
-      ["Plan sală / mese", "Plan vizual + comenzi la masă", "Variază — module extra"],
-      ["Display bucătărie", "Add-on opțional", "Adesea în pachete enterprise"],
+      ["Stoc + rețete", "Incluse în Operations", "Variază — module extra"],
+      ["Raport Z / TVA", "Inclus", "Variază după pachet"],
       ["Preț lunar listat", "De la 79€/lună Operations", "Adesea doar la ofertă"],
       ["Timp setup", "Sub o oră self-serve", "Adesea proiect la fața locului"],
     ],
@@ -100,16 +100,12 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Nu. franchisetech rulează în browser pe tablete. FiscalNet rulează pe PC-ul de casă pentru bonuri fiscale.",
       },
       {
-        question: "Cum funcționează servirea la masă?",
-        answer: "Activezi servirea la masă în Integrări. Configurezi planul, apeși masa, trimiți runde cu Trimite, încasezi o dată cu Încasează — bon fiscal la final când FiscalNet e activ.",
+        question: "Pot începe doar cu POS la tejghea?",
+        answer: "Da. Fluxul principal este POS la tejghea: produse, coș, plată, bon fiscal și raport Z.",
       },
       {
-        question: "Pot separa terasa de sală?",
-        answer: "Da. Secțiunile planului (sală, terasă, bar) organizează serviciul pe același plan.",
-      },
-      {
-        question: "Există display bucătărie?",
-        answer: "Da, modul opțional. Comenzile apar pe un panou în browser pentru echipa de preparare.",
+        question: "Pot urmări costul rețetelor?",
+        answer: "Da. Planul Operations include rețete, ingrediente, achiziții și rapoarte de marjă.",
       },
       {
         question: "Defalcare TVA pentru contabil?",
@@ -117,49 +113,40 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
     ],
     ctaTitle: "Încearcă POS restaurant — 15 zile gratuit",
-    ctaSubtitle: "Plan sală, bucătărie și închidere casă — pentru servire completă.",
+    ctaSubtitle: "Vânzări, stoc, rețete și închidere casă — pentru control zilnic.",
   },
   takeaways: {
     eyebrow: "Takeaway & fast food",
-    title: "POS takeaway — Glovo, Bolt, FiscalNet",
-    metaTitle: "POS takeaway România — integrare Glovo, casă rapidă | franchisetech",
+    title: "POS takeaway — casă rapidă, FiscalNet",
+    metaTitle: "POS takeaway România — casă rapidă, închidere zi | franchisetech",
     description:
-      "POS takeaway și fast food: comenzi Glovo automat, grilă rapidă la tejghea, vânzări delivery separate, FiscalNet și raport Z zilnic.",
-    h1: "Glovo, Bolt și Tazz înregistrate corect. Fără bătaie de cap la ANAF.",
-    heroBefore: "",
-    heroHighlight: "Glovo, Bolt și Tazz înregistrate corect",
-    heroAfter: ". Fără bătaie de cap la ANAF.",
-    heroSubheadline: "Livrare și vânzări la tejghea într-o singură casă — canale separate, înregistrare fiscală corectă.",
+      "POS takeaway și fast food: grilă rapidă la tejghea, numerar și card, bon fiscal prin FiscalNet și raport Z zilnic.",
+    h1: "Comanda pleacă în trei atingeri, nu în trei ecrane.",
+    heroBefore: "Comanda pleacă în ",
+    heroHighlight: "trei atingeri, nu în trei ecrane",
+    heroAfter: ".",
+    heroSubheadline: "Grilă de produse fixă, gândită pentru viteză la oră de vârf, cu bon fiscal la fiecare vânzare.",
     painPoints: [
       {
-        title: "Comenzi delivery re-tastate la casă",
-        text: "Glovo sună pe tabletă și cineva tastează din nou în casa fiscală. Importul automat pune comenzile în workspace — gata de înregistrat corect.",
+        title: "La prânz se face coadă și greșim comenzile",
+        text: "Meniurile sunt produse cu preț fix, nu configuratoare. Poziția tile-urilor nu se mută, așa că mâna învață unde să apese.",
       },
       {
-        title: "Payout vs sertar",
-        text: "Încasările platformelor și numerarul din locație sunt lucruri diferite. Vânzările pe canal te ajută să reconciliezi ce ai câștigat vs ce e în sertar.",
+        title: "Ture diferite, sertar comun",
+        text: "Fiecare tură are deschidere, mișcări de numerar și închidere separate, cu responsabil pe fiecare.",
       },
       {
-        title: "Viteză la peak",
-        text: "La prânz coada nu așteaptă meniuri adânci. Grilă plată și încasare cu o atingere țin linia în mișcare.",
+        title: "Nu știu ce meniu se vinde de fapt",
+        text: "Raportul de vânzări arată top produse pe interval explicit. Cu Operations vezi și costul pe porție.",
       },
     ],
     competitorRows: [
-      ["Import Glovo automat", "Inclus în plan", "Variază — adesea modul opțional"],
-      ["Bolt / Tazz automat", "Bolt/Tazz în curând", "POSnet: Glovo/Bolt/Wolt auto"],
+      ["Grilă de produse", "Tile-uri fixe, poziții stabile", "Variază"],
       ["Rețete / stoc", "Plan Operations", "Variază"],
       ["Preț listat", "De la 49€/lună", "Adesea doar la ofertă"],
       ["POS browser", "Da", "Adesea client instalat"],
     ],
     faqs: [
-      {
-        question: "Glovo se integrează automat?",
-        answer: "Da. Comenzile Glovo sosesc prin webhook când integrarea e configurată. Bolt Food și Tazz se pot înregistra în POS; import automat în curând.",
-      },
-      {
-        question: "Vânzările delivery sunt separate de cele din locație?",
-        answer: "Da. Vânzările pot fi înregistrate pe canal ca rapoartele și înregistrările fiscale să rămână clare.",
-      },
       {
         question: "Funcționează cu FiscalNet?",
         answer: "Da, când FiscalNet e activ pe PC-ul de casă. Bonurile fiscale urmează hardware-ul configurat.",
@@ -168,46 +155,54 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         question: "Pot rula de pe tabletă la tejghea?",
         answer: "Da. franchisetech e în browser — ideal pentru tejgheaua compactă takeaway.",
       },
+      {
+        question: "Fiecare tură poate avea propria sesiune de casă?",
+        answer: "Da. Fiecare tură deschide și închide propria casă, cu mișcări de numerar și un responsabil numit.",
+      },
+      {
+        question: "Pot vedea ce se vinde de fapt?",
+        answer: "Da. Rapoartele de vânzări arată top produse pe orice interval; Operations adaugă cost pe porție și marjă.",
+      },
     ],
     ctaTitle: "Pornește POS takeaway — 15 zile gratuit",
-    ctaSubtitle: "Glovo, vânzări la tejghea și raport Z într-un singur setup.",
+    ctaSubtitle: "Casă rapidă, bon fiscal prin FiscalNet și raport Z într-un singur setup.",
   },
   "bar-pub": {
     eyebrow: "Baruri & puburi",
     title: "POS pentru baruri și puburi",
     metaTitle: "POS bar România — stoc, TVA, închidere casă | franchisetech",
     description:
-      "POS bar și pub: mese pe plan sală, stoc băuturi, TVA 9% vs 19%, personal nelimitat și închidere casă rapidă după program.",
-    h1: "Ții mesele deschise. La închidere, sertarul bate.",
-    heroBefore: "Ții mesele deschise. La închidere, ",
+      "POS bar și pub: vânzare rapidă la tejghea, TVA 21% / 11%, personal nelimitat și închidere casă rapidă după program.",
+    h1: "Vindeți rapid la bar. La închidere, sertarul bate.",
+    heroBefore: "Vindeți rapid la bar. La închidere, ",
     heroHighlight: "sertarul bate",
     heroAfter: ".",
     heroSubheadline: "Serviciu la bar, stoc băuturi și raport Z după program — POS în browser pe orice tabletă.",
     painPoints: [
       {
-        title: "Bar aglomerat, multe mese active",
-        text: "Când serviciul e pe masă, personalul alege locul pe plan, trimite runde și încasează o dată — în loc să piardă comenzi deschise.",
+        title: "Bar aglomerat, coadă la tejghea",
+        text: "Personalul găsește produsul, încasează și trece imediat la următoarea comandă, fără meniuri și ecrane inutile.",
       },
       {
         title: "Stoc valoric de băuturi",
-        text: "Spirtoasele și vinul trebuie inventariate corect. Achizițiile și nivelurile de stoc ajută să vezi pierderile înainte să lovească marja.",
+        text: "Spirtoasele și vinul trebuie inventariate corect. Achizițiile și nivelurile de stoc ajută să vedeți pierderile înainte să lovească marja.",
       },
       {
         title: "Închidere târzie, echipă obosită",
-        text: "După ultimul client vrei numerar numărat vs așteptat în două minute — nu un ritual Excel de 20 de minute.",
+        text: "După ultimul client doriți numerar numărat vs așteptat în două minute — nu un ritual Excel de 20 de minute.",
       },
     ],
     competitorRows: [
       ["POS browser", "Tabletă la bar", "Adesea terminale fixe"],
-      ["Flux mese", "Plan sală + comenzi", "Variază"],
+      ["Vânzări rapide", "POS browser", "Variază"],
       ["Stoc", "Plan Operations", "Variază"],
       ["Taxă personal", "Nelimitat", "Verificați per utilizator"],
       ["Preț listat", "De la 79€/lună", "Adesea doar la ofertă"],
     ],
     faqs: [
       {
-        question: "Pot ține comenzi deschise per masă?",
-        answer: "Cu servirea la masă activată, fiecare loc pe plan poate avea runde deschise până la încasare și bon fiscal o singură dată.",
+        question: "Pot vinde rapid direct la tejghea?",
+        answer: "Da. Grila POS este construită pentru selectarea rapidă a produselor, plată numerar sau card și bon fiscal prin FiscalNet când este configurat.",
       },
       {
         question: "TVA diferit pe soft drinks vs alcool?",
@@ -231,9 +226,9 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     metaTitle: "POS patiserie România — cost rețetă, bon consum, FiscalNet",
     description:
       "POS patiserie și brutărie: cost per croissant, bon de consum pentru contabil, vânzare la bucată sau kg, stoc și FiscalNet.",
-    h1: "Știi costul fiecărui croissant înainte să-l pui la vitrină.",
-    heroBefore: "Știi costul fiecărui ",
-    heroHighlight: "croissant înainte să-l pui la vitrină",
+    h1: "Știți costul fiecărui croissant înainte să îl puneți la vitrină.",
+    heroBefore: "Știți costul fiecărui ",
+    heroHighlight: "croissant înainte să îl puneți la vitrină",
     heroAfter: ".",
     heroSubheadline: "Cost rețete, bon de consum și POS retail — pentru patiserii și brutării.",
     painPoints: [
@@ -247,7 +242,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         title: "En-gros și retail în aceeași zi",
-        text: "Vinzi la bucată la walk-in și la kg pentru B2B din aceeași listă de produse — cu TVA și înregistrare fiscală corectă.",
+        text: "Vindeți la bucată la walk-in și la kg pentru B2B din aceeași listă de produse — cu TVA și înregistrare fiscală corectă.",
       },
     ],
     competitorRows: [
@@ -260,7 +255,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     faqs: [
       {
         question: "Pot calcula costul fiecărei rețete de patiserie?",
-        answer: "Da. Adaugi ingrediente și cantități; franchisetech calculează costul per porție și marja față de prețul de vânzare.",
+        answer: "Da. Adăugați ingrediente și cantități; franchisetech calculează costul per porție și marja față de prețul de vânzare.",
       },
       {
         question: "Bonul de consum e inclus?",
@@ -268,7 +263,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Vânzare la kg și la bucată?",
-        answer: "Produsele suportă unitatea de măsură în catalog; configurezi articole pentru retail la bucată sau la greutate după nevoie.",
+        answer: "Produsele suportă unitatea de măsură în catalog; configurați articole pentru retail la bucată sau la greutate după nevoie.",
       },
       {
         question: "Funcționează cu FiscalNet?",
@@ -283,10 +278,10 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     title: "POS food truck — mobil, offline, raport Z",
     metaTitle: "POS food truck România — tabletă, mod offline | franchisetech",
     description:
-      "POS food truck pe tabletă: vinzi când semnalul pică cu coadă offline, sincronizare la reconectare, FiscalNet când e conectat, raport Z seara.",
-    h1: "Vinde de oriunde. Raportul Z te așteaptă la seară.",
-    heroBefore: "Vinde de oriunde. ",
-    heroHighlight: "Raportul Z te așteaptă la seară",
+      "POS food truck pe tabletă: vindeți când semnalul pică cu coadă offline, sincronizare la reconectare, FiscalNet când e conectat, raport Z seara.",
+    h1: "Vindeți de oriunde. Raportul Z vă așteaptă la seară.",
+    heroBefore: "Vindeți de oriunde. ",
+    heroHighlight: "Raportul Z vă așteaptă la seară",
     heroAfter: ".",
     heroSubheadline: "POS în browser pe tabletă — vânzări în coadă offline, sincronizare când revine conexiunea.",
     painPoints: [
@@ -296,7 +291,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         title: "O persoană, trei joburi",
-        text: "Gătești, vinzi și numeri casa. Un POS în trei ecrane în browser bate un back-office greoi.",
+        text: "Gătiți, vindeți și numărați casa. Un POS în trei ecrane în browser bate un back-office greoi.",
       },
       {
         title: "Alt loc în fiecare zi",
@@ -313,7 +308,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     faqs: [
       {
         question: "franchisetech funcționează offline?",
-        answer: "Da. POS-ul pune vânzările în coadă locală în pene scurte și sincronizează când browserul se reconectează. Tipărirea fiscală depinde de FiscalNet când ești online.",
+        answer: "Da. POS-ul pune vânzările în coadă locală în pene scurte și sincronizează când browserul se reconectează. Tipărirea fiscală depinde de FiscalNet când sunteți online.",
       },
       {
         question: "Am nevoie de laptop și tabletă?",
@@ -325,7 +320,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Locații diferite în aceeași săptămână?",
-        answer: "O organizație; aceeași listă de produse. Add-on multi-locație când ai site-uri juridice separate.",
+        answer: "O organizație; aceeași listă de produse. Add-on multi-locație când aveți site-uri juridice separate.",
       },
     ],
     ctaTitle: "Încearcă POS food truck — 15 zile gratuit",
@@ -337,8 +332,8 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     metaTitle: "POS lanț restaurante — panou centralizat | franchisetech",
     description:
       "2–10 locații: casă și raport Z per site, panou proprietar, catalog și stoc comune, export Saga — 89€/locație/lună, personal nelimitat.",
-    h1: "Toate locațiile tale, un singur panou. Cifrele reale în fiecare seară.",
-    heroBefore: "Toate locațiile tale, ",
+    h1: "Toate locațiile dumneavoastră, un singur panou. Cifrele reale în fiecare seară.",
+    heroBefore: "Toate locațiile dumneavoastră, ",
     heroHighlight: "un singur panou",
     heroAfter: ". Cifrele reale în fiecare seară.",
     heroSubheadline: "Închidere casă per locație, vânzări comparate și exporturi contabil — fără contracte enterprise.",
@@ -349,7 +344,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         title: "A doua locație = de la zero",
-        text: "Adaugi o locație fără să reconstruiești tot catalogul — setup consistent, sesiuni per site.",
+        text: "Adăugați o locație fără să reconstruiți tot catalogul — setup consistent, sesiuni per site.",
       },
       {
         title: "Contabilul vrea un export",

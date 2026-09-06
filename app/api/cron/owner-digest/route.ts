@@ -4,11 +4,12 @@
 // Uses SUPABASE_SERVICE_ROLE_KEY + SECURITY DEFINER RPCs.
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { fetchOwnerDigestData } from "@/lib/owner-digest/fetch";
 import { sendOwnerDigestEmail } from "@/lib/email/owner-digest";
 import { isOwnerDigestDue, ownerDigestWindowStart } from "@/lib/owner-digest/schedule";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
+import { buildReferralLink } from "@/lib/referrals";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,25 @@ type DigestOrgRow = {
   owner_digest_last_sent_at: string | null;
   business_day_cutoff_time: string | null;
 };
+
+async function ensureDigestReferralLink(
+  supabase: SupabaseClient,
+  organisationId: string,
+): Promise<string | null> {
+  const { data: org } = await supabase
+    .from("organisations")
+    .select("referral_code")
+    .eq("id", organisationId)
+    .maybeSingle();
+
+  let code = (org as { referral_code?: string | null } | null)?.referral_code ?? null;
+  if (!code) {
+    const { data: generatedCode } = await supabase.rpc("ensure_referral_code", { p_org_id: organisationId });
+    code = typeof generatedCode === "string" ? generatedCode : null;
+  }
+
+  return code ? buildReferralLink(code) : null;
+}
 
 export async function POST(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
@@ -120,6 +140,7 @@ export async function POST(req: NextRequest) {
         businessDayCutoffTime: row.business_day_cutoff_time,
         referenceNow: now,
       });
+      digestData.referralLink = await ensureDigestReferralLink(supabase, row.organisation_id);
 
       const result = await sendOwnerDigestEmail({ to: recipients, data: digestData });
 

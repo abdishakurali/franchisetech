@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { trackLoopsEvent } from "@/lib/loops";
-import { captureServerEvent } from "@/lib/posthog-server";
+import { captureServerEventAsync } from "@/lib/posthog-server";
 
 export type GrowthMilestone = "till_opened" | "first_sale" | "first_report";
 
@@ -48,7 +48,10 @@ async function trackGrowthMilestonePostHog(
   try {
     const distinctId = userId ?? (await resolveOrgOwnerId(orgId));
     if (!distinctId) return;
-    captureServerEvent(
+    // Awaited (not fire-and-forget): this runs inside a floating promise, so
+    // after(flushPostHog) at the request entrypoint can't cover it — the request
+    // may already have ended. captureServerEventAsync flushes for itself.
+    await captureServerEventAsync(
       distinctId,
       POSTHOG_EVENT[milestone],
       { organisation_id: orgId },
@@ -143,7 +146,10 @@ export async function recordGrowthMilestone(
 
     await supabase.from("organisations").update(updates).eq("id", orgId);
     void trackGrowthMilestoneLoops(orgId, milestone);
-    void trackGrowthMilestonePostHog(orgId, milestone, userId);
+    // Awaited so the capture is flushed before the caller's request scope ends.
+    // Bounded cost: the early-return above means this runs at most once per org
+    // per milestone.
+    await trackGrowthMilestonePostHog(orgId, milestone, userId);
   } catch {
     // Non-fatal if migration 041 not yet applied
   }

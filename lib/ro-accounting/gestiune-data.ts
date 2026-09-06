@@ -17,12 +17,6 @@ type PurchaseRow = {
   purchase_items: Array<{ tax_rate: number | null; total_cost: number | null }>;
 };
 
-type TransactionRow = {
-  sold_at: string;
-  status: string;
-  pos_transaction_items: Array<{ vat_rate: number | null; gross_amount: number | null; line_total: number | null }>;
-};
-
 type VatBucket = { tva19: number; tva9: number; tva5: number; tva0: number; total: number };
 
 export type GestiuneReportData = {
@@ -176,52 +170,6 @@ export async function computeGestiuneReport(
     });
   }
 
-  // Filtered on pos_transactions.sold_at (real sale date), not
-  // pos_transaction_items.created_at (row-insert time; for migrated
-  // historical sales that's the bulk-import timestamp).
-  const { data: transactions } = await supabase
-    .from("pos_transactions")
-    .select(`sold_at, status, pos_transaction_items(vat_rate, gross_amount, line_total)`)
-    .eq("organisation_id", orgId)
-    .gte("sold_at", periodStart)
-    .lte("sold_at", periodEnd);
-
-  const salesByDate = new Map<string, VatBucket & { count: number }>();
-  for (const tx of (transactions ?? []) as TransactionRow[]) {
-    if (tx.status === "voided") continue;
-    const dateKey = tx.sold_at.slice(0, 10);
-    const existing = salesByDate.get(dateKey) ?? { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0, count: 0 };
-
-    for (const item of tx.pos_transaction_items ?? []) {
-      const value = Number(item.gross_amount ?? item.line_total ?? 0);
-      const vatRate = Number(item.vat_rate ?? 21);
-
-      if (vatRate === 21) existing.tva19 += value;
-      else if (vatRate === 11) existing.tva9 += value;
-      else if (vatRate === 5) existing.tva5 += value;
-      else existing.tva0 += value;
-      existing.total += value;
-      existing.count += 1;
-    }
-
-    salesByDate.set(dateKey, existing);
-  }
-
-  for (const [dateKey, values] of Array.from(salesByDate.entries()).sort(([a], [b]) => a.localeCompare(b))) {
-    if (values.total > 0) {
-      movements.push({
-        date: dateKey,
-        documentType: "vanzare",
-        description: labels.zReportItems(values.count),
-        tva19: values.tva19,
-        tva9: values.tva9,
-        tva5: values.tva5,
-        tva0: values.tva0,
-        total: values.total,
-      });
-    }
-  }
-
   // intrari* accumulates ONLY period NIR (goods actually received in this
   // date range) -- opening stock is a separate starting balance, not a
   // period inflow, and must not be double-counted as "Total intrari".
@@ -233,7 +181,7 @@ export async function computeGestiuneReport(
         acc.intrari5 += m.tva5;
         acc.intrari0 += m.tva0;
         acc.intrariTotal += m.total;
-      } else if (m.documentType === "consum" || m.documentType === "vanzare") {
+      } else if (m.documentType === "consum") {
         acc.iesiri19 += m.tva19;
         acc.iesiri9 += m.tva9;
         acc.iesiri5 += m.tva5;

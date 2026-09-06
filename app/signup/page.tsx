@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { GoogleIcon } from "@/components/ui/google-icon";
 import { createClient } from "@/lib/supabase/client";
 import { useAppI18n } from "@/lib/app-i18n-context";
+import { mapSupabaseAuthError } from "@/lib/auth-error-messages";
 import { toast } from "sonner";
 import { getPlan } from "@/lib/billing/plans";
 import { isPreferredBillingPlan, writePreferredPlanClient } from "@/lib/billing/preferred-plan";
@@ -23,6 +24,7 @@ import {
   writeAcquisitionClient,
 } from "@/lib/marketing/acquisition";
 import { MARKETING_LOCALE_COOKIE } from "@/lib/marketing/locale";
+import { captureClientEvent } from "@/lib/analytics/client-events";
 
 const googleAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "true";
 
@@ -31,7 +33,7 @@ export default function SignupPage() {
   const searchParams = useSearchParams();
   const planParam = searchParams.get("plan");
   const supabase = createClient();
-  const { t } = useAppI18n();
+  const { t, locale } = useAppI18n();
   const a = t.auth.signup;
   const [loading, setLoading] = useState(false);
   const [, startHydrate] = useTransition();
@@ -73,24 +75,43 @@ export default function SignupPage() {
       toast.error(a.errors.passwordLength);
       return;
     }
+    captureClientEvent("signup_started", { plan: planParam ?? null });
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: form.email,
-      password: form.password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding`,
-      },
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else if (data.session) {
-      toast.success(a.successSession);
-      router.push("/onboarding");
-      router.refresh();
-    } else {
-      toast.success(a.successEmail);
-      router.push(`/check-email?email=${encodeURIComponent(form.email)}`);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=/onboarding`,
+        },
+      });
+      if (error) {
+        captureClientEvent("signup_failed", { reason: error.message?.slice(0, 120) ?? null });
+        toast.error(mapSupabaseAuthError(error.message, locale));
+      } else if (data.session) {
+        captureClientEvent("signup_session_created", {});
+        toast.success(a.successSession);
+        router.push("/onboarding");
+        router.refresh();
+      } else if (data.user && data.user.identities?.length === 0) {
+        // Supabase's anti-enumeration behavior: signing up with an email that
+        // already belongs to a CONFIRMED account returns no error, no session,
+        // and an empty identities array — and sends no email. Without this
+        // check we'd tell the user to "check their email" for one that will
+        // never arrive.
+        toast.error(a.existingAccount);
+      } else {
+        captureClientEvent("signup_email_sent", {});
+        toast.success(a.successEmail);
+        router.push(`/check-email?email=${encodeURIComponent(form.email)}`);
+      }
+    } catch {
+      // Network failure, ad-blocker/privacy-extension interference, etc. —
+      // without this, a rejected promise here left the button stuck showing
+      // its loading spinner forever with no feedback.
+      toast.error(mapSupabaseAuthError("network_error", locale));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -129,7 +150,7 @@ export default function SignupPage() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="tu@cafeneaua.ro"
+                placeholder="nume@cafeneaua.ro"
               />
             </div>
             <div className="space-y-1.5">
@@ -149,7 +170,12 @@ export default function SignupPage() {
               {loading ? a.submitting : a.submit}
             </Button>
           </form>
-          <p className="text-center text-xs text-slate-400 mt-4">{a.legal}</p>
+          <p className="text-center text-xs text-slate-400 mt-4">
+            {a.legal}{" "}
+            <Link href="/terms" className="underline hover:text-slate-600">{a.legalTermsLink}</Link>{" "}
+            {a.legalAnd}{" "}
+            <Link href="/privacy" className="underline hover:text-slate-600">{a.legalPrivacyLink}</Link>.
+          </p>
           <p className="text-center text-sm text-slate-500 mt-3">
             {a.hasAccount}{" "}
             <Link href="/login" className="text-blue-600 hover:underline font-medium">

@@ -73,6 +73,7 @@ export type OwnerDigestData = {
   priorPeriodLabel: string;
   attentionItems: OwnerDigestAttention[];
   allClear: boolean;
+  referralLink?: string | null;
 };
 
 function money(value: number, currency: string, locale: AppLocale): string {
@@ -379,6 +380,29 @@ function buildStockSection(data: OwnerDigestData, ro: boolean): string {
     </table>`;
 }
 
+function buildReferralCta(data: OwnerDigestData, ro: boolean): string {
+  if (!data.referralLink) return "";
+  const label = ro ? "Invită un prieten" : "Refer a friend";
+  const copy = ro
+    ? "Primești o lună gratuită când recomandarea devine client plătitor."
+    : "Get one free month when your referral becomes a paying customer.";
+
+  return `
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin:18px 0 0;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="vertical-align:middle;padding-right:12px;">
+            <p style="margin:0;font-size:13px;font-weight:800;color:#0f172a;">${esc(label)}</p>
+            <p style="margin:4px 0 0;font-size:12px;color:#64748b;">${esc(copy)}</p>
+          </td>
+          <td align="right" style="vertical-align:middle;width:150px;">
+            <a href="${esc(data.referralLink)}" style="display:inline-block;background:#0f172a;color:#fff;font-weight:700;font-size:12px;text-align:center;text-decoration:none;padding:9px 11px;border-radius:7px;">${esc(label)}</a>
+          </td>
+        </tr>
+      </table>
+    </div>`;
+}
+
 export function buildOwnerDigestBodyHtml(data: OwnerDigestData): string {
   const ro = data.locale === "ro";
   const m = (v: number) => money(v, data.currency, data.locale);
@@ -429,6 +453,7 @@ export function buildOwnerDigestBodyHtml(data: OwnerDigestData): string {
     ${buildVatSection(data, ro, m)}
     ${buildTopProductsSection(data, ro, m)}
     ${buildStockSection(data, ro)}
+    ${buildReferralCta(data, ro)}
     ${ctas}`;
 }
 

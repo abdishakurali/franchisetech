@@ -1,0 +1,14 @@
+create index if not exists payment_events_transaction_idx on public.payment_events(transaction_id);
+create index if not exists payment_events_return_idx on public.payment_events(return_id) where return_id is not null;
+create index if not exists payment_events_performed_by_idx on public.payment_events(performed_by) where performed_by is not null;
+create index if not exists pos_returns_transaction_idx on public.pos_returns(transaction_id);
+create index if not exists pos_returns_returned_by_idx on public.pos_returns(returned_by) where returned_by is not null;
+create index if not exists pos_return_items_org_idx on public.pos_return_items(organisation_id);
+create index if not exists pos_return_items_return_idx on public.pos_return_items(return_id);
+create index if not exists pos_return_items_product_idx on public.pos_return_items(product_id) where product_id is not null;
+create index if not exists repair_actions_org_idx on public.repair_actions(organisation_id);
+create index if not exists repair_batches_approved_by_idx on public.repair_batches(approved_by) where approved_by is not null;
+create index if not exists repair_batches_created_by_idx on public.repair_batches(created_by) where created_by is not null;
+create index if not exists products_vat_approved_by_idx on public.products(vat_approved_by) where vat_approved_by is not null;
+create index if not exists recipes_supersedes_idx on public.recipes(supersedes_recipe_id) where supersedes_recipe_id is not null;
+create index if not exists recipes_retired_by_idx on public.recipes(retired_by) where retired_by is not null;

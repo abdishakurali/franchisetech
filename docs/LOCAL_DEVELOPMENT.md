@@ -146,8 +146,7 @@ Then report results and wait for `APPROVED TO DEPLOY` from the owner.
 
 ---
 
-## FiscalNet / drawer note
+## FiscalNet note
 
 - FiscalNet (`http://localhost` calls) must be called from the cashier PC browser — not from this dev server.
 - Do not test FiscalNet flows locally unless you have a local FiscalNet installation on the same machine.
-- Cash drawer opening is hardware-only — it will not open on a dev machine.

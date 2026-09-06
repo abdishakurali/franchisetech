@@ -187,12 +187,7 @@ export const MARKETPLACE_PRODUCTS: Record<MarketplaceProductKey, CatalogItem> = 
 };
 
 export const MARKETPLACE_PRODUCT_ORDER: readonly MarketplaceProductKey[] = [
-  "kitchen_display",
-  "table_service",
-  "loyalty",
-  "saga_export",
   "fiscalnet",
-  "anaf_efactura",
 ];
 
 export function marketplaceAllowsSelfInstall(item: CatalogItem): boolean {

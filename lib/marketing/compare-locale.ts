@@ -65,7 +65,7 @@ export function compareHubFaqs(locale: MarketingLocale): CompareHubFaq[] {
       {
         question: "Care e cea mai bună alternativă POS în România?",
         answer:
-          "Depinde de prioritate: facturare (SmartBill/Oblio/Saga), hardware plăți (Square/SumUp) sau operațiuni zilnice (POS + stoc + rețete + Glovo/Bolt + închidere casă). franchisetech țintește ultimul — comparați pe paginile Ebriza, NexusERP, Boogit, Expressoft, rKeeper și Bit-Soft.",
+          "Depinde de prioritate: facturare (SmartBill/Oblio/Saga), hardware plăți (Square/SumUp) sau operațiuni zilnice (POS + stoc + rețete + închidere casă). franchisetech țintește ultimul — comparați pe paginile Ebriza, NexusERP, Boogit, Expressoft, rKeeper și Bit-Soft.",
       },
       {
         question: "De ce unii vânzători POS taxează extra rapoartele?",

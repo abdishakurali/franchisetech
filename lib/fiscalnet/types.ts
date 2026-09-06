@@ -77,8 +77,7 @@ export type FiscalCommandType =
   | "cash_out"   // O^  — cash out of drawer
   | "x_report"   // X^  — daily total (non-resetting)
   | "z_report"   // Z^  — close fiscal day
-  | "status"     // ST^ — printer status
-  | "drawer";    // DS^ — open cash drawer
+  | "status";    // ST^ — printer status
 
 export interface FiscalSaleCommand {
   type:              "sale";

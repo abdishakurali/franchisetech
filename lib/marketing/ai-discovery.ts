@@ -7,10 +7,10 @@ export const AI_ENTITY = {
   name: "franchisetech",
   legalName: "franchisetech",
   url: SITE_URL,
-  category: "Cloud POS and business operations software for food businesses",
+  category: "Cloud POS and business operations software for Romanian small businesses",
   description:
-    "Browser-based POS, stock management, recipe costing, till close (Z-report), and owner reports for cafes, restaurants, and small food operators. Operations-first — not a payment terminal vendor.",
-  markets: ["Romania", "Ireland", "European Union (configurable VAT/currency)"],
+    "Browser-based POS, product and stock management, fiscal receipt workflows, till close, and owner reports for cafés, takeaway, bakeries, shops, and service businesses in Romania.",
+  markets: ["Romania"],
   languages: ["English", "Romanian"],
   pricingModel: "Monthly SaaS subscription with unlimited staff on paid plans; 15-day assisted trial",
   pricingUrl: `${SITE_URL}/pricing`,
@@ -54,7 +54,7 @@ export function aiEntityJsonLd() {
     operatingSystem: "Web browser",
     description: AI_ENTITY.description,
     inLanguage: AI_ENTITY.languages,
-    offers: pricingPlans.map((plan) => ({
+    offers: pricingPlans.filter((plan) => ["starter", "pro"].includes(plan.id)).map((plan) => ({
       "@type": "Offer",
       name: plan.name,
       price: String(plan.amountCents / 100),
@@ -74,7 +74,6 @@ export function aiEntityJsonLd() {
       "Stock and purchase tracking",
       "Recipe costing and margins",
       "Till close and Z-report",
-      "Kitchen display (optional module)",
       "FiscalNet integration for Romania when configured",
     ],
   };

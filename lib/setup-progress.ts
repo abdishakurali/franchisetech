@@ -1,5 +1,6 @@
 import type { BusinessProfile } from "@/lib/business-profile";
 import { normaliseBusinessProfile } from "@/lib/business-profile";
+import { LEAN_PRODUCT_SCOPE_ENABLED } from "@/lib/product-scope";
 
 export type SetupSignals = {
   orgName?: string | null;
@@ -14,6 +15,8 @@ export type SetupSignals = {
   txCount?: number;
   openSession?: boolean;
   reportViewed?: boolean;
+  fiscalRequired?: boolean;
+  fiscalConfigured?: boolean;
   subscription?: boolean;
   siteCount?: number;
   ingredientCount?: number;
@@ -64,6 +67,18 @@ export function buildSetupSteps(signals: SetupSignals): SetupStep[] {
       status: `${signals.productCount ?? 0} products`,
       section: "core",
     },
+    ...(signals.fiscalRequired
+      ? [{
+          id: "fiscal_setup",
+          title: "Configure fiscal receipts",
+          text: "Connect FiscalNet and verify payment and VAT mappings before the first real sale.",
+          href: "/app/settings?tab=integrations",
+          label: "Configure FiscalNet",
+          done: Boolean(signals.fiscalConfigured),
+          status: signals.fiscalConfigured ? "FiscalNet connected" : "Not configured",
+          section: "core" as const,
+        }]
+      : []),
     {
       id: "payments",
       title: "Set payment methods",
@@ -98,9 +113,9 @@ export function buildSetupSteps(signals: SetupSignals): SetupStep[] {
       id: "daily_report",
       title: "Check daily report",
       text: "Review sales, cash/card totals, and top products after the first sale.",
-      href: "/app",
+      href: "/app/reports/z-report",
       label: "View reports",
-      done: Boolean(signals.reportViewed) || (signals.txCount ?? 0) > 0,
+      done: Boolean(signals.reportViewed),
       section: "core",
     },
   ];
@@ -186,7 +201,11 @@ export function buildSetupSteps(signals: SetupSignals): SetupStep[] {
     (step) => !["business_details", "payments", "open_till"].includes(step.id),
   );
 
-  return [...activationCore, ...multiSite, ...advanced, billing];
+  return [
+    ...activationCore,
+    ...(!LEAN_PRODUCT_SCOPE_ENABLED ? [...multiSite, ...advanced] : []),
+    billing,
+  ];
 }
 
 export function computeSetupProgress(signals: SetupSignals): {

@@ -85,9 +85,13 @@ export function money(value: number | null | undefined) {
 export function formatCurrency(value: number | string | null | undefined, code = "EUR", symbol = "€") {
   const n = Number(value ?? 0);
   const amount = Number.isFinite(n) ? n : 0;
-  if (code === "RON") return `${amount.toFixed(2)} lei`;
-  if (symbol) return `${symbol}${amount.toFixed(2)}`;
-  return new Intl.NumberFormat("en-IE", { style: "currency", currency: code || "EUR" }).format(amount);
+  const formatted = new Intl.NumberFormat("ro-RO", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
+  if (code === "RON") return `${formatted} lei`;
+  if (symbol) return `${formatted} ${symbol}`;
+  return new Intl.NumberFormat("ro-RO", { style: "currency", currency: code || "EUR" }).format(amount);
 }
 
 export function numberValue(formData: FormData, key: string, fallback = 0) {

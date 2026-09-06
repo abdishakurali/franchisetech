@@ -1,27 +1,22 @@
+import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import {
-  Beer,
-  Building2,
-  Coffee,
-  Croissant,
-  ShoppingBag,
-  Truck,
-  Utensils,
-} from "lucide-react";
-import { showcaseAssets } from "@/lib/marketing/showcase";
+import { Coffee, Croissant, ShoppingBag, Utensils } from "lucide-react";
 import { INDUSTRY_VANITY_REDIRECTS } from "@/lib/marketing/industry-vanity-redirects";
+import { OwnerPosProof, OwnerRecipeProof } from "@/components/marketing/OwnerProofScreens";
 
 export { INDUSTRY_VANITY_REDIRECTS };
 
-/** Canonical English slugs for the 7 primary HoReCa verticals (Romania SEO). */
+/**
+ * Canonical English slugs for the primary HoReCa verticals (Romania SEO).
+ * Scoped to the actual ICP (AGENTS.md: cafés, restaurants, takeaway,
+ * patisseries, 1-3 locations) — bar-pub, food-trucks, and multi-site were
+ * cut 2026-09-05: zero traffic and outside the stated ICP.
+ */
 export const PRIMARY_INDUSTRY_SLUGS = [
   "cafes",
   "restaurants",
   "takeaways",
-  "bar-pub",
   "patisserie-bakery",
-  "food-trucks",
-  "multi-site",
 ] as const;
 
 export type PrimaryIndustrySlug = (typeof PRIMARY_INDUSTRY_SLUGS)[number];
@@ -57,32 +52,11 @@ export const PRIMARY_INDUSTRY_NAV: IndustryNavItem[] = [
     labelEn: "Takeaway & fast food",
   },
   {
-    slug: "bar-pub",
-    path: "/industries/bar-pub",
-    icon: Beer,
-    labelRo: "Baruri & puburi",
-    labelEn: "Bars & pubs",
-  },
-  {
     slug: "patisserie-bakery",
     path: "/industries/patisserie-bakery",
     icon: Croissant,
     labelRo: "Patiserii & brutării",
     labelEn: "Patisseries & bakeries",
-  },
-  {
-    slug: "food-trucks",
-    path: "/industries/food-trucks",
-    icon: Truck,
-    labelRo: "Food truck",
-    labelEn: "Food trucks",
-  },
-  {
-    slug: "multi-site",
-    path: "/industries/multi-site",
-    icon: Building2,
-    labelRo: "Multi-locație",
-    labelEn: "Multi-location",
   },
 ];
 
@@ -90,45 +64,31 @@ export function isPrimaryIndustrySlug(slug: string): slug is PrimaryIndustrySlug
   return (PRIMARY_INDUSTRY_SLUGS as readonly string[]).includes(slug);
 }
 
-/** Default hero showcase per vertical — override per page in seo.ts if needed. */
+/**
+ * Default hero showcase per vertical — override per page in seo.ts if needed.
+ * `posCart`/`ownerDashboard`/`recipeCosting` in showcase.ts are stale QA-test
+ * screenshots (English UI, EUR pricing, wrong VAT rates) — verticals that used
+ * them render a drawn `component` instead.
+ */
 export const INDUSTRY_SHOWCASE_DEFAULTS: Record<
   PrimaryIndustrySlug,
-  { src: string; path: string; alt: string }
+  { src: string; path: string; alt: string } | { component: ComponentType; alt: string }
 > = {
   cafes: {
-    src: showcaseAssets.posCart.src,
-    path: showcaseAssets.posCart.path,
+    component: OwnerPosProof,
     alt: "franchisetech POS pentru cafenele",
   },
   restaurants: {
-    src: showcaseAssets.tableFloor.src,
-    path: showcaseAssets.tableFloor.path,
-    alt: "franchisetech plan sală pentru restaurante",
+    component: OwnerPosProof,
+    alt: "franchisetech POS rapid pentru localuri mici",
   },
   takeaways: {
-    src: showcaseAssets.posCart.src,
-    path: showcaseAssets.posCart.path,
+    component: OwnerPosProof,
     alt: "franchisetech POS takeaway",
   },
-  "bar-pub": {
-    src: showcaseAssets.posCart.src,
-    path: showcaseAssets.posCart.path,
-    alt: "franchisetech POS pentru baruri",
-  },
   "patisserie-bakery": {
-    src: showcaseAssets.recipeCosting.src,
-    path: showcaseAssets.recipeCosting.path,
+    component: OwnerRecipeProof,
     alt: "franchisetech cost rețete patiserie",
-  },
-  "food-trucks": {
-    src: showcaseAssets.posCart.src,
-    path: showcaseAssets.posCart.path,
-    alt: "franchisetech POS food truck",
-  },
-  "multi-site": {
-    src: showcaseAssets.ownerDashboard.src,
-    path: showcaseAssets.ownerDashboard.path,
-    alt: "franchisetech panou multi-locație",
   },
 };
 
@@ -137,8 +97,5 @@ export const INDUSTRY_COMPETITOR_SLUGS: Record<PrimaryIndustrySlug, string> = {
   cafes: "ebriza",
   restaurants: "expressoft",
   takeaways: "posnet",
-  "bar-pub": "ebriza",
   "patisserie-bakery": "smartbill",
-  "food-trucks": "square",
-  "multi-site": "nexuserp",
 };

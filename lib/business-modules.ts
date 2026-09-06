@@ -61,9 +61,9 @@ export const BUSINESS_MODULE_DEFINITIONS: readonly {
   {
     key: "team_advanced",
     label: "Team & audit",
-    description: "Team roles, permissions, and cash audit trail.",
+    description: "Team roles and permissions.",
     settingsKey: "team_advanced_enabled",
-    routes: ["/app/settings/team", "/app/settings/cash-drawer-audit"],
+    routes: ["/app/settings/team"],
   },
   {
     key: "multi_site",
@@ -75,7 +75,7 @@ export const BUSINESS_MODULE_DEFINITIONS: readonly {
   {
     key: "kitchen_ops",
     label: "Kitchen & order flow",
-    description: "Kitchen display and restaurant order workflow toggles.",
+    description: "Parked restaurant workflow toggles.",
     settingsKey: null,
     routes: ["/app/kitchen"],
   },

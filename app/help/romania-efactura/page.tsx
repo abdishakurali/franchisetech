@@ -83,7 +83,7 @@ export default function RomaniaEfacturaPage() {
           <div className="mt-4 flex gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
             <p className="text-sm text-blue-800">
-              <strong>e-Factura and FiscalNet are different, unrelated systems.</strong> e-Factura (this guide) is ANAF&apos;s national electronic invoicing system for B2B/B2G invoices. FiscalNet is the driver that talks to your physical fiscal cash register for POS receipts, X/Z reports, and cash drawer control — see the{" "}
+              <strong>e-Factura and FiscalNet are different, unrelated systems.</strong> e-Factura (this guide) is ANAF&apos;s national electronic invoicing system for B2B/B2G invoices. FiscalNet is the driver that talks to your physical fiscal cash register for POS receipts and X/Z reports — see the{" "}
               <Link href="/help/romania-fiscalnet" className="underline hover:text-blue-900">
                 FiscalNet setup guide
               </Link>{" "}

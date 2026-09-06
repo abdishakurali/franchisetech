@@ -26,8 +26,6 @@ Every P1-or-above change must verify these flows before shipping. Any ❌ is a b
 - [ ] Overpayment: sale records at actual total, not cash received
 - [ ] Sale is saved to DB with correct amount (never inflated by change)
 - [ ] FiscalNet payment amount = sale total, NOT cash received
-- [ ] Drawer open command sent after sale (if connector available)
-- [ ] Drawer failure does not block sale from saving
 - [ ] Receipt printed or print dialog shown
 
 ---
@@ -66,8 +64,7 @@ Every P1-or-above change must verify these flows before shipping. Any ❌ is a b
 - [ ] Cash in/out requires admin or manager role
 - [ ] Movement is recorded in till log
 - [ ] Does not affect sale revenue in reports
-- [ ] Drawer opens on cash movement (if connector available)
-- [ ] Failure does not corrupt the till balance
+- [ ] Movement failure does not corrupt the till balance
 
 ---
 

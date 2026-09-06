@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState, type ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Mail, ArrowLeft, RotateCcw } from "lucide-react";
@@ -11,6 +12,27 @@ import { toast } from "sonner";
 const COOLDOWN_SECONDS = 60;
 
 export default function CheckEmailPage() {
+  return (
+    <Suspense fallback={<CheckEmailFrame />}>
+      <CheckEmailContent />
+    </Suspense>
+  );
+}
+
+function CheckEmailFrame({ children }: { children?: ReactNode }) {
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md text-center">
+        <div className="flex items-center justify-center mb-8">
+          <Image src="/franchise-tech-logo.png" alt="franchisetech" width={220} height={40} className="h-10 w-auto" priority />
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function CheckEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const [cooldown, setCooldown] = useState(0);
@@ -31,40 +53,35 @@ export default function CheckEmailPage() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Confirmation email resent — check your inbox.");
+      toast.success("Emailul de confirmare a fost retrimis.");
       setCooldown(COOLDOWN_SECONDS);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md text-center">
-        <div className="flex items-center justify-center mb-8">
-          <img src="/franchise-tech-logo.png" alt="franchisetech" className="h-10 w-auto" />
-        </div>
-
+    <CheckEmailFrame>
         <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
           <Mail className="h-8 w-8 text-blue-600" />
         </div>
 
-        <h1 className="text-2xl font-bold text-slate-900 mb-3">Check your email</h1>
+        <h1 className="text-2xl font-bold text-slate-900 mb-3">Verifică emailul</h1>
         {email ? (
           <p className="text-slate-500 mb-2">
-            We sent a confirmation link to <span className="font-medium text-slate-700">{email}</span>.
+            Am trimis linkul de confirmare la <span className="font-medium text-slate-700">{email}</span>.
           </p>
         ) : (
           <p className="text-slate-500 mb-2">
-            We sent a confirmation link to your email address.
+            Am trimis linkul de confirmare pe adresa dumneavoastră de email.
           </p>
         )}
         <p className="text-slate-500 mb-8">
-          Click the link to confirm your account, then come back here to sign in and finish setup.
+          Apăsați linkul pentru confirmarea contului, apoi autentificați-vă ca să terminați configurarea.
         </p>
 
         <div className="space-y-3">
           <Link href="/login">
             <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-              Go to sign in
+              Mergi la autentificare
             </Button>
           </Link>
 
@@ -77,26 +94,25 @@ export default function CheckEmailPage() {
             >
               <RotateCcw className="h-4 w-4" />
               {cooldown > 0
-                ? `Resend available in ${cooldown}s`
+                ? `Poți retrimite în ${cooldown}s`
                 : loading
-                ? "Sending…"
-                : "Resend confirmation email"}
+                ? "Se trimite..."
+                : "Retrimite emailul de confirmare"}
             </Button>
           )}
 
           <Link href="/signup">
             <Button variant="outline" className="w-full gap-2">
               <ArrowLeft className="h-4 w-4" />
-              Back to sign up
+              Înapoi la înscriere
             </Button>
           </Link>
         </div>
 
         <p className="text-xs text-slate-400 mt-8">
-          Didn&apos;t receive an email? Check your spam folder or{" "}
-          {email ? "use the resend button above" : "try signing up again"}.
+          Nu ați primit emailul? Verificați folderul spam sau{" "}
+          {email ? "folosește butonul de retrimitere" : "încearcă înscrierea din nou"}.
         </p>
-      </div>
-    </div>
+    </CheckEmailFrame>
   );
 }

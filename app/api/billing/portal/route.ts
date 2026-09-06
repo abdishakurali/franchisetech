@@ -23,7 +23,7 @@ export async function POST() {
     .maybeSingle();
 
   if (!membership || !canManageBilling(membership.role)) {
-    return NextResponse.json({ error: "Only an owner can manage billing" }, { status: 403 });
+    return NextResponse.json({ error: "Only active organisation members can manage billing" }, { status: 403 });
   }
 
   const service = await createServiceClient();

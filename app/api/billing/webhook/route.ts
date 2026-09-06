@@ -1,12 +1,12 @@
 import Stripe from "stripe";
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { creditReferralOnFirstPayment } from "@/lib/referrals";
 import { trackLoopsEvent } from "@/lib/loops";
 import { syncStripeSubscription } from "@/lib/billing/stripe-sync";
 import { startTrialAfterCardVerification } from "@/lib/billing/verification";
 import { reportPaidConversion } from "@/lib/analytics/server-conversions";
-import { captureServerEvent } from "@/lib/posthog-server";
+import { captureServerEvent, flushPostHog } from "@/lib/posthog-server";
 
 export const dynamic = "force-dynamic";
 
@@ -99,6 +99,10 @@ async function markEventProcessed(
 }
 
 export async function POST(request: Request) {
+  // captureServerEvent is fire-and-forget; without this the in-flight POST to
+  // PostHog races the serverless function freezing and events are silently lost.
+  after(flushPostHog);
+
   if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
     return NextResponse.json({ error: "Billing webhook is not configured" }, { status: 503 });
   }
@@ -268,6 +272,22 @@ export async function POST(request: Request) {
         if (isRealPayment) {
           const subOrgId = subscription.metadata?.organisation_id;
           if (subOrgId) {
+            const ownerId = await resolveOrgOwnerId(subOrgId);
+            if (ownerId) {
+              captureServerEvent(
+                ownerId,
+                "payment_succeeded",
+                {
+                  $insert_id: `stripe_payment_${invoice.id ?? subscription.id}`,
+                  organisation_id: subOrgId,
+                  plan: subscription.metadata?.plan ?? "",
+                  amount_paid_cents: invoice.amount_paid ?? 0,
+                  currency: invoice.currency ?? "eur",
+                  billing_reason: invoice.billing_reason ?? "",
+                },
+                { organisation: subOrgId },
+              );
+            }
             const supabase = await createServiceClient();
 
             const { data: org } = await supabase

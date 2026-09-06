@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { openCashDrawer, type CashDrawerReason } from "@/lib/cash-drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,12 +44,9 @@ export function PosCashForm({ sessionId, movementType, action }: CashFormProps) 
 
     try {
       await action(formData);
-      // Attempt drawer open
-      const drawerReason: CashDrawerReason = movementType;
-      const result = await openCashDrawer(drawerReason);
       setNotice({
-        message: result.cashierMessage || "Cash movement saved.",
-        type: result.result === "command_sent" ? "success" : "info",
+        message: "Cash movement saved.",
+        type: "success",
       });
       formRef.current?.reset();
     } catch {

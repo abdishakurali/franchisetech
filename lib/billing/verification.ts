@@ -42,7 +42,7 @@ export async function startTrialAfterCardVerification(
     .eq("id", input.organisationId)
     .is("trial_started_at", null)
     .select(
-      "id, name, country_code, business_type, acquisition_gclid, acquisition_gbraid, acquisition_wbraid"
+      "id, name, country_code, business_type, acquisition_gclid, acquisition_gbraid, acquisition_wbraid, acquisition_fbclid"
     )
     .maybeSingle();
 
@@ -55,16 +55,6 @@ export async function startTrialAfterCardVerification(
     // Trial already started (webhook and success page both fired) — nothing to do.
     return { started: false, alreadyStarted: true };
   }
-
-  // ── trial_started events — best-effort, never block the payment flow ──────
-  // Google Ads offline conversion (card-verified trial = primary bidding signal).
-  // Idempotent by construction: only the call that flipped trial_started_at gets here.
-  void reportTrialConversion({
-    organisationId: input.organisationId,
-    gclid: updated.acquisition_gclid,
-    gbraid: updated.acquisition_gbraid,
-    wbraid: updated.acquisition_wbraid,
-  }).catch((e: unknown) => console.error("[card_verification] google ads trial conversion failed", e));
 
   let userId = input.actor?.userId ?? null;
   let email = input.actor?.email ?? null;
@@ -83,6 +73,19 @@ export async function startTrialAfterCardVerification(
     const { data: authUser } = await supabase.auth.admin.getUserById(userId).catch(() => ({ data: null }));
     email = authUser?.user?.email ?? null;
   }
+
+  // ── trial_started events — best-effort, never block the payment flow ──────
+  // Google Ads offline conversion + Meta Conversions API (card-verified trial =
+  // primary bidding signal for both). Idempotent by construction: only the call
+  // that flipped trial_started_at gets here.
+  void reportTrialConversion({
+    organisationId: input.organisationId,
+    gclid: updated.acquisition_gclid,
+    gbraid: updated.acquisition_gbraid,
+    wbraid: updated.acquisition_wbraid,
+    fbclid: updated.acquisition_fbclid,
+    email,
+  }).catch((e: unknown) => console.error("[card_verification] ad platform trial conversion failed", e));
 
   if (email) {
     void upsertLoopsContact(email, { trialStartedAt: now.toISOString() }).catch((e: unknown) =>

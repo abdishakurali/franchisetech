@@ -18,7 +18,7 @@ export default async function SetupChecklistPage() {
     moduleFlags,
     subscriptionStatus,
   ] = await Promise.all([
-    supabase.from("organisations").select("name,country,currency_code,business_profile").eq("id", orgId).maybeSingle(),
+    supabase.from("organisations").select("name,country,currency_code,business_profile,country_code,fiscalnet_enabled,growth_first_report_at").eq("id", orgId).maybeSingle(),
     supabase
       .from("products")
       .select("*", { count: "exact", head: true })
@@ -58,6 +58,9 @@ export default async function SetupChecklistPage() {
     paymentMethodCount: paymentCountResult.count ?? 0,
     txCount: txCountResult.count ?? 0,
     openSession: Boolean(sessionResult.data),
+    reportViewed: Boolean(org?.growth_first_report_at),
+    fiscalRequired: org?.country_code === "RO",
+    fiscalConfigured: Boolean(org?.fiscalnet_enabled),
     subscription:
       subscriptionStatus?.state === "active" ||
       subscriptionStatus?.state === "trialing" ||

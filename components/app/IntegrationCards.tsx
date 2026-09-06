@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { setBusinessModuleInstalled } from "@/app/actions/org-settings";
-import { ChatRequestButton } from "@/components/app/ChatRequestButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -150,7 +149,7 @@ export async function IntegrationCards({
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2 pt-0">
                   {card.installKey && !active && !marketplaceAllowsSelfInstall(card.item) ? (
-                    <ChatRequestButton label={isRO ? "Contactați-ne" : "Contact us"} />
+                    <Link href="/contact"><Button size="sm" className="h-7 text-xs">{isRO ? "Contactați-ne" : "Contact us"}</Button></Link>
                   ) : card.installKey ? (
                     <form action={setBusinessModuleInstalled}>
                       <input type="hidden" name="module" value={card.installKey} />

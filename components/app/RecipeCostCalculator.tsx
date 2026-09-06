@@ -246,14 +246,38 @@ function InlineCreateModal({
 export function RecipeCostCalculator({
   sellableProducts,
   ingredientProducts,
+  // Edit mode: when a recipeId is supplied the same calculator is reused to
+  // update an existing recipe instead of creating a new one, so both flows stay
+  // visually identical and there is only one costing UI to maintain.
+  recipeId,
+  initialProductId,
+  initialYieldQty,
+  initialRows,
+  submitAction,
+  submitLabel,
 }: {
   sellableProducts: SellableProduct[];
   ingredientProducts: IngredientProduct[];
+  recipeId?: string;
+  initialProductId?: string;
+  initialYieldQty?: string;
+  initialRows?: { product_id: string; quantity: string }[];
+  submitAction?: (fd: FormData) => Promise<void>;
+  submitLabel?: string;
 }) {
-  const nextId = { current: 1 };
-  const [selectedProductId, setSelectedProductId] = useState(sellableProducts[0]?.id ?? "");
-  const [yieldQty, setYieldQty] = useState("1");
-  const [rows, setRows] = useState<IngredientRow[]>([{ id: 0, product_id: "", quantity: "" }]);
+  const seededRows: IngredientRow[] = (initialRows ?? []).map((r, i) => ({
+    id: i,
+    product_id: r.product_id,
+    quantity: r.quantity,
+  }));
+  const nextId = { current: seededRows.length > 0 ? seededRows.length : 1 };
+  const [selectedProductId, setSelectedProductId] = useState(
+    initialProductId ?? sellableProducts[0]?.id ?? ""
+  );
+  const [yieldQty, setYieldQty] = useState(initialYieldQty ?? "1");
+  const [rows, setRows] = useState<IngredientRow[]>(
+    seededRows.length > 0 ? seededRows : [{ id: 0, product_id: "", quantity: "" }]
+  );
   const [allIngredients, setAllIngredients] = useState<IngredientProduct[]>(ingredientProducts);
   const [inlineCreate, setInlineCreate] = useState<InlineCreateState>(null);
 
@@ -325,9 +349,15 @@ export function RecipeCostCalculator({
         />
       )}
 
-      <form action={addRecipeFromProducts as unknown as (fd: FormData) => Promise<void>} className="space-y-5">
+      <form
+        action={
+          (submitAction ?? addRecipeFromProducts) as unknown as (fd: FormData) => Promise<void>
+        }
+        className="space-y-5"
+      >
         {/* Hidden recipe name — auto-set to selected product name */}
         <input type="hidden" name="name" value={recipeName || "Ingrediente"} />
+        {recipeId ? <input type="hidden" name="recipe_id" value={recipeId} /> : null}
 
         {/* Finished product + batch size */}
         <div className="grid gap-3 sm:grid-cols-2">
@@ -531,13 +561,15 @@ export function RecipeCostCalculator({
         )}
 
         <div className="flex gap-3 pt-2 border-t border-slate-100">
-          <Link href="/app/recipes"><Button variant="outline" type="button">Anulează</Button></Link>
+          <Link href={recipeId ? `/app/recipes/${recipeId}` : "/app/recipes"}>
+            <Button variant="outline" type="button">Anulează</Button>
+          </Link>
           <Button
             type="submit"
             disabled={allIngredients.length === 0 || !selectedProductId || filledRows.length === 0}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            Salvează ingredientele
+            {submitLabel ?? "Salvează ingredientele"}
           </Button>
         </div>
       </form>

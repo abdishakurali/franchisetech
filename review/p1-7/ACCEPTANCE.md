@@ -42,11 +42,6 @@ Exclude marketing/blog/SEO files from deploy — they are unrelated dirty worktr
 |------|--------|
 | [`lib/pos-offline-queue.ts`](../../lib/pos-offline-queue.ts) | localStorage queue, max 20 |
 
-### Chatwoot hiding
-| File | Change |
-|------|--------|
-| [`components/app/SupportChat.tsx`](../../components/app/SupportChat.tsx) | `return null` when `pathname.startsWith("/app/pos")` |
-
 ### i18n labels
 | File | Change |
 |------|--------|
@@ -238,17 +233,7 @@ P^1^218
 
 ---
 
-## 9. Chatwoot on POS
-
-| Check | Status |
-|-------|--------|
-| Hidden on `/app/pos` | **Pass** — early `return null` |
-| Visible elsewhere | **Pass** — script loads on other app routes |
-| Global removal | **No** |
-
----
-
-## 10. Local gates
+## 9. Local gates
 
 | Gate | Result |
 |------|--------|

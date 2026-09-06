@@ -92,7 +92,7 @@ export const featurePages: SeoPage[] = [
       { question: "Can I use it on a tablet at the counter?", answer: "Yes. franchisetech runs in the browser — laptop, tablet, or till screen." },
       { question: "How many staff can use the register?", answer: "Unlimited. Add cashiers, managers, and kitchen roles at no extra per-user cost." },
     ],
-    related: [{ label: "Z-report", href: "/features/z-report" }, { label: "Cafes", href: "/industries/cafes" }, { label: "What cafes need from POS", href: "/resources/pos-system-for-small-cafes" }],
+    related: [{ label: "Z-report", href: "/features/z-report" }, { label: "Cafes", href: "/industries/cafes" }],
     image: "/showcase/pos-grid.png",
     heroComponent: OwnerPosProof,
   },
@@ -115,8 +115,9 @@ export const featurePages: SeoPage[] = [
       { question: "Can franchisetech replace a warehouse system?", answer: "No. It is a practical stock tool for small food operators, not a complex enterprise warehouse platform." },
       { question: "Can purchases update stock?", answer: "Yes. Purchases can be recorded against products and suppliers to keep stock movement clear." },
       { question: "Can POS sales reduce ingredient stock?", answer: "Yes, when recipes are configured, sales can reduce the stock of recipe ingredients." },
+      { question: "Can I transfer stock between locations?", answer: "Not yet. Stock transfer between locations is on the roadmap — today, each location's stock is tracked separately." },
     ],
-    related: [{ label: "Recipe costing", href: "/features/recipe-costing" }, { label: "Stock control article", href: "/resources/food-business-stock-control" }, { label: "Restaurants", href: "/industries/restaurants" }],
+    related: [{ label: "Recipe costing", href: "/features/recipe-costing" }, { label: "Stock control article", href: "/blog/stoc-negativ-cauze-si-solutii" }, { label: "Restaurants", href: "/industries/restaurants" }],
     image: "/showcase/stock-levels.png",
     heroComponent: OwnerStockProof,
   },
@@ -140,7 +141,7 @@ export const featurePages: SeoPage[] = [
       { question: "Does franchisetech include tax advice?", answer: "No. franchisetech helps keep organised records. It does not replace professional accounting or tax advice." },
       { question: "Can recipes connect to POS?", answer: "Yes. Recipe products can be sold through POS and used for stock calculations." },
     ],
-    related: [{ label: "Recipe costing guide", href: "/resources/recipe-costing-for-cafes" }, { label: "Stock management", href: "/features/stock-management" }, { label: "Health bars", href: "/industries/health-bars" }],
+    related: [{ label: "Stock management", href: "/features/stock-management" }],
     image: "/showcase/recipe-costing.png",
     heroComponent: OwnerRecipeProof,
   },
@@ -164,7 +165,7 @@ export const featurePages: SeoPage[] = [
       { question: "Can I record cash in and cash out?", answer: "Yes. Cash movements can be recorded with reasons so expected cash stays clear." },
       { question: "Does this replace my accountant?", answer: "No. franchisetech helps keep organised sales and till records. Professional tax and accounting advice remains your responsibility." },
     ],
-    related: [{ label: "Z-report explained", href: "/resources/z-report-explained" }, { label: "POS feature", href: "/features/pos" }, { label: "Cash-up guide", href: "/resources/cash-up-at-end-of-day" }],
+    related: [{ label: "Z-report explained", href: "/resources/z-report-explained" }, { label: "POS feature", href: "/features/pos" }],
     image: "/showcase/reports-dashboard.png",
     heroComponent: OwnerZReportProof,
   },
@@ -461,77 +462,6 @@ export const featurePages: SeoPage[] = [
 export const industryPages: SeoPage[] = [
   ...primaryIndustryPages,
   {
-    slug: "health-bars",
-    path: "/industries/health-bars",
-    eyebrow: "Health bars",
-    title: "Health Bar POS and Smoothie Recipe Costing",
-    metaTitle: "Health Bar POS, Smoothie Bar Stock, Recipe Costing, and Margins",
-    description: "franchisetech helps health bars and smoothie bars sell products, manage ingredients, cost recipes, track stock, and review margins.",
-    h1: "POS, stock, and recipe costing for health bars",
-    intro: "Health bars depend on fresh ingredients, recipe consistency, and clear margins for smoothies, bowls, snacks, and drinks.",
-    bullets: ["Smoothie and bowl recipes", "Ingredient stock tracking", "Margin visibility", "POS sales and cash/card records", "Unlimited staff — no per-seat fees"],
-    sections: [
-      { title: "Pain points", body: "Fresh ingredients expire quickly, recipes use small quantities, and product margins can be difficult to see without costing." },
-      { title: "How franchisetech helps", body: "Ingredients, products, purchases, recipes, and POS sales connect so owners can review cost and stock together." },
-      { title: "Useful owner reports", body: "Top products, transaction history, recipe margin, low stock, purchases, and daily till close." },
-    ],
-    faqs: [
-      { question: "Can I cost smoothies?", answer: "Yes. Add fruit, milk, powders, packaging, and quantities to calculate recipe cost." },
-      { question: "Can I track can-make counts?", answer: "Yes. Recipe and stock data can show how many portions can be made." },
-      { question: "Can I import product lists?", answer: "Yes. Product import and export are supported by CSV." },
-    ],
-    related: [{ label: "Recipe costing guide", href: "/resources/recipe-costing-for-cafes" }],
-    image: "/marketing/industry-cafe.png",
-  },
-  {
-    slug: "ireland",
-    path: "/industries/ireland",
-    eyebrow: "🇮🇪 Ireland",
-    title: "POS System for Irish Businesses — Cafés, Restaurants & Retail",
-    metaTitle: "POS System for Irish Businesses | EUR, VAT, HACCP | franchisetech",
-    description: "franchisetech is built for Irish cafés, restaurants, takeaways, retail shops, and local businesses. Euro currency, Irish VAT rates (23%/13.5%/9%), HACCP food-safety records, and unlimited team members.",
-    h1: "POS and operations software built for Ireland",
-    intro: "franchisetech is designed with Irish food and retail businesses in mind — Euro currency, correct VAT rates, HACCP food-safety records, and daily cash control that fits the rhythm of an Irish business day.",
-    bullets: [
-      "Euro (€) currency throughout — POS, reports, and receipts",
-      "Irish VAT rates pre-loaded: 23%, 13.5%, 9%, 0%",
-      "HACCP-ready food-safety temperature records",
-      "Unlimited team members — no per-user fees",
-      "Cash and card POS with daily Z-report",
-      "Stock, recipes, suppliers, and purchases in one system",
-      "Works on any device as a PWA — no app install needed",
-    ],
-    sections: [
-      {
-        title: "Currency and VAT — ready for Ireland",
-        body: "All amounts display in Euro (€). VAT rates are pre-loaded for Irish businesses: Standard 23%, Reduced 13.5%, Second Reduced 9%, and Zero 0%. Rates are fully editable if your business has specific requirements.",
-      },
-      {
-        title: "HACCP food-safety records",
-        body: "Irish food businesses must keep temperature logs and corrective action records. franchisetech includes a Food Safety module for recording checks, actions taken, and generating exportable food-safety records.",
-      },
-      {
-        title: "Simple daily cash control",
-        body: "Open the till with a float, record cash in and out, process sales and refunds, then close with a Z-report showing expected cash, counted cash, and the difference. Clear records for busy Irish operators.",
-      },
-    ],
-    faqs: [
-      { question: "Does franchisetech display prices in Euro?", answer: "Yes. All prices, reports, receipts, and the POS display in Euro (€) for Irish organisations." },
-      { question: "Are Irish VAT rates pre-loaded?", answer: "Yes. Standard 23%, Reduced 13.5%, Second Reduced 9%, and Zero 0% are available from the start. You can edit or add rates at any time." },
-      { question: "Does it support HACCP food-safety records?", answer: "Yes. The Food Safety module allows logging temperature checks, corrective actions, and reminders — suitable for Irish HACCP record-keeping." },
-      { question: "Is there a limit on team members?", answer: "No. You can add unlimited staff members with role-based access — from Owner to Cashier — at no extra cost." },
-      { question: "Does franchisetech work for Irish retail shops?", answer: "Yes. Product catalogue, discounts, receipts, staff permissions, and daily reports work equally well for retail and food businesses." },
-    ],
-    related: [
-      { label: "POS register", href: "/features/pos" },
-      { label: "Z-report and till closing", href: "/features/z-report" },
-      { label: "Guided setup", href: "/features/setup-onboarding" },
-      { label: "Cafés", href: "/industries/cafes" },
-    ],
-    image: "/showcase/pos-grid.png",
-    heroComponent: OwnerPosProof,
-  },
-  {
     slug: "romania",
     path: "/industries/romania",
     eyebrow: "🇷🇴 România",
@@ -579,53 +509,6 @@ export const industryPages: SeoPage[] = [
     heroComponent: OwnerDashboardProof,
   },
   {
-    slug: "retail-shops",
-    path: "/industries/retail-shops",
-    eyebrow: "Retail",
-    title: "POS System for Retail Shops — Products, Staff & Daily Reports",
-    metaTitle: "Retail POS System | Products, Discounts, Staff Roles | franchisetech",
-    description: "franchisetech helps retail shops, convenience stores, and mini markets sell products, manage stock, track staff, and generate daily reports. Works in Ireland (EUR) and Romania (lei).",
-    h1: "Simple POS and retail management for shops and stores",
-    intro: "Whether you run a convenience store, boutique, mini market, or specialist retail shop — franchisetech gives you a clean product catalogue, fast checkout, staff control, and daily records without enterprise complexity.",
-    bullets: [
-      "Fast product grid with categories and search",
-      "Discounts per item and refunds with reason",
-      "Multiple payment methods — cash, card, vouchers",
-      "Unlimited staff with role-based access",
-      "Daily sales dashboard and Z-report",
-      "Stock tracking and purchase records",
-      "Works in EUR (Ireland) and lei / RON (Romania)",
-    ],
-    sections: [
-      {
-        title: "Products and categories",
-        body: "Build a clean catalogue with product categories, prices, costs, and POS availability flags. Import by CSV for large catalogues. Products can be toggled on or off the POS without deleting them.",
-      },
-      {
-        title: "Staff and shift accountability",
-        body: "Add every team member at no extra cost. Cashiers see only the till. Managers see reports and can manage products. Owners control everything. Every sale, refund, and void is traceable to a user.",
-      },
-      {
-        title: "Reports for retail owners",
-        body: "Daily sales, transaction history, top products, payment method breakdown, stock movements, and purchase records give retail owners a clear picture of the business at the end of every day.",
-      },
-    ],
-    faqs: [
-      { question: "Does franchisetech work for convenience stores?", answer: "Yes. The product catalogue, cash control, staff roles, and daily reports apply directly to convenience store operations." },
-      { question: "Can I track stock for retail products?", answer: "Yes. Products can have stock levels tracked, updated by purchases, and reduced by sales." },
-      { question: "Is there a limit on products or staff?", answer: "No hard limit on products. Staff can be added without per-user fees." },
-      { question: "Does it work in both Ireland and Romania?", answer: "Yes. Irish organisations use EUR (€) with Irish VAT rates. Romanian organisations use lei (RON) with TVA rates and FiscalNet support." },
-    ],
-    related: [
-      { label: "POS register", href: "/features/pos" },
-      { label: "Z-report", href: "/features/z-report" },
-      { label: "Ireland", href: "/industries/ireland" },
-      { label: "Romania", href: "/industries/romania" },
-    ],
-    image: "/showcase/stock-levels.png",
-    heroComponent: OwnerStockProof,
-  },
-  {
     slug: "salons",
     path: "/industries/salons",
     eyebrow: "Salons & Barbers",
@@ -666,55 +549,7 @@ export const industryPages: SeoPage[] = [
     related: [
       { label: "POS register", href: "/features/pos" },
       { label: "Z-report and till closing", href: "/features/z-report" },
-      { label: "Ireland", href: "/industries/ireland" },
       { label: "Romania", href: "/industries/romania" },
-    ],
-    image: "/showcase/pos-grid.png",
-    heroComponent: OwnerPosProof,
-  },
-  {
-    slug: "eu",
-    path: "/industries/eu",
-    eyebrow: "🇪🇺 European Union",
-    title: "VAT-Aware POS for EU Food Businesses — Configurable Currency & Country",
-    metaTitle: "POS for EU Food Businesses | Configurable VAT, Currency, Timezone | franchisetech",
-    description: "franchisetech is built for Ireland and adaptable across the EU, with configurable VAT, currency, timezone, and optional country-specific workflows. No overclaiming — fiscal integrations only where enabled and configured.",
-    h1: "POS and operations software adaptable across the EU",
-    intro: "Built for Ireland and adaptable across the EU, with configurable VAT, currency, timezone, and optional country-specific workflows. franchisetech does not claim universal compliance — fiscal integrations are enabled only where they have been set up and verified.",
-    bullets: [
-      "Configurable currency (EUR, RON, and others via settings)",
-      "Configurable VAT rates — set the rates applicable to your country",
-      "Configurable timezone — reports reflect your local business day",
-      "Optional workflows: tips and split payments",
-      "Hardware connectors: Windows and Android, where verified",
-      "Country-specific fiscal integrations only where enabled (e.g. FiscalNet for Romania)",
-      "Unlimited staff — no per-user fees",
-    ],
-    sections: [
-      {
-        title: "VAT-aware by default, not by assumption",
-        body: "franchisetech records VAT rate per product and produces VAT-ready reports and Z-reports. It does not claim certification under any specific EU country's revenue authority — that remains your professional responsibility. Rates, currency, and timezone are configurable in Settings.",
-      },
-      {
-        title: "Optional workflows — enable what you need",
-        body: "Order types, tips, and split payments can be enabled per organisation in Settings. They are all off by default. Enabling them does not affect unrelated workflows.",
-      },
-      {
-        title: "Hardware compatibility — verified setups only",
-        body: "Fiscal hardware compatibility is checked during setup. franchisetech does not claim support for every printer, cash register, or device.",
-      },
-    ],
-    faqs: [
-      { question: "Is franchisetech compliant with EU fiscal regulations?", answer: "No universal claim is made. Country-specific integrations (e.g. FiscalNet for Romania) work where specifically enabled and configured. For other EU countries, franchisetech provides VAT-ready records — professional tax advice remains your responsibility." },
-      { question: "Can I use franchisetech in a country other than Ireland or Romania?", answer: "Yes, with manual configuration. Currency, VAT rates, and timezone are all configurable. There is no country-specific fiscal integration for other EU countries today — only Romania has FiscalNet support." },
-      { question: "Does franchisetech support multiple currencies?", answer: "One currency per organisation. You configure it in Settings." },
-      { question: "Are fiscal receipts available in every EU country?", answer: "No. Fiscal receipt printing is currently only available for Romania via FiscalNet integration. Other EU countries receive VAT-ready records that you can submit to your own accountant." },
-    ],
-    related: [
-      { label: "Ireland", href: "/industries/ireland" },
-      { label: "Romania", href: "/industries/romania" },
-      { label: "POS register", href: "/features/pos" },
-      { label: "VAT report", href: "/features/z-report" },
     ],
     image: "/showcase/pos-grid.png",
     heroComponent: OwnerPosProof,
@@ -736,49 +571,6 @@ export type ResourcePage = {
 
 export const resourcePages: ResourcePage[] = [
   {
-    slug: "pos-system-for-small-cafes",
-    path: "/resources/pos-system-for-small-cafes",
-    title: "Ce au nevoie cafenelele mici de la un sistem POS",
-    metaTitle: "Ce au nevoie cafenelele mici de la un sistem POS",
-    description: "Ghid practic despre sisteme POS pentru cafenele mici: viteză la casă, produse, evidență numerar/card, bonuri, retururi și închidere zilnică.",
-    intro: "Un POS bun pentru o cafenea mică ajută personalul să servească rapid, ține evidențe curate și dă proprietarului cifrele de care are nevoie la finalul zilei.",
-    sections: [
-      { title: "Casa trebuie să rămână simplă", body: "Servirea la tejghea e rapidă. Un POS bun face produsele uzuale ușor de găsit, ține coșul clar și lasă personalul să finalizeze o vânzare fără să caute prin meniuri de back-office." },
-      { title: "Evidența numerar și card contează", body: "Proprietarii trebuie să compare numerarul din sertar, totalurile pe card, retururile, anulările și evidențele de sfârșit de zi. Contează mai ales când mai mulți angajați folosesc aceeași casă." },
-      { title: "Produsele înseamnă mai mult decât butoane", body: "O listă de produse pentru o cafenea ar trebui să includă categorii, cotă TVA, preț de vânzare, cost, comportament de stoc și dacă articolul apare în POS." },
-      { title: "La închidere se văd greșelile", body: "Numerar de deschidere, vânzări în numerar, intrări/ieșiri numerar, numerar așteptat, numerar numărat și diferențele ar trebui înregistrate într-un singur loc, ca ziua următoare să înceapă curat." },
-      { title: "Cum ajută franchisetech", body: "franchisetech combină POS, produse, tranzacții, retururi, clienți, stoc, rețete, achiziții și rapoarte pentru afaceri alimentare mici." },
-    ],
-    faqs: [
-      { question: "Care este cea mai importantă funcție POS pentru o cafenea mică?", answer: "Viteza și claritatea. Personalul trebuie să poată vinde produsele uzuale rapid, iar proprietarul trebuie să poată revizui evidențe corecte mai târziu." },
-      { question: "Ar trebui un POS de cafenea să urmărească stocul?", answer: "Pentru multe cafenele, da. Chiar și o vizibilitate simplă a stocului ajută la achiziții și controlul pierderilor." },
-      { question: "franchisetech include hardware de plată?", answer: "franchisetech înregistrează metoda de plată. Integrarea cu hardware și terminale de plată nu trebuie presupusă decât dacă este configurată separat." },
-    ],
-    related: [{ label: "Funcționalitate POS", href: "/features/pos" }, { label: "Cafenele", href: "/industries/cafes" }, { label: "Ghid raport Z", href: "/resources/z-report-explained" }],
-  },
-  {
-    slug: "recipe-costing-for-cafes",
-    path: "/resources/recipe-costing-for-cafes",
-    title: "Cum calculați costul rețetei și marja pentru produsele de cafenea",
-    metaTitle: "Cum calculați costul rețetei și marja pentru produsele de cafenea",
-    description: "Aflați cum calculați costul rețetei, marja pe prețul de vânzare și câte porții puteți face, cu exemplul unui sandviș club.",
-    intro: "Costul rețetei îi ajută pe proprietari să înțeleagă dacă un produs este cu adevărat profitabil, ținând cont de ingrediente, mărimea porției și prețul de vânzare.",
-    sections: [
-      { title: "Porniți de la ingrediente", body: "Listați fiecare ingredient folosit în produs. Pentru un sandviș club, includeți pieptul de pui, salata, sosul, brânza, pâinea și ambalajul." },
-      { title: "Adăugați cantitatea folosită", body: "Fiecare linie de rețetă are nevoie de o cantitate. Dacă pieptul de pui costă 40 lei/kg și rețeta folosește 120g, costul pentru o porție este 4,80 lei." },
-      { title: "Calculați costul rețetei", body: "Adunați costul fiecărui ingredient. Dacă puiul costă 4,80 lei, salata 1,20 lei, sosul 0,80 lei, brânza 1,50 lei, pâinea 1,00 lei și ambalajul 0,90 lei, costul rețetei este 10,20 lei." },
-      { title: "Comparați cu prețul de vânzare", body: "Dacă sandvișul se vinde cu 32 lei și costă 10,20 lei de făcut, profitul brut este 21,80 lei. Marja este profitul brut împărțit la prețul de vânzare, aproximativ 68% înainte de alte cheltuieli." },
-      { title: "Folosiți numărul de porții posibile", body: "Dacă în stoc aveți 2,4 kg de piept de pui și fiecare porție folosește 120g, puiul susține 20 de porții. Numărul real de porții posibile este limitat de ingredientul cel mai puțin disponibil." },
-      { title: "Cum ajută franchisetech", body: "franchisetech vă lasă să construiți rețete din produse, să urmăriți costul, să comparați prețul de vânzare și să legați stocul de câte porții puteți face." },
-    ],
-    faqs: [
-      { question: "Ce este marja pe rețetă?", answer: "Marja pe rețetă compară prețul de vânzare al produsului cu costul ingredientelor. Arată cât profit brut rămâne înainte de alte cheltuieli." },
-      { question: "Ar trebui inclus ambalajul?", answer: "Da. Ambalajul este un cost real și ar trebui inclus când face parte din produs." },
-      { question: "Este acesta sfat contabil?", answer: "Nu. Este un ghid operațional. franchisetech ajută la păstrarea unor evidențe organizate și nu înlocuiește consultanța contabilă sau fiscală profesională." },
-    ],
-    related: [{ label: "Baruri de sănătate", href: "/industries/health-bars" }],
-  },
-  {
     slug: "z-report-explained",
     path: "/resources/z-report-explained",
     title: "Ce este raportul Z și de ce contează?",
@@ -797,313 +589,7 @@ export const resourcePages: ResourcePage[] = [
       { question: "Raportul Z poate preveni greșelile de numerar?", answer: "Nu poate preveni orice greșeală, dar face diferențele vizibile și mai ușor de revizuit." },
       { question: "franchisetech depune declarații fiscale?", answer: "Nu. franchisetech vă ajută să păstrați evidențe organizate. Nu înlocuiește contabilitatea sau consultanța fiscală." },
     ],
-    related: [{ label: "Funcționalitate raport Z", href: "/features/z-report" }, { label: "Ghid închidere de zi", href: "/resources/cash-up-at-end-of-day" }, { label: "Funcționalitate POS", href: "/features/pos" }],
-  },
-  {
-    slug: "food-business-stock-control",
-    path: "/resources/food-business-stock-control",
-    title: "Control simplu de stoc pentru afaceri alimentare mici",
-    metaTitle: "Control simplu de stoc pentru afaceri alimentare mici",
-    description: "Ghid practic de control al stocului pentru cafenele, takeaway, food truck-uri și restaurante mici.",
-    intro: "Afacerile alimentare mici nu au nevoie de un software complicat de depozit, dar au nevoie de un proces clar de stoc.",
-    sections: [
-      { title: "Porniți de la produsele care contează", body: "Urmăriți ingredientele și produsele care afectează costul, disponibilitatea sau pierderile. Nu fiecare articol mic are nevoie de același nivel de control." },
-      { title: "Înregistrați achizițiile constant", body: "Furnizor, dată de achiziție, produs, cantitate, unitate și cost unitar sunt suficiente pentru un istoric util de achiziții." },
-      { title: "Folosiți praguri de reaprovizionare", body: "Un prag de reaprovizionare dă personalului un semnal clar că un produs are nevoie de atenție înainte să se termine." },
-      { title: "Legați rețetele de stoc", body: "Când rețetele sunt legate de ingrediente, vânzările pot ajuta să explice consumul de stoc și câte porții mai puteți face." },
-      { title: "Cum ajută franchisetech", body: "franchisetech leagă produsele, ingredientele, furnizorii, achizițiile, rețetele și vânzările POS, ca stocul să fie mai ușor de revizuit." },
-    ],
-    faqs: [
-      { question: "Cât de des ar trebui o cafenea mică să verifice stocul?", answer: "Ingredientele care se consumă rapid ar trebui verificate frecvent. Articolele mai lente pot fi revizuite mai rar." },
-      { question: "Ce înseamnă câte porții pot face?", answer: "Estimează câte produse finite pot fi făcute din stocul actual de ingrediente." },
-      { question: "franchisetech poate importa produse de stoc?", answer: "Da. Importul/exportul de produse este suportat prin CSV." },
-    ],
-    related: [],
-  },
-  {
-    slug: "cash-up-at-end-of-day",
-    path: "/resources/cash-up-at-end-of-day",
-    title: "Cum închideți casa la finalul zilei",
-    metaTitle: "Cum închideți casa la finalul zilei",
-    description: "Un proces simplu de închidere a casei pentru cafenele și afaceri alimentare mici: numerar de deschidere, vânzări, intrări/ieșiri numerar, numerar numărat și diferențe.",
-    intro: "Închiderea casei este obiceiul zilnic de a verifica dacă evidențele de casă se potrivesc cu ce este în sertar și cu ce s-a plătit prin card.",
-    sections: [
-      { title: "Porniți de la numerarul de deschidere", body: "Numerarul de deschidere este fondul din casă înainte să înceapă vânzările. Ar trebui înregistrat când se deschide casa." },
-      { title: "Adăugați vânzările în numerar", body: "Vânzările în numerar cresc numerarul așteptat din sertar. Vânzările cu cardul ar trebui ținute separat, pentru că nu sunt numerar fizic." },
-      { title: "Înregistrați intrările și ieșirile de numerar", body: "Numerarul adăugat sau scos din sertar ar trebui să aibă o sumă și un motiv, ca numerarul așteptat să rămână corect." },
-      { title: "Numărați sertarul", body: "La finalul zilei, numărați numerarul fizic și comparați-l cu numerarul așteptat. Orice diferență ar trebui înregistrată cu observații." },
-      { title: "Folosiți închiderea ca punct de resetare", body: "O închidere curată înseamnă că mâine începe cu o sumă clară de numerar de deschidere și o evidență clară a zilei de ieri." },
-    ],
-    faqs: [
-      { question: "Ce se întâmplă dacă numerarul numărat nu se potrivește cu cel așteptat?", answer: "Înregistrați diferența și observațiile. Scopul este o evidență clară, nu ascunderea diferenței." },
-      { question: "Totalurile cu cardul ar trebui incluse în numerar?", answer: "Nu. Totalurile cu cardul ar trebui urmărite separat de numerarul fizic din sertar." },
-    ],
-    related: [{ label: "Raport Z", href: "/features/z-report" }, { label: "POS", href: "/features/pos" }, { label: "Raportul Z explicat", href: "/resources/z-report-explained" }],
-  },
-  {
-    slug: "pos-software-romania",
-    path: "/resources/pos-software-romania",
-    title: "Software POS pentru restaurante și cafenele în România",
-    metaTitle: "Software POS România — casă, FiscalNet, TVA, stoc | franchisetech",
-    description:
-      "Ghid practic pentru alegerea unui software POS în România: casă de marcat, FiscalNet, TVA 21%/11%/5%, stoc, rețete și raport Z pentru cafenele și restaurante mici.",
-    intro:
-      "Un POS bun în România trebuie să rezolve ziua de zi: vânzare rapidă, bon fiscal când FiscalNet e configurat, stoc care nu rămâne în Excel, și închidere casă clară pentru contabil.",
-    sections: [
-      {
-        title: "Ce caută proprietarii români la POS",
-        body: "Viteză la servire, lei (RON) peste tot, cote TVA corecte, integrare FiscalNet unde e cazul, și rapoarte pe care contabilul le poate folosi fără reconstrucție manuală.",
-      },
-      {
-        title: "POS plăți-first vs operațiuni-first",
-        body: "Terminalul de card rezolvă plata. franchisetech rezolvă ce se întâmplă după: ce s-a vândut, ce stoc s-a consumat, care e marja pe rețetă, și dacă numerarul din sertar se potrivește cu raportul.",
-      },
-      {
-        title: "Trial fără risc",
-        body: "Rulați 15 zile în paralel cu sistemul actual. Adăugați produsele principale, faceți o vânzare test, comparați raportul zilnic — apoi decideți.",
-      },
-    ],
-    faqs: [
-      {
-        question: "franchisetech emite bon fiscal?",
-        answer:
-          "Da, când FiscalNet este activat și configurat corect pe stația de casă. Nu presupuneți conformitate fără verificarea contabilului.",
-      },
-      {
-        question: "Funcționează pentru retail, nu doar restaurant?",
-        answer: "Da. Catalog produse, reduceri, personal și rapoarte zilnice funcționează și pentru magazine mici.",
-      },
-      {
-        question: "Cât costă per angajat?",
-        answer: "Planurile plătite includ personal nelimitat — fără taxă per casier.",
-      },
-    ],
-    related: [
-      { label: "Pagina România", href: "/industries/romania" },
-      { label: "Alternative SmartBill", href: "/compare/smartbill" },
-      { label: "Ghid FiscalNet", href: "/help/romania-fiscalnet" },
-    ],
-  },
-  {
-    slug: "stock-management-romania",
-    path: "/resources/stock-management-romania",
-    title: "Gestiune stoc și achiziții pentru restaurante în România",
-    metaTitle: "Gestiune stoc restaurant România — NIR, furnizori, rețete | franchisetech",
-    description:
-      "Cum să țineți stocul, achizițiile de la furnizori și legătura cu rețetele într-un restaurant mic din România — fără software de depozit enterprise.",
-    intro:
-      "Restaurantele mici nu au nevoie de WMS enterprise, dar au nevoie de claritate: ce a intrat de la furnizor, ce s-a consumat, ce e pe terminate.",
-    sections: [
-      {
-        title: "De la NIR la porții posibile",
-        body: "Înregistrați achizițiile cu furnizor, cantitate și cost. Leagați ingredientele de rețete ca să vedeți câte porții puteți face din stocul curent.",
-      },
-      {
-        title: "Alerte stoc scăzut",
-        body: "Setați praguri pentru ingredientele critice — lapte, carne, ambalaje — ca să comandați înainte de serviciu, nu în timpul lui.",
-      },
-      {
-        title: "Contabilul vrea claritate",
-        body: "franchisetech păstrează mișcări organizate. Nu înlocuiește sfatul fiscal — exportați și reconciliați cu contabilul.",
-      },
-    ],
-    faqs: [
-      {
-        question: "Pot importa produse din Excel?",
-        answer: "Da, prin CSV. Util pentru meniuri mari sau migrare de la alt sistem.",
-      },
-      {
-        question: "Vânzările scad automat stocul?",
-        answer: "Da, când rețetele sunt configurate și legate de produsele POS.",
-      },
-    ],
-    related: [],
-  },
-  {
-    slug: "choose-pos-romania",
-    path: "/resources/choose-pos-romania",
-    title: "Cum alegi un POS pentru restaurant sau cafenea în România",
-    metaTitle: "Cum alegi POS restaurant România — checklist 2026 | franchisetech",
-    description:
-      "Checklist pentru evaluarea POS-urilor în România: FiscalNet, TVA, stoc, rețete, raport Z, cost total și trial paralel.",
-    intro:
-      "Piața POS din România e aglomerată. Acest checklist te ajută să compari onest — fără promisiuni pe care niciun vendor nu le poate garanta universal.",
-    sections: [
-      {
-        title: "1. Casă și servire",
-        body: "Personalul poate vinde produsele frecvente în sub 3 atingeri? Refundurile și anulările sunt urmărite cu motiv?",
-      },
-      {
-        title: "2. Fiscal și TVA",
-        body: "Afișaj lei, cote TVA 19/9/5%, FiscalNet dacă aveți nevoie de bon fiscal — verificați cu contabilul înainte de go-live.",
-      },
-      {
-        title: "3. Stoc și marje",
-        body: "Dacă marjele sunt în Excel astăzi, POS-ul trebuie să lege vânzările de ingrediente sau veți continua să ghiciți.",
-      },
-      {
-        title: "4. Cost total",
-        body: "Licență + terminale + taxă per casier + ore reconciliere manuală. Compară totalul lunar, nu doar prețul afișat.",
-      },
-      {
-        title: "5. Trial paralel",
-        body: "Orice vendor serios permite o perioadă de test în paralel. Refuză dacă singura opțiune e migrare big-bang fără backup.",
-      },
-    ],
-    faqs: [
-      {
-        question: "Unde compar alternative?",
-        answer: "Vezi pagina noastră de comparații: SmartBill, Saga, RezoSoft, Expressoft, hePOS și altele.",
-      },
-    ],
-    related: [
-      { label: "Comparații POS", href: "/compare" },
-      { label: "SmartBill vs franchisetech", href: "/compare/smartbill" },
-      { label: "Obiecții frecvente", href: "/resources/objections-pos-romania" },
-      { label: "Prețuri", href: "/pricing" },
-    ],
-  },
-  {
-    slug: "objections-pos-romania",
-    path: "/resources/objections-pos-romania",
-    title: "Obiecții frecvente la alegerea unui POS în România",
-    metaTitle: "Obiecții POS România — SmartBill, FiscalNet, timp, preț | franchisetech",
-    description:
-      "Răspunsuri oneste la obiecțiile din apelurile de vânzare: SmartBill existent, FiscalNet, lipsă de timp, preț — cu trial paralel 15 zile.",
-    intro:
-      "Aceste obiecții apar în aproape fiecare evaluare POS pentru restaurante și cafenele din România. Răspunsurile de mai jos reflectă ce putem susține onest astăzi — fără promisiuni de conformitate universală.",
-    sections: [
-      {
-        title: "„Am deja SmartBill / Saga”",
-        body: "Multe afaceri păstrează SmartBill sau Saga pentru facturare și e-Factura. franchisetech țintește golul zilnic: casă, stoc, rețete, raport Z. Rulați 15 zile în paralel — aceleași produse, aceeași echipă — și comparați timpul de reconciliere la final de zi.",
-      },
-      {
-        title: "„FiscalNet e greu / nu vreau risc fiscal”",
-        body: "Integrarea FiscalNet necesită configurare corectă pe stația de casă. Oferim ghid pas cu pas; contabilul verifică înainte de go-live. Nu presupuneți conformitate fără verificare profesională.",
-      },
-      {
-        title: "„Nu am timp de migrare”",
-        body: "Nu cerem migrare big-bang. Ghidul de configurare din aplicație include produse demo, deschidere casă și ghidare la prima vânzare, fără cost. Majoritatea trialurilor activează prima vânzare într-o singură sesiune ghidată.",
-      },
-      {
-        title: "„E scump față de Excel / POS vechi”",
-        body: "Comparați costul total: licență, taxă per casier, ore reconciliere manuală, rupturi de stoc. Planurile franchisetech includ personal nelimitat — util când rotația echipei e mare.",
-      },
-    ],
-    faqs: [
-      {
-        question: "Pot păstra contabilul actual?",
-        answer: "Da. Exportați rapoarte zilnice și reconciliați cu contabilul — franchisetech nu înlocuiește sfatul fiscal profesional.",
-      },
-      {
-        question: "Unde văd comparația cu SmartBill?",
-        answer: "Pagina dedicată: franchisetech vs SmartBill pentru operațiuni zilnice HORECA.",
-      },
-    ],
-    related: [
-      { label: "SmartBill vs franchisetech", href: "/compare/smartbill" },
-      { label: "Checklist alegere POS", href: "/resources/choose-pos-romania" },
-      { label: "Ghid FiscalNet", href: "/help/romania-fiscalnet" },
-      { label: "Prețuri și trial", href: "/pricing" },
-    ],
-  },
-  {
-    slug: "switch-from-ebriza",
-    path: "/resources/switch-from-ebriza",
-    title: "Cum migrezi de la Ebriza la franchisetech",
-    metaTitle: "Migrare de la Ebriza la franchisetech — ghid practic",
-    description:
-      "Ghid pas cu pas pentru cafenele și restaurante care vor să testeze franchisetech în paralel cu Ebriza: export, import produse, trial 15 zile și comparație cost total.",
-    intro:
-      "Migrarea nu trebuie făcută big-bang. Cel mai sigur mod este să exportați datele, să importați catalogul principal în franchisetech și să rulați 15 zile în paralel înainte să decideți.",
-    sections: [
-      {
-        title: "1. Exportați datele din Ebriza",
-        body: "Începeți cu produsele active, categorii, prețuri, cote TVA și, dacă folosiți gestiune, articole de stoc. Păstrați exportul original ca backup înainte de orice curățare.",
-      },
-      {
-        title: "2. Curățați catalogul înainte de import",
-        body: "Eliminați produse duplicate, produse inactive și denumiri ambigue. Verificați unitatea de măsură, categoria, prețul de vânzare, prețul de cost și cota TVA pentru fiecare produs important.",
-      },
-      {
-        title: "3. Importați produsele în franchisetech",
-        body: "Folosiți importul CSV pentru produse și ingrediente. Începeți cu cele mai vândute articole, nu cu întreg istoricul. Scopul primei zile este o casă funcțională și rapoarte clare.",
-      },
-      {
-        title: "4. Rulați în paralel 15 zile",
-        body: "Faceți aceleași vânzări test, urmăriți raportul Z, TVA, stocul și timpul de închidere. Nu opriți sistemul vechi până când echipa nu poate face o vânzare și o închidere fără ajutor.",
-      },
-      {
-        title: "5. Comparați costul real",
-        body: "Comparați abonamentul, add-on-urile pentru rapoarte, KDS, Saga sau stoc, taxele per terminal/casier și timpul pierdut la reconciliere. Decideți pe cost total lunar, nu doar pe prețul de intrare.",
-      },
-    ],
-    faqs: [
-      {
-        question: "Trebuie să migrez tot istoricul din Ebriza?",
-        answer: "Nu pentru primul trial. Migrați catalogul activ și articolele critice. Istoricul vechi poate rămâne arhivat în sistemul anterior sau în exporturi.",
-      },
-      {
-        question: "Pot rula Ebriza și franchisetech în paralel?",
-        answer: "Da. Recomandarea este să testați 15 zile în paralel, cu aceleași produse principale, pentru a compara raportarea și timpul de închidere.",
-      },
-      {
-        question: "franchisetech înlocuiește contabilul?",
-        answer: "Nu. franchisetech organizează POS, stoc, NIR și rapoarte operaționale. Contabilul rămâne responsabil pentru verificări fiscale și raportări oficiale.",
-      },
-    ],
-    related: [
-      { label: "franchisetech vs Ebriza", href: "/compare/ebriza" },
-      { label: "Checklist alegere POS", href: "/resources/choose-pos-romania" },
-      { label: "Prețuri", href: "/pricing" },
-    ],
-  },
-  {
-    slug: "smartbill-si-franchisetech",
-    path: "/resources/smartbill-si-franchisetech",
-    title: "SmartBill + franchisetech — folosite împreună",
-    metaTitle: "SmartBill și franchisetech împreună — facturare, POS, stoc",
-    description:
-      "Cum pot lucra împreună SmartBill și franchisetech: SmartBill pentru facturare, franchisetech pentru POS, stoc, NIR, rețete și închiderea de zi.",
-    intro:
-      "SmartBill și franchisetech nu trebuie privite ca alegere exclusivă. Pentru multe afaceri HORECA din România, SmartBill rămâne pentru facturare, iar franchisetech acoperă operațiunile zilnice.",
-    sections: [
-      {
-        title: "SmartBill rămâne pentru facturare",
-        body: "Dacă firma folosește deja SmartBill pentru facturi, clienți B2B sau fluxuri contabile, îl puteți păstra. Nu este nevoie să schimbați facturarea doar ca să îmbunătățiți casa și stocul.",
-      },
-      {
-        title: "franchisetech acoperă operațiunile zilnice",
-        body: "franchisetech gestionează vânzările POS, produse, TVA pe produse, stoc, achiziții/NIR, furnizori, rețete și raportul de închidere. Acestea sunt zonele unde Excel și WhatsApp devin fragile.",
-      },
-      {
-        title: "Export/import pentru contabil",
-        body: "La final de zi sau perioadă, exportați rapoartele necesare din franchisetech și le transmiteți contabilului sau le reconciliați cu instrumentele existente. Scopul este claritate, nu dublă muncă.",
-      },
-      {
-        title: "Când are sens combinația",
-        body: "Combinația are sens dacă aveți nevoie de facturare consacrată, dar echipa din locație are nevoie de POS rapid, stoc legat de vânzări și închidere casă verificabilă.",
-      },
-    ],
-    faqs: [
-      {
-        question: "Trebuie să renunț la SmartBill?",
-        answer: "Nu. Dacă SmartBill funcționează bine pentru facturare, îl puteți păstra și folosi franchisetech pentru operațiunile zilnice.",
-      },
-      {
-        question: "Pot exporta date pentru contabil?",
-        answer: "Da. franchisetech oferă rapoarte și exporturi operaționale pentru vânzări, TVA, stoc și achiziții.",
-      },
-      {
-        question: "Care sistem este sursa pentru POS?",
-        answer: "franchisetech trebuie să fie sursa pentru vânzările POS și stocul operațional. SmartBill poate rămâne sursa pentru facturi și fluxuri contabile externe.",
-      },
-    ],
-    related: [
-      { label: "franchisetech vs SmartBill", href: "/compare/smartbill" },
-      { label: "Software POS România", href: "/resources/pos-software-romania" },
-      { label: "Gestiune stoc România", href: "/resources/stock-management-romania" },
-    ],
+    related: [{ label: "Funcționalitate raport Z", href: "/features/z-report" }, { label: "Ghid închidere de zi", href: "/blog/inchidere-zi-cafenea-cum-faci-corect" }, { label: "Funcționalitate POS", href: "/features/pos" }],
   },
 ];
 

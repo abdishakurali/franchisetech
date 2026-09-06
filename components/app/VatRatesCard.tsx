@@ -26,8 +26,8 @@ interface Props {
 }
 
 const FISCALNET_GROUPS = [
-  { value: "1", label: "1 — Standard (19%)" },
-  { value: "2", label: "2 — Reduced (9%)" },
+  { value: "1", label: "1 — Standard (21%)" },
+  { value: "2", label: "2 — Reduced (11%)" },
   { value: "3", label: "3 — Super-reduced (5%)" },
   { value: "4", label: "4 — Zero (0%)" },
   { value: "5", label: "5 — Exempt" },
@@ -228,7 +228,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
               <div>
                 <Label className="text-xs text-slate-500">Name</Label>
                 <Input
-                  placeholder="e.g. TVA 19%"
+                  placeholder="e.g. TVA 21%"
                   value={newState.name}
                   onChange={(e) => setNewState((s) => ({ ...s, name: e.target.value }))}
                   className="h-8 w-28 text-sm"

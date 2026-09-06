@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqJsonLd, featurePages, findPage, pageMetadata, SITE_URL } from "@/lib/marketing/seo";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages, localizeSeoPage } from "@/lib/marketing/i18n";
+import { isLeanPublicFeature } from "@/lib/product-scope";
 
 function featurePath(slug: string): string {
   const paths: Record<string, string> = {
@@ -26,12 +27,14 @@ function featurePath(slug: string): string {
 }
 
 export function generateStaticParams() {
-  return featurePages.map((page) => ({ slug: page.slug }));
+  return featurePages.filter((page) => isLeanPublicFeature(page.slug)).map((page) => ({ slug: page.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const locale = await getMarketingLocale();
-  const raw = findPage(featurePages, (await params).slug);
+  const slug = (await params).slug;
+  if (!isLeanPublicFeature(slug)) return {};
+  const raw = findPage(featurePages, slug);
   if (!raw) return {};
   const page = localizeSeoPage(raw, locale);
   return pageMetadata(page, locale);
@@ -39,6 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function FeaturePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  if (!isLeanPublicFeature(slug)) notFound();
   if (slug === "food-safety-records") {
     redirect("/features");
   }
@@ -87,8 +91,12 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
                 </Link>
               </div>
             </div>
-            {page.image && (
-              <BrowserFrame src={page.image} alt={page.h1} priority className="shadow-xl" path={featurePath(page.slug)} fit="contain" />
+            {page.heroComponent ? (
+              <page.heroComponent />
+            ) : (
+              page.image && (
+                <BrowserFrame src={page.image} alt={page.h1} priority className="shadow-xl" path={featurePath(page.slug)} fit="contain" />
+              )
             )}
           </div>
         </div>
@@ -105,12 +113,14 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
                 <h2 className="text-2xl font-bold text-slate-950">{section.title}</h2>
                 <p className="mt-3 text-sm leading-7 text-slate-600">{section.body}</p>
               </div>
-              {page.image && index === 0 && (
-                <BrowserFrame src={page.image} alt={section.title} path={featurePath(page.slug)} fit="contain" />
-              )}
-              {page.image && index === 1 && (
-                <BrowserFrame src={page.image} alt={section.title} path={featurePath(page.slug)} fit="contain" />
-              )}
+              {(index === 0 || index === 1) &&
+                (page.heroComponent ? (
+                  <page.heroComponent />
+                ) : (
+                  page.image && (
+                    <BrowserFrame src={page.image} alt={section.title} path={featurePath(page.slug)} fit="contain" />
+                  )
+                ))}
               {index === 2 && (
                 <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                   <h3 className="font-semibold text-slate-950">{t.seoPage.readyTitle}</h3>

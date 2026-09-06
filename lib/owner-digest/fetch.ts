@@ -300,9 +300,26 @@ function buildAttention(params: {
   currency: string;
   voidTotal: number;
   refundTotal: number;
+  vatReviewCount: number;
+  daysUntilVatEnforcement: number | null;
 }): OwnerDigestAttention[] {
   const ro = params.locale === "ro";
   const items: OwnerDigestAttention[] = [];
+
+  if (params.vatReviewCount > 0) {
+    const days = params.daysUntilVatEnforcement;
+    const soon = days !== null && days <= 3;
+    items.push({
+      severity: soon ? "critical" : "warning",
+      message: ro
+        ? days !== null && days > 0
+          ? `${params.vatReviewCount} produs(e) au nevoie de validare TVA — devin nevandabile la casă în ${days} ${days === 1 ? "zi" : "zile"}. Vezi Setări → Controlul datelor.`
+          : `${params.vatReviewCount} produs(e) au nevoie de validare TVA — pot fi deja blocate la vânzare. Vezi Setări → Controlul datelor.`
+        : days !== null && days > 0
+          ? `${params.vatReviewCount} product(s) need VAT approval — they'll stop being sellable in ${days} day${days === 1 ? "" : "s"}. See Settings → Data controls.`
+          : `${params.vatReviewCount} product(s) need VAT approval — they may already be blocked from sale. See Settings → Data controls.`,
+    });
+  }
 
   if (params.tillOpen) {
     items.push({
@@ -399,6 +416,8 @@ export async function fetchOwnerDigestData(
     closedSessionsResult,
     dailyCloseResult,
     productsResult,
+    vatReviewResult,
+    orgComplianceResult,
   ] = await Promise.all([
     supabase
       .from("pos_transactions")
@@ -449,6 +468,18 @@ export async function fetchOwnerDigestData(
       .eq("organisation_id", orgId)
       .eq("active", true)
       .or("is_stock_tracked.eq.true,is_ingredient.eq.true"),
+    supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("active", true)
+      .eq("is_sellable", true)
+      .in("vat_status", ["pending", "ambiguous"]),
+    supabase
+      .from("organisations")
+      .select("compliance_enforcement_at")
+      .eq("id", orgId)
+      .maybeSingle(),
   ]);
 
   const transactions = (txResult.data ?? []) as TxRow[];
@@ -542,6 +573,12 @@ export async function fetchOwnerDigestData(
   });
   const lowStockItems = allStockRows.filter((r) => r.isLow);
 
+  const vatReviewCount = vatReviewResult.count ?? 0;
+  const complianceEnforcementAt = orgComplianceResult.data?.compliance_enforcement_at ?? null;
+  const daysUntilVatEnforcement = complianceEnforcementAt
+    ? Math.ceil((new Date(complianceEnforcementAt).getTime() - referenceNow.getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+
   const dailySales =
     frequency === "weekly" ? buildDailySales(transactions, timeZone, businessDayCutoffTime) : [];
   const tradingDays = dailySales.length;
@@ -559,6 +596,8 @@ export async function fetchOwnerDigestData(
     closesInPeriod,
     salesCount: current.salesCount,
     currency,
+    vatReviewCount,
+    daysUntilVatEnforcement,
   });
 
   return {

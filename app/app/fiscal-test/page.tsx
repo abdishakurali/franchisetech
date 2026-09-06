@@ -16,7 +16,6 @@
 import { useState, useTransition, useCallback } from "react";
 import {
   runTestReceipt,
-  runTestOpenDrawer,
   runTestXReport,
   runTestZReport,
   runTestCancelReceipt,
@@ -280,8 +279,20 @@ export default function FiscalTestPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">FiscalNet Test Console</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Admin tool — test every fiscal command against your printer configuration.
+          Internal engineering tool — test every fiscal command against your printer configuration.
           All operations are logged. Z report requires double confirmation.
+        </p>
+      </div>
+
+      {/* Danger warning — every button below sends a real command to whatever
+          fiscal printer is actually connected, printing on real paper. */}
+      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p className="font-semibold">⚠️ This sends real commands to your connected fiscal printer.</p>
+        <p className="mt-1">
+          Every button prints on the physical device, not a simulator — including &ldquo;Non-Fiscal&rdquo; and &ldquo;Cancel
+          Receipt&rdquo;, which print test slips marked <em>BON NEFISCAL</em> / <em>BON ANULAT</em>. That is expected
+          fiscal-compliance behaviour (the printer refusing to record a test as a real sale), not an error — but do
+          not use this console during business hours or on a printer that is actively serving customers.
         </p>
       </div>
 
@@ -314,7 +325,6 @@ export default function FiscalTestPage() {
       <Section title="Utility">
         <Btn variant="outline" onClick={() => run("Non-Fiscal",       () => runTestNonFiscal())}>📄 Non-Fiscal</Btn>
         <Btn variant="outline" onClick={() => run("Customer Display", () => runTestCustomerDisplay())}>🖥️ Customer Display</Btn>
-        <Btn variant="outline" onClick={() => run("Open Drawer",      () => runTestOpenDrawer())}>🗄️ Open Drawer</Btn>
         <Btn variant="outline" onClick={() => run("Cash In 100 RON",  () => runTestCashIn(100))}>⬆️ Cash In (100)</Btn>
         <Btn variant="outline" onClick={() => run("Cash Out 50 RON",  () => runTestCashOut(50))}>⬇️ Cash Out (50)</Btn>
         <Btn variant="outline" onClick={() => run("Cancel Receipt",   () => runTestCancelReceipt())}>❌ Cancel Receipt</Btn>

@@ -29,22 +29,23 @@ export function taxLabelForMarket(market: BillingMarket): string {
 }
 
 export function tillCloseLabelForMarket(market: BillingMarket): string {
+  if (market === "RO") return "Raport închidere casă";
   if (market === "IE" || market === "UK") return "End-of-day till close (Z-read)";
   return "Till close report";
 }
 
 export function purchaseReceivingLabelForMarket(market: BillingMarket): string {
-  if (market === "RO") return "NIR purchase receiving (14-3-1A)";
+  if (market === "RO") return "Recepție marfă (NIR 14-3-1A)";
   return "Supplier purchase records";
 }
 
 export function pricingNotIncludedText(market: BillingMarket): string {
   if (market === "RO") {
-    return "You are responsible for purchasing and registering a compatible fiscal printer. franchisetech connects to it via FiscalNet and handles fiscal receipts, Z-reports, and ANAF e-Factura automatically.";
+    return "Prețul nu include TVA, hardware fiscal, abonamentul FiscalNet, comisioanele procesatorilor de plată sau alte servicii terțe. Compatibilitatea casei fiscale se verifică înainte de configurare.";
   }
   const fiscalNote =
     market === "IE" || market === "UK"
       ? "Revenue/tax filing and certified fiscal printers are your responsibility — franchisetech records sales and till totals."
       : "Country-specific fiscal certification and tax filing are your responsibility — franchisetech records sales and till totals.";
-  return `Hardware setup, accounting integrations, online ordering, loyalty, and table service are not part of the core package. ${fiscalNote}`;
+  return `Hardware setup, accounting integrations, online ordering, and loyalty are not part of the core package. ${fiscalNote}`;
 }

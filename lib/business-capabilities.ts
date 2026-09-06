@@ -69,7 +69,7 @@ export const CAPABILITY_CATEGORIES: CapabilityCategory[] = [
   {
     id: "workstation",
     title: "Workstation layout",
-    description: "Screen layout for busy tills and installed kitchen displays.",
+    description: "Screen layout for busy tills.",
     items: [
       {
         kind: "feature",

@@ -7,7 +7,7 @@
  *       saleItem(), stornoItem(), discountPercent(), discountValue(),
  *       markupPercent(), markupValue(), subtotal(), textLine(), payment(),
  *       customerFiscalCode(), xReport(), zReport(), cancelReceipt(),
- *       openDrawer(), cashIn(), cashOut(), barcode(), customerDisplay(),
+ *       cashIn(), cashOut(), barcode(), customerDisplay(),
  *       posPayment()
  *
  *  2. ReceiptBuilder (v3 — new)
@@ -34,7 +34,6 @@
  *   X^                                — X report (daily totals, non-resetting)
  *   Z^                                — Z report (close fiscal day — IRREVERSIBLE)
  *   VB^                               — cancel/void current receipt
- *   DS^                               — open cash drawer
  *   I^AMOUNT                          — cash in (bani)
  *   O^AMOUNT                          — cash out (bani)
  *   CB^CODE^TYPE                      — barcode / QR (type 1=EAN8 2=EAN13 3=Code128 4=QR)
@@ -310,9 +309,6 @@ export function zReport(): string { return "Z^"; }
 /** Cancel/void current open receipt. */
 export function cancelReceipt(): string { return "VB^"; }
 
-/** Open cash drawer. */
-export function openDrawer(): string { return "DS^"; }
-
 /**
  * Cash in (introducere numerar).
  * @example cashIn(100.00)  →  "I^10000"
@@ -508,7 +504,6 @@ export function buildXReportLines(): string[] { return ["X^"]; }
 export function buildZReportLines(): string[] { return ["Z^"]; }
 /** ST^ doubles as printer-status query (standalone) and subtotal marker (in-receipt). */
 export function buildStatusLines(): string[]  { return ["ST^"]; }
-export function buildDrawerLines(): string[]  { return ["DS^"]; }
 export function buildCashInLines(amountRON: number): string[]  { return [`I^${formatMoney(amountRON)}`]; }
 export function buildCashOutLines(amountRON: number): string[] { return [`O^${formatMoney(amountRON)}`]; }
 export function buildVoidLines(): string[]    { return ["VB^"]; }
@@ -519,4 +514,3 @@ export function buildSaleCommand(cmd: FiscalSaleCommand): string { return linesT
 export function buildStatusCommand(_op?: string): string  { return linesToFileContent(buildStatusLines()); }
 export function buildXReportCommand(_op?: string): string { return linesToFileContent(buildXReportLines()); }
 export function buildZReportCommand(_op?: string): string { return linesToFileContent(buildZReportLines()); }
-export function buildDrawerCommand(_op?: string): string  { return linesToFileContent(buildDrawerLines()); }

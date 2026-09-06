@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-plex-mono);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -49,7 +49,6 @@
 }
 
 :root {
-  --marketing-primary: #2563eb;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -189,16 +188,6 @@
   height: 100vh;
 }
 
-/* Hide Chatwoot bubble and panel on POS (widget may already be loaded from other routes). */
-body.hide-chatwoot #woot-widget-holder,
-body.hide-chatwoot .woot--bubble-holder,
-body.hide-chatwoot .woot-widget-bubble,
-body.hide-chatwoot iframe[title="Chatwoot"] {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
 /* Marketing hero — staggered entrance */
 @keyframes marketing-hero-rise {
   from {
@@ -241,17 +230,4 @@ body.hide-chatwoot iframe[title="Chatwoot"] {
     opacity: 1;
     transform: none;
   }
-}
-
-/* Lift Chatwoot bubble above marketing sticky bars on mobile */
-body.marketing-mobile-cta #woot-widget-holder,
-body.marketing-mobile-cta .woot-widget-bubble,
-body.marketing-mobile-cta .woot--bubble-holder {
-  bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)) !important;
-}
-
-body.marketing-partners-sticky #woot-widget-holder,
-body.marketing-partners-sticky .woot-widget-bubble,
-body.marketing-partners-sticky .woot--bubble-holder {
-  bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px)) !important;
 }

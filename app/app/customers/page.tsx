@@ -98,7 +98,7 @@ export default async function CustomersPage() {
       <details className="rounded-xl border border-slate-200 bg-white">
         <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-700">{t.customers.importCustomers}</summary>
         <form action={importCustomersCsv as unknown as (fd: FormData) => Promise<void>} className="space-y-3 border-t p-4">
-          <a className="text-sm text-blue-600 hover:underline" href={`data:text/csv;charset=utf-8,${encodeURIComponent("name,phone,email,notes\nJane Murphy,+353 87 000 0000,jane@example.ie,Regular customer")}`} download="franchisetech-customers-template.csv">Download CSV template</a>
+          <a className="text-sm text-blue-600 hover:underline" href={`data:text/csv;charset=utf-8,${encodeURIComponent("name,phone,email,notes\nJane Murphy,+353 87 000 0000,jane@example.ie,Regular customer")}`} download="franchisetech-customers-template.csv">{t.customers.downloadCsvTemplate}</a>
           <input name="csv_file" type="file" accept=".csv,text/csv" className="block text-sm" />
           <textarea name="csv_text" className="min-h-24 w-full rounded-md border border-slate-200 p-3 font-mono text-xs" placeholder="name,phone,email,notes" />
           <Button type="submit" size="sm">{t.customers.importCustomers}</Button>

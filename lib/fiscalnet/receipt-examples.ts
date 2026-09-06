@@ -11,7 +11,7 @@ import {
   saleItem, stornoItem, textLine, payment,
   customerFiscalCode, discountPercent, discountValue,
   markupPercent, subtotal, barcode,
-  xReport, zReport, cancelReceipt, openDrawer,
+  xReport, zReport, cancelReceipt,
   cashIn, cashOut, customerDisplay, posPayment,
   linesToFileContent, buildNonFiscalFilename, buildDisplayFilename,
 } from "./command-builder";
@@ -114,7 +114,6 @@ const withQrLines = [
 const xReportLines  = [xReport()];
 const zReportLines  = [zReport()];
 const cancelLines   = [cancelReceipt()];
-const drawerLines   = [openDrawer()];
 const cashInLines   = [cashIn(100.00)];
 const cashOutLines  = [cashOut(50.00)];
 
@@ -254,14 +253,6 @@ export const RECEIPT_EXAMPLES: Record<string, ReceiptExample> = {
     filenamePrefix: "",
     content: linesToFileContent(cancelLines),
     suggestedFilename: "test_cancel.txt",
-  },
-  openDrawer: {
-    name: "Open Drawer (DS^)",
-    description: "Open the cash drawer without a sale",
-    lines: drawerLines,
-    filenamePrefix: "",
-    content: linesToFileContent(drawerLines),
-    suggestedFilename: "test_drawer.txt",
   },
   cashIn: {
     name: "Cash In 100 RON (I^)",

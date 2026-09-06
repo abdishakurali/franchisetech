@@ -14,7 +14,7 @@
  * ATOMIC WRITES: File-mode commands use .tmp → rename to prevent FiscalNet
  * driver from reading partially-written files.
  *
- * DB LOGGING: All utility operations (cash in/out, X/Z report, drawer, etc.)
+ * DB LOGGING: All utility operations (cash in/out and X/Z reports)
  * are logged to fiscal_command_log when UtilLogOpts are provided.
  */
 
@@ -34,7 +34,6 @@ import {
   buildXReportLines,
   buildZReportLines,
   buildStatusLines,
-  buildDrawerLines,
   buildCashInLines,
   buildCashOutLines,
   buildVoidLines,
@@ -426,9 +425,6 @@ export async function fiscalZReport(config: FiscalNetConfig, log?: UtilLogOpts):
 }
 export async function fiscalStatus(config: FiscalNetConfig, log?: UtilLogOpts): Promise<{ ok: boolean; message: string }> {
   return runCommand(config, buildStatusLines(), "Status", "status", log);
-}
-export async function fiscalOpenDrawer(config: FiscalNetConfig, log?: UtilLogOpts): Promise<{ ok: boolean; message: string }> {
-  return runCommand(config, buildDrawerLines(), "Open drawer", "drawer", log);
 }
 export async function fiscalCashIn(config: FiscalNetConfig, amountRON: number, log?: UtilLogOpts): Promise<{ ok: boolean; message: string }> {
   const opts = log ? { ...log, amountRon: amountRON } : undefined;

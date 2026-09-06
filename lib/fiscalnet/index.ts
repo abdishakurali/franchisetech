@@ -40,7 +40,7 @@ export {
   subtotal, textLine,
   payment, customerFiscalCode,
   xReport, zReport,
-  cancelReceipt, openDrawer,
+  cancelReceipt,
   cashIn, cashOut,
   barcode, customerDisplay, posPayment,
 
@@ -52,7 +52,6 @@ export {
   buildXReportLines, buildXReportCommand,
   buildZReportLines, buildZReportCommand,
   buildStatusLines, buildStatusCommand,
-  buildDrawerLines, buildDrawerCommand,
   buildCashInLines, buildCashOutLines,
   buildVoidLines, buildReprintLines,
 } from "./command-builder";
@@ -72,7 +71,7 @@ export { RECEIPT_EXAMPLES, getExamplesList } from "./receipt-examples";
 export {
   printFiscalReceipt, shouldPrintFiscalReceipt,
   fiscalXReport, fiscalZReport, fiscalStatus,
-  fiscalOpenDrawer, fiscalCashIn, fiscalCashOut, fiscalVoidLast,
+  fiscalCashIn, fiscalCashOut, fiscalVoidLast,
 } from "./service";
 export type { PrintFiscalReceiptOptions } from "./service";
 

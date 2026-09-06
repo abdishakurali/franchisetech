@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 export default function RefundsError({
   error,
@@ -10,6 +11,7 @@ export default function RefundsError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { t } = useAppI18n();
   useEffect(() => {
     // Log the error so we can investigate later
     console.error("[refunds] client error:", error?.message, error?.digest);
@@ -19,15 +21,14 @@ export default function RefundsError({
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 space-y-4">
       <div className="text-center space-y-2 max-w-md">
         <h2 className="text-lg font-semibold text-slate-800">
-          Could not load refunds
+          {t.errors.refundsLoadFailed}
         </h2>
         <p className="text-sm text-slate-500">
-          There was a problem loading this page. Your sales data is safe — this
-          is a display error only.
+          {t.errors.refundsSafeData}
         </p>
         {error?.digest && (
           <p className="text-xs text-slate-400 font-mono">
-            Error ID: {error.digest}
+            {t.errors.errorId}: {error.digest}
           </p>
         )}
       </div>
@@ -36,13 +37,13 @@ export default function RefundsError({
           onClick={reset}
           className="text-sm px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
         >
-          Try again
+          {t.errors.tryAgain}
         </button>
         <Link
           href="/app"
           className="text-sm px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
         >
-          Back to dashboard
+          {t.errors.backToDashboard}
         </Link>
       </div>
     </div>

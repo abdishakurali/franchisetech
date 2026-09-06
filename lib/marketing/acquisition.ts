@@ -15,6 +15,8 @@ export type AcquisitionParams = {
   gbraid?: string;
   /** Google Ads click ID for iOS web-to-app campaigns (Apple SKAdNetwork/Private Click Measurement flows). */
   wbraid?: string;
+  /** Meta click ID — required for the Conversions API `fbc` match key (lib/analytics/server-conversions.ts). */
+  fbclid?: string;
   /** GA4 client_id read from the `_ga` cookie — required to attribute a server-side Measurement Protocol event back to the original session. */
   ga_client_id?: string;
 };
@@ -55,6 +57,7 @@ export function parseAcquisitionFromSearchParams(
     gclid: trim(params.get("gclid")),
     gbraid: trim(params.get("gbraid")),
     wbraid: trim(params.get("wbraid")),
+    fbclid: trim(params.get("fbclid")),
   };
 }
 
@@ -67,7 +70,8 @@ export function hasAcquisitionData(params: AcquisitionParams): boolean {
       params.ref ||
       params.gclid ||
       params.gbraid ||
-      params.wbraid
+      params.wbraid ||
+      params.fbclid
   );
 }
 

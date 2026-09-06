@@ -1,4 +1,4 @@
-import { formatCurrency, getActiveOrg, money } from "@/lib/kitchenops/data";
+import { formatCurrency, getActiveOrg } from "@/lib/kitchenops/data";
 export { formatCurrency };
 
 export async function getKitchenOpsContext() {
@@ -27,7 +27,7 @@ export function formatOrgMoney(value: number | string | null | undefined, member
 
 export function formatDate(value: string | null | undefined) {
   if (!value) return "-";
-  return new Intl.DateTimeFormat("en-IE", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  return new Intl.DateTimeFormat("ro-RO", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
 export function marginPercent(salePrice: number, cost: number) {

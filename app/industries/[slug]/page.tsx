@@ -18,9 +18,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 export default async function IndustrySlugPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const locale = await getMarketingLocale();
   const t = getMarketingMessages(locale);
-  const raw = findPage(industryPages, (await params).slug);
+  const raw = findPage(industryPages, slug);
   if (!raw) notFound();
   const page = localizeSeoPage(raw, locale);
 

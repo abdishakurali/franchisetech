@@ -2,11 +2,14 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
-import { MarketingShell, Section, SectionLabel } from "@/components/marketing/MarketingShell";
+import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { SkagLandingShell } from "@/components/marketing/SkagLandingShell";
+import { Section, SectionLabel } from "@/components/marketing/MarketingShell.primitives";
 import { JsonLd } from "@/components/marketing/JsonLd";
-import { MarketingBrowserShot } from "@/components/marketing/MarketingBrowserShot";
+import { RaportXLandingRedesign } from "@/components/marketing/RaportXLandingRedesign";
+import { RaportZLandingRedesign } from "@/components/marketing/RaportZLandingRedesign";
 import { WhyOwnersChoose } from "@/components/marketing/WhyOwnersChoose";
-import { showcaseAssets } from "@/lib/marketing/showcase";
+import { OwnerZReportProof } from "@/components/marketing/OwnerProofScreens";
 import { ro } from "@/lib/marketing/i18n/ro";
 import { SITE_URL } from "@/lib/marketing/seo";
 import { marketingCard, marketingCtaPrimary, marketingCtaSecondary, marketingHeroBg, marketingHeroRadial } from "@/lib/marketing/tokens";
@@ -45,21 +48,58 @@ export default async function SkagLandingPage({
   const page = findSkagPage((await params).slug);
   if (!page) notFound();
 
-  // Google auto-tags the ad's landing URL with gclid — must forward it to /signup
-  // or the offline conversion upload (lib/analytics/server-conversions.ts) has
-  // nothing to attach the trial/paid conversion to.
+  // Ad platforms auto-tag the landing URL with a click ID — it must survive the hop
+  // to /signup or the conversion upload (lib/analytics/server-conversions.ts) has
+  // nothing to attach the trial/paid conversion to. fbclid matters most here: Meta
+  // is the channel actually driving this traffic, and its CAPI `fbc` match key is
+  // built from it. The inbound utm_* tags are forwarded too rather than overwritten,
+  // so a Meta visit is not misreported to /signup as google/cpc.
   const sp = await searchParams;
-  const clickIdParams = new URLSearchParams();
-  for (const key of ["gclid", "gbraid", "wbraid"] as const) {
+  const forwarded = new URLSearchParams();
+  for (const key of ["gclid", "gbraid", "wbraid", "fbclid", "msclkid", "ttclid"] as const) {
     const value = sp[key];
-    if (typeof value === "string" && value) clickIdParams.set(key, value);
+    if (typeof value === "string" && value) forwarded.set(key, value);
   }
-  const signupHref = `/signup?plan=starter&utm_source=google&utm_medium=cpc&utm_campaign=${page.slug}${
-    clickIdParams.size ? `&${clickIdParams.toString()}` : ""
-  }`;
+  for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const) {
+    const value = sp[key];
+    if (typeof value === "string" && value) forwarded.set(key, value);
+  }
+  // Fall back to the SKAG defaults only when the visit arrived untagged.
+  if (!forwarded.has("utm_source")) forwarded.set("utm_source", "google");
+  if (!forwarded.has("utm_medium")) forwarded.set("utm_medium", "cpc");
+  if (!forwarded.has("utm_campaign")) forwarded.set("utm_campaign", page.slug);
+  const signupHref = `/signup?plan=starter&${forwarded.toString()}`;
+
+  // Slugs with a purpose-built page. Everything else falls through to the generic
+  // SKAG template below.
+  const Redesign =
+    page.slug === "raport-z-casa-de-marcat"
+      ? RaportZLandingRedesign
+      : page.slug === "raport-x-casa-de-marcat"
+        ? RaportXLandingRedesign
+        : null;
+
+  if (Redesign) {
+    return (
+      <>
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "franchisetech",
+            applicationCategory: "BusinessApplication",
+            url: `${SITE_URL}/lp/${page.slug}`,
+          }}
+        />
+        <MarketingShell>
+          <Redesign signupHref={signupHref} />
+        </MarketingShell>
+      </>
+    );
+  }
 
   return (
-    <MarketingShell>
+    <SkagLandingShell>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -100,13 +140,7 @@ export default async function SkagLandingPage({
           <p className="mt-3 text-sm font-medium text-slate-600">{ro.home.hero.socialProof}</p>
         </div>
         <div className="relative mx-auto mt-12 max-w-4xl px-4 sm:px-0">
-          <MarketingBrowserShot
-            src={showcaseAssets.posTableOrder.src}
-            alt={ro.home.hero.tableOrderAlt}
-            path={showcaseAssets.posTableOrder.path}
-            chrome
-            priority
-          />
+          <OwnerZReportProof />
         </div>
       </section>
 
@@ -135,7 +169,7 @@ export default async function SkagLandingPage({
             Gata în câteva minute, nu în câteva zile
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600">
-            Configurezi produsele, deschizi tura și faci prima vânzare test — fără instalare,
+            Configurați produsele, deschideți tura și faceți prima vânzare test — fără instalare,
             merge pe orice tabletă sau calculator. Suport în limba română pe tot parcursul probei.
           </p>
           <div className="mt-8">
@@ -148,6 +182,6 @@ export default async function SkagLandingPage({
           </div>
         </div>
       </Section>
-    </MarketingShell>
+    </SkagLandingShell>
   );
 }

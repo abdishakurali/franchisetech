@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 type Option = {
   value: string;
@@ -25,11 +26,13 @@ export function SearchableSelect({
   options,
   defaultValue = "",
   placeholder = "—",
-  searchPlaceholder = "Search...",
+  searchPlaceholder,
   className = "",
   required = false,
   onValueChange,
 }: Props) {
+  const { t } = useAppI18n();
+  const resolvedSearchPlaceholder = searchPlaceholder ?? `${t.common.search}...`;
   const initial = defaultValue ?? "";
   const [value, setValue] = useState(initial);
   const [query, setQuery] = useState("");
@@ -102,7 +105,7 @@ export function SearchableSelect({
             setQuery("");
           }, 150);
         }}
-        placeholder={searchPlaceholder}
+        placeholder={resolvedSearchPlaceholder}
         autoComplete="off"
         className="h-10 w-full min-w-0 truncate rounded-lg border border-slate-200 bg-white px-3 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
       />
@@ -139,7 +142,7 @@ export function SearchableSelect({
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className="px-3 py-2 text-xs text-slate-400">No matching option</div>
+            <div className="px-3 py-2 text-xs text-slate-400">{t.common.noMatchingOption}</div>
           )}
         </div>,
         portalTarget,

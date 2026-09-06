@@ -32,13 +32,6 @@ import { captureClientEvent } from "@/lib/analytics/client-events";
 import { OnboardingStepper } from "@/components/app/OnboardingStepper";
 import { OnboardingSidebar } from "@/components/onboarding/OnboardingSidebar";
 
-const countryOptions = [
-  { code: "RO", label: "România" },
-  { code: "IE", label: "Ireland" },
-  { code: "UK", label: "United Kingdom" },
-  { code: "OTHER", label: "Other" },
-];
-
 const BUSINESS_TYPES = {
   ro: [
     "Cafenea",
@@ -87,7 +80,7 @@ const UI_STRINGS = {
     trialBadge: "Probă 15 zile · verificare card 1 €",
     sidebarBanner: "Configurați-vă afacerea și casa de marcat ca să puteți vinde azi.",
     sidebarStepDescriptions: [
-      "Numele firmei, țara și tipul activității.",
+      "Numele firmei, tipul activității și numele dumneavoastră.",
       "Produse demo, FiscalNet și casa pregătită pentru prima vânzare.",
     ],
     fiscalLater: "Fac asta mai târziu",
@@ -136,7 +129,7 @@ const UI_STRINGS = {
     trialBadge: "15-day trial · €1 card verification",
     sidebarBanner: "Set up your business and till so you can start selling today.",
     sidebarStepDescriptions: [
-      "Brand name, country, and industry.",
+      "Brand name, industry, and your name.",
       "Starter products, FiscalNet, and an open till for the first sale.",
     ],
     fiscalLater: "I'll do this later",
@@ -346,21 +339,6 @@ export default function OnboardingPage() {
                     className="mt-1"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="countryCode">{t.country}</Label>
-                  <Select value={form.countryCode} onValueChange={(value) => update({ countryCode: value })}>
-                    <SelectTrigger id="countryCode" className="mt-1 w-full">
-                      <SelectValue placeholder={t.selectType} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {countryOptions.map((opt) => (
-                        <SelectItem key={opt.code} value={opt.code}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 {isRO && (
                   <div>
                     <Label htmlFor="anafCif">CUI firmă</Label>
@@ -396,16 +374,6 @@ export default function OnboardingPage() {
                   </div>
                 )}
                 <div>
-                  <Label htmlFor="userName">{t.yourName}</Label>
-                  <Input
-                    id="userName"
-                    value={form.userName}
-                    onChange={(e) => update({ userName: e.target.value })}
-                    placeholder={t.namePlaceholder}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
                   <Label htmlFor="businessType">{t.industry}</Label>
                   <Select
                     value={form.businessType || "__none__"}
@@ -423,6 +391,16 @@ export default function OnboardingPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <Label htmlFor="userName">{t.yourName}</Label>
+                  <Input
+                    id="userName"
+                    value={form.userName}
+                    onChange={(e) => update({ userName: e.target.value })}
+                    placeholder={t.namePlaceholder}
+                    className="mt-1"
+                  />
                 </div>
                 <div className="border-t border-slate-100 pt-6">
                   <Button

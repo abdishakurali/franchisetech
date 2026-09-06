@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Outfit } from "next/font/google";
+import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from "@/lib/marketing/seo";
@@ -10,14 +10,26 @@ import { marketingHtmlLang, marketingOpenGraphLocale } from "@/lib/marketing/loc
 import { getMarketingMessages } from "@/lib/marketing/i18n";
 import { GlobalSeoJsonLd } from "@/components/marketing/GlobalSeoJsonLd";
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-body",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  themeColor: "#0D0F0E",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -89,14 +101,21 @@ export default async function RootLayout({
   return (
     <html
       lang={htmlLang}
-      className={`${outfit.variable} h-full antialiased`}
+      className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased`}
     >
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM site summary" />
         <link rel="alternate" type="text/plain" href="/llms-full.txt" title="LLM full site index" />
       </head>
-      <body className="min-h-full flex flex-col font-[family-name:var(--font-outfit)]">
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-body)]">
         <GlobalSeoJsonLd />
+        {/* Datafa.st — cookieless analytics */}
+        <Script
+          strategy="afterInteractive"
+          data-website-id="dfid_eGuCOapGCwiDn1MuvbIi1"
+          data-domain="franchisetech.ro"
+          src="https://datafa.st/js/script.cookieless.js"
+        />
         {/* GA4 — accepts both NEXT_PUBLIC_GA_MEASUREMENT_ID (preferred) and legacy NEXT_PUBLIC_GA_ID */}
         {(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_ID) ? (() => {
           const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.NEXT_PUBLIC_GA_ID;

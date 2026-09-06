@@ -7,6 +7,7 @@ import { OpenTillForm } from "@/components/app/OpenTillForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { LEAN_PRODUCT_SCOPE_ENABLED } from "@/lib/product-scope";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { PageHint } from "@/components/app/PageHint";
 import Link from "next/link";
@@ -104,13 +105,13 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     .eq("id", orgId)
     .maybeSingle();
   const features = {
-    kitchenDisplay: Boolean(orgInfo?.kitchen_display_enabled),
+    kitchenDisplay: !LEAN_PRODUCT_SCOPE_ENABLED && Boolean(orgInfo?.kitchen_display_enabled),
     restaurantOrderFlow: Boolean(orgInfo?.restaurant_order_flow_enabled),
     orderTypes: Boolean(orgInfo?.order_types_enabled),
-    tableService: Boolean(orgInfo?.table_service_enabled),
+    tableService: !LEAN_PRODUCT_SCOPE_ENABLED && Boolean(orgInfo?.table_service_enabled),
     splitPayments: Boolean(orgInfo?.payment_split_enabled),
     tips: Boolean(orgInfo?.tips_enabled),
-    loyalty: Boolean(loyaltyOrgRow?.loyalty_enabled),
+    loyalty: !LEAN_PRODUCT_SCOPE_ENABLED && Boolean(loyaltyOrgRow?.loyalty_enabled),
   };
 
   let activeTab: {
@@ -149,32 +150,6 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     .eq("id", user.id)
     .maybeSingle();
   const userName: string = userProfile?.full_name || user.email || "Staff";
-  let cashDrawerSettings = {
-    mode: "manual" as const,
-    port: 17878,
-    token: null as string | null,
-    triggerOnCashSale: true,
-    triggerOnCashIn: true,
-    triggerOnCashOut: true,
-  };
-  try {
-    const { data: drawerOrg, error } = await supabase
-      .from("organisations")
-      .select("cash_drawer_mode,cash_drawer_connector_port,cash_drawer_connector_token,cash_drawer_trigger_on_cash_sale,cash_drawer_trigger_on_cash_in,cash_drawer_trigger_on_cash_out")
-      .eq("id", orgId)
-      .maybeSingle();
-    if (!error && drawerOrg) {
-      cashDrawerSettings = {
-        mode: drawerOrg.cash_drawer_mode ?? "manual",
-        port: drawerOrg.cash_drawer_connector_port ?? 17878,
-        token: drawerOrg.cash_drawer_connector_token ?? null,
-        triggerOnCashSale: drawerOrg.cash_drawer_trigger_on_cash_sale ?? true,
-        triggerOnCashIn: drawerOrg.cash_drawer_trigger_on_cash_in ?? true,
-        triggerOnCashOut: drawerOrg.cash_drawer_trigger_on_cash_out ?? true,
-      };
-    }
-  } catch {}
-
   // FiscalNet browser config (passed to PosRegister for client-side API calls)
   let fiscalNet: BrowserFiscalConfig | null = null;
   let sgrEnabled = false;
@@ -534,7 +509,6 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
         fiscalZReportDone={Boolean(openSession?.fiscal_z_report_done)}
         customers={(customers ?? []) as never}
         recentTransactions={(recentTransactions ?? []) as never}
-        cashDrawerSettings={cashDrawerSettings}
         fiscalNet={fiscalNet}
         vatRateGroupMap={vatRateGroupMap}
         isRO={isRO}

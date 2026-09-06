@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { PrintButton } from "@/components/app/PrintButton";
 import { VoidTransactionButton } from "@/components/app/VoidTransactionButton";
-import { CashDrawerNotice } from "@/components/app/CashDrawerNotice";
+import { returnTransactionLine } from "@/app/actions/kitchenops";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { formatAppDate } from "@/lib/app-locale";
 import {
@@ -64,36 +64,10 @@ export default async function TransactionDetailPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const { id } = await params;
-  const query = await searchParams;
+  await searchParams;
   const { countryCode, profileLocale, supabase, orgId, membership, currency } = await getKitchenOpsContext();
   const { t, locale } = await getAppLocaleAndText(countryCode, profileLocale);
   const r = t.transactions.receipt;
-  let cashDrawerSettings = {
-    mode: "manual" as const,
-    port: 17878,
-    token: null as string | null,
-    triggerOnCashSale: true,
-    triggerOnCashIn: true,
-    triggerOnCashOut: true,
-  };
-  try {
-    const { data: drawerOrg, error } = await supabase
-      .from("organisations")
-      .select("cash_drawer_mode,cash_drawer_connector_port,cash_drawer_connector_token,cash_drawer_trigger_on_cash_sale,cash_drawer_trigger_on_cash_in,cash_drawer_trigger_on_cash_out")
-      .eq("id", orgId)
-      .maybeSingle();
-    if (!error && drawerOrg) {
-      cashDrawerSettings = {
-        mode: drawerOrg.cash_drawer_mode ?? "manual",
-        port: drawerOrg.cash_drawer_connector_port ?? 17878,
-        token: drawerOrg.cash_drawer_connector_token ?? null,
-        triggerOnCashSale: drawerOrg.cash_drawer_trigger_on_cash_sale ?? true,
-        triggerOnCashIn: drawerOrg.cash_drawer_trigger_on_cash_in ?? true,
-        triggerOnCashOut: drawerOrg.cash_drawer_trigger_on_cash_out ?? true,
-      };
-    }
-  } catch {}
-
   const { data: tx } = await supabase
     .from("pos_transactions")
     .select("*,payment_methods(name),pos_transaction_items(*),table_tabs(restaurant_tables(name))")
@@ -102,6 +76,16 @@ export default async function TransactionDetailPage({
     .single();
 
   if (!tx) return <div className="p-6 text-slate-500">{t.transactions.notFound}</div>;
+
+  const { data: returnedRows } = await supabase
+    .from("pos_return_items")
+    .select("transaction_item_id,quantity")
+    .eq("organisation_id", orgId)
+    .in("transaction_item_id", (tx.pos_transaction_items ?? []).map((item: { id: string }) => item.id));
+  const returnedByItem = new Map<string, number>();
+  for (const row of returnedRows ?? []) {
+    returnedByItem.set(row.transaction_item_id, (returnedByItem.get(row.transaction_item_id) ?? 0) + Number(row.quantity ?? 0));
+  }
 
   // Cash received / change due from sale_payments metadata
   let cashPaymentMeta: { cash_received?: number; change_due?: number } | null = null;
@@ -166,7 +150,6 @@ export default async function TransactionDetailPage({
 
   return (
     <div className="space-y-6 p-6">
-      {query.drawer === "cash_sale" && <CashDrawerNotice reason="cash_sale" settings={cashDrawerSettings} />}
       <div className="flex items-start justify-between gap-4 flex-wrap print:hidden">
         <div>
           <h1 className="text-2xl font-semibold text-slate-950">
@@ -301,6 +284,40 @@ export default async function TransactionDetailPage({
           </div>
         </CardContent>
       </Card>
+
+      {canVoid && tx.status !== "voided" && (
+        <Card className="mx-auto max-w-xl print:hidden">
+          <CardHeader>
+            <CardTitle className="text-base">Retur pe produs</CardTitle>
+            <p className="text-sm text-slate-500">Cantitatea, TVA-ul, plata, stocul și garanția SGR se inversează împreună.</p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {items.map((item) => {
+              const remaining = Math.max(0, Number(item.quantity) - (returnedByItem.get(item.id) ?? 0));
+              if (remaining <= 0) return null;
+              return (
+                <form key={item.id} action={returnTransactionLine} className="grid gap-2 border-b pb-3 sm:grid-cols-[1fr_5rem_1fr_auto] sm:items-end">
+                  <input type="hidden" name="transaction_id" value={tx.id} />
+                  <input type="hidden" name="transaction_item_id" value={item.id} />
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{item.product_name}</p>
+                    <p className="text-xs text-slate-500">Disponibil pentru retur: {remaining}</p>
+                  </div>
+                  <label className="text-xs text-slate-600">
+                    Cantitate
+                    <input name="quantity" type="number" min="0.001" max={remaining} step="0.001" defaultValue={remaining} required className="mt-1 h-9 w-full rounded-md border px-2 text-sm" />
+                  </label>
+                  <label className="text-xs text-slate-600">
+                    Motiv
+                    <input name="reason" required placeholder="Motivul returului" className="mt-1 h-9 w-full rounded-md border px-2 text-sm" />
+                  </label>
+                  <button type="submit" className="h-9 rounded-md bg-slate-950 px-3 text-sm font-medium text-white hover:bg-slate-800">Retur</button>
+                </form>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Audit trail */}
       {(auditEvents && auditEvents.length > 0) && (

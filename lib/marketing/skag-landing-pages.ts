@@ -52,6 +52,24 @@ export const skagLandingPages: SkagLandingPage[] = [
       "Soft de gestiune pentru cafenele: POS, stocuri în timp real, raport Z zilnic. Probă 15 zile, suport în română.",
     trustSignals: ["Configurare în aceeași zi", "Suport în limba română", "Raport Z în 2 minute"],
   },
+  {
+    slug: "raport-z-casa-de-marcat",
+    h1: "Raport Z Casă de Marcat",
+    subhead:
+      "Raport Z generat automat la închiderea zilei — numerar, card și TVA într-un singur ecran. Casa se potrivește cu sertarul, fără calcule manuale.",
+    metaDescription:
+      "Raport Z automat pentru casa de marcat: numerar, card și TVA calculate la închidere. Probă 15 zile, suport în română.",
+    trustSignals: ["Configurare în aceeași zi", "Suport în limba română", "Raport Z în 2 minute"],
+  },
+  {
+    slug: "raport-x-casa-de-marcat",
+    h1: "Raport X Casă de Marcat",
+    subhead:
+      "Raport X oricând în timpul zilei — vânzări, numerar, card și TVA de până acum. Nu resetează totalurile și nu închide ziua.",
+    metaDescription:
+      "Raport X pentru casa de marcat: citire intermediară cu vânzări, numerar și TVA, fără să închideți ziua. Probă 15 zile, suport în română.",
+    trustSignals: ["Nu resetează totalurile", "Oricâte rapoarte X pe zi", "Suport în limba română"],
+  },
 ];
 
 export function findSkagPage(slug: string): SkagLandingPage | undefined {

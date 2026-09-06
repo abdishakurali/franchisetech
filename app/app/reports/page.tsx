@@ -42,7 +42,7 @@ export default async function ReportsHubPage() {
       </div>
       {showCoreUpgradePrompt && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-950">
-          Want stock reports, recipes and kitchen display?{" "}
+          Want stock reports and recipes?{" "}
           <Link href="/pricing" className="font-semibold underline underline-offset-4">
             Upgrade to Operations — €79/mo.
           </Link>

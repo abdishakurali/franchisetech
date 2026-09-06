@@ -6,8 +6,6 @@ import { createClient } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app/AppShell";
 import { AppI18nProvider } from "@/lib/app-i18n-context";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
-import { SupportChat } from "@/components/app/SupportChat";
-import { chatwootIdentifierHash } from "@/lib/chatwoot/identity";
 import { PostHogIdentify } from "@/components/app/PostHogIdentify";
 import { ensureReferralCode } from "@/lib/referrals";
 import { getSubscriptionStatus, isSubscriptionBlockedForApp } from "@/lib/billing/subscription";
@@ -62,16 +60,29 @@ export default async function AppLayout({
 
   const subscriptionBlocked = isSubscriptionBlockedForApp(subStatus);
 
-  // New signups must complete the €1 card verification before the trial (and
-  // app access) starts. Existing orgs all have trial_started_at set, and orgs
-  // with a real subscription are never redirected.
   const hasRealSubscription =
     subStatus?.state === "active" ||
     subStatus?.state === "trialing" ||
     subStatus?.state === "past_due";
-  if (activeOrg?.id && !activeOrg.trial_started_at && !hasRealSubscription) {
-    redirect("/onboarding/verify-card");
+
+  // Completed-sale count is needed both for the delayed verification gate
+  // below and for setupComplete further down — computed once here so a new
+  // signup only pays the query cost a single time per request.
+  let txCount = 0;
+  if (activeOrg?.id) {
+    const { count } = await supabase
+      .from("pos_transactions")
+      .select("*", { count: "exact", head: true })
+      .eq("organisation_id", activeOrg.id)
+      .eq("status", "completed");
+    txCount = count ?? 0;
   }
+
+  // New signups get a fully unrestricted 5-day trial (see
+  // lib/billing/subscription.ts's created_at-based fallback) — no forced
+  // card-verification redirect mid-trial, regardless of Z-report views or
+  // sale count. Once the 5 days are up, getSubscriptionStatus resolves to a
+  // blocked state and the paywall in components/app/AppShell.tsx takes over.
 
   // Resolve accessible sites and active site (non-blocking — falls back gracefully)
   let accessibleSites: { id: string; name: string }[] = [];
@@ -99,15 +110,9 @@ export default async function AppLayout({
   };
 
   if (activeOrg?.id && !subscriptionBlocked) {
-    const { count: txCount } = await supabase
-      .from("pos_transactions")
-      .select("*", { count: "exact", head: true })
-      .eq("organisation_id", activeOrg.id)
-      .eq("status", "completed");
-
     const moduleFlags = await fetchOrgModuleFlags(supabase, activeOrg.id);
 
-    setupComplete = (txCount ?? 0) > 0;
+    setupComplete = txCount > 0;
     const hasTrial = subStatus?.state === "trialing" || subStatus?.state === "soft_trial";
 
     moduleVisibility = {
@@ -122,10 +127,6 @@ export default async function AppLayout({
   if (activeOrg?.id && !subscriptionBlocked && pathname.startsWith("/app/") && !pathname.startsWith("/app/settings") && !pathname.startsWith("/app/billing")) {
     await requireModuleForPathname(pathname);
   }
-
-  const isWorkstationRoute = pathname.startsWith("/app/pos") || pathname.startsWith("/app/kitchen") || pathname.startsWith("/app/tables") || pathname.startsWith("/app/settings");
-
-  const chatwootHash = chatwootIdentifierHash(user.id);
 
   const { locale: appLocale } = getAppLocaleAndText(
     activeOrg?.country_code ?? null,
@@ -154,14 +155,6 @@ export default async function AppLayout({
         orgId={activeOrg?.id ?? null}
         orgName={activeOrg?.name ?? null}
       />
-      {!isWorkstationRoute && (
-        <SupportChat
-          userId={user.id}
-          userName={profile?.full_name}
-          userEmail={user.email}
-          identifierHash={chatwootHash}
-        />
-      )}
     </AppShell>
     </AppI18nProvider>
   );

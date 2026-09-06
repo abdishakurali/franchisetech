@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
@@ -15,9 +16,16 @@ import {
   type RecipeRow,
 } from "@/lib/recipe-costing";
 
-export default async function RecipeDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function RecipeDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ saved?: string }>;
+}) {
   await requireBusinessModule("recipe_costing");
   const { id } = await params;
+  const justSaved = (await searchParams)?.saved === "1";
   const { supabase, orgId, currency } = await getKitchenOpsContext();
 
   const { data: rawRecipe } = await supabase
@@ -58,14 +66,25 @@ export default async function RecipeDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="space-y-6 p-6">
-      <div>
-        <Link href="/app/recipes" className="text-sm text-slate-500 hover:text-slate-700">
-          ← Toate rețetele
+      {justSaved && (
+        <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+          ✓ Modificările au fost salvate.
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <Link href="/app/recipes" className="text-sm text-slate-500 hover:text-slate-700">
+            ← Toate rețetele
+          </Link>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-950">{recipe.name}</h1>
+          <p className="text-sm text-slate-500">
+            {product?.name ?? "—"} · {metrics.yieldQty} {metrics.yieldQty === 1 ? "porție" : "porții"} per rețetă
+          </p>
+        </div>
+        <Link href={`/app/recipes/${recipe.id}/edit`}>
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white">Editează rețeta</Button>
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-950">{recipe.name}</h1>
-        <p className="text-sm text-slate-500">
-          {product?.name ?? "—"} · {metrics.yieldQty} {metrics.yieldQty === 1 ? "porție" : "porții"} per rețetă
-        </p>
       </div>
 
       <Card>

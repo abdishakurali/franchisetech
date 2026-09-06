@@ -14,13 +14,14 @@ function localizedUrl(path: string, lang: MarketingLocale | "x-default"): string
 
 export function localeAlternates(
   path: string,
-  activeLocale: MarketingLocale = "en",
+  _activeLocale: MarketingLocale = "en",
 ): Metadata["alternates"] {
+  // Canonical always points at the clean URL, regardless of which locale
+  // rendered the page — a ?lang=ro canonical on the majority-locale traffic
+  // was splitting ranking signal between the bare path and its own query
+  // variant. Locale variants still live in `languages` below for hreflang.
   const normalized = path === "/" ? "/" : path.startsWith("/") ? path : `/${path}`;
-  const canonical =
-    activeLocale === "en"
-      ? normalized
-      : `${normalized}${normalized === "/" ? "?" : "?"}lang=${activeLocale}`;
+  const canonical = normalized;
 
   return {
     canonical,
@@ -37,7 +38,6 @@ export const MARKETING_KEYWORDS_EN = [
   "restaurant POS",
   "food business software",
   "cloud POS",
-  "kitchen display system",
   "recipe costing",
   "stock management cafe",
   "till close report",

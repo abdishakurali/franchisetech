@@ -9,6 +9,7 @@ import { isBillingConfigured } from "@/lib/billing/plans";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { effectivePlanLabel } from "@/lib/business-modules";
 import { createClient } from "@/lib/supabase/server";
+import { canManageBilling } from "@/lib/access-control";
 import { cn } from "@/lib/utils";
 
 type BillingSearchParams = { reason?: string; checkout?: string };
@@ -28,8 +29,8 @@ function formatDate(locale: AppLocale, iso: string) {
 function trialText(locale: AppLocale, days: number | null) {
   if (locale === "ro") {
     if (days === null) return "Perioada de probă este activă.";
-    if (days === 1) return "Mai ai 1 zi de probă.";
-    return `Mai ai ${days} zile de probă.`;
+    if (days === 1) return "Mai aveți 1 zi de probă.";
+    return `Mai aveți ${days} zile de probă.`;
   }
   if (days === null) return "Your trial is active.";
   if (days === 1) return "You have 1 trial day left.";
@@ -66,8 +67,8 @@ const copy = {
     subtitle: "Manage your plan and payment details.",
     trialExpiredTitle: "Your trial has ended.",
     trialExpiredDesc: "Choose a plan to continue using FranchiseTech. Your data stays saved.",
-    pastDueTitle: "Payment required to restore access.",
-    pastDueDesc: "Update your payment method or choose a plan below.",
+    pastDueTitle: "Payment required.",
+    pastDueDesc: "Update your payment method. POS sales remain available while you fix billing.",
     successTitle: "Subscription activated.",
     successDesc: "Your plan is active. Thank you.",
     checkoutErrorTitle: "Checkout did not start.",
@@ -75,10 +76,10 @@ const copy = {
     setupTitle: "Stripe setup is incomplete.",
     setupDesc: "Plans are visible, but checkout is disabled until Stripe prices are configured.",
     trialContinue: "You can choose a plan now so access continues without interruption.",
-    graceEnded: "Your grace period has ended. Update payment or start a new subscription.",
+    graceEnded: "Your grace period has ended. Update payment now. POS sales remain available.",
     cancelsOn: (date: string) => `Cancels on ${date}.`,
     nextBilling: (date: string) => `Next billing date: ${date}.`,
-    paymentFailed: "Your last payment failed. Update your payment details to continue.",
+    paymentFailed: "Your last payment failed. Update your payment details. POS sales remain available.",
     canceled: "Your subscription has ended. Choose a plan below to resubscribe.",
     incomplete: "Checkout was not completed. Start a new checkout to activate your plan.",
     details: "Subscription details",
@@ -100,22 +101,22 @@ const copy = {
     title: "Facturare",
     subtitle: "Gestionează planul și detaliile de plată.",
     trialExpiredTitle: "Perioada de probă s-a încheiat.",
-    trialExpiredDesc: "Alege un plan ca să continui să folosești FranchiseTech. Datele tale rămân salvate.",
-    pastDueTitle: "Este necesară plata pentru a restabili accesul.",
-    pastDueDesc: "Actualizează metoda de plată sau alege un plan de mai jos.",
+    trialExpiredDesc: "Alegeți un plan ca să continuați să folosiți FranchiseTech. Datele dumneavoastră rămân salvate.",
+    pastDueTitle: "Este necesară plata.",
+    pastDueDesc: "Actualizați metoda de plată. Vânzările POS rămân disponibile cât timp rezolvați facturarea.",
     successTitle: "Abonamentul a fost activat.",
-    successDesc: "Planul tău este activ. Mulțumim.",
+    successDesc: "Planul dumneavoastră este activ. Mulțumim.",
     checkoutErrorTitle: "Checkout-ul nu a pornit.",
-    checkoutErrorDesc: "Încearcă din nou sau contactează suportul dacă problema continuă.",
+    checkoutErrorDesc: "Încercați din nou sau contactați suportul dacă problema continuă.",
     setupTitle: "Configurarea Stripe este incompletă.",
     setupDesc: "Planurile sunt vizibile, dar checkout-ul este dezactivat până când prețurile Stripe sunt configurate.",
-    trialContinue: "Poți alege un plan acum ca accesul să continue fără întrerupere.",
-    graceEnded: "Perioada de grație s-a încheiat. Actualizează plata sau pornește un abonament nou.",
+    trialContinue: "Puteți alege un plan acum ca accesul să continue fără întrerupere.",
+    graceEnded: "Perioada de grație s-a încheiat. Actualizați plata acum. Vânzările POS rămân disponibile.",
     cancelsOn: (date: string) => `Se anulează pe ${date}.`,
     nextBilling: (date: string) => `Următoarea plată: ${date}.`,
-    paymentFailed: "Ultima plată a eșuat. Actualizează detaliile de plată ca să continui.",
-    canceled: "Abonamentul s-a încheiat. Alege un plan de mai jos ca să reîncepi.",
-    incomplete: "Checkout-ul nu a fost finalizat. Pornește un checkout nou ca să activezi planul.",
+    paymentFailed: "Ultima plată a eșuat. Actualizați detaliile de plată. Vânzările POS rămân disponibile.",
+    canceled: "Abonamentul s-a încheiat. Alegeți un plan de mai jos ca să reîncepeți.",
+    incomplete: "Checkout-ul nu a fost finalizat. Porniți un checkout nou ca să activați planul.",
     details: "Detalii abonament",
     billingHistory: "Istoric facturare",
     billingHistoryDesc: "Facturi plătite din Stripe pentru evidența contabilă.",
@@ -124,8 +125,8 @@ const copy = {
     invoiceAmount: "Sumă",
     invoiceStatus: "Status",
     invoicePaid: "Plătită",
-    viewInvoice: "Vezi factura",
-    downloadPdf: "Descarcă PDF",
+    viewInvoice: "Vizualizați factura",
+    downloadPdf: "Descărcați PDF",
     cancels: "Se anulează",
     renews: "Reînnoire",
     referralCredit: "Credit recomandare",
@@ -193,10 +194,10 @@ export async function BillingPanel({
     ? await supabase.from("profiles").select("locale").eq("id", user.id).maybeSingle()
     : { data: null };
 
-  const { data: membership } = user && !organisationId
+  const { data: membership } = user
     ? await supabase
         .from("organisation_members")
-        .select("organisation_id")
+        .select("organisation_id, role")
         .eq("user_id", user.id)
         .or("status.is.null,status.eq.active")
         .order("created_at", { ascending: true })
@@ -216,9 +217,10 @@ export async function BillingPanel({
   const c = copy[locale];
   const sub = resolvedOrganisationId ? await getSubscriptionStatus(resolvedOrganisationId) : null;
   const configured = isBillingConfigured();
-  const needsPlan = !sub || ["none", "past_due_expired", "incomplete", "canceled"].includes(sub.state);
+  const needsPlan = !sub || ["none", "incomplete", "canceled"].includes(sub.state);
   const canChoosePlan = needsPlan || sub?.state === "soft_trial" || sub?.state === "trialing";
   const paidInvoices = await listPaidInvoices(sub?.stripeCustomerId ?? null, locale);
+  const canOpenBillingPortal = canManageBilling(membership?.role);
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -288,7 +290,9 @@ export async function BillingPanel({
                 )}
               </div>
             </div>
-            {sub.stripeCustomerId && <BillingPortalButton />}
+            {sub.stripeCustomerId && (
+              canOpenBillingPortal ? <BillingPortalButton /> : null
+            )}
           </div>
         </div>
       )}

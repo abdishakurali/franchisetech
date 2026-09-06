@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { updateKitchenOrderStatus } from "@/app/actions/kitchenops";
 import { Package } from "lucide-react";
+import { useAppI18n } from "@/lib/app-i18n-context";
+import type { AppT } from "@/lib/app-i18n";
 
 type KitchenOrderItem = {
   id: string;
@@ -32,7 +34,7 @@ type KitchenOrder = {
   kitchen_order_items: KitchenOrderItem[];
 };
 
-const COLUMNS: Array<{
+function buildColumns(t: AppT): Array<{
   status: KitchenOrder["status"];
   title: string;
   next?: KitchenOrder["status"];
@@ -40,26 +42,30 @@ const COLUMNS: Array<{
   headerCls: string;
   borderCls: string;
   btnCls: string;
-}> = [
-  { status: "sent",      title: "🔵 NEW",       next: "preparing", action: "Start preparing", headerCls: "text-blue-700",  borderCls: "border-blue-200  bg-blue-50/60",  btnCls: "bg-blue-600 hover:bg-blue-700 text-white" },
-  { status: "preparing", title: "🟡 PREPARING", next: "ready",     action: "Mark ready",      headerCls: "text-amber-700", borderCls: "border-amber-200 bg-amber-50/60", btnCls: "bg-amber-500 hover:bg-amber-600 text-white" },
-  { status: "ready",     title: "🟢 READY",     next: "completed", action: "Complete",        headerCls: "text-green-700", borderCls: "border-green-200 bg-green-50/60", btnCls: "bg-green-600 hover:bg-green-700 text-white" },
-  { status: "completed", title: "✓ DONE",                                                     headerCls: "text-slate-500", borderCls: "border-slate-200 bg-slate-50/40", btnCls: "" },
-];
+}> {
+  return [
+    { status: "sent",      title: `🔵 ${t.kitchen.columnNew}`,       next: "preparing", action: t.kitchen.actionStartPreparing, headerCls: "text-blue-700",  borderCls: "border-blue-200  bg-blue-50/60",  btnCls: "bg-blue-600 hover:bg-blue-700 text-white" },
+    { status: "preparing", title: `🟡 ${t.kitchen.columnPreparing}`, next: "ready",     action: t.kitchen.actionMarkReady,      headerCls: "text-amber-700", borderCls: "border-amber-200 bg-amber-50/60", btnCls: "bg-amber-500 hover:bg-amber-600 text-white" },
+    { status: "ready",     title: `🟢 ${t.kitchen.columnReady}`,     next: "completed", action: t.kitchen.actionComplete,       headerCls: "text-green-700", borderCls: "border-green-200 bg-green-50/60", btnCls: "bg-green-600 hover:bg-green-700 text-white" },
+    { status: "completed", title: `✓ ${t.kitchen.columnDone}`,                                                                 headerCls: "text-slate-500", borderCls: "border-slate-200 bg-slate-50/40", btnCls: "" },
+  ];
+}
 
-export const KITCHEN_STATION_LABELS: Record<string, string> = {
-  bar:         "Bar",
-  starters:    "Starters",
-  mains:       "Mains",
-  vegetables:  "Vegetables",
-  desserts:    "Desserts",
-  cold_prep:   "Cold Prep",
-  hot_kitchen: "Hot Kitchen",
-};
+function stationLabels(t: AppT): Record<string, string> {
+  return {
+    bar:         t.kitchen.stationBar,
+    starters:    t.kitchen.stationStarters,
+    mains:       t.kitchen.stationMains,
+    vegetables:  t.kitchen.stationVegetables,
+    desserts:    t.kitchen.stationDesserts,
+    cold_prep:   t.kitchen.stationColdPrep,
+    hot_kitchen: t.kitchen.stationHotKitchen,
+  };
+}
 
-function elapsed(createdAt: string) {
+function elapsed(createdAt: string, t: AppT) {
   const minutes = Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000));
-  if (minutes < 1) return { label: "Just now", urgent: false };
+  if (minutes < 1) return { label: t.kitchen.justNow, urgent: false };
   if (minutes < 60) return { label: `${minutes}m`, urgent: minutes >= 15 };
   return { label: `${Math.floor(minutes / 60)}h ${minutes % 60}m`, urgent: true };
 }
@@ -103,6 +109,9 @@ export function KitchenDisplayClient({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const activeStation = searchParams.get("station") ?? null;
+  const { t } = useAppI18n();
+  const COLUMNS = buildColumns(t);
+  const KITCHEN_STATION_LABELS = stationLabels(t);
 
   useEffect(() => {
     const timer = window.setInterval(() => router.refresh(), 8000);
@@ -126,7 +135,7 @@ export function KitchenDisplayClient({
             : "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700"
         }`}
       >
-        All stations
+        {t.kitchen.allStations}
       </Link>
       {activeStations.map((station) => (
         <Link
@@ -149,8 +158,7 @@ export function KitchenDisplayClient({
       {stationTabs}
       {activeStation && (
         <p className="mb-3 text-sm text-slate-500">
-          Showing items for <strong>{KITCHEN_STATION_LABELS[activeStation] ?? activeStation}</strong> station.
-          Items with no station assigned also appear here.
+          {t.kitchen.showingItemsFor(KITCHEN_STATION_LABELS[activeStation] ?? activeStation)}
         </p>
       )}
       <div className="-mx-4 overflow-x-auto px-4 pb-4 sm:mx-0 sm:px-0">
@@ -168,17 +176,17 @@ export function KitchenDisplayClient({
                 </div>
                 {columnOrders.length === 0 ? (
                   <div className="rounded-lg border border-dashed border-slate-200 bg-white/60 p-6 text-center text-xs text-slate-400">
-                    No orders
+                    {t.kitchen.noOrders}
                   </div>
                 ) : (
                   <div className="min-h-0 flex-1 space-y-2.5 overflow-y-auto pr-0.5">
                     {columnOrders.map((order) => {
-                      const { label: elapsedLabel, urgent } = elapsed(order.created_at);
+                      const { label: elapsedLabel, urgent } = elapsed(order.created_at, t);
                       return (
                         <Card key={order.id} className="border-white bg-white shadow-sm">
                           <CardHeader className="space-y-1.5 pb-2 pt-3">
                             <div className="flex items-start justify-between gap-2">
-                              <CardTitle className="text-base leading-tight">{order.order_number ?? "Order"}</CardTitle>
+                              <CardTitle className="text-base leading-tight">{order.order_number ?? t.kitchen.orderFallback}</CardTitle>
                               <div className={`rounded-md px-1.5 py-0.5 text-right text-[10px] font-semibold tabular-nums leading-tight ${urgent ? "bg-red-50 text-red-600" : "bg-slate-50 text-slate-500"}`}>
                                 <p>{new Date(order.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
                                 <p className="font-bold">{elapsedLabel}</p>

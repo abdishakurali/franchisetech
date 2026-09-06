@@ -5,7 +5,6 @@ import {
   tillCloseLabelForMarket,
   type BillingMarket,
 } from "@/lib/billing/market";
-import { addonPriceLabel, PAID_ADDONS } from "@/lib/billing/catalog";
 
 export type PlanFeatureCategory = {
   title: string;
@@ -43,7 +42,6 @@ export function getPlanFeatureCategories(
 ): readonly PlanFeatureCategory[] {
   const tax = taxLabelForMarket(market);
   const tillClose = tillCloseLabelForMarket(market);
-  const kitchenDisplayPrice = addonPriceLabel(PAID_ADDONS.kitchen_display, market === "RO" ? "ro" : "en");
 
   if (plan === "starter" || plan === "core") {
     const tillItems =
@@ -68,11 +66,15 @@ export function getPlanFeatureCategories(
       },
       {
         title: "Products",
-        items: ["Products & categories", `${tax} rates`, "CSV import & export"],
+        items: [
+          "Products & categories",
+          market === "RO" ? "Cote TVA" : `${tax} rates`,
+          "CSV import & export",
+        ],
       },
       {
         title: "Reports",
-        items: ["Sales report", tillClose, `${tax} report`],
+        items: ["Sales report", tillClose, market === "RO" ? "Raport TVA" : `${tax} report`],
       },
       ...(market === "RO"
         ? [
@@ -109,7 +111,6 @@ export function getPlanFeatureCategories(
         items: [
           "Everything in Core",
           "Split payments & tips (optional)",
-          "Cash drawer connector support",
         ],
       },
       {
@@ -129,18 +130,18 @@ export function getPlanFeatureCategories(
         title: market === "RO" ? "Contabilitate" : "Accounting",
         items: accountingItems,
       },
-      {
-        title: "Optional modules",
-        items: [
-          `Kitchen Display add-on (${kitchenDisplayPrice})`,
-          "FiscalNet included in FranchiseTech; provider subscription paid separately",
-        ],
-      },
+      ...(market === "RO"
+        ? [
+            {
+              title: "Fiscal",
+              items: ["FiscalNet este inclus în franchisetech; abonamentul la furnizor se plătește separat"],
+            },
+          ]
+        : []),
       {
         title: "Team & controls",
         items: [
           "Staff roles & permissions",
-          "Cash drawer audit trail",
           "Owner digest email: sales, cash status, voids, refunds, VAT and stock",
         ],
       },
@@ -156,12 +157,6 @@ export function getPlanFeatureCategories(
           "Priority support (same-day response)",
           "Dedicated onboarding call",
           "Advanced operations support",
-        ],
-      },
-      {
-        title: "Optional modules",
-        items: [
-          `Kitchen Display add-on (${kitchenDisplayPrice})`,
         ],
       },
       {

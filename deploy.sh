@@ -46,7 +46,6 @@ rsync -av --delete \
   --exclude='fridgeproof-full-flow-png' \
   --exclude='kitchenops-pos-qa-screenshots' \
   --exclude='fridgeproof-final-retest-screenshots' \
-  --exclude='*.mp4' \
   --exclude='efactura docs' \
   --exclude='.cursor' \
   --exclude='.agents' \

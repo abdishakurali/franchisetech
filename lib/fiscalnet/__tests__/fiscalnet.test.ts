@@ -11,7 +11,6 @@ import {
   buildSaleCommand,
   buildCashInLines,
   buildCashOutLines,
-  buildDrawerLines,
   buildCommandFilename,
   buildXReportCommand,
   buildZReportCommand,
@@ -133,28 +132,27 @@ describe("FiscalNet TXT command payloads", () => {
     expect(linesToFileContent(buildCashOutLines(25))).toBe("O^2500\r\n");
   });
 
-  it("builds report and drawer commands", () => {
+  it("builds report commands", () => {
     expect(buildZReportCommand()).toBe("Z^\r\n");
     expect(buildXReportCommand()).toBe("X^\r\n");
-    expect(linesToFileContent(buildDrawerLines())).toBe("DS^\r\n");
   });
 
   it("uses FiscalNet settings for receipt VAT group, operator code, payment code, and amount", () => {
     const lines = buildFiscalNetReceiptLines(
-      [{ productName: "Test Product", quantity: 1, unitPrice: 10, vatRate: 9 }],
+      [{ productName: "Test Product", quantity: 1, unitPrice: 10, vatRate: 11 }],
       "card",
       {
         enabled: true,
         mockMode: false,
         connectionMode: "file",
         apiHost: "http://localhost:65400",
-        vatGroups: [{ code: 7, rate: 9, label: "TVA 9" }],
+        vatGroups: [{ code: 5, rate: 11, label: "TVA 11" }],
         paymentTypeMap: { card: 5, other: 8 },
         operatorCode: "42",
       },
       10,
     );
-    expect(lines).toEqual(["S^Test Product^1000^1000^buc^7^42", "ST^0", "P^5^1000"]);
+    expect(lines).toEqual(["S^Test Product^1000^1000^Buc^5^42", "ST^0", "P^5^1000"]);
   });
 
   it("emits DP^ immediately after S^ when item has discountPercent", () => {
@@ -356,6 +354,7 @@ describe("buildFiscalNetConfig", () => {
 
   it("maps all fields correctly", () => {
     const config = buildFiscalNetConfig({
+      country_code:           "RO",
       fiscalnet_enabled:      true,
       fiscalnet_mock_mode:    false,
       fiscalnet_bonuri_path:  "C:\\FiscalNet\\Bonuri",

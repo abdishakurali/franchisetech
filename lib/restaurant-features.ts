@@ -101,15 +101,15 @@ export function isFeatureEnabled(
 export function getSuggestedFeaturesForIndustry(industry: string | null | undefined): RestaurantFeatureKey[] {
   switch (industry) {
     case "restaurant":
-      return ["kitchen_display_enabled", "restaurant_order_flow_enabled", "order_types_enabled", "table_service_enabled", "payment_split_enabled", "tips_enabled"];
+      return ["order_types_enabled", "payment_split_enabled", "tips_enabled"];
     case "cafe":
-      return ["kitchen_display_enabled", "order_types_enabled", "product_modifiers_enabled", "payment_split_enabled", "tips_enabled"];
+      return ["order_types_enabled", "product_modifiers_enabled", "payment_split_enabled", "tips_enabled"];
     case "takeaway_qsr":
-      return ["kitchen_display_enabled", "order_types_enabled", "restaurant_order_flow_enabled"];
+      return ["order_types_enabled"];
     case "food_truck":
-      return ["order_types_enabled", "kitchen_display_enabled"];
+      return ["order_types_enabled"];
     case "catering_events":
-      return ["restaurant_order_flow_enabled", "courses_enabled"];
+      return ["courses_enabled"];
     default:
       return [];
   }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { captureClientEvent } from "@/lib/analytics/client-events";
 import { useMarketingMessages } from "@/lib/marketing/use-marketing-locale";
 
 export function MobileStickyCta() {
@@ -9,7 +10,19 @@ export function MobileStickyCta() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const plan = searchParams.get("plan");
-  const signupHref = plan ? `/signup?plan=${plan}` : "/signup";
+  // Most of this site's traffic is mobile, so this is the CTA most visitors actually
+  // tap. Building the href from `plan` alone dropped every utm_*/click ID on the way
+  // to /signup, which left the conversion upload with nothing to attribute against.
+  const signupParams = new URLSearchParams();
+  if (plan) signupParams.set("plan", plan);
+  for (const key of [
+    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
+    "gclid", "gbraid", "wbraid", "fbclid", "msclkid", "ttclid",
+  ]) {
+    const value = searchParams.get(key);
+    if (value) signupParams.set(key, value);
+  }
+  const signupHref = signupParams.size ? `/signup?${signupParams.toString()}` : "/signup";
 
   if (
     pathname?.startsWith("/login") ||
@@ -22,22 +35,25 @@ export function MobileStickyCta() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#DFDCD2] bg-white/95 px-4 py-3 backdrop-blur-md md:hidden"
       style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
-      <div className="mx-auto flex max-w-lg gap-2">
+      <div className="mx-auto max-w-lg">
         <Link
           href={signupHref}
-          className="flex flex-1 items-center justify-center rounded-full bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
+          className="flex w-full items-center justify-center rounded-[10px] bg-[#165DFC] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#165DFC]"
+          onClick={() =>
+            captureClientEvent("marketing_cta_clicked", {
+              cta_type: "primary",
+              cta_location: "mobile_sticky",
+              cta_text: t.cta.getStarted,
+              href: signupHref,
+              plan: plan ?? null,
+            })
+          }
         >
           {t.cta.getStarted}
         </Link>
-        <a
-          href="mailto:info@franchisetech.ro"
-          className="flex flex-1 items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-        >
-          {t.cta.talkToSales}
-        </a>
       </div>
     </div>
   );

@@ -13,13 +13,13 @@
 import { getActiveOrg }         from "@/lib/kitchenops/data";
 import { buildFiscalNetConfig } from "@/lib/fiscalnet/config";
 import {
-  fiscalXReport, fiscalZReport, fiscalOpenDrawer,
+  fiscalXReport, fiscalZReport,
   fiscalCashIn, fiscalCashOut, fiscalVoidLast, fiscalStatus,
 } from "@/lib/fiscalnet/service";
 import type { FiscalNetConfig } from "@/lib/fiscalnet/types";
 import {
   saleItem, textLine, payment, customerDisplay as displayLine,
-  buildCashInLines, buildCashOutLines, buildDrawerLines, buildVoidLines,
+  buildCashInLines, buildCashOutLines, buildVoidLines,
   buildXReportLines, buildZReportLines,
   buildNonFiscalFilename, buildDisplayFilename,
   linesToFileContent, generateOperationId,
@@ -45,10 +45,24 @@ function canManage(role: string): boolean {
   return ["owner", "manager"].includes(role);
 }
 
+// This console fires unguarded commands straight at whatever fiscal printer
+// is actually connected — including VB^ (void) and non-fiscal test prints —
+// with no confirmation beyond the Z-report's own typed-phrase step. "Owner
+// or manager" is every real customer account, so a curious owner clicking
+// through the buttons prints real, alarming (if fiscally harmless) test
+// receipts on their live device — that's what happened here. Gate the whole
+// console behind an explicit, off-by-default env flag so it's unreachable
+// in production regardless of role, and only opt-in for real QA use.
+function isTestConsoleEnabled(): boolean {
+  return process.env.FISCALNET_TEST_CONSOLE_ENABLED === "true";
+}
+
 async function getFiscalConfig(): Promise<
   { config: FiscalNetConfig; error?: never } |
   { config?: never; error: string }
 > {
+  if (!isTestConsoleEnabled())
+    return { error: "The FiscalNet test console is disabled. It sends real commands to your connected fiscal printer and is for internal use only." };
   try {
     const { supabase, orgId, membership } = await getActiveOrg();
     if (!canManage(membership.role))
@@ -157,19 +171,6 @@ export async function runNamedExample(
 }
 
 // ── Utility tests ─────────────────────────────────────────────────────────────
-
-export async function runTestOpenDrawer(): Promise<TestActionResult> {
-  const res = await getFiscalConfig();
-  if (res.error) return { ok: false, message: res.error, mock: false };
-  const config = res.config!;
-  const lines = buildDrawerLines();
-  if (config.connectionMode === "file") {
-    return fileDownloadResult(config, "Open drawer TXT generated.", lines, "DRAWER");
-  }
-  const t0 = Date.now();
-  const r  = await fiscalOpenDrawer(config);
-  return { ok: r.ok, message: r.message, durationMs: Date.now() - t0, mock: config.mockMode };
-}
 
 export async function runTestXReport(): Promise<TestActionResult> {
   const res = await getFiscalConfig();

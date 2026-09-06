@@ -25,7 +25,6 @@ export type EntitlementKey =
   | "team.unlimited_staff"
   | "pos.split_payments"
   | "pos.tips"
-  | "pos.cash_drawer_connector"
   | "inventory.enabled"
   | "inventory.stock_movements"
   | "purchases.suppliers"
@@ -104,7 +103,6 @@ const OPERATIONS_ENTITLEMENTS: readonly EntitlementKey[] = [
   ...CORE_ENTITLEMENTS,
   "pos.split_payments",
   "pos.tips",
-  "pos.cash_drawer_connector",
   "inventory.enabled",
   "inventory.stock_movements",
   "purchases.suppliers",
@@ -139,9 +137,29 @@ const MULTI_SITE_ENTITLEMENTS: readonly EntitlementKey[] = [
 ];
 
 const FALLBACK_ENTITLEMENTS: readonly EntitlementKey[] = [
+  "pos.enabled",
+  "pos.discounts",
+  "pos.transaction_history",
+  "pos.till_sessions",
+  "pos.offline_queue",
+  "pos.split_payments",
+  "pos.tips",
+  "products.enabled",
+  "vat.enabled",
+  "reports.sales",
   "reports.till_close",
   "reports.vat",
-  "pos.transaction_history",
+  "fiscal.fiscalnet",
+  "fiscal.z_report",
+  "fiscal.x_report",
+  "fiscal.vat_groups",
+  "team.staff_roles",
+  "team.unlimited_staff",
+  "kitchen.enabled",
+  "kitchen.order_flow",
+  "kitchen.stations",
+  "kitchen.order_types",
+  "kitchen.table_service",
 ];
 
 const GRACE_PERIOD_WRITE_BLOCKS = new Set<EntitlementKey>([
@@ -173,7 +191,6 @@ const REQUIRED_PLAN: Record<EntitlementKey | EntitlementLimitKey, PlanCode | "mu
   "team.unlimited_staff": "core",
   "pos.split_payments": "operations",
   "pos.tips": "operations",
-  "pos.cash_drawer_connector": "operations",
   "inventory.enabled": "operations",
   "inventory.stock_movements": "operations",
   "purchases.suppliers": "operations",

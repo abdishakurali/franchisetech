@@ -84,11 +84,16 @@ function LoginForm() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@yourbistro.ie"
+                placeholder="nume@cafeneaua.ro"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">{a.password}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{a.password}</Label>
+                <Link href="/forgot-password" className="text-xs font-medium text-blue-600 hover:underline">
+                  {a.forgotPassword}
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"
@@ -111,6 +116,12 @@ function LoginForm() {
           </p>
         </CardContent>
       </Card>
+      <p className="text-center text-sm text-slate-400 mt-6">
+        {a.needHelp}{" "}
+        <Link href="/help" className="text-slate-500 hover:text-slate-700 hover:underline font-medium">
+          {a.helpLink}
+        </Link>
+      </p>
     </AuthPageFrame>
   );
 }

@@ -45,6 +45,6 @@ export const partnerBenefits = [
   },
   {
     title: "Full product stack",
-    text: "POS, kitchen display, stock, recipes, and reports — one platform to resell, not five tools.",
+    text: "POS, stock, recipes, and reports — one platform to resell, not five tools.",
   },
 ] as const;

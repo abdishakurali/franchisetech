@@ -15,7 +15,7 @@ const SECTION_LABEL_KEYS = {
   billing: "sectionBilling",
 } as const satisfies Record<SetupStep["section"], "sectionCore" | "sectionAdvanced" | "sectionMultiSite" | "sectionBilling">;
 
-const LOCALIZED_STEP_IDS = new Set(["products", "first_sale", "daily_report"]);
+const LOCALIZED_STEP_IDS = new Set(["products", "fiscal_setup", "first_sale", "daily_report"]);
 
 type Props = {
   locale: AppLocale;

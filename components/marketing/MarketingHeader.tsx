@@ -3,30 +3,53 @@
 import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { captureClientEvent } from "@/lib/analytics/client-events";
 import { useMarketingMessages, useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
 import { MarketingBrand } from "@/components/marketing/MarketingBrand";
-import { MarketingLocaleSwitcher } from "@/components/marketing/MarketingLocaleSwitcher";
 import { marketingCtaPrimary } from "@/lib/marketing/tokens";
 import { PRIMARY_INDUSTRY_NAV } from "@/lib/marketing/industry-verticals";
+import { LEAN_PRODUCT_SCOPE_ENABLED } from "@/lib/product-scope";
 
 type UserChip = {
   displayName: string;
   initials: string;
 };
 
+// Each entry must resolve to a real page or a real anchor on the homepage
+// (POS/Gestiune/Integrări/Hardware are homepage sections, not standalone
+// pages — franchisetech doesn't have a page per module yet). "/#slug" from
+// any page navigates home and jumps to the anchor; a bare "#slug" only
+// works while already on the homepage.
+const PRODUCT_MENU = [
+  { hrefRo: "/features/pos", hrefEn: "/features/pos", labelRo: "POS", labelEn: "POS" },
+  { hrefRo: "/features/stock-management", hrefEn: "/features/stock-management", labelRo: "Gestiune", labelEn: "Stock" },
+  { hrefRo: "/#conformitate", hrefEn: "/#conformitate", labelRo: "Integrări", labelEn: "Integrations" },
+  { hrefRo: "/#hardware", hrefEn: "/#hardware", labelRo: "Hardware", labelEn: "Hardware" },
+] as const;
+
 export function MarketingHeader({ user }: { user: UserChip | null }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [industryOpen, setIndustryOpen] = useState(false);
+  const [productOpen, setProductOpen] = useState(false);
   const industryRef = useRef<HTMLDivElement>(null);
+  const productRef = useRef<HTMLDivElement>(null);
   const t = useMarketingMessages();
   const locale = useMarketingLocale();
+  const isRo = locale === "ro";
   const industryLabel = (item: (typeof PRIMARY_INDUSTRY_NAV)[number]) =>
-    locale === "ro" ? item.labelRo : item.labelEn;
+    isRo ? item.labelRo : item.labelEn;
+  const industryNav = LEAN_PRODUCT_SCOPE_ENABLED
+    ? PRIMARY_INDUSTRY_NAV.filter((item) => item.slug === "cafes" || item.slug === "takeaways")
+    : PRIMARY_INDUSTRY_NAV;
 
+  // Every entry here must be a real, distinct page — a nav item that just
+  // scrolls the visitor down the current page reads as broken once they've
+  // clicked it once and landed nowhere new.
   const navLinks = [
-    { href: "/features", label: t.nav.features },
-    { href: "/pricing", label: t.nav.pricing },
-    { href: "/resources/suppliers", label: t.nav.partners },
+    { href: "/compare", label: isRo ? "Comparații" : "Compare" },
+    { href: "/blog", label: isRo ? "Ghiduri" : "Guides" },
+    { href: "/pricing", label: isRo ? "Prețuri" : "Pricing" },
+    { href: "/contact", label: "Contact" },
   ];
 
   useEffect(() => {
@@ -39,35 +62,98 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
   }, [mobileOpen]);
 
   useEffect(() => {
-    if (!industryOpen) return;
+    if (!industryOpen && !productOpen) return;
     function onPointerDown(e: MouseEvent) {
-      if (industryRef.current && !industryRef.current.contains(e.target as Node)) {
+      if (industryOpen && industryRef.current && !industryRef.current.contains(e.target as Node)) {
         setIndustryOpen(false);
+      }
+      if (productOpen && productRef.current && !productRef.current.contains(e.target as Node)) {
+        setProductOpen(false);
       }
     }
     document.addEventListener("mousedown", onPointerDown);
     return () => document.removeEventListener("mousedown", onPointerDown);
-  }, [industryOpen]);
+  }, [industryOpen, productOpen]);
 
   function closeMenu() {
     setMobileOpen(false);
     setIndustryOpen(false);
+    setProductOpen(false);
+  }
+
+  function trackNavClick(label: string, href: string, location: "desktop_nav" | "mobile_nav" | "industry_nav" | "product_nav") {
+    captureClientEvent("nav_link_clicked", {
+      label,
+      href,
+      location,
+    });
+  }
+
+  function trackHeaderSignup(location: "desktop_header" | "mobile_header") {
+    captureClientEvent("marketing_cta_clicked", {
+      cta_type: "header_signup",
+      cta_location: location,
+      cta_text: locale === "ro" ? "Începe trialul" : "Start trial",
+      href: "/signup?plan=starter",
+      plan: null,
+    });
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/90 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:h-[4.25rem]">
+    <header className="sticky top-0 z-50 border-b border-[#DFDCD2] bg-white/90 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-9 px-4 sm:px-6 lg:h-[4.625rem]">
         <MarketingBrand onClick={closeMenu} />
 
-        <nav className="hidden items-center gap-6 text-sm text-slate-500 lg:flex" aria-label="Main">
-          <Link href="/features" className="transition hover:text-slate-900">
-            {t.nav.features}
-          </Link>
+        <nav className="hidden items-center gap-7 text-sm font-medium text-[#5B5D57] lg:flex" aria-label="Main">
+          <div ref={productRef} className="relative">
+            <button
+              type="button"
+              className="inline-flex items-center gap-1 transition hover:text-[#0D0F0E]"
+              aria-expanded={productOpen}
+              aria-haspopup="true"
+              onClick={() => setProductOpen((v) => !v)}
+            >
+              {isRo ? "Produs" : "Product"}
+              <ChevronDown className={`h-4 w-4 transition ${productOpen ? "rotate-180" : ""}`} />
+            </button>
+            {productOpen && (
+              <div className="absolute left-0 top-full z-50 mt-3 w-52 rounded-2xl border border-[#DFDCD2] bg-white py-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                {PRODUCT_MENU.map((item) => {
+                  const href = isRo ? item.hrefRo : item.hrefEn;
+                  const label = isRo ? item.labelRo : item.labelEn;
+                  return (
+                    <Link
+                      key={label}
+                      href={href}
+                      className="block px-4 py-2.5 text-[#5B5D57] transition hover:bg-[#F3F0E8] hover:text-[#0D0F0E]"
+                      onClick={() => {
+                        trackNavClick(label, href, "product_nav");
+                        setProductOpen(false);
+                      }}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
+                <div className="my-1 border-t border-[#EDEAE1]" />
+                <Link
+                  href="/features"
+                  className="block px-4 py-2 text-xs font-medium text-[#165DFC] hover:text-[#165DFC]"
+                  onClick={() => {
+                    trackNavClick(isRo ? "Toate funcționalitățile" : "All features", "/features", "product_nav");
+                    setProductOpen(false);
+                  }}
+                >
+                  {isRo ? "Toate funcționalitățile →" : "All features →"}
+                </Link>
+              </div>
+            )}
+          </div>
 
           <div ref={industryRef} className="relative">
             <button
               type="button"
-              className="inline-flex items-center gap-1 transition hover:text-slate-900"
+              className="inline-flex items-center gap-1 transition hover:text-[#0D0F0E]"
               aria-expanded={industryOpen}
               aria-haspopup="true"
               onClick={() => setIndustryOpen((v) => !v)}
@@ -76,26 +162,32 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
               <ChevronDown className={`h-4 w-4 transition ${industryOpen ? "rotate-180" : ""}`} />
             </button>
             {industryOpen && (
-              <div className="absolute left-0 top-full z-50 mt-2 w-64 rounded-xl border border-slate-200 bg-white py-2 shadow-lg">
-                {PRIMARY_INDUSTRY_NAV.map((item) => {
+              <div className="absolute left-0 top-full z-50 mt-3 w-64 rounded-2xl border border-[#DFDCD2] bg-white py-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                {industryNav.map((item) => {
                   const Icon = item.icon;
                   return (
                     <Link
                       key={item.slug}
                       href={item.path}
-                      className="flex items-center gap-3 px-4 py-2.5 text-slate-700 transition hover:bg-slate-50 hover:text-slate-950"
-                      onClick={() => setIndustryOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-[#5B5D57] transition hover:bg-[#F3F0E8] hover:text-[#0D0F0E]"
+                      onClick={() => {
+                        trackNavClick(industryLabel(item), item.path, "industry_nav");
+                        setIndustryOpen(false);
+                      }}
                     >
-                      <Icon className="h-4 w-4 shrink-0 text-blue-600" aria-hidden />
+                      <Icon className="h-4 w-4 shrink-0 text-[#8F8F86]" aria-hidden />
                       <span>{industryLabel(item)}</span>
                     </Link>
                   );
                 })}
-                <div className="my-1 border-t border-slate-100" />
+                <div className="my-1 border-t border-[#EDEAE1]" />
                 <Link
                   href="/industries"
-                  className="block px-4 py-2 text-xs font-medium text-blue-600 hover:text-blue-700"
-                  onClick={() => setIndustryOpen(false)}
+                  className="block px-4 py-2 text-xs font-medium text-[#165DFC] hover:text-[#165DFC]"
+                  onClick={() => {
+                    trackNavClick(t.nav.industries, "/industries", "industry_nav");
+                    setIndustryOpen(false);
+                  }}
                 >
                   {t.nav.industries} →
                 </Link>
@@ -103,26 +195,30 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
             )}
           </div>
 
-          {navLinks.slice(1).map((link) => (
-            <Link key={link.href} href={link.href} className="transition hover:text-slate-900">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="transition hover:text-[#0D0F0E]"
+              onClick={() => trackNavClick(link.label, link.href, "desktop_nav")}
+            >
               {link.label}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <div className="hidden items-center gap-3 lg:flex">
-            <MarketingLocaleSwitcher className="shrink-0" />
+        <div className="ml-auto flex items-center gap-2">
+          <div className="hidden items-center gap-4 lg:flex">
             {user ? (
               <>
-                <Link href="/app" className="text-sm font-medium text-slate-600 hover:text-slate-950">
+                <Link href="/app" className="text-sm font-medium text-[#5B5D57] hover:text-[#0D0F0E]">
                   {t.header.dashboard}
                 </Link>
                 <Link
                   href="/app/profile"
-                  className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2 py-1 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="flex items-center gap-2 rounded-[10px] border border-[#DFDCD2] bg-white px-2 py-1 text-sm font-medium text-[#5B5D57] hover:bg-[#F3F0E8]"
                 >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EAF1FF] text-xs font-bold text-[#165DFC]">
                     {user.initials || "U"}
                   </span>
                   <span className="max-w-32 truncate">{user.displayName}</span>
@@ -130,31 +226,23 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
               </>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-medium text-slate-600 hover:text-slate-950">
+                <Link href="/login" className="text-sm font-medium text-[#5B5D57] hover:text-[#0D0F0E]">
                   {t.header.login}
                 </Link>
                 <Link
-                  href="/signup"
-                  className={`rounded-full px-5 py-2 text-sm font-medium text-white transition ${marketingCtaPrimary}`}
+                  href="/signup?plan=starter"
+                  className={`rounded-[10px] px-5 py-2.5 text-sm font-semibold text-white transition ${marketingCtaPrimary}`}
+                  onClick={() => trackHeaderSignup("desktop_header")}
                 >
-                  {t.header.getStarted}
+                  {locale === "ro" ? "Începe trialul" : "Start trial"}
                 </Link>
               </>
             )}
           </div>
 
-          {!user && (
-            <Link
-              href="/signup"
-              className={`rounded-full px-3.5 py-2 text-xs font-semibold text-white transition lg:hidden ${marketingCtaPrimary}`}
-            >
-              {t.header.getStarted}
-            </Link>
-          )}
-
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-700 lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#DFDCD2] text-[#5B5D57] lg:hidden"
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? t.header.closeMenu : t.header.openMenu}
             onClick={() => setMobileOpen((v) => !v)}
@@ -168,51 +256,80 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
         <>
           <button
             type="button"
-            className="fixed inset-0 z-40 bg-slate-900/30 lg:hidden"
+            className="fixed inset-0 z-40 bg-[#0D0F0E]/30 lg:hidden"
             aria-label={t.header.closeMenu}
             onClick={closeMenu}
           />
-          <div className="fixed inset-x-0 top-14 z-50 max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-t border-slate-100 bg-white px-4 py-5 shadow-lg lg:hidden">
+          <div className="fixed inset-x-0 top-16 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-[#DFDCD2] bg-white px-4 py-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] lg:hidden">
             <nav className="flex flex-col gap-1" aria-label="Mobile">
+              <p className="px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] text-[#8F8F86]">
+                {isRo ? "Produs" : "Product"}
+              </p>
+              {PRODUCT_MENU.map((item) => {
+                const href = isRo ? item.hrefRo : item.hrefEn;
+                const label = isRo ? item.labelRo : item.labelEn;
+                return (
+                  <Link
+                    key={label}
+                    href={href}
+                    className="rounded-[10px] px-3 py-2.5 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
+                    onClick={() => {
+                      trackNavClick(label, href, "mobile_nav");
+                      closeMenu();
+                    }}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
               <Link
                 href="/features"
-                className="rounded-lg px-3 py-3 text-base font-medium text-slate-800 hover:bg-slate-50"
+                className="rounded-[10px] px-3 py-2 text-sm font-medium text-[#165DFC] hover:bg-[#F3F0E8]"
                 onClick={closeMenu}
               >
-                {t.nav.features}
+                {isRo ? "Toate funcționalitățile →" : "All features →"}
               </Link>
 
-              <p className="mt-3 px-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <p className="mt-3 px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] text-[#8F8F86]">
                 {t.nav.businessTypes}
               </p>
-              {PRIMARY_INDUSTRY_NAV.map((item) => {
+              {industryNav.map((item) => {
                 const Icon = item.icon;
                 return (
                   <Link
                     key={item.slug}
                     href={item.path}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-medium text-slate-800 hover:bg-slate-50"
-                    onClick={closeMenu}
+                    className="flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
+                    onClick={() => {
+                      trackNavClick(industryLabel(item), item.path, "industry_nav");
+                      closeMenu();
+                    }}
                   >
-                    <Icon className="h-4 w-4 shrink-0 text-blue-600" aria-hidden />
+                    <Icon className="h-4 w-4 shrink-0 text-[#8F8F86]" aria-hidden />
                     {industryLabel(item)}
                   </Link>
                 );
               })}
               <Link
                 href="/industries"
-                className="rounded-lg px-3 py-2 text-sm font-medium text-blue-600 hover:bg-slate-50"
-                onClick={closeMenu}
+                className="rounded-[10px] px-3 py-2 text-sm font-medium text-[#165DFC] hover:bg-[#F3F0E8]"
+                onClick={() => {
+                  trackNavClick(t.nav.industries, "/industries", "mobile_nav");
+                  closeMenu();
+                }}
               >
                 {t.nav.industries} →
               </Link>
 
-              {navLinks.slice(1).map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="rounded-lg px-3 py-3 text-base font-medium text-slate-800 hover:bg-slate-50"
-                  onClick={closeMenu}
+                  className="rounded-[10px] px-3 py-3 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
+                  onClick={() => {
+                    trackNavClick(link.label, link.href, "mobile_nav");
+                    closeMenu();
+                  }}
                 >
                   {link.label}
                 </Link>
@@ -222,14 +339,14 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
                 <>
                   <Link
                     href="/app"
-                    className="rounded-lg px-3 py-3 text-base font-medium text-slate-800 hover:bg-slate-50"
+                    className="rounded-[10px] px-3 py-3 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
                     onClick={closeMenu}
                   >
                     {t.header.dashboard}
                   </Link>
                   <Link
                     href="/app/profile"
-                    className="rounded-lg px-3 py-3 text-base font-medium text-slate-800 hover:bg-slate-50"
+                    className="rounded-[10px] px-3 py-3 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
                     onClick={closeMenu}
                   >
                     {user.displayName}
@@ -238,7 +355,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
               ) : (
                 <Link
                   href="/login"
-                  className="rounded-lg px-3 py-3 text-base font-medium text-slate-800 hover:bg-slate-50"
+                  className="rounded-[10px] px-3 py-3 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
                   onClick={closeMenu}
                 >
                   {t.header.login}
@@ -246,20 +363,16 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
               )}
             </nav>
 
-            <div className="mt-5 border-t border-slate-100 pt-5">
-              <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                {t.header.language}
-              </p>
-              <MarketingLocaleSwitcher />
-            </div>
-
             {!user && (
               <Link
-                href="/signup"
-                className={`mt-5 flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-semibold text-white ${marketingCtaPrimary}`}
-                onClick={closeMenu}
+                href="/signup?plan=starter"
+                className={`mt-5 flex w-full items-center justify-center rounded-[10px] px-5 py-3 text-sm font-semibold text-white ${marketingCtaPrimary}`}
+                onClick={() => {
+                  trackHeaderSignup("mobile_header");
+                  closeMenu();
+                }}
               >
-                {t.header.getStarted}
+                {locale === "ro" ? "Începe trialul" : "Start trial"}
               </Link>
             )}
           </div>

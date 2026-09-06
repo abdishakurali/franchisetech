@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trash2, Loader2 } from "lucide-react";
 import { useAppI18n } from "@/lib/app-i18n-context";
+import { toast } from "sonner";
 
 function fmt(v: number, currency = "EUR") {
   const n = Number(v ?? 0);
@@ -86,7 +87,7 @@ export function ProductsBulkTable({
   currency = "EUR",
 }: {
   products: Product[];
-  deleteAction: (ids: string[]) => Promise<void>;
+  deleteAction: (ids: string[]) => Promise<{ archived: number; deleted: number; blocked: number } | void>;
   updateStockAction?: (fd: FormData) => Promise<void>;
   inventoryVisible?: boolean;
   recipeVisible?: boolean;
@@ -126,8 +127,21 @@ export function ProductsBulkTable({
     if (!confirm(t.tables.deleteConfirm(selected.size))) return;
     setDeleting(true);
     try {
-      await deleteAction([...selected]);
+      const result = await deleteAction([...selected]);
       setSelected(new Set());
+      // Previously the result was discarded, so a delete that removed nothing
+      // looked identical to one that worked — the reason archived rows appeared
+      // impossible to clear.
+      if (result) {
+        const parts: string[] = [];
+        if (result.deleted) parts.push(t.tables.deleteResultDeleted(result.deleted));
+        if (result.archived) parts.push(t.tables.deleteResultArchived(result.archived));
+        if (parts.length) toast.success(parts.join(" · "));
+        if (result.blocked) toast.warning(t.tables.deleteResultBlocked(result.blocked));
+        if (!parts.length && !result.blocked) toast.info(t.tables.deleteResultNone);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.tables.deleteResultFailed);
     } finally {
       setDeleting(false);
     }

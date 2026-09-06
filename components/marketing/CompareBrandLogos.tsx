@@ -30,8 +30,13 @@ export function CompareBrandLogos({ competitorSlug, size = "md" }: Props) {
       <span className={`font-semibold text-slate-400 ${s.vs}`}>vs</span>
       {brand ? (
         <div
-          className={`relative ${s.box} shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm`}
-          style={{ boxShadow: `0 0 0 1px ${brand.accent}22` }}
+          className={`relative ${s.box} shrink-0 overflow-hidden rounded-xl border p-1.5 shadow-sm ${
+            brand.logoNeedsDarkChip ? "border-transparent" : "border-slate-200 bg-white"
+          }`}
+          style={{
+            boxShadow: `0 0 0 1px ${brand.accent}22`,
+            backgroundColor: brand.logoNeedsDarkChip ? brand.accent : undefined,
+          }}
         >
           <Image src={brand.logoSrc} alt="" width={80} height={80} className="h-full w-full object-contain" />
         </div>
@@ -57,11 +62,11 @@ export function CompareBrandLogosLabeled({ competitorSlug }: { competitorSlug: s
       </div>
       <div className="flex flex-wrap gap-4 text-sm text-slate-500">
         <span>
-          <strong className="text-slate-800">{FRANCHISETECH_BRAND.name}</strong> — POS + stock + recipes
+          <strong className="text-slate-800">{FRANCHISETECH_BRAND.name}</strong> — POS + stoc + rețete
         </span>
         {brand ? (
           <span>
-            <strong className="text-slate-800">{brand.name}</strong> — {brand.market === "ro" ? "RO market" : "global"}
+            <strong className="text-slate-800">{brand.name}</strong>
           </span>
         ) : null}
       </div>

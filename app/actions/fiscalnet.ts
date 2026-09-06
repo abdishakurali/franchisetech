@@ -19,7 +19,7 @@ import { stringValue, numberValue } from "@/lib/kitchenops/data";
 import {
   printFiscalReceipt,
   fiscalXReport, fiscalZReport, fiscalStatus,
-  fiscalOpenDrawer, fiscalCashIn, fiscalCashOut, fiscalVoidLast,
+  fiscalCashIn, fiscalCashOut, fiscalVoidLast,
   DEFAULT_VAT_GROUPS, DEFAULT_PAYMENT_TYPE_MAP,
 } from "@/lib/fiscalnet";
 import type { FiscalLineItem, VatGroup, FiscalPaymentCode } from "@/lib/fiscalnet";
@@ -28,7 +28,6 @@ import {
   buildCashInLines,
   buildCashOutLines,
   buildCommandFilename,
-  buildDrawerLines,
   buildXReportLines,
   buildZReportLines,
   linesToFileContent,
@@ -272,31 +271,6 @@ export async function fiscalVoidLastAction(): Promise<{ ok: boolean; message: st
 
   const config = buildFiscalNetConfig(org);
   return fiscalVoidLast(config, { supabase, orgId, performedBy: user.id });
-}
-
-// ── Open drawer ───────────────────────────────────────────────────────────
-
-export async function fiscalDrawerAction(): Promise<FiscalActionResult> {
-  const { supabase, orgId, membership, user } = await getActiveOrg();
-  if (!canManage(membership.role)) return { ok: false, message: "Permission denied." };
-  try {
-    await assertEntitlement(orgId, "fiscal.fiscalnet", { write: false });
-  } catch (error) {
-    if (error instanceof EntitlementDeniedError) return { ok: false, message: error.body.error };
-    throw error;
-  }
-
-  const org = await getOrgWithFiscal(supabase, orgId);
-  if (!org || org.country_code !== "RO" || !org.fiscalnet_enabled) {
-    return { ok: false, message: "FiscalNet not active." };
-  }
-
-  const config = buildFiscalNetConfig(org);
-  console.info("[FiscalNet] drawer requested", { mode: config.connectionMode, bonuriPathNull: !config.bonuriPath, raspunsPathNull: !config.raspunsPath });
-  if (config.connectionMode === "file") {
-    return fiscalDownload("drawer", "DRAWER", buildDrawerLines());
-  }
-  return fiscalOpenDrawer(config, { supabase, orgId, performedBy: user.id });
 }
 
 // ── X Report ─────────────────────────────────────────────────────────────

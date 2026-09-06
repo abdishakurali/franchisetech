@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { OrgVatRate } from "@/lib/vat-rates";
 import { formatRatePercent, ratesMatch } from "@/lib/vat-rates";
+import { useAppI18n } from "@/lib/app-i18n-context";
 
 type Props = {
   rates: OrgVatRate[];
@@ -31,6 +32,7 @@ export function VatRateSelect({
   className = "",
   settingsHint = true,
 }: Props) {
+  const { t } = useAppI18n();
   const activeRates = useMemo(
     () => rates.filter((r) => r.active !== false).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.rate - b.rate),
     [rates]
@@ -157,7 +159,7 @@ export function VatRateSelect({
               </button>
             ))
           ) : (
-            <div className="px-3 py-2 text-xs text-slate-400">No matching VAT rate</div>
+            <div className="px-3 py-2 text-xs text-slate-400">{t.common.noMatchingOption}</div>
           )}
         </div>,
         portalTarget,

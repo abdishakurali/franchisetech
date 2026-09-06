@@ -20,10 +20,8 @@ import { VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 import Link from "next/link";
 import { CopyReferralButton } from "@/components/app/CopyReferralButton";
 import { ensureReferralCode } from "@/lib/referrals";
-import { CashDrawerSettingsCard } from "@/components/app/CashDrawerSettingsCard";
 import { FiscalNetSettingsCard } from "@/components/app/FiscalNetSettingsCard";
 import { SettingsTabNav } from "@/components/app/SettingsTabNav";
-import type { CashDrawerMode } from "@/lib/cash-drawer";
 import { FormSelect } from "@/components/app/FormSelect";
 import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
@@ -36,16 +34,6 @@ import { CuiLookupCard } from "@/components/app/CuiLookupCard";
 import { OwnerDigestCard, type OwnerDigestTeamMember } from "@/components/app/OwnerDigestCard";
 import { BillingPanel } from "@/components/billing/BillingPanel";
 import { CheckCircle2, Circle, AlertCircle, ExternalLink } from "lucide-react";
-
-const DEFAULT_CASH_DRAWER = {
-  cash_drawer_mode: "manual" as CashDrawerMode,
-  cash_drawer_connector_port: 17878,
-  cash_drawer_connector_token: null as string | null,
-  cash_drawer_trigger_on_cash_sale: true,
-  cash_drawer_trigger_on_cash_in: true,
-  cash_drawer_trigger_on_cash_out: true,
-  cash_drawer_last_status: "Not checked",
-};
 
 const COUNTRY_OPTIONS = [
   { code: "IE", label: "Ireland" },
@@ -140,17 +128,6 @@ export default async function SettingsPage({
 
   const fiscalnetEnabled = Boolean(orgRow?.fiscalnet_enabled ?? false);
   const efacturaEnabled = Boolean(orgRow?.efactura_enabled ?? false);
-
-  // Cash drawer
-  let drawerOrg = DEFAULT_CASH_DRAWER;
-  try {
-    const { data, error } = await supabase
-      .from("organisations")
-      .select("cash_drawer_mode,cash_drawer_connector_port,cash_drawer_connector_token,cash_drawer_trigger_on_cash_sale,cash_drawer_trigger_on_cash_in,cash_drawer_trigger_on_cash_out,cash_drawer_last_status")
-      .eq("id", orgId)
-      .maybeSingle();
-    if (!error && data) drawerOrg = { ...DEFAULT_CASH_DRAWER, ...data };
-  } catch { drawerOrg = DEFAULT_CASH_DRAWER; }
 
   // Units
   let unitsResult: { data: Array<{ id: string; name: string; abbreviation: string | null; organisation_id: string | null }> } = { data: [] };
@@ -250,6 +227,25 @@ export default async function SettingsPage({
     sagaProductCount = sagaCount.count ?? 0;
   }
 
+  // VAT review queue — products blocked from POS pending accountant approval.
+  // Once compliance_enforcement_at passes, unapproved products hard-fail at sale time
+  // (post_pos_document raises PRODUCT_VAT_REVIEW_REQUIRED), so owners need advance warning.
+  let vatReviewCount = 0;
+  const complianceEnforcementAt = (orgRow?.compliance_enforcement_at as string | null) ?? null;
+  if (isRO) {
+    const { count } = await supabase
+      .from("products")
+      .select("*", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("active", true)
+      .eq("is_sellable", true)
+      .in("vat_status", ["pending", "ambiguous"]);
+    vatReviewCount = count ?? 0;
+  }
+  const daysUntilEnforcement = complianceEnforcementAt
+    ? Math.ceil((new Date(complianceEnforcementAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+    : null;
+
   const sagaGestiuneCode = (orgRow?.saga_gestiune_code as string | null) ?? null;
   const sagaInstalled = Boolean(orgRow?.saga_export_enabled ?? false);
   const accountantStepsDone = [
@@ -270,6 +266,7 @@ export default async function SettingsPage({
     { id: "notifications",label: isRO ? "Notificări" : t.settings.tabNotifications },
     { id: "billing",      label: t.settings.tabBilling },
     { id: "team", label: isRO ? "Echipă" : "Team", href: "/app/settings/team" },
+    ...(isRO ? [{ id: "data-repair", label: "Controlul datelor", href: "/app/settings/data-repair" }] : []),
   ];
 
   return (
@@ -278,6 +275,29 @@ export default async function SettingsPage({
         <h1 className="text-2xl font-semibold text-slate-950">{t.settings.title}</h1>
         <p className="text-sm text-slate-500 mt-1">{t.settings.subtitleSimple}</p>
       </div>
+
+      {vatReviewCount > 0 && (
+        <Link
+          href="/app/settings/data-repair"
+          className={`mb-6 flex items-start gap-3 rounded-lg border p-4 text-sm ${
+            daysUntilEnforcement !== null && daysUntilEnforcement <= 3
+              ? "border-red-300 bg-red-50 text-red-900"
+              : "border-amber-300 bg-amber-50 text-amber-900"
+          }`}
+        >
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+          <div>
+            <p className="font-semibold">
+              {vatReviewCount} {vatReviewCount === 1 ? "produs are" : "produse au"} nevoie de validare TVA
+            </p>
+            <p className="mt-0.5">
+              {daysUntilEnforcement !== null && daysUntilEnforcement > 0
+                ? `Aceste produse vor deveni nevandabile la casă în ${daysUntilEnforcement} ${daysUntilEnforcement === 1 ? "zi" : "zile"}, dacă nu sunt aprobate. Mergeți la Controlul datelor pentru a le revizui.`
+                : "Aceste produse pot fi deja blocate la vânzare. Mergeți la Controlul datelor pentru a le revizui."}
+            </p>
+          </div>
+        </Link>
+      )}
 
       <SettingsTabNav tabs={tabs} />
 
@@ -562,23 +582,6 @@ export default async function SettingsPage({
             </CardContent>
           </Card>
 
-          {/* Cash drawer */}
-          <CashDrawerSettingsCard
-            settings={{
-              mode: drawerOrg?.cash_drawer_mode ?? "manual",
-              port: drawerOrg?.cash_drawer_connector_port ?? 17878,
-              token: drawerOrg?.cash_drawer_connector_token ?? null,
-              triggerOnCashSale: drawerOrg?.cash_drawer_trigger_on_cash_sale ?? true,
-              triggerOnCashIn: drawerOrg?.cash_drawer_trigger_on_cash_in ?? true,
-              triggerOnCashOut: drawerOrg?.cash_drawer_trigger_on_cash_out ?? true,
-              lastStatus: drawerOrg?.cash_drawer_last_status ?? "Not checked",
-            }}
-          />
-          <div className="flex justify-end">
-            <a href="/app/settings/cash-drawer-audit" className="text-sm text-blue-600 hover:underline">
-              View cash drawer audit log &rarr;
-            </a>
-          </div>
         </div>
       )}
 

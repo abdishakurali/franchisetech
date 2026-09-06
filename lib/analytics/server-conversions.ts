@@ -8,6 +8,8 @@ type ReportPaidConversionInput = {
   gbraid?: string | null;
   wbraid?: string | null;
   gaClientId?: string | null;
+  fbclid?: string | null;
+  email?: string | null;
   amountCents: number;
   currency: string;
   transactionId: string;
@@ -123,6 +125,73 @@ function googleAdsDateTime(date: Date): string {
   return `${iso.slice(0, 10)} ${iso.slice(11, 19)}+00:00`;
 }
 
+type MetaCapiInput = {
+  eventName: "StartTrial" | "Purchase";
+  /** Stable per-conversion id — lets a future client-side pixel dedupe against this server event. */
+  eventId: string;
+  email?: string | null;
+  fbclid?: string | null;
+  value?: { amountCents: number; currency: string };
+};
+
+async function sha256Lower(value: string): Promise<string> {
+  const { createHash } = await import("node:crypto");
+  return createHash("sha256").update(value.trim().toLowerCase()).digest("hex");
+}
+
+/**
+ * Sends a server-side event to Meta's Conversions API (no client-side pixel
+ * exists yet, so this is the only Meta-side signal). No-op unless
+ * META_PIXEL_ID and META_CAPI_ACCESS_TOKEN are set. Needs at least an email
+ * or an fbclid to be worth sending — with neither, Meta has nothing to match
+ * the event against.
+ */
+async function uploadMetaCapiEvent(input: MetaCapiInput): Promise<void> {
+  const pixelId = process.env.META_PIXEL_ID;
+  const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
+  if (!pixelId || !accessToken) return;
+  if (!input.email && !input.fbclid) return;
+
+  const userData: Record<string, unknown> = {};
+  if (input.email) userData.em = [await sha256Lower(input.email)];
+  // Meta's required fbc format: fb.<subdomainIndex>.<creationTime>.<fbclid>
+  if (input.fbclid) userData.fbc = `fb.1.${Date.now()}.${input.fbclid}`;
+
+  try {
+    const res = await fetch(
+      `https://graph.facebook.com/v21.0/${pixelId}/events?access_token=${encodeURIComponent(accessToken)}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          data: [
+            {
+              event_name: input.eventName,
+              event_time: Math.floor(Date.now() / 1000),
+              event_id: input.eventId,
+              action_source: "website",
+              user_data: userData,
+              ...(input.value
+                ? {
+                    custom_data: {
+                      value: input.value.amountCents / 100,
+                      currency: input.value.currency.toLowerCase(),
+                    },
+                  }
+                : {}),
+            },
+          ],
+        }),
+      }
+    );
+    if (!res.ok) {
+      console.error("[conversions] meta capi upload failed", res.status, await res.text().catch(() => ""));
+    }
+  } catch (err) {
+    console.error("[conversions] meta capi upload threw", err);
+  }
+}
+
 /**
  * Sends a GA4 `purchase` event via the Measurement Protocol, attributed to the
  * original session via the stored `_ga` client_id. Requires GA4_API_SECRET
@@ -180,6 +249,13 @@ export async function reportPaidConversion(input: ReportPaidConversionInput): Pr
         })
       : Promise.resolve(),
     sendGa4Purchase(input),
+    uploadMetaCapiEvent({
+      eventName: "Purchase",
+      eventId: input.transactionId,
+      email: input.email,
+      fbclid: input.fbclid,
+      value: { amountCents: input.amountCents, currency: input.currency },
+    }),
   ]);
 }
 
@@ -188,6 +264,8 @@ type ReportTrialConversionInput = {
   gclid?: string | null;
   gbraid?: string | null;
   wbraid?: string | null;
+  fbclid?: string | null;
+  email?: string | null;
 };
 
 /**
@@ -198,12 +276,22 @@ type ReportTrialConversionInput = {
  */
 export async function reportTrialConversion(input: ReportTrialConversionInput): Promise<void> {
   const conversionActionId = process.env.GOOGLE_ADS_TRIAL_CONVERSION_ACTION_ID;
-  if (!conversionActionId) return;
-  await uploadGoogleAdsClickConversion({
-    gclid: input.gclid,
-    gbraid: input.gbraid,
-    wbraid: input.wbraid,
-    conversionActionId,
-    transactionId: `trial_${input.organisationId}`,
-  });
+  const eventId = `trial_${input.organisationId}`;
+  await Promise.allSettled([
+    conversionActionId
+      ? uploadGoogleAdsClickConversion({
+          gclid: input.gclid,
+          gbraid: input.gbraid,
+          wbraid: input.wbraid,
+          conversionActionId,
+          transactionId: eventId,
+        })
+      : Promise.resolve(),
+    uploadMetaCapiEvent({
+      eventName: "StartTrial",
+      eventId,
+      email: input.email,
+      fbclid: input.fbclid,
+    }),
+  ]);
 }
