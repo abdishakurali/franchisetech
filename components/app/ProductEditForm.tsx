@@ -18,6 +18,7 @@ import type { ProductModuleVisibility } from "@/lib/product-module-fields";
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import { KITCHEN_STATIONS } from "@/lib/kitchen-stations";
+import { unitLabel } from "@/lib/units-of-measure";
 
 type ProductRecord = {
   id: string;
@@ -122,7 +123,7 @@ export function ProductEditForm({
   returnTo,
 }: Props) {
   const router = useRouter();
-  const { t: i18n } = useAppI18n();
+  const { t: i18n, locale } = useAppI18n();
   const pf = i18n.productsForm;
   const formRef = useRef<HTMLFormElement>(null);
   const [saving, setSaving] = useState(false);
@@ -131,7 +132,7 @@ export function ProductEditForm({
   const [availableInPos, setAvailableInPos] = useState(product.available_in_pos !== false);
   const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
   const posCategoryOptions = posCategories.map((c) => ({ value: c.id, label: c.name }));
-  const unitOptions = units.map((u) => ({ value: u, label: u }));
+  const unitOptions = units.map((u) => ({ value: u, label: unitLabel(u, locale) }));
   const supplierOptions = suppliers.map((s) => ({ value: s.id, label: s.name }));
   const stationOptions = KITCHEN_STATIONS.map((s) => ({ value: s.value, label: s.label }));
 
@@ -219,7 +220,7 @@ export function ProductEditForm({
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.basics}</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <Label htmlFor="product-name">Product name *</Label>
+                    <Label htmlFor="product-name">{pf.productName} *</Label>
                     <Input
                       id="product-name"
                       name="name"
@@ -234,7 +235,7 @@ export function ProductEditForm({
                       <Label htmlFor="product-category">{pf.category}</Label>
                       <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{t.manageCategories}</Link>
                     </div>
-                    <SearchableSelect name="category_id" options={categoryOptions} defaultValue={product.category_id} placeholder="— none —" searchPlaceholder={pf.category} className="mt-1.5" />
+                    <SearchableSelect name="category_id" options={categoryOptions} defaultValue={product.category_id} placeholder={pf.none} searchPlaceholder={pf.category} className="mt-1.5" />
                   </div>
                   {availableInPos && (
                     <div className="sm:col-span-2">
@@ -242,7 +243,7 @@ export function ProductEditForm({
                         <Label>{t.posCategory}</Label>
                         <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{t.manageCategories}</Link>
                       </div>
-                      <SearchableSelect name="pos_category_id" options={posCategoryOptions} defaultValue={product.pos_category_id ?? null} placeholder="— none —" searchPlaceholder={t.posCategory} className="mt-1.5" />
+                      <SearchableSelect name="pos_category_id" options={posCategoryOptions} defaultValue={product.pos_category_id ?? null} placeholder={pf.none} searchPlaceholder={t.posCategory} className="mt-1.5" />
                     </div>
                   )}
                 </div>
@@ -287,8 +288,8 @@ export function ProductEditForm({
                 </div>
               </div>
               <div>
-                <Label htmlFor="unit">Unit</Label>
-                <SearchableSelect name="unit_of_measure" options={unitOptions} defaultValue={product.unit_of_measure ?? "each"} required searchPlaceholder="Unit" className="mt-1.5" />
+                <Label htmlFor="unit">{pf.unit}</Label>
+                <SearchableSelect name="unit_of_measure" options={unitOptions} defaultValue={product.unit_of_measure ?? "each"} required searchPlaceholder={pf.unit} className="mt-1.5" />
               </div>
             </div>
           </CardContent>
@@ -335,7 +336,7 @@ export function ProductEditForm({
             {visibility.inventory && suppliers.length > 0 && (
               <div>
                 <Label htmlFor="supplier">{t.supplier}</Label>
-                <SearchableSelect name="supplier_id" options={supplierOptions} defaultValue={product.supplier_id} placeholder="— none —" searchPlaceholder={t.supplier} className="mt-1.5" />
+                <SearchableSelect name="supplier_id" options={supplierOptions} defaultValue={product.supplier_id} placeholder={pf.none} searchPlaceholder={t.supplier} className="mt-1.5" />
               </div>
             )}
           </CardContent>
@@ -348,13 +349,13 @@ export function ProductEditForm({
           </summary>
           <div className="space-y-4 border-t border-slate-100 px-4 py-4">
             <div>
-              <Label htmlFor="sku">SKU</Label>
-              <Input id="sku" name="sku" defaultValue={product.sku ?? ""} placeholder="optional" className="mt-1.5 max-w-md" />
+              <Label htmlFor="sku">{pf.skuOptional}</Label>
+              <Input id="sku" name="sku" defaultValue={product.sku ?? ""} className="mt-1.5 max-w-md" />
             </div>
             {kitchenStationsEnabled && (
               <div>
-                <Label htmlFor="kitchen-station">Kitchen station</Label>
-                <SearchableSelect name="kitchen_station" options={stationOptions} defaultValue={product.kitchen_station} placeholder="— all stations —" searchPlaceholder="Kitchen station" className="mt-1.5 max-w-md" />
+                <Label htmlFor="kitchen-station">{pf.kitchenStation}</Label>
+                <SearchableSelect name="kitchen_station" options={stationOptions} defaultValue={product.kitchen_station} placeholder={pf.allStations} searchPlaceholder={pf.kitchenStation} className="mt-1.5 max-w-md" />
               </div>
             )}
           </div>

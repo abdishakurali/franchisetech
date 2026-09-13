@@ -128,6 +128,10 @@ export default async function TransactionDetailPage({
       : t.common.walkInCustomer;
   const paymentName = method?.name || r.payment;
   const statusVoided = tx.status === "voided";
+  const fiscalNotConfirmed =
+    Boolean(tx.fiscal_receipt_required) &&
+    tx.fiscal_receipt_status !== "success" &&
+    tx.fiscal_receipt_status !== "not_required";
 
   const canVoid = membership.role === "owner" || membership.role === "manager";
 
@@ -185,6 +189,11 @@ export default async function TransactionDetailPage({
           {statusVoided && (
             <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700 font-medium">
               {t.transactions.statusVoided.toUpperCase()}
+            </div>
+          )}
+          {!statusVoided && fiscalNotConfirmed && (
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800 font-medium">
+              {r.fiscalNotConfirmed}
             </div>
           )}
         </CardHeader>

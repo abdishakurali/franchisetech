@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Cursor IDE
 .cursor/
+
+# Local agent worktrees
+.worktrees/

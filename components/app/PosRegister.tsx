@@ -57,6 +57,8 @@ import {
   listOfflineQueue,
   listPendingSync,
   markOfflineSaleSynced,
+  markOfflineSaleNeedsAttention,
+  OfflineQueueFullError,
   payloadToFormData,
   removeOfflineSale,
   markOfflineSaleSyncFailed,
@@ -897,6 +899,10 @@ function PosRegisterInner({
     () => offlineQueue.filter((q) => q.status === "pending_fiscal"),
     [offlineQueue]
   );
+  const pendingAttentionSales = useMemo(
+    () => offlineQueue.filter((q) => q.status === "needs_attention"),
+    [offlineQueue]
+  );
 
   // Offline probe removed — unreliable on slow connections and caused false offline detection.
 
@@ -1107,7 +1113,24 @@ function PosRegisterInner({
         return;
       }
       if (action === "queue") {
-        enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
+        try {
+          enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
+        } catch (queueErr) {
+          if (queueErr instanceof OfflineQueueFullError) {
+            // Queue is at capacity — block the sale instead of silently evicting an
+            // older, still-unsynced one. Cart and retry payload are preserved so the
+            // cashier can retry once the queue is synced or cleared.
+            setSaleStatus({ ok: false, msg: t.offlineQueueFull });
+            setSalePending(false);
+            setLastCompletedSale((prev) =>
+              prev
+                ? { ...prev, status: "failed", retryPayload: payload, errorMsg: t.offlineQueueFull }
+                : { amountLabel, status: "failed", retryPayload: payload, errorMsg: t.offlineQueueFull },
+            );
+            return;
+          }
+          throw queueErr;
+        }
         clearCartBackupFromStorage();
         resetCartAfterSale();
         setPaymentCartSnapshot(null);
@@ -1267,7 +1290,10 @@ function PosRegisterInner({
       );
       const res = await Promise.race([syncPromise, timeoutPromise]);
       if (!res.ok || !res.transactionId) {
-        markOfflineSaleSyncFailed(
+        // The server gave a definite answer (not a network/timeout exception), so retrying
+        // the identical payload will fail again — mark it terminal so the 60s/reconnect
+        // auto-sync stops hammering it. A human can still trigger a manual resend below.
+        markOfflineSaleNeedsAttention(
           entry.id,
           !res.ok ? friendlySaleErrorFromCode(res.code, res.error, locale) : t.saleSaveFailed,
         );
@@ -1327,7 +1353,11 @@ function PosRegisterInner({
 
   async function resendQueuedSale(id: string) {
     if (syncingOfflineRef.current) return;
-    const entry = listOfflineQueue().find((q) => q.id === id && q.status === "pending_sync");
+    // Manual resend (unlike the automatic 60s/reconnect flush) is allowed for
+    // needs_attention entries too — staff use it after fixing the underlying issue.
+    const entry = listOfflineQueue().find(
+      (q) => q.id === id && (q.status === "pending_sync" || q.status === "needs_attention"),
+    );
     if (!entry) return;
     syncingOfflineRef.current = true;
     setSyncingOffline(true);
@@ -1677,6 +1707,7 @@ function PosRegisterInner({
           browserOffline={browserOffline}
           pendingSync={pendingSyncSales}
           pendingFiscal={pendingFiscalSales}
+          needsAttention={pendingAttentionSales}
           syncing={syncingOffline}
           onQueueChange={() => setOfflineQueue(listOfflineQueue())}
           onSyncAll={() => void flushAllPending()}

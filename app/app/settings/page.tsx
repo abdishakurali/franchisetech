@@ -794,24 +794,24 @@ export default async function SettingsPage({
           {referral.available && referral.link && (
             <Card>
               <CardHeader>
-                <CardTitle>Referrals</CardTitle>
+                <CardTitle>{t.referrals.title}</CardTitle>
                 <p className="text-sm text-slate-500">
-                  Share your link. You earn <strong>1 free month</strong> when your invited user makes their first payment.
+                  {t.referrals.shareBefore}<strong>{t.referrals.shareBold}</strong>{t.referrals.shareAfter}
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div>
-                    <p className="text-sm text-slate-500">Referral code</p>
+                    <p className="text-sm text-slate-500">{t.referrals.code}</p>
                     <p className="font-medium">{referral.code}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-500">Credit earned</p>
-                    <p className="font-medium">{referral.creditMonths} month{referral.creditMonths === 1 ? "" : "s"}</p>
+                    <p className="text-sm text-slate-500">{t.referrals.creditEarned}</p>
+                    <p className="font-medium">{t.referrals.months(referral.creditMonths)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-500">Trial</p>
-                    <p className="font-medium">{referral.daysLeft !== null ? `${referral.daysLeft} days left` : "15 days"}</p>
+                    <p className="text-sm text-slate-500">{t.referrals.trial}</p>
+                    <p className="font-medium">{referral.daysLeft !== null ? t.referrals.daysLeft(referral.daysLeft) : t.referrals.daysLeftDefault}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -819,19 +819,19 @@ export default async function SettingsPage({
                   <CopyReferralButton link={referral.link} />
                 </div>
                 {referral.creditMonths > 0 && (
-                  <p className="text-sm text-blue-700">Your free month credit is recorded and will be applied before billing.</p>
+                  <p className="text-sm text-blue-700">{t.referrals.creditAppliedNote}</p>
                 )}
                 <div className="space-y-2">
-                  <p className="text-sm font-medium">People invited</p>
+                  <p className="text-sm font-medium">{t.referrals.peopleInvited}</p>
                   {referral.referrals.length ? (
                     referral.referrals.map((r) => (
                       <div key={r.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
-                        <span>{r.referred_email || "New business"}</span>
-                        <span className="capitalize text-slate-500">{r.status} &middot; {r.credit_months ?? 1} month</span>
+                        <span>{r.referred_email || t.referrals.newBusiness}</span>
+                        <span className="text-slate-500">{r.status ? (t.referrals.status[r.status] ?? r.status) : ""} &middot; {t.referrals.months(r.credit_months ?? 1)}</span>
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-slate-500">No referrals yet.</p>
+                    <p className="text-sm text-slate-500">{t.referrals.noReferralsYet}</p>
                   )}
                 </div>
               </CardContent>

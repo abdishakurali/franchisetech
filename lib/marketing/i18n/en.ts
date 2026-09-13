@@ -134,7 +134,7 @@ export const en = {
       titleAfter: " where the money went.",
       subtitle: "franchisetech shows sales, cash, card, margin, and stock gaps before you go home.",
       socialProof: "For owners who want daily control, not complicated reports at month end.",
-      trialNote: "€1 card verification · Guided in-app setup · Cancel anytime",
+      trialNote: "No card required · Guided in-app setup · Cancel anytime",
       trustSignals: [
         { title: "No surprises at close", text: "Cash, card, and differences visible before the site closes." },
         { title: "Fast first sale", text: "Demo products, open till, and guided checkout in one session." },
@@ -321,7 +321,7 @@ export const en = {
     faq: {
       title: "Questions from owners",
       items: [
-        { question: "How does the 15-day trial work?", answer: "The trial starts after a one-time €1 card verification via Stripe. It's not a subscription — monthly billing begins only if you choose a plan at the end." },
+        { question: "How does the 15-day trial work?", answer: "The trial starts immediately, no card required. It's not a subscription — monthly billing begins only if you choose a plan at the end." },
         { question: "Do I need special POS hardware?", answer: "The app runs in a browser on supported devices. Fiscal hardware and FiscalNet compatibility are checked separately." },
         { question: "Can I see margins on menu items?", answer: "Yes. Recipe costing links ingredients to sale price so you see cost per portion and gross margin before you change the menu." },
         { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
@@ -340,7 +340,7 @@ export const en = {
     heroText: "Products, POS, FiscalNet, VAT, and Z-report in one simple flow. No per-seat pricing.",
     compareCallout: {
       title: "Evaluating other tools?",
-      text: "Honest comparisons vs Ebriza, SmartBill, Oblio, Bit-Soft, and more — including when rivals charge extra for reporting.",
+      text: "Honest comparisons vs Ebriza, SmartBill, Expressoft, and more — including when rivals charge extra for reporting.",
       cta: "Compare POS software",
       href: "/compare",
     },
@@ -443,11 +443,11 @@ export const en = {
   },
   pricing: {
     title: "franchisetech Pricing",
-    description: "Core is €49/location/month and Operations is €79/location/month. The 15-day trial starts after a one-time €1 card verification.",
+    description: "Core is €49/location/month and Operations is €79/location/month. The 15-day trial starts immediately, no card required.",
     badge: "Simple pricing",
     heroTitle: "Two plans with clear per-location pricing.",
     heroText: "Core covers sales and daily close. Operations adds stock, purchasing, and recipes.",
-    heroStatFrom: "€1 card verification",
+    heroStatFrom: "No card required",
     heroStatTrial: "15-day trial",
     heroStatTill: "No long-term contract",
     seeFeatures: "See all features",
@@ -472,7 +472,7 @@ export const en = {
     fairnessItems: [
       "Unlimited staff — no per-user fees",
       "No hardware lock-in or terminal contracts",
-      "15-day trial after a €1 card verification",
+      "15-day trial, no card required",
       "Cancel anytime — no long-term lock-in",
       "Existing subscribers keep their rate when prices change",
     ],
@@ -504,19 +504,19 @@ export const en = {
           href: "/compare/ebriza",
         },
         {
-          name: "Oblio vs daily POS",
-          summary: "Oblio is ~€2.49/month for unlimited invoicing — excellent for e-Factura. franchisetech Core (€49) is for till sessions, stock, recipes, and Z-style close — different job.",
-          href: "/compare/oblio",
-        },
-        {
           name: "SmartBill vs operations",
           summary: "SmartBill Silver from ~€5.84/month covers invoicing; Gestiune adds stock from ~€16/month. Strong for documents — franchisetech targets HORECA till + margins in one browser workspace.",
           href: "/compare/smartbill",
         },
         {
-          name: "Bit-Soft enterprise",
-          summary: "Bit-Soft Breeze serves chains and hotels with quote-based pricing. franchisetech publishes €49–€109/month for independent 1–3 location venues.",
-          href: "/compare/bit-soft",
+          name: "Expressoft enterprise",
+          summary: "Expressoft serves large HoReCa/retail chains with dedicated, weeks-long rollouts. franchisetech lists €49–€109/month with a self-serve trial for independent 1–3 location venues.",
+          href: "/compare/expressoft",
+        },
+        {
+          name: "Boogit (delivery vs POS)",
+          summary: "Boogit's own POS pricing isn't published — its FAQ mentions a setup fee plus a quote-based subscription. franchisetech lists €49–€109/month on the site, no setup fee.",
+          href: "/compare/boogit",
         },
       ],
     },
@@ -581,14 +581,14 @@ export const en = {
     homeTeaser: {
       label: "Pricing",
       title: "One workspace. One price per shop.",
-      text: "From {starter}/location/month. The 15-day trial starts after a €1 card verification. No long-term contract.",
+      text: "From {starter}/location/month. The 15-day trial starts immediately, no card required. No long-term contract.",
       cta: "See all plans",
     },
   },
   auth: {
     loginTitle: "Sign in to franchisetech",
     signupTitle: "Start your free account",
-    signupDescription: "Guided setup. The 15-day trial starts after a €1 card verification.",
+    signupDescription: "Guided setup. The 15-day trial starts immediately, no card required.",
     signupLegal: "By signing up you agree that franchisetech supports your records — it does not replace your legal obligations as a food business operator.",
     email: "Email",
     password: "Password",

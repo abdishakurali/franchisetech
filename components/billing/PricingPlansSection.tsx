@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { captureClientEvent } from "@/lib/analytics/client-events";
@@ -214,7 +213,14 @@ export function PricingPlansSection({
   labels,
   locale = "en",
 }: Props) {
-  const [interval, setInterval] = useState<"month" | "year">("year");
+  // Annual billing is hidden, not just defaulted away from: the live annual
+  // Stripe prices are misconfigured (return the monthly-equivalent amount
+  // instead of the annual total — see docs/adr/0002-annual-pricing-blocked.md),
+  // so checkout on annual 503s every time. A visible toggle that fails on
+  // click is worse than not offering the choice — re-enable once the Stripe
+  // prices are corrected to actually charge the annual total on a yearly
+  // interval.
+  const interval: "month" | "year" = "month";
   const l = labels ?? DEFAULT_LABELS[locale];
 
   const mainPlans = pricingPlans.filter((plan) => plan.id === "starter" || plan.id === "pro");
@@ -227,46 +233,11 @@ export function PricingPlansSection({
         </div>
       )}
 
-      {/* Monthly / Annual toggle */}
-      <div className="flex items-center justify-center gap-3">
-        <button
-          onClick={() => setInterval("month")}
-          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-            interval === "month"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-          }`}
-        >
-          {localizedText(locale, "Monthly", "Lunar")}
-        </button>
-        <button
-          onClick={() => setInterval("year")}
-          className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-            interval === "year"
-              ? "bg-slate-900 text-white"
-              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-          }`}
-        >
-          {localizedText(locale, "Annual", "Anual")}
-          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-            interval === "year" ? "bg-emerald-400 text-emerald-900" : "bg-emerald-100 text-emerald-700"
-          }`}>
-            {localizedText(locale, "Save 20%", "Economisești 20%")}
-          </span>
-        </button>
-      </div>
-
-      {interval === "year" && (
-        <p className="text-center text-sm text-slate-500">
-          {localizedText(locale, "Billed annually - pay for 10 months and get 12.", "Facturat anual - plătiți 10 luni și primiți 12.")}
-        </p>
-      )}
-
       {/* Main plan cards */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {mainPlans.map((plan) => {
-          const displayPrice = interval === "year" ? plan.annualPrice : plan.price;
-          const displayCadence = interval === "year" ? plan.annualCadence : plan.cadence;
+          const displayPrice = plan.price;
+          const displayCadence = plan.cadence;
           const shortName = PLAN_SHORT_NAMES[plan.id];
 
           return (
@@ -286,7 +257,7 @@ export function PricingPlansSection({
               </p>
               <p className="mt-2 text-4xl font-bold text-slate-900">{displayPrice}</p>
               <p className="text-sm text-slate-500">
-                {interval === "year" ? localizedText(locale, displayCadence, "/lună, facturat anual") : localizedText(locale, displayCadence, "/lună")}
+                {localizedText(locale, displayCadence, "/lună")}
               </p>
               <p className="mt-4 text-sm leading-6 text-slate-600">{localizedPlanDescription(locale, plan.id, market)}</p>
               <PlanFeaturesAccordion planId={plan.id} market={market} seeFeatures={l.seeFeatures} locale={locale} />
@@ -320,8 +291,8 @@ export function PricingPlansSection({
         const scale = pricingPlans.find((p) => p.id === "scale");
         const multi = pricingPlans.find((p) => p.id === "multi_location");
         if (!scale || !multi) return null;
-        const scalePrice = interval === "year" ? scale.annualPrice : scale.price;
-        const multiPrice = interval === "year" ? multi.annualPrice : multi.price;
+        const scalePrice = scale.price;
+        const multiPrice = multi.price;
         return (
           <div className="rounded-2xl border-2 border-slate-200 bg-white p-6 sm:p-8">
             <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">{l.multiTitle}</p>
@@ -386,11 +357,6 @@ export function PricingPlansSection({
         )}
       </div>
 
-      {interval === "month" && (
-        <p className="text-center text-xs text-slate-400">
-          {localizedText(locale, "Switch to annual billing and pay for 10 months, get 12 - saving 20%.", "Treceți la facturare anuală și plătiți 10 luni, primiți 12 - economisiți 20%.")}
-        </p>
-      )}
     </div>
   );
 }

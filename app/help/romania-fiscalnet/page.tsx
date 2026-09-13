@@ -20,7 +20,7 @@ const steps = [
   },
   {
     title: "Assign TVA rates to products",
-    body: "Romanian TVA rates — 21% (standard), 11% (food/hospitality), 5% (reduced), and 0% (exempt) — are pre-loaded. Go to Products, edit each product, and assign the correct TVA rate. Your accountant can confirm which rate applies to each product type.",
+    body: "Romanian TVA rates — 21% (standard), 11% (food/hospitality), and 0% (exempt) — are pre-loaded. Go to Products, edit each product, and assign the correct TVA rate. Your accountant can confirm which rate applies to each product type.",
   },
   {
     title: "Configure FiscalNet credentials",
@@ -38,6 +38,18 @@ const steps = [
     title: "Daily reconciliation with the Z-report",
     body: "At the end of each trading day, go to Reports → Till closes and run the Z-report. This shows daily totals by payment method and TVA rate. Keep a copy for your records — your accountant or fiscal advisor may need it for periodic filings.",
   },
+];
+
+const supportedDevices = [
+  { brand: "Datecs", models: "DP25, DP150, WP500, WP50, DP05 (fiscal registers); FP800, FP700, FP650 (fiscal printers)" },
+  { brand: "Daisy", models: "eXpert SX, Compact M, Perfect M, Compact S" },
+  { brand: "Custom", models: "KSmart, BigPlus (registers); Q3xF, K3F (printers)" },
+  { brand: "Orgtech", models: "Teo, Nova" },
+  { brand: "Partner", models: "Partner 200, Partner 300, Partner 600" },
+  { brand: "Posiflex", models: "AURA 8900 (fiscal printer)" },
+  { brand: "Sam4S", models: "NR-240, NR-300, NR-440" },
+  { brand: "Tremol", models: "Activa Galaxy Plus, Adpos M, Tremol M20, Excel Master, and others" },
+  { brand: "Incotex", models: "SuccesM7" },
 ];
 
 const checklist = [
@@ -96,6 +108,50 @@ export default function RomaniaFiscalNetPage() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Supported FiscalNet devices */}
+      <section className="border-t border-slate-100 px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-xl font-bold text-slate-950">Supported FiscalNet devices</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            FiscalNet is a driver, not a piece of hardware — it runs on a Windows PC and connects to whichever
+            fiscal register or fiscal printer your business already has. It also has an Android companion app.
+            Confirm your exact model against{" "}
+            <a
+              href="https://driverfiscal.ro/echipamente-implementate/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-blue-700 hover:underline"
+            >
+              FiscalNet&apos;s published device list
+            </a>{" "}
+            before buying hardware.
+          </p>
+          <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-4 py-3">Brand</th>
+                  <th className="px-4 py-3">Models</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {supportedDevices.map((device) => (
+                  <tr key={device.brand}>
+                    <td className="px-4 py-3 font-medium text-slate-900">{device.brand}</td>
+                    <td className="px-4 py-3 text-slate-600">{device.models}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-slate-600">
+            FiscalNet is sold separately by FiscalNet or your hardware distributor, licensed per cash register
+            (lifetime or annual). franchisetech connects to FiscalNet once it&apos;s installed and licensed — it
+            does not sell, install, or license the driver itself.
+          </p>
         </div>
       </section>
 

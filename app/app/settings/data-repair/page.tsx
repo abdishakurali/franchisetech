@@ -3,13 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { PRODUCT_INVENTORY_CATEGORY_EMBED } from "@/lib/supabase/product-selects";
 
 export default async function DataRepairPage() {
   const { supabase, orgId, membership } = await getKitchenOpsContext();
   const canManage = ["owner", "manager"].includes(membership.role ?? "");
   const [{ data: products }, { data: rates }, { data: batches }, { data: org }] = await Promise.all([
     supabase.from("products")
-      .select("id,name,vat_rate,vat_status,category,product_categories(name)")
+      .select(`id,name,vat_rate,vat_status,category,${PRODUCT_INVENTORY_CATEGORY_EMBED}(name)`)
       .eq("organisation_id", orgId)
       .in("vat_status", ["pending", "ambiguous"])
       .eq("active", true)
@@ -48,7 +49,7 @@ export default async function DataRepairPage() {
             <TableHeader><TableRow><TableHead>Produs</TableHead><TableHead>Categorie</TableHead><TableHead>Stare</TableHead><TableHead>Cotă aprobată</TableHead></TableRow></TableHeader>
             <TableBody>
               {(products ?? []).map((product) => {
-                const categoryRelation = product.product_categories as unknown as { name?: string | null } | Array<{ name?: string | null }> | null;
+                const categoryRelation = product.inventory_category as unknown as { name?: string | null } | Array<{ name?: string | null }> | null;
                 const category = Array.isArray(categoryRelation) ? categoryRelation[0]?.name : categoryRelation?.name;
                 return (
                   <TableRow key={product.id}>
