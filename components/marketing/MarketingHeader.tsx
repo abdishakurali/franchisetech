@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { useMarketingMessages, useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
 import { MarketingBrand } from "@/components/marketing/MarketingBrand";
+import { MarketingLocaleSwitcher } from "@/components/marketing/MarketingLocaleSwitcher";
 import { marketingCtaPrimary } from "@/lib/marketing/tokens";
 import { PRIMARY_INDUSTRY_NAV } from "@/lib/marketing/industry-verticals";
 import { LEAN_PRODUCT_SCOPE_ENABLED } from "@/lib/product-scope";
@@ -22,6 +23,7 @@ type UserChip = {
 // works while already on the homepage.
 const PRODUCT_MENU = [
   { hrefRo: "/features/pos", hrefEn: "/features/pos", labelRo: "POS", labelEn: "POS" },
+  { hrefRo: "/#offline", hrefEn: "/#offline", labelRo: "Mod offline", labelEn: "Offline mode" },
   { hrefRo: "/features/stock-management", hrefEn: "/features/stock-management", labelRo: "Gestiune", labelEn: "Stock" },
   { hrefRo: "/#conformitate", hrefEn: "/#conformitate", labelRo: "Integrări", labelEn: "Integrations" },
   { hrefRo: "/#hardware", hrefEn: "/#hardware", labelRo: "Hardware", labelEn: "Hardware" },
@@ -208,6 +210,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          <MarketingLocaleSwitcher />
           <div className="hidden items-center gap-4 lg:flex">
             {user ? (
               <>

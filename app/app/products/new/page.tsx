@@ -14,12 +14,12 @@ import { getDefaultVatRateValue } from "@/lib/vat-rates";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { productModuleVisibility } from "@/lib/product-module-fields";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
-import { listOperationalUnitNames } from "@/lib/units-of-measure";
+import { listOperationalUnitNames, unitLabel } from "@/lib/units-of-measure";
 import { KITCHEN_STATIONS } from "@/lib/kitchen-stations";
 
 export default async function ProductsNewPage({ searchParams }: { searchParams?: Promise<{ type?: string }> }) {
   const { supabase, orgId, membership, currency, countryCode, profileLocale } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
+  const { t, locale } = await getAppLocaleAndText(countryCode, profileLocale);
   const pf = t.productsForm;
   const orgInfo = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as { kitchen_stations_enabled?: boolean | null } | null;
   const kitchenStationsEnabled = Boolean(orgInfo?.kitchen_stations_enabled);
@@ -44,7 +44,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
   const defaultVatRate = getDefaultVatRateValue(vatRates);
   const categoryOptions = (inventoryCategories ?? []).map((c: { id: string; name: string }) => ({ value: c.id, label: c.name }));
   const posCategoryOptions = (posCategories ?? []).map((c: { id: string; name: string }) => ({ value: c.id, label: c.name }));
-  const unitOptions = units.map((u) => ({ value: u, label: u }));
+  const unitOptions = units.map((u) => ({ value: u, label: unitLabel(u, locale) }));
   const supplierOptions = (suppliers ?? []).map((s: { id: string; name: string }) => ({ value: s.id, label: s.name }));
   const stationOptions = KITCHEN_STATIONS.map((s) => ({ value: s.value, label: s.label }));
   const sym = currency === "RON" ? "lei" : currency === "GBP" ? "£" : "€";
@@ -71,7 +71,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                     <Input
                       name="name"
                       required
-                      placeholder={defaultIngredient ? "e.g. Chicken, Cos Lettuce, Caesar Dressing" : "e.g. Americano, Chicken Caesar"}
+                      placeholder={defaultIngredient ? pf.ingredientNamePlaceholder : pf.namePlaceholder}
                       autoFocus
                       className="mt-1.5 h-11 text-base"
                     />
@@ -196,7 +196,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
             {kitchenStationsEnabled && (
               <div>
                 <Label>{pf.kitchenStation}</Label>
-                <SearchableSelect name="kitchen_station" options={stationOptions} placeholder="— all stations (default) —" searchPlaceholder={pf.kitchenStation} className="mt-1.5" />
+                <SearchableSelect name="kitchen_station" options={stationOptions} placeholder={pf.allStations} searchPlaceholder={pf.kitchenStation} className="mt-1.5" />
               </div>
             )}
           </CardContent>

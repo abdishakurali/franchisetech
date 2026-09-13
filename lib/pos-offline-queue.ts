@@ -5,13 +5,14 @@
  * - Queued sales live in localStorage on this browser only (not synced across devices).
  * - FiscalNet receipt must be printed manually when back online — sync does not auto-print fiscal.
  * - Stock is not reserved while offline; concurrent tills may oversell.
- * - Duplicate sync is prevented by status: only `pending_sync` entries are flushed.
- * - Max 20 entries; oldest dropped when full.
+ * - Duplicate sync is prevented by status: only `pending_sync` entries are auto-flushed.
+ * - Max 200 entries; enqueueing past that throws OFFLINE_QUEUE_FULL instead of dropping
+ *   an older, unsynced sale — losing a recorded sale silently is worse than blocking checkout.
  */
 
 export type QueuedSalePayload = Record<string, string>;
 
-export type OfflineQueueStatus = "pending_sync" | "pending_fiscal";
+export type OfflineQueueStatus = "pending_sync" | "pending_fiscal" | "needs_attention";
 
 export type QueuedSale = {
   id: string;
@@ -25,7 +26,12 @@ export type QueuedSale = {
 };
 
 const STORAGE_KEY = "pos_offline_sale_queue";
-const MAX_QUEUE = 20;
+const MAX_QUEUE = 200;
+
+function normalizeStatus(status: unknown): OfflineQueueStatus {
+  if (status === "pending_fiscal" || status === "needs_attention") return status;
+  return "pending_sync";
+}
 
 function readQueue(): QueuedSale[] {
   if (typeof localStorage === "undefined") return [];
@@ -35,7 +41,7 @@ function readQueue(): QueuedSale[] {
     if (!Array.isArray(parsed)) return [];
     return parsed.map((entry) => ({
       ...entry,
-      status: entry.status === "pending_fiscal" ? "pending_fiscal" : "pending_sync",
+      status: normalizeStatus(entry.status),
       label: entry.label || "Queued sale",
     }));
   } catch {
@@ -126,7 +132,20 @@ export function payloadToFormData(payload: QueuedSalePayload): FormData {
   return fd;
 }
 
+/** Thrown by enqueueOfflineSale when the queue is at capacity — the caller must block
+ *  the sale and tell the cashier to sync or clear entries rather than losing data. */
+export class OfflineQueueFullError extends Error {
+  constructor() {
+    super("OFFLINE_QUEUE_FULL");
+    this.name = "OfflineQueueFullError";
+  }
+}
+
 export function enqueueOfflineSale(payload: QueuedSalePayload, label: string): QueuedSale {
+  const existing = readQueue();
+  if (existing.length >= MAX_QUEUE) {
+    throw new OfflineQueueFullError();
+  }
   const entry: QueuedSale = {
     id: `offline_${Date.now().toString(36)}`,
     payload,
@@ -134,7 +153,7 @@ export function enqueueOfflineSale(payload: QueuedSalePayload, label: string): Q
     status: "pending_sync",
     label: label.trim() || "Queued sale",
   };
-  writeQueue([entry, ...readQueue()]);
+  writeQueue([entry, ...existing]);
   return entry;
 }
 
@@ -152,6 +171,22 @@ export function markOfflineSaleSyncFailed(id: string, error: string) {
   writeQueue(
     readQueue().map((entry) =>
       entry.id === id ? { ...entry, lastError: error.slice(0, 200) } : entry
+    )
+  );
+}
+
+/**
+ * Marks an entry as permanently rejected by the server (a definite ok:false
+ * response, not a network/timeout exception) so the auto-sync loop stops
+ * retrying it every reconnect/60s tick. A cashier or admin can still trigger
+ * a manual resend once the underlying issue (e.g. a product's VAT status) is fixed.
+ */
+export function markOfflineSaleNeedsAttention(id: string, error: string) {
+  writeQueue(
+    readQueue().map((entry) =>
+      entry.id === id
+        ? { ...entry, status: "needs_attention" as const, lastError: error.slice(0, 200) }
+        : entry
     )
   );
 }
@@ -177,12 +212,21 @@ export function listPendingFiscal(): QueuedSale[] {
   return listOfflineQueue().filter((q) => q.status === "pending_fiscal");
 }
 
+/** Entries the server permanently rejected — excluded from auto-sync; manual resend only. */
+export function listNeedsAttention(): QueuedSale[] {
+  return listOfflineQueue().filter((q) => q.status === "needs_attention");
+}
+
 export function pendingSyncCount(): number {
   return listPendingSync().length;
 }
 
 export function pendingFiscalCount(): number {
   return listPendingFiscal().length;
+}
+
+export function needsAttentionCount(): number {
+  return listNeedsAttention().length;
 }
 
 export function offlineQueueCount(): number {

@@ -4,11 +4,15 @@ export type DemoProductSeed = {
   sort_order: number;
 };
 
-type BusinessCategory = "cafenea" | "takeaway" | "patiserie" | "magazin" | "altele";
+type BusinessCategory = "cafenea" | "restaurant" | "takeaway" | "patiserie" | "magazin" | "altele";
 
 function categorizeBusinessType(businessType: string | undefined | null): BusinessCategory {
   const t = (businessType ?? "").toLowerCase();
   if (t.includes("cafe") || t.includes("café") || t.includes("cafenea")) return "cafenea";
+  // Checked before "takeaway": Romanian "restaurant" and English "restaurant" never
+  // collide with any other branch here, but keep this order if takeaway-style
+  // matching ever loosens (e.g. to match "restaurant & takeaway" combos).
+  if (t.includes("restaurant")) return "restaurant";
   if (t.includes("takeaway")) return "takeaway";
   if (t.includes("patiserie") || t.includes("brutărie") || t.includes("brutarie") || t.includes("bakery")) return "patiserie";
   if (t.includes("magazin") || t.includes("shop")) return "magazin";
@@ -21,6 +25,12 @@ const CATALOG_RO: Record<BusinessCategory, DemoProductSeed[]> = {
     { name: "Croissant", sale_price: 15, sort_order: 2 },
     { name: "Latte", sale_price: 18, sort_order: 3 },
     { name: "Sandwich", sale_price: 32, sort_order: 4 },
+  ],
+  restaurant: [
+    { name: "Ciorbă de legume", sale_price: 15, sort_order: 1 },
+    { name: "Piept de pui la grătar", sale_price: 32, sort_order: 2 },
+    { name: "Salată Caesar", sale_price: 22, sort_order: 3 },
+    { name: "Limonadă", sale_price: 10, sort_order: 4 },
   ],
   takeaway: [
     { name: "Shaorma", sale_price: 22, sort_order: 1 },
@@ -54,6 +64,12 @@ const CATALOG_INTL: Record<BusinessCategory, DemoProductSeed[]> = {
     { name: "Croissant", sale_price: 3.2, sort_order: 2 },
     { name: "Latte", sale_price: 3.8, sort_order: 3 },
     { name: "Sandwich", sale_price: 6.5, sort_order: 4 },
+  ],
+  restaurant: [
+    { name: "Vegetable soup", sale_price: 3.5, sort_order: 1 },
+    { name: "Grilled chicken breast", sale_price: 8.5, sort_order: 2 },
+    { name: "Caesar salad", sale_price: 6, sort_order: 3 },
+    { name: "Lemonade", sale_price: 2.5, sort_order: 4 },
   ],
   takeaway: [
     { name: "Shawarma", sale_price: 4.5, sort_order: 1 },

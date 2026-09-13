@@ -42,6 +42,7 @@ export async function completePosOnboarding(input: {
   countryCode: string;
   anafCif?: string;
   anafVatRegistered?: boolean;
+  anafAddress?: string;
   locationBand: LocationBand;
   ingredientTracking: IngredientTrackingIntent;
   preferredPlan?: BillingPlan;
@@ -131,6 +132,7 @@ export async function completePosOnboarding(input: {
     ingredient_tracking_intent: input.ingredientTracking,
     anaf_cif: input.countryCode === "RO" ? input.anafCif?.trim() || null : null,
     anaf_vat_registered: input.countryCode === "RO" ? Boolean(input.anafVatRegistered) : false,
+    company_address: input.countryCode === "RO" ? input.anafAddress?.trim() || null : null,
     currency_code: currencyCode,
     currency_symbol: currencySymbol,
     referred_by_code: input.referralCode?.trim() || null,

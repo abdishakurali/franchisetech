@@ -75,16 +75,17 @@ export default async function PricingPage() {
         }}
       />
 
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">{t.pricing.heroTitle}</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-600">{t.pricing.heroText}</p>
-          <p className="mx-auto mt-4 max-w-xl text-sm text-slate-500">{heroStats.join(" · ")}</p>
+      <section className="relative overflow-hidden bg-[#0D0F0E] px-4 py-16 sm:px-6 lg:px-8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_70%_at_78%_0%,rgba(22,93,252,0.35),transparent_60%)]" />
+        <div className="relative mx-auto max-w-3xl text-center">
+          <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-[#FAF8F4] sm:text-5xl">{t.pricing.heroTitle}</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-[#FAF8F4]/72">{t.pricing.heroText}</p>
+          <p className="mx-auto mt-4 max-w-xl text-sm text-[#FAF8F4]/50">{heroStats.join(" · ")}</p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
             <Link
               href="/signup?plan=starter"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#1a3ab8] px-8 py-3.5 text-sm font-medium text-white transition hover:bg-[#152e93] sm:w-auto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#165DFC] px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-[#3E7BFF] sm:w-auto"
             >
               {t.cta.getStarted} <ArrowRight className="h-4 w-4" />
             </Link>
@@ -93,7 +94,7 @@ export default async function PricingPage() {
                 href={demoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-8 py-3.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] border border-white/24 px-8 py-3.5 text-sm font-medium text-[#FAF8F4] transition hover:border-white sm:w-auto"
               >
                 {t.cta.bookDemo}
               </a>
@@ -102,7 +103,7 @@ export default async function PricingPage() {
         </div>
       </section>
 
-      <section className="border-t border-slate-100 px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="border-t border-[#DFDCD2] px-4 pb-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <PricingPlansSection
             variant="marketing"
@@ -122,15 +123,15 @@ export default async function PricingPage() {
         </div>
       </section>
 
-      <section className="border-t border-slate-100 bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="border-t border-[#DFDCD2] bg-[#F3F0E8] px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-2xl font-bold text-slate-900">{t.pricing.notIncludedTitle}</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-600">{pricingNotIncludedText(market)}</p>
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold text-[#0D0F0E]">{t.pricing.notIncludedTitle}</h2>
+          <p className="mt-3 text-sm leading-6 text-[#5B5D57]">{pricingNotIncludedText(market)}</p>
           <div className="mt-8 space-y-4">
             {t.pricing.faqs.map(([q, a]) => (
-              <div key={q} className="rounded-xl border border-slate-200 bg-white p-5">
-                <h3 className="font-semibold text-slate-900">{q}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{a}</p>
+              <div key={q} className="rounded-2xl border border-[#DFDCD2] bg-white p-5">
+                <h3 className="font-semibold text-[#0D0F0E]">{q}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#5B5D57]">{a}</p>
               </div>
             ))}
           </div>

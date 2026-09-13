@@ -35,6 +35,7 @@ import { OnboardingSidebar } from "@/components/onboarding/OnboardingSidebar";
 const BUSINESS_TYPES = {
   ro: [
     "Cafenea",
+    "Restaurant",
     "Takeaway",
     "Patiserie / brutărie",
     "Magazin mic",
@@ -42,6 +43,7 @@ const BUSINESS_TYPES = {
   ],
   en: [
     "Café",
+    "Restaurant",
     "Takeaway",
     "Bakery / patisserie",
     "Small shop",
@@ -54,6 +56,14 @@ const UI_STRINGS = {
     brandName: "Numele firmei / brandului",
     brandPlaceholder: "ex: Café Central",
     country: "Țară",
+    cuiLabel: "CUI firmă",
+    cuiPlaceholder: "ex: 12345678",
+    cuiButton: "ANAF",
+    cuiRequired: "Introduceți CUI-ul.",
+    vatRegisteredLabel: "Plătitor de TVA",
+    addressLabel: "Adresă",
+    registrationCodeLabel: "Nr. Reg. Com.",
+    anafResolvedNote: (name: string) => `✓ ${name} — date preluate din ANAF`,
     yourName: "Numele dumneavoastră",
     namePlaceholder: "Proprietar sau manager",
     industry: "Tip activitate",
@@ -77,7 +87,7 @@ const UI_STRINGS = {
     stepOf: (current: number, total: number) => `Pasul ${current} din ${total}`,
     stepEyebrow: (current: number, total: number) => `Pasul ${current} din ${total}`,
     timeEstimate: "~2 minute",
-    trialBadge: "Probă 15 zile · verificare card 1 €",
+    trialBadge: "Probă 15 zile · fără card necesar",
     sidebarBanner: "Configurați-vă afacerea și casa de marcat ca să puteți vinde azi.",
     sidebarStepDescriptions: [
       "Numele firmei, tipul activității și numele dumneavoastră.",
@@ -103,6 +113,14 @@ const UI_STRINGS = {
     brandName: "Brand/shop name",
     brandPlaceholder: "e.g. Café Central",
     country: "Country",
+    cuiLabel: "Company tax ID (CUI)",
+    cuiPlaceholder: "e.g. 12345678",
+    cuiButton: "ANAF",
+    cuiRequired: "Enter the CUI.",
+    vatRegisteredLabel: "VAT registered",
+    addressLabel: "Address",
+    registrationCodeLabel: "Trade registry no.",
+    anafResolvedNote: (name: string) => `✓ ${name} — retrieved from ANAF`,
     yourName: "Your name",
     namePlaceholder: "Owner or manager name",
     industry: "Industry",
@@ -126,7 +144,7 @@ const UI_STRINGS = {
     stepOf: (current: number, total: number) => `Step ${current} of ${total}`,
     stepEyebrow: (current: number, total: number) => `Step ${current} of ${total}`,
     timeEstimate: "~2 minutes",
-    trialBadge: "15-day trial · €1 card verification",
+    trialBadge: "15-day trial · no card required",
     sidebarBanner: "Set up your business and till so you can start selling today.",
     sidebarStepDescriptions: [
       "Brand name, industry, and your name.",
@@ -158,12 +176,14 @@ export default function OnboardingPage() {
     name: "",
     anafCif: "",
     anafVatRegistered: false,
+    anafAddress: "",
     businessType: "",
     userName: "",
     countryCode: "RO",
     locationBand: "one" as LocationBand,
     ingredientTracking: "later" as IngredientTrackingIntent,
   });
+  const [anafRegistrationCode, setAnafRegistrationCode] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -208,7 +228,13 @@ export default function OnboardingPage() {
         toast.error("Firma nu a fost găsită în ANAF.");
         return;
       }
-      update({ name: result.name, anafCif: result.cui, anafVatRegistered: result.vatRegistered });
+      update({
+        name: result.name,
+        anafCif: result.cui,
+        anafVatRegistered: result.vatRegistered,
+        anafAddress: result.address,
+      });
+      setAnafRegistrationCode(result.registrationCode);
       setCifResolved(true);
       toast.success("Date preluate din ANAF.");
     });
@@ -231,6 +257,7 @@ export default function OnboardingPage() {
         orgName: form.name,
         anafCif: form.anafCif,
         anafVatRegistered: form.anafVatRegistered,
+        anafAddress: form.anafAddress,
         businessType: form.businessType || undefined,
         userName: form.userName,
         countryCode: form.countryCode,
@@ -330,18 +357,26 @@ export default function OnboardingPage() {
                   <span>{isRO ? "Datele firmei apar pe bonuri și rapoarte." : "Business details appear on receipts and reports."}</span>
                 </div>
                 <div>
-                  <Label htmlFor="name">{t.brandName}</Label>
-                  <Input
-                    id="name"
-                    value={form.name}
-                    onChange={(e) => update({ name: e.target.value })}
-                    placeholder={t.brandPlaceholder}
-                    className="mt-1"
-                  />
+                  <Label htmlFor="businessType">{t.industry}</Label>
+                  <Select
+                    value={form.businessType || undefined}
+                    onValueChange={(value) => update({ businessType: value })}
+                  >
+                    <SelectTrigger id="businessType" className="mt-1 w-full">
+                      <SelectValue placeholder={t.selectType} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {businessTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 {isRO && (
                   <div>
-                    <Label htmlFor="anafCif">CUI firmă</Label>
+                    <Label htmlFor="anafCif">{t.cuiLabel}</Label>
                     <div className="mt-1 flex gap-2">
                       <Input
                         id="anafCif"
@@ -353,10 +388,10 @@ export default function OnboardingPage() {
                         onBlur={() => {
                           if (form.anafCif.trim().length >= 4 && !form.name) void lookupCui();
                         }}
-                        placeholder="ex: 12345678"
+                        placeholder={t.cuiPlaceholder}
                       />
                       <Button type="button" variant="outline" onClick={lookupCui} disabled={pending}>
-                        ANAF
+                        {t.cuiButton}
                       </Button>
                     </div>
                     <label className="mt-2 flex items-center gap-2 text-sm text-slate-600">
@@ -366,31 +401,30 @@ export default function OnboardingPage() {
                         onChange={(e) => update({ anafVatRegistered: e.target.checked })}
                         className="h-4 w-4 rounded border-slate-300"
                       />
-                      Plătitor de TVA
+                      {t.vatRegisteredLabel}
                     </label>
                     {cifResolved && (
-                      <p className="mt-1 text-xs text-green-600">✓ {form.name} — date preluate din ANAF</p>
+                      <div className="mt-2 space-y-0.5 rounded-lg bg-green-50 px-3 py-2 text-xs text-green-700">
+                        <p className="font-medium">{t.anafResolvedNote(form.name)}</p>
+                        {form.anafAddress && (
+                          <p>{t.addressLabel}: {form.anafAddress}</p>
+                        )}
+                        {anafRegistrationCode && (
+                          <p>{t.registrationCodeLabel}: {anafRegistrationCode}</p>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
                 <div>
-                  <Label htmlFor="businessType">{t.industry}</Label>
-                  <Select
-                    value={form.businessType || "__none__"}
-                    onValueChange={(value) => update({ businessType: value === "__none__" ? "" : value })}
-                  >
-                    <SelectTrigger id="businessType" className="mt-1 w-full">
-                      <SelectValue placeholder={t.selectType} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">{t.selectType}</SelectItem>
-                      {businessTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="name">{t.brandName}</Label>
+                  <Input
+                    id="name"
+                    value={form.name}
+                    onChange={(e) => update({ name: e.target.value })}
+                    placeholder={t.brandPlaceholder}
+                    className="mt-1"
+                  />
                 </div>
                 <div>
                   <Label htmlFor="userName">{t.yourName}</Label>

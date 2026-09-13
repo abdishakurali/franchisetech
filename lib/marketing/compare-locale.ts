@@ -65,7 +65,7 @@ export function compareHubFaqs(locale: MarketingLocale): CompareHubFaq[] {
       {
         question: "Care e cea mai bună alternativă POS în România?",
         answer:
-          "Depinde de prioritate: facturare (SmartBill/Oblio/Saga), hardware plăți (Square/SumUp) sau operațiuni zilnice (POS + stoc + rețete + închidere casă). franchisetech țintește ultimul — comparați pe paginile Ebriza, NexusERP, Boogit, Expressoft, rKeeper și Bit-Soft.",
+          "Depinde de prioritate: facturare (SmartBill/Oblio/Saga), hardware plăți (Square/SumUp) sau operațiuni zilnice (POS + stoc + rețete + închidere casă). franchisetech țintește ultimul — comparați pe paginile Ebriza, SmartBill, Boogit, Expressoft, POSnet și rKeeper.",
       },
       {
         question: "De ce unii vânzători POS taxează extra rapoartele?",
@@ -88,7 +88,7 @@ export function compareHubFaqs(locale: MarketingLocale): CompareHubFaq[] {
     {
       question: "What is the best POS alternative in Romania?",
       answer:
-        "It depends on your priority: invoicing (SmartBill/Oblio/Saga), payments hardware (Square/SumUp class), or daily operations (POS + stock + recipes + till close). franchisetech targets the last — compare on our Ebriza, SmartBill, Oblio, and Bit-Soft pages.",
+        "It depends on your priority: invoicing (SmartBill/Oblio/Saga), payments hardware (Square/SumUp class), or daily operations (POS + stock + recipes + till close). franchisetech targets the last — compare on our Ebriza, SmartBill, Boogit, and Expressoft pages.",
     },
     {
       question: "Why do some POS vendors charge extra for reports?",

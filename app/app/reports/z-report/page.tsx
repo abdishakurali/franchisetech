@@ -111,7 +111,15 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
     available: false,
     link: null as string | null,
   }));
-  const showReferralNudge = completedTx.length > 0 && Boolean(referral.link);
+  // Don't pitch the referral nudge on the business's very first Z-report ever —
+  // only once they have completed sales from at least one earlier day too.
+  const { count: priorDaySalesCount } = await supabase
+    .from("pos_transactions")
+    .select("*", { count: "exact", head: true })
+    .eq("organisation_id", orgId)
+    .neq("status", "voided")
+    .lt("sold_at", dayStart);
+  const showReferralNudge = completedTx.length > 0 && (priorDaySalesCount ?? 0) > 0 && Boolean(referral.link);
   return (
     <div className="space-y-6 p-6">
       <GrowthReportViewTracker />

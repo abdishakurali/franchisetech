@@ -277,7 +277,7 @@ export const featurePages: SeoPage[] = [
     bullets: ["0–15 min: signup and business settings", "15–45 min: demo products and payment methods", "45–60 min: open till and first test sale"],
     sections: [
       { title: "Clear milestones", body: "Each step links to the right screen — settings, POS, or reports — so setup stays focused." },
-      { title: "Guided self-serve setup", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — the 15-day trial starts after a one-time €1 card verification." },
+      { title: "Guided self-serve setup", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — the 15-day trial starts immediately, no card required." },
     ],
     faqs: [
       { question: "How long does setup take?", answer: "Core path (signup → demo products → open till → first sale): most cafes finish in under an hour. A full catalog migration with 200+ products may take 1–2 days — spread it over your trial." },
@@ -363,7 +363,7 @@ export const featurePages: SeoPage[] = [
       "Balanță cantitativ-valorică — opening/closing stock by product",
       "Raport de gestiune — complete inventory movement report with TVA breakdown",
       "Saga XML export — NIR and sales in Saga-compatible format",
-      "TVA breakdown by rate (21%, 11%, 5%, 0%)",
+      "TVA breakdown by rate (21%, 11%, 0%)",
     ],
     sections: [
       {
@@ -380,7 +380,7 @@ export const featurePages: SeoPage[] = [
       },
       {
         title: "Raport de gestiune (Stock Management Report)",
-        body: "The complete inventory report combining all movements in chronological order: opening stock, NIR entries, consumption, Z-report sales values, and closing stock — split by TVA rate columns (21%, 11%, 5%, 0%).",
+        body: "The complete inventory report combining all movements in chronological order: opening stock, NIR entries, consumption, Z-report sales values, and closing stock — split by TVA rate columns (21%, 11%, 0%).",
       },
       {
         title: "Saga XML Export",
@@ -466,13 +466,13 @@ export const industryPages: SeoPage[] = [
     path: "/industries/romania",
     eyebrow: "🇷🇴 România",
     title: "Soft de Casa de Marcat Romania — FiscalNet, TVA, lei",
-    metaTitle: "POS Romania cu FiscalNet | TVA 21%/11%/5% | lei (RON) | franchisetech",
-    description: "franchisetech este un sistem POS pentru restaurante, cafenele și magazine din România. Integrare FiscalNet, afișaj în lei (RON), cote TVA românești (21%/11%/5%), membri de echipă nelimitați.",
+    metaTitle: "POS Romania cu FiscalNet | TVA 21%/11%/0% | lei (RON) | franchisetech",
+    description: "franchisetech este un sistem POS pentru restaurante, cafenele și magazine din România. Integrare FiscalNet, afișaj în lei (RON), cote TVA românești (21%/11%/0%), membri de echipă nelimitați.",
     h1: "POS pentru afaceri din România — FiscalNet, TVA, lei",
     intro: "franchisetech este configurat pentru piața românească: monedă lei (RON), cote TVA standard, integrare FiscalNet pentru bonuri fiscale, și echipă nelimitată fără costuri suplimentare.",
     bullets: [
       "Afișaj în lei (RON) în tot sistemul — POS, rapoarte, bonuri",
-      "Cote TVA românești pre-încărcate: 21%, 11%, 5%, 0%",
+      "Cote TVA românești pre-încărcate: 21%, 11%, 0%",
       "Integrare FiscalNet pentru bonuri fiscale",
       "Tipuri de plată mapate pentru FiscalNet (coduri 1–8): numerar, card, tichete masă etc.",
       "Grupe TVA FiscalNet (1–5) configurabile per cotă",
@@ -482,7 +482,7 @@ export const industryPages: SeoPage[] = [
     sections: [
       {
         title: "Monedă și TVA pentru România",
-        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 21% (grupa FiscalNet 1), TVA Redus 11% (grupa 2), TVA Super-redus 5% (grupa 3), Scutit 0% (grupa 4). Cotele sunt editabile oricând.",
+        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 21% (grupa FiscalNet 1), TVA Redus 11% (grupa 2), Scutit 0% (grupa 4). Cotele sunt editabile oricând.",
       },
       {
         title: "Integrare FiscalNet completă",
@@ -495,7 +495,7 @@ export const industryPages: SeoPage[] = [
     ],
     faqs: [
       { question: "franchisetech afișează prețurile în lei?", answer: "Da. Toate prețurile, rapoartele, bonurile și POS-ul afișează în lei (RON) pentru organizațiile din România." },
-      { question: "Sunt pre-încărcate cotele TVA românești?", answer: "Da. TVA Standard 21%, TVA Redus 11%, TVA Super-redus 5% și Scutit 0% sunt disponibile de la început. Pot fi editate sau completate oricând." },
+      { question: "Sunt pre-încărcate cotele TVA românești?", answer: "Da. TVA Standard 21%, TVA Redus 11% și Scutit 0% sunt disponibile de la început. Pot fi editate sau completate oricând." },
       { question: "Cum funcționează integrarea FiscalNet?", answer: "franchisetech trimite comenzi către driver-ul FiscalNet: S^ pentru articole, DP^ pentru reduceri, P^ pentru plăți. Codul de plată și grupa TVA se configurează per metodă de plată și cotă TVA în setări." },
       { question: "Există limită de utilizatori?", answer: "Nu. Poți adăuga membri de echipă nelimitați cu acces bazat pe rol, fără cost suplimentar." },
       { question: "Funcționează pe tabletă sau telefon?", answer: "Da. franchisetech rulează ca PWA în orice browser modern, inclusiv pe tablete Android — fără instalare de aplicație." },

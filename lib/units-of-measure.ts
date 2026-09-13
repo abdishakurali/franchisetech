@@ -12,6 +12,26 @@ export const DEFAULT_OPERATIONAL_UNITS = [
   "pack",
 ] as const;
 
+// Display-only Romanian labels for the canonical unit codes above. The stored
+// value (in products.unit_of_measure and units_of_measure.name) stays in
+// English for stability — only what's shown to the user is localized.
+// Org-defined custom units aren't in this map and render as typed, unchanged.
+const UNIT_LABELS_RO: Partial<Record<(typeof DEFAULT_OPERATIONAL_UNITS)[number], string>> = {
+  each: "bucată",
+  portion: "porție",
+  litre: "litru",
+  cup: "cană",
+  bottle: "sticlă",
+  box: "cutie",
+  case: "bax",
+  pack: "pachet",
+};
+
+export function unitLabel(unit: string, locale: "en" | "ro"): string {
+  if (locale !== "ro") return unit;
+  return UNIT_LABELS_RO[unit as (typeof DEFAULT_OPERATIONAL_UNITS)[number]] ?? unit;
+}
+
 type UnitRow = { name: string | null };
 
 function uniqueUnitNames(names: Array<string | null | undefined>): string[] {

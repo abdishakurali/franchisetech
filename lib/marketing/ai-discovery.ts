@@ -21,7 +21,7 @@ export const AI_ENTITY = {
   sitemapUrl: `${SITE_URL}/sitemap.xml`,
   romanianCapabilities: [
     "Display in lei (RON)",
-    "Romanian TVA rates 21%, 11%, 5%, 0%",
+    "Romanian TVA rates 21%, 11%, 0%",
     "FiscalNet fiscal receipt integration when enabled and configured",
     "Unlimited team members on paid plans",
   ],

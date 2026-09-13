@@ -128,6 +128,8 @@ export const posText = {
     offlineResend: "Resend",
     offlineSyncNow: "Sync now",
     offlineSyncFailed: "Could not sync — tap Resend when online.",
+    offlinePendingAttentionRow: "Rejected — needs review, won't auto-retry",
+    offlineQueueFull: "Offline queue is full (200 sales waiting). Sync or clear queued sales before taking new orders.",
     offlineQueueLabel: (items: number, total: string) =>
       `${items} item${items !== 1 ? "s" : ""} · ${total}`,
     holdOrder: "Hold order",
@@ -392,6 +394,8 @@ export const posText = {
     offlineResend: "Retrimite",
     offlineSyncNow: "Sincronizează",
     offlineSyncFailed: "Nu s-a sincronizat — apasă Retrimite când ai internet.",
+    offlinePendingAttentionRow: "Respinsă — necesită verificare, nu se retrimite automat",
+    offlineQueueFull: "Coada offline e plină (200 vânzări în așteptare). Sincronizează sau golește coada înainte de a lua comenzi noi.",
     offlineQueueLabel: (items: number, total: string) =>
       `${items} produs${items !== 1 ? "e" : ""} · ${total}`,
     holdOrder: "Pune în așteptare",
