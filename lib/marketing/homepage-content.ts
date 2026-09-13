@@ -24,7 +24,7 @@ export const fiscalHardware = [
 
 const ro = {
   eyebrow: "Pentru cafenele, restaurante și magazine",
-  title: "POS și gestiune pentru localul tău.",
+  title: "POS și gestiune pentru un local care vrea să știe ce îi rămâne.",
   intro:
     "Vânzări, bonuri fiscale, stoc și marje, în același loc. Cu lucru offline pentru întreruperile scurte de internet și o imagine clară a zilei.",
   trial: "Începe proba de 15 zile",
@@ -85,7 +85,10 @@ const ro = {
       text: "Compari încasările cu numerarul așteptat într-un singur loc.",
     },
   ],
+  benefitsLabel: "Patru lucruri, legate între ele",
+  benefitsTitle: "De la prima vânzare până la închiderea zilei.",
   customerProof: {
+    label: "Folosit într-o cafenea reală",
     title: "Un local real. O zi mai clară.",
     caption: "FranchiseTech folosit zilnic într-o cafenea din România.",
     stats: [
@@ -189,7 +192,7 @@ const ro = {
 
 const en: typeof ro = {
   eyebrow: "For cafés, restaurants and shops",
-  title: "POS and stock management for your business.",
+  title: "POS and operations for a business that wants to know what remains.",
   intro:
     "Sales, fiscal receipts, stock and margins in one place. With offline queuing for short internet outages and a clear view of your day.",
   trial: "Start your 15-day trial",
@@ -245,7 +248,10 @@ const en: typeof ro = {
       text: "Compare takings with expected cash in one place.",
     },
   ],
+  benefitsLabel: "Four connected essentials",
+  benefitsTitle: "From the first sale to closing the day.",
   customerProof: {
+    label: "Used in a real café",
     title: "A real business. A clearer day.",
     caption: "FranchiseTech used daily in a Romanian café.",
     stats: [
