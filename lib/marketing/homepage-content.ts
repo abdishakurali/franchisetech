@@ -67,6 +67,38 @@ const ro = {
       href: "/features/reporting",
     },
   ],
+  benefits: [
+    {
+      title: "Vinzi simplu",
+      text: "Produsele și comenzile sunt la îndemână, direct la tejghea.",
+    },
+    {
+      title: "Stocul se mișcă odată cu vânzarea",
+      text: "Vezi cantitățile disponibile și ce trebuie reaprovizionat.",
+    },
+    {
+      title: "Știi marja reală",
+      text: "Costurile rețetelor arată ce îți rămâne din fiecare produs.",
+    },
+    {
+      title: "Închizi ziua cu adevărul",
+      text: "Compari încasările cu numerarul așteptat într-un singur loc.",
+    },
+  ],
+  customerProof: {
+    title: "Un local real. O zi mai clară.",
+    caption: "FranchiseTech folosit zilnic într-o cafenea din România.",
+    stats: [
+      { value: "3.700+", label: "bonuri înregistrate" },
+      { value: "9.000+", label: "mișcări de stoc" },
+    ],
+  },
+  pricing: {
+    planText: [
+      "POS, produse și închiderea zilei.",
+      "Stoc, achiziții, rețete și marje.",
+    ],
+  },
   enlarge: "Mărește imaginea",
   close: "Închide imaginea",
   more: "Vezi funcționalitățile",
@@ -195,6 +227,38 @@ const en: typeof ro = {
       href: "/features/reporting",
     },
   ],
+  benefits: [
+    {
+      title: "Sell simply",
+      text: "Products and orders stay within reach at the counter.",
+    },
+    {
+      title: "Stock moves with every sale",
+      text: "See available quantities and what needs replenishing.",
+    },
+    {
+      title: "Know the real margin",
+      text: "Recipe costs show what remains from every product.",
+    },
+    {
+      title: "Close the day with truth",
+      text: "Compare takings with expected cash in one place.",
+    },
+  ],
+  customerProof: {
+    title: "A real business. A clearer day.",
+    caption: "FranchiseTech used daily in a Romanian café.",
+    stats: [
+      { value: "3,700+", label: "receipts recorded" },
+      { value: "9,000+", label: "stock movements" },
+    ],
+  },
+  pricing: {
+    planText: [
+      "POS, products and daily closing.",
+      "Stock, purchasing, recipes and margins.",
+    ],
+  },
   enlarge: "Enlarge image",
   close: "Close image",
   more: "Explore features",
