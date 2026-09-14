@@ -39,7 +39,7 @@ function mergeCatalogProps(props: PosRegisterProps, cached: ReturnType<typeof re
   };
 }
 
-function buildRegisterProps(props: PosRegisterProps, offline: boolean) {
+export function buildRegisterProps(props: PosRegisterProps, offline: boolean) {
   const orgId = props.orgId ?? "";
   if (orgId && props.products?.length) {
     writePosCatalogCache({
@@ -60,6 +60,7 @@ function buildRegisterProps(props: PosRegisterProps, offline: boolean) {
   const merged = mergeCatalogProps(props, cached, offline);
   return {
     ...merged,
+    browserOffline: offline,
     catalogOffline: offline || Boolean(merged.catalogOffline),
     catalogCachedAt: merged.catalogCachedAt ?? cached?.cachedAt ?? null,
   };
@@ -73,7 +74,8 @@ function PosRegisterWithCatalog(props: PosRegisterProps) {
   const tourParam = searchParams.get("tour") === "first_sale";
   const shouldOfferTour = welcomeFlow || tourParam;
 
-  const [offline, setOffline] = useState(false);
+  // Stay conservatively offline until the server probe verifies connectivity.
+  const [offline, setOffline] = useState(true);
   const [tourNonce, setTourNonce] = useState(0);
 
   useEffect(() => {
@@ -125,7 +127,7 @@ function PosRegisterWithCatalog(props: PosRegisterProps) {
 }
 
 export function PosWithTour(props: PosRegisterProps) {
-  const boot = buildRegisterProps(props, false);
+  const boot = buildRegisterProps(props, true);
   return (
     <Suspense fallback={<PosRegister {...boot} />}>
       <PosRegisterWithCatalog {...props} />
