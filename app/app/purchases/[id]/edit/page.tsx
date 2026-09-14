@@ -13,7 +13,7 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
 
   const { data: purchase } = await supabase
     .from("purchases")
-    .select("id,status,supplier_id,purchase_date,nir_date,invoice_number,supplier_invoice_date,site_id,notes,purchase_items(product_id,quantity,unit_cost,tax_rate,unit_of_measure)")
+    .select("id,status,supplier_id,purchase_date,nir_date,invoice_number,supplier_invoice_date,site_id,notes,purchase_items(product_id,quantity,received_quantity,unit_cost,tax_rate,unit_of_measure)")
     .eq("id", id)
     .eq("organisation_id", orgId)
     .single();
@@ -37,6 +37,7 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
   type ItemRow = {
     product_id: string;
     quantity: number;
+    received_quantity: number | null;
     unit_cost: number;
     tax_rate: number;
     unit_of_measure: string | null;

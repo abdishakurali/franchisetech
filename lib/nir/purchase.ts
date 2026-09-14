@@ -16,6 +16,8 @@ export function formatDateDisplay(value: string | null | undefined, locale: AppL
 export type PurchaseLineInput = {
   product_id: string;
   quantity: number;
+  /** Actually received, when recorded separately from the invoiced quantity. Null = not separately recorded. */
+  received_quantity: number | null;
   unit_cost: number;
   total_cost: number;
   tax_rate: number;
@@ -28,6 +30,13 @@ export type PurchaseStatus = "draft" | "posted" | "received" | "partial" | "canc
 export function parsePurchaseLinesFromForm(formData: FormData): PurchaseLineInput[] {
   const productIds = formData.getAll("product_id").map((v) => String(v));
   const quantities = formData.getAll("quantity").map((v) => Number(v));
+  // Blank means "not separately recorded" — must stay null, not fall back to
+  // 0 or to the invoiced quantity, or every future row would silently lose
+  // the distinction this field exists to make (see the migration comment).
+  const receivedQuantities = formData.getAll("received_quantity").map((v) => {
+    const s = String(v).trim();
+    return s === "" ? null : Number(s);
+  });
   const unitCosts = formData.getAll("unit_cost").map((v) => Number(v));
   const taxRates = formData.getAll("tax_rate").map((v) => Number(v) || 0);
   const unitMeasures = formData.getAll("unit_of_measure").map((v) => String(v) || "each");
@@ -39,9 +48,11 @@ export function parsePurchaseLinesFromForm(formData: FormData): PurchaseLineInpu
       const rate = taxRates[i] || 0;
       const subtotal = qty * cost;
       const taxAmount = (subtotal * rate) / 100;
+      const receivedRaw = receivedQuantities[i] ?? null;
       return {
         product_id: pid || "",
         quantity: qty,
+        received_quantity: receivedRaw != null && !Number.isNaN(receivedRaw) ? receivedRaw : null,
         unit_cost: cost,
         total_cost: subtotal,
         tax_rate: rate,

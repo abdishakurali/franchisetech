@@ -31,6 +31,8 @@ type LineItem = {
   id: number;
   product_id: string;
   quantity: string;
+  /** Blank = not separately recorded; the field shows quantity as a placeholder in that case. */
+  received_quantity: string;
   unit_cost: string;
   tax_rate: string;
   unit_of_measure: string;
@@ -48,6 +50,7 @@ export type PurchaseDraftInitial = {
   items: Array<{
     product_id: string;
     quantity: number;
+    received_quantity?: number | null;
     unit_cost: number;
     tax_rate: number;
     unit_of_measure: string | null;
@@ -292,16 +295,17 @@ export function PurchaseForm({
         id: i,
         product_id: item.product_id,
         quantity: String(item.quantity),
+        received_quantity: item.received_quantity != null ? String(item.received_quantity) : "",
         unit_cost: String(item.unit_cost),
         tax_rate: String(item.tax_rate),
         unit_of_measure: item.unit_of_measure && umOptions.includes(item.unit_of_measure) ? item.unit_of_measure : defaultUm,
       }));
     }
-    return [{ id: 0, product_id: "", quantity: "", unit_cost: "", tax_rate: defaultVatRate, unit_of_measure: defaultUm }];
+    return [{ id: 0, product_id: "", quantity: "", received_quantity: "", unit_cost: "", tax_rate: defaultVatRate, unit_of_measure: defaultUm }];
   });
 
   function addLine() {
-    setLines((prev) => [...prev, { id: nextId.current++, product_id: "", quantity: "", unit_cost: "", tax_rate: defaultVatRate, unit_of_measure: defaultUm }]);
+    setLines((prev) => [...prev, { id: nextId.current++, product_id: "", quantity: "", received_quantity: "", unit_cost: "", tax_rate: defaultVatRate, unit_of_measure: defaultUm }]);
   }
   function removeLine(id: number) {
     setLines((prev) => prev.filter((l) => l.id !== id));
@@ -472,10 +476,11 @@ export function PurchaseForm({
                 <span className="text-xs text-slate-400">{lines.length}</span>
               </div>
 
-              <div className="grid grid-cols-[1fr_80px_90px_90px_80px_80px_36px] gap-2 px-0.5 text-xs text-slate-400 font-medium">
+              <div className="grid grid-cols-[1fr_80px_90px_90px_90px_80px_80px_36px] gap-2 px-0.5 text-xs text-slate-400 font-medium">
                 <span>{t.purchases.form.product}</span>
                 <span>{t.purchases.form.um}</span>
                 <span>{t.purchases.form.qty}</span>
+                <span>{t.purchases.form.receivedQty}</span>
                 <span>{t.purchases.form.unitCost}</span>
                 <span>{taxLabel}</span>
                 <span>{t.purchases.gross}</span>
@@ -486,7 +491,7 @@ export function PurchaseForm({
                 const calc = lineCalc[idx];
                 const unitOptions = umOptions.map((unit) => ({ value: unit, label: unit }));
                 return (
-                  <div key={line.id} className="grid grid-cols-[1fr_80px_90px_90px_80px_80px_36px] gap-2 items-center">
+                  <div key={line.id} className="grid grid-cols-[1fr_80px_90px_90px_90px_80px_80px_36px] gap-2 items-center">
                     <PurchaseItemCombobox
                       products={products}
                       productId={line.product_id}
@@ -501,6 +506,14 @@ export function PurchaseForm({
                       placeholder={t.purchases.form.qty}
                       value={line.quantity}
                       onChange={(e) => updateLine(line.id, "quantity", e.target.value)}
+                    />
+                    <Input
+                      name="received_quantity"
+                      type="number" step="0.001" min="0"
+                      placeholder={line.quantity || t.purchases.form.receivedQty}
+                      title={t.purchases.form.receivedQty}
+                      value={line.received_quantity}
+                      onChange={(e) => updateLine(line.id, "received_quantity", e.target.value)}
                     />
                     <Input
                       name="unit_cost"

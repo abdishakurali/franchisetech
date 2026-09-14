@@ -1047,6 +1047,7 @@ async function replacePurchaseItems(
       product_name: productLookup.get(item.product_id) || "Item",
       item_name: productLookup.get(item.product_id) || "Item",
       quantity: item.quantity,
+      received_quantity: item.received_quantity,
       unit_cost: item.unit_cost,
       total_cost: item.total_cost,
       tax_rate: item.tax_rate,
@@ -1181,7 +1182,7 @@ async function loadDraftPurchaseItems(
 ): Promise<PurchaseLineInput[]> {
   const { data } = await supabase
     .from("purchase_items")
-    .select("product_id,quantity,unit_cost,total_cost,tax_rate,tax_amount,unit_of_measure")
+    .select("product_id,quantity,received_quantity,unit_cost,total_cost,tax_rate,tax_amount,unit_of_measure")
     .eq("purchase_id", purchaseId)
     .eq("organisation_id", orgId);
   return (data ?? [])
@@ -1189,6 +1190,7 @@ async function loadDraftPurchaseItems(
     .map((row: {
       product_id: string;
       quantity: number;
+      received_quantity: number | null;
       unit_cost: number;
       total_cost: number;
       tax_rate: number;
@@ -1197,6 +1199,7 @@ async function loadDraftPurchaseItems(
     }) => ({
       product_id: row.product_id,
       quantity: Number(row.quantity),
+      received_quantity: row.received_quantity != null ? Number(row.received_quantity) : null,
       unit_cost: Number(row.unit_cost),
       total_cost: Number(row.total_cost),
       tax_rate: Number(row.tax_rate ?? 0),
