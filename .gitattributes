@@ -7,7 +7,7 @@
 # Untracking any of these is a separate decision with its own commit —
 # this file only controls what git archive extracts, not what git tracks.
 
-/efactura\ docs/** export-ignore
+/efactura?docs/** export-ignore
 /data/** export-ignore
 /.agents/** export-ignore
 /test-results/** export-ignore
