@@ -263,7 +263,7 @@ A release is valid only if it has:
 - `app/page.tsx` NOT containing `KitchenOps`
 - `components/marketing/MarketingShell.tsx` present
 - `public/franchise-tech-logo.png` present
-- `RELEASE.json` present (written by build.sh)
+- `RELEASE.json` present (written by deploy.sh via SSH heredoc, before build.sh runs)
 - `supabase/migrations/035_purchase_inventory_model.sql` present
 
 ---
