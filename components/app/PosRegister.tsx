@@ -30,6 +30,7 @@ import { PosOfflineBar } from "@/components/app/PosOfflineBar";
 import { CashCountModal } from "@/components/app/CashCountModal";
 import { friendlySaleErrorFromCode, paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
 import { classifySaleFailure } from "@/lib/pos-sale-failure";
+import { flushPendingSalesSequentially } from "@/lib/pos-offline-sync";
 import { PosI18nProvider, usePosI18n, posIntlLocale } from "@/lib/pos-i18n-context";
 import {
   readCartBackupFromStorage,
@@ -673,6 +674,7 @@ function PosRegisterInner({
   defaultVatRate = 0,
   catalogOffline = false,
   catalogCachedAt = null,
+  browserOffline = false,
   trackActivationSale = false,
 }: {
   products: Product[];
@@ -710,6 +712,8 @@ function PosRegisterInner({
   defaultVatRate?: number;
   catalogOffline?: boolean;
   catalogCachedAt?: string | null;
+  /** Verified server connectivity state owned by PosWithTour. */
+  browserOffline?: boolean;
   /** Fire PostHog activation_first_sale on the next successful server save */
   trackActivationSale?: boolean;
 }) {
@@ -883,8 +887,6 @@ function PosRegisterInner({
 
   const [heldOpen, setHeldOpen] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<QueuedSale[]>(() => listOfflineQueue());
-  // Offline detection disabled — always treat as online; legacy queue items can still be dismissed/retried
-  const [browserOffline] = useState(false);
   const showCatalogOfflineBanner = clientMounted && catalogOffline && !browserOffline;
   const [syncingOffline, setSyncingOffline] = useState(false);
   const [quickAccessOpen, setQuickAccessOpen] = useState(false);
@@ -1013,14 +1015,30 @@ function PosRegisterInner({
 
   function queueCurrentSale(saleCart: CartItem[], dueTotal: number) {
     const fd = buildSaleFormData(saleCart, dueTotal);
-    enqueueOfflineSale(
-      formDataToPayload(fd),
-      t.offlineQueueLabel(saleCart.length, money(dueTotal)),
-    );
+    const payload = formDataToPayload(fd);
+    const amountLabel = money(dueTotal);
+    try {
+      enqueueOfflineSale(payload, t.offlineQueueLabel(saleCart.length, amountLabel));
+    } catch (queueErr) {
+      if (queueErr instanceof OfflineQueueFullError) {
+        // Queue is at capacity — block the sale instead of silently evicting an
+        // older, still-unsynced one. Cart and retry payload are preserved so the
+        // cashier can retry once the queue is synced or cleared.
+        setSaleStatus({ ok: false, msg: t.offlineQueueFull });
+        setSalePending(false);
+        setLastCompletedSale((prev) =>
+          prev
+            ? { ...prev, status: "failed", retryPayload: payload, errorMsg: t.offlineQueueFull }
+            : { amountLabel, status: "failed", retryPayload: payload, errorMsg: t.offlineQueueFull },
+        );
+        return;
+      }
+      throw queueErr;
+    }
     resetCartAfterSale();
     setPaymentCartSnapshot(null);
     setOfflineQueue(listOfflineQueue());
-    setLastCompletedSale({ amountLabel: money(dueTotal), status: "queued" });
+    setLastCompletedSale({ amountLabel, status: "queued" });
     setCheckoutStep("complete");
     setSalePending(false);
   }
@@ -1330,16 +1348,13 @@ function PosRegisterInner({
   }
 
   async function flushAllPending() {
-    if (syncingOfflineRef.current) return;
+    if (browserOffline || syncingOfflineRef.current) return;
     const pending = listPendingSync();
     if (!pending.length) return;
     syncingOfflineRef.current = true;
     setSyncingOffline(true);
     setSaleStatus({ ok: true, msg: t.offlineSyncing });
-    let synced = 0;
-    for (const entry of pending) {
-      if (await syncQueuedEntry(entry)) synced++;
-    }
+    const synced = await flushPendingSalesSequentially(browserOffline, pending, syncQueuedEntry);
     syncingOfflineRef.current = false;
     setSyncingOffline(false);
     setOfflineQueue(listOfflineQueue());
@@ -1368,17 +1383,14 @@ function PosRegisterInner({
   }
 
   useEffect(() => {
-    const onOnline = () => { void flushAllPending(); };
-    window.addEventListener("online", onOnline);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- async fn, setState runs after await, not synchronously in the effect body
     void flushAllPending();
     const timer = setInterval(() => { void flushAllPending(); }, 60_000);
     return () => {
-      window.removeEventListener("online", onOnline);
       clearInterval(timer);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- flush uses stable sale/fiscal helpers
-  }, [t.offlineSyncDone, t.offlineSyncing, fiscalActive, fiscalNet, locale]);
+  }, [browserOffline, t.offlineSyncDone, t.offlineSyncing, fiscalActive, fiscalNet, locale]);
 
   useEffect(() => {
     // State changes occur after the server promise resolves; this is a tab refresh subscription.
@@ -1683,6 +1695,10 @@ function PosRegisterInner({
       <form onSubmit={(e) => {
         e.preventDefault();
         if (!checkoutCart.length || checkoutStep !== "payment" || salePending) return;
+        if (browserOffline) {
+          queueCurrentSale(checkoutCart, checkoutTotalDue);
+          return;
+        }
         const fd = buildSaleFormData(checkoutCart, checkoutTotalDue);
         const amountLabel = money(checkoutTotalDue);
         const cartSnapshot = checkoutCart;
