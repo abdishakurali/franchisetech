@@ -243,7 +243,18 @@ export function invalidateEntitlementCache(orgId?: string | null): void {
 
 export const normalizePlan = _normalizePlan;
 
-function planEntitlements(plan: PlanCode | null): EntitlementKey[] {
+/**
+ * Static per-plan entitlement set — what a plan TIER grants in principle.
+ * Deliberately NOT the same question as resolveEntitlements(orgId), which
+ * additionally folds in subscription status (fallback for expired/unpaid/
+ * canceled) and per-org overrides. lib/billing/entitlements.ts derives its
+ * coarse BusinessModuleKey membership from this function specifically —
+ * never from resolveEntitlements — because the coarse system has never had
+ * a concept of subscription status, and deriving from the per-org resolved
+ * set would silently grant modules to e.g. an expired core-plan org via
+ * FALLBACK_ENTITLEMENTS, which the coarse system has never done.
+ */
+export function planEntitlements(plan: PlanCode | null): EntitlementKey[] {
   if (plan === "scale") return [...SCALE_ENTITLEMENTS];
   if (plan === "operations") return [...OPERATIONS_ENTITLEMENTS];
   if (plan === "core") return [...CORE_ENTITLEMENTS];
