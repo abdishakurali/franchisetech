@@ -1,5 +1,34 @@
 import { describe, expect, it } from "vitest";
-import { parsePurchaseLinesFromForm } from "./purchase";
+import { parsePurchaseLinesFromForm, nirLineValue, nirUnitCostForDisplay } from "./purchase";
+
+describe("nirLineValue — the costing rule the whole document family follows", () => {
+  it("registered buyer: value is net (VAT is reclaimed, not part of acquisition cost)", () => {
+    expect(nirLineValue({ buyerVatRegistered: true, netAmount: 100, taxAmount: 19 })).toBe(100);
+  });
+
+  it("unregistered buyer: value is gross (VAT is not reclaimable, so it IS acquisition cost)", () => {
+    expect(nirLineValue({ buyerVatRegistered: false, netAmount: 100, taxAmount: 19 })).toBe(119);
+  });
+
+  it("zero tax: registered and unregistered agree, trivially", () => {
+    expect(nirLineValue({ buyerVatRegistered: true, netAmount: 100, taxAmount: 0 })).toBe(100);
+    expect(nirLineValue({ buyerVatRegistered: false, netAmount: 100, taxAmount: 0 })).toBe(100);
+  });
+});
+
+describe("nirUnitCostForDisplay", () => {
+  it("registered buyer sees the net unit cost as-is", () => {
+    expect(nirUnitCostForDisplay({ buyerVatRegistered: true, netUnitCost: 10, taxRatePct: 21 })).toBe(10);
+  });
+
+  it("unregistered buyer sees the unit cost grossed up by the tax rate", () => {
+    expect(nirUnitCostForDisplay({ buyerVatRegistered: false, netUnitCost: 10, taxRatePct: 21 })).toBeCloseTo(12.1, 5);
+  });
+
+  it("unregistered buyer with a 0% line: gross-up is a no-op, not a divide-by-zero", () => {
+    expect(nirUnitCostForDisplay({ buyerVatRegistered: false, netUnitCost: 10, taxRatePct: 0 })).toBe(10);
+  });
+});
 
 function buildFormData(rows: Array<{
   product_id: string;
