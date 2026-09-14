@@ -1,0 +1,13 @@
+# Paths that stay tracked in git but must never reach a deployed release.
+# git archive (used by deploy.sh) honors export-ignore; this is versioned
+# with the commit, so the archived payload is self-describing — reproducing
+# what shipped for a given sha needs nothing beyond this file at that sha,
+# not the deploy script's state on the day it ran.
+#
+# Untracking any of these is a separate decision with its own commit —
+# this file only controls what git archive extracts, not what git tracks.
+
+/efactura\ docs/** export-ignore
+/data/** export-ignore
+/.agents/** export-ignore
+/test-results/** export-ignore
