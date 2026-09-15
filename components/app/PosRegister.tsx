@@ -956,6 +956,7 @@ function PosRegisterInner({
   // for real in the effect below, after mount.
   const [lastSyncedAt, setLastSyncedAtState] = useState<string | null>(null);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- runs once on mount (empty deps) to upgrade from the server-safe null seed; can't cascade
     setLastSyncedAtState(getLastSyncedAt());
   }, []);
 
