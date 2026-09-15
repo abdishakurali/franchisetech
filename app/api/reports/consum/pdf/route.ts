@@ -2,6 +2,7 @@ import { formatMoney } from "@/lib/kitchenops/metrics";
 import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { buildConsumPdfCopy } from "@/lib/reports/consum-copy";
 import {
   fetchStockMovements,
   stockMovementQty,
@@ -64,6 +65,7 @@ export async function GET(req: Request) {
   }
 
   const items = Array.from(aggregated.values()).sort((a, b) => a.name.localeCompare(b.name));
+  const copy = buildConsumPdfCopy();
   const money = (v: number) => formatMoney(v, currency);
   const totalValue = items.reduce((s, i) => s + i.totalCost, 0);
   const hasAnyGap = items.some((i) => i.hasGap);
@@ -77,43 +79,43 @@ export async function GET(req: Request) {
     unit: item.unit,
     quantity: item.quantity.toFixed(2),
     unitCost: item.unitCost != null ? money(item.unitCost) : "—",
-    totalCost: item.unitCost != null ? `${money(item.totalCost)}${item.hasGap ? " (parțial)" : ""}` : "—",
+    totalCost: item.unitCost != null ? `${money(item.totalCost)}${item.hasGap ? ` (${copy.partialMarker})` : ""}` : "—",
   }));
   pdfRows.push({
     nr: "",
-    product: "TOTAL",
+    product: copy.total,
     unit: "",
     quantity: "",
     unitCost: "",
-    totalCost: `${money(totalValue)}${hasAnyGap ? " (parțial)" : ""}`,
+    totalCost: `${money(totalValue)}${hasAnyGap ? ` (${copy.partialMarker})` : ""}`,
     _rowStyle: "total",
   });
 
   const doc = ReportPdfDocument({
     companyName: org?.name ?? "franchisetech",
     companyCui: org?.fiscalnet_cif ?? undefined,
-    title: "Bon de Consum",
+    title: copy.title,
     subtitle: `Document nr. ${documentNumber}`,
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
     generatedAt: new Date().toLocaleString("ro-RO"),
     summary: [
-      { label: "Articole", value: String(items.length) },
-      { label: "Valoare totală", value: money(totalValue) },
+      { label: copy.itemCount, value: String(items.length) },
+      { label: copy.totalValue, value: money(totalValue) },
     ],
     footnote: hasAnyGap
-      ? "Unele mișcări din această perioadă nu au cost înregistrat. Valorile marcate \"(parțial)\" sunt un minim cunoscut, nu cifra completă — un cost lipsă nu este completat niciodată din prețul curent."
+      ? copy.costGapNote
       : undefined,
     columns: [
-      { key: "nr", label: "Nr.", align: "right", width: "6%" },
-      { key: "product", label: "Produs", width: "36%" },
-      { key: "unit", label: "UM", width: "10%" },
-      { key: "quantity", label: "Cantitate", align: "right", width: "16%" },
-      { key: "unitCost", label: "Cost unitar", align: "right", width: "16%" },
-      { key: "totalCost", label: "Cost total", align: "right", width: "16%" },
+      { key: "nr", label: copy.columns.rowNo, align: "right", width: "6%" },
+      { key: "product", label: copy.columns.product, width: "36%" },
+      { key: "unit", label: copy.columns.unit, width: "10%" },
+      { key: "quantity", label: copy.columns.quantity, align: "right", width: "16%" },
+      { key: "unitCost", label: copy.columns.unitCost, align: "right", width: "16%" },
+      { key: "totalCost", label: copy.columns.totalCost, align: "right", width: "16%" },
     ],
     rows: pdfRows,
-    signatureLabels: ["Predător (bucătărie)", "Primitor"],
+    signatureLabels: [...copy.signatureLabels],
   });
 
   return renderReportPdfResponse(doc, `bon-consum-${from}-${to}.pdf`);

@@ -1,4 +1,5 @@
 import type { PosLocale } from "@/lib/pos-i18n";
+import { CONSUM_REPORT_RO_COPY } from "@/lib/reports/consum-copy";
 
 export type AppLocale = PosLocale;
 
@@ -2448,19 +2449,11 @@ const ro: typeof en = {
       grossMargin: "Marjă brută",
     },
     consum: {
-      title: "Bon de Consum",
+      ...CONSUM_REPORT_RO_COPY,
       subtitle: "Raport consum materii prime din rețete",
       from: "De la",
       to: "Până la",
       load: "Încarcă",
-      product: "Produs",
-      unit: "UM",
-      quantity: "Cantitate",
-      unitCost: "Preț unitar",
-      totalCost: "Valoare",
-      totalItems: "Articole consumate",
-      totalValue: "Valoare totală",
-      total: "TOTAL",
       noData: "Nu există date de consum pentru perioada selectată",
       noDataHint:
         "Consumul apare când vindeți produse cu rețete definite. Pași: (1) marcați ingredientele ca „urmărite la stoc”, (2) creați rețete pe produsele vândute, (3) înregistrați vânzări în POS.",
@@ -2471,7 +2464,6 @@ const ro: typeof en = {
       unitLabel: "Unitate",
       period: "Perioadă",
       docNo: "Nr. document",
-      rowNo: "Nr.",
       handedOver: "Predat de",
       receivedBy: "Primit de",
       signature: "Nume și semnătură",
@@ -2481,14 +2473,8 @@ const ro: typeof en = {
       docCode: "Formular 14-3-4/aA — OMFP 2634/2015",
       evaluationMethod: "Metodă evaluare stoc",
       evaluationMethodValue: "Cost mediu ponderat (CMP rulant)",
-      intocmit: "Întocmit",
-      aprobat: "Aprobat",
-      primit: "Primit",
       footerDisclaimer: "Document generat de franchisetech pentru evidență operațională. Nu reprezintă certificare legală sau contabilă.",
       costUnknown: "necunoscut",
-      partialTag: "parțial",
-      costGapNote:
-        "Unele mișcări din această perioadă nu au cost înregistrat. Valorile marcate \"parțial\" sunt un minim cunoscut, nu cifra completă — un cost lipsă nu este completat niciodată din prețul curent.",
     },
     fisaMagazie: {
       title: "Fișă de Magazie",
