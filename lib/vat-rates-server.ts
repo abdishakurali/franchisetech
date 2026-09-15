@@ -45,10 +45,23 @@ export async function listAllVatRates(
   }));
 }
 
+/**
+ * vatRegistered defaults to false because it always is at the point this
+ * runs: it's called from org creation / ensurePosDefaults, before ANAF
+ * registration status is ever known or asked about. A RO org is seeded
+ * with only its 0% rate active and default; 21%/11% are still created (so
+ * the rate definitions exist, unchanged, for later) but inactive — matching
+ * the shape the Gate A fix leaves an unregistered org's catalog in, and
+ * required by the vat_rates registration trigger: without this, seeding a
+ * brand-new unregistered RO org's default 21%-active-and-default row would
+ * fail against that trigger the moment it runs. Non-RO countries (no ANAF
+ * concept) are unaffected regardless of the flag.
+ */
 export async function seedOrgVatRatesIfEmpty(
   supabase: SupabaseClient,
   orgId: string,
-  countryCode: string | null | undefined
+  countryCode: string | null | undefined,
+  vatRegistered: boolean = false
 ): Promise<void> {
   const { count } = await supabase
     .from("vat_rates")
@@ -58,13 +71,14 @@ export async function seedOrgVatRatesIfEmpty(
 
   const code = (countryCode ?? "IE").toUpperCase();
   const defaults = VAT_DEFAULTS_BY_COUNTRY[code] ?? VAT_DEFAULTS_BY_COUNTRY.IE;
+  const gateByRegistration = code === "RO" && !vatRegistered;
   const rows = defaults.map((d, i) => ({
     organisation_id: orgId,
     name: d.name,
     rate: d.rate,
     fiscalnet_vat_group: d.fiscalnet_vat_group,
-    is_default: d.is_default,
-    active: true,
+    is_default: gateByRegistration ? d.rate === 0 : d.is_default,
+    active: gateByRegistration ? d.rate === 0 : true,
     sort_order: i + 1,
   }));
   await supabase.from("vat_rates").insert(rows);

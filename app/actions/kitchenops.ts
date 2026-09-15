@@ -36,7 +36,7 @@ import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags"
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEventAsync } from "@/lib/posthog-server";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
-import { nearestVatRate, ratesMatch, validateVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
+import { ratesMatch, resolveCsvVatRate, validateVatRateForOrg, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 import { listOperationalUnitNames, validateOperationalUnit } from "@/lib/units-of-measure";
 import {
   assertEntitlement,
@@ -60,8 +60,15 @@ async function resolveSubmittedVatRate(
   key: string
 ): Promise<{ ok: true; rate: number } | { ok: false; error: string }> {
   const rate = numberValue(formData, key);
-  const vatRates = await listActiveVatRates(supabase, orgId);
-  const validation = validateVatRate(vatRates, rate);
+  const [vatRates, orgRow] = await Promise.all([
+    listActiveVatRates(supabase, orgId),
+    supabase.from("organisations").select("country_code, anaf_vat_registered").eq("id", orgId).maybeSingle()
+      .then(({ data }: { data: { country_code: string | null; anaf_vat_registered: boolean | null } | null }) => data),
+  ]);
+  const validation = validateVatRateForOrg(vatRates, rate, {
+    countryCode: orgRow?.country_code ?? null,
+    vatRegistered: Boolean(orgRow?.anaf_vat_registered),
+  });
   if (!validation.ok) return { ok: false, error: validation.message };
   return { ok: true, rate };
 }
@@ -1526,6 +1533,16 @@ export async function importProductsCsv(formData: FormData) {
     }
     return categoryId;
   }
+  // Same registration gate as resolveSubmittedVatRate (manual entry), via
+  // resolveCsvVatRate below — this path used to have its own separate logic
+  // that never consulted anaf_vat_registered at all, which is how a
+  // blank-VAT CSV row could land on this org's active-default rate (21%)
+  // even while unregistered.
+  const { data: orgRowForVat } = await supabase
+    .from("organisations")
+    .select("country_code, anaf_vat_registered")
+    .eq("id", orgId)
+    .maybeSingle();
   const { data: vatRateRows } = await supabase
     .from("vat_rates")
     .select("id,name,rate,is_default,active,fiscalnet_vat_group,sort_order")
@@ -1561,14 +1578,10 @@ export async function importProductsCsv(formData: FormData) {
     // explicit numeric value in the file goes through nearest-rate snapping;
     // a missing one falls back to the org's own default rate instead.
     const rawVat = row.vat_rate !== "" && row.vat_rate != null ? Number(row.vat_rate) : null;
-    const orgDefaultRate = catalogRates.find((r) => r.is_default)?.rate ?? 0;
-    let vatRate = orgDefaultRate;
-    if (rawVat != null && catalogRates.length > 0) {
-      const nearest = nearestVatRate(catalogRates, rawVat);
-      vatRate = nearest?.rate ?? rawVat;
-    } else if (rawVat != null) {
-      vatRate = rawVat;
-    }
+    const vatRate = resolveCsvVatRate(rawVat, catalogRates, {
+      countryCode: orgRowForVat?.country_code ?? null,
+      vatRegistered: Boolean(orgRowForVat?.anaf_vat_registered),
+    });
     const { error } = await supabase.from("products").insert({
       organisation_id: orgId, name, category_id: categoryId, pos_category_id: posCategoryId,
       sku: row.sku || row.barcode || null,
