@@ -251,9 +251,15 @@ Dolce Nera's data was already corrected directly in production (this isn't a
 
 ### 8.2 **[NEEDS REAL TILL — OFF-HOURS]** — the one thing actually gated on your schedule
 
-This needs FiscalNet in its real (non-mock) mode against the actual till hardware,
-with someone watching. Confirm a short window first (even 10-15 minutes, first
-thing before opening or after close) — this is the single remaining decision.
+> **STOP — do not run the steps below during normal service, and not alone.**
+> This is the one part of this whole script that touches the real till with real
+> FiscalNet, not mock mode or a local dev instance. Arrange a specific window
+> first — even 10-15 minutes, before opening or after close — with someone
+> physically present to watch the first sale. If you're reading this mid-shift
+> with customers waiting, close this section and come back later; nothing above
+> section 8.2 needs that.
+
+Once that window is arranged:
 
 1. Complete one real sale on the real till, real FiscalNet connection.
 2. Confirm the fiscal receipt printed as expected (unchanged from before — this fix
