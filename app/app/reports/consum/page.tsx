@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { FileDown } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PrintButton } from "@/components/app/PrintButton";
 import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
@@ -81,15 +80,15 @@ export default async function ConsumReportPage({
   });
   const documentNumber = (bcNum as string | null) ?? `BC-${fromDate.replace(/-/g, "")}`;
 
+  const sans = "font-[family-name:var(--font-body)]";
+  const mono = "font-[family-name:var(--font-plex-mono)]";
+  const display = "font-[family-name:var(--font-display)]";
+
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap print:hidden">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
-          <p className="text-sm text-slate-500">{labels.subtitle}</p>
-        </div>
-        <div className="flex gap-3 items-center flex-wrap">
-          <ReportDateRangeFilter basePath="/app/reports/consum" from={fromDate} to={toDate} />
+    <div className={`mx-auto max-w-4xl p-8 print:p-4 text-slate-900 ${sans}`}>
+      <div className="mb-6 flex items-center justify-between print:hidden">
+        <ReportDateRangeFilter basePath="/app/reports/consum" from={fromDate} to={toDate} />
+        <div className="flex gap-3 items-center">
           <Link
             href={`/api/reports/consum/pdf?from=${fromDate}&to=${toDate}`}
             className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
@@ -97,107 +96,98 @@ export default async function ConsumReportPage({
             <FileDown className="h-4 w-4" />
             {t.common.downloadPdf}
           </Link>
+          <PrintButton />
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 print:border-0">
-        <div className="flex flex-wrap gap-8 text-sm">
-          <div>
-            <p className="text-slate-500">{labels.unitLabel}</p>
-            <p className="font-semibold text-slate-900">{org?.name ?? "franchisetech"}</p>
-          </div>
-          <div>
-            <p className="text-slate-500">{labels.docNo}</p>
-            <p className="font-semibold text-slate-900">{documentNumber}</p>
-          </div>
-          <div>
-            <p className="text-slate-500">{labels.period}</p>
-            <p className="font-semibold text-slate-900">{fromDate} — {toDate}</p>
-          </div>
+      {/* ── Header: title/subtitle left, doc number + unit right — same
+          grammar as the NIR print page, so the two read as one family. ── */}
+      <header className="flex items-start justify-between gap-6 border-b-4 border-slate-900 pb-4 mb-6">
+        <div>
+          <h1 className={`text-2xl font-semibold uppercase tracking-tight leading-tight ${display}`}>
+            {labels.title}
+          </h1>
+          <p className="mt-1 text-[10px] uppercase tracking-wide text-slate-400">{labels.docCode}</p>
         </div>
-      </div>
+        <div className={`text-right text-sm ${mono}`}>
+          <p>
+            {labels.docNo} <span className="font-semibold">{documentNumber}</span>
+          </p>
+          <p className="mt-1 text-slate-600">
+            {labels.unitLabel}: <span className="font-medium text-slate-900">{org?.name ?? "—"}</span>
+          </p>
+        </div>
+      </header>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{labels.totalItems}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold">{items.length}</CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{labels.totalValue}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-2xl font-semibold text-blue-600">
-            {formatMoney(totalValue, currency)}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{labels.title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {items.length === 0 ? (
-            <div className="py-8 text-center">
-              <p className="text-sm text-slate-400">{labels.noData}</p>
-              <p className="text-xs text-slate-300 mt-2">{labels.noDataHint}</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">{labels.rowNo}</TableHead>
-                  <TableHead>{labels.product}</TableHead>
-                  <TableHead>{labels.unit}</TableHead>
-                  <TableHead className="text-right">{labels.quantity}</TableHead>
-                  <TableHead className="text-right">{labels.unitCost}</TableHead>
-                  <TableHead className="text-right">{labels.totalCost}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((item, idx) => (
-                  <TableRow key={item.name}>
-                    <TableCell>{idx + 1}</TableCell>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.unit}</TableCell>
-                    <TableCell className="text-right tabular-nums">{item.quantity.toFixed(2)}</TableCell>
-                    <TableCell className="text-right tabular-nums">{formatMoney(item.unitCost, currency)}</TableCell>
-                    <TableCell className="text-right tabular-nums font-medium">{formatMoney(item.totalCost, currency)}</TableCell>
-                  </TableRow>
-                ))}
-                <TableRow className="bg-slate-50 font-bold">
-                  <TableCell colSpan={5} className="text-right">{labels.total}:</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatMoney(totalValue, currency)}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card className="print:block">
-        <CardHeader>
-          <CardTitle>{labels.signatures}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-8 mt-4 text-sm">
-            <div>
-              <p className="text-slate-500 mb-8">{labels.stockIssuer}</p>
-              <div className="border-b border-slate-400 w-full" />
-              <p className="text-slate-400 mt-2">{labels.signature}</p>
-            </div>
-            <div>
-              <p className="text-slate-500 mb-8">{labels.stockReceiver}</p>
-              <div className="border-b border-slate-400 w-full" />
-              <p className="text-slate-400 mt-2">{labels.signature}</p>
-            </div>
+      {/* ── Metadata grid ── */}
+      <section className="grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-3 mb-8 text-sm">
+        {[
+          { label: labels.period, value: `${fromDate} — ${toDate}` },
+          { label: labels.evaluationMethod, value: labels.evaluationMethodValue },
+          { label: labels.totalItems, value: String(items.length) },
+        ].map((f) => (
+          <div key={f.label}>
+            <p className={`text-[10px] uppercase tracking-wider text-slate-400 ${mono}`}>{f.label}</p>
+            <p className="mt-1 font-medium text-slate-900">{f.value}</p>
           </div>
-        </CardContent>
-      </Card>
+        ))}
+      </section>
 
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 print:hidden">
+      {items.length === 0 ? (
+        <div className="py-8 text-center">
+          <p className="text-sm text-slate-400">{labels.noData}</p>
+          <p className="text-xs text-slate-300 mt-2">{labels.noDataHint}</p>
+        </div>
+      ) : (
+        <table className={`w-full text-sm border-collapse mb-2 ${sans}`}>
+          <thead>
+            <tr className="border-t-2 border-b-2 border-slate-900">
+              <th className="text-left py-2 px-1 w-8">{labels.rowNo}</th>
+              <th className="text-left py-2 px-1">{labels.product}</th>
+              <th className="text-center py-2 px-1">{labels.unit}</th>
+              <th className={`text-right py-2 px-1 ${mono}`}>{labels.quantity}</th>
+              <th className={`text-right py-2 px-1 ${mono}`}>{labels.unitCost}</th>
+              <th className={`text-right py-2 px-1 ${mono}`}>{labels.totalCost}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr key={item.name} className="border-b border-slate-200">
+                <td className="py-2 px-1 text-slate-500">{idx + 1}</td>
+                <td className="py-2 px-1">{item.name}</td>
+                <td className="text-center py-2 px-1">{item.unit}</td>
+                <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>{item.quantity.toFixed(2)}</td>
+                <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>{formatMoney(item.unitCost, currency)}</td>
+                <td className={`text-right py-2 px-1 tabular-nums font-medium ${mono}`}>{formatMoney(item.totalCost, currency)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="border-t-2 border-slate-900 font-semibold">
+              <td colSpan={5} className="py-2 px-1 text-right">{labels.total}</td>
+              <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>{formatMoney(totalValue, currency)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      )}
+
+      {/* ── Signatures: three blocks — same grammar as the NIR print page ── */}
+      <footer className="mt-10 border-t border-slate-300 pt-6 text-sm">
+        <div className="grid gap-8 sm:grid-cols-3">
+          {[labels.intocmit, labels.aprobat, labels.primit].map((role) => (
+            <div key={role}>
+              <p className={`text-[10px] uppercase tracking-wider text-slate-400 mb-8 ${mono}`}>{role}</p>
+              <div className="border-b border-slate-400 w-full" />
+              <p className="text-xs text-slate-500 mt-1">{labels.signature}</p>
+            </div>
+          ))}
+        </div>
+        <p className="mt-8 text-[10px] text-slate-400 leading-relaxed print:text-[9px]">
+          {labels.footerDisclaimer}
+        </p>
+      </footer>
+
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 mt-8 print:hidden">
         <p className="text-xs text-slate-500">
           <strong>{labels.dataSourceLabel}</strong> {labels.dataSource}
         </p>
