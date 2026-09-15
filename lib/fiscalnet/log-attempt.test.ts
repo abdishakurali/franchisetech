@@ -122,4 +122,25 @@ describe("fiscalBrowserReceiptAndLog", () => {
 
     expect(recordAttempt).toHaveBeenCalledWith(expect.objectContaining({ attemptNumber: 3 }));
   });
+
+  it("does not hang forever if the logging call itself never resolves — bounded so the offline-sync loop, which awaits this whole function per entry, can't stall indefinitely on the logging step alone", async () => {
+    vi.useFakeTimers();
+    try {
+      fiscalBrowserReceiptMock.mockResolvedValue({ ok: true, message: "Bon tipărit.", receiptNumber: "NR-7" });
+      const recordAttempt = vi.fn(() => new Promise<{ ok: boolean }>(() => {})); // never resolves
+
+      const pending = fiscalBrowserReceiptAndLog(baseConfig, [], 10, "cash", {
+        transactionId: "tx-7",
+        recordAttempt,
+      });
+
+      await vi.advanceTimersByTimeAsync(10_000);
+      const result = await pending;
+
+      // The agent's own result still comes back, unaffected by the stuck logging call.
+      expect(result).toEqual(expect.objectContaining({ ok: true, receiptNumber: "NR-7" }));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

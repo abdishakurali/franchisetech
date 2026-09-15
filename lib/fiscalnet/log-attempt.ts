@@ -20,6 +20,28 @@ export type RecordFiscalAttempt = (
   input: RecordFiscalAttemptInput
 ) => Promise<{ ok: boolean; attemptId?: string; error?: string }>;
 
+// The FiscalNet agent call itself is time-bounded (callApi's AbortController,
+// browser.ts, default 15s) — recordAttempt has no such bound of its own, and
+// one call site (the offline-sync loop) awaits this whole function per queued
+// entry. Without a cap here, a hung Supabase/network call for the logging
+// step alone could stall that loop indefinitely — a real behavioural change
+// from before this fix existed, not just "attempts now get logged". Capped
+// shorter than completeSaleReturn's own 25s race in syncQueuedEntry, since
+// this is a single lightweight write, not a full sale-recording transaction.
+const RECORD_ATTEMPT_TIMEOUT_MS = 10_000;
+
+async function recordAttemptWithTimeout(
+  recordAttempt: RecordFiscalAttempt,
+  input: RecordFiscalAttemptInput
+): Promise<{ ok: boolean; attemptId?: string; error?: string }> {
+  return Promise.race([
+    recordAttempt(input),
+    new Promise<{ ok: boolean; error: string }>((resolve) =>
+      setTimeout(() => resolve({ ok: false, error: "record_fiscal_receipt_attempt timed out" }), RECORD_ATTEMPT_TIMEOUT_MS)
+    ),
+  ]);
+}
+
 /**
  * The single joined operation: the FiscalNet agent call and recording its
  * outcome happen inside one function, so a call site can't fire the receipt
@@ -59,18 +81,16 @@ export async function fiscalBrowserReceiptAndLog(
       ? "success"
       : "failed";
 
-  const logResult = await ctx
-    .recordAttempt({
-      transactionId: ctx.transactionId,
-      attemptNumber: ctx.attemptNumber ?? 1,
-      status,
-      mockMode: config.mockMode,
-      responseContent: result.content ?? result.message ?? null,
-      receiptNumber: result.receiptNumber ?? null,
-      errorCode: result.ok ? null : "CLIENT_ERROR",
-      errorInfo: result.ok ? null : result.message,
-    })
-    .catch((e: unknown) => ({ ok: false, error: e instanceof Error ? e.message : String(e) }));
+  const logResult = await recordAttemptWithTimeout(ctx.recordAttempt, {
+    transactionId: ctx.transactionId,
+    attemptNumber: ctx.attemptNumber ?? 1,
+    status,
+    mockMode: config.mockMode,
+    responseContent: result.content ?? result.message ?? null,
+    receiptNumber: result.receiptNumber ?? null,
+    errorCode: result.ok ? null : "CLIENT_ERROR",
+    errorInfo: result.ok ? null : result.message,
+  }).catch((e: unknown) => ({ ok: false, error: e instanceof Error ? e.message : String(e) }));
 
   if (!logResult.ok) {
     console.error("[FiscalNet] failed to record receipt attempt", logResult.error);
