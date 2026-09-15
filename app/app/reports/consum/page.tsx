@@ -101,6 +101,12 @@ export default async function ConsumReportPage({
         <ReportDateRangeFilter basePath="/app/reports/consum" from={fromDate} to={toDate} />
         <div className="flex gap-3 items-center">
           <Link
+            href="/app/reports/consum-teoretic"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+          >
+            Teoretic vs. real
+          </Link>
+          <Link
             href={`/api/reports/consum/pdf?from=${fromDate}&to=${toDate}`}
             className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
           >
