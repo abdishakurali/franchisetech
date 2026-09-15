@@ -2021,6 +2021,28 @@ export async function updateOrgCountry(formData: FormData): Promise<void> {
   revalidatePath("/app/settings");
 }
 
+// ── updateSite (Step 8: Location section) ───────────────────────
+// No addSite/deleteSite: every org here has exactly one site, and there's
+// no multi-site switcher to manage more than that yet. Add those when a
+// second location genuinely exists, not before.
+export async function updateSite(formData: FormData): Promise<void> {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+  const id = stringValue(formData, "id");
+  const name = stringValue(formData, "name");
+  if (!id || !name) return;
+  await supabase
+    .from("sites")
+    .update({
+      name,
+      address: stringValue(formData, "address") || null,
+      city: stringValue(formData, "city") || null,
+    })
+    .eq("id", id)
+    .eq("organisation_id", orgId);
+  revalidatePath("/app/settings");
+}
+
 // ── updateOrgCurrency ────────────────────────────────────────────────────────
 const ALLOWED_CURRENCIES: Record<string, { code: string; symbol: string }> = {
   EUR: { code: "EUR", symbol: "€" },

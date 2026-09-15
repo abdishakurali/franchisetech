@@ -1,10 +1,12 @@
 import {
   addCategory, updateCategory, deleteCategory,
-  addUnit, updateUnit, deleteUnit,
   updateOrgCountry, updateOrgCurrency, updateOrganisationIndustry,
   addPaymentMethod, updatePaymentMethod, deletePaymentMethod,
   addVatRate, updateVatRate, deleteVatRate, seedDefaultVatRates,
+  updateSite,
 } from "@/app/actions/kitchenops";
+import { SettingsSection } from "@/components/app/SettingsSection";
+import { unitLabel } from "@/lib/units-of-measure";
 import { AnafSettingsCard } from "@/components/app/AnafSettingsCard";
 import { TestimonialPromptCard } from "@/components/app/TestimonialPromptCard";
 import { IntegrationCards } from "@/components/app/IntegrationCards";
@@ -42,12 +44,25 @@ const COUNTRY_OPTIONS = [
   { code: "OTHER", label: "Other" },
 ] as const;
 
+// Verified against every real ?tab= link in the codebase (grepped, not
+// assumed) rather than trusting the old map, which carried three aliases
+// (features/modules/hardware) that no navigation anywhere ever generates,
+// and was missing "general" -- a live, broken link in VatRateSelect.tsx
+// that has pointed nowhere since it was written.
+//
+//   anaf        -- InvoiceActions.tsx, ANAF OAuth callback route
+//   products    -- ProductEditForm.tsx / products/new (its own link text
+//                  is literally "Manage categories")
+//   operations  -- module-guard.ts's locked-module redirect,
+//                  DashboardModulePrompts.tsx, the inventory module's
+//                  settingsHref in billing/catalog.ts
+//   general     -- VatRateSelect.tsx ("Add rates in Settings") -- was
+//                  broken, landing on no matching tab or alias at all
 const TAB_ALIASES: Record<string, string> = {
-  features: "operations",
-  modules: "operations",
-  products: "operations",
-  hardware: "operations",
   anaf: "fiscal",
+  products: "categories",
+  operations: "categories",
+  general: "business",
 };
 
 function resolveCountryCode(
@@ -103,12 +118,16 @@ export default async function SettingsPage({
     { data: profile },
     { data: paymentMethods },
     { data: vatRates },
+    { data: sites },
   ] = await Promise.all([
     supabase.from("product_categories").select("*").eq("organisation_id", orgId).order("name"),
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     supabase.from("payment_methods").select("*").eq("organisation_id", orgId).order("created_at"),
     supabase.from("vat_rates").select("*").eq("organisation_id", orgId).order("sort_order"),
+    supabase.from("sites").select("id,name,address,city").eq("organisation_id", orgId).order("created_at"),
   ]);
+  const primarySite = sites?.[0] ?? null;
+  const hasMultipleSites = (sites?.length ?? 0) > 1;
 
   // ANAF connection status (RO only)
   let anafConnected = false;
@@ -129,21 +148,54 @@ export default async function SettingsPage({
   const fiscalnetEnabled = Boolean(orgRow?.fiscalnet_enabled ?? false);
   const efacturaEnabled = Boolean(orgRow?.efactura_enabled ?? false);
 
-  // Units
-  let unitsResult: { data: Array<{ id: string; name: string; abbreviation: string | null; organisation_id: string | null }> } = { data: [] };
-  try {
-    const { data: u } = await supabase
-      .from("units_of_measure")
-      .select("id,name,abbreviation,organisation_id")
-      .or(`organisation_id.eq.${orgId},organisation_id.is.null`)
-      .order("name");
-    unitsResult = { data: (u ?? []) as typeof unitsResult.data };
-  } catch { /* table not yet created */ }
+  // FiscalNet measured history — a setting that contradicts its own history
+  // (enabled, with no receipts ever attempted) says so here rather than
+  // just showing the toggle as if that alone meant it's working.
+  let fiscalReceiptAttempts = 0;
+  let fiscalLastAttemptAt: string | null = null;
+  let fiscalLastAttemptStatus: string | null = null;
+  let sessionsClosedCount = 0;
+  let zReportsDoneCount = 0;
+  let lastZReportAt: string | null = null;
+  if (isRO && fiscalnetEnabled) {
+    const [attemptsAgg, lastAttempt, sessionsAgg, zReportsAgg] = await Promise.all([
+      supabase.from("fiscal_receipt_attempts").select("*", { count: "exact", head: true }).eq("organisation_id", orgId),
+      supabase
+        .from("fiscal_receipt_attempts")
+        .select("attempted_at,status")
+        .eq("organisation_id", orgId)
+        .order("attempted_at", { ascending: false })
+        .limit(1),
+      supabase.from("pos_sessions").select("*", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "closed"),
+      supabase
+        .from("pos_sessions")
+        .select("fiscal_z_report_at", { count: "exact" })
+        .eq("organisation_id", orgId)
+        .eq("fiscal_z_report_done", true)
+        .order("fiscal_z_report_at", { ascending: false })
+        .limit(1),
+    ]);
+    fiscalReceiptAttempts = attemptsAgg.count ?? 0;
+    fiscalLastAttemptAt = lastAttempt.data?.[0]?.attempted_at ?? null;
+    fiscalLastAttemptStatus = lastAttempt.data?.[0]?.status ?? null;
+    sessionsClosedCount = sessionsAgg.count ?? 0;
+    zReportsDoneCount = zReportsAgg.count ?? 0;
+    lastZReportAt = zReportsAgg.data?.[0]?.fiscal_z_report_at ?? null;
+  }
 
-  const customUnits      = unitsResult.data.filter((u) => u.organisation_id === orgId);
-  const customUnitNames  = new Set(customUnits.map((u) => u.name));
-  const globalUnitNames  = unitsResult.data.filter((u) => u.organisation_id === null).map((u) => u.name);
-  const defaultUnits     = [...new Set([...DEFAULT_OPERATIONAL_UNITS, ...globalUnitNames].filter((u) => !customUnitNames.has(u)))];
+  // Units — read-only. The normalization migration (20260915010000) settled
+  // this org's units onto the canonical set; the only place a free-text unit
+  // name could ever re-enter the system was this settings page's old "add a
+  // unit" form, which nothing here has used (confirmed: zero rows in
+  // units_of_measure, org-specific or global, for every org checked). Not
+  // rebuilding that input. If a custom unit genuinely exists for an org, it
+  // still shows here — just without a way to type a new one.
+  const { data: customUnitRows } = await supabase
+    .from("units_of_measure")
+    .select("id,name,abbreviation")
+    .eq("organisation_id", orgId)
+    .order("name");
+  const customUnits = customUnitRows ?? [];
 
   // Referrals
   const referral = await ensureReferralCode(orgId).catch(() => ({
@@ -256,9 +308,17 @@ export default async function SettingsPage({
   ].filter(Boolean).length;
 
   // ── Tabs ─────────────────────────────────────────────────────────────
+  // Step 8: units / payment methods / categories / location / fiscal are
+  // the five core operational sections, in that order — the list pattern
+  // built once, used five times. Business profile, Marketplace,
+  // notifications, billing, team, and data-repair are unrelated concerns
+  // and keep their own tabs; nothing about them changes here.
   const tabs = [
-    { id: "business",     label: t.settings.tabBusiness },
-    { id: "operations",   label: isRO ? "Operațiuni" : "Operations" },
+    { id: "business",         label: t.settings.tabBusiness },
+    { id: "units",            label: isRO ? "Unități de măsură" : "Units" },
+    { id: "payment-methods",  label: isRO ? "Metode de plată" : "Payment methods" },
+    { id: "categories",       label: isRO ? "Categorii" : "Categories" },
+    { id: "location",         label: isRO ? "Locație" : "Location" },
     ...(isRO && (fiscalnetEnabled || efacturaEnabled || sagaInstalled)
       ? [{ id: "fiscal", label: "Fiscal" }]
       : []),
@@ -298,6 +358,27 @@ export default async function SettingsPage({
           </div>
         </Link>
       )}
+
+      {/* Rendered here, not inside a specific tab: this banner comes from
+          module-guard.ts's redirect (?tab=operations&locked=X&msg=Y), and
+          "operations" no longer names a real section since categories and
+          units moved to their own tabs. A cross-cutting notice like this
+          shouldn't depend on which tab happens to be active when someone
+          lands here — that dependency is exactly what made the original
+          redirect target silently wrong for as long as it was. */}
+      {lockedModule && lockedMessage ? (
+        <Card className="mb-6 border-amber-200 bg-amber-50">
+          <CardHeader>
+            <CardTitle>Modul indisponibil</CardTitle>
+            <CardDescription>{lockedMessage}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/app/settings?tab=integrations">
+              <Button variant="outline">Deschide Marketplace</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <SettingsTabNav tabs={tabs} />
 
@@ -454,16 +535,6 @@ export default async function SettingsPage({
             </CardContent>
           </Card>
 
-          {/* Payment methods */}
-          <PaymentMethodsCard
-            methods={(paymentMethods ?? []) as Array<{ id: string; name: string; type: string; active: boolean; fiscalnet_code?: number | null }>}
-            fiscalnetEnabled={fiscalnetEnabled}
-            canEdit={canEdit}
-            addAction={addPaymentMethod as unknown as (fd: FormData) => Promise<void>}
-            updateAction={updatePaymentMethod as unknown as (fd: FormData) => Promise<void>}
-            deleteAction={deletePaymentMethod as unknown as (fd: FormData) => Promise<void>}
-          />
-
           {/* VAT rates */}
           {canEdit && (() => {
             const defaults = VAT_DEFAULTS_BY_COUNTRY[countryCode] ?? [];
@@ -487,24 +558,92 @@ export default async function SettingsPage({
         </div>
       )}
 
-      {/* ── OPERATIONS TAB ───────────────────────────────────────────── */}
-      {activeTab === "operations" && (
+      {/* ── UNITS TAB ────────────────────────────────────────────────── */}
+      {activeTab === "units" && (
         <div className="space-y-6">
-          {lockedModule && lockedMessage ? (
-            <Card className="border-amber-200 bg-amber-50">
-              <CardHeader>
-                <CardTitle>Modul indisponibil</CardTitle>
-                <CardDescription>{lockedMessage}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/app/settings?tab=integrations">
-                  <Button variant="outline">Deschide Marketplace</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ) : null}
+          <SettingsSection
+            title={isRO ? "Unități de măsură" : "Units of measurement"}
+            description={
+              isRO
+                ? "Unitățile standard sunt fixe — un articol precum „Buc”/„Units” care ar duplica una dintre ele nu mai poate fi introdus aici."
+                : "The standard set is fixed — a free-text entry that would duplicate one of these (like the old \"Buc\"/\"Units\" split) is no longer offered here."
+            }
+          >
+            <div className="flex flex-wrap gap-2">
+              {DEFAULT_OPERATIONAL_UNITS.map((u) => (
+                <Badge key={u} variant="outline" className="text-slate-600">{unitLabel(u, isRO ? "ro" : "en")}</Badge>
+              ))}
+            </div>
+            {customUnits.length > 0 ? (
+              <div className="mt-4 border-t border-slate-100 pt-4">
+                <p className="text-xs text-slate-500 mb-2">{isRO ? "Unități personalizate" : "Custom units"}</p>
+                <div className="flex flex-wrap gap-2">
+                  {customUnits.map((u) => (
+                    <Badge key={u.id} variant="outline" className="text-slate-600">
+                      {u.name}{u.abbreviation ? ` (${u.abbreviation})` : ""}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </SettingsSection>
+        </div>
+      )}
 
-          {/* Product categories */}
+      {/* ── PAYMENT METHODS TAB ──────────────────────────────────────── */}
+      {activeTab === "payment-methods" && (
+        <div className="space-y-6">
+          <PaymentMethodsCard
+            methods={(paymentMethods ?? []) as Array<{ id: string; name: string; type: string; active: boolean; fiscalnet_code?: number | null }>}
+            fiscalnetEnabled={fiscalnetEnabled}
+            canEdit={canEdit}
+            addAction={addPaymentMethod as unknown as (fd: FormData) => Promise<void>}
+            updateAction={updatePaymentMethod as unknown as (fd: FormData) => Promise<void>}
+            deleteAction={deletePaymentMethod as unknown as (fd: FormData) => Promise<void>}
+          />
+        </div>
+      )}
+
+      {/* ── LOCATION TAB ─────────────────────────────────────────────── */}
+      {activeTab === "location" && (
+        <div className="space-y-6">
+          <SettingsSection
+            title={isRO ? "Locație" : "Location"}
+            description={
+              hasMultipleSites
+                ? undefined
+                : isRO
+                  ? "O singură locație — selectorul de locații apare automat când există o a doua."
+                  : "One location — a location switcher appears automatically once a second one exists."
+            }
+          >
+            {primarySite ? (
+              canEdit ? (
+                <form action={updateSite as unknown as (fd: FormData) => Promise<void>} className="grid gap-3 sm:grid-cols-3 sm:items-end">
+                  <input type="hidden" name="id" value={primarySite.id} />
+                  <div><Label>{isRO ? "Nume" : "Name"}</Label><Input name="name" defaultValue={primarySite.name} required /></div>
+                  <div><Label>{isRO ? "Adresă" : "Address"}</Label><Input name="address" defaultValue={primarySite.address ?? ""} /></div>
+                  <div><Label>{isRO ? "Oraș" : "City"}</Label><Input name="city" defaultValue={primarySite.city ?? ""} /></div>
+                  <Button type="submit" variant="outline" size="sm" className="sm:col-span-3 sm:w-fit">
+                    {isRO ? "Salvează" : "Save"}
+                  </Button>
+                </form>
+              ) : (
+                <div className="text-sm">
+                  <p className="font-medium">{primarySite.name}</p>
+                  <p className="text-slate-500">{[primarySite.address, primarySite.city].filter(Boolean).join(", ") || "—"}</p>
+                </div>
+              )
+            ) : (
+              <p className="text-sm text-slate-400">{isRO ? "Nicio locație configurată." : "No location configured."}</p>
+            )}
+          </SettingsSection>
+        </div>
+      )}
+
+      {/* ── CATEGORIES TAB ───────────────────────────────────────────── */}
+      {activeTab === "categories" && (
+        <div className="space-y-6">
           {(["inventory", "pos"] as const).map((scope) => {
             const scopeCats = (categories ?? []).filter(
               (c) =>
@@ -553,41 +692,56 @@ export default async function SettingsPage({
               </Card>
             );
           })}
-
-          {/* Units of measurement */}
-          <Card>
-            <CardHeader><CardTitle>Units of measurement</CardTitle></CardHeader>
-            <CardContent>
-              <form action={addUnit as unknown as (fd: FormData) => Promise<void>} className="flex flex-wrap gap-3 items-end mb-4">
-                <div><Label>Unit name</Label><Input name="name" required placeholder="e.g. barrel, dozen" className="w-36" /></div>
-                <div><Label>Abbreviation</Label><Input name="abbreviation" placeholder="brl" className="w-24" /></div>
-                <Button type="submit" variant="outline" size="sm">Add unit</Button>
-              </form>
-              <div className="mb-4 flex flex-wrap gap-2">
-                {defaultUnits.map((u) => (
-                  <Badge key={u} variant="outline" className="text-slate-600">{u}</Badge>
-                ))}
-              </div>
-              <div className="space-y-2">
-                {customUnits.map((u) => (
-                  <form key={u.id} action={updateUnit as unknown as (fd: FormData) => Promise<void>} className="grid gap-2 rounded-lg border border-slate-100 p-2 sm:grid-cols-[1fr_120px_auto_auto] sm:items-end">
-                    <input type="hidden" name="id" value={u.id} />
-                    <div><Label>Unit name</Label><Input name="name" defaultValue={u.name} required /></div>
-                    <div><Label>Abbreviation</Label><Input name="abbreviation" defaultValue={u.abbreviation ?? ""} /></div>
-                    <Button type="submit" variant="outline" size="sm">Save</Button>
-                    <Button formAction={deleteUnit as unknown as (fd: FormData) => Promise<void>} type="submit" variant="outline" size="sm" className="border-red-200 text-red-700 hover:bg-red-50">Delete</Button>
-                  </form>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
         </div>
       )}
 
       {/* ── FISCAL & CONTABILITATE TAB (RO only) ─────────────────────── */}
       {activeTab === "fiscal" && isRO && (efacturaEnabled || fiscalnetEnabled || sagaInstalled) && (
         <div className="space-y-6">
+
+          {/* Measured history, not just the toggle. A "fiscalnet_enabled: true"
+              checkbox with zero receipt attempts ever recorded is a setting
+              contradicting its own history — this says so instead of letting
+              the toggle alone imply it's working. */}
+          {fiscalnetEnabled && (
+          <Card className={fiscalReceiptAttempts === 0 ? "border-amber-200 bg-amber-50" : undefined}>
+            <CardHeader>
+              <CardTitle>Istoric FiscalNet</CardTitle>
+              <CardDescription>
+                {fiscalReceiptAttempts === 0
+                  ? "FiscalNet este activat, dar nu există nicio încercare de emitere bon fiscal înregistrată."
+                  : "Activitate măsurată, nu doar starea conexiunii."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-4 text-sm">
+                <div>
+                  <p className="text-slate-500">Încercări bon fiscal</p>
+                  <p className={`font-medium ${fiscalReceiptAttempts === 0 ? "text-amber-700" : ""}`}>{fiscalReceiptAttempts}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Ultima încercare</p>
+                  <p className="font-medium">
+                    {fiscalLastAttemptAt
+                      ? `${new Date(fiscalLastAttemptAt).toLocaleString("ro-RO")} (${fiscalLastAttemptStatus ?? "—"})`
+                      : "Niciodată"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Sesiuni închise</p>
+                  <p className="font-medium">{sessionsClosedCount}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Rapoarte Z generate</p>
+                  <p className="font-medium">
+                    {zReportsDoneCount}
+                    {lastZReportAt ? ` (ultimul: ${new Date(lastZReportAt).toLocaleDateString("ro-RO")})` : ""}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          )}
 
           {efacturaEnabled && (
           <Card>
