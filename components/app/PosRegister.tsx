@@ -4,9 +4,10 @@ import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addCustomerFromPos, closePosSession, completeSaleReturn, posCashMovement, voidTransaction } from "@/app/actions/kitchenops";
-import { runZReport } from "@/app/actions/fiscalnet";
+import { runZReport, recordFiscalReceiptAttempt } from "@/app/actions/fiscalnet";
 import { getLoyaltyStampStatus, recordLoyaltyRedemption, type LoyaltyStampStatus } from "@/app/actions/loyalty";
-import { fiscalBrowserReceipt, fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
+import { fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
+import { fiscalBrowserReceiptAndLog, type RecordFiscalAttemptInput } from "@/lib/fiscalnet/log-attempt";
 import { useFiscalNetActive } from "@/lib/fiscalnet/use-fiscalnet-active";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -157,6 +158,26 @@ function productPlaceholderCfg(
     return { bg: "", iconColor: "text-white/80", icon: Package, style: { backgroundColor: categoryColor } };
   }
   return PLACEHOLDER_STYLES.other;
+}
+
+/**
+ * Adapts the server action's FormData signature to fiscalBrowserReceiptAndLog's
+ * RecordFiscalAttempt shape. Module-level (not a hook) — it has no closure
+ * dependencies, it's just marshalling.
+ */
+async function recordFiscalAttempt(
+  input: RecordFiscalAttemptInput,
+): Promise<{ ok: boolean; attemptId?: string; error?: string }> {
+  const fd = new FormData();
+  fd.set("transaction_id", input.transactionId);
+  fd.set("attempt_number", String(input.attemptNumber));
+  fd.set("status", input.status);
+  fd.set("mock_mode", String(input.mockMode));
+  if (input.responseContent) fd.set("response_content", input.responseContent);
+  if (input.receiptNumber) fd.set("receipt_number", input.receiptNumber);
+  if (input.errorCode) fd.set("error_code", input.errorCode);
+  if (input.errorInfo) fd.set("error_info", input.errorInfo);
+  return recordFiscalReceiptAttempt(fd);
 }
 
 function ProductTileMedia({
@@ -1101,7 +1122,10 @@ function PosRegisterInner({
       }
       setCheckoutStep("complete");
       if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
-        void fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType).then((fnRes) => {
+        void fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
+          transactionId: res.transactionId,
+          recordAttempt: recordFiscalAttempt,
+        }).then((fnRes) => {
           if (fiscalActive && fnRes.filename && fnRes.content) {
             setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
           }
@@ -1320,7 +1344,10 @@ function PosRegisterInner({
       let fiscalDone = !res.fiscalApiPending;
       if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
         try {
-          const fnRes = await fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType);
+          const fnRes = await fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
+            transactionId: res.transactionId,
+            recordAttempt: recordFiscalAttempt,
+          });
           if (fiscalActive && fnRes.filename && fnRes.content) {
             setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
           }

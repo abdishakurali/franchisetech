@@ -16,6 +16,7 @@
 import { revalidatePath } from "next/cache";
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { stringValue, numberValue } from "@/lib/kitchenops/data";
+import { createServiceClient } from "@/lib/supabase/server";
 import {
   printFiscalReceipt,
   fiscalXReport, fiscalZReport, fiscalStatus,
@@ -425,4 +426,55 @@ export async function retryFiscalReceipt(formData: FormData): Promise<{ ok: bool
     return { ok: true, message: `Receipt printed. Nr: ${result.receiptNumber ?? "?"}${result.mock ? " (mock)" : ""}` };
   }
   return { ok: false, message: result.errorInfo ?? `Print failed: ${result.status}` };
+}
+
+// ── Record fiscal receipt attempt (Gate B) ─────────────────────────────────
+//
+// Called once, from the client, immediately after fiscalBrowserReceipt
+// (lib/fiscalnet/browser.ts) resolves — success or failure. Unlike
+// printFiscalReceipt above, this never calls FiscalNet itself; it only
+// records an outcome the browser already has in hand, in one atomic RPC
+// call (record_fiscal_receipt_attempt — SECURITY DEFINER, service_role
+// only, idempotent on transaction_id+attempt_number). See
+// lib/fiscalnet/log-attempt.ts for the client-side wrapper that joins the
+// agent call and this logging call into one operation neither can be
+// skipped independently of.
+const FISCAL_ATTEMPT_STATUSES = ["success", "failed", "timeout", "ambiguous", "mock_success"] as const;
+type FiscalAttemptStatus = (typeof FISCAL_ATTEMPT_STATUSES)[number];
+
+export async function recordFiscalReceiptAttempt(
+  formData: FormData
+): Promise<{ ok: boolean; attemptId?: string; error?: string }> {
+  const transactionId = stringValue(formData, "transaction_id");
+  const status = stringValue(formData, "status");
+  const attemptNumber = numberValue(formData, "attempt_number", 1);
+  if (!transactionId) return { ok: false, error: "Missing transaction ID." };
+  if (!FISCAL_ATTEMPT_STATUSES.includes(status as FiscalAttemptStatus)) {
+    return { ok: false, error: `Invalid fiscal attempt status: ${status}` };
+  }
+
+  const { orgId, user } = await getActiveOrg();
+  const service = await createServiceClient();
+
+  const { data, error } = await service.rpc("record_fiscal_receipt_attempt", {
+    p_org_id: orgId,
+    p_transaction_id: transactionId,
+    p_attempt_number: attemptNumber,
+    p_status: status,
+    p_mock_mode: formData.get("mock_mode") === "true",
+    p_response_content: stringValue(formData, "response_content") || null,
+    p_receipt_number: stringValue(formData, "receipt_number") || null,
+    p_error_code: stringValue(formData, "error_code") || null,
+    p_error_info: stringValue(formData, "error_info") || null,
+    p_performed_by: user.id,
+  });
+
+  if (error) {
+    console.error("[FiscalNet] record_fiscal_receipt_attempt failed", error.message);
+    return { ok: false, error: error.message };
+  }
+
+  revalidatePath("/app/settings");
+  revalidatePath(`/app/transactions/${transactionId}`);
+  return { ok: true, attemptId: (data as { attempt_id?: string } | null)?.attempt_id };
 }
