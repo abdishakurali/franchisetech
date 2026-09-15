@@ -81,6 +81,9 @@ const en = {
     to: "To",
     downloadPdf: "Download PDF",
     customRange: "Custom range",
+    costBasisCmp: "CMP",
+    costAsOf: (date: string) => `CMP as of ${date}`,
+    costBasisUnknown: "cost basis unknown",
   },
   period: {
     today: "Today",
@@ -1470,6 +1473,9 @@ const ro: typeof en = {
     to: "Până la",
     downloadPdf: "Descarcă PDF",
     customRange: "Interval personalizat",
+    costBasisCmp: "CMP",
+    costAsOf: (date: string) => `CMP la ${date}`,
+    costBasisUnknown: "bază cost necunoscută",
   },
   period: {
     today: "Azi",

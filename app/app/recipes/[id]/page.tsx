@@ -8,6 +8,7 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import {
   firstJoined,
+  formatCostAsOf,
   formatQty,
   formatRecipeMoney,
   recipeCanMake,
@@ -31,7 +32,7 @@ export default async function RecipeDetailPage({
   const { data: rawRecipe } = await supabase
     .from("recipes")
     .select(
-      "id,name,yield_qty,product_id,products(name,sale_price),recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)"
+      "id,name,yield_qty,product_id,cost_computed_at,products(name,sale_price),recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)"
     )
     .eq("organisation_id", orgId)
     .eq("id", id)
@@ -116,6 +117,13 @@ export default async function RecipeDetailPage({
                   {formatRecipeMoney(metrics.costPerUnit, currency)}
                 </p>
                 <p className="mt-0.5 text-xs text-slate-400">cost ingrediente</p>
+                <p className="mt-0.5 text-[10px] text-slate-400">
+                  {formatCostAsOf(recipe.cost_computed_at, {
+                    basis: "CMP",
+                    asOf: (date) => `CMP la ${date}`,
+                    unknown: "bază cost necunoscută",
+                  })}
+                </p>
               </div>
               <div className="text-center">
                 <p

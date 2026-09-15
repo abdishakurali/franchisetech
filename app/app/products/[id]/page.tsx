@@ -8,6 +8,7 @@ import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleEnabled } from "@/lib/business-modules";
 import { PRODUCT_DETAIL_SELECT } from "@/lib/supabase/product-selects";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { formatCostAsOf } from "@/lib/recipe-costing";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -72,7 +73,7 @@ export default async function ProductDetailPage({
   const { data: recipes } = recipeVisible
     ? await supabase
         .from("recipes")
-        .select("id,name,yield_qty,recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)")
+        .select("id,name,yield_qty,cost_computed_at,recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)")
         .eq("product_id", id)
         .eq("organisation_id", orgId)
         .limit(1)
@@ -231,7 +232,16 @@ export default async function ProductDetailPage({
           <>
             <Card>
               <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Recipe cost</CardTitle></CardHeader>
-              <CardContent className="text-2xl font-bold text-slate-700">{money(recipeCostPerUnit, currency)}</CardContent>
+              <CardContent className="text-2xl font-bold text-slate-700">
+                {money(recipeCostPerUnit, currency)}
+                <p className="text-xs font-normal text-slate-400 mt-1">
+                  {formatCostAsOf(recipe.cost_computed_at, {
+                    basis: t.common.costBasisCmp,
+                    asOf: t.common.costAsOf,
+                    unknown: t.common.costBasisUnknown,
+                  })}
+                </p>
+              </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Gross margin</CardTitle></CardHeader>
@@ -309,6 +319,13 @@ export default async function ProductDetailPage({
                 <div className={`flex justify-between font-bold text-base pt-1 ${marginPct >= 60 ? "text-green-700" : "text-amber-600"}`}>
                   <span>Margin</span><span>{money(grossMargin, currency)} ({marginPct.toFixed(1)}%)</span>
                 </div>
+                <p className="text-xs text-slate-400 pt-1">
+                  {formatCostAsOf(recipe.cost_computed_at, {
+                    basis: t.common.costBasisCmp,
+                    asOf: t.common.costAsOf,
+                    unknown: t.common.costBasisUnknown,
+                  })}
+                </p>
               </div>
             </CardContent>
           </Card>

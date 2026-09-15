@@ -8,6 +8,7 @@ import { requireBusinessModule } from "@/lib/module-guard";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import {
   firstJoined,
+  formatCostAsOf,
   formatRecipeMoney,
   recipeCanMake,
   recipeCostMetrics,
@@ -24,7 +25,7 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
 
   const { data: rawRecipes } = await supabase
     .from("recipes")
-    .select("id,name,yield_qty,product_id,products(name,sale_price),recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_cost,total_cost)")
+    .select("id,name,yield_qty,product_id,cost_computed_at,products(name,sale_price),recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_cost,total_cost)")
     .eq("organisation_id", orgId)
     .order("created_at", { ascending: false });
 
@@ -169,7 +170,14 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
                       </TableCell>
                       <TableCell className="text-right tabular-nums text-slate-600">{ingredientCount}</TableCell>
                       <TableCell className="text-right tabular-nums hidden sm:table-cell">{formatRecipeMoney(salePrice, currency)}</TableCell>
-                      <TableCell className="text-right tabular-nums text-slate-600 hidden md:table-cell">
+                      <TableCell
+                        className="text-right tabular-nums text-slate-600 hidden md:table-cell"
+                        title={formatCostAsOf(recipe.cost_computed_at, {
+                          basis: t.common.costBasisCmp,
+                          asOf: t.common.costAsOf,
+                          unknown: t.common.costBasisUnknown,
+                        })}
+                      >
                         {formatRecipeMoney(costPerUnit, currency)}
                       </TableCell>
                       <TableCell className="text-right">

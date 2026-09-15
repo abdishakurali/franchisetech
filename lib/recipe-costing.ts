@@ -1,3 +1,27 @@
+// recipe_items.unit_cost/total_cost are a snapshot of products.cost_price
+// (rolling weighted-average cost, not FIFO) taken when the recipe was
+// created or last edited -- not recomputed on every view. A cost that moves
+// with every reception needs to say what it's a snapshot of and when it was
+// taken, or it reads as more current than it is.
+export const RECIPE_COST_BASIS = "CMP";
+
+/** Renders the recipe's cost-basis date, or an explicit "unknown" rather
+ * than silently omitting it -- a recipe written before this column existed,
+ * or never priced via the tracked write path, has no as-of date to show. */
+export function formatCostAsOf(
+  costComputedAt: string | null | undefined,
+  labels: { basis: string; asOf: (date: string) => string; unknown: string },
+  locale: string = "en-IE",
+): string {
+  if (!costComputedAt) return labels.unknown;
+  const date = new Date(costComputedAt).toLocaleDateString(locale, {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+  return labels.asOf(date);
+}
+
 export function formatRecipeMoney(v: number, currency = "EUR") {
   if (currency === "RON") return `${Number(v).toFixed(2)} lei`;
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: currency || "EUR" }).format(v);
@@ -27,6 +51,7 @@ export type RecipeRow = {
   name: string;
   yield_qty: number | string;
   product_id: string | null;
+  cost_computed_at?: string | null;
   products: { name: string; sale_price: number } | { name: string; sale_price: number }[] | null;
   recipe_items: RecipeItemRow[];
 };

@@ -1353,7 +1353,7 @@ export async function updateRecipeFromProducts(formData: FormData) {
 
   await supabase
     .from("recipes")
-    .update({ product_id: productId, name: recipeName, yield_qty: yieldQty })
+    .update({ product_id: productId, name: recipeName, yield_qty: yieldQty, cost_computed_at: new Date().toISOString() })
     .eq("id", recipeId)
     .eq("organisation_id", orgId);
 
@@ -1403,6 +1403,7 @@ export async function addRecipeFromProducts(formData: FormData) {
 
   const { data: recipe } = await supabase.from("recipes").insert({
     organisation_id: orgId, product_id: productId, name: recipeName, yield_qty: yieldQty,
+    cost_computed_at: new Date().toISOString(),
   }).select("id").single();
   if (!recipe) return;
 
