@@ -2,295 +2,78 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
-import { Section } from "@/components/marketing/MarketingShell.primitives";
-import { YouTubeFacade } from "@/components/marketing/YouTubeFacade";
+import { ArrowRight, Check, WifiOff } from "lucide-react";
+import { useEffect } from "react";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { pricingPlans } from "@/lib/billing/plans";
 import { getHomepageContent } from "@/lib/marketing/homepage-content";
 import { useMarketingLocaleContext } from "@/lib/marketing/marketing-locale-context";
 
-const heading =
-  "font-[family-name:var(--font-display)] text-3xl font-semibold leading-tight text-[#0D0F0E] sm:text-4xl";
-const label = "text-xs font-semibold uppercase text-[#165DFC]";
-const primary =
-  "inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#165DFC] px-6 text-sm font-semibold text-white transition hover:bg-[#0B47CC] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#165DFC]";
+function TrialLink({ location, className = "" }: { location: string; className?: string }) {
+  const { locale } = useMarketingLocaleContext();
+  const c = getHomepageContent(locale);
+  return (
+    <Link href="/signup?plan=starter" className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#165DFC] px-6 text-sm font-semibold text-white transition hover:bg-[#0B47CC] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#165DFC] ${className}`} onClick={() => captureClientEvent("cta_clicked", { location, destination: "/signup?plan=starter" })}>
+      {c.trial}<ArrowRight size={17} aria-hidden />
+    </Link>
+  );
+}
 
 export function HomePageContentTop() {
   const { locale } = useMarketingLocaleContext();
   const c = getHomepageContent(locale);
-
-  useEffect(() => {
-    captureClientEvent("landing_page_view", {
-      locale,
-      page: "homepage_single_truth",
-    });
-  }, [locale]);
-
-  return (
-    <section className="relative isolate overflow-hidden bg-[#151917] px-4 py-16 text-white sm:px-6 sm:py-24 lg:px-8 lg:py-28">
-      <Image
-        src="/marketing/hero-cafe-pos.png"
-        alt=""
-        fill
-        sizes="100vw"
-        preload
-        className="-z-20 object-cover object-[62%_center]"
-      />
-      <div className="absolute inset-0 -z-10 bg-black/70 lg:bg-gradient-to-r lg:from-black/80 lg:via-black/60 lg:to-black/25" />
-      <div className="mx-auto max-w-7xl">
-        <div className="max-w-3xl">
-          <p className="text-sm font-medium text-white/85">{c.eyebrow}</p>
-          <h1 className="mt-5 font-[family-name:var(--font-display)] text-4xl font-semibold leading-[1.06] sm:text-5xl lg:text-6xl">
-            {c.title}
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-white/90 sm:text-lg">
-            {c.intro}
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/signup?plan=starter"
-              className={primary}
-              onClick={() =>
-                captureClientEvent("cta_clicked", {
-                  location: "homepage_hero",
-                  destination: "/signup?plan=starter",
-                })
-              }
-            >
-              {c.trial}
-              <ArrowRight size={18} aria-hidden />
-            </Link>
-            <a
-              href="#product-proof"
-              className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/70 bg-black/20 px-6 text-sm font-semibold text-white transition hover:bg-black/40 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
-            >
-              {c.watch}
-            </a>
-          </div>
-          <p className="mt-5 flex items-center gap-2 text-sm text-white/85">
-            <Check size={16} aria-hidden />
-            {c.trialNote}
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ProductProof() {
-  const { locale } = useMarketingLocaleContext();
-  const c = getHomepageContent(locale);
-  const [selected, setSelected] = useState(0);
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const screen = c.screens[selected];
-
-  return (
-    <Section id="product-proof">
-      <div className="max-w-3xl">
-        <p className={label}>{c.galleryLabel}</p>
-        <h2 className={`mt-3 ${heading}`}>{c.galleryTitle}</h2>
-        <p className="mt-4 text-base leading-7 text-[#526158]">
-          {c.galleryIntro}
-        </p>
-      </div>
-      <div
-        role="tablist"
-        aria-label={c.galleryLabel}
-        className="mt-8 flex snap-x gap-1 overflow-x-auto border-b border-[#DDE2E0] sm:grid sm:grid-cols-4"
-      >
-        {c.screens.map((item, index) => (
-          <button
-            key={item.src}
-            ref={(node) => {
-              tabRefs.current[index] = node;
-            }}
-            type="button"
-            role="tab"
-            id={`screen-tab-${index}`}
-            aria-selected={selected === index}
-            aria-controls="product-screen"
-            tabIndex={selected === index ? 0 : -1}
-            onClick={() => setSelected(index)}
-            onKeyDown={(event) => {
-              let next = index;
-              if (event.key === "ArrowRight") next = (index + 1) % c.screens.length;
-              else if (event.key === "ArrowLeft")
-                next = (index - 1 + c.screens.length) % c.screens.length;
-              else if (event.key === "Home") next = 0;
-              else if (event.key === "End") next = c.screens.length - 1;
-              else return;
-              event.preventDefault();
-              setSelected(next);
-              tabRefs.current[next]?.focus();
-            }}
-            className={`min-h-12 min-w-32 snap-start border-b-2 px-4 py-3 text-sm font-semibold transition sm:min-w-0 ${selected === index ? "border-[#165DFC] text-[#165DFC]" : "border-transparent text-[#526158] hover:bg-[#F4F7F5]"}`}
-          >
-            {item.title}
-          </button>
-        ))}
-      </div>
-      <div
-        id="product-screen"
-        role="tabpanel"
-        aria-labelledby={`screen-tab-${selected}`}
-        tabIndex={0}
-        className="pt-5"
-      >
-        <p className="mb-4 text-sm leading-6 text-[#526158]">{screen.text}</p>
-        <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-[#DDE2E0] bg-[#F5F7F6] shadow-sm sm:aspect-[16/9]">
-          {screen.video ? (
-            <video
-              controls
-              playsInline
-              preload="none"
-              poster={screen.src}
-              aria-label={`${screen.title} — franchisetech`}
-              className="absolute inset-0 h-full w-full object-contain"
-            >
-              <source src={screen.video} type="video/mp4" />
-            </video>
-          ) : (
-            <Image
-              src={screen.src}
-              alt={`${screen.title} — franchisetech`}
-              fill
-              sizes="(min-width: 1280px) 1280px, 100vw"
-              className="object-contain"
-            />
-          )}
-        </div>
-      </div>
-    </Section>
-  );
-}
-
-export function HomePageContentBottom() {
-  const { locale, t } = useMarketingLocaleContext();
-  const c = getHomepageContent(locale);
-
+  useEffect(() => { captureClientEvent("landing_page_view", { locale, page: "homepage_claude_design" }); }, [locale]);
   return (
     <>
-      <ProductProof />
-      <section
-        id="benefits"
-        className="scroll-mt-24 border-y border-[#E2E6E3] bg-[#F5F3EE] px-4 py-16 sm:px-6 sm:py-20 lg:px-8"
-      >
-        <div className="mx-auto max-w-7xl">
-          <p className={label}>{c.benefitsLabel}</p>
-          <h2 className={`mt-3 max-w-3xl ${heading}`}>{c.benefitsTitle}</h2>
-          <ol className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
-            {c.benefits.map((benefit, index) => (
-              <li key={benefit.title} className="border-t border-[#C9CEC9] pt-5">
-                <span className="font-mono text-xs text-[#165DFC]">0{index + 1}</span>
-                <h3 className="mt-4 text-xl font-semibold text-[#0D0F0E]">
-                  {benefit.title}
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-[#526158]">
-                  {benefit.text}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-      <Section id="customer-proof">
-        <div className="grid items-center gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <section className="overflow-hidden bg-[#0D0F0E] px-4 py-14 text-white sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[0.88fr_1.12fr] lg:gap-16">
           <div>
-            <p className={label}>{c.customerProof.label}</p>
-            <h2 className={`mt-3 ${heading}`}>{c.customerProof.title}</h2>
-            <p className="mt-5 text-base leading-7 text-[#526158]">
-              {c.customerProof.caption}
-            </p>
-            <dl className="mt-8 grid grid-cols-2 gap-6 border-t border-[#DDE2E0] pt-6">
-              {c.customerProof.stats.map((stat) => (
-                <div key={stat.label}>
-                  <dd className="text-2xl font-semibold text-[#0D0F0E]">
-                    {stat.value}
-                  </dd>
-                  <dt className="mt-1 text-sm text-[#526158]">{stat.label}</dt>
-                </div>
-              ))}
-            </dl>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#8DB6FF]">{c.eyebrow}</p>
+            <h1 className="mt-5 max-w-2xl font-[family-name:var(--font-display)] text-4xl font-semibold leading-[1.04] tracking-[-0.035em] sm:text-5xl lg:text-[4rem]">{c.title}</h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-white/72 sm:text-lg">{c.intro}</p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row"><TrialLink location="homepage_hero" /><a href="#ce-face" className="inline-flex min-h-12 items-center justify-center rounded-lg border border-white/30 px-6 text-sm font-semibold text-white transition hover:bg-white/10">{c.watch}</a></div>
+            <p className="mt-5 flex items-center gap-2 text-sm text-white/60"><Check size={15} aria-hidden />{c.trialNote}</p>
           </div>
-          <div className="relative aspect-video overflow-hidden rounded-xl bg-[#151917]">
-            <YouTubeFacade
-              youtubeId={t.home.videoTestimonial.youtubeId}
-              title={c.customerProof.title}
-            />
-          </div>
-        </div>
-      </Section>
-      <section
-        id="pricing"
-        className="scroll-mt-24 bg-[#151917] px-4 py-16 text-white sm:px-6 sm:py-20 lg:px-8"
-      >
-        <div className="mx-auto max-w-7xl">
-          <p className="text-xs font-semibold uppercase text-[#8DB6FF]">
-            {c.pricingLabel}
-          </p>
-          <div className="mt-3 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-            <div>
-              <h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold leading-tight sm:text-4xl">
-                {c.pricingTitle}
-              </h2>
-              <p className="mt-4 max-w-xl text-sm leading-6 text-white/70">
-                {c.pricingNote}
-              </p>
-            </div>
-            <Link
-              href="/pricing"
-              className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#AFC9FF]"
-            >
-              {c.pricingLink}
-              <ArrowRight size={16} aria-hidden />
-            </Link>
-          </div>
-          <div className="mt-9 grid gap-5 sm:grid-cols-2">
-            {(["starter", "pro"] as const).map((id, index) => {
-              const plan = pricingPlans.find((item) => item.id === id)!;
-              return (
-                <article
-                  key={id}
-                  className="rounded-xl bg-white p-6 text-[#0D0F0E] sm:p-8"
-                >
-                  <h3 className="text-xl font-semibold">
-                    {id === "starter" ? "Starter" : "Pro"}
-                  </h3>
-                  <p className="mt-4 text-4xl font-semibold">
-                    {Math.round(plan.amountCents / 100)} €
-                    <span className="text-sm font-normal text-[#526158]">
-                      {" "}/ {c.month}
-                    </span>
-                  </p>
-                  <p className="mt-4 text-sm leading-6 text-[#526158]">
-                    {c.pricing.planText[index]}
-                  </p>
-                  <Link href={`/signup?plan=${id}`} className={`mt-6 ${primary}`}>
-                    {c.trial}
-                    <ArrowRight size={16} aria-hidden />
-                  </Link>
-                </article>
-              );
-            })}
-          </div>
-          <div className="mt-12 flex flex-col items-start justify-between gap-6 border-t border-white/20 pt-8 lg:flex-row lg:items-center">
-            <div>
-              <h2 className="max-w-2xl font-[family-name:var(--font-display)] text-2xl font-semibold sm:text-3xl">
-                {c.finalTitle}
-              </h2>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-white/70">
-                {c.finalText}
-              </p>
-            </div>
-            <Link href="/signup?plan=starter" className={`shrink-0 ${primary}`}>
-              {c.trial}
-              <ArrowRight size={16} aria-hidden />
-            </Link>
+          <div className="relative">
+            <div className="absolute -inset-12 rounded-full bg-[#165DFC]/20 blur-3xl" />
+            <div className="relative overflow-hidden rounded-xl border border-white/15 bg-white shadow-2xl"><Image src="/showcase/pos-cart.png" alt="Ecranul de vânzare FranchiseTech" width={1600} height={1000} priority className="h-auto w-full" /></div>
+            <p className="mt-3 text-center text-xs text-white/45">{locale === "ro" ? "Ecranul de vânzare, din platformă" : "The sales screen, inside the platform"}</p>
           </div>
         </div>
       </section>
+      <section className="border-b border-[#DFDCD2] bg-[#F3F0E8] px-4 py-7 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-7xl gap-6 text-center sm:grid-cols-3 sm:text-left">
+          {[[locale === "ro" ? "Folosit zilnic în România" : "Used daily in Romania", locale === "ro" ? "de cafenele independente" : "by independent cafés"], ["3.800+", locale === "ro" ? "bonuri procesate" : "receipts processed"], ["9.500+", locale === "ro" ? "mișcări de stoc urmărite" : "stock movements tracked"]].map(([value, text]) => <div key={value} className="border-[#CFCABE] sm:border-l sm:pl-6 first:sm:border-l-0 first:sm:pl-0"><p className="font-[family-name:var(--font-display)] text-xl font-semibold text-[#0D0F0E]">{value}</p><p className="mt-1 text-sm text-[#666960]">{text}</p></div>)}
+        </div>
+      </section>
+    </>
+  );
+}
+
+const featureImages = ["/showcase/pos-cart.png", "/showcase/recipe-costing.png", "/showcase/stock-levels.png", "/showcase/reports-dashboard.png"] as const;
+
+export function HomePageContentBottom() {
+  const { locale } = useMarketingLocaleContext();
+  const c = getHomepageContent(locale);
+  const starter = pricingPlans.find((plan) => plan.id === "starter")!;
+  return (
+    <>
+      <section id="ce-face" className="scroll-mt-20 bg-[#FAF8F4] px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#165DFC]">{locale === "ro" ? "Ce face, pe scurt" : "What it does"}</p>
+          <h2 className="mt-4 max-w-3xl font-[family-name:var(--font-display)] text-3xl font-semibold tracking-[-0.025em] text-[#0D0F0E] sm:text-5xl">{c.benefitsLabel}.</h2>
+          <div className="mt-14 space-y-20 lg:space-y-28">
+            {c.benefits.map((benefit, index) => <article key={benefit.title} className="grid items-center gap-9 lg:grid-cols-2 lg:gap-20"><div className={index % 2 ? "lg:order-2" : ""}><p className="font-mono text-sm text-[#165DFC]">0{index + 1}</p><h3 className="mt-4 font-[family-name:var(--font-display)] text-3xl font-semibold tracking-[-0.02em] text-[#0D0F0E]">{benefit.title}</h3><p className="mt-4 max-w-lg text-base leading-7 text-[#666960]">{benefit.text}</p></div><div className={`overflow-hidden rounded-xl border border-[#DFDCD2] bg-white shadow-[0_18px_60px_rgba(13,15,14,0.08)] ${index % 2 ? "lg:order-1" : ""}`}><Image src={featureImages[index]} alt={benefit.title} width={1600} height={1000} className="h-auto w-full" /></div></article>)}
+          </div>
+        </div>
+      </section>
+      <section id="offline" className="bg-[#111513] px-4 py-16 text-white sm:px-6 sm:py-20 lg:px-8">
+        <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20"><div><p className="flex items-center gap-2 font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#E3A64A]"><WifiOff size={16} aria-hidden />{c.offlineLabel}</p><h2 className="mt-4 font-[family-name:var(--font-display)] text-3xl font-semibold tracking-[-0.025em] sm:text-5xl">{locale === "ro" ? "Cade internetul. Casa vinde mai departe." : "Internet goes down. The till keeps selling."}</h2><p className="mt-5 max-w-xl text-base leading-7 text-white/65">{c.offlineIntro}</p></div><div className="rounded-xl border border-white/12 bg-white/[0.06] p-6 sm:p-8">{c.offlineSteps.map((step, index) => <div key={step.title} className="flex gap-4 border-b border-white/10 py-5 first:pt-0 last:border-0 last:pb-0"><span className="font-mono text-sm text-[#8DB6FF]">0{index + 1}</span><div><h3 className="font-semibold">{step.title}</h3><p className="mt-1 text-sm leading-6 text-white/60">{step.text}</p></div></div>)}</div></div>
+      </section>
+      <section id="customer-proof" className="bg-[#F3F0E8] px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-20"><div><p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-[#165DFC]">{c.customerProof.label}</p><h2 className="mt-4 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-[-0.025em] text-[#0D0F0E]">{c.customerProof.title}</h2><p className="mt-5 text-base leading-7 text-[#666960]">{c.customerProof.caption}</p></div><dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-[#D8D3C7] bg-[#D8D3C7]">{[["3.814", locale === "ro" ? "bonuri" : "receipts"], ["9.513", locale === "ro" ? "mișcări stoc" : "stock movements"], ["238", locale === "ro" ? "produse" : "products"], ["115", locale === "ro" ? "rețete" : "recipes"]].map(([value, text]) => <div key={text} className="bg-white p-6 sm:p-8"><dd className="font-mono text-3xl font-semibold text-[#0D0F0E]">{value}</dd><dt className="mt-2 text-sm text-[#666960]">{text}</dt></div>)}</dl></div>
+      </section>
+      <section id="final-cta" className="bg-[#165DFC] px-4 py-16 text-white sm:px-6 sm:py-20 lg:px-8"><div className="mx-auto flex max-w-5xl flex-col items-center text-center"><h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold tracking-[-0.025em] sm:text-5xl">{locale === "ro" ? "Începe cu rețetele tale. Vezi cifrele în aceeași zi." : "Start with your recipes. See the numbers the same day."}</h2><p className="mt-5 max-w-2xl text-base leading-7 text-white/75">{locale === "ro" ? `Îți importăm produsele din ce ai acum. Trial asistat 15 zile după verificarea unică de 1 €. Starter de la ${Math.round(starter.amountCents / 100)} €/lună.` : `We import your existing products. A 15-day assisted trial starts after the one-time €1 verification. Starter from €${Math.round(starter.amountCents / 100)}/month.`}</p><TrialLink location="homepage_final" className="mt-8 !bg-white !text-[#0D0F0E] hover:!bg-[#F3F0E8]" /></div></section>
     </>
   );
 }
