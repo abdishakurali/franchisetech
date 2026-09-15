@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { MapPin, Plus, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +10,16 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import type { Site } from "@/lib/types";
+
+type Site = {
+  id: string;
+  organisation_id: string;
+  name: string;
+  address: string | null;
+  city: string | null;
+  eircode: string | null;
+  created_at: string;
+};
 
 interface Props {
   sites: Site[];
@@ -108,9 +116,6 @@ export function SitesManager({ sites: initialSites, assetCounts, orgId, canManag
                       <Badge variant="secondary" className="text-xs">
                         {assetCounts[site.id] ?? 0} asset{(assetCounts[site.id] ?? 0) !== 1 ? "s" : ""}
                       </Badge>
-                      <Link href={`/app/checks/new?siteId=${site.id}`} className="text-xs text-blue-600 hover:underline">
-                        Log check
-                      </Link>
                     </div>
                   </div>
                 </div>
