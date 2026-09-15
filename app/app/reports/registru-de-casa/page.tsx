@@ -60,6 +60,24 @@ export default async function RegistruDeCasaReportPage({
     .lte("performed_at", periodEnd)
     .order("performed_at");
 
+  // A till close records what was actually counted vs. what the system
+  // expected (pos_sessions.counted_cash / expected_cash / cash_difference).
+  // A nonzero difference is real, recorded shrinkage or surplus -- and the
+  // NEXT day's opening_cash is the system's EXPECTED figure, not what was
+  // physically counted, so an uncorrected difference silently carries
+  // forward into every later balance in this ledger. Surface it as its own
+  // entry rather than let the report's numbers quietly diverge from the
+  // drawer.
+  const { data: closedSessions } = await supabase
+    .from("pos_sessions")
+    .select("closed_at,cash_difference")
+    .eq("organisation_id", orgId)
+    .gte("closed_at", periodStart)
+    .lte("closed_at", periodEnd)
+    .not("cash_difference", "is", null)
+    .neq("cash_difference", 0)
+    .order("closed_at");
+
   // Filtered on pos_transactions.sold_at (real sale date), not created_at --
   // same fix applied throughout this session's other reports.
   const { data: transactions } = await supabase
@@ -123,6 +141,23 @@ export default async function RegistruDeCasaReportPage({
         description: "Vânzări POS (numerar)",
         cashIn: total,
         cashOut: 0,
+      },
+    });
+  }
+
+  let difCount = 0;
+  for (const s of (closedSessions ?? [])) {
+    const diff = Number(s.cash_difference ?? 0);
+    if (diff === 0 || !s.closed_at) continue;
+    difCount++;
+    entries.push({
+      sortKey: s.closed_at,
+      entry: {
+        date: new Date(s.closed_at).toLocaleDateString("ro-RO"),
+        docNo: `DIF${String(difCount).padStart(4, "0")}`,
+        description: diff < 0 ? "Diferență casă la închidere (lipsă)" : "Diferență casă la închidere (plus)",
+        cashIn: diff > 0 ? diff : 0,
+        cashOut: diff < 0 ? Math.abs(diff) : 0,
       },
     });
   }
