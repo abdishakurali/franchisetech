@@ -1,54 +1,11 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { normalizePlan as _normalizePlan, type PlanCode as _PlanCode } from "@/lib/billing/plan-codes";
+import { planEntitlements, type EntitlementKey } from "@/lib/billing/entitlement-catalog";
 
 export type PlanCode = _PlanCode;
-export type EntitlementKey =
-  | "pos.enabled"
-  | "pos.discounts"
-  | "pos.transaction_history"
-  | "pos.till_sessions"
-  | "pos.offline_queue"
-  | "products.enabled"
-  | "products.csv"
-  | "vat.enabled"
-  | "reports.sales"
-  | "reports.till_close"
-  | "reports.vat"
-  | "fiscal.fiscalnet"
-  | "fiscal.z_report"
-  | "fiscal.x_report"
-  | "fiscal.vat_groups"
-  | "fiscal.efactura"
-  | "team.owner_role"
-  | "team.staff_roles"
-  | "team.unlimited_staff"
-  | "pos.split_payments"
-  | "pos.tips"
-  | "inventory.enabled"
-  | "inventory.stock_movements"
-  | "purchases.suppliers"
-  | "purchases.nir"
-  | "reports.stock"
-  | "reports.audit"
-  | "recipes.enabled"
-  | "recipes.costing"
-  | "recipes.stock_depletion"
-  | "kitchen.enabled"
-  | "kitchen.order_flow"
-  | "kitchen.stations"
-  | "kitchen.order_types"
-  | "kitchen.table_service"
-  | "loyalty.enabled"
-  | "team.advanced_roles"
-  | "owner_digest.enabled"
-  | "reports.gestiune"
-  | "reports.accountant_pack"
-  | "support.priority"
-  | "multi_site.enabled"
-  | "multi_site.site_switching"
-  | "reports.per_site"
-  | "fiscal.multi_site";
+export type { EntitlementKey } from "@/lib/billing/entitlement-catalog";
+export { planEntitlements } from "@/lib/billing/entitlement-catalog";
 
 type EntitlementStatus =
   | "trialing"
@@ -76,58 +33,6 @@ type ResolvedEntitlements = {
   entitlements: Set<EntitlementKey>;
   limits: Record<EntitlementLimitKey, number | "unlimited">;
 };
-
-const CORE_ENTITLEMENTS: readonly EntitlementKey[] = [
-  "pos.enabled",
-  "pos.discounts",
-  "pos.transaction_history",
-  "pos.till_sessions",
-  "pos.offline_queue",
-  "products.enabled",
-  "products.csv",
-  "vat.enabled",
-  "reports.sales",
-  "reports.till_close",
-  "reports.vat",
-  "fiscal.fiscalnet",
-  "fiscal.z_report",
-  "fiscal.x_report",
-  "fiscal.vat_groups",
-  "fiscal.efactura",
-  "team.owner_role",
-  "team.staff_roles",
-  "team.unlimited_staff",
-];
-
-const OPERATIONS_ENTITLEMENTS: readonly EntitlementKey[] = [
-  ...CORE_ENTITLEMENTS,
-  "pos.split_payments",
-  "pos.tips",
-  "inventory.enabled",
-  "inventory.stock_movements",
-  "purchases.suppliers",
-  "purchases.nir",
-  "reports.stock",
-  "reports.audit",
-  "reports.gestiune",
-  "recipes.enabled",
-  "recipes.costing",
-  "recipes.stock_depletion",
-  "kitchen.enabled",
-  "kitchen.order_flow",
-  "kitchen.stations",
-  "kitchen.order_types",
-  "kitchen.table_service",
-  "loyalty.enabled",
-  "team.advanced_roles",
-  "owner_digest.enabled",
-];
-
-const SCALE_ENTITLEMENTS: readonly EntitlementKey[] = [
-  ...OPERATIONS_ENTITLEMENTS,
-  "reports.accountant_pack",
-  "support.priority",
-];
 
 const MULTI_SITE_ENTITLEMENTS: readonly EntitlementKey[] = [
   "multi_site.enabled",
@@ -242,24 +147,6 @@ export function invalidateEntitlementCache(orgId?: string | null): void {
 }
 
 export const normalizePlan = _normalizePlan;
-
-/**
- * Static per-plan entitlement set — what a plan TIER grants in principle.
- * Deliberately NOT the same question as resolveEntitlements(orgId), which
- * additionally folds in subscription status (fallback for expired/unpaid/
- * canceled) and per-org overrides. lib/billing/entitlements.ts derives its
- * coarse BusinessModuleKey membership from this function specifically —
- * never from resolveEntitlements — because the coarse system has never had
- * a concept of subscription status, and deriving from the per-org resolved
- * set would silently grant modules to e.g. an expired core-plan org via
- * FALLBACK_ENTITLEMENTS, which the coarse system has never done.
- */
-export function planEntitlements(plan: PlanCode | null): EntitlementKey[] {
-  if (plan === "scale") return [...SCALE_ENTITLEMENTS];
-  if (plan === "operations") return [...OPERATIONS_ENTITLEMENTS];
-  if (plan === "core") return [...CORE_ENTITLEMENTS];
-  return [];
-}
 
 function limitForPlan(plan: PlanCode | null): number | "unlimited" {
   if (plan === "scale") return "unlimited";

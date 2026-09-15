@@ -1,6 +1,6 @@
 import type { BillingPlan } from "@/lib/billing/plans";
 import { normalizePlan, type PlanCode } from "@/lib/billing/plan-codes";
-import { planEntitlements, type EntitlementKey } from "@/lib/billing/entitlement-resolver";
+import { planEntitlements, type EntitlementKey } from "@/lib/billing/entitlement-catalog";
 
 export type BusinessModuleKey =
   | "pos_core"
