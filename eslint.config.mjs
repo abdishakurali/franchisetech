@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
     ".next-stale-*/**",
     "out/**",
     "build/**",
+    ".worktrees/**",
     "next-env.d.ts",
     // macOS resource fork files
     "._*",
