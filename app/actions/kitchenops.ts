@@ -1903,6 +1903,109 @@ export async function bulkUpdateProductStock(formData: FormData): Promise<{ ok: 
   return { ok: true, updated };
 }
 
+// ── Inventory counts (Step 5: Inventar) ─────────────────────────
+// A session-grouped physical stock count, distinct from the ad-hoc
+// updateProductStock/bulkUpdateProductStock above: those apply immediately
+// on submit, one product (or one low-stock batch) at a time. This lets
+// staff walk the whole catalog over however long it takes, record counts
+// as they go without committing each one, then review every variance
+// before a single finalize applies them together as one auditable batch.
+
+export async function startInventoryCount(): Promise<void> {
+  const { supabase, membership, orgId, user } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "inventory.enabled");
+
+  const { data: count } = await supabase
+    .from("inventory_counts")
+    .insert({ organisation_id: orgId, started_by: user.id })
+    .select("id")
+    .single();
+  if (!count) return;
+
+  revalidatePath("/app/inventory");
+  redirect(`/app/inventory/${count.id}`);
+}
+
+/** Records (or updates) one product's counted quantity for an in-progress
+ * count. expected_qty is read fresh right now, not carried over from when
+ * the count session started or from any earlier count of this same item —
+ * see the migration comment on inventory_count_items for why. */
+export async function recordInventoryCountItem(
+  formData: FormData
+): Promise<{ ok: boolean; error?: string }> {
+  const { supabase, membership, orgId, user } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied" };
+  await assertEntitlement(orgId, "inventory.enabled");
+
+  const countId = stringValue(formData, "inventory_count_id");
+  const productId = stringValue(formData, "product_id");
+  const countedQty = numberValue(formData, "counted_qty", NaN);
+  if (!countId || !productId || !Number.isFinite(countedQty) || countedQty < 0) {
+    return { ok: false, error: "Invalid count" };
+  }
+
+  const { data: count } = await supabase
+    .from("inventory_counts")
+    .select("id,status")
+    .eq("id", countId)
+    .eq("organisation_id", orgId)
+    .maybeSingle();
+  if (!count) return { ok: false, error: "Count not found" };
+  if (count.status !== "draft") return { ok: false, error: "Count already finalized" };
+
+  const { data: product } = await supabase
+    .from("products")
+    .select("current_stock_qty, unit_of_measure")
+    .eq("id", productId)
+    .eq("organisation_id", orgId)
+    .single();
+  if (!product) return { ok: false, error: "Product not found" };
+
+  const { error } = await supabase.from("inventory_count_items").upsert(
+    {
+      organisation_id: orgId,
+      inventory_count_id: countId,
+      product_id: productId,
+      expected_qty: Number(product.current_stock_qty ?? 0),
+      counted_qty: countedQty,
+      unit_of_measure: product.unit_of_measure ?? "each",
+      counted_at: new Date().toISOString(),
+      counted_by: user.id,
+    },
+    { onConflict: "inventory_count_id,product_id" }
+  );
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/app/inventory/${countId}`);
+  return { ok: true };
+}
+
+export async function finalizeInventoryCount(formData: FormData): Promise<void> {
+  const { membership, orgId, user } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "inventory.enabled");
+
+  const countId = stringValue(formData, "inventory_count_id");
+  if (!countId) return;
+
+  const serviceSupabase = await createServiceClient();
+  const { error } = await serviceSupabase.rpc("finalize_inventory_count", {
+    p_count_id: countId,
+    p_org_id: orgId,
+    p_actor_id: user.id,
+  });
+  if (error) redirect(`/app/inventory/${countId}?error=finalize_failed`);
+
+  revalidatePath("/app/inventory");
+  revalidatePath(`/app/inventory/${countId}`);
+  revalidatePath("/app/products");
+  revalidatePath("/app/stock");
+  revalidatePath("/app/reports/balanta");
+  revalidatePath("/app/reports/gestiune");
+  redirect(`/app/inventory/${countId}?finalized=1`);
+}
+
 // ── Business country ────────────────────────────────────────────
 const ALLOWED_COUNTRY_CODES = ["IE", "RO", "UK", "OTHER"] as const;
 type CountryCode = (typeof ALLOWED_COUNTRY_CODES)[number];

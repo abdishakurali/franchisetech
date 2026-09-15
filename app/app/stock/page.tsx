@@ -68,6 +68,7 @@ export default async function StockPage({
           <Link href="/app/products?type=all" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">{t.stock.allStock}</Link>
           <Link href="/app/products?type=ingredient" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">{t.stock.ingredients}</Link>
           <Link href="/app/products/import-ingredients" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">{t.stock.importIngredients}</Link>
+          <Link href="/app/inventory" className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-200 hover:text-blue-700 transition-colors">Inventar</Link>
           <Link href="/app/purchases/new" className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">{t.stock.recordPurchase}</Link>
         </div>
       </div>
