@@ -23,13 +23,13 @@ export const fiscalHardware = [
 ] as const;
 
 const ro = {
-  eyebrow: "Pentru cafenele, restaurante și magazine",
-  title: "POS și gestiune pentru un local care vrea să știe ce îi rămâne.",
+  eyebrow: "POS + gestiune pentru cafenele",
+  title: "Știi cât te costă de fapt un cappuccino.",
   intro:
-    "Vânzări, bonuri fiscale, stoc și marje, în același loc. Cu lucru offline pentru întreruperile scurte de internet și o imagine clară a zilei.",
-  trial: "Începe proba de 15 zile",
-  watch: "Vezi povestea unui client",
-  trialNote: "Trial asistat · Fără card necesar",
+    "Casa de marcat îți spune cât ai vândut. FranchiseTech îți spune cât ai consumat, cât a costat și cât ți-a rămas — din rețete și stoc reale.",
+  trial: "Începe trialul de 15 zile",
+  watch: "Vezi ce face",
+  trialNote: "Trial asistat · verificare card de 1 € · suport în română",
   quickLinks: [
     "Vânzări și stoc",
     "Mod offline",
@@ -88,12 +88,12 @@ const ro = {
   benefitsLabel: "Patru lucruri, legate între ele",
   benefitsTitle: "De la prima vânzare până la închiderea zilei.",
   customerProof: {
-    label: "Folosit într-o cafenea reală",
-    title: "Un local real. O zi mai clară.",
-    caption: "FranchiseTech folosit zilnic într-o cafenea din România.",
+    label: "Un client, pe față",
+    title: "Dolce Nera, Cluj-Napoca",
+    caption: "O cafenea, o casă, 238 de produse și 115 rețete întreținute zilnic.",
     stats: [
-      { value: "3.700+", label: "bonuri înregistrate" },
-      { value: "9.000+", label: "mișcări de stoc" },
+      { value: "3.800+", label: "bonuri procesate" },
+      { value: "9.500+", label: "mișcări de stoc urmărite" },
     ],
   },
   pricing: {
@@ -182,7 +182,7 @@ const ro = {
     {
       question: "Cum începe proba?",
       answer:
-        "Ai 15 zile de probă asistată, fără card necesar. Configurăm împreună produsele și fluxul de vânzare pentru localul tău.",
+        "Trialul asistat durează 15 zile și începe după o verificare unică de 1 € a cardului. Configurăm împreună produsele și fluxul de vânzare pentru localul tău.",
     },
   ],
   finalTitle: "Următoarea tură, cu mai multă claritate.",
@@ -197,7 +197,7 @@ const en: typeof ro = {
     "Sales, fiscal receipts, stock and margins in one place. With offline queuing for short internet outages and a clear view of your day.",
   trial: "Start your 15-day trial",
   watch: "Watch a customer's story",
-  trialNote: "Assisted trial · No card required",
+  trialNote: "Assisted trial · €1 card verification · Romanian support",
   quickLinks: ["Sales and stock", "Offline mode", "Hardware", "Customer story"],
   galleryLabel: "The platform in practice",
   galleryTitle: "From the first order to closing time.",
@@ -255,8 +255,8 @@ const en: typeof ro = {
     title: "A real business. A clearer day.",
     caption: "FranchiseTech used daily in a Romanian café.",
     stats: [
-      { value: "3,700+", label: "receipts recorded" },
-      { value: "9,000+", label: "stock movements" },
+      { value: "3,800+", label: "receipts recorded" },
+      { value: "9,500+", label: "stock movements" },
     ],
   },
   pricing: {
@@ -345,7 +345,7 @@ const en: typeof ro = {
     {
       question: "How does the trial start?",
       answer:
-        "You get a 15-day assisted trial with no card required. We help configure products and the sales workflow for your business.",
+        "The 15-day assisted trial starts after a one-time €1 card verification. We help configure products and the sales workflow for your business.",
     },
   ],
   finalTitle: "Start your next shift with a clearer picture.",
