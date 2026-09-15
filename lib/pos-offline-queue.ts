@@ -232,3 +232,29 @@ export function needsAttentionCount(): number {
 export function offlineQueueCount(): number {
   return readQueue().length;
 }
+
+// ── Last-synced timestamp (for the connection indicator) ──────────────────
+
+const LAST_SYNCED_KEY = "pos_offline_last_synced_at";
+
+/** Records "the app was confirmed in sync with the server" right now —
+ *  called after a successful flush, or when a probe confirms online with an
+ *  empty queue. Not the same claim as "browser is online": this is about
+ *  the till's own data actually having reached the server. */
+export function setLastSyncedAt(iso: string = new Date().toISOString()): void {
+  if (typeof localStorage === "undefined") return;
+  try {
+    localStorage.setItem(LAST_SYNCED_KEY, iso);
+  } catch {
+    // ignore quota errors
+  }
+}
+
+export function getLastSyncedAt(): string | null {
+  if (typeof localStorage === "undefined") return null;
+  try {
+    return localStorage.getItem(LAST_SYNCED_KEY);
+  } catch {
+    return null;
+  }
+}

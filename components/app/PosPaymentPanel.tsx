@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
 import type { PosT } from "@/lib/pos-i18n-context";
+import { selectPrimaryPaymentMethods } from "@/lib/pos-payment-tiles";
 
 type PaymentMethod = { id: string; name: string; type: string };
 
@@ -60,7 +61,7 @@ function MethodIcon({ type }: { type: string }) {
 
 function AmountDisplay({ parts }: { parts: ReturnType<typeof formatAmountParts> }) {
   return (
-    <div className="flex items-baseline justify-center tabular-nums">
+    <div className="flex items-baseline justify-center font-mono tabular-nums">
       <span className="mr-1 text-xl font-medium text-slate-400">{parts.currency}</span>
       <span className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">{parts.integer}</span>
       <span className="text-2xl font-semibold text-slate-400">{parts.fraction}</span>
@@ -94,6 +95,8 @@ export function PosPaymentPanel({
 }: Props) {
   const selected = paymentMethods.find((m) => m.id === paymentMethodId);
   const isCash = selected?.type === "cash";
+
+  const primaryMethods = useMemo(() => selectPrimaryPaymentMethods(paymentMethods), [paymentMethods]);
   const keypadFreshRef = useRef(true);
   const inputStrRef = useRef("");
 
@@ -179,7 +182,7 @@ export function PosPaymentPanel({
         )}
 
         <div className="mb-5 grid w-full grid-cols-2 gap-2">
-          {paymentMethods.map((m) => {
+          {primaryMethods.map((m) => {
             const active = paymentMethodId === m.id;
             return (
               <button
@@ -187,7 +190,7 @@ export function PosPaymentPanel({
                 type="button"
                 onClick={() => onSelectMethod(m.id, m.type === "cash")}
                 className={cn(
-                  "flex h-14 items-center justify-center gap-2 rounded-xl border text-base font-semibold transition-colors",
+                  "flex h-16 items-center justify-center gap-2 rounded-xl border text-base font-semibold transition-colors",
                   active
                     ? "border-blue-600 bg-blue-50 text-blue-800"
                     : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",

@@ -8,13 +8,14 @@ import { runZReport, recordFiscalReceiptAttempt } from "@/app/actions/fiscalnet"
 import { getLoyaltyStampStatus, recordLoyaltyRedemption, type LoyaltyStampStatus } from "@/app/actions/loyalty";
 import { fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
 import { fiscalBrowserReceiptAndLog, type RecordFiscalAttemptInput } from "@/lib/fiscalnet/log-attempt";
+import { computeCategoryTileMode, tileModeForProduct, type PosTileMode } from "@/lib/pos-tile-mode";
 import { useFiscalNetActive } from "@/lib/fiscalnet/use-fiscalnet-active";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Check, ChevronDown, Coffee, Droplets, Equal, Gift, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
+import { Banknote, Check, ChevronDown, Coffee, Droplets, Equal, Gift, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, ReceiptText, RefreshCcw, ShoppingBag, StickyNote, UserPlus, Users, Utensils, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -64,8 +65,12 @@ import {
   payloadToFormData,
   removeOfflineSale,
   markOfflineSaleSyncFailed,
+  getLastSyncedAt,
+  setLastSyncedAt,
   type QueuedSale,
 } from "@/lib/pos-offline-queue";
+import { computeConnectionStatus } from "@/lib/pos-connection-status";
+import { PosConnectionIndicator } from "@/components/app/PosConnectionIndicator";
 import { PosQuickAddProduct } from "@/components/app/PosQuickAddProduct";
 import { PosQuickAccessSheet } from "@/components/app/PosQuickAccessSheet";
 import { sortCategoriesByName } from "@/lib/product-categories";
@@ -231,6 +236,7 @@ function ProductGridTile({
   placeholderType,
   categoryName,
   categoryColor,
+  tileMode,
   inCartQty,
   selected,
   onClick,
@@ -241,6 +247,11 @@ function ProductGridTile({
   placeholderType: string | null | undefined;
   categoryName: string | null | undefined;
   categoryColor: string | null | undefined;
+  /** Decided per category (computeCategoryTileMode), not per product — a
+   *  category below the photo-coverage threshold gets name tiles across the
+   *  board, even for its few products that do have a photo, rather than a
+   *  patchwork grid. */
+  tileMode: PosTileMode;
   inCartQty: number;
   selected: boolean;
   onClick: () => void;
@@ -254,23 +265,48 @@ function ProductGridTile({
         selected ? "border-blue-400 bg-blue-50/30 ring-1 ring-blue-100" : "border-slate-200 bg-white hover:border-blue-300",
       )}
     >
-      <ProductTileMedia
-        imageUrl={imageUrl}
-        name={name}
-        placeholderType={placeholderType}
-        categoryName={categoryName}
-        categoryColor={categoryColor}
-      />
+      {tileMode === "photo" ? (
+        <ProductTileMedia
+          imageUrl={imageUrl}
+          name={name}
+          placeholderType={placeholderType}
+          categoryName={categoryName}
+          categoryColor={categoryColor}
+        />
+      ) : (
+        <div
+          className="h-1.5 w-full shrink-0"
+          style={{ backgroundColor: categoryColor ?? "#78786F" }}
+          aria-hidden
+        />
+      )}
       {inCartQty > 0 && (
         <span className="absolute right-1.5 top-1.5 rounded-md bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm sm:text-xs">
           ×{inCartQty}
         </span>
       )}
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-0.5 p-1.5 sm:p-2">
-        <span className="line-clamp-2 text-[11px] font-semibold leading-snug text-slate-900 [overflow-wrap:anywhere] sm:text-xs">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col justify-between gap-0.5 p-1.5 sm:p-2",
+          tileMode === "name" && "py-2.5 sm:py-3",
+        )}
+      >
+        <span
+          className={cn(
+            "line-clamp-2 font-semibold leading-snug text-slate-900 [overflow-wrap:anywhere]",
+            tileMode === "photo" ? "text-[11px] sm:text-xs" : "text-sm sm:text-base",
+          )}
+        >
           {name}
         </span>
-        <span className="text-[10px] font-bold tabular-nums text-slate-700 sm:text-[11px]">{priceLabel}</span>
+        <span
+          className={cn(
+            "font-bold tabular-nums text-slate-700",
+            tileMode === "photo" ? "text-[10px] sm:text-[11px]" : "text-xs sm:text-sm",
+          )}
+        >
+          {priceLabel}
+        </span>
       </div>
     </button>
   );
@@ -913,6 +949,15 @@ function PosRegisterInner({
   const [quickAccessOpen, setQuickAccessOpen] = useState(false);
   const [addProductOpen, setAddProductOpen] = useState(false);
   const syncingOfflineRef = useRef(false);
+  // Seeded null (matches what the server renders) rather than reading
+  // localStorage synchronously — same reason PosWithTour seeds offline=true
+  // before probing: reading real client-only state during the render that
+  // gets hydrated against server HTML risks a hydration mismatch. Upgraded
+  // for real in the effect below, after mount.
+  const [lastSyncedAt, setLastSyncedAtState] = useState<string | null>(null);
+  useEffect(() => {
+    setLastSyncedAtState(getLastSyncedAt());
+  }, []);
 
   const pendingSyncSales = useMemo(
     () => offlineQueue.filter((q) => q.status === "pending_sync"),
@@ -1209,6 +1254,11 @@ function PosRegisterInner({
   const posProducts = useMemo(() =>
     products.filter((p) => p.available_in_pos !== false && p.is_ingredient !== true), [products]);
 
+  // Computed from the full sellable set, not the search/category-filtered
+  // `filtered` list below — which category gets photo tiles shouldn't
+  // change as the cashier types into the search box.
+  const categoryTileModes = useMemo(() => computeCategoryTileMode(posProducts), [posProducts]);
+
   const filtered = useMemo(() =>
     posProducts.filter((p) => {
       const matchCat = search.trim() ? true : activeCategory === "all" || p.pos_category?.id === activeCategory;
@@ -1377,7 +1427,13 @@ function PosRegisterInner({
   async function flushAllPending() {
     if (browserOffline || syncingOfflineRef.current) return;
     const pending = listPendingSync();
-    if (!pending.length) return;
+    if (!pending.length) {
+      // Nothing to flush and we're confirmed online — that's a synced
+      // moment worth recording for the connection indicator's last-sync time.
+      setLastSyncedAt();
+      setLastSyncedAtState(getLastSyncedAt());
+      return;
+    }
     syncingOfflineRef.current = true;
     setSyncingOffline(true);
     setSaleStatus({ ok: true, msg: t.offlineSyncing });
@@ -1387,6 +1443,8 @@ function PosRegisterInner({
     setOfflineQueue(listOfflineQueue());
     if (synced > 0) {
       setSaleStatus({ ok: true, msg: t.offlineSyncDone(synced) });
+      setLastSyncedAt();
+      setLastSyncedAtState(getLastSyncedAt());
     } else {
       setSaleStatus(null);
     }
@@ -1440,8 +1498,21 @@ function PosRegisterInner({
     (pendingTabItems.length > 0 || cart.length > 0) &&
     (!tableTabLocked || canManage);
 
+  const connectionStatus = computeConnectionStatus({
+    browserOffline,
+    syncing: syncingOffline,
+    queuedCount: pendingSyncSales.length + pendingAttentionSales.length,
+  });
+
   return (
     <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white">
+      <PosConnectionIndicator
+        t={t}
+        locale={locale}
+        state={connectionStatus.state}
+        queuedCount={connectionStatus.queuedCount}
+        lastSyncedAt={lastSyncedAt}
+      />
       {features.tableService && activeTab && (
         <PosTableContextBar
           activeTab={activeTab}
@@ -1476,6 +1547,51 @@ function PosRegisterInner({
               <span className="hidden sm:inline">{t.addProduct}</span>
             </Button>
           )}
+          {/* Everything Gate B moved out of the 4-item quick-access sheet
+              (Customers, recent transactions, held orders, Z report) lives
+              here instead — still one tap away, not crowding that sheet. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button type="button" variant="outline" className="h-11 px-3 shrink-0 relative">
+                  <MoreHorizontal className="h-4 w-4" />
+                  {heldSales.length > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-bold text-white">
+                      {heldSales.length}
+                    </span>
+                  )}
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => setCustomersSheetOpen(true)}>
+                <Users className="h-4 w-4" />
+                {t.customers}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOrdersSheetOpen(true)}>
+                <ReceiptText className="h-4 w-4" />
+                {t.ordersTransactions}
+              </DropdownMenuItem>
+              {heldSales.length > 0 && (
+                <DropdownMenuItem onClick={() => setHeldOpen(true)}>
+                  <ShoppingBag className="h-4 w-4" />
+                  {`${t.heldOrders} (${heldSales.length})`}
+                </DropdownMenuItem>
+              )}
+              {fiscalActive && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    disabled={zReportDone || zReportPending}
+                    onClick={() => setZReportOpen(true)}
+                  >
+                    <ReceiptText className="h-4 w-4" />
+                    {zReportPending ? t.zReportProcessing : zReportDone ? t.zReportDone : t.zReport}
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <div className="flex-1" />
           <Button
             type="button"
@@ -1567,6 +1683,7 @@ function PosRegisterInner({
                 placeholderType={p.placeholder_type}
                 categoryName={p.pos_category?.name}
                 categoryColor={p.pos_category?.color}
+                tileMode={tileModeForProduct(categoryTileModes, p)}
                 priceLabel={money(Number(p.sale_price))}
                 inCartQty={inCart?.quantity ?? 0}
                 selected={Boolean(inCart)}
@@ -1591,9 +1708,6 @@ function PosRegisterInner({
           open={quickAccessOpen}
           onOpenChange={setQuickAccessOpen}
           canManage={canManage}
-          onAddProduct={() => setAddProductOpen(true)}
-          onCustomers={() => setCustomersSheetOpen(true)}
-          onOrders={() => setOrdersSheetOpen(true)}
           onRefund={() => setRefundDialogOpen(true)}
           onCashMovement={() => setTillDialogOpen(true)}
           onCloseTill={() => setCloseTillDialogOpen(true)}
@@ -1605,12 +1719,6 @@ function PosRegisterInner({
               setCheckoutStep("order");
             }
           }}
-          heldCount={heldSales.length}
-          onHeldOrders={() => setHeldOpen(true)}
-          fiscalActive={fiscalActive}
-          onZReport={() => setZReportOpen(true)}
-          zReportDone={zReportDone}
-          zReportPending={zReportPending}
           cartHasItems={cart.length > 0}
         />
         {canManage && (
@@ -2198,7 +2306,7 @@ function PosRegisterInner({
                 <span className="text-sm font-semibold text-slate-700 sm:text-base">
                   {showTableOrderActions ? "Total de încasat" : t.total}
                 </span>
-                <span className="text-2xl font-bold tabular-nums text-slate-950 sm:text-3xl">
+                <span className="font-mono text-2xl font-bold tabular-nums text-slate-950 sm:text-3xl">
                   {money(showTableOrderActions ? tabCheckoutTotal : totalDue)}
                 </span>
               </div>
