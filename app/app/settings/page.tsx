@@ -6,11 +6,11 @@ import {
   updateSite,
 } from "@/app/actions/kitchenops";
 import { SettingsSection } from "@/components/app/SettingsSection";
+import { SettingsListSection } from "@/components/app/SettingsListSection";
 import { unitLabel } from "@/lib/units-of-measure";
 import { AnafSettingsCard } from "@/components/app/AnafSettingsCard";
 import { TestimonialPromptCard } from "@/components/app/TestimonialPromptCard";
 import { IntegrationCards } from "@/components/app/IntegrationCards";
-import { PaymentMethodsCard } from "@/components/app/PaymentMethodsCard";
 import { VatRatesCard } from "@/components/app/VatRatesCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,23 @@ const COUNTRY_OPTIONS = [
   { code: "UK", label: "United Kingdom" },
   { code: "OTHER", label: "Other" },
 ] as const;
+
+const METHOD_TYPE_OPTIONS = ["cash", "card", "online", "other"].map((t) => ({
+  value: t,
+  label: t.charAt(0).toUpperCase() + t.slice(1),
+}));
+
+const FISCALNET_CODE_OPTIONS = [
+  { value: "", label: "— none —" },
+  { value: "1", label: "1 – Cash" },
+  { value: "2", label: "2 – Card" },
+  { value: "3", label: "3 – Credit" },
+  { value: "4", label: "4 – Tichete masă" },
+  { value: "5", label: "5 – Tichete valorice" },
+  { value: "6", label: "6 – Voucher" },
+  { value: "7", label: "7 – Plată modernă" },
+  { value: "8", label: "8 – Altele" },
+];
 
 // Verified against every real ?tab= link in the codebase (grepped, not
 // assumed) rather than trusting the old map, which carried three aliases
@@ -593,13 +610,34 @@ export default async function SettingsPage({
       {/* ── PAYMENT METHODS TAB ──────────────────────────────────────── */}
       {activeTab === "payment-methods" && (
         <div className="space-y-6">
-          <PaymentMethodsCard
-            methods={(paymentMethods ?? []) as Array<{ id: string; name: string; type: string; active: boolean; fiscalnet_code?: number | null }>}
-            fiscalnetEnabled={fiscalnetEnabled}
+          <SettingsListSection
+            title={isRO ? "Metode de plată" : "Payment methods"}
+            description={fiscalnetEnabled ? "FiscalNet enabled — assign a payment code (1–8) to each method." : undefined}
+            rows={((paymentMethods ?? []) as Array<{ id: string; name: string; type: string; active: boolean; fiscalnet_code?: number | null }>).map((m) => ({
+              id: m.id,
+              primary: m.name,
+              secondary: `${m.type.charAt(0).toUpperCase()}${m.type.slice(1)}${fiscalnetEnabled && m.fiscalnet_code != null ? ` · FN code ${m.fiscalnet_code}` : ""}`,
+              badge: { label: m.active ? "Active" : "Inactive", active: m.active },
+              editValues: { name: m.name, type: m.type, fiscalnet_code: m.fiscalnet_code ?? "", active: m.active },
+            }))}
             canEdit={canEdit}
+            addFields={[
+              { key: "name", label: "Name", type: "text", placeholder: "e.g. Tichete masă" },
+              { key: "type", label: "Type", type: "select", options: METHOD_TYPE_OPTIONS },
+              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: "FiscalNet code", type: "select" as const, options: FISCALNET_CODE_OPTIONS }] : []),
+            ]}
+            editFields={[
+              { key: "name", label: "Name", type: "text" },
+              { key: "type", label: "Type", type: "select", options: METHOD_TYPE_OPTIONS },
+              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: "FiscalNet code", type: "select" as const, options: FISCALNET_CODE_OPTIONS }] : []),
+              { key: "active", label: "Active", type: "toggle" },
+            ]}
+            addDefaults={{ name: "", type: "cash", fiscalnet_code: "", active: true }}
             addAction={addPaymentMethod as unknown as (fd: FormData) => Promise<void>}
             updateAction={updatePaymentMethod as unknown as (fd: FormData) => Promise<void>}
             deleteAction={deletePaymentMethod as unknown as (fd: FormData) => Promise<void>}
+            addLabel="+ Add payment method"
+            emptyLabel="No payment methods yet."
           />
         </div>
       )}
@@ -649,47 +687,51 @@ export default async function SettingsPage({
               (c) =>
                 (c as { category_type?: string }).category_type === scope ||
                 ((c as { category_type?: string }).category_type === "both" && scope === "pos")
-            );
+            ) as Array<{ id: string; name: string; color: string | null; sort_order: number | null; category_type?: string }>;
             const title =
               scope === "inventory"
                 ? (t.settings.categoryInventory ?? "Inventory categories")
                 : (t.settings.categoryPos ?? "POS categories");
+            const typeOptions = [
+              { value: "pos", label: t.settings.categoryPos },
+              { value: "inventory", label: t.settings.categoryInventory },
+            ];
+            const rows = scopeCats.map((c) => ({
+              id: c.id,
+              primary: c.name,
+              secondary: `Sort ${c.sort_order ?? 0}`,
+              editValues: {
+                name: c.name,
+                color: c.color ?? "#64748b",
+                sort_order: c.sort_order ?? 0,
+                category_type: c.category_type === "both" ? scope : (c.category_type ?? scope),
+              },
+            }));
             return (
-              <Card key={scope}>
-                <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
-                <CardContent>
-                  <form action={addCategory as unknown as (fd: FormData) => Promise<void>} className="flex flex-wrap gap-3 items-end mb-4">
-                    <input type="hidden" name="category_type" value={scope} />
-                    <div><Label>Name</Label><Input name="name" required placeholder={scope === "inventory" ? "e.g. MATERIA PRIMA" : "e.g. Hot Drinks"} className="w-40" /></div>
-                    <div><Label>Colour</Label><Input name="color" type="color" defaultValue="#2563eb" className="h-10 w-16 p-1" /></div>
-                    <div><Label>Sort order</Label><Input name="sort_order" type="number" placeholder="1" className="w-20" /></div>
-                    <Button type="submit" variant="outline" size="sm">Add category</Button>
-                  </form>
-                  <div className="space-y-2">
-                    {scopeCats.map((c) => (
-                      <form key={c.id} action={updateCategory as unknown as (fd: FormData) => Promise<void>} className="grid gap-2 rounded-lg border border-slate-100 p-2 sm:grid-cols-[1fr_72px_90px_160px_auto_auto] sm:items-end">
-                        <input type="hidden" name="id" value={c.id} />
-                        <div><Label>Name</Label><Input name="name" defaultValue={c.name} required /></div>
-                        <div><Label>Colour</Label><Input name="color" type="color" defaultValue={c.color ?? "#64748b"} className="h-10 w-16 p-1" /></div>
-                        <div><Label>Sort</Label><Input name="sort_order" type="number" defaultValue={c.sort_order ?? 0} /></div>
-                        <div>
-                          <Label>{t.settings.type}</Label>
-                          <FormSelect
-                            name="category_type"
-                            defaultValue={(c as { category_type?: string }).category_type === "both" ? scope : ((c as { category_type?: string }).category_type ?? scope)}
-                            options={[
-                              { value: "pos", label: t.settings.categoryPos },
-                              { value: "inventory", label: t.settings.categoryInventory },
-                            ]}
-                          />
-                        </div>
-                        <Button type="submit" variant="outline" size="sm">Save</Button>
-                        <Button formAction={deleteCategory as unknown as (fd: FormData) => Promise<void>} type="submit" variant="outline" size="sm" className="border-red-200 text-red-700 hover:bg-red-50">Delete</Button>
-                      </form>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <SettingsListSection
+                key={scope}
+                title={title}
+                rows={rows}
+                canEdit={canEdit}
+                addFields={[
+                  { key: "name", label: "Name", type: "text", placeholder: scope === "inventory" ? "e.g. MATERIA PRIMA" : "e.g. Hot Drinks" },
+                  { key: "color", label: "Colour", type: "color" },
+                  { key: "sort_order", label: "Sort order", type: "number", placeholder: "1", className: "w-20" },
+                ]}
+                editFields={[
+                  { key: "name", label: "Name", type: "text" },
+                  { key: "color", label: "Colour", type: "color" },
+                  { key: "sort_order", label: "Sort", type: "number", className: "w-20" },
+                  { key: "category_type", label: t.settings.type, type: "select", options: typeOptions },
+                ]}
+                hiddenAddValues={{ category_type: scope }}
+                addDefaults={{ name: "", color: "#2563eb", sort_order: "" }}
+                addAction={addCategory as unknown as (fd: FormData) => Promise<void>}
+                updateAction={updateCategory as unknown as (fd: FormData) => Promise<void>}
+                deleteAction={deleteCategory as unknown as (fd: FormData) => Promise<void>}
+                addLabel="Add category"
+                emptyLabel="No categories yet."
+              />
             );
           })}
         </div>
