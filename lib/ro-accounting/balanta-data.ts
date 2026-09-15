@@ -8,6 +8,11 @@ type ProductRow = BalantaProductMeta & { vat_rate: number | null };
 export type BalantaReportData = {
   items: BalantaItem[];
   totals: { openingValue: number; entryValue: number; exitValue: number; closingValue: number };
+  /** True if any item had a movement with no recorded cost. That movement's
+   * quantity is still counted, but its value is not — so any item (and the
+   * totals above) may be a known floor rather than the complete figure
+   * whenever this, or the item's own hasUnknownCost, is true. */
+  hasUnknownCost: boolean;
 };
 
 /**
@@ -40,19 +45,33 @@ export async function computeBalantaReport(
 
   // Opening stock is a NET running balance -- qty and value must stay
   // signed together (purchases/opening add, consumption subtracts).
-  const calcOpeningStock = new Map<string, { qty: number; value: number }>();
+  // knownQty tracks only the portion whose cost is actually known, so
+  // avgCost below isn't diluted by quantity that contributed zero value.
+  // A movement with no recorded cost still counts toward qty -- it is not
+  // dropped, only its value is -- and marks hasUnknownCost so the item (and
+  // report) show that value as a floor, not silently understate it as
+  // complete.
+  type Bucket = { qty: number; value: number; knownQty: number; hasUnknownCost: boolean };
+  const emptyBucket = (): Bucket => ({ qty: 0, value: 0, knownQty: 0, hasUnknownCost: false });
+
+  const calcOpeningStock = new Map<string, Bucket>();
   for (const m of movementsBeforePeriod) {
     if (!m.product_id) continue;
-    const existing = calcOpeningStock.get(m.product_id) ?? { qty: 0, value: 0 };
+    const existing = calcOpeningStock.get(m.product_id) ?? emptyBucket();
     const qty = stockMovementQty(m);
     const cost = stockMovementUnitCost(m);
     existing.qty += qty;
-    existing.value += qty * cost;
+    if (cost != null) {
+      existing.value += qty * cost;
+      existing.knownQty += qty;
+    } else {
+      existing.hasUnknownCost = true;
+    }
     calcOpeningStock.set(m.product_id, existing);
   }
 
-  const periodEntries = new Map<string, { qty: number; value: number }>();
-  const periodExits = new Map<string, { qty: number; value: number }>();
+  const periodEntries = new Map<string, Bucket>();
+  const periodExits = new Map<string, Bucket>();
 
   for (const m of movementsDuringPeriod) {
     if (!m.product_id) continue;
@@ -70,16 +89,26 @@ export async function computeBalantaReport(
       (m.movement_type === "manual_adjustment" && qty < 0);
 
     if (isEntry) {
-      const existing = periodEntries.get(m.product_id) ?? { qty: 0, value: 0 };
+      const existing = periodEntries.get(m.product_id) ?? emptyBucket();
       existing.qty += Math.abs(qty);
-      existing.value += Math.abs(qty) * cost;
+      if (cost != null) {
+        existing.value += Math.abs(qty) * cost;
+        existing.knownQty += Math.abs(qty);
+      } else {
+        existing.hasUnknownCost = true;
+      }
       periodEntries.set(m.product_id, existing);
     }
 
     if (isExit) {
-      const existing = periodExits.get(m.product_id) ?? { qty: 0, value: 0 };
+      const existing = periodExits.get(m.product_id) ?? emptyBucket();
       existing.qty += Math.abs(qty);
-      existing.value += Math.abs(qty) * cost;
+      if (cost != null) {
+        existing.value += Math.abs(qty) * cost;
+        existing.knownQty += Math.abs(qty);
+      } else {
+        existing.hasUnknownCost = true;
+      }
       periodExits.set(m.product_id, existing);
     }
   }
@@ -93,15 +122,17 @@ export async function computeBalantaReport(
   const items: BalantaItem[] = Array.from(allProductIds)
     .map((productId) => {
       const product = productMap.get(productId);
-      const opening = calcOpeningStock.get(productId) ?? { qty: 0, value: 0 };
-      const entries = periodEntries.get(productId) ?? { qty: 0, value: 0 };
-      const exits = periodExits.get(productId) ?? { qty: 0, value: 0 };
+      const opening = calcOpeningStock.get(productId) ?? emptyBucket();
+      const entries = periodEntries.get(productId) ?? emptyBucket();
+      const exits = periodExits.get(productId) ?? emptyBucket();
 
       const closingQty = opening.qty + entries.qty - exits.qty;
-      const avgCost =
-        opening.value + entries.value > 0
-          ? (opening.value + entries.value) / (opening.qty + entries.qty || 1)
-          : 0;
+      // Averaged over the KNOWN-cost quantity only, not the combined
+      // opening+entry quantity -- using the latter would dilute the average
+      // with quantity that contributed zero value, understating it whenever
+      // a cost is missing rather than just leaving that portion unpriced.
+      const knownAvailableQty = opening.knownQty + entries.knownQty;
+      const avgCost = knownAvailableQty > 0 ? (opening.value + entries.value) / knownAvailableQty : 0;
       const closingValue = closingQty * avgCost;
 
       const ledgerQty = sumMovementQty(allMovements, productId);
@@ -123,6 +154,7 @@ export async function computeBalantaReport(
         integrityStatus,
         catalogQty: product ? catalogQty : undefined,
         ledgerQty,
+        hasUnknownCost: opening.hasUnknownCost || entries.hasUnknownCost || exits.hasUnknownCost,
       };
     })
     .filter((item) => item.openingQty !== 0 || item.entryQty !== 0 || item.exitQty !== 0)
@@ -138,5 +170,5 @@ export async function computeBalantaReport(
     { openingValue: 0, entryValue: 0, exitValue: 0, closingValue: 0 },
   );
 
-  return { items, totals };
+  return { items, totals, hasUnknownCost: items.some((item) => item.hasUnknownCost) };
 }

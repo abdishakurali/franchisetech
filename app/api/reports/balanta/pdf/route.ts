@@ -24,12 +24,12 @@ export async function GET(req: Request) {
     throw error;
   }
 
-  const { items, totals } = await computeBalantaReport(supabase, orgId, from, to, "—");
+  const { items, totals, hasUnknownCost } = await computeBalantaReport(supabase, orgId, from, to, "—");
   const money = (v: number) => formatMoney(v, currency);
 
   const pdfRows: PdfRow[] = items.map((item, idx) => ({
     nr: idx + 1,
-    product: item.productName,
+    product: item.hasUnknownCost ? `${item.productName} (cost parțial)` : item.productName,
     unit: item.unit,
     openingQty: item.openingQty.toFixed(2),
     openingValue: money(item.openingValue),
@@ -79,6 +79,9 @@ export async function GET(req: Request) {
     ],
     rows: pdfRows,
     signatureLabels: ["Întocmit de", "Semnătură contabil"],
+    footnote: hasUnknownCost
+      ? "Unele mișcări nu au cost înregistrat. Cantitatea lor este în continuare contabilizată, dar nu și valoarea — rândurile marcate \"(cost parțial)\" și totalurile de mai sus sunt un minim cunoscut, nu cifra completă."
+      : undefined,
   });
 
   return renderReportPdfResponse(doc, `balanta-${from}-${to}.pdf`);

@@ -123,7 +123,14 @@ export default async function FisaMagaziePage({
         </div>
       </div>
 
-      {/* ── Header: same grammar as NIR / Bon de Consum ── */}
+      {/* ── Header: same grammar as NIR / Bon de Consum ──
+          labels.docCode below ("Formular 14-3-8") is UNVERIFIED. Unlike
+          NIR's 14-3-1A and Bon de Consum's 14-3-4/aA, which were already in
+          use elsewhere in this codebase (settings page, blog content) when
+          those documents were built, 14-3-8 is only best-knowledge — it was
+          not found anywhere else in this repo and has not been confirmed
+          against OMFP 2634/2015 Annex 1 by anyone. Do not treat it as
+          settled; get accountant sign-off before relying on it. ── */}
       <header className="flex items-start justify-between gap-6 border-b-4 border-slate-900 pb-4 mb-6">
         <div>
           <h1 className={`text-2xl font-semibold uppercase tracking-tight leading-tight ${display}`}>

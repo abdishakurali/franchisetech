@@ -39,7 +39,7 @@ export default async function GestiuneReportPage({
 
   const labels = t.reportPages.gestiune;
 
-  const { org, movements, totals, openingStock, closingStock } = await computeGestiuneReport(
+  const { org, movements, totals, openingStock, closingStock, hasUnknownCost } = await computeGestiuneReport(
     supabase,
     orgId,
     fromDate,
@@ -231,6 +231,11 @@ export default async function GestiuneReportPage({
         {closingStock.total < 0 && (
           <p className="text-xs text-amber-800">
             {labels.negativeStockWarning}
+          </p>
+        )}
+        {hasUnknownCost && (
+          <p className="text-xs text-amber-800">
+            {labels.costGapWarning}
           </p>
         )}
       </div>

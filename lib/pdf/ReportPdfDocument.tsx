@@ -72,6 +72,16 @@ const styles = StyleSheet.create({
   signatureBlock: { width: "45%" },
   signatureLabel: { fontSize: 7, color: "#64748b", marginBottom: 20 },
   signatureLine: { borderTop: 0.5, borderTopColor: "#334155", paddingTop: 2, fontSize: 6.5, color: "#94a3b8" },
+  footnote: {
+    marginTop: 8,
+    padding: 6,
+    fontSize: 6.5,
+    color: "#92400e",
+    backgroundColor: "#fffbeb",
+    border: 0.5,
+    borderColor: "#fde68a",
+    borderRadius: 3,
+  },
 });
 
 export type PdfColumn = { key: string; label: string; align?: "left" | "right" | "center"; width: string };
@@ -91,6 +101,7 @@ export function ReportPdfDocument({
   rows,
   signatureLabels,
   orientation = "portrait",
+  footnote,
 }: {
   companyName: string;
   companyCui?: string | null;
@@ -104,6 +115,9 @@ export function ReportPdfDocument({
   rows: PdfRow[];
   signatureLabels?: [string, string];
   orientation?: "portrait" | "landscape";
+  /** Optional warning shown below the table, e.g. flagging that some rows'
+   * values are a known-partial figure rather than the complete one. */
+  footnote?: string;
 }) {
   return (
     <Document>
@@ -156,6 +170,8 @@ export function ReportPdfDocument({
             </View>
           ))}
         </View>
+
+        {footnote ? <Text style={styles.footnote}>{footnote}</Text> : null}
 
         {signatureLabels ? (
           <View style={styles.signatureRow}>

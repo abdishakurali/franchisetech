@@ -65,7 +65,7 @@ export default async function BalantaReportPage({
     .eq("id", orgId)
     .single();
 
-  const { items, totals } = await computeBalantaReport(supabase, orgId, fromDate, toDate, t.common.unknown);
+  const { items, totals, hasUnknownCost } = await computeBalantaReport(supabase, orgId, fromDate, toDate, t.common.unknown);
   const integrityIssues = items.filter((i) => i.integrityStatus && i.integrityStatus !== "ok");
   const hasArchived = integrityIssues.some((i) => i.integrityStatus === "archived");
 
@@ -126,6 +126,12 @@ export default async function BalantaReportPage({
               {labels.viewArchivedProducts}
             </Link>
           ) : null}
+        </div>
+      ) : null}
+
+      {hasUnknownCost ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 print:hidden">
+          <p className="font-medium">{labels.costGapBanner}</p>
         </div>
       ) : null}
 
@@ -231,6 +237,11 @@ export default async function BalantaReportPage({
                             className={`text-xs ${integrityBadgeClass(item.integrityStatus)}`}
                           >
                             {integrityLabels[item.integrityStatus]}
+                          </Badge>
+                        ) : null}
+                        {item.hasUnknownCost ? (
+                          <Badge variant="secondary" className="text-xs bg-amber-50 text-amber-800">
+                            {labels.costPartialBadge}
                           </Badge>
                         ) : null}
                       </div>

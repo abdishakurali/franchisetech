@@ -29,7 +29,15 @@ export async function GET(req: Request) {
     to: dayEnd,
   });
 
-  const aggregated = new Map<string, { name: string; unit: string; quantity: number; unitCost: number; totalCost: number }>();
+  // unitCost/totalCost only ever reflect the KNOWN-cost portion of a
+  // product's movements — a missing historical cost is never filled in
+  // from today's price. hasGap marks a product with at least one
+  // contributing movement that had no recorded cost, so its totalCost is a
+  // floor, not the complete figure; see footnote below.
+  const aggregated = new Map<
+    string,
+    { name: string; unit: string; quantity: number; unitCost: number | null; totalCost: number; hasGap: boolean }
+  >();
   for (const m of movements) {
     const prod = stockMovementProduct(m);
     const productName = prod?.name ?? "—";
@@ -37,19 +45,28 @@ export async function GET(req: Request) {
     const qty = Math.abs(stockMovementQty(m));
     const unitCost = stockMovementUnitCost(m);
 
-    const existing = aggregated.get(productName);
-    if (existing) {
-      existing.quantity += qty;
+    const existing = aggregated.get(productName) ?? {
+      name: productName,
+      unit,
+      quantity: 0,
+      unitCost: null,
+      totalCost: 0,
+      hasGap: false,
+    };
+    existing.quantity += qty;
+    if (unitCost != null) {
       existing.totalCost += qty * unitCost;
-      if (unitCost > 0) existing.unitCost = unitCost;
+      existing.unitCost = unitCost;
     } else {
-      aggregated.set(productName, { name: productName, unit, quantity: qty, unitCost, totalCost: qty * unitCost });
+      existing.hasGap = true;
     }
+    aggregated.set(productName, existing);
   }
 
   const items = Array.from(aggregated.values()).sort((a, b) => a.name.localeCompare(b.name));
   const money = (v: number) => formatMoney(v, currency);
   const totalValue = items.reduce((s, i) => s + i.totalCost, 0);
+  const hasAnyGap = items.some((i) => i.hasGap);
 
   const { data: bcNum } = await supabase.rpc("assign_bc_number", { p_org_id: orgId, p_from: from, p_to: to });
   const documentNumber = (bcNum as string | null) ?? `BC-${from.replace(/-/g, "")}`;
@@ -59,10 +76,18 @@ export async function GET(req: Request) {
     product: item.name,
     unit: item.unit,
     quantity: item.quantity.toFixed(2),
-    unitCost: money(item.unitCost),
-    totalCost: money(item.totalCost),
+    unitCost: item.unitCost != null ? money(item.unitCost) : "—",
+    totalCost: item.unitCost != null ? `${money(item.totalCost)}${item.hasGap ? " (parțial)" : ""}` : "—",
   }));
-  pdfRows.push({ nr: "", product: "TOTAL", unit: "", quantity: "", unitCost: "", totalCost: money(totalValue), _rowStyle: "total" });
+  pdfRows.push({
+    nr: "",
+    product: "TOTAL",
+    unit: "",
+    quantity: "",
+    unitCost: "",
+    totalCost: `${money(totalValue)}${hasAnyGap ? " (parțial)" : ""}`,
+    _rowStyle: "total",
+  });
 
   const doc = ReportPdfDocument({
     companyName: org?.name ?? "franchisetech",
@@ -76,6 +101,9 @@ export async function GET(req: Request) {
       { label: "Articole", value: String(items.length) },
       { label: "Valoare totală", value: money(totalValue) },
     ],
+    footnote: hasAnyGap
+      ? "Unele mișcări din această perioadă nu au cost înregistrat. Valorile marcate \"(parțial)\" sunt un minim cunoscut, nu cifra completă — un cost lipsă nu este completat niciodată din prețul curent."
+      : undefined,
     columns: [
       { key: "nr", label: "Nr.", align: "right", width: "6%" },
       { key: "product", label: "Produs", width: "36%" },

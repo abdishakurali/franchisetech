@@ -45,7 +45,15 @@ export default async function ConsumReportPage({
     to: dayEnd,
   });
 
-  const aggregated = new Map<string, { name: string; unit: string; quantity: number; unitCost: number; totalCost: number }>();
+  // unitCost: last known cost seen for this product, or null if none of its
+  // movements had one recorded. totalCost only sums the KNOWN-cost portion —
+  // never today's price standing in for a missing historical one. hasGap
+  // marks a product where at least one contributing movement had no cost,
+  // so its totalCost is a floor, not a complete figure.
+  const aggregated = new Map<
+    string,
+    { name: string; unit: string; quantity: number; unitCost: number | null; totalCost: number; hasGap: boolean }
+  >();
 
   for (const m of movements) {
     const prod = stockMovementProduct(m);
@@ -54,24 +62,27 @@ export default async function ConsumReportPage({
     const qty = Math.abs(stockMovementQty(m));
     const unitCost = stockMovementUnitCost(m);
 
-    const existing = aggregated.get(productName);
-    if (existing) {
-      existing.quantity += qty;
+    const existing = aggregated.get(productName) ?? {
+      name: productName,
+      unit,
+      quantity: 0,
+      unitCost: null,
+      totalCost: 0,
+      hasGap: false,
+    };
+    existing.quantity += qty;
+    if (unitCost != null) {
       existing.totalCost += qty * unitCost;
-      if (unitCost > 0) existing.unitCost = unitCost;
+      existing.unitCost = unitCost;
     } else {
-      aggregated.set(productName, {
-        name: productName,
-        unit,
-        quantity: qty,
-        unitCost,
-        totalCost: qty * unitCost,
-      });
+      existing.hasGap = true;
     }
+    aggregated.set(productName, existing);
   }
 
   const items = Array.from(aggregated.values()).sort((a, b) => a.name.localeCompare(b.name));
   const totalValue = items.reduce((sum, item) => sum + item.totalCost, 0);
+  const hasAnyGap = items.some((item) => item.hasGap);
 
   const { data: bcNum } = await supabase.rpc("assign_bc_number", {
     p_org_id: orgId,
@@ -157,19 +168,51 @@ export default async function ConsumReportPage({
                 <td className="py-2 px-1">{item.name}</td>
                 <td className="text-center py-2 px-1">{item.unit}</td>
                 <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>{item.quantity.toFixed(2)}</td>
-                <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>{formatMoney(item.unitCost, currency)}</td>
-                <td className={`text-right py-2 px-1 tabular-nums font-medium ${mono}`}>{formatMoney(item.totalCost, currency)}</td>
+                <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>
+                  {item.unitCost != null ? (
+                    formatMoney(item.unitCost, currency)
+                  ) : (
+                    <span className="text-slate-300">{labels.costUnknown}</span>
+                  )}
+                </td>
+                <td className={`text-right py-2 px-1 tabular-nums font-medium ${mono}`}>
+                  {item.unitCost != null ? (
+                    <>
+                      {formatMoney(item.totalCost, currency)}
+                      {item.hasGap ? (
+                        <span className="ml-1 text-[9px] font-normal uppercase tracking-wide text-amber-600">
+                          {labels.partialTag}
+                        </span>
+                      ) : null}
+                    </>
+                  ) : (
+                    <span className="text-slate-300">{labels.costUnknown}</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-slate-900 font-semibold">
               <td colSpan={5} className="py-2 px-1 text-right">{labels.total}</td>
-              <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>{formatMoney(totalValue, currency)}</td>
+              <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>
+                {formatMoney(totalValue, currency)}
+                {hasAnyGap ? (
+                  <span className="ml-1 text-[9px] font-normal uppercase tracking-wide text-amber-600">
+                    {labels.partialTag}
+                  </span>
+                ) : null}
+              </td>
             </tr>
           </tfoot>
         </table>
       )}
+
+      {hasAnyGap ? (
+        <p className="mt-4 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-md p-3 print:text-[9px]">
+          {labels.costGapNote}
+        </p>
+      ) : null}
 
       {/* ── Signatures: three blocks — same grammar as the NIR print page ── */}
       <footer className="mt-10 border-t border-slate-300 pt-6 text-sm">
