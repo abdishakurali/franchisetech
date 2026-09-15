@@ -172,6 +172,18 @@ if git -C "$SOURCE" rev-parse --git-dir > /dev/null 2>&1; then
   fi
 fi
 
+# ── 12. Schema drift: production must not have any migration this repo ──
+#         doesn't know about (the database half of the append-only rule).
+echo "Checking for schema drift between production and this repo..."
+if [ -f "$SOURCE/scripts/check-schema-drift.sh" ]; then
+  DRIFT_OUTPUT=$(bash "$SOURCE/scripts/check-schema-drift.sh" 2>&1) || {
+    fail "Schema drift detected:"
+    while IFS= read -r line; do
+      ERRORS="$ERRORS\n      $line"
+    done <<< "$(echo "$DRIFT_OUTPUT" | head -30)"
+  }
+fi
+
 # ── Report ────────────────────────────────────────────────────
 echo ""
 if [ "$FAIL" -eq 0 ]; then
