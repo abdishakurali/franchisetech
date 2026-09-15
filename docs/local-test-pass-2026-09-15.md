@@ -1,4 +1,4 @@
-# Local test pass — Steps 4-8 and 10 (Group A/B)
+# Local test pass — Steps 4-10, Gate A, Gate B
 
 Run this against your local dev server (`npm run dev`), logged in as a Dolce Nera
 owner/manager. Nothing here has been deployed — the café is still running the old
@@ -8,6 +8,14 @@ Where a step needs something I can't see (your own eyes on layout/spacing, or a
 decision only you can make), it's marked **[YOU CHECK]**. Everything else I've
 already verified by reading the code and querying production data, but a human
 click-through is the actual bar per the standing rules — code review isn't proof.
+
+Sections 1-6 cover Steps 4-10 (already signed off if you've run this before —
+nothing in them changed). Section 7 is Gate A (VAT fix), already live in
+production data, verifiable here without any risk. **Section 8 is Gate B** — most
+of it is safe to click through right now, at any hour, with zero risk; the parts
+that need the real till and FiscalNet hardware are marked
+**[NEEDS REAL TILL — OFF-HOURS]** and are the one thing actually gated on your
+schedule.
 
 ---
 
@@ -182,15 +190,101 @@ longer fabricates a cost from today's price when the historical cost is unknown)
 
 ---
 
+## 7. Gate A — VAT fix (already live in production data)
+
+Dolce Nera's data was already corrected directly in production (this isn't a
+"will it work" check, it's confirming the correction actually took and stayed).
+
+1. Go to `/app/products`, open a handful of products that used to carry 21% or 11%
+   VAT (anything drink/food-related is a safe bet — before the fix, 42 products were
+   at 21% and 20 at 11%). Confirm VAT shows **0%** on all of them.
+2. Go to `/app/settings?tab=fiscal` (or wherever VAT rates are listed in Settings) —
+   confirm **TVA 0%** is the only active/default rate; 21%/11%/5% should show as
+   present but inactive, not deleted.
+3. Go to `/app/settings/data-repair` — confirm there's a completed VAT repair batch
+   dated 2026-09-15 covering 62 products, with a full before/after audit trail per
+   product.
+4. **[YOU CHECK]** Try to import a CSV of products with a blank VAT column (or edit
+   a product and try to manually set VAT to 21%) — confirm it's rejected or forced
+   to 0%, not silently accepted. If a product ends up with non-zero VAT through any
+   path, that's the exact bug come back — flag it immediately.
+
+---
+
+## 8. Gate B — POS sell screen + fiscal receipt logging
+
+### 8.1 Safe to check right now, no till or off-hours needed
+
+1. Go to `/app/pos` with an open till. Open the **quick-access menu** (the grid
+   icon, top-left) — confirm it shows exactly **four** tiles: Pune în așteptare
+   (only if the cart has items), Rambursare, Mișcare numerar, Închide casa (the
+   last two only if you're an owner/manager). Nothing else should be in this sheet.
+2. Find the **"…" (More) button** next to it in the top bar — confirm it opens a
+   dropdown with Clienți, Comenzi, and (only if there's something to show) held
+   orders and Raport Z. This is where the other 7 destinations that used to be in
+   the quick-access sheet moved to — **[YOU CHECK]** confirm you can still do
+   everything you used to be able to do from the old 11-item menu, just from here
+   or from the main app nav (Settings/Products/Reports) instead. If something you
+   relied on is missing from both places, tell me which.
+3. Add a few products to the cart and go to the payment step — confirm you see
+   exactly **two** payment buttons, Numerar and Card, each large enough to be a
+   comfortable target (not a list of every configured payment method). Confirm the
+   total shown is the biggest number on that screen.
+4. **[YOU CHECK]** Look at the product grid across a few different categories —
+   coffee/drink categories should show real photos; **SHOP** and **LIMONADA &
+   FRESH** specifically should show clean name+price+colour tiles instead of
+   broken/missing-image placeholders (their real photo coverage is 38% and 13%,
+   below the threshold this was built around). If any category looks like a mix of
+   photo tiles and blank placeholders in the same section, that's the fallback not
+   working — tell me which category.
+5. Look for the **connection status indicator** — a small pill, fixed in a corner
+   of the screen, visible even while you're on the payment screen. It should read
+   "Sincronizat" in normal conditions. Turn off your Wi-Fi/network briefly (or use
+   your browser's offline dev-tools toggle) — confirm it switches to "Offline"
+   within a few seconds, and back to "Sincronizat" (or briefly "Se sincronizează")
+   when you reconnect. It should never appear as a popup, toast, or modal — just
+   that one small fixed badge.
+6. Set FiscalNet to **mock mode** in Settings if it isn't already, complete a test
+   sale, then check `/app/settings?tab=fiscal`'s measured-history card — confirm
+   the attempt count went up by one and shows a recent timestamp. This is the
+   actual bug fix: before this, that count never moved for a real sale, ever.
+
+### 8.2 **[NEEDS REAL TILL — OFF-HOURS]** — the one thing actually gated on your schedule
+
+This needs FiscalNet in its real (non-mock) mode against the actual till hardware,
+with someone watching. Confirm a short window first (even 10-15 minutes, first
+thing before opening or after close) — this is the single remaining decision.
+
+1. Complete one real sale on the real till, real FiscalNet connection.
+2. Confirm the fiscal receipt printed as expected (unchanged from before — this fix
+   doesn't touch how or whether a receipt prints, only whether the outcome gets
+   recorded).
+3. Immediately after, check `/app/settings?tab=fiscal`'s measured-history card, or
+   directly query `fiscal_receipt_attempts` for that transaction — confirm exactly
+   **one** row was written, with `status = 'success'` and a real receipt number,
+   not stuck at `'pending'` or `'api_pending'`.
+4. If you can safely simulate a failure (e.g. temporarily disconnect the FiscalNet
+   agent before completing a sale, if your setup allows it without risking a stuck
+   till) — confirm the attempt gets logged as `'failed'`, not silently dropped.
+   Skip this specific check if there's no safe way to do it without risking the
+   real shift.
+5. Run a handful of real sales across a real short shift (this is the "done means
+   a full real shift ran on it without falling back" bar — not a single test
+   transaction). Watch for: the sell screen staying responsive, the connection
+   indicator reflecting reality, no duplicate fiscal attempts for one sale, no
+   sale that completed without eventually getting *some* fiscal_receipt_status
+   other than stuck-pending.
+
+---
+
 ## What I'm not asking you to check
 
-- Gate A (VAT registration fix) and Gate B (POS UI + fiscal logging) — both untouched,
-  waiting on your input (VAT registration status; off-hours timing for Gate B). Not
-  part of this pass.
 - Group C/D deletions (delivery, e-Factura, modifiers, referrals, testimonials) — not
   started, waiting on three months of silence per your instruction.
 - Anything requiring FiscalNet hardware/ANAF credentials I don't have access to — if a
   step above needs those and you hit a wall, that's expected; note it and move on.
+- Deploying any of this — nothing here has shipped. This whole script runs against
+  your local dev server only.
 
 ---
 
