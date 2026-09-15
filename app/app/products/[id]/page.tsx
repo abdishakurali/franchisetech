@@ -369,6 +369,11 @@ export default async function ProductDetailPage({
                   })}
                 </div>
               )}
+              <div className="pt-3 mt-1 border-t border-slate-100">
+                <Link href={`/app/products/${id}/fisa-magazie`} className="text-sm text-blue-600 hover:underline">
+                  View full stock card (Fișă de magazie) &rarr;
+                </Link>
+              </div>
             </CardContent>
           </Card>
         )}
