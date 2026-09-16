@@ -12,6 +12,7 @@ const t = {
     recipes: "Recipes",
     kitchen: "Kitchen",
     customers: "Customers",
+    stock: "Stock",
     stockLevels: "Stock",
     purchases: "Purchases",
     suppliers: "Suppliers",
@@ -43,11 +44,11 @@ describe("buildMainNav", () => {
   it("returns the full, unrestricted nav regardless of role — role restriction is resolveNavItems' job", () => {
     expect(hrefs(buildMainNav(t))).toEqual([
       "/app",
-      "/app/setup-checklist",
       "/app/pos",
       "/app/products",
-      "/app/reports",
       "/app/recipes",
+      "/app/stock",
+      "/app/reports",
     ]);
   });
 });
@@ -74,7 +75,7 @@ describe("resolveNavItems", () => {
     expect(hrefs(withEfactura.mainNav)).toEqual(["/app", "/app/reports", "/app/purchases", "/app/suppliers", "/app/invoices"]);
   });
 
-  it("hides setup-checklist once setup is complete, and gates recipes/stock on module visibility", () => {
+  it("shows only the seven design destinations while preserving recipe and stock entitlements", () => {
     const { mainNav, stockNav, showStock } = resolveNavItems(
       "owner",
       t,
@@ -82,8 +83,19 @@ describe("resolveNavItems", () => {
       moduleVisibility({ recipeCosting: false, inventory: true }),
       { id: "org1", name: "Org" },
     );
-    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/reports"]);
-    expect(showStock).toBe(true);
-    expect(hrefs(stockNav)).toEqual(["/app/stock", "/app/purchases", "/app/suppliers"]);
+    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/stock", "/app/reports"]);
+    expect(showStock).toBe(false);
+    expect(hrefs(stockNav)).toEqual([]);
+  });
+
+  it("keeps all seven destinations for an entitled owner, with no extra module links", () => {
+    const { mainNav } = resolveNavItems(
+      "owner",
+      t,
+      false,
+      moduleVisibility({ recipeCosting: true, inventory: true }),
+      { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true, kitchen_display_enabled: true, loyalty_enabled: true },
+    );
+    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/recipes", "/app/stock", "/app/reports"]);
   });
 });

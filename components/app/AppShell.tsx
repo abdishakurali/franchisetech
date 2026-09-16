@@ -8,8 +8,8 @@ import { User } from "@supabase/supabase-js";
 import {
   LayoutDashboard, Package, BarChart3,
   LogOut, Menu, X, ChevronDown, Archive,
-  CreditCard, ListChecks, Truck, ShoppingBag,
-  Gift, BookOpen, FileText, Star, ChefHat,
+  CreditCard, Truck, ShoppingBag,
+  Gift, BookOpen, FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -30,7 +30,6 @@ import { HeaderBillingNotice } from "@/components/billing/HeaderBillingNotice";
 import { resetPosTillOpen, subscribePosTillOpen } from "@/lib/pos-till-state";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import type { AppT } from "@/lib/app-i18n";
-import { LEAN_PRODUCT_SCOPE_ENABLED } from "@/lib/product-scope";
 
 interface AppShellProps {
   user: User;
@@ -93,26 +92,18 @@ function isSubscriptionBlockedForClient(subStatus?: SubscriptionStatus): boolean
 export function buildMainNav(t: AppT): NavItem[] {
   const nav: NavItem[] = [
     { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
-    { href: "/app/setup-checklist", label: t.nav.setupGuide, icon: ListChecks, exact: false },
     { href: "/app/pos", label: t.nav.pos, icon: CreditCard, exact: false },
     { href: "/app/products", label: t.nav.products, icon: Package, exact: false },
-    { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
     // Recipes is a paid Operations module: gate it ONLY on the org's own
     // recipeCosting visibility (applied in resolveNavItems below), never on the
     // marketing-scope flag. LEAN_PRODUCT_SCOPE_ENABLED trims what the public
     // site advertises — it must not decide what a paying customer can reach.
     { href: "/app/recipes", label: t.nav.recipes, icon: BookOpen, exact: false },
+    { href: "/app/stock", label: t.nav.stock, icon: Archive, exact: false },
+    { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
   ];
 
   return nav;
-}
-
-function buildStockNav(t: AppT) {
-  return [
-    { href: "/app/stock", label: t.nav.stockLevels, icon: Archive },
-    { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag },
-    { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck },
-  ];
 }
 
 export function resolveNavItems(
@@ -138,19 +129,9 @@ export function resolveNavItems(
     return { mainNav: accountantNav, stockNav: [], showStock: false, limited: false };
   }
 
-  const mainNav = [
-    ...buildMainNav(t).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
-    ...(!LEAN_PRODUCT_SCOPE_ENABLED && activeOrg?.kitchen_display_enabled === true && !limited
-      ? [{ href: "/app/kitchen", label: t.nav.kitchen, icon: ChefHat, exact: false }]
-      : []),
-    ...(!LEAN_PRODUCT_SCOPE_ENABLED && activeOrg?.loyalty_enabled === true && !limited
-      ? [{ href: "/app/customers", label: t.nav.customers ?? "Customers", icon: Star, exact: false }]
-      : []),
-    ...(showEfactura && !limited
-      ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }]
-      : []),
-  ]
+  const mainNav = buildMainNav(t)
     .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
+    .filter((item) => item.href !== "/app/stock" || moduleVisibility?.inventory === true)
     .filter((item) => {
       if (!limited) return true;
       return item.href === "/app" || item.href === "/app/pos";
@@ -158,8 +139,10 @@ export function resolveNavItems(
 
   // Stock / purchases / suppliers are paid Operations modules — gated on the
   // org's own inventory visibility only, not on the marketing-scope flag.
-  const showStock = moduleVisibility?.inventory === true && !limited;
-  const stockNav = showStock ? buildStockNav(t) : [];
+  // Keep legacy destinations reachable from their own workflows, but give
+  // the owner a single seven-destination navigation as specified by design.
+  const showStock = false;
+  const stockNav: NavItem[] = [];
 
   return { mainNav, stockNav, showStock, limited };
 }
@@ -207,71 +190,6 @@ function HeaderNavLink({
   );
 }
 
-function StockHeaderMenu({
-  pathname,
-  stockNav,
-  t,
-  onNavigate,
-  variant = "desktop",
-}: {
-  pathname: string;
-  stockNav: ReturnType<typeof buildStockNav>;
-  t: AppT;
-  onNavigate?: () => void;
-  variant?: "desktop" | "mobile";
-}) {
-  const router = useRouter();
-  const isStockActive = stockNav.some((item) => pathname.startsWith(item.href));
-
-  if (variant === "mobile") {
-    return (
-      <div className="space-y-0.5">
-        <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          {t.nav.stock}
-        </p>
-        {stockNav.map((item) => (
-          <HeaderNavLink
-            key={item.href}
-            href={item.href}
-            label={item.label}
-            pathname={pathname}
-            onNavigate={onNavigate}
-            className="block w-full"
-          />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn(
-          "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors outline-none",
-          isStockActive
-            ? "bg-blue-50 text-blue-700"
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-        )}
-        aria-label={t.nav.stock}
-      >
-        {t.nav.stock}
-        <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-48">
-        {stockNav.map((item) => (
-          <DropdownMenuItem
-            key={item.href}
-            onClick={() => router.push(item.href)}
-            className={cn(pathname.startsWith(item.href) && "font-semibold text-blue-700")}
-          >
-            {item.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
 function AppHeader({
   pathname,
   activeOrg,
@@ -311,7 +229,7 @@ function AppHeader({
   activeSiteId?: string | null;
   userRole: string | null;
 }) {
-  const { mainNav, stockNav, showStock, limited } = useMemo(
+  const { mainNav, limited } = useMemo(
     () => resolveNavItems(userRole, t, setupComplete ?? false, moduleVisibility, activeOrg),
     [userRole, t, setupComplete, moduleVisibility, activeOrg],
   );
@@ -340,9 +258,6 @@ function AppHeader({
               exact={item.exact}
             />
           ))}
-          {showStock && (
-            <StockHeaderMenu pathname={pathname} stockNav={stockNav} t={t} />
-          )}
           {!limited && (
             <HeaderNavLink
               href="/app/settings"
@@ -435,16 +350,6 @@ function AppHeader({
               className="block w-full"
             />
           ))}
-
-          {showStock && (
-            <StockHeaderMenu
-              pathname={pathname}
-              stockNav={stockNav}
-              t={t}
-              onNavigate={closeMobile}
-              variant="mobile"
-            />
-          )}
 
           {!limited && (
             <HeaderNavLink
