@@ -347,10 +347,11 @@ export default async function SettingsPage({
   ];
 
   return (
-    <div className="settings-page-wrapper max-w-4xl p-4 sm:p-6">
-      <div className="settings-page-heading mb-6">
-        <h1 className="text-2xl font-semibold text-slate-950">{t.settings.title}</h1>
-        <p className="text-sm text-slate-500 mt-1">{t.settings.subtitleSimple}</p>
+    <div className="settings-page-wrapper mx-auto max-w-5xl p-4 sm:p-8">
+      <div className="settings-page-heading mb-8">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-blue-700">Workspace</p>
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-950">{t.settings.title}</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{t.settings.subtitleSimple}</p>
       </div>
 
       {vatReviewCount > 0 && (

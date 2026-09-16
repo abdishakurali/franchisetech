@@ -23,14 +23,14 @@ export function SettingsTabNav({ tabs }: { tabs: SettingsTab[] }) {
 
   return (
     <div
-      className="settings-tab-nav border-b border-slate-200 -mx-6 px-6 mb-6"
+      className="settings-tab-nav mb-8 rounded-xl border border-slate-200 bg-white p-1 shadow-sm"
       style={{
-        marginLeft: "-1.5rem",
-        marginRight: "-1.5rem",
-        paddingLeft: "1.5rem",
-        paddingRight: "1.5rem",
-        marginBottom: "1.5rem",
-        borderBottom: "1px solid #e2e8f0",
+        marginLeft: 0,
+        marginRight: 0,
+        paddingLeft: 0,
+        paddingRight: 0,
+        marginBottom: "2rem",
+        borderBottom: "0",
         overflowX: "auto",
       }}
     >
@@ -53,8 +53,8 @@ export function SettingsTabNav({ tabs }: { tabs: SettingsTab[] }) {
               className={cn(
                 "inline-flex items-center whitespace-nowrap border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-t",
                 isActive
-                  ? "border-blue-600 text-blue-700 bg-blue-50/40"
-                  : "border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300"
+                  ? "border-blue-600 text-blue-700 bg-blue-50"
+                  : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50"
               )}
               style={{
                 display: "inline-flex",
@@ -70,6 +70,7 @@ export function SettingsTabNav({ tabs }: { tabs: SettingsTab[] }) {
                 textDecoration: "none",
                 color: isActive ? "#1d4ed8" : "#475569",
                 borderBottom: isActive ? "2px solid #2563eb" : "2px solid transparent",
+                borderRadius: "0.625rem",
                 marginRight: "0",
               }}
               aria-current={isActive ? "page" : undefined}
