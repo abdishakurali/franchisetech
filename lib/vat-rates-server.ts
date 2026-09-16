@@ -48,14 +48,10 @@ export async function listAllVatRates(
 /**
  * vatRegistered defaults to false because it always is at the point this
  * runs: it's called from org creation / ensurePosDefaults, before ANAF
- * registration status is ever known or asked about. A RO org is seeded
- * with only its 0% rate active and default; 21%/11% are still created (so
- * the rate definitions exist, unchanged, for later) but inactive — matching
- * the shape the Gate A fix leaves an unregistered org's catalog in, and
- * required by the vat_rates registration trigger: without this, seeding a
- * brand-new unregistered RO org's default 21%-active-and-default row would
- * fail against that trigger the moment it runs. Non-RO countries (no ANAF
- * concept) are unaffected regardless of the flag.
+ * registration status is ever known or asked about. A RO org keeps 0% as
+ * its selling default, while all standard rates remain active so purchase
+ * documents can record supplier VAT independently. The selling path applies
+ * the ANAF registration gate separately. Non-RO countries are unaffected.
  */
 export async function seedOrgVatRatesIfEmpty(
   supabase: SupabaseClient,
@@ -78,7 +74,7 @@ export async function seedOrgVatRatesIfEmpty(
     rate: d.rate,
     fiscalnet_vat_group: d.fiscalnet_vat_group,
     is_default: gateByRegistration ? d.rate === 0 : d.is_default,
-    active: gateByRegistration ? d.rate === 0 : true,
+    active: true,
     sort_order: i + 1,
   }));
   await supabase.from("vat_rates").insert(rows);

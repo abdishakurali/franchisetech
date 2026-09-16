@@ -529,6 +529,7 @@ export function PurchaseForm({
                       name="tax_rate"
                       compact
                       settingsHint={false}
+                      includeInactive
                     />
                     <div className="text-right text-sm font-medium text-slate-700 tabular-nums">
                       {calc.lineTotal > 0 ? fmt(calc.lineTotal) : "—"}

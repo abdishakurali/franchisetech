@@ -18,6 +18,7 @@ type Props = {
   id?: string;
   className?: string;
   settingsHint?: boolean;
+  includeInactive?: boolean;
 };
 
 export function VatRateSelect({
@@ -31,11 +32,12 @@ export function VatRateSelect({
   id,
   className = "",
   settingsHint = true,
+  includeInactive = false,
 }: Props) {
   const { t } = useAppI18n();
   const activeRates = useMemo(
-    () => rates.filter((r) => r.active !== false).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.rate - b.rate),
-    [rates]
+    () => rates.filter((r) => includeInactive || r.active !== false).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.rate - b.rate),
+    [includeInactive, rates]
   );
   const numericValue = value === "" ? NaN : Number(value);
   const matched = activeRates.find((r) => ratesMatch(r.rate, numericValue));

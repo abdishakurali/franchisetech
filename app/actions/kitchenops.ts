@@ -30,7 +30,7 @@ import {
   type PurchaseLineInput,
 } from "@/lib/nir/purchase";
 import { createServiceClient } from "@/lib/supabase/server";
-import { listActiveVatRates, seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
+import { listActiveVatRates, listAllVatRates, seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
 import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
@@ -79,9 +79,11 @@ async function validateSubmittedVatRates(
   orgId: string,
   rates: number[]
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const activeRates = await listActiveVatRates(supabase, orgId);
-  if (activeRates.length === 0) return { ok: true };
-  const invalid = rates.find((rate) => !activeRates.some((r) => ratesMatch(r.rate, rate)));
+  // Purchases record supplier VAT and are independent of the organisation's
+  // selling-rate restriction for an unregistered Romanian business.
+  const catalogRates = await listAllVatRates(supabase, orgId);
+  if (catalogRates.length === 0) return { ok: true };
+  const invalid = rates.find((rate) => !catalogRates.some((r) => ratesMatch(r.rate, rate)));
   if (invalid == null) return { ok: true };
   return { ok: false, error: `VAT rate ${invalid}% is not active in Settings.` };
 }
