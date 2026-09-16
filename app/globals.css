@@ -117,6 +117,19 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Claude Design: quiet back-office hierarchy for the consolidated settings surface. */
+.settings-page-wrapper h1,
+.settings-page-wrapper h2,
+.settings-page-wrapper h3 {
+  font-family: var(--font-display), var(--font-body), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.settings-page-wrapper .tabular-nums,
+.settings-page-wrapper input[type="number"] {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+}
+
 @media print {
   /* Hide all app chrome */
   .print\:hidden,
