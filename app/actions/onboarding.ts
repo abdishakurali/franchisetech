@@ -120,8 +120,8 @@ export async function completePosOnboarding(input: {
   const countryLabel = COUNTRY_LABELS[input.countryCode] ?? COUNTRY_LABELS.OTHER;
   const { code: currencyCode, symbol: currencySymbol } = currencyForCountry(input.countryCode);
 
-  // trial_started_at / trial_ends_at are intentionally NOT set here — the trial
-  // starts only after the €1 card verification payment (see lib/billing/verification.ts).
+  // Explicit trial timestamps are not set here. Subscription status falls back
+  // to a 15-day trial from organisation creation for new accounts.
   const { error: orgUpdateError } = await supabase.from("organisations").update({
     business_type: input.businessType || null,
     country: countryLabel,
@@ -287,8 +287,8 @@ export async function completePosOnboarding(input: {
   }
 
   // ── Loops: non-blocking ────────────────────────────────────────────────
-  // trial_started (Loops + PostHog) now fires when the trial actually starts —
-  // after the €1 card verification — in lib/billing/verification.ts.
+  // The card-verification flow records its own milestone when used; ordinary
+  // new accounts receive the soft trial through subscription status fallback.
   if (user.email) {
     void upsertLoopsContact(user.email, {
       firstName: input.userName?.trim(),

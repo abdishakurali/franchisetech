@@ -134,7 +134,7 @@ export const en = {
       titleAfter: " where the money went.",
       subtitle: "franchisetech shows sales, cash, card, margin, and stock gaps before you go home.",
       socialProof: "For owners who want daily control, not complicated reports at month end.",
-      trialNote: "One-time €1 verification · Guided in-app setup · Cancel anytime",
+      trialNote: "No card required · Guided in-app setup · Cancel anytime",
       trustSignals: [
         { title: "No surprises at close", text: "Cash, card, and differences visible before the site closes." },
         { title: "Fast first sale", text: "Demo products, open till, and guided checkout in one session." },
@@ -321,7 +321,7 @@ export const en = {
     faq: {
       title: "Questions from owners",
       items: [
-        { question: "How does the 15-day trial work?", answer: "The trial starts after a one-time €1 card verification. Monthly billing begins only if you choose a plan at the end." },
+        { question: "How does the 15-day trial work?", answer: "The trial starts when the account is created, with no card required. Monthly billing begins only if you choose a plan at the end." },
         { question: "Do I need special POS hardware?", answer: "The app runs in a browser on supported devices. Fiscal hardware and FiscalNet compatibility are checked separately." },
         { question: "Can I see margins on menu items?", answer: "Yes. Recipe costing links ingredients to sale price so you see cost per portion and gross margin before you change the menu." },
         { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
@@ -443,15 +443,15 @@ export const en = {
   },
   pricing: {
     title: "franchisetech Pricing",
-    description: "Core is €49/location/month and Operations is €79/location/month. The 15-day trial starts after a one-time €1 verification.",
+    description: "Core is €49/location/month and Operations is €79/location/month. The 15-day trial starts when the account is created, with no card required.",
     badge: "Simple pricing",
     heroTitle: "Two plans with clear per-location pricing.",
     heroText: "Core covers sales and daily close. Operations adds stock, purchasing, and recipes.",
-    heroStatFrom: "One-time €1 verification",
+    heroStatFrom: "No card required",
     heroStatTrial: "15-day trial",
     heroStatTill: "No long-term contract",
     seeFeatures: "See all features",
-    freeSetupStrip: "One-time €1 card verification, then a 15-day trial. Guided in-app setup included.",
+    freeSetupStrip: "15-day trial without a card. Guided in-app setup included.",
     setupFreeTitle: "Free in-app setup",
     setupFreeText: "New account → demo products → open till → first sale. Step-by-step guide, no cost.",
     embeddedSignupTitle: "Get started today",
@@ -472,7 +472,7 @@ export const en = {
     fairnessItems: [
       "Unlimited staff — no per-user fees",
       "No hardware lock-in or terminal contracts",
-      "One-time €1 verification, then a 15-day trial",
+      "15-day trial without a card",
       "Cancel anytime — no long-term lock-in",
       "Existing subscribers keep their rate when prices change",
     ],
@@ -581,14 +581,14 @@ export const en = {
     homeTeaser: {
       label: "Pricing",
       title: "One workspace. One price per shop.",
-      text: "From {starter}/location/month. One-time €1 verification, then a 15-day trial. No long-term contract.",
+      text: "From {starter}/location/month. 15-day trial without a card. No long-term contract.",
       cta: "See all plans",
     },
   },
   auth: {
     loginTitle: "Sign in to franchisetech",
     signupTitle: "Start your free account",
-    signupDescription: "Guided setup. The 15-day trial starts after a one-time €1 verification.",
+    signupDescription: "Guided setup. The 15-day trial starts when the account is created, with no card required.",
     signupLegal: "By signing up you agree that franchisetech supports your records — it does not replace your legal obligations as a food business operator.",
     email: "Email",
     password: "Password",

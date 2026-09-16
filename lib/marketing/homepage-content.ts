@@ -29,7 +29,7 @@ const ro = {
     "Casa de marcat îți spune cât ai vândut. FranchiseTech îți spune cât ai consumat, cât a costat și cât ți-a rămas — din rețete și stoc reale.",
   trial: "Începe trialul de 15 zile",
   watch: "Vezi ce face",
-  trialNote: "Trial asistat · verificare card de 1 € · suport în română",
+  trialNote: "Probă 15 zile · fără card necesar · suport în română",
   quickLinks: [
     "Vânzări și stoc",
     "Mod offline",
@@ -182,7 +182,7 @@ const ro = {
     {
       question: "Cum începe proba?",
       answer:
-        "Trialul asistat durează 15 zile și începe după o verificare unică de 1 € a cardului. Configurăm împreună produsele și fluxul de vânzare pentru localul tău.",
+        "Proba durează 15 zile și începe la crearea contului, fără card. Configurarea ghidată a produselor și fluxului de vânzare este disponibilă în aplicație.",
     },
   ],
   finalTitle: "Următoarea tură, cu mai multă claritate.",
@@ -197,7 +197,7 @@ const en: typeof ro = {
     "Sales, fiscal receipts, stock and margins in one place. With offline queuing for short internet outages and a clear view of your day.",
   trial: "Start your 15-day trial",
   watch: "Watch a customer's story",
-  trialNote: "Assisted trial · €1 card verification · Romanian support",
+  trialNote: "15-day trial · no card required · Romanian support",
   quickLinks: ["Sales and stock", "Offline mode", "Hardware", "Customer story"],
   galleryLabel: "The platform in practice",
   galleryTitle: "From the first order to closing time.",
@@ -345,7 +345,7 @@ const en: typeof ro = {
     {
       question: "How does the trial start?",
       answer:
-        "The 15-day assisted trial starts after a one-time €1 card verification. We help configure products and the sales workflow for your business.",
+        "The 15-day trial starts when you create your account, with no card required. In-app guidance helps configure products and the sales workflow.",
     },
   ],
   finalTitle: "Start your next shift with a clearer picture.",

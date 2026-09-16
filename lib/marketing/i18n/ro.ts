@@ -136,7 +136,7 @@ export const ro: MarketingMessages = {
       titleAfter: " ați făcut.",
       subtitle: "Vindeți ziua, închideți casa și vedeți imediat ce a intrat, ce lipsește din stoc și ce trebuie cumpărat mâine.",
       socialProof: "Pentru proprietarii care vor control zilnic, nu rapoarte complicate la final de lună.",
-      trialNote: "Verificare unică de 1 € · Setup ghidat în aplicație · Anulați oricând",
+      trialNote: "Fără card necesar · Setup ghidat în aplicație · Anulați oricând",
       trustSignals: [
         { title: "Seară fără surprize", text: "Numerar, card și diferențe vizibile înainte să închideți locația." },
         { title: "Prima vânzare rapid", text: "Produse demo, casă deschisă și checkout ghidat într-o singură sesiune." },
@@ -324,7 +324,7 @@ export const ro: MarketingMessages = {
     faq: {
       title: "Întrebări de la proprietari",
       items: [
-        { question: "Cum funcționează trial-ul de 15 zile?", answer: "Trialul începe după verificarea unică a cardului de 1 €. Plata lunară începe numai dacă alegeți un plan la final." },
+        { question: "Cum funcționează trial-ul de 15 zile?", answer: "Trialul începe de la crearea contului, fără card. Plata lunară începe numai dacă alegeți un plan la final." },
         { question: "Am nevoie de hardware POS special?", answer: "Aplicația rulează în browser pe dispozitive compatibile. Pentru bonuri fiscale, verificăm separat casa fiscală și configurația FiscalNet." },
         { question: "Pot vedea marjele pe produsele din meniu?", answer: "Da. Costul rețetelor leagă ingredientele de prețul de vânzare — vedeți costul per porție și marja brută înainte să schimbați meniul." },
         { question: "Există preț per loc?", answer: "Nu. Personal nelimitat fără cost suplimentar per utilizator." },
@@ -446,15 +446,15 @@ export const ro: MarketingMessages = {
   },
   pricing: {
     title: "Prețuri franchisetech",
-    description: "Core costă 49 €/locație/lună, iar Operations 79 €/locație/lună. Trialul de 15 zile începe după verificarea unică de 1 €.",
+    description: "Core costă 49 €/locație/lună, iar Operations 79 €/locație/lună. Trialul de 15 zile începe de la crearea contului, fără card.",
     badge: "Prețuri simple",
     heroTitle: "Două planuri, cu preț clar pe locație.",
     heroText: "Core pentru vânzare și închidere zilnică. Operations adaugă stoc, achiziții și rețete.",
-    heroStatFrom: "Verificare unică de 1 €",
+    heroStatFrom: "Fără card necesar",
     heroStatTrial: "15 zile de probă",
     heroStatTill: "Fără contract pe termen lung",
     seeFeatures: "Vezi toate funcționalitățile",
-    freeSetupStrip: "Verificare unică de 1 €, apoi trial 15 zile. Configurarea ghidată în aplicație este inclusă.",
+    freeSetupStrip: "Probă 15 zile fără card. Configurarea ghidată în aplicație este inclusă.",
     setupFreeTitle: "Configurare gratuită în aplicație",
     setupFreeText: "Cont nou → produse demo → deschidere casă → prima vânzare. Ghid pas cu pas, fără cost.",
     embeddedSignupTitle: "Începeți astăzi",
@@ -475,7 +475,7 @@ export const ro: MarketingMessages = {
     fairnessItems: [
       "Echipă nelimitată — fără taxe per utilizator",
       "Fără lock-in hardware sau contracte de terminal",
-      "Verificare unică de 1 €, apoi trial 15 zile",
+      "Probă 15 zile fără card",
       "Anulare oricând — fără contract pe termen lung",
       "Abonații existenți păstrează tariful la schimbarea prețurilor",
     ],
@@ -585,14 +585,14 @@ export const ro: MarketingMessages = {
     homeTeaser: {
       label: "Prețuri",
       title: "Un workspace. Un preț pe magazin.",
-      text: "De la {starter}/locație/lună. Verificare unică de 1 €, apoi trial 15 zile. Fără contract pe termen lung.",
+      text: "De la {starter}/locație/lună. Probă 15 zile fără card. Fără contract pe termen lung.",
       cta: "Vezi toate planurile",
     },
   },
   auth: {
     loginTitle: "Autentificare franchisetech",
     signupTitle: "Începeți contul gratuit",
-    signupDescription: "Configurare ghidată. Trialul de 15 zile începe după verificarea unică de 1 €.",
+    signupDescription: "Configurare ghidată. Trialul de 15 zile începe de la crearea contului, fără card.",
     signupLegal: "Prin înregistrare acceptați că franchisetech vă susține înregistrările — nu înlocuiește obligațiile legale ca operator alimentar.",
     email: "Email",
     password: "Parolă",

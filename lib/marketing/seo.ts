@@ -277,7 +277,7 @@ export const featurePages: SeoPage[] = [
     bullets: ["0–15 min: signup and business settings", "15–45 min: demo products and payment methods", "45–60 min: open till and first test sale"],
     sections: [
       { title: "Clear milestones", body: "Each step links to the right screen — settings, POS, or reports — so setup stays focused." },
-      { title: "Guided self-serve setup", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — the 15-day trial starts after a one-time €1 card verification." },
+      { title: "Guided self-serve setup", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — the 15-day trial starts when the account is created, with no card required." },
     ],
     faqs: [
       { question: "How long does setup take?", answer: "Core path (signup → demo products → open till → first sale): most cafes finish in under an hour. A full catalog migration with 200+ products may take 1–2 days — spread it over your trial." },

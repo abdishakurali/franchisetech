@@ -185,7 +185,7 @@ export default function SignupPage() {
         </CardContent>
       </Card>
       <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-slate-400">
-        <span>✓ Verificare unică de 1 €</span>
+        <span>✓ Probă 15 zile fără card</span>
         <span>✓ Trial 15 zile</span>
         <span>✓ Configurare ghidată</span>
       </div>

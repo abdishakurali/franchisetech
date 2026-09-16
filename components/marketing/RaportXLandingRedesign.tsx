@@ -73,7 +73,7 @@ const faqs = [
   ],
   [
     "Am nevoie de card la înscriere?",
-    "Trialul asistat de 15 zile începe după verificarea unică a cardului de 1 €. Plata lunară începe numai dacă alegeți un plan după perioada de probă.",
+    "Trialul asistat de 15 zile începe de la crearea contului, fără card. Plata lunară începe numai dacă alegeți un plan după perioada de probă.",
   ],
   [
     "Merge pe telefon?",
@@ -107,7 +107,7 @@ function PrimaryCta({ signupHref, centered = false }: { signupHref: string; cent
 function TrialMicrocopy({ dark = false }: { dark?: boolean }) {
   return (
     <p className={`mt-3 text-xs leading-6 ${dark ? "text-white/60" : "text-slate-500"}`}>
-      verificare unică de 1 € · 15 zile cu configurare asistată · fără plată lunară în perioada de
+      fără card necesar · 15 zile cu configurare asistată · fără plată lunară în perioada de
       probă · anulare oricând
     </p>
   );

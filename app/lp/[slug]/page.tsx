@@ -135,7 +135,7 @@ export default async function SkagLandingPage({
             </Link>
           </div>
           <p className="mt-4 text-xs text-slate-500">
-            Verificare unică de 1 € · anulezi oricând · suport în limba română
+            Fără card necesar · anulezi oricând · suport în limba română
           </p>
           <p className="mt-3 text-sm font-medium text-slate-600">{ro.home.hero.socialProof}</p>
         </div>

@@ -87,7 +87,7 @@ const UI_STRINGS = {
     stepOf: (current: number, total: number) => `Pasul ${current} din ${total}`,
     stepEyebrow: (current: number, total: number) => `Pasul ${current} din ${total}`,
     timeEstimate: "~2 minute",
-    trialBadge: "Probă 15 zile · după verificarea unică de 1 €",
+    trialBadge: "Probă 15 zile · fără card necesar",
     sidebarBanner: "Configurați-vă afacerea și casa de marcat ca să puteți vinde azi.",
     sidebarStepDescriptions: [
       "Numele firmei, tipul activității și numele dumneavoastră.",
@@ -144,7 +144,7 @@ const UI_STRINGS = {
     stepOf: (current: number, total: number) => `Step ${current} of ${total}`,
     stepEyebrow: (current: number, total: number) => `Step ${current} of ${total}`,
     timeEstimate: "~2 minutes",
-    trialBadge: "15-day trial · after the one-time €1 verification",
+    trialBadge: "15-day trial · no card required",
     sidebarBanner: "Set up your business and till so you can start selling today.",
     sidebarStepDescriptions: [
       "Brand name, industry, and your name.",

@@ -9,29 +9,29 @@ export const metadata = { title: "Verificare card — franchisetech" };
 
 const copy = {
   ro: {
-    title: "Un ultim pas: verificarea cardului",
-    body: "Pentru a porni trialul de 15 zile, verificăm cardul cu o plată unică de 1 €. Nu este un abonament — nu se percepe nimic altceva în timpul trialului.",
+    title: "Verificare opțională a cardului",
+    body: "Proba de 15 zile începe la crearea contului, fără card. Dacă alegeți verificarea cardului, aceasta presupune o plată unică de 1 € și nu activează automat un abonament.",
     points: [
       "Plată unică de 1 € — atât, nimic recurent",
-      "Trialul de 15 zile pornește imediat după plată",
+      "Proba de 15 zile începe la crearea contului, fără această plată",
       "Poți anula oricând — trialul nu se transformă automat în abonament",
     ],
     button: "Verifică cardul (1 €)",
     loading: "Se deschide plata securizată…",
-    canceled: "Plata a fost anulată. Poți relua verificarea oricând — trialul pornește imediat după.",
+    canceled: "Plata a fost anulată. Poți relua verificarea oricând; proba nu depinde de ea.",
     secure: "Plată securizată prin Stripe",
   },
   en: {
-    title: "One last step: card verification",
-    body: "To start your 15-day trial we verify your card with a one-time €1 charge. This is not a subscription — nothing else is charged during the trial.",
+    title: "Optional card verification",
+    body: "The 15-day trial starts when you create an account, without a card. If you choose card verification, it is a one-time €1 charge and does not automatically start a subscription.",
     points: [
       "One-time €1 charge — that's all, nothing recurring",
-      "Your 15-day trial starts immediately after payment",
+      "Your 15-day trial starts when you create an account, without this payment",
       "Cancel anytime — the trial does not auto-convert to a subscription",
     ],
     button: "Verify card (€1)",
     loading: "Opening secure payment…",
-    canceled: "Payment was canceled. You can retry anytime — the trial starts right after.",
+    canceled: "Payment was canceled. You can retry anytime; the trial does not depend on it.",
     secure: "Secure payment via Stripe",
   },
 } as const;
