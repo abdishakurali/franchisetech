@@ -37,6 +37,7 @@ import { OwnerDigestCard, type OwnerDigestTeamMember } from "@/components/app/Ow
 import { BillingPanel } from "@/components/billing/BillingPanel";
 import { CheckCircle2, Circle, AlertCircle, ExternalLink } from "lucide-react";
 import { SettingsOverview } from "@/components/app/SettingsOverview";
+import { SettingsCoreLists } from "@/components/app/SettingsCoreLists";
 
 const COUNTRY_OPTIONS = [
   { code: "IE", label: "Ireland" },
@@ -107,7 +108,7 @@ export default async function SettingsPage({
   searchParams?: Promise<{ tab?: string; locked?: string; msg?: string; reason?: string; checkout?: string; install_error?: string }>;
 }) {
   const params = await searchParams;
-  const rawTab = params?.tab ?? "business";
+  const rawTab = params?.tab ?? "overview";
   const activeTab = TAB_ALIASES[rawTab] ?? rawTab;
   const lockedModule = params?.locked ?? null;
   const lockedMessage = params?.msg ? decodeURIComponent(params.msg) : null;
@@ -332,6 +333,7 @@ export default async function SettingsPage({
   // notifications, billing, team, and data-repair are unrelated concerns
   // and keep their own tabs; nothing about them changes here.
   const tabs = [
+    { id: "overview",         label: isRO ? "Setări" : "Settings" },
     { id: "business",         label: t.settings.tabBusiness },
     { id: "units",            label: isRO ? "Unități de măsură" : "Units" },
     { id: "payment-methods",  label: isRO ? "Metode de plată" : "Payment methods" },
@@ -400,6 +402,18 @@ export default async function SettingsPage({
       ) : null}
 
       <SettingsTabNav tabs={tabs} />
+
+      {activeTab === "overview" && (
+        <SettingsCoreLists
+          locale={locale}
+          units={DEFAULT_OPERATIONAL_UNITS.map((u) => unitLabel(u, isRO ? "ro" : "en"))}
+          customUnits={customUnits.map((u) => `${u.name}${u.abbreviation ? ` (${u.abbreviation})` : ""}`)}
+          payments={((paymentMethods ?? []) as Array<{ name: string; type: string; active: boolean }>).map((m) => ({ name: m.name, type: m.type, active: m.active }))}
+          categories={(categories ?? []).map((c) => c.name as string)}
+          location={primarySite ? `${primarySite.name}${primarySite.city ? ` · ${primarySite.city}` : ""}` : (isRO ? "Nicio locație" : "No location")}
+          fiscal={{ configured: fiscalnetEnabled, attempts: fiscalReceiptAttempts, sessions: sessionsClosedCount }}
+        />
+      )}
 
       {/* ── BUSINESS TAB ─────────────────────────────────────────────── */}
       {activeTab === "business" && (
