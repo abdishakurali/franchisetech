@@ -41,7 +41,7 @@ export function StockAdjustCell({
         title={t.stock.clickToEditQty}
         className="tabular-nums font-semibold hover:bg-blue-50 hover:text-blue-700 rounded px-1.5 py-0.5 transition-colors"
       >
-        {currentQty}
+        {currentQty.toLocaleString("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </button>
     );
   }
@@ -50,6 +50,8 @@ export function StockAdjustCell({
     <span className="inline-flex items-center gap-1">
       <input
         type="number"
+        step="any"
+        aria-label="Cantitate stoc nouă"
         value={val}
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={(e) => {
