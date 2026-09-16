@@ -36,6 +36,7 @@ import { CuiLookupCard } from "@/components/app/CuiLookupCard";
 import { OwnerDigestCard, type OwnerDigestTeamMember } from "@/components/app/OwnerDigestCard";
 import { BillingPanel } from "@/components/billing/BillingPanel";
 import { CheckCircle2, Circle, AlertCircle, ExternalLink } from "lucide-react";
+import { SettingsOverview } from "@/components/app/SettingsOverview";
 
 const COUNTRY_OPTIONS = [
   { code: "IE", label: "Ireland" },
@@ -403,6 +404,15 @@ export default async function SettingsPage({
       {/* ── BUSINESS TAB ─────────────────────────────────────────────── */}
       {activeTab === "business" && (
         <div className="space-y-6">
+          <SettingsOverview
+            locale={locale}
+            units={DEFAULT_OPERATIONAL_UNITS.length + customUnits.length}
+            payments={paymentMethods?.length ?? 0}
+            categories={categories?.length ?? 0}
+            fiscalConfigured={fiscalnetEnabled}
+            fiscalAttempts={fiscalReceiptAttempts}
+            closedSessions={sessionsClosedCount}
+          />
           {/* CUI autofill (RO only) */}
           {isRO && (
             <CuiLookupCard
