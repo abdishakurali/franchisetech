@@ -1349,8 +1349,8 @@ const en = {
     },
     signup: {
       title: "The till matches the drawer — start the trial",
-      descDefault: "Open your till today. Guided first sale. 15-day trial, no card required.",
-      descPlan: (plan: string) => `15-day trial · no card required · ${plan} after`,
+      descDefault: "Open your till today. Guided first sale. 15-day trial after a one-time €1 card verification.",
+      descPlan: (plan: string) => `One-time €1 card verification · 15-day trial · ${plan} after`,
       businessName: "Brand/shop name",
       yourName: "Your name",
       email: "Email address",
@@ -2728,8 +2728,8 @@ const ro: typeof en = {
     },
     signup: {
       title: "Casa se potrivește cu sertarul — începe trialul",
-      descDefault: "Deschideți casa azi. Prima vânzare ghidată. 15 zile de probă, fără card necesar.",
-      descPlan: (plan: string) => `Probă 15 zile · fără card necesar · ${plan} după`,
+      descDefault: "Deschideți casa azi. Prima vânzare ghidată. Probă 15 zile după verificarea unică a cardului de 1 €.",
+      descPlan: (plan: string) => `Verificare unică de 1 € · probă 15 zile · ${plan} după`,
       businessName: "Nume brand/magazin",
       yourName: "Numele dumneavoastră",
       email: "Adresă email",

@@ -206,7 +206,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum testați înainte să decideți",
-        body: "Ambele platforme oferă perioadă de testare gratuită. La Franchisetech: 15 zile trial fără card necesar, configurare gratuită în aplicație.\n\nTestul corect pe orice platformă POS:\n\n1. Configurați produsele reale (nu demo) cu prețurile dumneavoastră\n2. Faceți câteva vânzări numerar + card\n3. Închideți ziua (raport Z) și comparați numerarul din sertar cu ce arată sistemul\n4. Înregistrați o recepție de marfă (NIR) de la un furnizor real\n5. Exportați datele pentru contabil și trimiteți-i fișierul\n\nDacă fluxul dumneavoastră zilnic funcționează fără probleme în trial — sistemul e potrivit. Dacă dați de blocaje sau aveți nevoie de suport pentru pași de bază, ia asta ca semnal.",
+        body: "Verificați condițiile de testare ale fiecărei platforme. La franchisetech, trialul de 15 zile începe după verificarea unică a cardului de 1 €; configurarea ghidată în aplicație este inclusă.\n\nTestul corect pe orice platformă POS:\n\n1. Configurați produsele reale (nu demo) cu prețurile dumneavoastră\n2. Faceți câteva vânzări numerar + card\n3. Închideți ziua (raport Z) și comparați numerarul din sertar cu ce arată sistemul\n4. Înregistrați o recepție de marfă (NIR) de la un furnizor real\n5. Exportați datele pentru contabil și trimiteți-i fișierul\n\nDacă fluxul dumneavoastră zilnic funcționează fără probleme în trial — sistemul e potrivit. Dacă dați de blocaje sau aveți nevoie de suport pentru pași de bază, ia asta ca semnal.",
       },
     ],
   },
@@ -238,7 +238,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum testați corect în trial",
-        body: "Orice sistem POS vă va părea bun dacă îl testați cu produse demo și scenarii simple. Testul real:\n\n1. Adăugați produsele dumneavoastră reale cu prețurile și cotele TVA corecte\n2. Faceți 10 vânzări — mix numerar și card\n3. Înregistrați o recepție de marfă (NIR) de la furnizorul dumneavoastră de cafea\n4. Închideți ziua și numărați sertarul — comparați cu ce arată raportul Z\n5. Exportați datele și trimiteți-le contabilului dumneavoastră să confirme că poate importa în Saga\n\nDacă toți cei 5 pași funcționează fără să sunați la suport — ați găsit sistemul potrivit.\n\nFranchisetech oferă 15 zile trial (fără card necesar) și configurare ghidată în aplicație.",
+        body: "Orice sistem POS vă va părea bun dacă îl testați cu produse demo și scenarii simple. Testul real:\n\n1. Adăugați produsele dumneavoastră reale cu prețurile și cotele TVA corecte\n2. Faceți 10 vânzări — mix numerar și card\n3. Înregistrați o recepție de marfă (NIR) de la furnizorul dumneavoastră de cafea\n4. Închideți ziua și numărați sertarul — comparați cu ce arată raportul Z\n5. Exportați datele și trimiteți-le contabilului dumneavoastră să confirme că poate importa în Saga\n\nDacă toți cei 5 pași funcționează fără să sunați la suport — ați găsit sistemul potrivit.\n\nfranchisetech oferă trial 15 zile după verificarea unică a cardului de 1 € și configurare ghidată în aplicație.",
       },
     ],
   },

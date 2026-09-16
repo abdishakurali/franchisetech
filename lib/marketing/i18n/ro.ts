@@ -136,7 +136,7 @@ export const ro: MarketingMessages = {
       titleAfter: " ați făcut.",
       subtitle: "Vindeți ziua, închideți casa și vedeți imediat ce a intrat, ce lipsește din stoc și ce trebuie cumpărat mâine.",
       socialProof: "Pentru proprietarii care vor control zilnic, nu rapoarte complicate la final de lună.",
-      trialNote: "Fără card necesar · Setup ghidat în aplicație · Anulați oricând",
+      trialNote: "Verificare unică de 1 € · Setup ghidat în aplicație · Anulați oricând",
       trustSignals: [
         { title: "Seară fără surprize", text: "Numerar, card și diferențe vizibile înainte să închideți locația." },
         { title: "Prima vânzare rapid", text: "Produse demo, casă deschisă și checkout ghidat într-o singură sesiune." },
@@ -255,7 +255,7 @@ export const ro: MarketingMessages = {
       label: "Cum funcționează",
       title: "Live în trei pași.",
       items: [
-        { title: "Configurare gratuită", text: "Înregistrare și produse demo — sub 60 de minute până la prima vânzare." },
+        { title: "Configurare ghidată", text: "Produse demo, deschiderea casei și prima vânzare, cu pașii explicați în aplicație." },
         { title: "Deschideți casa", text: "Porniți o sesiune și vindeți de pe orice dispozitiv." },
         { title: "Vindeți și raportați", text: "Închideți ziua cu numerar, card și TVA clare." },
       ],
@@ -324,7 +324,7 @@ export const ro: MarketingMessages = {
     faq: {
       title: "Întrebări de la proprietari",
       items: [
-        { question: "Cum funcționează trial-ul de 15 zile?", answer: "Trialul începe imediat, fără card. Nu este un abonament — plata lunară începe numai dacă alegeți un plan la final." },
+        { question: "Cum funcționează trial-ul de 15 zile?", answer: "Trialul începe după verificarea unică a cardului de 1 €. Plata lunară începe numai dacă alegeți un plan la final." },
         { question: "Am nevoie de hardware POS special?", answer: "Aplicația rulează în browser pe dispozitive compatibile. Pentru bonuri fiscale, verificăm separat casa fiscală și configurația FiscalNet." },
         { question: "Pot vedea marjele pe produsele din meniu?", answer: "Da. Costul rețetelor leagă ingredientele de prețul de vânzare — vedeți costul per porție și marja brută înainte să schimbați meniul." },
         { question: "Există preț per loc?", answer: "Nu. Personal nelimitat fără cost suplimentar per utilizator." },
@@ -446,15 +446,15 @@ export const ro: MarketingMessages = {
   },
   pricing: {
     title: "Prețuri franchisetech",
-    description: "Core costă 49 €/locație/lună, iar Operations 79 €/locație/lună. Trialul de 15 zile începe imediat, fără card.",
+    description: "Core costă 49 €/locație/lună, iar Operations 79 €/locație/lună. Trialul de 15 zile începe după verificarea unică de 1 €.",
     badge: "Prețuri simple",
     heroTitle: "Două planuri, cu preț clar pe locație.",
     heroText: "Core pentru vânzare și închidere zilnică. Operations adaugă stoc, achiziții și rețete.",
-    heroStatFrom: "Fără card necesar",
+    heroStatFrom: "Verificare unică de 1 €",
     heroStatTrial: "15 zile de probă",
     heroStatTill: "Fără contract pe termen lung",
     seeFeatures: "Vezi toate funcționalitățile",
-    freeSetupStrip: "Trial 15 zile, fără card necesar. Configurarea ghidată în aplicație este inclusă.",
+    freeSetupStrip: "Verificare unică de 1 €, apoi trial 15 zile. Configurarea ghidată în aplicație este inclusă.",
     setupFreeTitle: "Configurare gratuită în aplicație",
     setupFreeText: "Cont nou → produse demo → deschidere casă → prima vânzare. Ghid pas cu pas, fără cost.",
     embeddedSignupTitle: "Începeți astăzi",
@@ -475,7 +475,7 @@ export const ro: MarketingMessages = {
     fairnessItems: [
       "Echipă nelimitată — fără taxe per utilizator",
       "Fără lock-in hardware sau contracte de terminal",
-      "Trial 15 zile, fără card necesar",
+      "Verificare unică de 1 €, apoi trial 15 zile",
       "Anulare oricând — fără contract pe termen lung",
       "Abonații existenți păstrează tariful la schimbarea prețurilor",
     ],
@@ -495,7 +495,7 @@ export const ro: MarketingMessages = {
     },
     notIncludedTitle: "Ce nu este inclus încă",
     notIncludedText:
-      "Clientul cumpără și înregistrează imprimanta fiscală compatibilă. franchisetech se conectează prin FiscalNet și gestionează automat bonurile fiscale și rapoartele Z; facturile ANAF e-Factura se generează și se trimit din aplicație, per factură. Comenzile online și loialitatea nu sunt incluse încă.",
+      "Clientul cumpără și înregistrează imprimanta fiscală compatibilă. Conectarea FiscalNet și orice flux ANAF e-Factura depind de configurarea și verificarea integrărilor locale. Comenzile online și loialitatea nu sunt incluse încă.",
     faqTitle: "Întrebări prețuri",
     compareCompetitors: {
       title: "Cost total vs competitori (România)",
@@ -585,14 +585,14 @@ export const ro: MarketingMessages = {
     homeTeaser: {
       label: "Prețuri",
       title: "Un workspace. Un preț pe magazin.",
-      text: "De la {starter}/locație/lună. Trial 15 zile, fără card necesar. Fără contract pe termen lung.",
+      text: "De la {starter}/locație/lună. Verificare unică de 1 €, apoi trial 15 zile. Fără contract pe termen lung.",
       cta: "Vezi toate planurile",
     },
   },
   auth: {
     loginTitle: "Autentificare franchisetech",
     signupTitle: "Începeți contul gratuit",
-    signupDescription: "Configurare ghidată. Trialul de 15 zile începe imediat, fără card.",
+    signupDescription: "Configurare ghidată. Trialul de 15 zile începe după verificarea unică de 1 €.",
     signupLegal: "Prin înregistrare acceptați că franchisetech vă susține înregistrările — nu înlocuiește obligațiile legale ca operator alimentar.",
     email: "Email",
     password: "Parolă",

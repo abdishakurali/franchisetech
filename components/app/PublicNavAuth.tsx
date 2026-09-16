@@ -20,7 +20,7 @@ export function PublicNavAuth({ email, name }: { email?: string | null; name?: s
     return (
       <div className="flex items-center gap-3">
         <Link href="/login"><Button variant="ghost" size="sm">Log in</Button></Link>
-        <Link href="/signup"><Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">Start free trial</Button></Link>
+        <Link href="/signup"><Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">Începeți proba</Button></Link>
       </div>
     );
   }

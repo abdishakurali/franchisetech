@@ -6,7 +6,7 @@ type Props = {
   signupHref: string;
 };
 
-const trustBadges = ["Configurat cu FiscalNet", "TVA 21% / 11% / 5%", "Export Saga", "Funcționează pe telefon"];
+const trustBadges = ["FiscalNet, când este configurat", "Grupe TVA configurabile", "Export pentru contabil", "Funcționează pe telefon"];
 
 const pains = [
   "Închideți casa din memorie și numărați sertarul aproximativ.",
@@ -26,7 +26,7 @@ const flow = [
 const faqs = [
   [
     "Am nevoie de card la înscriere?",
-    "Nu. Trialul asistat de 15 zile începe imediat, fără card. Plata lunară începe numai dacă alegeți un plan după perioada de probă.",
+    "Trialul asistat de 15 zile începe după verificarea unică a cardului de 1 €. Plata lunară începe numai dacă alegeți un plan după perioada de probă.",
   ],
   [
     "franchisetech generează QR-ul de pe bon?",
@@ -64,7 +64,7 @@ function PrimaryCta({ signupHref, compact = false }: { signupHref: string; compa
 function TrialMicrocopy({ dark = false }: { dark?: boolean }) {
   return (
     <p className={`mt-3 text-xs leading-6 ${dark ? "text-white/60" : "text-slate-500"}`}>
-      15 zile cu configurare asistată · fără card necesar · fără plată lunară în perioada de probă · anulare oricând
+      verificare unică de 1 € · 15 zile cu configurare asistată · fără plată lunară în perioada de probă · anulare oricând
     </p>
   );
 }

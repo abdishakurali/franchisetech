@@ -183,7 +183,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Raport vânzări, raport Z și raport TVA incluse în Core (49€) — fără add-on Insights",
       "Fără taxă per angajat; personal nelimitat pe plan",
       "Stoc, NIR, rețete și rapoarte marjă pe Operations (79€) — fără salt la 99€+ doar pentru gestiune",
-      "Browser POS — trial 15 zile, fără card necesar; FiscalNet când este configurat",
+      "Browser POS — trial 15 zile după verificarea unică a cardului de 1 €; FiscalNet când este configurat",
     ],
     sections: [
       {
@@ -326,7 +326,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Comparație onestă franchisetech vs POSnet: ambele au Saga C. POSnet adaugă import automat livrare, licență definitivă și funcționare offline; franchisetech adaugă rețete cu marje și preț lunar listat.",
     h1: "franchisetech vs POSnet — comparație onestă pentru HoReCa România",
     intro:
-      "POSnet este un POS puternic pentru restaurante din România: import automat comenzi Glovo, Bolt, Wolt, integrare Saga C, NIR auto, KDS, chioșc self-ordering și funcționare offline. Licență definitivă (fără abonament lunar). franchisetech acoperă aceleași job-uri de bază — casă, stoc, Saga — cu browser cloud (fără instalare), cost rețete pe porție, marje și trial 15 zile fără card necesar, la preț lunar listat.",
+      "POSnet este un POS pentru restaurante din România, cu funcții diferite de cele oferite de franchisetech. franchisetech oferă casă, stoc și cost rețete în browser, cu preț lunar listat și trial 15 zile după verificarea unică a cardului de 1 €. Verificați funcțiile și compatibilitatea fiecărui produs înainte de alegere.",
     betterFor:
       "POSnet câștigă dacă preferați licență definitivă fără abonament lunar, aveți nevoie de funcționare offline sau chioșc self-ordering. franchisetech câștigă dacă vreți cloud fără server local de menținut, cost rețete și marje per preparat, preț lunar listat transparent și trial fără angajament.",
     competitorStrengths: [
@@ -342,7 +342,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Browser cloud — fără instalare, server local sau mentenanță IT",
       "Cost rețete per porție — știți marja brută înainte de a schimba meniul",
       "Preț lunar listat pe site: 49€ Core, 79€ Operations, 89€/locație Multi-location",
-      "Trial 15 zile, fără card necesar — prima vânzare în ore, fără proiect de implementare",
+      "Trial 15 zile după verificarea unică a cardului de 1 € — configurare ghidată în aplicație",
       "Multi-location la 89€/locație — dashboard unificat, rapoarte separate",
     ],
     sections: [
@@ -373,7 +373,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Ce are franchisetech și POSnet nu detaliază?",
         answer:
-          "franchisetech include: cost rețete per porție și marjă brută, preț lunar listat transparent pe site, browser fără instalare și trial 15 zile fără card necesar. POSnet nu detaliază pe site cost rețete sau trial gratuit — verificați cu furnizorul.",
+          "franchisetech include cost rețete per porție, preț lunar listat și trial 15 zile după verificarea unică a cardului de 1 €. Verificați direct cu fiecare furnizor disponibilitatea și condițiile funcțiilor comparate.",
       },
     ],
     related: [
@@ -390,7 +390,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Chioșc self-ordering", "Nu este inclus", "Da — disponibil la POSnet"],
       ["KDS bucătărie", "Pro", "Da — disponibil la POSnet"],
       ["Deploy", "Browser cloud — fără instalare", "Aplicație locală — necesită instalare și server"],
-      ["Trial gratuit", "15 zile, fără card necesar", "Neconfirmat — contactați furnizorul"],
+      ["Trial", "15 zile după verificarea unică de 1 €", "Contactați furnizorul pentru condiții"],
     ],
   },
   {

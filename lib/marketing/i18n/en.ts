@@ -134,7 +134,7 @@ export const en = {
       titleAfter: " where the money went.",
       subtitle: "franchisetech shows sales, cash, card, margin, and stock gaps before you go home.",
       socialProof: "For owners who want daily control, not complicated reports at month end.",
-      trialNote: "No card required · Guided in-app setup · Cancel anytime",
+      trialNote: "One-time €1 verification · Guided in-app setup · Cancel anytime",
       trustSignals: [
         { title: "No surprises at close", text: "Cash, card, and differences visible before the site closes." },
         { title: "Fast first sale", text: "Demo products, open till, and guided checkout in one session." },
@@ -252,7 +252,7 @@ export const en = {
       label: "How it works",
       title: "Live in three steps.",
       items: [
-        { title: "Free setup", text: "Sign up and demo products — under 60 minutes to your first sale." },
+        { title: "Guided setup", text: "Demo products, till opening, and your first sale, with in-app guidance." },
         { title: "Open till", text: "Start a session and sell from any device." },
         { title: "Sell & report", text: "Close the day with clear cash, card, and VAT totals." },
       ],
@@ -321,7 +321,7 @@ export const en = {
     faq: {
       title: "Questions from owners",
       items: [
-        { question: "How does the 15-day trial work?", answer: "The trial starts immediately, no card required. It's not a subscription — monthly billing begins only if you choose a plan at the end." },
+        { question: "How does the 15-day trial work?", answer: "The trial starts after a one-time €1 card verification. Monthly billing begins only if you choose a plan at the end." },
         { question: "Do I need special POS hardware?", answer: "The app runs in a browser on supported devices. Fiscal hardware and FiscalNet compatibility are checked separately." },
         { question: "Can I see margins on menu items?", answer: "Yes. Recipe costing links ingredients to sale price so you see cost per portion and gross margin before you change the menu." },
         { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
@@ -443,15 +443,15 @@ export const en = {
   },
   pricing: {
     title: "franchisetech Pricing",
-    description: "Core is €49/location/month and Operations is €79/location/month. The 15-day trial starts immediately, no card required.",
+    description: "Core is €49/location/month and Operations is €79/location/month. The 15-day trial starts after a one-time €1 verification.",
     badge: "Simple pricing",
     heroTitle: "Two plans with clear per-location pricing.",
     heroText: "Core covers sales and daily close. Operations adds stock, purchasing, and recipes.",
-    heroStatFrom: "No card required",
+    heroStatFrom: "One-time €1 verification",
     heroStatTrial: "15-day trial",
     heroStatTill: "No long-term contract",
     seeFeatures: "See all features",
-    freeSetupStrip: "Start free. In-app setup included — under an hour to your first sale.",
+    freeSetupStrip: "One-time €1 card verification, then a 15-day trial. Guided in-app setup included.",
     setupFreeTitle: "Free in-app setup",
     setupFreeText: "New account → demo products → open till → first sale. Step-by-step guide, no cost.",
     embeddedSignupTitle: "Get started today",
@@ -472,7 +472,7 @@ export const en = {
     fairnessItems: [
       "Unlimited staff — no per-user fees",
       "No hardware lock-in or terminal contracts",
-      "15-day trial, no card required",
+      "One-time €1 verification, then a 15-day trial",
       "Cancel anytime — no long-term lock-in",
       "Existing subscribers keep their rate when prices change",
     ],
@@ -492,7 +492,7 @@ export const en = {
     },
     notIncludedTitle: "What is not included yet",
     notIncludedText:
-      "You are responsible for purchasing and registering a compatible fiscal printer. franchisetech connects to it via FiscalNet and handles fiscal receipts and Z-reports automatically; ANAF e-Factura invoices are generated and submitted from the app, per invoice. Online ordering and loyalty are not included yet.",
+      "You are responsible for purchasing and registering a compatible fiscal printer. FiscalNet connectivity and any ANAF e-Factura flow depend on verified local integration setup. Online ordering and loyalty are not included yet.",
     faqTitle: "Pricing FAQ",
     compareCompetitors: {
       title: "Total cost vs competitors (Romania)",
@@ -581,14 +581,14 @@ export const en = {
     homeTeaser: {
       label: "Pricing",
       title: "One workspace. One price per shop.",
-      text: "From {starter}/location/month. The 15-day trial starts immediately, no card required. No long-term contract.",
+      text: "From {starter}/location/month. One-time €1 verification, then a 15-day trial. No long-term contract.",
       cta: "See all plans",
     },
   },
   auth: {
     loginTitle: "Sign in to franchisetech",
     signupTitle: "Start your free account",
-    signupDescription: "Guided setup. The 15-day trial starts immediately, no card required.",
+    signupDescription: "Guided setup. The 15-day trial starts after a one-time €1 verification.",
     signupLegal: "By signing up you agree that franchisetech supports your records — it does not replace your legal obligations as a food business operator.",
     email: "Email",
     password: "Password",

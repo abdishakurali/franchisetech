@@ -72,7 +72,7 @@ export function buildSetupSteps(signals: SetupSignals): SetupStep[] {
           id: "fiscal_setup",
           title: "Configure fiscal receipts",
           text: "Connect FiscalNet and verify payment and VAT mappings before the first real sale.",
-          href: "/app/settings?tab=integrations",
+          href: "/app/settings?tab=fiscal",
           label: "Configure FiscalNet",
           done: Boolean(signals.fiscalConfigured),
           status: signals.fiscalConfigured ? "FiscalNet connected" : "Not configured",
