@@ -68,11 +68,18 @@ the `production-new` environment (not repository variables):
 - `DEPLOY_SSH_KEY` — private key restricted to that deployment user
 - `DEPLOY_KNOWN_HOSTS` — the server SSH host key from `ssh-keyscan`
 - `DEPLOY_PATH` — `/srv/franchise`
+- `NEXT_PUBLIC_SUPABASE_URL` — the chosen isolated project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — its publishable key
 
 The server's `.env.production` is created once from
 `server-config-template.txt` and is never uploaded by Actions. Use the
 workflow's required `DEPLOY` confirmation input only after DNS points
 `new.franchisetech.ro` to this host and the Supabase redirect URLs include it.
+
+`Publish container image` is a separate manual workflow. It sends the supplied
+public Supabase configuration into the build, authenticates to ECR with GitHub
+OIDC (no AWS access key), and publishes an immutable commit-SHA tag to
+`841125194442.dkr.ecr.eu-north-1.amazonaws.com/franchisetech-new`.
 
 ## Cost and capacity
 
