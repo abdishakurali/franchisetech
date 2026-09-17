@@ -4,6 +4,10 @@ This app runs as a standalone Next.js container. A shared Caddy Docker proxy
 receives ports 80 and 443 and routes each hostname to the matching container.
 Projects do not publish their own host ports.
 
+This release uses `new.franchisetech.ro` as an isolated hostname. It must not
+replace `franchisetech.ro`, point at Dolcenera, or reuse a production database
+without an explicit migration and approval.
+
 The current AWS CLI account has one running instance: `Garaad`
 (`i-0f8ca0d70abdf36c9`) in `us-east-1`, type `t2.micro`. Confirm its current
 workloads before installing Docker or Caddy.
@@ -48,6 +52,25 @@ docker compose --env-file .env.production up -d --build
 
 Record the current image before an update with `docker image ls`. To roll back,
 check out the prior Git commit and run the same Compose command.
+
+## GitHub Actions
+
+CI runs lint, unit tests, TypeScript, and a production build on every pull
+request and push to `main`. CD is intentionally manual (`Actions → Deploy new.franchisetech.ro`) so a merge cannot publish unexpectedly.
+
+Before allowing a manual deploy, add these **GitHub environment secrets** to
+the `production-new` environment (not repository variables):
+
+- `DEPLOY_HOST` — the EC2 public IPv4 or hostname
+- `DEPLOY_USER` — the non-root deployment user
+- `DEPLOY_SSH_KEY` — private key restricted to that deployment user
+- `DEPLOY_KNOWN_HOSTS` — the server SSH host key from `ssh-keyscan`
+- `DEPLOY_PATH` — `/srv/franchise`
+
+The server's `.env.production` is created once from
+`server-config-template.txt` and is never uploaded by Actions. Use the
+workflow's required `DEPLOY` confirmation input only after DNS points
+`new.franchisetech.ro` to this host and the Supabase redirect URLs include it.
 
 ## Cost and capacity
 

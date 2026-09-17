@@ -1,7 +1,8 @@
 # Copy this file to .env.production on the server. Do not commit the real file.
-APP_DOMAIN=staging.example.com
-NEXT_PUBLIC_APP_URL=https://staging.example.com
-NEXT_PUBLIC_SITE_URL=https://staging.example.com
+# New, isolated deployment. Do not point these at franchisetech.ro or Dolcenera.
+APP_DOMAIN=new.franchisetech.ro
+NEXT_PUBLIC_APP_URL=https://new.franchisetech.ro
+NEXT_PUBLIC_SITE_URL=https://new.franchisetech.ro
 NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_PUBLISHABLE_KEY
 SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY

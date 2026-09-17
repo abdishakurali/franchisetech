@@ -5,7 +5,7 @@ env_file="${1:-.env.production}"
 required=(APP_DOMAIN NEXT_PUBLIC_APP_URL NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY SUPABASE_SERVICE_ROLE_KEY CRON_SECRET)
 
 if [[ ! -f "$env_file" ]]; then
-  echo "Missing $env_file. Copy .env.production.example and set its values."
+  echo "Missing $env_file. Copy server-config-template.txt and set its values."
   exit 1
 fi
 
