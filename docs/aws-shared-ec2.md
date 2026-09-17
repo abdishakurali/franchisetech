@@ -83,7 +83,14 @@ OIDC (no AWS access key), and publishes an immutable commit-SHA tag to
 
 ## Cost and capacity
 
-A public IPv4 address costs $0.005/hour, about $3.65 in a 30-day month.
-Instance, EBS, data transfer, snapshots and optional Route 53 are extra. A
-`t2.micro` has 1 GiB RAM: build images off-host or add swap before running
-several builds. Monitor capacity with `docker stats`.
+The monthly infrastructure ceiling for this host is **€20**. Use exactly one
+`t4g.small` (2 GiB ARM) with a 20 GB gp3 EBS volume and one public IPv4. At
+730 hours this is about $12.56 for compute, $3.65 for IPv4, and $1.67 for EBS
+(about $17.88 total before bandwidth). Build images in GitHub Actions; do not
+build on the host. Do not add a NAT gateway, load balancer, RDS instance,
+Elastic IP, extra volumes, or a second instance under this budget.
+
+This is a spending target, not an absolute AWS billing cap: transfer, snapshots
+and ECR storage can add charges. Tag the instance `Project=FranchiseTechNew`
+at launch and create a tag-filtered AWS Budget alert at $18 and $20. Monitor
+capacity with `docker stats`.
