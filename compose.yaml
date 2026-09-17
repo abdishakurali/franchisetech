@@ -1,0 +1,44 @@
+services:
+  franchise:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+        NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: ${NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN:-}
+        NEXT_PUBLIC_POSTHOG_HOST: ${NEXT_PUBLIC_POSTHOG_HOST:-}
+        NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID:-}
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
+        NEXT_PUBLIC_META_PIXEL_ID: ${NEXT_PUBLIC_META_PIXEL_ID:-}
+        NEXT_PUBLIC_LINKEDIN_PARTNER_ID: ${NEXT_PUBLIC_LINKEDIN_PARTNER_ID:-}
+        NEXT_PUBLIC_ENABLE_GOOGLE_AUTH: ${NEXT_PUBLIC_ENABLE_GOOGLE_AUTH:-false}
+        NEXT_PUBLIC_DEMO_BOOKING_URL: ${NEXT_PUBLIC_DEMO_BOOKING_URL:-}
+        NEXT_PUBLIC_LEAN_PRODUCT_SCOPE: ${NEXT_PUBLIC_LEAN_PRODUCT_SCOPE:-true}
+    env_file: .env.production
+    restart: unless-stopped
+    expose:
+      - "3000"
+    volumes:
+      - franchise-backups:/data/backups
+    networks:
+      - edge
+    labels:
+      caddy: ${APP_DOMAIN}
+      caddy.reverse_proxy: "{{upstreams 3000}}"
+      caddy.encode: zstd gzip
+      caddy.header: "-Server"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  franchise-backups:
+
+networks:
+  edge:
+    external: true

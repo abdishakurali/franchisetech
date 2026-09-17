@@ -15,7 +15,7 @@ import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendC
 
 type Preview = { metrics: Array<[string, string]>; rows: Array<[string, string]>; error?: boolean };
 
-export default async function ReportsHubPage({ searchParams }: { searchParams: Promise<{ report?: string }> }) {
+export default async function ReportsHubPage({ searchParams }: { searchParams: Promise<{ report?: string; period?: string }> }) {
   const { countryCode, profileLocale, supabase, orgId, currency, membership } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const orgModules = await fetchOrgModuleFlags(supabase, orgId);
@@ -34,10 +34,12 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
     loyaltyVisible: Boolean(settings?.loyalty_enabled) && loyaltyEntitled,
   });
   const core = visible.filter((report) => CORE_REPORTS.some((key) => report.href === `/app/reports/${key}`));
-  const selected = selectCoreReport((await searchParams).report, core.map((report) => report.href));
+  const params = await searchParams;
+  const period = params.period === "today" || params.period === "week" ? params.period : "month";
+  const selected = selectCoreReport(params.report, core.map((report) => report.href));
   const active = core.find((report) => report.href === `/app/reports/${selected}`) ?? core[0];
   const now = new Date();
-  const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString().slice(0, 10);
+  const from = new Date(period === "today" ? Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) : period === "week" ? Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6) : Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString().slice(0, 10);
   const to = now.toISOString().slice(0, 10);
   const start = `${from}T00:00:00.000Z`;
   const end = `${to}T23:59:59.999Z`;
@@ -109,26 +111,26 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
     preview = { error: Boolean(error), metrics: [["Rețete recente", String(rows.length)]], rows: rows.slice(0, 5) };
   }
 
-  return <div className="space-y-6 p-4 sm:p-6">
-    <div><h1 className="text-3xl font-extrabold tracking-tight text-[#0D0F0E]">{t.reports.pageTitle}</h1><p className="mt-1 text-sm text-slate-600">{core.length} rapoarte disponibile · restul rămân accesibile direct</p></div>
-    <div className="grid gap-4 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)]">
-      <nav aria-label="Alege raportul" className="space-y-2">{core.map((report) => {
+  return <div className="min-h-full bg-[#F3F0E8] p-4 sm:p-6">
+    <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+      <div><div className="mb-5"><h1 className="font-[family-name:var(--font-display)] text-[26px] font-bold tracking-[-0.025em] text-[#0D0F0E]">{t.reports.pageTitle}</h1><p className="mt-1 text-sm text-[#78786F]">{core.length} rapoarte · o singură sursă de adevăr</p></div>
+      <nav aria-label="Alege raportul" className="overflow-hidden rounded-[10px] border border-[#DFDCD2] bg-white">{core.map((report) => {
         const isActive = report.href === active?.href;
-        return <Link key={report.href} href={`/app/reports?report=${report.href.split("/").pop()}`} aria-current={isActive ? "page" : undefined} className={`flex min-h-16 items-center gap-3 rounded-[10px] border px-4 py-3 transition-colors ${isActive ? "border-blue-600 bg-blue-50" : "border-[#DFDCD2] bg-white hover:border-blue-300"}`}>
-          <span className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${report.color}`}><report.icon className="size-5" /></span>
+        return <Link key={report.href} href={`/app/reports?report=${report.href.split("/").pop()}&period=${period}`} aria-current={isActive ? "page" : undefined} className={`flex min-h-[76px] items-center justify-between gap-3 border-b border-[#DFDCD2] px-[18px] py-4 last:border-b-0 transition-colors ${isActive ? "border-l-[3px] border-l-[#165DFC] bg-[#E8EFFE] text-[#0B47CC]" : "text-[#0D0F0E] hover:bg-[#FAF8F4]"}`}>
           <span className="min-w-0"><span className="block font-semibold text-[#0D0F0E]">{report.title}</span><span className="block text-xs text-slate-600">{report.desc}</span></span>
         </Link>;
-      })}</nav>
+      })}</nav></div>
       <section aria-label={active?.title ?? "Previzualizare raport"} className="min-w-0 rounded-[10px] border border-[#DFDCD2] bg-white p-4 sm:p-6">
         {active ? <>
-          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#DFDCD2] pb-4"><div><h2 className="text-xl font-extrabold text-[#0D0F0E]">{active.title}</h2><p className="text-sm text-slate-600">{active.desc}</p></div><Link href={active.href} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#165DFC] px-4 text-sm font-semibold text-white hover:bg-blue-700">Deschide raportul <ArrowUpRight className="size-4" /></Link></div>
+          <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-[#0D0F0E]">{active.title}</h2><p className="mt-1 text-[13px] text-[#78786F]">{active.desc}</p></div>{(selected === "sales" || selected === "vat") && <nav aria-label="Perioada raportului" className="flex gap-1.5">{([["today", "Azi"], ["week", "7 zile"], ["month", "Luna aceasta"]] as const).map(([value, label]) => <Link key={value} href={`/app/reports?report=${selected}&period=${value}`} aria-current={period === value ? "true" : undefined} className={`rounded-md border px-3 py-2 text-xs font-semibold ${period === value ? "border-[#165DFC] bg-[#E8EFFE] text-[#0B47CC]" : "border-[#DFDCD2] text-[#78786F]"}`}>{label}</Link>)}</nav>}</div>
           {preview.error ? <p role="alert" className="py-8 text-sm text-red-700">Datele raportului nu au putut fi încărcate. Deschide raportul pentru detalii.</p> : <>
             <p className="mt-4 text-xs font-medium uppercase tracking-wide text-slate-500">Date reale · {selected === "z-report" ? "ultimele 5 închideri" : selected === "stock" ? "stoc curent" : selected === "purchases" || selected === "margins" ? "ultimele 100 înregistrări" : `${from} – ${to}`}</p>
-            <div className="mt-3 grid grid-cols-2 gap-3 xl:grid-cols-4">{preview.metrics.map(([label, value]) => <div key={label} className="rounded-lg bg-slate-50 p-3"><p className="text-xs text-slate-600">{label}</p><p className="mt-1 text-right font-mono text-lg font-bold tabular-nums text-[#0D0F0E]">{value}</p></div>)}</div>
+            <div className="mt-5 grid grid-cols-2 gap-px border border-[#DFDCD2] bg-[#DFDCD2] xl:grid-cols-4">{preview.metrics.map(([label, value]) => <div key={label} className="bg-white p-4"><p className="font-mono text-[10px] uppercase tracking-[0.08em] text-[#78786F]">{label}</p><p className="mt-1 break-words font-[family-name:var(--font-display)] text-[23px] font-semibold tracking-tight tabular-nums text-[#0D0F0E]">{value}</p></div>)}</div>
             {selected === "sales" && <><h3 className="mt-6 text-sm font-semibold text-[#0D0F0E]">Vânzări pe zi</h3><ReportsTrendChart days={salesDays} currency={currency} /></>}
             <h3 className="mt-6 text-sm font-semibold text-[#0D0F0E]">{selected === "sales" ? "Top produse" : "Detalii recente"}</h3>
             {preview.rows.length ? <div className="mt-2 divide-y divide-[#DFDCD2]">{preview.rows.map(([label, value], index) => <div key={`${label}-${index}`} className="flex justify-between gap-3 py-3 text-sm"><span className="text-slate-700">{label}</span><span className="text-right font-mono font-medium tabular-nums text-[#0D0F0E]">{value}</span></div>)}</div> : <p className="mt-3 text-sm text-slate-500">Nu există date pentru această perioadă.</p>}
           </>}
+          <div className="mt-5 flex flex-wrap gap-2.5 border-t border-[#DFDCD2] pt-4">{selected === "sales" && <a href={`/api/reports/sales/pdf?from=${from}&to=${to}`} className="inline-flex min-h-[42px] items-center rounded-lg bg-[#165DFC] px-[18px] text-sm font-bold text-white">Descarcă PDF</a>}<Link href={`${active.href}?from=${from}&to=${to}`} className="inline-flex min-h-[42px] items-center gap-2 rounded-lg border border-[#DFDCD2] px-[18px] text-sm font-semibold text-[#0D0F0E]">Deschide raportul <ArrowUpRight className="size-4" /></Link></div>
         </> : <p className="text-sm text-slate-600">Nu există rapoarte disponibile pentru acest cont.</p>}
       </section>
     </div>

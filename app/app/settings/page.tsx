@@ -36,8 +36,7 @@ import { CuiLookupCard } from "@/components/app/CuiLookupCard";
 import { OwnerDigestCard, type OwnerDigestTeamMember } from "@/components/app/OwnerDigestCard";
 import { BillingPanel } from "@/components/billing/BillingPanel";
 import { CheckCircle2, Circle, AlertCircle, ExternalLink } from "lucide-react";
-import { SettingsOverview } from "@/components/app/SettingsOverview";
-import { SettingsCoreLists } from "@/components/app/SettingsCoreLists";
+import { SettingsWorkspace as SettingsCoreLists } from "@/components/app/SettingsWorkspace";
 
 const COUNTRY_OPTIONS = [
   { code: "IE", label: "Ireland" },
@@ -81,6 +80,7 @@ const TAB_ALIASES: Record<string, string> = {
   anaf: "fiscal",
   products: "categories",
   operations: "categories",
+  integrations: "fiscal",
   general: "business",
 };
 
@@ -110,6 +110,7 @@ export default async function SettingsPage({
   const params = await searchParams;
   const rawTab = params?.tab ?? "overview";
   const activeTab = TAB_ALIASES[rawTab] ?? rawTab;
+  const coreTab = ["overview", "units", "payment-methods", "categories", "location", "fiscal"].includes(activeTab);
   const lockedModule = params?.locked ?? null;
   const lockedMessage = params?.msg ? decodeURIComponent(params.msg) : null;
 
@@ -217,7 +218,7 @@ export default async function SettingsPage({
   const customUnits = customUnitRows ?? [];
 
   // Referrals
-  const referral = await ensureReferralCode(orgId).catch(() => ({
+  const referral = await ensureReferralCode(orgId, false).catch(() => ({
     available: false, link: null, code: null, creditMonths: 0, daysLeft: null, referrals: [],
   }));
 
@@ -342,19 +343,390 @@ export default async function SettingsPage({
     ...(isRO && (fiscalnetEnabled || efacturaEnabled || sagaInstalled)
       ? [{ id: "fiscal", label: "Fiscal" }]
       : []),
-    { id: "integrations", label: "Marketplace" },
+    { id: "marketplace", label: "Marketplace" },
     { id: "notifications",label: isRO ? "Notificări" : t.settings.tabNotifications },
     { id: "billing",      label: t.settings.tabBilling },
     { id: "team", label: isRO ? "Echipă" : "Team", href: "/app/settings/team" },
     ...(isRO ? [{ id: "data-repair", label: "Controlul datelor", href: "/app/settings/data-repair" }] : []),
   ];
 
+  const unitsEditor = (
+<div className="space-y-6">
+          <SettingsSection
+            title={isRO ? "Unități de măsură" : "Units of measurement"}
+            description={
+              isRO
+                ? "Unitățile standard sunt fixe — un articol precum „Buc”/„Units” care ar duplica una dintre ele nu mai poate fi introdus aici."
+                : "The standard set is fixed — a free-text entry that would duplicate one of these (like the old \"Buc\"/\"Units\" split) is no longer offered here."
+            }
+          >
+            <div className="flex flex-wrap gap-2">
+              {DEFAULT_OPERATIONAL_UNITS.map((u) => (
+                <Badge key={u} variant="outline" className="text-slate-600">{unitLabel(u, isRO ? "ro" : "en")}</Badge>
+              ))}
+            </div>
+            {customUnits.length > 0 ? (
+              <div className="mt-4 border-t border-slate-100 pt-4">
+                <p className="text-xs text-slate-500 mb-2">{isRO ? "Unități personalizate" : "Custom units"}</p>
+                <div className="flex flex-wrap gap-2">
+                  {customUnits.map((u) => (
+                    <Badge key={u.id} variant="outline" className="text-slate-600">
+                      {u.name}{u.abbreviation ? ` (${u.abbreviation})` : ""}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </SettingsSection>
+        </div>
+  );
+
+  const paymentsEditor = (
+<div className="space-y-6">
+          <SettingsListSection
+            title={isRO ? "Metode de plată" : "Payment methods"}
+            description={fiscalnetEnabled ? "FiscalNet enabled — assign a payment code (1–8) to each method." : undefined}
+            rows={((paymentMethods ?? []) as Array<{ id: string; name: string; type: string; active: boolean; fiscalnet_code?: number | null }>).map((m) => ({
+              id: m.id,
+              primary: m.name,
+              secondary: `${m.type.charAt(0).toUpperCase()}${m.type.slice(1)}${fiscalnetEnabled && m.fiscalnet_code != null ? ` · FN code ${m.fiscalnet_code}` : ""}`,
+              badge: { label: m.active ? "Active" : "Inactive", active: m.active },
+              editValues: { name: m.name, type: m.type, fiscalnet_code: m.fiscalnet_code ?? "", active: m.active },
+            }))}
+            canEdit={canEdit}
+            addFields={[
+              { key: "name", label: "Name", type: "text", placeholder: "e.g. Tichete masă" },
+              { key: "type", label: "Type", type: "select", options: METHOD_TYPE_OPTIONS },
+              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: "FiscalNet code", type: "select" as const, options: FISCALNET_CODE_OPTIONS }] : []),
+            ]}
+            editFields={[
+              { key: "name", label: "Name", type: "text" },
+              { key: "type", label: "Type", type: "select", options: METHOD_TYPE_OPTIONS },
+              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: "FiscalNet code", type: "select" as const, options: FISCALNET_CODE_OPTIONS }] : []),
+              { key: "active", label: "Active", type: "toggle" },
+            ]}
+            addDefaults={{ name: "", type: "cash", fiscalnet_code: "", active: true }}
+            addAction={addPaymentMethod as unknown as (fd: FormData) => Promise<void>}
+            updateAction={updatePaymentMethod as unknown as (fd: FormData) => Promise<void>}
+            deleteAction={deletePaymentMethod as unknown as (fd: FormData) => Promise<void>}
+            addLabel="+ Add payment method"
+            emptyLabel="No payment methods yet."
+          />
+        </div>
+  );
+
+  const locationEditor = (
+<div className="space-y-6">
+          <SettingsSection
+            title={isRO ? "Locație" : "Location"}
+            description={
+              hasMultipleSites
+                ? undefined
+                : isRO
+                  ? "O singură locație — selectorul de locații apare automat când există o a doua."
+                  : "One location — a location switcher appears automatically once a second one exists."
+            }
+          >
+            {primarySite ? (
+              canEdit ? (
+                <form action={updateSite as unknown as (fd: FormData) => Promise<void>} className="grid gap-3 sm:grid-cols-3 sm:items-end">
+                  <input type="hidden" name="id" value={primarySite.id} />
+                  <div><Label>{isRO ? "Nume" : "Name"}</Label><Input name="name" defaultValue={primarySite.name} required /></div>
+                  <div><Label>{isRO ? "Adresă" : "Address"}</Label><Input name="address" defaultValue={primarySite.address ?? ""} /></div>
+                  <div><Label>{isRO ? "Oraș" : "City"}</Label><Input name="city" defaultValue={primarySite.city ?? ""} /></div>
+                  <Button type="submit" variant="outline" size="sm" className="sm:col-span-3 sm:w-fit">
+                    {isRO ? "Salvează" : "Save"}
+                  </Button>
+                </form>
+              ) : (
+                <div className="text-sm">
+                  <p className="font-medium">{primarySite.name}</p>
+                  <p className="text-slate-500">{[primarySite.address, primarySite.city].filter(Boolean).join(", ") || "—"}</p>
+                </div>
+              )
+            ) : (
+              <p className="text-sm text-slate-400">{isRO ? "Nicio locație configurată." : "No location configured."}</p>
+            )}
+          </SettingsSection>
+        </div>
+  );
+
+  const categoriesEditor = (
+<div className="space-y-6">
+          {(["inventory", "pos"] as const).map((scope) => {
+            const scopeCats = (categories ?? []).filter(
+              (c) =>
+                (c as { category_type?: string }).category_type === scope ||
+                ((c as { category_type?: string }).category_type === "both" && scope === "pos")
+            ) as Array<{ id: string; name: string; color: string | null; sort_order: number | null; category_type?: string }>;
+            const title =
+              scope === "inventory"
+                ? (t.settings.categoryInventory ?? "Inventory categories")
+                : (t.settings.categoryPos ?? "POS categories");
+            const typeOptions = [
+              { value: "pos", label: t.settings.categoryPos },
+              { value: "inventory", label: t.settings.categoryInventory },
+            ];
+            const rows = scopeCats.map((c) => ({
+              id: c.id,
+              primary: c.name,
+              secondary: `Sort ${c.sort_order ?? 0}`,
+              editValues: {
+                name: c.name,
+                color: c.color ?? "#64748b",
+                sort_order: c.sort_order ?? 0,
+                category_type: c.category_type === "both" ? scope : (c.category_type ?? scope),
+              },
+            }));
+            return (
+              <SettingsListSection
+                key={scope}
+                title={title}
+                rows={rows}
+                canEdit={canEdit}
+                addFields={[
+                  { key: "name", label: "Name", type: "text", placeholder: scope === "inventory" ? "e.g. MATERIA PRIMA" : "e.g. Hot Drinks" },
+                  { key: "color", label: "Colour", type: "color" },
+                  { key: "sort_order", label: "Sort order", type: "number", placeholder: "1", className: "w-20" },
+                ]}
+                editFields={[
+                  { key: "name", label: "Name", type: "text" },
+                  { key: "color", label: "Colour", type: "color" },
+                  { key: "sort_order", label: "Sort", type: "number", className: "w-20" },
+                  { key: "category_type", label: t.settings.type, type: "select", options: typeOptions },
+                ]}
+                hiddenAddValues={{ category_type: scope }}
+                addDefaults={{ name: "", color: "#2563eb", sort_order: "" }}
+                addAction={addCategory as unknown as (fd: FormData) => Promise<void>}
+                updateAction={updateCategory as unknown as (fd: FormData) => Promise<void>}
+                deleteAction={deleteCategory as unknown as (fd: FormData) => Promise<void>}
+                addLabel="Add category"
+                emptyLabel="No categories yet."
+              />
+            );
+          })}
+        </div>
+  );
+
+  const fiscalEditor = (
+<div className="space-y-6">
+
+          {/* Measured history, not just the toggle. A "fiscalnet_enabled: true"
+              checkbox with zero receipt attempts ever recorded is a setting
+              contradicting its own history — this says so instead of letting
+              the toggle alone imply it's working. */}
+          {fiscalnetEnabled && (
+          <Card className={fiscalReceiptAttempts === 0 ? "border-amber-200 bg-amber-50" : undefined}>
+            <CardHeader>
+              <CardTitle>Istoric FiscalNet</CardTitle>
+              <CardDescription>
+                {fiscalReceiptAttempts === 0
+                  ? "FiscalNet este activat, dar nu există nicio încercare de emitere bon fiscal înregistrată."
+                  : "Activitate măsurată, nu doar starea conexiunii."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-3 sm:grid-cols-4 text-sm">
+                <div>
+                  <p className="text-slate-500">Încercări bon fiscal</p>
+                  <p className={`font-medium ${fiscalReceiptAttempts === 0 ? "text-amber-700" : ""}`}>{fiscalReceiptAttempts}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Ultima încercare</p>
+                  <p className="font-medium">
+                    {fiscalLastAttemptAt
+                      ? `${new Date(fiscalLastAttemptAt).toLocaleString("ro-RO")} (${fiscalLastAttemptStatus ?? "—"})`
+                      : "Niciodată"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Sesiuni închise</p>
+                  <p className="font-medium">{sessionsClosedCount}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Rapoarte Z generate</p>
+                  <p className="font-medium">
+                    {zReportsDoneCount}
+                    {lastZReportAt ? ` (ultimul: ${new Date(lastZReportAt).toLocaleDateString("ro-RO")})` : ""}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          )}
+
+          {efacturaEnabled && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                e-Factura
+                {anafConnected ? (
+                  <Badge className="bg-green-100 text-green-800 border-0 text-xs">Conectat</Badge>
+                ) : (
+                  <Badge className="bg-red-100 text-red-800 border-0 text-xs">Neconectat</Badge>
+                )}
+              </CardTitle>
+              <CardDescription>
+                Obligatorie pentru toate firmele românești din ianuarie 2025.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg bg-blue-50 border border-blue-100 p-4 text-sm text-blue-800 space-y-1">
+                <p className="font-medium">De știut:</p>
+                <p>Fiecare factură B2B trebuie transmisă în SPV în <strong>5 zile lucrătoare</strong>. Amenda pentru netransmitere: <strong>1.000–2.500 lei per factură</strong>.</p>
+              </div>
+              {anafConnected ? (
+                <div className="flex items-center gap-2 text-sm text-green-700">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Conectat la ANAF SPV — facturile pot fi transmise automat.
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-3 items-center">
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <AlertCircle className="h-4 w-4 text-amber-500" />
+                    Neconectat la ANAF SPV
+                  </div>
+                  <Link href="/app/settings?tab=marketplace">
+                    <Button size="sm">Conectează cu ANAF SPV &rarr;</Button>
+                  </Link>
+                </div>
+              )}
+              <Link
+                href="/help/romania-efactura"
+                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
+              >
+                Ghid complet e-Factura <ExternalLink className="h-3 w-3" />
+              </Link>
+            </CardContent>
+          </Card>
+          )}
+
+          {efacturaEnabled && (
+          <AnafSettingsCard
+            canEdit={canEdit}
+            anafConnected={anafConnected}
+            anafCif={anafCif}
+            anafVatRegistered={anafVatRegistered}
+            anafAuthUrl={anafAuthUrl}
+          />
+          )}
+
+          {sagaInstalled && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Contabilitate</CardTitle>
+              <CardDescription>Configurare Saga, bon de consum colectiv, metodă de calcul CMP.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-900">Configurare contabil (Saga, CMP, coduri)</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{accountantStepsDone}/4 pași completați</p>
+                </div>
+                <Link href="/app/settings/accountant">
+                  <Button variant="outline" size="sm">Configurare &rarr;</Button>
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {[
+                  { label: "CUI firmă", done: !!fiscalnetCif },
+                  { label: "Cod gestiune Saga", done: !!sagaGestiuneCode },
+                  { label: "Coduri articole produse", done: sagaProductCount > 0 },
+                  { label: "Documente legale semnate", done: false },
+                ].map(({ label, done }) => (
+                  <div key={label} className="flex items-center gap-1.5">
+                    {done
+                      ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
+                      : <Circle className="h-3.5 w-3.5 text-slate-300 shrink-0" />}
+                    <span className={done ? "text-slate-700" : "text-slate-400"}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          )}
+
+          {sagaInstalled && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Bon de Consum Colectiv</CardTitle>
+              <CardDescription>Formular 14-3-4/aA — OMFP 2634/2015</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid gap-3 sm:grid-cols-3 text-sm">
+                <div>
+                  <p className="text-slate-500">Serie numere</p>
+                  <p className="font-medium">
+                    {bcCount > 0
+                      ? `BC-${new Date().getFullYear()}-000001 — ${latestBcNumber ?? "—"}`
+                      : "Niciun bon generat încă"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Bonuri generate {new Date().getFullYear()}</p>
+                  <p className="font-medium">{bcCount}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Metodă evaluare stoc</p>
+                  <Badge className="bg-blue-100 text-blue-800 border-0 mt-1">CMP rulant</Badge>
+                </div>
+              </div>
+              <div className="pt-2 border-t border-slate-100">
+                <Link href="/app/reports/consum" className="text-sm text-blue-600 hover:underline">
+                  Descarcă bon de consum &rarr;
+                </Link>
+              </div>
+              <div className="pt-1">
+                <Link href="/app/settings/accountant?tab=checklist" className="text-sm text-blue-600 hover:underline">
+                  Descarcă proceduri interne &rarr;
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+          )}
+
+          {fiscalnetEnabled && (
+          <FiscalNetSettingsCard
+            orgId={orgId}
+            enabled={Boolean(orgRow?.fiscalnet_enabled ?? false)}
+            mockMode={(orgRow?.fiscalnet_mock_mode as boolean) !== false}
+            connectionMode={((orgRow?.fiscalnet_connection_mode as string) === "file" ? "file" : "api")}
+            apiHost={(orgRow?.fiscalnet_api_host as string) || "http://localhost:65400"}
+            bonuriPath={(orgRow?.fiscalnet_bonuri_path as string) || null}
+            raspunsPath={(orgRow?.fiscalnet_raspuns_path as string) || null}
+            autoPrint={Boolean(orgRow?.fiscalnet_auto_print ?? true)}
+            askBeforePrint={Boolean(orgRow?.fiscalnet_ask_before_print ?? false)}
+            manualOnly={Boolean(orgRow?.fiscalnet_manual_only ?? false)}
+            timeoutMs={Number(orgRow?.fiscalnet_timeout_ms ?? 30000)}
+            retryCount={Number(orgRow?.fiscalnet_retry_count ?? 2)}
+            cif={(anafCif || fiscalnetCif) || null}
+            operatorCode={(orgRow?.fiscalnet_operator_code as string) || "1"}
+            vatGroups={(orgRow?.fiscalnet_vat_groups as import("@/lib/fiscalnet/types").VatGroup[]) ?? []}
+            paymentTypeMap={(orgRow?.fiscalnet_payment_type_map as Record<string, import("@/lib/fiscalnet/types").FiscalPaymentCode>) ?? {}}
+          />
+          )}
+
+          {!efacturaEnabled && !fiscalnetEnabled && !sagaInstalled && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Instalează din Marketplace</CardTitle>
+                <CardDescription>Alege e-Factura, FiscalNet sau Saga doar dacă le folosești.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href="/app/settings?tab=marketplace">
+                  <Button>Deschide Marketplace</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+  );
+
   return (
-    <div className="settings-page-wrapper mx-auto max-w-5xl p-4 sm:p-8">
+    <div className="settings-page-wrapper mx-auto min-h-full w-full max-w-[1280px] bg-[#FAF8F4] p-4 sm:p-6">
       <div className="settings-page-heading mb-8">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-blue-700">Workspace</p>
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-950">{t.settings.title}</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{t.settings.subtitleSimple}</p>
+        <h1 className="text-[26px] font-bold tracking-[-0.025em] text-[#0D0F0E]">{t.settings.title}</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{org?.name ?? t.settings.subtitleSimple}{isRO ? ` · ${anafVatRegistered ? "plătitor de TVA" : "neplătitor de TVA"}` : ""}</p>
       </div>
 
       {vatReviewCount > 0 && (
@@ -394,39 +766,35 @@ export default async function SettingsPage({
             <CardDescription>{lockedMessage}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/app/settings?tab=integrations">
+            <Link href="/app/settings?tab=marketplace">
               <Button variant="outline">Deschide Marketplace</Button>
             </Link>
           </CardContent>
         </Card>
       ) : null}
 
-      <SettingsTabNav tabs={tabs} />
+      {!coreTab && <SettingsTabNav tabs={tabs} />}
+      {coreTab && <div className="mb-5 flex justify-end"><Link href="?tab=business" className="text-sm font-medium text-[#5B5D57] underline underline-offset-4">Firmă, TVA și cont</Link></div>}
 
-      {activeTab === "overview" && (
+      {coreTab && (
         <SettingsCoreLists
           locale={locale}
+          initialSection={activeTab}
+          editors={{ units: unitsEditor, payments: paymentsEditor, categories: categoriesEditor, location: locationEditor, fiscal: isRO ? fiscalEditor : null }}
+          canEdit={canEdit}
           units={DEFAULT_OPERATIONAL_UNITS.map((u) => unitLabel(u, isRO ? "ro" : "en"))}
           customUnits={customUnits.map((u) => `${u.name}${u.abbreviation ? ` (${u.abbreviation})` : ""}`)}
           payments={((paymentMethods ?? []) as Array<{ name: string; type: string; active: boolean }>).map((m) => ({ name: m.name, type: m.type, active: m.active }))}
           categories={(categories ?? []).map((c) => c.name as string)}
           location={primarySite ? `${primarySite.name}${primarySite.city ? ` · ${primarySite.city}` : ""}` : (isRO ? "Nicio locație" : "No location")}
-          fiscal={{ configured: fiscalnetEnabled, attempts: fiscalReceiptAttempts, sessions: sessionsClosedCount }}
+          fiscal={{ configured: fiscalnetEnabled, attempts: fiscalReceiptAttempts, sessions: sessionsClosedCount, zReports: zReportsDoneCount, lastAttempt: fiscalLastAttemptAt, status: fiscalLastAttemptStatus }}
         />
       )}
 
       {/* ── BUSINESS TAB ─────────────────────────────────────────────── */}
       {activeTab === "business" && (
         <div className="space-y-6">
-          <SettingsOverview
-            locale={locale}
-            units={DEFAULT_OPERATIONAL_UNITS.length + customUnits.length}
-            payments={paymentMethods?.length ?? 0}
-            categories={categories?.length ?? 0}
-            fiscalConfigured={fiscalnetEnabled}
-            fiscalAttempts={fiscalReceiptAttempts}
-            closedSessions={sessionsClosedCount}
-          />
+
           {/* CUI autofill (RO only) */}
           {isRO && (
             <CuiLookupCard
@@ -601,384 +969,17 @@ export default async function SettingsPage({
       )}
 
       {/* ── UNITS TAB ────────────────────────────────────────────────── */}
-      {activeTab === "units" && (
-        <div className="space-y-6">
-          <SettingsSection
-            title={isRO ? "Unități de măsură" : "Units of measurement"}
-            description={
-              isRO
-                ? "Unitățile standard sunt fixe — un articol precum „Buc”/„Units” care ar duplica una dintre ele nu mai poate fi introdus aici."
-                : "The standard set is fixed — a free-text entry that would duplicate one of these (like the old \"Buc\"/\"Units\" split) is no longer offered here."
-            }
-          >
-            <div className="flex flex-wrap gap-2">
-              {DEFAULT_OPERATIONAL_UNITS.map((u) => (
-                <Badge key={u} variant="outline" className="text-slate-600">{unitLabel(u, isRO ? "ro" : "en")}</Badge>
-              ))}
-            </div>
-            {customUnits.length > 0 ? (
-              <div className="mt-4 border-t border-slate-100 pt-4">
-                <p className="text-xs text-slate-500 mb-2">{isRO ? "Unități personalizate" : "Custom units"}</p>
-                <div className="flex flex-wrap gap-2">
-                  {customUnits.map((u) => (
-                    <Badge key={u.id} variant="outline" className="text-slate-600">
-                      {u.name}{u.abbreviation ? ` (${u.abbreviation})` : ""}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </SettingsSection>
-        </div>
-      )}
 
       {/* ── PAYMENT METHODS TAB ──────────────────────────────────────── */}
-      {activeTab === "payment-methods" && (
-        <div className="space-y-6">
-          <SettingsListSection
-            title={isRO ? "Metode de plată" : "Payment methods"}
-            description={fiscalnetEnabled ? "FiscalNet enabled — assign a payment code (1–8) to each method." : undefined}
-            rows={((paymentMethods ?? []) as Array<{ id: string; name: string; type: string; active: boolean; fiscalnet_code?: number | null }>).map((m) => ({
-              id: m.id,
-              primary: m.name,
-              secondary: `${m.type.charAt(0).toUpperCase()}${m.type.slice(1)}${fiscalnetEnabled && m.fiscalnet_code != null ? ` · FN code ${m.fiscalnet_code}` : ""}`,
-              badge: { label: m.active ? "Active" : "Inactive", active: m.active },
-              editValues: { name: m.name, type: m.type, fiscalnet_code: m.fiscalnet_code ?? "", active: m.active },
-            }))}
-            canEdit={canEdit}
-            addFields={[
-              { key: "name", label: "Name", type: "text", placeholder: "e.g. Tichete masă" },
-              { key: "type", label: "Type", type: "select", options: METHOD_TYPE_OPTIONS },
-              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: "FiscalNet code", type: "select" as const, options: FISCALNET_CODE_OPTIONS }] : []),
-            ]}
-            editFields={[
-              { key: "name", label: "Name", type: "text" },
-              { key: "type", label: "Type", type: "select", options: METHOD_TYPE_OPTIONS },
-              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: "FiscalNet code", type: "select" as const, options: FISCALNET_CODE_OPTIONS }] : []),
-              { key: "active", label: "Active", type: "toggle" },
-            ]}
-            addDefaults={{ name: "", type: "cash", fiscalnet_code: "", active: true }}
-            addAction={addPaymentMethod as unknown as (fd: FormData) => Promise<void>}
-            updateAction={updatePaymentMethod as unknown as (fd: FormData) => Promise<void>}
-            deleteAction={deletePaymentMethod as unknown as (fd: FormData) => Promise<void>}
-            addLabel="+ Add payment method"
-            emptyLabel="No payment methods yet."
-          />
-        </div>
-      )}
 
       {/* ── LOCATION TAB ─────────────────────────────────────────────── */}
-      {activeTab === "location" && (
-        <div className="space-y-6">
-          <SettingsSection
-            title={isRO ? "Locație" : "Location"}
-            description={
-              hasMultipleSites
-                ? undefined
-                : isRO
-                  ? "O singură locație — selectorul de locații apare automat când există o a doua."
-                  : "One location — a location switcher appears automatically once a second one exists."
-            }
-          >
-            {primarySite ? (
-              canEdit ? (
-                <form action={updateSite as unknown as (fd: FormData) => Promise<void>} className="grid gap-3 sm:grid-cols-3 sm:items-end">
-                  <input type="hidden" name="id" value={primarySite.id} />
-                  <div><Label>{isRO ? "Nume" : "Name"}</Label><Input name="name" defaultValue={primarySite.name} required /></div>
-                  <div><Label>{isRO ? "Adresă" : "Address"}</Label><Input name="address" defaultValue={primarySite.address ?? ""} /></div>
-                  <div><Label>{isRO ? "Oraș" : "City"}</Label><Input name="city" defaultValue={primarySite.city ?? ""} /></div>
-                  <Button type="submit" variant="outline" size="sm" className="sm:col-span-3 sm:w-fit">
-                    {isRO ? "Salvează" : "Save"}
-                  </Button>
-                </form>
-              ) : (
-                <div className="text-sm">
-                  <p className="font-medium">{primarySite.name}</p>
-                  <p className="text-slate-500">{[primarySite.address, primarySite.city].filter(Boolean).join(", ") || "—"}</p>
-                </div>
-              )
-            ) : (
-              <p className="text-sm text-slate-400">{isRO ? "Nicio locație configurată." : "No location configured."}</p>
-            )}
-          </SettingsSection>
-        </div>
-      )}
 
       {/* ── CATEGORIES TAB ───────────────────────────────────────────── */}
-      {activeTab === "categories" && (
-        <div className="space-y-6">
-          {(["inventory", "pos"] as const).map((scope) => {
-            const scopeCats = (categories ?? []).filter(
-              (c) =>
-                (c as { category_type?: string }).category_type === scope ||
-                ((c as { category_type?: string }).category_type === "both" && scope === "pos")
-            ) as Array<{ id: string; name: string; color: string | null; sort_order: number | null; category_type?: string }>;
-            const title =
-              scope === "inventory"
-                ? (t.settings.categoryInventory ?? "Inventory categories")
-                : (t.settings.categoryPos ?? "POS categories");
-            const typeOptions = [
-              { value: "pos", label: t.settings.categoryPos },
-              { value: "inventory", label: t.settings.categoryInventory },
-            ];
-            const rows = scopeCats.map((c) => ({
-              id: c.id,
-              primary: c.name,
-              secondary: `Sort ${c.sort_order ?? 0}`,
-              editValues: {
-                name: c.name,
-                color: c.color ?? "#64748b",
-                sort_order: c.sort_order ?? 0,
-                category_type: c.category_type === "both" ? scope : (c.category_type ?? scope),
-              },
-            }));
-            return (
-              <SettingsListSection
-                key={scope}
-                title={title}
-                rows={rows}
-                canEdit={canEdit}
-                addFields={[
-                  { key: "name", label: "Name", type: "text", placeholder: scope === "inventory" ? "e.g. MATERIA PRIMA" : "e.g. Hot Drinks" },
-                  { key: "color", label: "Colour", type: "color" },
-                  { key: "sort_order", label: "Sort order", type: "number", placeholder: "1", className: "w-20" },
-                ]}
-                editFields={[
-                  { key: "name", label: "Name", type: "text" },
-                  { key: "color", label: "Colour", type: "color" },
-                  { key: "sort_order", label: "Sort", type: "number", className: "w-20" },
-                  { key: "category_type", label: t.settings.type, type: "select", options: typeOptions },
-                ]}
-                hiddenAddValues={{ category_type: scope }}
-                addDefaults={{ name: "", color: "#2563eb", sort_order: "" }}
-                addAction={addCategory as unknown as (fd: FormData) => Promise<void>}
-                updateAction={updateCategory as unknown as (fd: FormData) => Promise<void>}
-                deleteAction={deleteCategory as unknown as (fd: FormData) => Promise<void>}
-                addLabel="Add category"
-                emptyLabel="No categories yet."
-              />
-            );
-          })}
-        </div>
-      )}
 
       {/* ── FISCAL & CONTABILITATE TAB (RO only) ─────────────────────── */}
-      {activeTab === "fiscal" && isRO && (efacturaEnabled || fiscalnetEnabled || sagaInstalled) && (
-        <div className="space-y-6">
-
-          {/* Measured history, not just the toggle. A "fiscalnet_enabled: true"
-              checkbox with zero receipt attempts ever recorded is a setting
-              contradicting its own history — this says so instead of letting
-              the toggle alone imply it's working. */}
-          {fiscalnetEnabled && (
-          <Card className={fiscalReceiptAttempts === 0 ? "border-amber-200 bg-amber-50" : undefined}>
-            <CardHeader>
-              <CardTitle>Istoric FiscalNet</CardTitle>
-              <CardDescription>
-                {fiscalReceiptAttempts === 0
-                  ? "FiscalNet este activat, dar nu există nicio încercare de emitere bon fiscal înregistrată."
-                  : "Activitate măsurată, nu doar starea conexiunii."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-3 sm:grid-cols-4 text-sm">
-                <div>
-                  <p className="text-slate-500">Încercări bon fiscal</p>
-                  <p className={`font-medium ${fiscalReceiptAttempts === 0 ? "text-amber-700" : ""}`}>{fiscalReceiptAttempts}</p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Ultima încercare</p>
-                  <p className="font-medium">
-                    {fiscalLastAttemptAt
-                      ? `${new Date(fiscalLastAttemptAt).toLocaleString("ro-RO")} (${fiscalLastAttemptStatus ?? "—"})`
-                      : "Niciodată"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Sesiuni închise</p>
-                  <p className="font-medium">{sessionsClosedCount}</p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Rapoarte Z generate</p>
-                  <p className="font-medium">
-                    {zReportsDoneCount}
-                    {lastZReportAt ? ` (ultimul: ${new Date(lastZReportAt).toLocaleDateString("ro-RO")})` : ""}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          )}
-
-          {efacturaEnabled && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                e-Factura
-                {anafConnected ? (
-                  <Badge className="bg-green-100 text-green-800 border-0 text-xs">Conectat</Badge>
-                ) : (
-                  <Badge className="bg-red-100 text-red-800 border-0 text-xs">Neconectat</Badge>
-                )}
-              </CardTitle>
-              <CardDescription>
-                Obligatorie pentru toate firmele românești din ianuarie 2025.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-lg bg-blue-50 border border-blue-100 p-4 text-sm text-blue-800 space-y-1">
-                <p className="font-medium">De știut:</p>
-                <p>Fiecare factură B2B trebuie transmisă în SPV în <strong>5 zile lucrătoare</strong>. Amenda pentru netransmitere: <strong>1.000–2.500 lei per factură</strong>.</p>
-              </div>
-              {anafConnected ? (
-                <div className="flex items-center gap-2 text-sm text-green-700">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Conectat la ANAF SPV — facturile pot fi transmise automat.
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-3 items-center">
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <AlertCircle className="h-4 w-4 text-amber-500" />
-                    Neconectat la ANAF SPV
-                  </div>
-                  <Link href="/app/settings?tab=integrations">
-                    <Button size="sm">Conectează cu ANAF SPV &rarr;</Button>
-                  </Link>
-                </div>
-              )}
-              <Link
-                href="/help/romania-efactura"
-                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
-              >
-                Ghid complet e-Factura <ExternalLink className="h-3 w-3" />
-              </Link>
-            </CardContent>
-          </Card>
-          )}
-
-          {efacturaEnabled && (
-          <AnafSettingsCard
-            canEdit={canEdit}
-            anafConnected={anafConnected}
-            anafCif={anafCif}
-            anafVatRegistered={anafVatRegistered}
-            anafAuthUrl={anafAuthUrl}
-          />
-          )}
-
-          {sagaInstalled && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Contabilitate</CardTitle>
-              <CardDescription>Configurare Saga, bon de consum colectiv, metodă de calcul CMP.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-900">Configurare contabil (Saga, CMP, coduri)</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{accountantStepsDone}/4 pași completați</p>
-                </div>
-                <Link href="/app/settings/accountant">
-                  <Button variant="outline" size="sm">Configurare &rarr;</Button>
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                {[
-                  { label: "CUI firmă", done: !!fiscalnetCif },
-                  { label: "Cod gestiune Saga", done: !!sagaGestiuneCode },
-                  { label: "Coduri articole produse", done: sagaProductCount > 0 },
-                  { label: "Documente legale semnate", done: false },
-                ].map(({ label, done }) => (
-                  <div key={label} className="flex items-center gap-1.5">
-                    {done
-                      ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
-                      : <Circle className="h-3.5 w-3.5 text-slate-300 shrink-0" />}
-                    <span className={done ? "text-slate-700" : "text-slate-400"}>{label}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-          )}
-
-          {sagaInstalled && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Bon de Consum Colectiv</CardTitle>
-              <CardDescription>Formular 14-3-4/aA — OMFP 2634/2015</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid gap-3 sm:grid-cols-3 text-sm">
-                <div>
-                  <p className="text-slate-500">Serie numere</p>
-                  <p className="font-medium">
-                    {bcCount > 0
-                      ? `BC-${new Date().getFullYear()}-000001 — ${latestBcNumber ?? "—"}`
-                      : "Niciun bon generat încă"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Bonuri generate {new Date().getFullYear()}</p>
-                  <p className="font-medium">{bcCount}</p>
-                </div>
-                <div>
-                  <p className="text-slate-500">Metodă evaluare stoc</p>
-                  <Badge className="bg-blue-100 text-blue-800 border-0 mt-1">CMP rulant</Badge>
-                </div>
-              </div>
-              <div className="pt-2 border-t border-slate-100">
-                <Link href="/app/reports/consum" className="text-sm text-blue-600 hover:underline">
-                  Descarcă bon de consum &rarr;
-                </Link>
-              </div>
-              <div className="pt-1">
-                <Link href="/app/settings/accountant?tab=checklist" className="text-sm text-blue-600 hover:underline">
-                  Descarcă proceduri interne &rarr;
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-          )}
-
-          {fiscalnetEnabled && (
-          <FiscalNetSettingsCard
-            orgId={orgId}
-            enabled={Boolean(orgRow?.fiscalnet_enabled ?? false)}
-            mockMode={(orgRow?.fiscalnet_mock_mode as boolean) !== false}
-            connectionMode={((orgRow?.fiscalnet_connection_mode as string) === "file" ? "file" : "api")}
-            apiHost={(orgRow?.fiscalnet_api_host as string) || "http://localhost:65400"}
-            bonuriPath={(orgRow?.fiscalnet_bonuri_path as string) || null}
-            raspunsPath={(orgRow?.fiscalnet_raspuns_path as string) || null}
-            autoPrint={Boolean(orgRow?.fiscalnet_auto_print ?? true)}
-            askBeforePrint={Boolean(orgRow?.fiscalnet_ask_before_print ?? false)}
-            manualOnly={Boolean(orgRow?.fiscalnet_manual_only ?? false)}
-            timeoutMs={Number(orgRow?.fiscalnet_timeout_ms ?? 30000)}
-            retryCount={Number(orgRow?.fiscalnet_retry_count ?? 2)}
-            cif={(anafCif || fiscalnetCif) || null}
-            operatorCode={(orgRow?.fiscalnet_operator_code as string) || "1"}
-            vatGroups={(orgRow?.fiscalnet_vat_groups as import("@/lib/fiscalnet/types").VatGroup[]) ?? []}
-            paymentTypeMap={(orgRow?.fiscalnet_payment_type_map as Record<string, import("@/lib/fiscalnet/types").FiscalPaymentCode>) ?? {}}
-          />
-          )}
-
-          {!efacturaEnabled && !fiscalnetEnabled && !sagaInstalled && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Instalează din Marketplace</CardTitle>
-                <CardDescription>Alege e-Factura, FiscalNet sau Saga doar dacă le folosești.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Link href="/app/settings?tab=integrations">
-                  <Button>Deschide Marketplace</Button>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      )}
 
       {/* ── INTEGRATIONS TAB ─────────────────────────────────────────── */}
-      {activeTab === "integrations" && (
+      {activeTab === "marketplace" && (
         <div className="space-y-2">
           <p className="text-sm text-slate-500 mb-4">
             {isRO
@@ -989,7 +990,7 @@ export default async function SettingsPage({
             orgId={orgId}
             countryCode={countryCode}
             installError={params?.install_error ? decodeURIComponent(params.install_error) : null}
-            returnTo="/app/settings?tab=integrations"
+            returnTo="/app/settings?tab=marketplace"
           />
         </div>
       )}

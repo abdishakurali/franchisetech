@@ -7,7 +7,7 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleEnabled } from "@/lib/business-modules";
 import { FormSelect } from "@/components/app/FormSelect";
-import { addCategory, ensurePosDefaults, deleteProducts, updateProductStock } from "@/app/actions/kitchenops";
+import { addCategory, deleteProducts, updateProductStock } from "@/app/actions/kitchenops";
 import { ProductsBulkTable } from "@/components/app/BulkDeleteTable";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { PRODUCT_LIST_SELECT } from "@/lib/supabase/product-selects";
@@ -33,7 +33,6 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const recipeVisible = isModuleEnabled(moduleFlags, "recipe_costing");
   const inventoryVisible = isModuleEnabled(moduleFlags, "inventory");
-  await ensurePosDefaults();
   const params = await searchParams;
   const q = params?.q ?? "";
   const selectedCategory = params?.category ?? "all";

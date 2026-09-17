@@ -30,7 +30,6 @@ import { readAcquisitionClient } from "@/lib/marketing/acquisition";
 import { readPreferredPlanClient } from "@/lib/billing/preferred-plan";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { OnboardingStepper } from "@/components/app/OnboardingStepper";
-import { OnboardingSidebar } from "@/components/onboarding/OnboardingSidebar";
 
 const BUSINESS_TYPES = {
   ro: [
@@ -288,16 +287,9 @@ export default function OnboardingPage() {
   };
 
   const stepShortLabels = t.stepShortLabels;
-  const sidebarDescriptions = t.sidebarStepDescriptions;
-  const stepIcons = [Building2, Receipt];
-  const sidebarSteps = stepShortLabels.map((label, i) => ({
-    icon: stepIcons[i],
-    title: label,
-    description: sidebarDescriptions[i],
-  }));
 
   return (
-    <div className="relative min-h-screen bg-slate-100">
+    <div className="relative min-h-screen bg-[#F3F0E8] text-[#0D0F0E] [&_input]:border-[#DFDCD2] [&_input]:bg-white [&_button[data-slot=select-trigger]]:border-[#DFDCD2]">
       {pending && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
           <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
@@ -312,7 +304,7 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      <header className="border-b border-slate-200/80 bg-white/90 backdrop-blur">
+      <header className="border-b border-[#DFDCD2] bg-white">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
           <img src="/marketing/franchise-tech-logo.png" alt="franchisetech" className="h-8 w-auto" />
           <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 ring-1 ring-blue-100">
@@ -321,8 +313,8 @@ export default function OnboardingPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8 pb-16 sm:py-10">
-        <div className="lg:hidden">
+      <main className="mx-auto max-w-[768px] px-4 py-8 pb-16 sm:py-10">
+        <div>
           <OnboardingStepper
             labels={stepShortLabels}
             current={step}
@@ -331,20 +323,13 @@ export default function OnboardingPage() {
           />
         </div>
 
-        <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 lg:grid lg:grid-cols-[320px_1fr]">
-          <OnboardingSidebar banner={t.sidebarBanner} steps={sidebarSteps} current={step} />
-
-          <div className="p-6 sm:p-10 lg:p-12">
-            <div className="mb-8 hidden lg:block">
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-600">
-                {t.stepEyebrow(step + 1, stepShortLabels.length)}
-              </p>
-            </div>
+        <div className="overflow-hidden rounded-xl border border-[#DFDCD2] bg-white">
+          <div className="p-5 sm:p-10">
             <div className="mb-8">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
+              <h1 className="font-[family-name:var(--font-display)] text-[30px] font-bold leading-[1.1] tracking-[-0.03em] text-[#0D0F0E] sm:text-[34px]">
                 {t.stepTitles[step]}
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
+              <p className="mt-3 max-w-xl text-[17px] leading-[1.55] text-[#5B5D57]">
                 {t.stepSubtitles[step]}
               </p>
             </div>

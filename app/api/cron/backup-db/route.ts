@@ -18,10 +18,9 @@ import { mkdir, stat, readdir } from "fs/promises";
 export const dynamic = "force-dynamic";
 
 const execAsync = promisify(exec);
-const BACKUP_DIR = "/var/www/fp-releases/backups";
+const BACKUP_DIR = process.env.BACKUP_DIR ?? "/var/www/fp-releases/backups";
 const RETENTION_DAYS = 7;
-// Use the versioned binary — system pg_dump may lag behind Supabase's Postgres version
-const PG_DUMP = "/usr/lib/postgresql/17/bin/pg_dump";
+const PG_DUMP = process.env.PG_DUMP ?? "/usr/lib/postgresql/17/bin/pg_dump";
 
 export async function POST(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;

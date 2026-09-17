@@ -1,3 +1,4 @@
+import { ClaudeMarketingShell, DesignIndustries } from "@/components/marketing/ClaudeMarketing";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -28,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function IndustriesPage() {
   const locale = await getMarketingLocale();
+  if (locale === "ro") return <ClaudeMarketingShell><DesignIndustries /></ClaudeMarketingShell>;
   const t = getMarketingMessages(locale);
 
   return (

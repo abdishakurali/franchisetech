@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClaudeMarketingShell, DesignHome } from "@/components/marketing/ClaudeMarketing";
 import { HomePageContentTop, HomePageContentBottom } from "@/components/marketing/HomePageContent";
 import { MarketingShell } from "@/components/marketing/MarketingShell";
 import { JsonLd } from "@/components/marketing/JsonLd";
@@ -30,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const locale = await getMarketingLocale();
+  if (locale === "ro") return <ClaudeMarketingShell><DesignHome /></ClaudeMarketingShell>;
   const faq = getHomepageContent(locale).faq;
 
   return (

@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PosPaymentPanel } from "@/components/app/PosPaymentPanel";
+import { selectPrimaryPaymentMethods } from "@/lib/pos-payment-tiles";
 import { PosTableContextBar, type PosActiveTable } from "@/components/app/PosTableContextBar";
 import { sendTabOrder, getTabPendingItems, type TabPendingItem } from "@/app/actions/table-service";
 import { PreBillPrintButton } from "@/components/app/PreBillPrintButton";
@@ -261,7 +262,7 @@ function ProductGridTile({
       type="button"
       onClick={onClick}
       className={cn(
-        "relative flex flex-col overflow-hidden rounded-xl border text-left shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300",
+        "relative flex min-h-[132px] flex-col overflow-hidden rounded-[10px] border text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300",
         selected ? "border-blue-400 bg-blue-50/30 ring-1 ring-blue-100" : "border-slate-200 bg-white hover:border-blue-300",
       )}
     >
@@ -287,8 +288,8 @@ function ProductGridTile({
       )}
       <div
         className={cn(
-          "flex min-h-0 flex-1 flex-col justify-between gap-0.5 p-1.5 sm:p-2",
-          tileMode === "name" && "py-2.5 sm:py-3",
+          "flex min-h-0 flex-1 flex-col justify-between gap-3 p-3 sm:p-4",
+          tileMode === "name" && "py-4",
         )}
       >
         <span
@@ -301,8 +302,8 @@ function ProductGridTile({
         </span>
         <span
           className={cn(
-            "font-bold tabular-nums text-slate-700",
-            tileMode === "photo" ? "text-[10px] sm:text-[11px]" : "text-xs sm:text-sm",
+            "font-mono font-bold tabular-nums text-[#0D0F0E]",
+            tileMode === "photo" ? "text-sm" : "text-base sm:text-[17px]",
           )}
         >
           {priceLabel}
@@ -1525,7 +1526,7 @@ function PosRegisterInner({
       <div className="relative grid min-h-0 w-full flex-1 grid-rows-[minmax(0,1fr)_auto] overflow-hidden lg:flex lg:flex-row">
       {/* Left: Products column — order step only */}
       {checkoutStep === "order" && (
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white lg:min-h-0 lg:min-w-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[#F3F0E8] lg:min-h-0 lg:min-w-0">
         {/* Top bar: quick access + add product + new sale */}
         <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3 shrink-0">
           <Button
@@ -1673,7 +1674,7 @@ function PosRegisterInner({
           style={{ WebkitOverflowScrolling: "touch" }}
           data-tour="pos-product"
         >
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
           {filtered.map((p) => {
             const inCart = cart.find((i) => i.product_id === p.id);
             return (
@@ -2074,7 +2075,7 @@ function PosRegisterInner({
             const lineTotal = lineGrossAfter(item);
             const lineList = lineGrossBefore(item);
             return (
-            <div key={item.product_id} className="rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm sm:p-3">
+            <div key={item.product_id} className="border-b border-[#EDEAE1] bg-white py-3">
               <button type="button" onClick={() => openItemOptions(item.product_id)} className="mb-2 w-full text-left">
                 <p className="line-clamp-2 break-words text-sm font-semibold leading-snug text-slate-900 sm:text-base">{item.product_name}</p>
                 {linePct > 0 && (
@@ -2307,7 +2308,7 @@ function PosRegisterInner({
                 <span className="text-sm font-semibold text-slate-700 sm:text-base">
                   {showTableOrderActions ? "Total de încasat" : t.total}
                 </span>
-                <span className="font-mono text-2xl font-bold tabular-nums text-slate-950 sm:text-3xl">
+                <span className="font-mono text-[34px] font-bold tracking-tight tabular-nums text-[#0D0F0E]">
                   {money(showTableOrderActions ? tabCheckoutTotal : totalDue)}
                 </span>
               </div>
@@ -2364,18 +2365,24 @@ function PosRegisterInner({
                     disabled={tableTabLocked && !canManage}
                   />
                 )}
-                <Button
+                <div className="grid grid-cols-2 gap-2.5">
+                {selectPrimaryPaymentMethods(paymentMethods).map((method) => <Button
+                  key={method.id}
                   type="button"
                   disabled={!cart.length || !paymentMethods.length || tableTabLocked}
                   data-tour="pos-charge"
-                  className="h-12 w-full rounded-xl bg-blue-600 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-40 sm:h-14 sm:text-lg"
+                  className={`h-16 w-full rounded-[10px] text-lg font-bold text-white disabled:opacity-40 ${method.type === "cash" ? "bg-[#00752C] hover:bg-[#005d23]" : "bg-[#165DFC] hover:bg-blue-700"}`}
                   onClick={() => {
+                    setPaymentMethodId(method.id);
+                    setCashReceived(method.type === "cash" ? cashExactAmount : "");
                     setPaymentCartSnapshot(normalizeCartLines(cart, txDiscountPct));
                     setCheckoutStep("payment");
                   }}
                 >
-                  {!paymentMethods.length ? t.setupPaymentMethods : cart.length === 0 ? t.addItems : t.chargeAmount(money(totalDue))}
-                </Button>
+                  {paymentTypeLabel(method.type, method.name, locale)}
+                </Button>)}
+                {!paymentMethods.length && <p className="col-span-2 text-center text-sm text-amber-800">{t.setupPaymentMethods}</p>}
+                </div>
               </div>
               )}
         </div>

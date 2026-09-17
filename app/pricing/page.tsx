@@ -1,3 +1,4 @@
+import { ClaudeMarketingShell, DesignPricing } from "@/components/marketing/ClaudeMarketing";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
@@ -26,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PricingPage() {
   const locale = await getMarketingLocale();
+  if (locale === "ro") return <ClaudeMarketingShell><DesignPricing /></ClaudeMarketingShell>;
   const market = marketFromMarketingLocale(locale);
   const t = getMarketingMessages(locale);
 

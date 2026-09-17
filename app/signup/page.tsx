@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AuthPageFrame } from "@/components/auth/AuthPageFrame";
+import { AuthBrand } from "@/components/marketing/AuthBrand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -116,15 +116,17 @@ export default function SignupPage() {
   };
 
   return (
-    <AuthPageFrame>
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle>{a.title}</CardTitle>
+    <main className="flex min-h-svh items-center justify-center bg-[#F3F0E8] px-4 py-10 text-[#0D0F0E]">
+      <div className="w-full max-w-[460px]">
+      <AuthBrand />
+      <Card className="rounded-xl border-[#DFDCD2] bg-white py-8 shadow-none">
+        <CardHeader className="space-y-2 text-left sm:px-8">
+          <CardTitle className="font-[family-name:var(--font-display)] text-[30px] font-bold leading-[1.1] tracking-[-0.03em]">{a.title}</CardTitle>
           <CardDescription>
             {selectedPlan ? a.descPlan(selectedPlan.name) : a.descDefault}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="sm:px-8 [&_input]:h-12 [&_input]:border-[#DFDCD2] [&_input]:bg-white">
           {googleAuthEnabled && (
             <>
               <Link href={planParam ? `/auth/google?plan=${planParam}` : "/auth/google"}>
@@ -166,7 +168,7 @@ export default function SignupPage() {
                 placeholder={a.passwordPlaceholder}
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
+            <Button type="submit" className="h-12 w-full rounded-[10px] bg-[#165DFC] text-base hover:bg-[#104bd1]" disabled={loading}>
               {loading ? a.submitting : a.submit}
             </Button>
           </form>
@@ -185,10 +187,10 @@ export default function SignupPage() {
         </CardContent>
       </Card>
       <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-slate-400">
-        <span>✓ Probă 15 zile fără card</span>
-        <span>✓ Trial 15 zile</span>
-        <span>✓ Configurare ghidată</span>
+        <span>{locale === "ro" ? "✓ Probă 15 zile fără card" : "✓ 15-day trial, no card required"}</span>
+        <span>{locale === "ro" ? "✓ Configurare ghidată" : "✓ Guided setup"}</span>
       </div>
-    </AuthPageFrame>
+      </div>
+    </main>
   );
 }

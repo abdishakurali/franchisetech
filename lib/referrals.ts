@@ -19,7 +19,7 @@ function daysLeft(date: string | null) {
   return Math.max(0, Math.ceil((new Date(date).getTime() - Date.now()) / 86400000));
 }
 
-export async function ensureReferralCode(orgId: string): Promise<ReferralInfo> {
+export async function ensureReferralCode(orgId: string, createIfMissing = true): Promise<ReferralInfo> {
   const client = await createClient();
 
   // Read current org data (RLS allows org members to SELECT their own org)
@@ -33,7 +33,7 @@ export async function ensureReferralCode(orgId: string): Promise<ReferralInfo> {
 
   // Use SECURITY DEFINER function to generate code if missing (bypasses RLS for atomic write)
   let code = org.referral_code ?? null;
-  if (!code) {
+  if (!code && createIfMissing) {
     const { data: generatedCode } = await client.rpc("ensure_referral_code", { p_org_id: orgId });
     code = generatedCode ?? null;
   }

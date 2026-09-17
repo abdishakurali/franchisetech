@@ -1,3 +1,4 @@
+import { ClaudeMarketingShell, DesignFeatures } from "@/components/marketing/ClaudeMarketing";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, PackagePlus, ReceiptText, ScanLine, ShoppingCart, WifiOff } from "lucide-react";
@@ -26,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FeaturesPage() {
   const locale = await getMarketingLocale();
+  if (locale === "ro") return <ClaudeMarketingShell><DesignFeatures /></ClaudeMarketingShell>;
   const t = getMarketingMessages(locale);
 
   return (

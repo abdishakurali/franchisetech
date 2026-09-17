@@ -2,14 +2,12 @@ import { redirect } from "next/navigation";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { listAccessibleSites } from "@/lib/site-context";
 import { PurchaseForm, type PurchaseDraftInitial } from "@/components/app/PurchaseForm";
-import { ensurePosDefaults } from "@/app/actions/kitchenops";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { listOperationalUnitNames } from "@/lib/units-of-measure";
 
 export default async function PurchaseEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, orgId, currency, membership, user } = await getKitchenOpsContext();
-  await ensurePosDefaults();
 
   const { data: purchase } = await supabase
     .from("purchases")

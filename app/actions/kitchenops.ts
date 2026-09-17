@@ -30,7 +30,7 @@ import {
   type PurchaseLineInput,
 } from "@/lib/nir/purchase";
 import { createServiceClient } from "@/lib/supabase/server";
-import { listActiveVatRates, listAllVatRates, seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
+import { listActiveVatRates, listAllVatRates } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
 import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
@@ -265,32 +265,6 @@ async function createKitchenOrderIfEnabled({
       message: error instanceof Error ? error.message : String(error),
     });
   }
-}
-
-export async function ensurePosDefaults() {
-  const { supabase, orgId } = await getActiveOrg();
-  const { data: orgRow } = await supabase.from("organisations").select("country_code").eq("id", orgId).single();
-  const countryCode = orgRow?.country_code ?? null;
-
-  const { data: cats } = await supabase.from("product_categories").select("id").eq("organisation_id", orgId).limit(1);
-  if (!cats?.length) {
-    await supabase.from("product_categories").insert([
-      { organisation_id: orgId, name: "Drinks", color: "#2563eb", sort_order: 1, category_type: "pos" },
-      { organisation_id: orgId, name: "Food", color: "#16a34a", sort_order: 2, category_type: "pos" },
-      { organisation_id: orgId, name: "Snacks", color: "#f59e0b", sort_order: 3, category_type: "pos" },
-      { organisation_id: orgId, name: "Ingredients", color: "#64748b", sort_order: 1, category_type: "inventory" },
-    ]);
-  }
-  const { data: methods } = await supabase.from("payment_methods").select("id").eq("organisation_id", orgId).limit(1);
-  if (!methods?.length) {
-    await supabase.from("payment_methods").insert([
-      { organisation_id: orgId, name: "Cash", type: "cash" },
-      { organisation_id: orgId, name: "Card", type: "card" },
-      { organisation_id: orgId, name: "Online", type: "online" },
-      { organisation_id: orgId, name: "Other", type: "other" },
-    ]);
-  }
-  await seedOrgVatRatesIfEmpty(supabase, orgId, countryCode);
 }
 
 export async function addCategory(formData: FormData) {

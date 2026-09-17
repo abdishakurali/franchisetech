@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
-import { addProduct, ensurePosDefaults } from "@/app/actions/kitchenops";
+import { addProduct } from "@/app/actions/kitchenops";
 import { ImageUploadField } from "@/components/app/ImageUploadField";
 import { ProductVatField } from "@/components/app/ProductVatField";
 import { SearchableSelect } from "@/components/app/SearchableSelect";
@@ -23,7 +23,6 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
   const pf = t.productsForm;
   const orgInfo = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as { kitchen_stations_enabled?: boolean | null } | null;
   const kitchenStationsEnabled = Boolean(orgInfo?.kitchen_stations_enabled);
-  await ensurePosDefaults();
 
   const params = await searchParams;
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);

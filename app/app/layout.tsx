@@ -97,7 +97,7 @@ export default async function AppLayout({
   }
 
   const referral = activeOrg?.id && !subscriptionBlocked
-    ? await ensureReferralCode(activeOrg.id)
+    ? await ensureReferralCode(activeOrg.id, false)
     : null;
 
   let setupComplete = false;

@@ -47,7 +47,7 @@ export async function listAllVatRates(
 
 /**
  * vatRegistered defaults to false because it always is at the point this
- * runs: it's called from org creation / ensurePosDefaults, before ANAF
+ * runs: it's called from org creation, before ANAF
  * registration status is ever known or asked about. A RO org keeps 0% as
  * its selling default, while all standard rates remain active so purchase
  * documents can record supplier VAT independently. The selling path applies

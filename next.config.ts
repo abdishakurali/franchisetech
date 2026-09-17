@@ -8,6 +8,7 @@ const industryVanityRedirects = Object.entries(INDUSTRY_VANITY_REDIRECTS).map(([
 }));
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   turbopack: {
     root: __dirname,
   },

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
-import { ensurePosDefaults } from "@/app/actions/kitchenops";
 import { ProductEditForm } from "@/components/app/ProductEditForm";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
@@ -28,7 +27,6 @@ export default async function ProductEditPage({
     kitchen_stations_enabled?: boolean | null;
   } | null;
   const kitchenStationsEnabled = Boolean(orgInfo?.kitchen_stations_enabled);
-  await ensurePosDefaults();
 
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const visibility = productModuleVisibility(moduleFlags);
