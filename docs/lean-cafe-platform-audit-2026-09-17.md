@@ -69,6 +69,11 @@ till, save a sale, receive a purchase, or close a day. The scratch Supabase
 project is missing required operational tables, so this cannot be safely tested
 there yet.
 
+Read-only schema verification confirms that the scratch project is missing
+`pos_sessions`, `stock_movements`, `growth_milestones`,
+`organisation_modules`, `subscription_status`, `invoices` and `stock_levels`.
+It must be made schema-compatible before any authenticated first-day test.
+
 ### P1 — reminders need an operational proof
 
 Owner digest and billing reminders correctly require `CRON_SECRET`; the owner
