@@ -12,6 +12,11 @@ jobs:
   verify:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      # Build-only placeholders keep CI independent from customer data and secrets.
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-build-only-key
+      SUPABASE_SERVICE_ROLE_KEY: placeholder-build-only-key
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
