@@ -8,14 +8,16 @@ This release uses `new.franchisetech.ro` as an isolated hostname. It must not
 replace `franchisetech.ro`, point at Dolcenera, or reuse a production database
 without an explicit migration and approval.
 
-The current AWS CLI account has one running instance: `Garaad`
-(`i-0f8ca0d70abdf36c9`) in `us-east-1`, type `t2.micro`. Confirm its current
-workloads before installing Docker or Caddy.
+Use a dedicated EC2 instance in `eu-north-1`; do not install this workload on
+the unrelated `Garaad` instance in `us-east-1`. Attach only the
+`franchise-web` security group: TCP 80/443 are public for HTTPS, while SSH is
+limited to the administrator workstation.
 
 ## One-time host setup
 
-Install Docker Engine and the Compose plugin on the EC2 host. Clone this
-repository to `/srv/franchise`, then start the shared proxy once:
+Install Docker Engine and the Compose plugin on the EC2 host. Create a
+non-root deployment user with Docker access and `/srv/franchise` owned by that
+user. Start the shared proxy once:
 
 ```bash
 cd /srv/franchise/infra/edge
