@@ -76,6 +76,47 @@ export function vatRateOptionsForSelect(rates: OrgVatRate[]): OrgVatRate[] {
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.rate - b.rate);
 }
 
+/**
+ * Supplier invoices are governed by the supplier's VAT, not by the buyer's
+ * selling VAT registration. Keep the organisation's configured rates, then
+ * offer the statutory rates for its country when an old 0%-only sales
+ * catalogue does not contain them yet.
+ */
+export function purchaseVatRateOptions(
+  rates: OrgVatRate[],
+  countryCode: string | null | undefined
+): OrgVatRate[] {
+  const configured = vatRateOptionsForSelect(rates);
+  const defaults = VAT_DEFAULTS_BY_COUNTRY[(countryCode ?? "").toUpperCase()] ?? [];
+  const missingDefaults = defaults
+    .filter((candidate) => !configured.some((rate) => ratesMatch(rate.rate, candidate.rate)))
+    .map((candidate, index) => ({
+      id: `supplier-vat-${(countryCode ?? "default").toLowerCase()}-${candidate.rate}`,
+      name: candidate.name,
+      rate: candidate.rate,
+      active: true,
+      is_default: false,
+      fiscalnet_vat_group: candidate.fiscalnet_vat_group,
+      sort_order: 10_000 + index,
+    }));
+  return [...configured, ...missingDefaults].sort((a, b) => a.rate - b.rate);
+}
+
+export function validatePurchaseVatRate(
+  rates: OrgVatRate[],
+  numericRate: number,
+  countryCode: string | null | undefined
+): { ok: true } | { ok: false; message: string } {
+  if (!Number.isFinite(numericRate) || (numericRate > 0 && numericRate < 1)) {
+    return { ok: false, message: `VAT rate ${numericRate}% is not valid.` };
+  }
+  const defaults = VAT_DEFAULTS_BY_COUNTRY[(countryCode ?? "").toUpperCase()] ?? [];
+  if (rates.some((rate) => ratesMatch(rate.rate, numericRate)) || defaults.some((rate) => ratesMatch(rate.rate, numericRate))) {
+    return { ok: true };
+  }
+  return { ok: false, message: `Supplier VAT rate ${numericRate}% is not available for this business.` };
+}
+
 export function validateVatRate(rates: OrgVatRate[], numericRate: number): { ok: true } | { ok: false; message: string } {
   if (rates.length === 0) return { ok: true };
   const match = findRateOption(rates, numericRate);

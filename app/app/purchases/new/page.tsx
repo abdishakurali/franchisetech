@@ -7,7 +7,7 @@ import { listOperationalUnitNames } from "@/lib/units-of-measure";
 
 export default async function PurchasesNewPage() {
   await requireBusinessModule("inventory");
-  const { supabase, orgId, currency, membership, user } = await getKitchenOpsContext();
+  const { supabase, orgId, currency, membership, user, countryCode } = await getKitchenOpsContext();
   const [suppRes, prodRes, sites, vatRates, units] = await Promise.all([
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     supabase
@@ -30,6 +30,7 @@ export default async function PurchasesNewPage() {
       currentUserId={user?.id}
       vatRates={vatRates}
       units={units}
+      countryCode={countryCode}
     />
   );
 }

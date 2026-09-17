@@ -7,7 +7,7 @@ import { listOperationalUnitNames } from "@/lib/units-of-measure";
 
 export default async function PurchaseEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { supabase, orgId, currency, membership, user } = await getKitchenOpsContext();
+  const { supabase, orgId, currency, membership, user, countryCode } = await getKitchenOpsContext();
 
   const { data: purchase } = await supabase
     .from("purchases")
@@ -63,6 +63,7 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
       initialDraft={initialDraft}
       vatRates={vatRates}
       units={units}
+      countryCode={countryCode}
     />
   );
 }

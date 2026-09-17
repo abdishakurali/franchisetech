@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { VatRateSelect } from "@/components/app/VatRateSelect";
 import { SearchableSelect } from "@/components/app/SearchableSelect";
 import type { OrgVatRate } from "@/lib/vat-rates";
-import { getDefaultVatRateValue } from "@/lib/vat-rates";
+import { getDefaultVatRateValue, purchaseVatRateOptions } from "@/lib/vat-rates";
 import { Plus, Trash2 } from "lucide-react";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import type { AppT } from "@/lib/app-i18n";
@@ -261,6 +261,7 @@ export function PurchaseForm({
   initialDraft,
   vatRates = [],
   units = [],
+  countryCode,
 }: {
   suppliers: Supplier[];
   products: Product[];
@@ -270,13 +271,15 @@ export function PurchaseForm({
   initialDraft?: PurchaseDraftInitial;
   vatRates?: OrgVatRate[];
   units?: string[];
+  countryCode?: string | null;
 }) {
   const { t, locale } = useAppI18n();
   const isRO = locale === "ro";
   const supplierInvoiceDateLabel = isRO ? "Data factură furnizor" : t.purchases.form.invoiceDate;
   const observationsLabel = isRO ? "Observații / diferențe" : t.purchases.form.notes;
-  const taxLabel = t.purchases.form.vat;
+  const taxLabel = isRO ? "TVA furnizor" : t.purchases.form.vat;
   const defaultVatRate = String(getDefaultVatRateValue(vatRates));
+  const supplierVatRates = purchaseVatRateOptions(vatRates, countryCode);
   const umOptions = units.length ? units : ["each"];
   const defaultUm = umOptions[0] ?? "each";
   const today = new Date().toISOString().slice(0, 10);
@@ -315,10 +318,9 @@ export function PurchaseForm({
   }
   function onProductChange(lineId: number, productId: string) {
     const p = products.find((pr) => pr.id === productId);
-    const taxRate = p?.vat_rate != null ? String(p.vat_rate) : defaultVatRate;
     const unitOfMeasure = p?.unit_of_measure && umOptions.includes(p.unit_of_measure) ? p.unit_of_measure : defaultUm;
     setLines((prev) => prev.map((l) => l.id === lineId
-      ? { ...l, product_id: productId, unit_of_measure: unitOfMeasure, tax_rate: taxRate }
+      ? { ...l, product_id: productId, unit_of_measure: unitOfMeasure }
       : l));
   }
 
@@ -523,13 +525,12 @@ export function PurchaseForm({
                       onChange={(e) => updateLine(line.id, "unit_cost", e.target.value)}
                     />
                     <VatRateSelect
-                      rates={vatRates}
+                      rates={supplierVatRates}
                       value={line.tax_rate}
                       onChange={(rate) => updateLine(line.id, "tax_rate", rate)}
                       name="tax_rate"
                       compact
                       settingsHint={false}
-                      includeInactive
                     />
                     <div className="text-right text-sm font-medium text-slate-700 tabular-nums">
                       {calc.lineTotal > 0 ? fmt(calc.lineTotal) : "—"}

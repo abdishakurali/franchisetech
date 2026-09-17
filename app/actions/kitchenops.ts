@@ -36,7 +36,7 @@ import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags"
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEventAsync } from "@/lib/posthog-server";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
-import { ratesMatch, resolveCsvVatRate, validateVatRateForOrg, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
+import { resolveCsvVatRate, validatePurchaseVatRate, validateVatRateForOrg, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 import { listOperationalUnitNames, validateOperationalUnit } from "@/lib/units-of-measure";
 import {
   assertEntitlement,
@@ -81,11 +81,15 @@ async function validateSubmittedVatRates(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   // Purchases record supplier VAT and are independent of the organisation's
   // selling-rate restriction for an unregistered Romanian business.
-  const catalogRates = await listAllVatRates(supabase, orgId);
-  if (catalogRates.length === 0) return { ok: true };
-  const invalid = rates.find((rate) => !catalogRates.some((r) => ratesMatch(r.rate, rate)));
-  if (invalid == null) return { ok: true };
-  return { ok: false, error: `VAT rate ${invalid}% is not active in Settings.` };
+  const [catalogRates, orgResult] = await Promise.all([
+    listAllVatRates(supabase, orgId),
+    supabase.from("organisations").select("country_code").eq("id", orgId).maybeSingle(),
+  ]);
+  const countryCode = orgResult.data?.country_code ?? null;
+  const invalid = rates
+    .map((rate) => validatePurchaseVatRate(catalogRates, rate, countryCode))
+    .find((validation) => !validation.ok);
+  return invalid && !invalid.ok ? { ok: false, error: invalid.message } : { ok: true };
 }
 
 // Checkout-time guard against garbage vat_rate values (e.g. a stale/tampered cart

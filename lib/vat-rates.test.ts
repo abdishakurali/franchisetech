@@ -14,7 +14,9 @@
 import { describe, expect, it } from "vitest";
 import {
   isRoUnregisteredOrg,
+  purchaseVatRateOptions,
   resolveCsvVatRate,
+  validatePurchaseVatRate,
   validateVatRateForOrg,
   type OrgVatRate,
 } from "./vat-rates";
@@ -102,5 +104,17 @@ describe("validateVatRateForOrg — manual entry path (addProduct, approveProduc
       { id: "1", name: "Standard 23%", rate: 23, active: true, is_default: true, sort_order: 1 },
     ];
     expect(validateVatRateForOrg(ieCatalog, 23, IE_ORG).ok).toBe(true);
+  });
+});
+
+describe("purchase VAT — supplier invoice path", () => {
+  it("offers Romanian supplier rates even when a non-registered buyer sells only at 0%", () => {
+    const options = purchaseVatRateOptions(FIXED_RO_CATALOG, "RO");
+    expect(options.map((rate) => rate.rate)).toEqual([0, 11, 21]);
+    expect(validatePurchaseVatRate(FIXED_RO_CATALOG, 21, "RO").ok).toBe(true);
+  });
+
+  it("does not allow a malformed supplier VAT rate", () => {
+    expect(validatePurchaseVatRate(FIXED_RO_CATALOG, 0.2, "RO").ok).toBe(false);
   });
 });
