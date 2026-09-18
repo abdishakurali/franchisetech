@@ -67,11 +67,14 @@ describe("resolveNavItems", () => {
     expect(limited).toBe(true);
   });
 
-  it("gives an accountant dashboard, reports, purchases, suppliers (and invoices when e-Factura is on)", () => {
-    const withoutEfactura = resolveNavItems("accountant", t, true, moduleVisibility(), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
+  it("gives an accountant only the enabled operations destinations", () => {
+    const withoutInventory = resolveNavItems("accountant", t, true, moduleVisibility(), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
+    expect(hrefs(withoutInventory.mainNav)).toEqual(["/app", "/app/reports"]);
+
+    const withoutEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ inventory: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
     expect(hrefs(withoutEfactura.mainNav)).toEqual(["/app", "/app/reports", "/app/purchases", "/app/suppliers"]);
 
-    const withEfactura = resolveNavItems("accountant", t, true, moduleVisibility(), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true });
+    const withEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ inventory: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true });
     expect(hrefs(withEfactura.mainNav)).toEqual(["/app", "/app/reports", "/app/purchases", "/app/suppliers", "/app/invoices"]);
   });
 

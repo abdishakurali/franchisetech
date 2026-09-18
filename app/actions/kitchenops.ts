@@ -558,8 +558,10 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
   });
 
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/app/products");
-  revalidatePath("/app/pos");
+  // Keep POS quick-add scoped to the two pages whose server data changed.
+  // Explicit `page` avoids invalidating the entire /app layout tree.
+  revalidatePath("/app/products", "page");
+  revalidatePath("/app/pos", "page");
   return { ok: true };
 }
 
@@ -2403,10 +2405,12 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     { organisation: orgId },
   );
 
-  revalidatePath("/app/pos");
-  revalidatePath("/app/transactions");
-  revalidatePath("/app/reports/sales");
-  revalidatePath("/app");
+  // A sale changes only these page-level read models. Do not invalidate the
+  // authenticated layout: that remounts navigation and unrelated modules.
+  revalidatePath("/app/pos", "page");
+  revalidatePath("/app/transactions", "page");
+  revalidatePath("/app/reports/sales", "page");
+  revalidatePath("/app", "page");
 
   return {
     ok: true,

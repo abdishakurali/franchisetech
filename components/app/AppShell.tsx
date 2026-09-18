@@ -119,11 +119,19 @@ export function resolveNavItems(
   const showEfactura = activeOrg?.country_code === "RO" && activeOrg?.efactura_enabled === true;
 
   if (accountant) {
+    // Accountants share the read-only operations surface, but optional stock
+    // destinations must follow the same capability contract as owner nav.
+    // Routes remain available (and continue to be guarded/redirected) for
+    // bookmarked links; this only removes unavailable modules from chrome.
     const accountantNav: NavItem[] = [
       { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
       { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
-      { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
-      { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck, exact: false },
+      ...(moduleVisibility?.inventory
+        ? [
+            { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
+            { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck, exact: false },
+          ]
+        : []),
       ...(showEfactura ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }] : []),
     ];
     return { mainNav: accountantNav, stockNav: [], showStock: false, limited: false };

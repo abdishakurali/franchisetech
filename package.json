@@ -18,6 +18,7 @@
     "verify-nir-purchase-flow": "node scripts/verify-nir-purchase-flow.mjs",
     "verify-owner-digest": "node scripts/verify-owner-digest.mjs",
     "verify-lean-product-scope": "node scripts/verify-lean-product-scope.mjs",
+    "verify-isolated-first-sale": "node scripts/verify-isolated-first-sale-contract.mjs",
     "verify-nir-staging-schema": "node scripts/verify-staging-nir-schema.mjs",
     "check-prod-nir-schema": "node scripts/check-prod-nir-schema.mjs",
     "check-prod-module-flags-schema": "node scripts/check-prod-module-flags-schema.mjs",

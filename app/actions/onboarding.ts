@@ -187,7 +187,14 @@ export async function completePosOnboarding(input: {
   }
 
   // ── WARN-ONLY: VAT rates ───────────────────────────────────────────────
-  const vatSeedError = await seedOrgVatRatesIfEmpty(supabase, orgId, input.countryCode).then(
+  // The organisation's ANAF VAT status is the source of truth for the
+  // initial selling default. Purchase VAT remains independently selectable.
+  const vatSeedError = await seedOrgVatRatesIfEmpty(
+    supabase,
+    orgId,
+    input.countryCode,
+    Boolean(input.anafVatRegistered),
+  ).then(
     () => null,
     (e: unknown) => e,
   );
