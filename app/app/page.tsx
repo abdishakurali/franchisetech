@@ -217,13 +217,15 @@ export default async function DashboardPage({ searchParams }: Props) {
             </div>
           ) : null}
           <DateFilter current={period} />
-          <Link href="/app/setup-checklist"><Button variant="outline">{t.dashboard.setupGuide}</Button></Link>
+          {!showActivationBanner ? (
+            <Link href="/app/setup-checklist"><Button variant="outline">{t.dashboard.setupGuide}</Button></Link>
+          ) : null}
           <Link href="/app/pos"><Button className="bg-blue-600 hover:bg-blue-700 text-white">{t.dashboard.openPos}</Button></Link>
         </div>
       </div>
 
-      {/* ── Primary metrics row ── */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Empty accounts need one clear next action; metrics become useful after the first sale. */}
+      {!showActivationBanner ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Suspense fallback={
           <Card>
             <CardHeader className="pb-1">
@@ -310,10 +312,10 @@ export default async function DashboardPage({ searchParams }: Props) {
             </p>
           </CardContent>
         </Card>
-      </div>
+      </div> : null}
 
       {/* ── Top products + stock watch ── */}
-      {(topProducts.length > 0 || (inventoryVisible && lowStock.length > 0)) ? (
+      {!showActivationBanner && (topProducts.length > 0 || (inventoryVisible && lowStock.length > 0)) ? (
         <div className="grid gap-4 lg:grid-cols-2">
           {topProducts.length > 0 && (
             <Card>
@@ -360,7 +362,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       ) : null}
 
-      {showAttentionRow && !topProducts.length ? (
+      {!showActivationBanner && showAttentionRow && !topProducts.length ? (
         <div className={`grid gap-4 ${inventoryVisible ? "lg:grid-cols-3" : ""}`}>
           <Card className={inventoryVisible ? "lg:col-span-2" : ""}>
             <CardHeader><CardTitle className="text-base">{t.dashboard.attention}</CardTitle></CardHeader>
@@ -407,8 +409,8 @@ export default async function DashboardPage({ searchParams }: Props) {
         </div>
       ) : null}
 
-      {/* ── Reports grid ── */}
-      <div>
+      {/* Reports are deliberately deferred until the workspace has real activity. */}
+      {!showActivationBanner ? <div>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-sm font-semibold text-slate-700">{t.dashboard.reports}</h2>
           {inventoryVisible ? (
@@ -446,7 +448,7 @@ export default async function DashboardPage({ searchParams }: Props) {
             </Link>
           ))}
         </div>
-      </div>
+      </div> : null}
     </div>
   );
 }

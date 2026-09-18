@@ -13,7 +13,6 @@ import {
   type LocationBand,
 } from "@/lib/business-profile";
 import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
-import { demoProductsForCountry } from "@/lib/onboarding/demo-products";
 import { saveOrgModuleFlags } from "@/lib/org-module-flags";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { upsertLoopsContact } from "@/lib/loops";
@@ -194,58 +193,6 @@ export async function completePosOnboarding(input: {
   );
   if (vatSeedError) {
     console.warn("onboarding_vat_seed_failed", vatSeedError);
-  }
-
-  const { data: defaultVat } = await supabase
-    .from("vat_rates")
-    .select("rate")
-    .eq("organisation_id", orgId)
-    .eq("is_default", true)
-    .limit(1)
-    .maybeSingle();
-  const vatRate = defaultVat?.rate != null ? Number(defaultVat.rate) : input.countryCode === "RO" ? 21 : 23;
-
-  if (category?.id) {
-    const demos = demoProductsForCountry(input.countryCode, input.businessType);
-    const { error: productsError } = await supabase.from("products").insert(
-      demos.map((item) => ({
-        organisation_id: orgId,
-        category_id: category.id,
-        name: item.name,
-        sale_price: item.sale_price,
-        vat_rate: vatRate,
-        available_in_pos: true,
-        active: true,
-        pos_sort_order: item.sort_order,
-      })),
-    );
-    if (productsError) {
-      console.warn("onboarding_products_seed_failed", productsError.message);
-    }
-  }
-
-  // ── CRITICAL: guarantee at least one sellable product ─────────────────
-  const { count: productCount } = await supabase
-    .from("products")
-    .select("id", { count: "exact", head: true })
-    .eq("organisation_id", orgId)
-    .eq("active", true);
-
-  if (!productCount || productCount === 0) {
-    const fallbackPrice = input.countryCode === "RO" ? 12 : 2.5;
-    const { error: fallbackError } = await supabase.from("products").insert({
-      organisation_id: orgId,
-      name: "Espresso",
-      sale_price: fallbackPrice,
-      vat_rate: vatRate,
-      available_in_pos: true,
-      active: true,
-      pos_sort_order: 1,
-    });
-    if (fallbackError) {
-      console.error("onboarding_product_fallback_failed", fallbackError.message);
-      return { error: "Could not create your product list. Please try again." };
-    }
   }
 
   // ── CRITICAL: POS session ─────────────────────────────────────────────

@@ -79,7 +79,7 @@ const UI_STRINGS = {
     stepTitles: ["Configurați-vă afacerea", "Pregătit pentru prima vânzare"],
     stepSubtitles: [
       "Câteva detalii rapide pentru a vă deschide casa — puteți schimba totul mai târziu din Setări.",
-      "Creăm un catalog de pornire, metodele de plată și casa. FiscalNet se configurează înainte de prima vânzare reală.",
+      "Metodele de plată și casa sunt pregătite. Adăugați primul produs înainte de prima vânzare reală.",
     ],
     stepLabels: ["1. Afacere", "2. Prima vânzare"],
     stepShortLabels: ["Afacere", "Prima vânzare"],
@@ -90,7 +90,7 @@ const UI_STRINGS = {
     sidebarBanner: "Configurați-vă afacerea și casa de marcat ca să puteți vinde azi.",
     sidebarStepDescriptions: [
       "Numele firmei, tipul activității și numele dumneavoastră.",
-      "Produse demo, FiscalNet și casa pregătită pentru prima vânzare.",
+      "Metodele de plată și casa pregătite; adăugați primul produs când sunteți gata.",
     ],
     fiscalLater: "Fac asta mai târziu",
     fiscalConnect: "Conectează ANAF e-Factura",
@@ -136,7 +136,7 @@ const UI_STRINGS = {
     stepTitles: ["Set up your business", "Ready for the first sale"],
     stepSubtitles: [
       "Quick details so we can open your till — you can change everything later in Settings.",
-      "We create starter products, payment methods, and the till. Configure FiscalNet before the first real sale.",
+      "Payment methods and the till are ready. Add your first product before the first real sale.",
     ],
     stepLabels: ["1. Business", "2. First sale"],
     stepShortLabels: ["Business", "First sale"],
@@ -147,7 +147,7 @@ const UI_STRINGS = {
     sidebarBanner: "Set up your business and till so you can start selling today.",
     sidebarStepDescriptions: [
       "Brand name, industry, and your name.",
-      "Starter products, FiscalNet, and an open till for the first sale.",
+      "Payment methods and an open till; add your first product when ready.",
     ],
     fiscalLater: "I'll do this later",
     fiscalConnect: "Connect ANAF e-Factura",
@@ -298,7 +298,7 @@ export default function OnboardingPage() {
               {fiscalAction === "anaf" ? t.fiscalConnecting : t.openingTill}
             </p>
             <p className="mt-1 text-sm text-slate-500">
-              {isRO ? "Se creează produsele demo și se deschide casa…" : "Creating demo products and opening your till…"}
+              {isRO ? "Se deschide casa…" : "Opening your till…"}
             </p>
           </div>
         </div>
@@ -440,8 +440,8 @@ export default function OnboardingPage() {
                 {[
                   {
                     icon: Package,
-                    title: isRO ? "Produse de pornire" : "Starter products",
-                    text: isRO ? "Adăugăm automat un catalog scurt pe baza tipului de activitate." : "We add a short starter catalog based on your business type.",
+                    title: isRO ? "Catalogul dumneavoastră" : "Your catalog",
+                    text: isRO ? "Catalogul începe gol. Adăugați primul produs direct din POS sau Produse." : "Your catalog starts empty. Add your first product from POS or Products.",
                   },
                   {
                     icon: Receipt,

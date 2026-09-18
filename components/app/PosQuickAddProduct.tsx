@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addProductFromPos } from "@/app/actions/kitchenops";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ export function PosQuickAddProduct({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const currencyLabel = currency === "RON" ? "lei" : currency;
 
   function handleClose(next: boolean) {
@@ -40,6 +41,7 @@ export function PosQuickAddProduct({
     e.preventDefault();
     setStatus(null);
     const fd = new FormData(e.currentTarget);
+    const keepOpen = fd.get("intent") === "add_another";
     startTransition(async () => {
       const res = await addProductFromPos(fd);
       if (!res.ok) {
@@ -48,6 +50,13 @@ export function PosQuickAddProduct({
       }
       setStatus({ ok: true, msg: t.productAdded });
       router.refresh();
+      if (keepOpen) {
+        formRef.current?.reset();
+        // Keep the business VAT default explicit for the next product.
+        const vat = formRef.current?.elements.namedItem("vat_rate") as HTMLInputElement | null;
+        if (vat) vat.value = String(defaultVatRate);
+        return;
+      }
       setTimeout(() => {
         setStatus(null);
         onOpenChange(false);
@@ -61,7 +70,7 @@ export function PosQuickAddProduct({
         <DialogHeader>
           <DialogTitle>{t.addProductTitle}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <input type="hidden" name="vat_rate" value={defaultVatRate} />
           <div>
             <Label>{t.productName}</Label>
@@ -70,6 +79,9 @@ export function PosQuickAddProduct({
           <div>
             <Label>{t.salePrice} ({currencyLabel})</Label>
             <Input name="sale_price" type="number" step="0.01" min="0" required placeholder="0.00" className="mt-1" />
+          </div>
+          <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            <span className="font-medium">{t.vatInherited(defaultVatRate)}</span>
           </div>
           <div>
             <Label>{t.category}</Label>
@@ -89,6 +101,9 @@ export function PosQuickAddProduct({
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => handleClose(false)} disabled={pending}>
               {t.cancel}
+            </Button>
+            <Button type="submit" name="intent" value="add_another" variant="outline" disabled={pending}>
+              {t.saveAddAnother}
             </Button>
             <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700" disabled={pending}>
               {pending ? t.processing : t.addProduct}

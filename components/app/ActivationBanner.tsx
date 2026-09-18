@@ -31,16 +31,10 @@ export function ActivationBanner({ locale }: Props) {
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <Link
-              href="/app/setup-checklist"
-              className="inline-flex h-8 items-center justify-center rounded-md border border-blue-200 bg-white px-3 text-sm font-medium text-blue-900 hover:bg-blue-50"
-            >
-              {t.dashboard.activationChecklist}
-            </Link>
-            <Link
-              href="/app/pos?welcome=1"
+              href="/app/products/new"
               className="inline-flex h-8 items-center justify-center rounded-md bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700"
             >
-              {t.dashboard.activationCta}
+              {t.dashboard.addProducts}
               <ArrowRight className="ml-1.5 h-4 w-4" />
             </Link>
           </div>
