@@ -6,6 +6,7 @@ const checks = [
   ["core operating schema", "supabase/migrations/20260917092553_e2e_core_operating_schema.sql", [/create table public\.pos_sessions/i, /create table public\.stock_movements/i, /create table public\.purchases/i]],
   ["POS posting contract", "supabase/migrations/20260917160000_e2e_post_pos_document.sql", [/function public\.post_pos_document/i, /idempotency_key/i]],
   ["NIR posting contract", "supabase/migrations/20260917163000_e2e_post_nir_purchase.sql", [/function public\.post_nir_purchase/i, /stock_movements/i]],
+  ["growth activation contract", "supabase/migrations/20260918120000_e2e_growth_activation_contract.sql", [/growth_first_sale_at/i, /growth_activated_at/i]],
 ];
 
 let failed = false;
@@ -40,6 +41,5 @@ for (const [label, pattern] of [
 
 if (failed) process.exitCode = 1;
 else {
-  console.warn("WARN growth_milestones is not present in the isolated schema; first-sale milestone assertion remains blocked until that contract is added.");
   console.log("Isolated first-sale contract is statically verified; no database was contacted.");
 }
