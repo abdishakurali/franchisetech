@@ -35,10 +35,10 @@ export function PosOfflineBar({
   if (!browserOffline && !hasQueue) return null;
 
   return (
-    <div className="shrink-0 space-y-1.5 border-b border-slate-100 bg-white px-3 py-2 sm:px-4">
+    <div className="shrink-0 space-y-1.5 border-b border-border bg-white px-3 py-2 sm:px-4">
       {browserOffline && (
-        <div className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-800 sm:text-sm">
-          <WifiOff className="h-4 w-4 shrink-0 text-slate-600" aria-hidden />
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-foreground sm:text-sm">
+          <WifiOff className="h-4 w-4 shrink-0 text-mid" aria-hidden />
           {t.offlineModeBanner}
         </div>
       )}
@@ -85,7 +85,7 @@ export function PosOfflineBar({
                 type="button"
                 disabled={syncing}
                 onClick={() => { onDismiss(entry.id); onQueueChange(); }}
-                className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                className="shrink-0 rounded-md border border-border bg-white px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-secondary disabled:opacity-50"
                 title="Elimină din coadă"
               >
                 ×
@@ -122,7 +122,7 @@ export function PosOfflineBar({
                 type="button"
                 disabled={syncing}
                 onClick={() => { onDismiss(entry.id); onQueueChange(); }}
-                className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                className="shrink-0 rounded-md border border-border bg-white px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-secondary disabled:opacity-50"
                 title="Elimină din coadă"
               >
                 ×

@@ -93,8 +93,8 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{t.products.title}</h1>
-          <p className="text-sm text-slate-500">{t.products.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t.products.title}</h1>
+          <p className="text-sm text-muted-foreground">{t.products.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <a href="/api/products/export"><Button variant="outline" size="sm">{t.common.export}</Button></a>
@@ -119,19 +119,19 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
       </div>
 
       {loadError && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded-lg border border-attention/25 bg-attention/10 px-4 py-3 text-sm text-attention">
           {t.products.loadError} {loadError}
         </div>
       )}
 
       {showArchived ? (
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+        <div className="rounded-lg border border-border bg-secondary px-4 py-3 text-sm text-mid">
           {t.products.archivedHint}
         </div>
       ) : null}
 
-      <details className="rounded-xl border border-slate-200 bg-white">
-        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-xl">
+      <details className="rounded-xl border border-border bg-card">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary rounded-xl">
           {t.products.manageCategories(categories.length)}
         </summary>
         <div className="p-4 border-t">
@@ -151,7 +151,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
                 >
                   <Badge
                     variant="secondary"
-                    className={`cursor-pointer transition-shadow hover:shadow-sm ${active ? "ring-2 ring-blue-500 ring-offset-1" : ""}`}
+                    className={`cursor-pointer transition-shadow hover:shadow-sm ${active ? "ring-2 ring-brass ring-offset-1" : ""}`}
                     style={{ backgroundColor: (c.color ?? "#94a3b8") + "20", color: c.color ?? undefined }}
                   >
                     {c.name}
@@ -187,7 +187,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
           </div>
           {categories.length > 0 ? (
             <div className="mt-3 space-y-2">
-              <p className="text-xs text-slate-500">{t.products.filterCategoryHint}</p>
+              <p className="text-xs text-muted-foreground">{t.products.filterCategoryHint}</p>
               <div className="flex flex-wrap gap-2">
                 <Link href={productsHref({ ...listHrefOpts, category: "all" })}>
                   <Badge
@@ -203,7 +203,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
                     <Link key={c.id} href={productsHref({ ...listHrefOpts, category: c.id })}>
                       <Badge
                         variant="secondary"
-                        className={`cursor-pointer text-xs transition-shadow hover:shadow-sm ${active ? "ring-2 ring-blue-500 ring-offset-1" : ""}`}
+                        className={`cursor-pointer text-xs transition-shadow hover:shadow-sm ${active ? "ring-2 ring-brass ring-offset-1" : ""}`}
                         style={{ backgroundColor: (c.color ?? "#94a3b8") + "20", color: c.color ?? undefined }}
                       >
                         {c.name}
@@ -214,12 +214,12 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
               </div>
             </div>
           ) : null}
-          <p className="text-xs text-slate-400 mt-1">{t.products.bulkHint}</p>
+          <p className="text-xs text-muted-foreground mt-1">{t.products.bulkHint}</p>
         </CardHeader>
         <CardContent>
           {!products.length ? (
             <div className="text-center py-10">
-              <p className="text-slate-400 mb-4">{t.products.empty}</p>
+              <p className="text-muted-foreground mb-4">{t.products.empty}</p>
               <Link href="/app/products/new"><Button variant="outline">{t.products.addFirst}</Button></Link>
             </div>
           ) : (

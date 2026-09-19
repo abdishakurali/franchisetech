@@ -53,7 +53,7 @@ export function InventoryCountCell({
         type="button"
         onClick={() => setEditing(true)}
         className={`tabular-nums font-semibold rounded px-1.5 py-0.5 transition-colors ${
-          hasVariance ? "text-amber-700 hover:bg-amber-50" : "text-green-700 hover:bg-green-50"
+          hasVariance ? "text-amber-700 hover:bg-amber-50" : "text-reconciled hover:bg-reconciled/10"
         }`}
       >
         {countedQty} {unit}
@@ -77,14 +77,14 @@ export function InventoryCountCell({
             }
           }}
           placeholder={String(expectedQty)}
-          className="w-20 h-7 text-sm border border-blue-300 rounded px-1.5 tabular-nums focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="w-20 h-7 text-sm border border-brass/40 rounded px-1.5 tabular-nums focus:outline-none focus:ring-2 focus:ring-brass/30"
           autoFocus
         />
         <button
           type="button"
           onClick={save}
           disabled={saving || val.trim() === ""}
-          className="text-xs font-bold text-green-600 hover:text-green-800 px-1 disabled:opacity-40"
+          className="text-xs font-bold text-reconciled hover:text-reconciled px-1 disabled:opacity-40"
         >
           {saving ? "…" : "✓"}
         </button>
@@ -95,13 +95,13 @@ export function InventoryCountCell({
               setVal(String(countedQty));
               setEditing(false);
             }}
-            className="text-xs text-slate-400 hover:text-slate-600 px-1"
+            className="text-xs text-muted-foreground hover:text-mid px-1"
           >
             ✕
           </button>
         ) : null}
       </span>
-      {error ? <span className="text-[10px] text-red-600">{error}</span> : null}
+      {error ? <span className="text-[10px] text-attention">{error}</span> : null}
     </span>
   );
 }

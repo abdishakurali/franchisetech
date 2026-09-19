@@ -60,12 +60,12 @@ export default async function ConsumTeoreticPage({
     return (
       <div className="space-y-6 p-6">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
-          <p className="text-sm text-slate-500">{labels.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{labels.title}</h1>
+          <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
         <ReportDateRangeFilter basePath="/app/reports/consum-teoretic" from={fromDate} to={toDate} />
         <Card>
-          <CardContent className="py-10 text-center text-sm text-slate-400">
+          <CardContent className="py-10 text-center text-sm text-muted-foreground">
             Nicio vânzare legată de o rețetă în această perioadă.
           </CardContent>
         </Card>
@@ -153,8 +153,8 @@ export default async function ConsumTeoreticPage({
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
-          <p className="text-sm text-slate-500">{labels.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{labels.title}</h1>
+          <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
         <ReportDateRangeFilter basePath="/app/reports/consum-teoretic" from={fromDate} to={toDate} />
       </div>
@@ -170,9 +170,9 @@ export default async function ConsumTeoreticPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Teoretic (rețete curente)</CardTitle></CardHeader><CardContent className="text-xl font-bold">{totalTheo.toFixed(2)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Real (scăzut din stoc)</CardTitle></CardHeader><CardContent className="text-xl font-bold">{totalAct.toFixed(2)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Diferență</CardTitle></CardHeader><CardContent className={`text-xl font-bold ${Math.abs(totalAct - totalTheo) < 0.01 ? "text-slate-700" : totalAct > totalTheo ? "text-red-600" : "text-green-700"}`}>{(totalAct - totalTheo).toFixed(2)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Teoretic (rețete curente)</CardTitle></CardHeader><CardContent className="text-xl font-bold">{totalTheo.toFixed(2)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Real (scăzut din stoc)</CardTitle></CardHeader><CardContent className="text-xl font-bold">{totalAct.toFixed(2)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Diferență</CardTitle></CardHeader><CardContent className={`text-xl font-bold ${Math.abs(totalAct - totalTheo) < 0.01 ? "text-foreground" : totalAct > totalTheo ? "text-attention" : "text-reconciled"}`}>{(totalAct - totalTheo).toFixed(2)}</CardContent></Card>
       </div>
 
       <Card>
@@ -192,16 +192,16 @@ export default async function ConsumTeoreticPage({
               {rows.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="font-medium">{r.name}</TableCell>
-                  <TableCell className="text-right tabular-nums text-slate-500">{r.theo.toFixed(3)} {r.unit}</TableCell>
-                  <TableCell className="text-right tabular-nums text-slate-500">{r.act.toFixed(3)} {r.unit}</TableCell>
+                  <TableCell className="text-right tabular-nums text-muted-foreground">{r.theo.toFixed(3)} {r.unit}</TableCell>
+                  <TableCell className="text-right tabular-nums text-muted-foreground">{r.act.toFixed(3)} {r.unit}</TableCell>
                   <TableCell
                     className={`text-right tabular-nums font-medium ${
-                      Math.abs(r.variance) < 0.005 ? "text-slate-400" : r.variance > 0 ? "text-red-600" : "text-green-700"
+                      Math.abs(r.variance) < 0.005 ? "text-muted-foreground" : r.variance > 0 ? "text-attention" : "text-reconciled"
                     }`}
                   >
                     {r.variance > 0 ? "+" : ""}{r.variance.toFixed(3)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-slate-500">
+                  <TableCell className="text-right tabular-nums text-muted-foreground">
                     {r.variancePct != null ? `${r.variancePct > 0 ? "+" : ""}${r.variancePct.toFixed(1)}%` : "—"}
                   </TableCell>
                 </TableRow>
@@ -211,8 +211,8 @@ export default async function ConsumTeoreticPage({
         </CardContent>
       </Card>
 
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <p className="text-xs text-slate-500">
+      <div className="rounded-lg border border-border bg-secondary p-4">
+        <p className="text-xs text-muted-foreground">
           <strong>Sursa datelor:</strong> Teoreticul provine din liniile de vânzare cu rețetă asociată (pos_transaction_items.recipe_id)
           × cantitățile din rețeta curentă. Realul provine din mișcările de stoc de tip &apos;sale_used&apos;, limitate strict la
           aceleași vânzări — o vânzare fără rețetă asociată nu apare pe nicio parte a comparației.

@@ -68,7 +68,7 @@ export function BusinessModulesCard({
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
             <p className="font-medium">Module locked</p>
             <p className="mt-1">{lockedMessage}</p>
-            <Link href="/app/billing" className="mt-2 inline-block text-blue-700 hover:underline">
+            <Link href="/app/billing" className="mt-2 inline-block text-brass hover:underline">
               View billing plans
             </Link>
           </div>
@@ -77,14 +77,14 @@ export function BusinessModulesCard({
         {canEdit ? (
           <form action={updateAction} className="space-y-6">
             <div>
-              <label htmlFor="business_profile" className="text-sm font-medium text-slate-700">
+              <label htmlFor="business_profile" className="text-sm font-medium text-foreground">
                 Business level
               </label>
               <select
                 id="business_profile"
                 name="business_profile"
                 defaultValue={profile}
-                className="mt-1 h-10 w-full max-w-md rounded-md border border-slate-200 bg-white px-3 text-sm"
+                className="mt-1 h-10 w-full max-w-md rounded-md border border-border bg-card px-3 text-sm"
               >
                 {PROFILE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -92,13 +92,13 @@ export function BusinessModulesCard({
                   </option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Changing level does not delete stock or recipe data. Turn modules off to simplify the menu.
               </p>
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-700">Product modules</p>
+              <p className="text-sm font-medium text-foreground">Product modules</p>
               {TOGGLE_MODULES.map((moduleKey) => {
                 const def = BUSINESS_MODULE_DEFINITIONS.find((d) => d.key === moduleKey);
                 const fieldName = def?.settingsKey ?? "inventory_enabled";
@@ -120,7 +120,7 @@ export function BusinessModulesCard({
                   <div
                     key={moduleKey}
                     className={`flex items-start gap-3 rounded-lg border p-3 ${
-                      allowed ? "border-slate-200" : "border-slate-100 bg-slate-50 opacity-90"
+                      allowed ? "border-border" : "border-border bg-secondary opacity-90"
                     }`}
                   >
                     <input type="hidden" name={fieldName} value="false" />
@@ -145,7 +145,7 @@ export function BusinessModulesCard({
                           </Badge>
                         ) : null}
                       </div>
-                      <p className="text-xs text-slate-500">{def?.description}</p>
+                      <p className="text-xs text-muted-foreground">{def?.description}</p>
                       {!allowed && blockReason ? (
                         <p className="mt-1 text-xs text-amber-700">{blockReason}</p>
                       ) : null}
@@ -160,14 +160,14 @@ export function BusinessModulesCard({
         ) : (
           <div className="space-y-2 text-sm">
             <p>
-              <span className="text-slate-500">Business level:</span>{" "}
+              <span className="text-muted-foreground">Business level:</span>{" "}
               <span className="font-medium">{profileLabel(profile, locale)}</span>
             </p>
             {TOGGLE_MODULES.map((moduleKey) => {
               const def = BUSINESS_MODULE_DEFINITIONS.find((d) => d.key === moduleKey);
               return (
                 <p key={moduleKey}>
-                  <span className="text-slate-500">{def?.label}:</span>{" "}
+                  <span className="text-muted-foreground">{def?.label}:</span>{" "}
                   <span className="font-medium">{isModuleEnabled(org, moduleKey) ? "On" : "Off"}</span>
                 </p>
               );

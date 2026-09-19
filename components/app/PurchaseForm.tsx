@@ -102,23 +102,23 @@ function SupplierCombobox({
           onBlur={() => setTimeout(() => setOpen(false), 150)}
           placeholder={t.purchases.form.searchSupplier}
           autoComplete="off"
-          className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 pr-8 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+          className="h-10 w-full rounded-md border border-border bg-card px-3 pr-8 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass/20 focus:border-brass/40"
         />
         {query && (
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-mid text-xs"
             aria-label={t.purchases.form.clearSupplier}
           >✕</button>
         )}
       </div>
       {open && (
-        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-56 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
           <button
             type="button"
             onMouseDown={handleClear}
-            className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-slate-100 italic text-slate-400"
+            className="w-full text-left px-3 py-2 text-sm hover:bg-accent border-b border-border italic text-muted-foreground"
           >
             {t.purchases.form.noSupplier}
           </button>
@@ -128,15 +128,15 @@ function SupplierCombobox({
                 key={s.id}
                 type="button"
                 onMouseDown={() => handleSelect(s)}
-                className={`w-full text-left px-3 py-2 text-sm hover:bg-blue-50 border-b border-slate-50 last:border-0 ${s.id === selectedId ? "text-blue-700 font-medium bg-blue-50" : "text-slate-800"}`}
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-accent border-b border-border last:border-0 ${s.id === selectedId ? "text-brass font-medium bg-accent" : "text-foreground"}`}
               >
                 {s.name}
               </button>
             ))
           ) : (
-            <div className="px-3 py-3 text-xs text-slate-500">
+            <div className="px-3 py-3 text-xs text-muted-foreground">
               {query && <span>{t.purchases.form.noSupplierFound}</span>}
-              <Link href="/app/suppliers/new" className="text-blue-600 hover:underline">
+              <Link href="/app/suppliers/new" className="text-brass hover:underline">
                 {t.purchases.form.addSupplierLink}
               </Link>
             </div>
@@ -205,19 +205,19 @@ function PurchaseItemCombobox({
           }
           placeholder={t.purchases.form.searchItem}
           autoComplete="off"
-          className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 pr-7 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+          className="h-10 w-full rounded-md border border-border bg-card px-3 pr-7 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-brass/20 focus:border-brass/40"
         />
         {query && (
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-mid text-xs"
             aria-label={t.purchases.form.clearItem}
           >✕</button>
         )}
       </div>
       {open && (
-        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-60 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-60 overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
           {filtered.length > 0 ? (
             filtered.map((p) => {
               const typeLabel = getTypeLabel(p);
@@ -227,11 +227,11 @@ function PurchaseItemCombobox({
                   key={p.id}
                   type="button"
                   onMouseDown={() => handleSelect(p)}
-                  className={`w-full text-left px-3 py-2 hover:bg-blue-50 border-b border-slate-50 last:border-0 ${isSelected ? "bg-blue-50" : ""}`}
+                  className={`w-full text-left px-3 py-2 hover:bg-accent border-b border-border last:border-0 ${isSelected ? "bg-accent" : ""}`}
                 >
-                  <p className={`text-sm font-medium ${isSelected ? "text-blue-700" : "text-slate-900"}`}>{p.name}</p>
+                  <p className={`text-sm font-medium ${isSelected ? "text-brass" : "text-foreground"}`}>{p.name}</p>
                   {(typeLabel || p.unit_of_measure) && (
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {[typeLabel, p.unit_of_measure].filter(Boolean).join(" · ")}
                     </p>
                   )}
@@ -239,9 +239,9 @@ function PurchaseItemCombobox({
               );
             })
           ) : (
-            <div className="px-3 py-3 text-xs text-slate-500">
+            <div className="px-3 py-3 text-xs text-muted-foreground">
               {t.purchases.form.noItemFound}
-              <Link href="/app/products/new" className="text-blue-600 hover:underline">
+              <Link href="/app/products/new" className="text-brass hover:underline">
                 {t.purchases.form.addItemLink}
               </Link>
             </div>
@@ -378,15 +378,15 @@ export function PurchaseForm({
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-6">
       <div className="flex items-center gap-3">
-        <Link href="/app/purchases" className="text-sm text-slate-500 hover:text-slate-700">← {t.purchases.title}</Link>
-        <h1 className="text-2xl font-semibold text-slate-950">{title}</h1>
+        <Link href="/app/purchases" className="text-sm text-muted-foreground hover:text-foreground">← {t.purchases.title}</Link>
+        <h1 className="text-2xl font-semibold text-foreground">{title}</h1>
       </div>
 
       {products.length === 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
           <p className="font-medium mb-1">{isRO ? "Articole cumpărate / stoc" : "Purchase / inventory items"}</p>
           <p>{emptyMsg}</p>
-          <Link href="/app/products" className="mt-2 inline-block text-blue-600 hover:underline text-xs">
+          <Link href="/app/products" className="mt-2 inline-block text-brass hover:underline text-xs">
             {isRO ? "Mergi la produse →" : "Go to products →"}
           </Link>
         </div>
@@ -395,7 +395,7 @@ export function PurchaseForm({
       <Card>
         <CardHeader>
           <CardTitle>{t.purchases.form.lineItems}</CardTitle>
-          <p className="text-sm text-slate-500 mt-1">{t.purchases.hintPosted}</p>
+          <p className="text-sm text-muted-foreground mt-1">{t.purchases.hintPosted}</p>
         </CardHeader>
         <CardContent>
           <form className="space-y-5">
@@ -412,7 +412,7 @@ export function PurchaseForm({
                   selectedId={supplierId}
                   onSelect={setSupplierId}
                 />
-                <button type="button" onClick={() => setShowNewSupplier((v) => !v)} className="mt-1 text-xs text-blue-600 hover:underline">
+                <button type="button" onClick={() => setShowNewSupplier((v) => !v)} className="mt-1 text-xs text-brass hover:underline">
                   {isRO ? "Adaugă furnizor rapid" : "Add supplier"}
                 </button>
               </div>
@@ -461,7 +461,7 @@ export function PurchaseForm({
             </div>
 
             {showNewSupplier && (
-              <div className="grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-[120px_1fr_1fr_auto]">
+              <div className="grid gap-2 rounded-xl border border-border bg-secondary p-3 sm:grid-cols-[120px_1fr_1fr_auto]">
                 <Input value={newSupplier.tax_id} onChange={(e) => setNewSupplier((s) => ({ ...s, tax_id: e.target.value }))} placeholder="CUI" />
                 <Input value={newSupplier.name} onChange={(e) => setNewSupplier((s) => ({ ...s, name: e.target.value }))} placeholder={t.purchases.form.supplier} />
                 <Input value={newSupplier.address} onChange={(e) => setNewSupplier((s) => ({ ...s, address: e.target.value }))} placeholder={isRO ? "Adresă" : "Address"} />
@@ -475,10 +475,10 @@ export function PurchaseForm({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>{t.purchases.form.lineItems}</Label>
-                <span className="text-xs text-slate-400">{lines.length}</span>
+                <span className="text-xs text-muted-foreground">{lines.length}</span>
               </div>
 
-              <div className="grid grid-cols-[1fr_80px_90px_90px_90px_80px_80px_36px] gap-2 px-0.5 text-xs text-slate-400 font-medium">
+              <div className="grid grid-cols-[1fr_80px_90px_90px_90px_80px_80px_36px] gap-2 px-0.5 text-xs text-muted-foreground font-medium">
                 <span>{t.purchases.form.product}</span>
                 <span>{t.purchases.form.um}</span>
                 <span>{t.purchases.form.qty}</span>
@@ -532,14 +532,14 @@ export function PurchaseForm({
                       compact
                       settingsHint={false}
                     />
-                    <div className="text-right text-sm font-medium text-slate-700 tabular-nums">
+                    <div className="text-right text-sm font-medium text-foreground tabular-nums">
                       {calc.lineTotal > 0 ? fmt(calc.lineTotal) : "—"}
                     </div>
                     <button
                       type="button"
                       onClick={() => removeLine(line.id)}
                       disabled={lines.length === 1}
-                      className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-400 hover:border-red-200 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                      className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-attention/25 hover:text-attention disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                       aria-label={`${isRO ? "Șterge linia" : "Remove line"} ${idx + 1}`}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -551,22 +551,22 @@ export function PurchaseForm({
               <button
                 type="button"
                 onClick={addLine}
-                className="flex items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-sm text-slate-500 hover:border-blue-300 hover:text-blue-600 transition-colors w-full justify-center"
+                className="flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground hover:border-brass/40 hover:text-brass transition-colors w-full justify-center"
               >
                 <Plus className="h-4 w-4" />{t.purchases.form.addLine}
               </button>
 
               {grandTotal > 0 && (
-                <div className="space-y-1 rounded-lg bg-slate-50 px-4 py-3 text-sm">
-                  <div className="flex justify-between text-slate-500">
+                <div className="space-y-1 rounded-lg bg-secondary px-4 py-3 text-sm">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>{t.purchases.form.subtotal}</span>
                     <span className="tabular-nums">{fmt(subtotalSum)}</span>
                   </div>
-                  <div className="flex justify-between text-slate-500">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>{t.purchases.form.tax}</span>
                     <span className="tabular-nums">{fmt(taxSum)}</span>
                   </div>
-                  <div className="flex justify-between text-lg font-bold text-slate-900 border-t pt-2 mt-1">
+                  <div className="flex justify-between text-lg font-bold text-foreground border-t pt-2 mt-1">
                     <span>{t.purchases.form.total}</span>
                     <span className="tabular-nums">{fmt(grandTotal)}</span>
                   </div>
@@ -576,7 +576,7 @@ export function PurchaseForm({
               <input type="hidden" name="subtotal_amount" value={subtotalSum.toFixed(4)} />
               <input type="hidden" name="tax_total" value={taxSum.toFixed(4)} />
 
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {isRO
                   ? "Cantitate = câte unități ai primit. Cost net = prețul pe unitate, fără TVA."
                   : "Quantity is how much you received. Net cost is the unit price excluding VAT."}
@@ -606,7 +606,7 @@ export function PurchaseForm({
               <Button
                 type="submit"
                 disabled={products.length === 0}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 formAction={postNirPurchase as unknown as (fd: FormData) => Promise<void>}
               >
                 {t.purchases.form.postNir}

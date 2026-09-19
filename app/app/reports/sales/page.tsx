@@ -54,14 +54,14 @@ export default async function SalesReportPage({
       <GrowthReportViewTracker />
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{rp.title}</h1>
-          <p className="text-sm text-slate-500">{rp.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{rp.title}</h1>
+          <p className="text-sm text-muted-foreground">{rp.subtitle}</p>
         </div>
         <div className="flex gap-3 items-center flex-wrap">
           <ReportDateRangeFilter basePath="/app/reports/sales" from={from} to={to} />
           <Link
             href={`/api/reports/sales/pdf?from=${from}&to=${to}`}
-            className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium hover:bg-secondary"
           >
             <FileDown className="h-4 w-4" />
             {t.common.downloadPdf}
@@ -71,19 +71,19 @@ export default async function SalesReportPage({
 
       {/* KPI cards */}
       <div className="grid gap-4 md:grid-cols-5">
-        <Card><CardHeader><CardTitle className="text-sm font-medium text-slate-500">{rp.today}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(sumRows(todayTx, (tx) => Number(tx.total ?? 0)), currency)}</CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-sm font-medium text-slate-500">{rp.thisWeek}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(sumRows(weekTx, (tx) => Number(tx.total ?? 0)), currency)}</CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-sm font-medium text-slate-500">{rp.grossExTips}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(grossExTips, currency)}</CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-sm font-medium text-slate-500">{t.transactions.title}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{transactionCount}</CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-sm font-medium text-slate-500">{rp.voided}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-red-600">{voidedCount}</CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.today}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(sumRows(todayTx, (tx) => Number(tx.total ?? 0)), currency)}</CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.thisWeek}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(sumRows(weekTx, (tx) => Number(tx.total ?? 0)), currency)}</CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.grossExTips}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(grossExTips, currency)}</CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{t.transactions.title}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{transactionCount}</CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.voided}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-attention">{voidedCount}</CardContent></Card>
       </div>
 
       {totalTips > 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <div className="flex flex-wrap gap-8 text-sm">
-            <div><p className="text-slate-500">{rp.grossExTipsShort}</p><p className="text-xl font-semibold text-slate-900">{formatMoney(grossExTips, currency)}</p></div>
-            <div><p className="text-slate-500">{rp.tipsCollected}</p><p className="text-xl font-semibold text-amber-700">{formatMoney(totalTips, currency)}</p></div>
-            <div><p className="text-slate-500">{rp.totalCollected}</p><p className="text-xl font-bold text-slate-900">{formatMoney(totalGross, currency)}</p></div>
+            <div><p className="text-muted-foreground">{rp.grossExTipsShort}</p><p className="text-xl font-semibold text-foreground">{formatMoney(grossExTips, currency)}</p></div>
+            <div><p className="text-muted-foreground">{rp.tipsCollected}</p><p className="text-xl font-semibold text-amber-700">{formatMoney(totalTips, currency)}</p></div>
+            <div><p className="text-muted-foreground">{rp.totalCollected}</p><p className="text-xl font-bold text-foreground">{formatMoney(totalGross, currency)}</p></div>
           </div>
         </div>
       )}
@@ -92,23 +92,23 @@ export default async function SalesReportPage({
         <CardHeader><CardTitle>{rp.vatSummary}</CardTitle></CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-3 mb-4">
-            <div className="rounded-lg bg-slate-50 p-4">
-              <p className="text-sm text-slate-500">{rp.netSales}</p>
-              <p className="text-xl font-bold text-slate-900">{formatMoney(totalNet || (grossExTips - totalVat), currency)}</p>
+            <div className="rounded-lg bg-secondary p-4">
+              <p className="text-sm text-muted-foreground">{rp.netSales}</p>
+              <p className="text-xl font-bold text-foreground">{formatMoney(totalNet || (grossExTips - totalVat), currency)}</p>
             </div>
-            <div className="rounded-lg bg-blue-50 p-4">
-              <p className="text-sm text-slate-500">{rp.vatCollected}</p>
-              <p className="text-xl font-bold text-blue-700">{formatMoney(totalVat, currency)}</p>
+            <div className="rounded-lg bg-accent p-4">
+              <p className="text-sm text-muted-foreground">{rp.vatCollected}</p>
+              <p className="text-xl font-bold text-brass">{formatMoney(totalVat, currency)}</p>
             </div>
-            <div className="rounded-lg bg-green-50 p-4">
-              <p className="text-sm text-slate-500">{rp.grossInclVat}</p>
-              <p className="text-xl font-bold text-green-700">{formatMoney(grossExTips, currency)}</p>
+            <div className="rounded-lg bg-reconciled/10 p-4">
+              <p className="text-sm text-muted-foreground">{rp.grossInclVat}</p>
+              <p className="text-xl font-bold text-reconciled">{formatMoney(grossExTips, currency)}</p>
             </div>
           </div>
           {totalDiscounts > 0 && (
-            <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm">
-              <p className="text-slate-600">{rp.discountsGiven}</p>
-              <p className="text-xl font-bold text-blue-700 mt-1">−{formatMoney(totalDiscounts, currency)}</p>
+            <div className="mb-4 rounded-lg border border-brass/30 bg-accent p-4 text-sm">
+              <p className="text-mid">{rp.discountsGiven}</p>
+              <p className="text-xl font-bold text-brass mt-1">−{formatMoney(totalDiscounts, currency)}</p>
             </div>
           )}
           {vatByRate.size > 0 && (
@@ -142,7 +142,7 @@ export default async function SalesReportPage({
           <CardHeader><CardTitle>{rp.topProducts}</CardTitle></CardHeader>
           <CardContent>
             {productRows.length === 0 ? (
-              <p className="text-sm text-slate-400">{rp.noSalesData}</p>
+              <p className="text-sm text-muted-foreground">{rp.noSalesData}</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -171,12 +171,12 @@ export default async function SalesReportPage({
           <CardHeader><CardTitle>{rp.paymentBreakdown}</CardTitle></CardHeader>
           <CardContent>
             {byPayment.size === 0 ? (
-              <p className="text-sm text-slate-400">{rp.noSalesData}</p>
+              <p className="text-sm text-muted-foreground">{rp.noSalesData}</p>
             ) : (
               [...byPayment.entries()].map(([name, total]) => (
                 <div key={name} className="flex justify-between border-b py-3 text-sm last:border-0">
-                  <span className="text-slate-700">{name}</span>
-                  <strong className="text-slate-900">{formatMoney(total, currency)}</strong>
+                  <span className="text-foreground">{name}</span>
+                  <strong className="text-foreground">{formatMoney(total, currency)}</strong>
                 </div>
               ))
             )}

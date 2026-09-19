@@ -23,21 +23,21 @@ export default async function DataRepairPage() {
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <header>
-        <h1 className="text-2xl font-semibold text-slate-950">Controlul datelor</h1>
-        <p className="text-sm text-slate-500">Excepțiile sunt blocate din POS până la validare și fiecare corecție rămâne în audit.</p>
+        <h1 className="text-2xl font-semibold text-foreground">Controlul datelor</h1>
+        <p className="text-sm text-muted-foreground">Excepțiile sunt blocate din POS până la validare și fiecare corecție rămâne în audit.</p>
       </header>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="border-l-4 border-red-500 bg-white p-4">
-          <p className="text-sm text-slate-500">TVA de validat</p>
+        <div className="border-l-4 border-red-500 bg-card p-4">
+          <p className="text-sm text-muted-foreground">TVA de validat</p>
           <p className="mt-1 text-2xl font-semibold">{products?.length ?? 0}</p>
         </div>
-        <div className="border-l-4 border-amber-500 bg-white p-4">
-          <p className="text-sm text-slate-500">Blocarea începe</p>
+        <div className="border-l-4 border-amber-500 bg-card p-4">
+          <p className="text-sm text-muted-foreground">Blocarea începe</p>
           <p className="mt-1 text-sm font-semibold">{org?.compliance_enforcement_at ? new Date(org.compliance_enforcement_at).toLocaleString("ro-RO") : "Imediat"}</p>
         </div>
-        <div className="border-l-4 border-emerald-600 bg-white p-4">
-          <p className="text-sm text-slate-500">Loturi finalizate</p>
+        <div className="border-l-4 border-emerald-600 bg-card p-4">
+          <p className="text-sm text-muted-foreground">Loturi finalizate</p>
           <p className="mt-1 text-2xl font-semibold">{(batches ?? []).filter((batch) => batch.status === "completed").length}</p>
         </div>
       </div>
@@ -60,17 +60,17 @@ export default async function DataRepairPage() {
                       {canManage ? (
                         <form action={approveProductVat} className="flex min-w-56 gap-2">
                           <input type="hidden" name="product_id" value={product.id} />
-                          <select name="vat_rate" defaultValue={String(product.vat_rate)} className="h-9 flex-1 rounded-md border bg-white px-2 text-sm">
+                          <select name="vat_rate" defaultValue={String(product.vat_rate)} className="h-9 flex-1 rounded-md border bg-card px-2 text-sm">
                             {(rates ?? []).map((rate) => <option key={rate.id} value={Number(rate.rate)}>{rate.name} ({Number(rate.rate)}%)</option>)}
                           </select>
-                          <button className="h-9 rounded-md bg-slate-950 px-3 text-sm font-medium text-white">Aprobă</button>
+                          <button className="h-9 rounded-md bg-ink px-3 text-sm font-medium text-white">Aprobă</button>
                         </form>
                       ) : "Doar proprietarul sau managerul poate aproba."}
                     </TableCell>
                   </TableRow>
                 );
               })}
-              {!products?.length && <TableRow><TableCell colSpan={4} className="py-10 text-center text-sm text-slate-500">Nu există produse blocate pentru TVA.</TableCell></TableRow>}
+              {!products?.length && <TableRow><TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">Nu există produse blocate pentru TVA.</TableCell></TableRow>}
             </TableBody>
           </Table>
         </CardContent>
@@ -81,7 +81,7 @@ export default async function DataRepairPage() {
         <CardContent>
           <form action={updateSgrPolicy} className="grid gap-3 sm:grid-cols-[1fr_9rem_9rem_auto] sm:items-end">
             <label className="text-sm">Tratament
-              <select name="sgr_policy" defaultValue={org?.sgr_policy ?? "accountant_approval_required"} className="mt-1 h-10 w-full rounded-md border bg-white px-2">
+              <select name="sgr_policy" defaultValue={org?.sgr_policy ?? "accountant_approval_required"} className="mt-1 h-10 w-full rounded-md border bg-card px-2">
                 <option value="accountant_approval_required">Necesită aprobarea contabilului</option>
                 <option value="outside_vat_scope">În afara bazei TVA</option>
                 <option value="included_in_taxable_base">Inclus în baza taxabilă</option>
@@ -93,7 +93,7 @@ export default async function DataRepairPage() {
             <label className="text-sm">TVA
               <input name="sgr_vat_rate" type="number" min="0" step="0.01" defaultValue={Number(org?.sgr_vat_rate ?? 0)} className="mt-1 h-10 w-full rounded-md border px-2" />
             </label>
-            <button className="h-10 rounded-md bg-slate-950 px-4 text-sm font-medium text-white">Salvează</button>
+            <button className="h-10 rounded-md bg-ink px-4 text-sm font-medium text-white">Salvează</button>
           </form>
         </CardContent>
       </Card>
@@ -107,7 +107,7 @@ export default async function DataRepairPage() {
               <Badge variant="outline">{batch.status}</Badge>
             </div>
           ))}
-          {!batches?.length && <p className="py-6 text-center text-sm text-slate-500">Nu există loturi de reparație.</p>}
+          {!batches?.length && <p className="py-6 text-center text-sm text-muted-foreground">Nu există loturi de reparație.</p>}
         </CardContent>
       </Card>
     </div>

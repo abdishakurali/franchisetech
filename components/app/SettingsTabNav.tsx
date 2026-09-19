@@ -23,7 +23,7 @@ export function SettingsTabNav({ tabs }: { tabs: SettingsTab[] }) {
 
   return (
     <div
-      className="settings-tab-nav mb-8 rounded-xl border border-slate-200 bg-white p-1 shadow-sm"
+      className="settings-tab-nav mb-8 rounded-xl border border-border bg-card p-1 shadow-sm"
       style={{
         marginLeft: 0,
         marginRight: 0,
@@ -51,10 +51,10 @@ export function SettingsTabNav({ tabs }: { tabs: SettingsTab[] }) {
               key={tab.id}
               href={tab.href ?? `?tab=${tab.id}`}
               className={cn(
-                "inline-flex items-center whitespace-nowrap border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-t",
+                "inline-flex items-center whitespace-nowrap border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/30 rounded-t",
                 isActive
-                  ? "border-blue-600 text-blue-700 bg-blue-50"
-                  : "border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  ? "border-brass text-brass bg-accent"
+                  : "border-transparent text-mid hover:text-foreground hover:bg-secondary"
               )}
               style={{
                 display: "inline-flex",

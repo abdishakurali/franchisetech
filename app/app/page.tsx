@@ -171,7 +171,7 @@ export default async function DashboardPage({ searchParams }: Props) {
   const sameWeekdayTotal = sameWeekdayTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
 
   const isGrowing = currentSalesExTips >= prevTotal;
-  const salesColor = prevTotal === 0 && currentTotal === 0 ? "text-slate-950" : isGrowing ? "text-green-600" : "text-red-600";
+  const salesColor = prevTotal === 0 && currentTotal === 0 ? "text-foreground" : isGrowing ? "text-reconciled" : "text-attention";
   const diffSign = isGrowing ? "+" : "";
   const diffAmount = currentSalesExTips - prevTotal;
 
@@ -206,13 +206,13 @@ export default async function DashboardPage({ searchParams }: Props) {
       {showActivationBanner && <ActivationBanner locale={locale} />}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{t.dashboard.title}</h1>
-          <p className="text-sm text-slate-500">{t.dashboard.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t.dashboard.title}</h1>
+          <p className="text-sm text-muted-foreground">{t.dashboard.subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {sessionData ? (
-            <div className="flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-800">
-              <span className="inline-flex h-2 w-2 rounded-full bg-green-500" />
+            <div className="flex items-center gap-2 rounded-full border border-reconciled/25 bg-reconciled/10 px-3 py-1 text-sm text-reconciled">
+              <span className="inline-flex h-2 w-2 rounded-full bg-reconciled" />
               {t.dashboard.tillOpen}
             </div>
           ) : null}
@@ -220,7 +220,7 @@ export default async function DashboardPage({ searchParams }: Props) {
           {!showActivationBanner ? (
             <Link href="/app/setup-checklist"><Button variant="outline">{t.dashboard.setupGuide}</Button></Link>
           ) : null}
-          <Link href="/app/pos"><Button className="bg-blue-600 hover:bg-blue-700 text-white">{t.dashboard.openPos}</Button></Link>
+          <Link href="/app/pos"><Button className="bg-primary hover:bg-primary/90 text-primary-foreground">{t.dashboard.openPos}</Button></Link>
         </div>
       </div>
 
@@ -229,7 +229,7 @@ export default async function DashboardPage({ searchParams }: Props) {
         <Suspense fallback={
           <Card>
             <CardHeader className="pb-1">
-              <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+              <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 <BarChart3 className="h-4 w-4" />{t.dashboard.sales}{currentTips > 0 ? t.common.exTips : ""}
               </CardTitle>
             </CardHeader>
@@ -241,15 +241,15 @@ export default async function DashboardPage({ searchParams }: Props) {
           <DashboardSalesHighlight>
             <Card>
               <CardHeader className="pb-1">
-                <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   <BarChart3 className="h-4 w-4" />{t.dashboard.sales}{currentTips > 0 ? t.common.exTips : ""}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className={`text-2xl font-bold ${salesColor}`}>{money(currentSalesExTips, currency)}</p>
-                <p className="text-xs text-slate-400">{t.common.transactions(currentCount)}{currentTips > 0 ? ` · +${money(currentTips, currency)} ${t.common.tips}` : ""}</p>
+                <p className="text-xs text-muted-foreground">{t.common.transactions(currentCount)}{currentTips > 0 ? ` · +${money(currentTips, currency)} ${t.common.tips}` : ""}</p>
                 {prevTotal > 0 || currentTotal > 0 ? (
-                  <p className={`text-xs mt-0.5 ${isGrowing ? "text-green-600" : "text-red-600"}`}>
+                  <p className={`text-xs mt-0.5 ${isGrowing ? "text-reconciled" : "text-attention"}`}>
                     {diffSign}{money(diffAmount, currency)} {periodLabel}
                   </p>
                 ) : null}
@@ -261,19 +261,19 @@ export default async function DashboardPage({ searchParams }: Props) {
         {/* Transactions + avg ticket */}
         <Card>
           <CardHeader className="pb-1">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <Receipt className="h-4 w-4" />{t.dashboard.transactions ?? "Transactions"}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-slate-950">{currentCount}</p>
+            <p className="text-2xl font-bold text-foreground">{currentCount}</p>
             {currentCount > 0 ? (
-              <p className="text-xs text-slate-400">{t.dashboard.avgTicket ?? "Avg ticket"}: {money(avgTicket, currency)}</p>
+              <p className="text-xs text-muted-foreground">{t.dashboard.avgTicket ?? "Avg ticket"}: {money(avgTicket, currency)}</p>
             ) : (
-              <p className="text-xs text-slate-400">{t.dashboard.noSalesYet ?? "No sales yet"}</p>
+              <p className="text-xs text-muted-foreground">{t.dashboard.noSalesYet ?? "No sales yet"}</p>
             )}
             {period === "today" && sameWeekdayTotal > 0 ? (
-              <p className={`text-xs mt-0.5 ${currentSalesExTips >= sameWeekdayTotal ? "text-green-600" : "text-slate-400"}`}>
+              <p className={`text-xs mt-0.5 ${currentSalesExTips >= sameWeekdayTotal ? "text-reconciled" : "text-muted-foreground"}`}>
                 {pctDiff(currentSalesExTips, sameWeekdayTotal)} {t.dashboard.vsSameWeekday ?? "vs same day last week"}
               </p>
             ) : null}
@@ -283,15 +283,15 @@ export default async function DashboardPage({ searchParams }: Props) {
         {/* Cash/card split */}
         <Card>
           <CardHeader className="pb-1">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <Banknote className="h-4 w-4" />{t.dashboard.cashInTill}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{money(expectedCash, currency)}</p>
-            <p className="text-xs text-slate-400">{sessionData ? t.dashboard.tillIsOpen : t.dashboard.openTillHint}</p>
+            <p className="text-xs text-muted-foreground">{sessionData ? t.dashboard.tillIsOpen : t.dashboard.openTillHint}</p>
             {currentCount > 0 ? (
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {t.common.cash} {money(currentCash, currency)} · {t.common.card} {money(currentCard, currency)}
               </p>
             ) : null}
@@ -301,13 +301,13 @@ export default async function DashboardPage({ searchParams }: Props) {
         {/* Month total */}
         <Card>
           <CardHeader className="pb-1">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <CreditCard className="h-4 w-4" />{t.dashboard.thisMonth}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-2xl font-bold">{money(monthTotal, currency)}</p>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-muted-foreground">
               {voidedCount > 0 ? `${t.common.voided}: ${voidedCount}` : t.dashboard.monthNoVoids ?? "No voids this month"}
             </p>
           </CardContent>
@@ -326,16 +326,16 @@ export default async function DashboardPage({ searchParams }: Props) {
                 {topProducts.map((p, i) => (
                   <div key={p.name} className="flex items-center justify-between gap-2 text-sm">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 shrink-0 text-xs font-medium text-slate-400">{i + 1}.</span>
-                      <span className="truncate text-slate-800">{p.name}</span>
+                      <span className="w-5 shrink-0 text-xs font-medium text-muted-foreground">{i + 1}.</span>
+                      <span className="truncate text-foreground">{p.name}</span>
                     </div>
                     <div className="shrink-0 flex items-center gap-2">
-                      <span className="text-xs text-slate-400">×{p.qty}</span>
-                      <span className="font-semibold text-slate-950">{money(p.total, currency)}</span>
+                      <span className="text-xs text-muted-foreground">×{p.qty}</span>
+                      <span className="font-semibold text-foreground">{money(p.total, currency)}</span>
                     </div>
                   </div>
                 ))}
-                <Link href="/app/reports/sales" className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline pt-1">
+                <Link href="/app/reports/sales" className="inline-flex items-center gap-1 text-xs text-brass hover:underline pt-1">
                   {t.dashboard.viewFullReport ?? "Full sales report"} <ArrowRight className="h-3 w-3" />
                 </Link>
               </CardContent>
@@ -351,9 +351,9 @@ export default async function DashboardPage({ searchParams }: Props) {
                     <Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge>
                   </div>
                 )) : (
-                  <p className="text-sm text-slate-500">{t.dashboard.stockOk}</p>
+                  <p className="text-sm text-muted-foreground">{t.dashboard.stockOk}</p>
                 )}
-                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-brass hover:underline">
                   {t.dashboard.viewStock} <ArrowRight className="h-3 w-3" />
                 </Link>
               </CardContent>
@@ -367,23 +367,23 @@ export default async function DashboardPage({ searchParams }: Props) {
           <Card className={inventoryVisible ? "lg:col-span-2" : ""}>
             <CardHeader><CardTitle className="text-base">{t.dashboard.attention}</CardTitle></CardHeader>
             <CardContent className={`grid gap-3 ${attentionCols >= 3 ? "sm:grid-cols-3" : attentionCols === 2 ? "sm:grid-cols-2" : ""}`}>
-              <Link href="/app/products/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
-                <Package className="mb-2 h-5 w-5 text-blue-600" />
+              <Link href="/app/products/new" className="rounded-xl border p-4 hover:border-brass/40 hover:bg-accent">
+                <Package className="mb-2 h-5 w-5 text-brass" />
                 <p className="font-semibold">{t.dashboard.addProducts}</p>
-                <p className="text-xs text-slate-500">{t.dashboard.addProductsDesc}</p>
+                <p className="text-xs text-muted-foreground">{t.dashboard.addProductsDesc}</p>
               </Link>
               {inventoryVisible ? (
-                <Link href="/app/stock" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
-                  <Package className="mb-2 h-5 w-5 text-blue-600" />
+                <Link href="/app/stock" className="rounded-xl border p-4 hover:border-brass/40 hover:bg-accent">
+                  <Package className="mb-2 h-5 w-5 text-brass" />
                   <p className="font-semibold">{t.dashboard.manageStock}</p>
-                  <p className="text-xs text-slate-500">{t.dashboard.manageStockDesc}</p>
+                  <p className="text-xs text-muted-foreground">{t.dashboard.manageStockDesc}</p>
                 </Link>
               ) : null}
               {recipeVisible ? (
-                <Link href="/app/recipes/new" className="rounded-xl border p-4 hover:border-blue-200 hover:bg-blue-50">
-                  <TrendingUp className="mb-2 h-5 w-5 text-blue-600" />
+                <Link href="/app/recipes/new" className="rounded-xl border p-4 hover:border-brass/40 hover:bg-accent">
+                  <TrendingUp className="mb-2 h-5 w-5 text-brass" />
                   <p className="font-semibold">{t.dashboard.createRecipe}</p>
-                  <p className="text-xs text-slate-500">{t.dashboard.createRecipeDesc}</p>
+                  <p className="text-xs text-muted-foreground">{t.dashboard.createRecipeDesc}</p>
                 </Link>
               ) : null}
             </CardContent>
@@ -398,9 +398,9 @@ export default async function DashboardPage({ searchParams }: Props) {
                     <Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge>
                   </div>
                 )) : (
-                  <p className="text-sm text-slate-500">{t.dashboard.stockOk}</p>
+                  <p className="text-sm text-muted-foreground">{t.dashboard.stockOk}</p>
                 )}
-                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
+                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-brass hover:underline">
                   {t.dashboard.viewStock} <ArrowRight className="h-3 w-3" />
                 </Link>
               </CardContent>
@@ -412,9 +412,9 @@ export default async function DashboardPage({ searchParams }: Props) {
       {/* Reports are deliberately deferred until the workspace has real activity. */}
       {!showActivationBanner ? <div>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold text-slate-700">{t.dashboard.reports}</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t.dashboard.reports}</h2>
           {inventoryVisible ? (
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               {t.dashboard.purchases7d(money(purchaseSpend, currency))}
               {lowStock.length > 0 ? (
                 <span className="ml-2 text-amber-600">
@@ -429,7 +429,7 @@ export default async function DashboardPage({ searchParams }: Props) {
             <Link
               key={r.href}
               href={r.href}
-              className="group block rounded-xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all"
+              className="group block rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md hover:border-brass/40 transition-all"
             >
               <div className="flex items-start gap-3">
                 <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${r.color}`}>
@@ -437,12 +437,12 @@ export default async function DashboardPage({ searchParams }: Props) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">{r.title}</p>
+                    <p className="font-semibold text-foreground group-hover:text-brass transition-colors">{r.title}</p>
                     {r.tag ? (
-                      <span className="text-[10px] rounded-full bg-slate-100 px-2 py-0.5 text-slate-500 font-medium">{r.tag}</span>
+                      <span className="text-[10px] rounded-full bg-secondary px-2 py-0.5 text-muted-foreground font-medium">{r.tag}</span>
                     ) : null}
                   </div>
-                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{r.desc}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{r.desc}</p>
                 </div>
               </div>
             </Link>

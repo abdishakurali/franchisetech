@@ -80,18 +80,18 @@ export function PurchasesBulkTable({
     <div>
       {selectedDraftCount > 0 && (
         <div className="flex items-center gap-3 mb-3 px-1">
-          <span className="text-sm font-medium text-slate-700">{t.common.selected(selectedDraftCount)}</span>
+          <span className="text-sm font-medium text-foreground">{t.common.selected(selectedDraftCount)}</span>
           <Button
             variant="outline"
             size="sm"
             onClick={handleDelete}
             disabled={deleting}
-            className="border-red-200 text-red-600 hover:bg-red-50 h-8"
+            className="border-attention/25 text-attention hover:bg-attention/10 h-8"
           >
             {deleting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 mr-1.5" />}
             {t.purchases.cancelDrafts}
           </Button>
-          <button type="button" className="text-xs text-slate-400 hover:text-slate-600" onClick={() => setSelected(new Set())}>
+          <button type="button" className="text-xs text-muted-foreground hover:text-mid" onClick={() => setSelected(new Set())}>
             {t.common.clearSelection}
           </button>
         </div>
@@ -106,7 +106,7 @@ export function PurchasesBulkTable({
                   checked={allCancellableSelected && cancellableIds.size > 0}
                   onChange={toggleAll}
                   disabled={cancellableIds.size === 0}
-                  className="h-4 w-4 accent-blue-600 cursor-pointer disabled:opacity-40"
+                  className="h-4 w-4 accent-brass cursor-pointer disabled:opacity-40"
                   title={t.purchases.selectDrafts}
                 />
               </TableHead>
@@ -132,7 +132,7 @@ export function PurchasesBulkTable({
                 <TableRow
                   key={p.id}
                   onClick={() => { window.location.href = `/app/purchases/${p.id}`; }}
-                  className={`cursor-pointer hover:bg-slate-50 ${selected.has(p.id) ? "bg-blue-50/50" : ""} ${isCancelled ? "opacity-50" : ""}`}
+                  className={`cursor-pointer hover:bg-secondary ${selected.has(p.id) ? "bg-accent/50" : ""} ${isCancelled ? "opacity-50" : ""}`}
                 >
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <input
@@ -140,17 +140,17 @@ export function PurchasesBulkTable({
                       checked={selected.has(p.id)}
                       onChange={() => toggle(p.id)}
                       disabled={!canSelect}
-                      className="h-4 w-4 accent-blue-600 cursor-pointer disabled:opacity-30"
+                      className="h-4 w-4 accent-brass cursor-pointer disabled:opacity-30"
                     />
                   </TableCell>
                   <TableCell>
-                    <Link href={`/app/purchases/${p.id}`} className="block hover:text-blue-600">{dateStr}</Link>
+                    <Link href={`/app/purchases/${p.id}`} className="block hover:text-brass">{dateStr}</Link>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-slate-600">{p.nir_number ?? "—"}</TableCell>
+                  <TableCell className="font-mono text-xs text-mid">{p.nir_number ?? "—"}</TableCell>
                   <TableCell>
-                    <Link href={`/app/purchases/${p.id}`} className="block font-medium hover:text-blue-600">{supplierName}</Link>
+                    <Link href={`/app/purchases/${p.id}`} className="block font-medium hover:text-brass">{supplierName}</Link>
                   </TableCell>
-                  <TableCell className="text-slate-500">{invoiceRef}</TableCell>
+                  <TableCell className="text-muted-foreground">{invoiceRef}</TableCell>
                   <TableCell>{(p.purchase_items ?? []).length}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className={`text-xs border ${badge.className}`}>{badge.label}</Badge>
@@ -159,7 +159,7 @@ export function PurchasesBulkTable({
                     {fmt(Number(p.total_amount ?? 0), currency)}
                   </TableCell>
                   <TableCell>
-                    <Link href={`/app/purchases/${p.id}`} onClick={(e) => e.stopPropagation()} className="flex items-center justify-end text-slate-400 hover:text-blue-600">
+                    <Link href={`/app/purchases/${p.id}`} onClick={(e) => e.stopPropagation()} className="flex items-center justify-end text-muted-foreground hover:text-brass">
                       <ChevronRight className="h-4 w-4" />
                     </Link>
                   </TableCell>

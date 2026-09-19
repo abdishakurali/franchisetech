@@ -176,7 +176,7 @@ export async function completePosOnboarding(input: {
     .insert({
       organisation_id: orgId,
       name: "Menu",
-      color: "#2563eb",
+      color: "#b4903f",
       sort_order: 1,
       category_type: "pos",
     })

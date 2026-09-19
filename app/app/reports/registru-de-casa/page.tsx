@@ -178,45 +178,45 @@ export default async function RegistruDeCasaReportPage({
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between flex-wrap gap-4 print:hidden">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
-          <p className="text-sm text-slate-500">{labels.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{labels.title}</h1>
+          <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
         <div className="flex gap-3 items-center flex-wrap">
           <ReportDateRangeFilter basePath="/app/reports/registru-de-casa" from={fromDate} to={toDate} />
           <Link
             href={`/api/reports/registru-de-casa/pdf?from=${fromDate}&to=${toDate}`}
-            className="h-9 inline-flex items-center rounded-md bg-slate-900 text-white px-3 text-sm font-medium hover:bg-slate-800"
+            className="h-9 inline-flex items-center rounded-md bg-ink text-white px-3 text-sm font-medium hover:bg-ink/90"
           >
             {labels.download}
           </Link>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex flex-wrap gap-8 text-sm">
           <div>
-            <p className="text-slate-500">Unitate</p>
-            <p className="font-semibold text-slate-900">{org?.name ?? "franchisetech"}</p>
+            <p className="text-muted-foreground">Unitate</p>
+            <p className="font-semibold text-foreground">{org?.name ?? "franchisetech"}</p>
           </div>
           <div>
-            <p className="text-slate-500">Perioadă</p>
-            <p className="font-semibold text-slate-900">{fromDate} — {toDate}</p>
+            <p className="text-muted-foreground">Perioadă</p>
+            <p className="font-semibold text-foreground">{fromDate} — {toDate}</p>
           </div>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.openingBalance}</CardTitle></CardHeader><CardContent className="text-xl font-bold">{formatMoney(openingCash, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.totalIn}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-green-700">{formatMoney(totalIn, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.totalOut}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-red-700">{formatMoney(totalOut, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.closingBalance}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-blue-700">{formatMoney(closingBalance, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.openingBalance}</CardTitle></CardHeader><CardContent className="text-xl font-bold">{formatMoney(openingCash, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.totalIn}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-reconciled">{formatMoney(totalIn, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.totalOut}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-attention">{formatMoney(totalOut, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.closingBalance}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-brass">{formatMoney(closingBalance, currency)}</CardContent></Card>
       </div>
 
       <Card>
         <CardHeader><CardTitle>{labels.title}</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
           {ledger.length === 0 ? (
-            <p className="text-sm text-slate-400 py-8 text-center">{labels.noData}</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{labels.noData}</p>
           ) : (
             <Table>
               <TableHeader>
@@ -231,7 +231,7 @@ export default async function RegistruDeCasaReportPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow className="bg-blue-50">
+                <TableRow className="bg-accent">
                   <TableCell />
                   <TableCell className="tabular-nums">{new Date(fromDate).toLocaleDateString("ro-RO")}</TableCell>
                   <TableCell>SOLD INI</TableCell>
@@ -242,7 +242,7 @@ export default async function RegistruDeCasaReportPage({
                 </TableRow>
                 {ledger.map((e, idx) => (
                   <TableRow key={idx}>
-                    <TableCell className="text-right tabular-nums text-slate-500">{idx + 1}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">{idx + 1}</TableCell>
                     <TableCell className="tabular-nums">{e.date}</TableCell>
                     <TableCell>{e.docNo}</TableCell>
                     <TableCell>{e.description}</TableCell>
@@ -251,13 +251,13 @@ export default async function RegistruDeCasaReportPage({
                     <TableCell className="text-right tabular-nums font-medium">{formatMoney(e.balance, currency)}</TableCell>
                   </TableRow>
                 ))}
-                <TableRow className="bg-slate-50 font-bold">
+                <TableRow className="bg-secondary font-bold">
                   <TableCell colSpan={4} className="text-right">{labels.total}:</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(totalIn, currency)}</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(totalOut, currency)}</TableCell>
                   <TableCell />
                 </TableRow>
-                <TableRow className="bg-blue-100 font-bold">
+                <TableRow className="bg-accent font-bold">
                   <TableCell colSpan={6} className="text-right">{labels.closingBalance}:</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(closingBalance, currency)}</TableCell>
                 </TableRow>
@@ -269,12 +269,12 @@ export default async function RegistruDeCasaReportPage({
 
       <div className="grid gap-8 sm:grid-cols-2 pt-8">
         <div>
-          <p className="text-xs text-slate-500 mb-8">{labels.preparedBy}</p>
-          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+          <p className="text-xs text-muted-foreground mb-8">{labels.preparedBy}</p>
+          <div className="border-t border-border pt-1 text-xs text-muted-foreground">{labels.nameDate}</div>
         </div>
         <div>
-          <p className="text-xs text-slate-500 mb-8">{labels.accountantSignature}</p>
-          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+          <p className="text-xs text-muted-foreground mb-8">{labels.accountantSignature}</p>
+          <div className="border-t border-border pt-1 text-xs text-muted-foreground">{labels.nameDate}</div>
         </div>
       </div>
     </div>

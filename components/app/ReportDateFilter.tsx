@@ -33,7 +33,7 @@ export function ReportDateFilter({ basePath, date }: { basePath: string; date: s
           type="button"
           size="sm"
           variant={value === todayIso ? "default" : "outline"}
-          className={value === todayIso ? "bg-blue-600 text-white hover:bg-blue-700" : "text-slate-600"}
+          className={value === todayIso ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-mid"}
           onClick={() => {
             setValue(todayIso);
             go(todayIso);
@@ -45,7 +45,7 @@ export function ReportDateFilter({ basePath, date }: { basePath: string; date: s
           type="button"
           size="sm"
           variant={value === yesterdayIso ? "default" : "outline"}
-          className={value === yesterdayIso ? "bg-blue-600 text-white hover:bg-blue-700" : "text-slate-600"}
+          className={value === yesterdayIso ? "bg-primary text-primary-foreground hover:bg-primary/90" : "text-mid"}
           onClick={() => {
             setValue(yesterdayIso);
             go(yesterdayIso);
@@ -54,7 +54,7 @@ export function ReportDateFilter({ basePath, date }: { basePath: string; date: s
           {t.reportPages.zReport.yesterday}
         </Button>
       </div>
-      <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1">
+      <div className="flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1">
         <input
           type="date"
           value={value}

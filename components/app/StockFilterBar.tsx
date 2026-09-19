@@ -6,8 +6,8 @@ export type StockView = "all" | "low" | "order" | "supplier";
 
 export function StockFilterBar({ filter, showArchived = false }: { filter: StockView; showArchived?: boolean }) {
   const base = "inline-flex items-center rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors";
-  const active = "border-blue-300 bg-blue-50 text-blue-800";
-  const idle = "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700";
+  const active = "border-brass/40 bg-accent text-foreground";
+  const idle = "border-border bg-card text-mid hover:border-brass/30 hover:text-brass";
 
   const views: Array<{ key: StockView; label: string }> = [
     { key: "all", label: "Toate" },

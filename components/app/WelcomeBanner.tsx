@@ -22,21 +22,21 @@ export function WelcomeBanner({ locale = "ro" }: Props) {
   };
 
   return (
-    <div className="border-b border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50/60 px-4 py-4">
+    <div className="border-b border-brass/25 bg-accent px-4 py-4">
       <div className="mx-auto flex max-w-6xl flex-col gap-4">
         <div className="flex flex-wrap items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brass text-ink shadow-sm">
             <ShoppingCart className="h-5 w-5" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-blue-950">{t.welcomeTitle}</p>
-            <p className="mt-0.5 text-sm text-blue-800/90">{t.welcomeBody}</p>
+            <p className="text-sm font-semibold text-foreground">{t.welcomeTitle}</p>
+            <p className="mt-0.5 text-sm text-foreground/90">{t.welcomeBody}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Button
               type="button"
               size="sm"
-              className="h-9 bg-blue-600 text-white hover:bg-blue-700"
+              className="h-9 bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={startTour}
             >
               {t.welcomeTourCta}
@@ -45,7 +45,7 @@ export function WelcomeBanner({ locale = "ro" }: Props) {
             <button
               type="button"
               onClick={() => setDismissed(true)}
-              className="rounded-lg p-1.5 text-blue-600 hover:bg-blue-100/80"
+              className="rounded-lg p-1.5 text-brass hover:bg-accent/80"
               aria-label={t.welcomeDismiss}
             >
               <X className="h-4 w-4" />
@@ -56,19 +56,19 @@ export function WelcomeBanner({ locale = "ro" }: Props) {
         <ol className="flex flex-wrap items-center gap-2 sm:gap-3">
           {t.welcomeSteps.map((label, i) => (
             <li key={label} className="flex items-center gap-2">
-              {i > 0 ? <span className="hidden text-blue-300 sm:inline" aria-hidden>→</span> : null}
+              {i > 0 ? <span className="hidden text-brass/50 sm:inline" aria-hidden>→</span> : null}
               <span
                 className={cn(
                   "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium",
                   i === 0
-                    ? "border-blue-300 bg-white text-blue-900 shadow-sm"
-                    : "border-blue-100/80 bg-blue-50/50 text-blue-700",
+                    ? "border-brass/40 bg-card text-foreground shadow-sm"
+                    : "border-brass/25 bg-accent/50 text-brass",
                 )}
               >
                 <span
                   className={cn(
                     "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold",
-                    i === 0 ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600",
+                    i === 0 ? "bg-brass text-ink" : "bg-accent text-brass",
                   )}
                 >
                   {i + 1}

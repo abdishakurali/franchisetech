@@ -56,7 +56,7 @@ export function SitesManager({ sites: initialSites, assetCounts, orgId, canManag
       {canManage && (
         <div className="flex justify-end">
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white h-9 px-4 py-2 transition-colors outline-none">
+            <DialogTrigger className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground h-9 px-4 py-2 transition-colors outline-none">
               <Plus className="h-4 w-4" />Add site
             </DialogTrigger>
             <DialogContent className="max-w-md">
@@ -80,7 +80,7 @@ export function SitesManager({ sites: initialSites, assetCounts, orgId, canManag
                     <Input placeholder="D02 X285" value={form.eircode} onChange={(e) => setForm((f) => ({ ...f, eircode: e.target.value }))} />
                   </div>
                 </div>
-                <Button onClick={handleAdd} className="w-full bg-blue-600 hover:bg-blue-700 text-white" disabled={saving}>
+                <Button onClick={handleAdd} className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={saving}>
                   {saving ? "Adding…" : "Add site"}
                 </Button>
               </div>
@@ -90,26 +90,26 @@ export function SitesManager({ sites: initialSites, assetCounts, orgId, canManag
       )}
 
       {sites.length === 0 ? (
-        <Card className="border-slate-100">
+        <Card className="border-border">
           <CardContent className="text-center py-12">
-            <Building className="h-10 w-10 text-slate-200 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">No sites yet</p>
-            <p className="text-slate-400 text-sm mt-1">Add your first site to get started.</p>
+            <Building className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">No sites yet</p>
+            <p className="text-muted-foreground text-sm mt-1">Add your first site to get started.</p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid sm:grid-cols-2 gap-4">
           {sites.map((site) => (
-            <Card key={site.id} className="border-slate-100 hover:border-blue-200 transition-colors">
+            <Card key={site.id} className="border-border hover:border-brass/30 transition-colors">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="h-5 w-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPin className="h-5 w-5 text-brass" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900">{site.name}</p>
-                    {site.address && <p className="text-sm text-slate-500 mt-0.5">{site.address}</p>}
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="font-semibold text-foreground">{site.name}</p>
+                    {site.address && <p className="text-sm text-muted-foreground mt-0.5">{site.address}</p>}
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {[site.city, site.eircode].filter(Boolean).join(" · ")}
                     </p>
                     <div className="flex items-center gap-2 mt-3">

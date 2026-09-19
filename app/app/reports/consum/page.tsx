@@ -96,19 +96,19 @@ export default async function ConsumReportPage({
   const display = "font-[family-name:var(--font-display)]";
 
   return (
-    <div className={`mx-auto max-w-4xl p-8 print:p-4 text-slate-900 ${sans}`}>
+    <div className={`mx-auto max-w-4xl p-8 print:p-4 text-foreground ${sans}`}>
       <div className="mb-6 flex items-center justify-between print:hidden">
         <ReportDateRangeFilter basePath="/app/reports/consum" from={fromDate} to={toDate} />
         <div className="flex gap-3 items-center">
           <Link
             href="/app/reports/consum-teoretic"
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium hover:bg-secondary"
           >
             Teoretic vs. real
           </Link>
           <Link
             href={`/api/reports/consum/pdf?from=${fromDate}&to=${toDate}`}
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium hover:bg-secondary"
           >
             <FileDown className="h-4 w-4" />
             {t.common.downloadPdf}
@@ -119,19 +119,19 @@ export default async function ConsumReportPage({
 
       {/* ── Header: title/subtitle left, doc number + unit right — same
           grammar as the NIR print page, so the two read as one family. ── */}
-      <header className="flex items-start justify-between gap-6 border-b-4 border-slate-900 pb-4 mb-6">
+      <header className="flex items-start justify-between gap-6 border-b-4 border-foreground pb-4 mb-6">
         <div>
           <h1 className={`text-2xl font-semibold uppercase tracking-tight leading-tight ${display}`}>
             {labels.title}
           </h1>
-          <p className="mt-1 text-[10px] uppercase tracking-wide text-slate-400">{labels.docCode}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{labels.docCode}</p>
         </div>
         <div className={`text-right text-sm ${mono}`}>
           <p>
             {labels.docNo} <span className="font-semibold">{documentNumber}</span>
           </p>
-          <p className="mt-1 text-slate-600">
-            {labels.unitLabel}: <span className="font-medium text-slate-900">{org?.name ?? "—"}</span>
+          <p className="mt-1 text-mid">
+            {labels.unitLabel}: <span className="font-medium text-foreground">{org?.name ?? "—"}</span>
           </p>
         </div>
       </header>
@@ -144,21 +144,21 @@ export default async function ConsumReportPage({
           { label: labels.totalItems, value: String(items.length) },
         ].map((f) => (
           <div key={f.label}>
-            <p className={`text-[10px] uppercase tracking-wider text-slate-400 ${mono}`}>{f.label}</p>
-            <p className="mt-1 font-medium text-slate-900">{f.value}</p>
+            <p className={`text-[10px] uppercase tracking-wider text-muted-foreground ${mono}`}>{f.label}</p>
+            <p className="mt-1 font-medium text-foreground">{f.value}</p>
           </div>
         ))}
       </section>
 
       {items.length === 0 ? (
         <div className="py-8 text-center">
-          <p className="text-sm text-slate-400">{labels.noData}</p>
-          <p className="text-xs text-slate-300 mt-2">{labels.noDataHint}</p>
+          <p className="text-sm text-muted-foreground">{labels.noData}</p>
+          <p className="text-xs text-muted-foreground mt-2">{labels.noDataHint}</p>
         </div>
       ) : (
         <table className={`w-full text-sm border-collapse mb-2 ${sans}`}>
           <thead>
-            <tr className="border-t-2 border-b-2 border-slate-900">
+            <tr className="border-t-2 border-b-2 border-foreground">
               <th className="text-left py-2 px-1 w-8">{labels.rowNo}</th>
               <th className="text-left py-2 px-1">{labels.product}</th>
               <th className="text-center py-2 px-1">{labels.unit}</th>
@@ -169,8 +169,8 @@ export default async function ConsumReportPage({
           </thead>
           <tbody>
             {items.map((item, idx) => (
-              <tr key={item.name} className="border-b border-slate-200">
-                <td className="py-2 px-1 text-slate-500">{idx + 1}</td>
+              <tr key={item.name} className="border-b border-border">
+                <td className="py-2 px-1 text-muted-foreground">{idx + 1}</td>
                 <td className="py-2 px-1">{item.name}</td>
                 <td className="text-center py-2 px-1">{item.unit}</td>
                 <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>{item.quantity.toFixed(2)}</td>
@@ -178,7 +178,7 @@ export default async function ConsumReportPage({
                   {item.unitCost != null ? (
                     formatMoney(item.unitCost, currency)
                   ) : (
-                    <span className="text-slate-300">{labels.costUnknown}</span>
+                    <span className="text-muted-foreground">{labels.costUnknown}</span>
                   )}
                 </td>
                 <td className={`text-right py-2 px-1 tabular-nums font-medium ${mono}`}>
@@ -192,14 +192,14 @@ export default async function ConsumReportPage({
                       ) : null}
                     </>
                   ) : (
-                    <span className="text-slate-300">{labels.costUnknown}</span>
+                    <span className="text-muted-foreground">{labels.costUnknown}</span>
                   )}
                 </td>
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr className="border-t-2 border-slate-900 font-semibold">
+            <tr className="border-t-2 border-foreground font-semibold">
               <td colSpan={5} className="py-2 px-1 text-right">{labels.total}</td>
               <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>
                 {formatMoney(totalValue, currency)}
@@ -221,23 +221,23 @@ export default async function ConsumReportPage({
       ) : null}
 
       {/* ── Signatures: three blocks — same grammar as the NIR print page ── */}
-      <footer className="mt-10 border-t border-slate-300 pt-6 text-sm">
+      <footer className="mt-10 border-t border-border pt-6 text-sm">
         <div className="grid gap-8 sm:grid-cols-3">
           {[labels.intocmit, labels.aprobat, labels.primit].map((role) => (
             <div key={role}>
-              <p className={`text-[10px] uppercase tracking-wider text-slate-400 mb-8 ${mono}`}>{role}</p>
-              <div className="border-b border-slate-400 w-full" />
-              <p className="text-xs text-slate-500 mt-1">{labels.signature}</p>
+              <p className={`text-[10px] uppercase tracking-wider text-muted-foreground mb-8 ${mono}`}>{role}</p>
+              <div className="border-b border-mid w-full" />
+              <p className="text-xs text-muted-foreground mt-1">{labels.signature}</p>
             </div>
           ))}
         </div>
-        <p className="mt-8 text-[10px] text-slate-400 leading-relaxed print:text-[9px]">
+        <p className="mt-8 text-[10px] text-muted-foreground leading-relaxed print:text-[9px]">
           {labels.footerDisclaimer}
         </p>
       </footer>
 
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 mt-8 print:hidden">
-        <p className="text-xs text-slate-500">
+      <div className="rounded-lg border border-border bg-secondary p-4 mt-8 print:hidden">
+        <p className="text-xs text-muted-foreground">
           <strong>{labels.dataSourceLabel}</strong> {labels.dataSource}
         </p>
       </div>

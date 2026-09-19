@@ -46,15 +46,15 @@ export default async function MarginReportPage({ searchParams }: { searchParams?
 
   return (
     <div className="space-y-6 p-6">
-      <div><h1 className="text-2xl font-semibold text-slate-950">{mp.title}</h1><p className="text-sm text-slate-500">{mp.subtitle}</p></div>
-      <form className="flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-3">
+      <div><h1 className="text-2xl font-semibold text-foreground">{mp.title}</h1><p className="text-sm text-muted-foreground">{mp.subtitle}</p></div>
+      <form className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-3">
         <div className="min-w-[220px] flex-1">
-          <label className="mb-1 block text-xs font-medium text-slate-500">{t.common.search}</label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">{t.common.search}</label>
           <Input name="q" defaultValue={params?.q ?? ""} placeholder={mp.searchPlaceholder} />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-500">{mp.filter}</label>
-          <select name="status" defaultValue={status} className="h-10 rounded-md border border-slate-200 bg-white px-3 text-sm">
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">{mp.filter}</label>
+          <select name="status" defaultValue={status} className="h-10 rounded-md border border-border bg-card px-3 text-sm">
             <option value="all">{mp.allMargins}</option>
             <option value="low-margin">{mp.lowMargin}</option>
             <option value="good-margin">{mp.goodMargin}</option>

@@ -40,7 +40,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 function StatusBadge({ status }: { status: string }) {
   return (
-    <Badge variant={status === "active" ? "secondary" : "outline"} className={status === "disabled" ? "text-red-500 border-red-200" : ""}>
+    <Badge variant={status === "active" ? "secondary" : "outline"} className={status === "disabled" ? "text-red-500 border-attention/25" : ""}>
       {status}
     </Badge>
   );
@@ -219,12 +219,12 @@ export function TeamClient({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">Team members</h2>
-          <p className="text-sm text-slate-500">{members.length} member{members.length !== 1 ? "s" : ""}</p>
+          <p className="text-sm text-muted-foreground">{members.length} member{members.length !== 1 ? "s" : ""}</p>
         </div>
         <Button onClick={() => { setShowAddModal(true); setAddResult(null); }}>Add team member</Button>
       </div>
       {actionError && (
-        <div className="rounded bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="rounded bg-attention/10 px-4 py-3 text-sm text-attention">
           {actionError}
         </div>
       )}
@@ -234,30 +234,30 @@ export function TeamClient({
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="border-b bg-slate-50">
+              <thead className="border-b bg-secondary">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Name</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Email</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Role</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-600">Joined</th>
-                  <th className="text-right px-4 py-3 font-medium text-slate-600">Actions</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">Name</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">Email</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">Role</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">Status</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">Joined</th>
+                  <th className="text-right px-4 py-3 font-medium text-mid">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {members.map((m) => (
-                  <tr key={m.id} className="border-b last:border-0 hover:bg-slate-50">
+                  <tr key={m.id} className="border-b last:border-0 hover:bg-secondary">
                     <td className="px-4 py-3">
                       <p className="font-medium">{m.profile?.full_name ?? "—"}</p>
-                      {m.profile?.role_title && <p className="text-xs text-slate-400">{m.profile.role_title}</p>}
+                      {m.profile?.role_title && <p className="text-xs text-muted-foreground">{m.profile.role_title}</p>}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{m.profile?.email ?? "—"}</td>
+                    <td className="px-4 py-3 text-mid">{m.profile?.email ?? "—"}</td>
                     <td className="px-4 py-3">
                       <select
                         value={m.role}
                         onChange={(e) => handleRoleChange(m.id, e.target.value)}
                         disabled={actionLoading === m.id + "-role"}
-                        className="h-7 rounded border border-slate-200 px-2 text-xs"
+                        className="h-7 rounded border border-border px-2 text-xs"
                       >
                         {(visibleRoles.includes(m.role)
                           ? visibleRoles
@@ -268,7 +268,7 @@ export function TeamClient({
                       </select>
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={m.status} /></td>
-                    <td className="px-4 py-3 text-slate-500">
+                    <td className="px-4 py-3 text-muted-foreground">
                       {new Date(m.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -293,7 +293,7 @@ export function TeamClient({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className={`h-7 text-xs ${m.status === "disabled" ? "text-green-600" : "text-red-500"}`}
+                          className={`h-7 text-xs ${m.status === "disabled" ? "text-reconciled" : "text-red-500"}`}
                           disabled={actionLoading === m.id + "-disable"}
                           onClick={() => handleToggleDisable(m.id)}
                         >
@@ -301,11 +301,11 @@ export function TeamClient({
                         </Button>
                         {confirmRemoveId === m.id ? (
                           <span className="flex items-center gap-1 text-xs">
-                            <span className="text-slate-600">Remove?</span>
+                            <span className="text-mid">Remove?</span>
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-7 text-xs text-red-600 px-2"
+                              className="h-7 text-xs text-attention px-2"
                               disabled={actionLoading === m.id + "-remove"}
                               onClick={() => handleRemove(m.id)}
                             >
@@ -324,7 +324,7 @@ export function TeamClient({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 text-xs text-slate-400 hover:text-red-500"
+                            className="h-7 text-xs text-muted-foreground hover:text-attention"
                             onClick={() => setConfirmRemoveId(m.id)}
                           >
                             Remove
@@ -333,15 +333,15 @@ export function TeamClient({
                       </div>
                       {resetResults[m.id] && (
                         <div className="mt-1 text-xs text-left">
-                          <p className="text-green-700 font-medium">Reset link:</p>
-                          <p className="break-all text-slate-600 max-w-xs">{resetResults[m.id]}</p>
+                          <p className="text-reconciled font-medium">Reset link:</p>
+                          <p className="break-all text-mid max-w-xs">{resetResults[m.id]}</p>
                         </div>
                       )}
                     </td>
                   </tr>
                 ))}
                 {members.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-400">No team members yet.</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No team members yet.</td></tr>
                 )}
               </tbody>
             </table>
@@ -377,7 +377,7 @@ export function TeamClient({
                   />
                 </div>
                 <div>
-                  <Label>New password <span className="text-slate-400 text-xs">(leave blank to keep current)</span></Label>
+                  <Label>New password <span className="text-muted-foreground text-xs">(leave blank to keep current)</span></Label>
                   <Input
                     type="password"
                     value={editForm.newPassword}
@@ -395,7 +395,7 @@ export function TeamClient({
                   />
                 </div>
                 <div>
-                  <Label>Job title <span className="text-slate-400 text-xs">(displayed under name)</span></Label>
+                  <Label>Job title <span className="text-muted-foreground text-xs">(displayed under name)</span></Label>
                   <Input
                     value={editForm.roleTitle}
                     onChange={(e) => setEditForm({ ...editForm, roleTitle: e.target.value })}
@@ -403,7 +403,7 @@ export function TeamClient({
                   />
                 </div>
                 {editError && (
-                  <p className="text-sm text-red-600 bg-red-50 rounded px-3 py-2">{editError}</p>
+                  <p className="text-sm text-attention bg-attention/10 rounded px-3 py-2">{editError}</p>
                 )}
                 <div className="flex gap-2 pt-2">
                   <Button type="submit" disabled={actionLoading === editMember.id + "-edit"} className="flex-1">
@@ -446,7 +446,7 @@ export function TeamClient({
                   <select
                     value={addForm.role}
                     onChange={(e) => setAddForm({ ...addForm, role: e.target.value })}
-                    className="mt-1 w-full h-10 rounded-md border border-slate-200 px-3 text-sm"
+                    className="mt-1 w-full h-10 rounded-md border border-border px-3 text-sm"
                   >
                     {visibleRoles.filter((r) => r !== "owner").map((r) => (
                       <option key={r} value={r}>{ROLE_LABELS[r] ?? r}</option>
@@ -454,7 +454,7 @@ export function TeamClient({
                   </select>
                 </div>
                 <div>
-                  <Label>Temporary password <span className="text-slate-400 text-xs">(leave blank to send a reset link)</span></Label>
+                  <Label>Temporary password <span className="text-muted-foreground text-xs">(leave blank to send a reset link)</span></Label>
                   <Input
                     type="password"
                     value={addForm.temporaryPassword}
@@ -475,15 +475,15 @@ export function TeamClient({
                 )}
 
                 {addResult?.error && (
-                  <p className="text-sm text-red-600 bg-red-50 rounded px-3 py-2">{addResult.error}</p>
+                  <p className="text-sm text-attention bg-attention/10 rounded px-3 py-2">{addResult.error}</p>
                 )}
                 {addResult?.resetLink !== undefined && !addResult.error && (
-                  <div className="bg-green-50 rounded px-3 py-2 text-sm">
-                    <p className="text-green-700 font-medium">User added successfully!</p>
+                  <div className="bg-reconciled/10 rounded px-3 py-2 text-sm">
+                    <p className="text-reconciled font-medium">User added successfully!</p>
                     {addResult.resetLink && (
                       <>
-                        <p className="text-xs text-slate-600 mt-1">Password reset link (share with the user):</p>
-                        <p className="break-all text-xs text-blue-700 mt-1">{addResult.resetLink}</p>
+                        <p className="text-xs text-mid mt-1">Password reset link (share with the user):</p>
+                        <p className="break-all text-xs text-brass mt-1">{addResult.resetLink}</p>
                       </>
                     )}
                   </div>

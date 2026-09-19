@@ -62,9 +62,9 @@ function MethodIcon({ type }: { type: string }) {
 function AmountDisplay({ parts }: { parts: ReturnType<typeof formatAmountParts> }) {
   return (
     <div className="flex items-baseline justify-center font-mono tabular-nums">
-      <span className="mr-1 text-xl font-medium text-slate-400">{parts.currency}</span>
-      <span className="text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">{parts.integer}</span>
-      <span className="text-2xl font-semibold text-slate-400">{parts.fraction}</span>
+      <span className="mr-1 text-xl font-medium text-muted-foreground">{parts.currency}</span>
+      <span className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl">{parts.integer}</span>
+      <span className="text-2xl font-semibold text-muted-foreground">{parts.fraction}</span>
     </div>
   );
 }
@@ -192,8 +192,8 @@ export function PosPaymentPanel({
                 className={cn(
                   "flex h-16 items-center justify-center gap-2 rounded-xl border text-base font-semibold transition-colors",
                   active
-                    ? "border-blue-600 bg-blue-50 text-blue-800"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                    ? "border-brass bg-accent text-foreground"
+                    : "border-border bg-white text-foreground hover:border-border",
                 )}
               >
                 <MethodIcon type={m.type} />
@@ -207,7 +207,7 @@ export function PosPaymentPanel({
           <button
             type="button"
             onClick={onSplit}
-            className="mb-4 w-full text-center text-sm font-medium text-blue-600 hover:text-blue-800"
+            className="mb-4 w-full text-center text-sm font-medium text-brass hover:text-foreground"
           >
             {t.splitAmount}
           </button>
@@ -215,26 +215,26 @@ export function PosPaymentPanel({
 
         {isCash ? (
           <div className="flex w-full flex-col items-center text-center">
-            <p className="text-sm font-medium text-slate-500">
-              {t.totalDueLabel}: <span className="font-bold tabular-nums text-slate-800">{money(totalDue)}</span>
+            <p className="text-sm font-medium text-muted-foreground">
+              {t.totalDueLabel}: <span className="font-bold tabular-nums text-foreground">{money(totalDue)}</span>
             </p>
-            <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">{t.cashReceived}</p>
+            <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.cashReceived}</p>
             <AmountDisplay parts={receivedParts} />
             {showChange ? (
-              <p className="mt-4 text-lg font-bold tabular-nums text-emerald-700">
+              <p className="mt-4 text-lg font-bold tabular-nums text-reconciled">
                 {t.changeDue}: {money(changeAmount)}
               </p>
             ) : cashUnderPaid ? (
-              <p className="mt-4 text-sm font-semibold text-red-600">
+              <p className="mt-4 text-sm font-semibold text-attention">
                 {t.changeDue}: −{money(Math.abs(changeAmount))} · {t.cashUnderpaidMsg}
               </p>
             ) : (
-              <p className="mt-4 text-sm font-medium text-slate-400">{t.changeDue}: {money(0)}</p>
+              <p className="mt-4 text-sm font-medium text-muted-foreground">{t.changeDue}: {money(0)}</p>
             )}
           </div>
         ) : (
           <div className="flex w-full flex-col items-center text-center">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.totalDueLabel}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.totalDueLabel}</p>
             <AmountDisplay parts={totalParts} />
           </div>
         )}
@@ -245,7 +245,7 @@ export function PosPaymentPanel({
               <button
                 type="button"
                 onClick={selectExact}
-                className="rounded-lg border border-blue-300 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-800 hover:bg-blue-100"
+                className="rounded-lg border border-brass/40 bg-accent px-4 py-2.5 text-sm font-bold text-foreground hover:bg-accent"
               >
                 {t.exact}
               </button>
@@ -254,7 +254,7 @@ export function PosPaymentPanel({
                   key={note}
                   type="button"
                   onClick={() => setTender(note)}
-                  className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-bold tabular-nums text-emerald-900 hover:bg-emerald-100"
+                  className="rounded-lg border border-reconciled/25 bg-reconciled/10 px-4 py-2.5 text-sm font-bold tabular-nums text-reconciled hover:bg-reconciled/15"
                 >
                   {money(note)}
                 </button>
@@ -267,7 +267,7 @@ export function PosPaymentPanel({
                   key={key}
                   type="button"
                   onClick={() => pressDigit(key)}
-                  className="h-12 rounded-xl border border-slate-200 bg-white text-xl font-semibold text-slate-800 hover:bg-slate-50 active:bg-slate-100"
+                  className="h-12 rounded-xl border border-border bg-white text-xl font-semibold text-foreground hover:bg-secondary active:bg-secondary"
                 >
                   {key}
                 </button>
@@ -275,14 +275,14 @@ export function PosPaymentPanel({
               <button
                 type="button"
                 onClick={() => pressDigit(".")}
-                className="h-12 rounded-xl border border-slate-200 bg-white text-xl font-semibold text-slate-700 hover:bg-slate-50"
+                className="h-12 rounded-xl border border-border bg-white text-xl font-semibold text-foreground hover:bg-secondary"
               >
                 .
               </button>
               <button
                 type="button"
                 onClick={() => pressDigit("0")}
-                className="h-12 rounded-xl border border-slate-200 bg-white text-xl font-semibold text-slate-800 hover:bg-slate-50"
+                className="h-12 rounded-xl border border-border bg-white text-xl font-semibold text-foreground hover:bg-secondary"
               >
                 0
               </button>
@@ -290,7 +290,7 @@ export function PosPaymentPanel({
                 type="button"
                 onClick={() => pressDigit("back")}
                 aria-label="Backspace"
-                className="flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200"
+                className="flex h-12 items-center justify-center rounded-xl border border-border bg-secondary text-mid hover:bg-secondary"
               >
                 <Delete className="h-5 w-5" />
               </button>
@@ -298,14 +298,14 @@ export function PosPaymentPanel({
           </>
         )}
 
-        {saleError && <p className="mt-4 w-full text-center text-sm text-red-600">{saleError}</p>}
+        {saleError && <p className="mt-4 w-full text-center text-sm text-attention">{saleError}</p>}
       </div>
 
-      <div className="shrink-0 grid w-full grid-cols-2 gap-2 border-t border-slate-100 bg-white px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-4">
+      <div className="shrink-0 grid w-full grid-cols-2 gap-2 border-t border-border bg-white px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-4">
         <Button
           type="button"
           variant="outline"
-          className="h-12 border-slate-300 text-base font-semibold text-slate-700"
+          className="h-12 border-border text-base font-semibold text-foreground"
           disabled={salePending}
           onClick={onBack}
         >
@@ -315,7 +315,7 @@ export function PosPaymentPanel({
           ref={chargeRef}
           type="submit"
           disabled={chargeDisabled}
-          className="h-12 gap-2 bg-blue-600 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-40"
+          className="h-12 gap-2 bg-brass text-base font-bold text-ink hover:bg-brass/90 disabled:opacity-40"
         >
           {salePending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
           {salePending

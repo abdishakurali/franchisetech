@@ -62,11 +62,11 @@ export function ProfileForm({
   return (
     <div className="space-y-4">
       {message && (
-        <Alert className={message.type === "success" ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}>
+        <Alert className={message.type === "success" ? "bg-reconciled/10 border-reconciled/25" : "bg-attention/10 border-attention/25"}>
           <AlertDescription>{message.text}</AlertDescription>
         </Alert>
       )}
-      <Card className="border-slate-100">
+      <Card className="border-border">
         <CardHeader><CardTitle className="text-base">Your profile</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5"><Label>Full name</Label><Input value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} /></div>
@@ -75,15 +75,15 @@ export function ProfileForm({
           <div className="space-y-1.5"><Label>Email</Label><Input value={email} readOnly /></div>
         </CardContent>
       </Card>
-      <Card className="border-slate-100">
+      <Card className="border-border">
         <CardHeader><CardTitle className="text-base">Business</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5"><Label>Brand/shop name</Label><Input value={form.businessName} disabled={!canEditBusiness} onChange={(e) => setForm({ ...form, businessName: e.target.value })} /></div>
           <div className="space-y-1.5"><Label>Business type</Label><Input value={form.businessType} disabled={!canEditBusiness} onChange={(e) => setForm({ ...form, businessType: e.target.value })} /></div>
-          {!canEditBusiness && <p className="text-xs text-slate-500">Only owners and managers can edit business details.</p>}
+          {!canEditBusiness && <p className="text-xs text-muted-foreground">Only owners and managers can edit business details.</p>}
         </CardContent>
       </Card>
-      <Button onClick={save} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white">
+      <Button onClick={save} disabled={saving} className="bg-primary hover:bg-primary/90 text-primary-foreground">
         {saving ? "Saving..." : "Save profile"}
       </Button>
     </div>

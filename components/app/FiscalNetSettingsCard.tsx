@@ -78,8 +78,8 @@ export function FiscalNetSettingsCard(props: Props) {
     <div className="space-y-4">
 
       {/* ── Enable ─────────────────────────────────────────────── */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-4">
-        <h2 className="text-base font-semibold text-slate-800">Romania receipts</h2>
+      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+        <h2 className="text-base font-semibold text-foreground">Romania receipts</h2>
 
         <Toggle
           checked={enabled}
@@ -89,20 +89,20 @@ export function FiscalNetSettingsCard(props: Props) {
         />
 
         {!enabled && (
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             Sales are still recorded in franchisetech. Fiscal receipts will not be sent to your till device.
           </p>
         )}
 
         {enabled && (
-          <div className="border-t border-slate-100 pt-4">
+          <div className="border-t border-border pt-4">
             <Toggle
               checked={!mockMode}
               onChange={(v) => setMockMode(!v)}
               label={mockMode ? "Mod test (nu se trimit bonuri reale)" : "Mod live (bonuri fiscale reale)"}
               color={mockMode ? "amber" : "blue"}
             />
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-muted-foreground">
               {mockMode
                 ? "Poți exersa vânzări fără să conectezi o casă fiscală reală."
                 : "Bonurile fiscale se trimit către casa configurată mai jos."}
@@ -114,8 +114,8 @@ export function FiscalNetSettingsCard(props: Props) {
       {enabled && (
         <>
           {/* ── Platform ───────────────────────────────────────── */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-3">
-            <h3 className="text-sm font-semibold text-slate-700">How receipts are sent</h3>
+          <div className="rounded-xl border border-border bg-card p-5 space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">How receipts are sent</h3>
             <div className="grid gap-2">
               <PlatformCard
                 active={platform === "api"}
@@ -128,7 +128,7 @@ export function FiscalNetSettingsCard(props: Props) {
 
             {platform === "api" && (
               <div className="mt-1 space-y-2">
-                <Label className="text-xs text-slate-600">Device address</Label>
+                <Label className="text-xs text-mid">Device address</Label>
                 <Input
                   type="text"
                   value={apiHost}
@@ -141,7 +141,7 @@ export function FiscalNetSettingsCard(props: Props) {
                     {testing ? "Se testează…" : "Testează conexiunea"}
                   </Button>
                   {testResult && (
-                    <span className={`text-xs font-medium ${testResult.ok ? "text-green-700" : "text-red-700"}`}>
+                    <span className={`text-xs font-medium ${testResult.ok ? "text-reconciled" : "text-attention"}`}>
                       {testResult.ok ? "✅" : "❌"} {testResult.msg}
                     </span>
                   )}
@@ -150,15 +150,15 @@ export function FiscalNetSettingsCard(props: Props) {
             )}
 
             {platform === "file" && (
-              <p className="text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-2">
+              <p className="text-xs text-muted-foreground bg-secondary rounded-lg px-3 py-2">
                 For each sale, cash movement, or day close, franchisetech downloads a TXT receipt file. Save it to the Bonuri folder used by your fiscal receipt software.
               </p>
             )}
           </div>
 
           {/* ── Operator code ──────────────────────────────────── */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 space-y-2">
-            <h3 className="text-sm font-semibold text-slate-700">Cashier code</h3>
+          <div className="rounded-xl border border-border bg-card p-5 space-y-2">
+            <h3 className="text-sm font-semibold text-foreground">Cashier code</h3>
             <Input
               type="text"
               value={opCode}
@@ -166,7 +166,7 @@ export function FiscalNetSettingsCard(props: Props) {
               placeholder="1"
               className="w-32"
             />
-            <p className="text-xs text-slate-500">The cashier/operator code used for receipts. Default is 1.</p>
+            <p className="text-xs text-muted-foreground">The cashier/operator code used for receipts. Default is 1.</p>
           </div>
         </>
       )}
@@ -176,12 +176,12 @@ export function FiscalNetSettingsCard(props: Props) {
         type="button"
         onClick={handleSave}
         disabled={saving}
-        className="w-full bg-blue-600 text-white hover:bg-blue-700"
+        className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
       >
         {saving ? "Se salvează…" : enabled ? "Save receipt settings" : "Save — receipts disabled"}
       </Button>
       {status && (
-        <div className={`rounded-lg px-3 py-2 text-sm font-medium border ${status.ok ? "bg-green-50 text-green-800 border-green-200" : "bg-red-50 text-red-800 border-red-200"}`}>
+        <div className={`rounded-lg px-3 py-2 text-sm font-medium border ${status.ok ? "bg-reconciled/10 text-reconciled border-reconciled/25" : "bg-attention/10 text-attention border-attention/25"}`}>
           {status.ok ? "✅" : "❌"} {status.msg}
         </div>
       )}
@@ -194,15 +194,15 @@ export function FiscalNetSettingsCard(props: Props) {
 function Toggle({ checked, onChange, label, color }: {
   checked: boolean; onChange: (v: boolean) => void; label: string; color: "blue" | "amber";
 }) {
-  const bg = checked ? (color === "amber" ? "bg-amber-400" : "bg-blue-600") : "bg-slate-300";
+  const bg = checked ? (color === "amber" ? "bg-amber-400" : "bg-brass") : "bg-secondary";
   return (
     <label className="flex items-center gap-3 cursor-pointer select-none">
       <div className="relative shrink-0">
         <input type="checkbox" className="sr-only" checked={checked} onChange={e => onChange(e.target.checked)} />
         <div className={`w-10 h-6 rounded-full transition-colors ${bg}`} />
-        <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${checked ? "translate-x-4" : ""}`} />
+        <div className={`absolute top-1 left-1 w-4 h-4 bg-card rounded-full shadow transition-transform ${checked ? "translate-x-4" : ""}`} />
       </div>
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <span className="text-sm font-medium text-foreground">{label}</span>
     </label>
   );
 }
@@ -215,12 +215,12 @@ function PlatformCard({ active, onClick, icon, title, desc }: {
       type="button"
       onClick={onClick}
       className={`rounded-xl border-2 p-4 text-left transition-colors ${
-        active ? "border-blue-600 bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300"
+        active ? "border-brass bg-accent" : "border-border bg-card hover:border-border"
       }`}
     >
       <div className="text-2xl mb-1">{icon}</div>
-      <p className={`text-sm font-semibold ${active ? "text-blue-700" : "text-slate-800"}`}>{title}</p>
-      <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+      <p className={`text-sm font-semibold ${active ? "text-brass" : "text-foreground"}`}>{title}</p>
+      <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
     </button>
   );
 }

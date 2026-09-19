@@ -68,7 +68,7 @@ export function SagaExportButtons({
         <CardTitle>{isRO ? "Export Saga XML" : "Saga XML Export"}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-slate-600 mb-4">
+        <p className="text-sm text-mid mb-4">
           {isRO
             ? "Exportă datele în format XML compatibil cu software-ul de contabilitate Saga C."
             : "Export data in XML format compatible with Saga C accounting software."}
@@ -94,7 +94,7 @@ export function SagaExportButtons({
             </button>
           ))}
         </div>
-        <p className="mt-4 text-xs text-slate-400">
+        <p className="mt-4 text-xs text-muted-foreground">
           {isRO
             ? `Exporturile includ date din ${fromDate} până la ${toDate}.`
             : `Exports include data from ${fromDate} to ${toDate}.`}

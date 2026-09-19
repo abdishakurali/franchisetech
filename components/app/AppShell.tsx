@@ -186,10 +186,10 @@ function HeaderNavLink({
       onClick={onNavigate}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap",
+        "rounded-md px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap",
         isActive
-          ? "bg-blue-50 text-blue-700"
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+          ? "bg-accent text-foreground"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground",
         className,
       )}
     >
@@ -247,7 +247,7 @@ function AppHeader({
   };
 
   return (
-    <div className="print:hidden shrink-0 bg-white border-b border-slate-100">
+    <div className="print:hidden shrink-0 bg-card border-b border-border">
       <div className="flex h-12 items-center gap-2 sm:gap-3 px-3 sm:px-4">
         <Link href="/app" className="shrink-0" aria-label={t.nav.dashboard}>
           <FranchiseTechLogo className="h-6 w-auto max-w-[120px] sm:h-7 sm:max-w-[140px]" />
@@ -286,25 +286,25 @@ function AppHeader({
 
           <DropdownMenu>
             <DropdownMenuTrigger
-              className="flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-slate-50 transition-colors outline-none"
+              className="flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-accent transition-colors outline-none"
               aria-label={profile?.full_name ?? t.shell.user}
             >
               <Avatar className="h-8 w-8 shrink-0">
-                <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
+                <AvatarFallback className="bg-accent text-foreground text-xs font-semibold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden md:block max-w-[8rem] truncate text-sm font-medium text-slate-800">
+              <span className="hidden md:block max-w-[8rem] truncate text-sm font-medium text-foreground">
                 {profile?.full_name ?? t.shell.user}
               </span>
-              <ChevronDown className="hidden md:block h-3.5 w-3.5 text-slate-400" />
+              <ChevronDown className="hidden md:block h-3.5 w-3.5 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               <div className="px-2 py-1.5 md:hidden">
-                <p className="text-sm font-medium text-slate-900 truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {profile?.full_name ?? t.shell.user}
                 </p>
-                <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
               </div>
               <DropdownMenuSeparator className="md:hidden" />
               {referral?.link && (
@@ -314,7 +314,7 @@ function AppHeader({
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onLogout} className="text-red-600">
+              <DropdownMenuItem onClick={onLogout} className="text-attention">
                 <LogOut className="h-4 w-4 mr-2" />
                 {t.nav.logout}
               </DropdownMenuItem>
@@ -338,7 +338,7 @@ function AppHeader({
       {mobileOpen && (
         <nav
           id="app-mobile-nav"
-          className="lg:hidden border-t border-slate-100 bg-white px-3 py-3 space-y-1 max-h-[min(70vh,28rem)] overflow-y-auto"
+          className="lg:hidden border-t border-border bg-card px-3 py-3 space-y-1 max-h-[min(70vh,28rem)] overflow-y-auto"
           aria-label={t.shell.mainNav}
         >
           {moduleVisibility?.multiSite === true && accessibleSites.length >= 2 && activeSiteId && (
@@ -427,7 +427,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
       };
 
   return (
-    <div className={cn("app-shell-h relative flex flex-col overflow-hidden", isPosRoute ? "bg-white" : "bg-slate-50")}>
+    <div className={cn("app-shell-h relative flex flex-col overflow-hidden", isPosRoute ? "bg-card" : "bg-background")}>
       <div
         className={cn(
           "contents",
@@ -466,7 +466,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
               <DialogDescription>{t.shell.inviteDesc}</DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
-              <p className="break-all rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{referral.link}</p>
+              <p className="break-all rounded-md bg-secondary px-3 py-2 text-sm text-foreground">{referral.link}</p>
               <div className="flex flex-wrap items-center gap-2">
                 <CopyReferralButton link={referral.link} />
                 {referral.code && <Badge variant="outline">{t.shell.referralCode} {referral.code}</Badge>}
@@ -478,7 +478,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
 
       <main
         className={cn(
-          "flex-1 min-h-0 bg-white",
+          "flex-1 min-h-0 bg-card",
           posTillSelling ? "flex flex-col overflow-hidden" : "overflow-y-auto",
           isPosRoute && !posTillOpen && "lg:max-w-5xl lg:mx-auto lg:w-full",
         )}
@@ -488,20 +488,20 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
       </div>
 
       {subscriptionOverlayActive && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 px-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 text-center shadow-xl">
-            <p className="text-xs font-semibold uppercase tracking-wide text-red-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 px-4 backdrop-blur-[2px]">
+          <div className="w-full max-w-sm rounded-md border border-border bg-card p-6 text-center shadow-xl">
+            <p className="text-xs font-semibold uppercase tracking-wide text-attention">
               {overlayCopy.eyebrow}
             </p>
-            <h2 className="mt-2 text-xl font-semibold text-slate-950">
+            <h2 className="mt-2 text-xl font-semibold text-foreground">
               {overlayCopy.title}
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-mid">
               {overlayCopy.body}
             </p>
             <Link
               href={`/app/billing?reason=${billingReason}`}
-              className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-paper transition-colors hover:bg-ink/90"
             >
               {overlayCopy.pay}
             </Link>

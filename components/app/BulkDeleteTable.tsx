@@ -30,7 +30,7 @@ function StockCell({ product, updateStock, clickHint }: { product: Product; upda
   const [saving, setSaving] = useState(false);
   const [val, setVal] = useState(String(product.current_stock_qty ?? 0));
 
-  if (!product.is_stock_tracked) return <span className="text-slate-300">—</span>;
+  if (!product.is_stock_tracked) return <span className="text-muted-foreground">—</span>;
   if (!updateStock) return <span className="tabular-nums text-sm">{product.current_stock_qty ?? 0}</span>;
 
   if (!editing) {
@@ -38,7 +38,7 @@ function StockCell({ product, updateStock, clickHint }: { product: Product; upda
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="tabular-nums text-sm rounded px-1 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+        className="tabular-nums text-sm rounded px-1 hover:bg-accent hover:text-brass transition-colors"
         title={clickHint}
       >
         {product.current_stock_qty ?? 0}
@@ -70,10 +70,10 @@ function StockCell({ product, updateStock, clickHint }: { product: Product; upda
         className="w-16 h-6 text-sm border rounded px-1 tabular-nums"
         autoFocus
       />
-      <button type="button" onClick={save} disabled={saving} className="text-xs text-green-600 hover:text-green-800 font-medium">
+      <button type="button" onClick={save} disabled={saving} className="text-xs text-reconciled hover:text-reconciled font-medium">
         {saving ? "…" : "✓"}
       </button>
-      <button type="button" onClick={() => setEditing(false)} className="text-xs text-slate-400 hover:text-slate-600">✕</button>
+      <button type="button" onClick={() => setEditing(false)} className="text-xs text-muted-foreground hover:text-mid">✕</button>
     </span>
   );
 }
@@ -151,18 +151,18 @@ export function ProductsBulkTable({
     <div>
       {selected.size > 0 && (
         <div className="flex items-center gap-3 mb-3 px-1">
-          <span className="text-sm font-medium text-slate-700">{t.common.selected(selected.size)}</span>
+          <span className="text-sm font-medium text-foreground">{t.common.selected(selected.size)}</span>
           <Button
             variant="outline"
             size="sm"
             onClick={handleDelete}
             disabled={deleting}
-            className="border-red-200 text-red-600 hover:bg-red-50 h-8"
+            className="border-attention/25 text-attention hover:bg-attention/10 h-8"
           >
             {deleting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5 mr-1.5" />}
             {t.tables.deleteSelected}
           </Button>
-          <button className="text-xs text-slate-400 hover:text-slate-600" onClick={() => setSelected(new Set())}>
+          <button className="text-xs text-muted-foreground hover:text-mid" onClick={() => setSelected(new Set())}>
             {t.common.clearSelection}
           </button>
         </div>
@@ -176,7 +176,7 @@ export function ProductsBulkTable({
                   type="checkbox"
                   checked={allSelected}
                   onChange={toggleAll}
-                  className="h-4 w-4 accent-blue-600 cursor-pointer"
+                  className="h-4 w-4 accent-brass cursor-pointer"
                   title={t.common.selectAll}
                 />
               </TableHead>
@@ -196,39 +196,39 @@ export function ProductsBulkTable({
                 key={p.id}
                 id={`product-${p.id}`}
                 onClick={() => { router.push(productHref(p.id)); }}
-                className={`cursor-pointer hover:bg-slate-50 ${selected.has(p.id) ? "bg-blue-50/50" : ""} ${p.active === false ? "opacity-70" : ""}`}
+                className={`cursor-pointer hover:bg-secondary ${selected.has(p.id) ? "bg-accent/50" : ""} ${p.active === false ? "opacity-70" : ""}`}
               >
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <input
                     type="checkbox"
                     checked={selected.has(p.id)}
                     onChange={() => toggle(p.id)}
-                    className="h-4 w-4 accent-blue-600 cursor-pointer"
+                    className="h-4 w-4 accent-brass cursor-pointer"
                   />
                 </TableCell>
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-2">
                     {p.image_url ? (
-                      <img src={p.image_url} alt="" className="h-8 w-8 rounded object-cover shrink-0 border border-slate-100" />
+                      <img src={p.image_url} alt="" className="h-8 w-8 rounded object-cover shrink-0 border border-border" />
                     ) : (
-                      <div className="h-8 w-8 rounded bg-slate-100 shrink-0" />
+                      <div className="h-8 w-8 rounded bg-secondary shrink-0" />
                     )}
                     <div>
-                      <Link href={productHref(p.id)} onClick={(e) => e.stopPropagation()} className="hover:text-blue-600 hover:underline">
+                      <Link href={productHref(p.id)} onClick={(e) => e.stopPropagation()} className="hover:text-brass hover:underline">
                         {p.name || t.common.untitled}
                       </Link>
                       {p.active === false && (
-                        <Badge variant="secondary" className="ml-2 text-xs bg-slate-100 text-slate-600">
+                        <Badge variant="secondary" className="ml-2 text-xs bg-secondary text-mid">
                           {t.badges.archived}
                         </Badge>
                       )}
                       {p.available_in_pos === false && (
-                        <span className="ml-2 text-xs text-slate-400">{t.common.notInPos}</span>
+                        <span className="ml-2 text-xs text-muted-foreground">{t.common.notInPos}</span>
                       )}
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-sm text-slate-600">{p.product_categories?.name ?? "—"}</TableCell>
+                <TableCell className="text-sm text-mid">{p.product_categories?.name ?? "—"}</TableCell>
                 <TableCell className="text-right tabular-nums">{fmt(Number(p.sale_price ?? 0), currency)}</TableCell>
                 <TableCell className="text-right tabular-nums">
                   {p.cost_price ? fmt(Number(p.cost_price), currency) : "—"}
@@ -237,7 +237,7 @@ export function ProductsBulkTable({
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
                     {p.available_in_pos !== false && (
-                      <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700">{t.badges.pos}</Badge>
+                      <Badge variant="secondary" className="text-xs bg-accent text-brass">{t.badges.pos}</Badge>
                     )}
                     {recipeVisible && p.is_ingredient && (
                       <Badge variant="outline" className="text-xs">{t.badges.ingredient}</Badge>

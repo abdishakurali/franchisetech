@@ -6,7 +6,7 @@ export type SalesDay = { day: string; total: number };
 
 export function ReportsTrendChart({ days, currency }: { days: SalesDay[]; currency: string }) {
   if (!days.length || days.every((day) => day.total === 0)) {
-    return <div className="mt-3 flex min-h-56 items-center justify-center rounded-lg border border-dashed border-[#DFDCD2] bg-slate-50 text-sm text-slate-500">Nu există vânzări în această perioadă.</div>;
+    return <div className="mt-3 flex min-h-56 items-center justify-center rounded-lg border border-dashed border-border bg-secondary text-sm text-muted-foreground">Nu există vânzări în această perioadă.</div>;
   }
   const format = (value: number) => new Intl.NumberFormat("ro-RO", { maximumFractionDigits: 0 }).format(value);
   return <div className="mt-3 h-64 w-full" role="img" aria-label="Graficul vânzărilor pe zile">

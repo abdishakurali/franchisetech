@@ -36,10 +36,10 @@ export function TestimonialPromptCard() {
 
   if (status === "success") {
     return (
-      <Card className="border-green-200 bg-green-50/40">
+      <Card className="border-reconciled/25 bg-reconciled/10">
         <CardContent className="flex items-center gap-3 py-5">
-          <MessageSquareHeart className="h-5 w-5 shrink-0 text-green-600" />
-          <p className="text-sm text-green-900">
+          <MessageSquareHeart className="h-5 w-5 shrink-0 text-reconciled" />
+          <p className="text-sm text-reconciled">
             Mulțumim! Feedback-ul tău va apărea pe site după verificare.
           </p>
         </CardContent>
@@ -51,7 +51,7 @@ export function TestimonialPromptCard() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
-          <MessageSquareHeart className="h-4 w-4 text-blue-600" />
+          <MessageSquareHeart className="h-4 w-4 text-brass" />
           Cum merge cu franchisetech?
         </CardTitle>
         <CardDescription>
@@ -78,12 +78,12 @@ export function TestimonialPromptCard() {
                 className="p-0.5"
               >
                 <Star
-                  className={`h-5 w-5 ${rating !== null && n <= rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}`}
+                  className={`h-5 w-5 ${rating !== null && n <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`}
                 />
               </button>
             ))}
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-attention">{error}</p>}
           <div className="flex items-center gap-2">
             <Button type="submit" size="sm" disabled={status === "loading"}>
               {status === "loading" ? "Se trimite…" : "Trimite feedback"}

@@ -153,14 +153,14 @@ export default async function DetaliiVanzariReportPage({
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between flex-wrap gap-4 print:hidden">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
-          <p className="text-sm text-slate-500">{labels.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{labels.title}</h1>
+          <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
         <div className="flex gap-3 items-center flex-wrap">
           <ReportDateRangeFilter basePath="/app/reports/detalii-vanzari" from={from} to={to} />
           <Link
             href={`/api/reports/detalii-vanzari/pdf?from=${from}&to=${to}`}
-            className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium hover:bg-secondary"
           >
             <FileDown className="h-4 w-4" />
             {t.common.downloadPdf}
@@ -169,22 +169,22 @@ export default async function DetaliiVanzariReportPage({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.netSales}</CardTitle></CardHeader><CardContent className="text-xl font-bold">{formatMoney(totNet, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.vatCollected}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-blue-600">{formatMoney(totVat, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.grossSales}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-green-600">{formatMoney(totGross, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.discountsGiven}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-amber-600">−{formatMoney(totDiscount, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.transactionCount}</CardTitle></CardHeader><CardContent className="text-xl font-bold">{completed.length}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{labels.voidedCount}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-red-600">{voided.length}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.netSales}</CardTitle></CardHeader><CardContent className="text-xl font-bold">{formatMoney(totNet, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.vatCollected}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-brass">{formatMoney(totVat, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.grossSales}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-reconciled">{formatMoney(totGross, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.discountsGiven}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-amber-600">−{formatMoney(totDiscount, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.transactionCount}</CardTitle></CardHeader><CardContent className="text-xl font-bold">{completed.length}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{labels.voidedCount}</CardTitle></CardHeader><CardContent className="text-xl font-bold text-attention">{voided.length}</CardContent></Card>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>{labels.itemizedTitle}</CardTitle>
-          <p className="text-xs text-slate-500">{from} → {to}</p>
+          <p className="text-xs text-muted-foreground">{from} → {to}</p>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {itemizedRows.length === 0 ? (
-            <p className="text-sm text-slate-400 py-8 text-center">{labels.noData}</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{labels.noData}</p>
           ) : (
             <Table>
               <TableHeader>
@@ -202,8 +202,8 @@ export default async function DetaliiVanzariReportPage({
               <TableBody>
                 {itemizedRows.map((r, idx) => (
                   <TableRow key={`${r.category}-${r.product}`}>
-                    <TableCell className="text-right tabular-nums text-slate-500">{idx + 1}</TableCell>
-                    <TableCell className="text-slate-500">{r.category}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">{idx + 1}</TableCell>
+                    <TableCell className="text-muted-foreground">{r.category}</TableCell>
                     <TableCell className="font-medium">{r.product}</TableCell>
                     <TableCell className="text-right tabular-nums">{r.qty}</TableCell>
                     <TableCell className="text-right tabular-nums">{formatMoney(r.net, currency)}</TableCell>
@@ -212,7 +212,7 @@ export default async function DetaliiVanzariReportPage({
                     <TableCell className="text-right tabular-nums text-amber-600">{r.discount > 0 ? `−${formatMoney(r.discount, currency)}` : "—"}</TableCell>
                   </TableRow>
                 ))}
-                <TableRow className="bg-slate-50 font-bold">
+                <TableRow className="bg-secondary font-bold">
                   <TableCell colSpan={3} className="text-right">{labels.total}:</TableCell>
                   <TableCell />
                   <TableCell className="text-right tabular-nums">{formatMoney(totNet, currency)}</TableCell>
@@ -230,11 +230,11 @@ export default async function DetaliiVanzariReportPage({
         <CardHeader><CardTitle>{labels.vatBreakdownTitle}</CardTitle></CardHeader>
         <CardContent>
           {byRate.size === 0 ? (
-            <p className="text-sm text-slate-400 py-8 text-center">{labels.noData}</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{labels.noData}</p>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b text-slate-500">
+                <tr className="border-b text-muted-foreground">
                   <th className="text-left py-2">{t.reportPages.zReport.rate}</th>
                   <th className="text-right py-2">{t.tables.net}</th>
                   <th className="text-right py-2">{t.tables.vat}</th>
@@ -249,7 +249,7 @@ export default async function DetaliiVanzariReportPage({
                     <td className="text-right py-2">{formatMoney(v.net, currency)}</td>
                     <td className="text-right py-2 font-medium">{formatMoney(v.vat, currency)}</td>
                     <td className="text-right py-2">{formatMoney(v.gross, currency)}</td>
-                    <td className="text-right py-2 text-slate-500">{v.count}</td>
+                    <td className="text-right py-2 text-muted-foreground">{v.count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -263,11 +263,11 @@ export default async function DetaliiVanzariReportPage({
           <CardHeader><CardTitle>{labels.paymentBreakdownTitle}</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
             {byPayment.size === 0 ? (
-              <p className="text-slate-400 text-center py-4">{labels.noData}</p>
+              <p className="text-muted-foreground text-center py-4">{labels.noData}</p>
             ) : (
               Array.from(byPayment.entries()).map(([name, total]) => (
                 <div key={name} className="flex justify-between">
-                  <span className="text-slate-600">{name}</span>
+                  <span className="text-mid">{name}</span>
                   <span className="font-semibold">{formatMoney(total, currency)}</span>
                 </div>
               ))
@@ -278,12 +278,12 @@ export default async function DetaliiVanzariReportPage({
           <CardHeader><CardTitle>{labels.voidedTitle}</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-slate-600">{labels.voidedCount}</span>
+              <span className="text-mid">{labels.voidedCount}</span>
               <span className="font-semibold">{voided.length}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-600">{labels.voidedValue}</span>
-              <span className="font-semibold text-red-600">{formatMoney(voidedValue, currency)}</span>
+              <span className="text-mid">{labels.voidedValue}</span>
+              <span className="font-semibold text-attention">{formatMoney(voidedValue, currency)}</span>
             </div>
           </CardContent>
         </Card>
@@ -291,12 +291,12 @@ export default async function DetaliiVanzariReportPage({
 
       <div className="grid gap-8 sm:grid-cols-2 pt-8 print:mt-12">
         <div>
-          <p className="text-xs text-slate-500 mb-8">{labels.preparedBy}</p>
-          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+          <p className="text-xs text-muted-foreground mb-8">{labels.preparedBy}</p>
+          <div className="border-t border-border pt-1 text-xs text-muted-foreground">{labels.nameDate}</div>
         </div>
         <div>
-          <p className="text-xs text-slate-500 mb-8">{labels.accountantSignature}</p>
-          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+          <p className="text-xs text-muted-foreground mb-8">{labels.accountantSignature}</p>
+          <div className="border-t border-border pt-1 text-xs text-muted-foreground">{labels.nameDate}</div>
         </div>
       </div>
     </div>

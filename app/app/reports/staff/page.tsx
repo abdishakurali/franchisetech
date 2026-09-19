@@ -94,12 +94,12 @@ export default async function StaffReportPage({ searchParams }: Props) {
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex items-center gap-3">
-        <Link href="/app/reports" className="text-slate-400 hover:text-slate-600">
+        <Link href="/app/reports" className="text-muted-foreground hover:text-mid">
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{t.reports.staff?.title ?? "Staff performance"}</h1>
-          <p className="text-sm text-slate-500">{t.reports.staff?.desc ?? "Transactions, discounts, and tips by cashier."}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t.reports.staff?.title ?? "Staff performance"}</h1>
+          <p className="text-sm text-muted-foreground">{t.reports.staff?.desc ?? "Transactions, discounts, and tips by cashier."}</p>
         </div>
       </div>
 
@@ -108,7 +108,7 @@ export default async function StaffReportPage({ searchParams }: Props) {
         <ReportDateRangeFilter basePath="/app/reports/staff" from={from} to={to} />
         <Link
           href={`/api/reports/staff/pdf?from=${from}&to=${to}`}
-          className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+          className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium hover:bg-secondary"
         >
           <FileDown className="h-4 w-4" />
           {t.common.downloadPdf}
@@ -118,16 +118,16 @@ export default async function StaffReportPage({ searchParams }: Props) {
       {/* Summary strip */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
-          <CardHeader className="pb-1"><CardTitle className="text-xs font-medium uppercase tracking-wide text-slate-500">{t.dashboard.sales}</CardTitle></CardHeader>
+          <CardHeader className="pb-1"><CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t.dashboard.sales}</CardTitle></CardHeader>
           <CardContent><p className="text-2xl font-bold">{money(totalRevenue, currency)}</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-1"><CardTitle className="text-xs font-medium uppercase tracking-wide text-slate-500">{t.reports.staff?.totalDiscounts ?? "Total discounts"}</CardTitle></CardHeader>
+          <CardHeader className="pb-1"><CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t.reports.staff?.totalDiscounts ?? "Total discounts"}</CardTitle></CardHeader>
           <CardContent><p className="text-2xl font-bold text-amber-700">{money(totalDiscounts, currency)}</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-1"><CardTitle className="text-xs font-medium uppercase tracking-wide text-slate-500">{t.reports.staff?.totalTips ?? "Total tips"}</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold text-green-700">{money(totalTips, currency)}</p></CardContent>
+          <CardHeader className="pb-1"><CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t.reports.staff?.totalTips ?? "Total tips"}</CardTitle></CardHeader>
+          <CardContent><p className="text-2xl font-bold text-reconciled">{money(totalTips, currency)}</p></CardContent>
         </Card>
       </div>
 
@@ -136,7 +136,7 @@ export default async function StaffReportPage({ searchParams }: Props) {
         <CardHeader><CardTitle className="text-base">{t.reports.staff?.byCashier ?? "By cashier"}</CardTitle></CardHeader>
         <CardContent className="p-0">
           {rows.length === 0 ? (
-            <p className="p-4 text-sm text-slate-500">{t.common.noData ?? "No data for this period."}</p>
+            <p className="p-4 text-sm text-muted-foreground">{t.common.noData ?? "No data for this period."}</p>
           ) : (
             <Table>
               <TableHeader>
@@ -164,11 +164,11 @@ export default async function StaffReportPage({ searchParams }: Props) {
                     </TableCell>
                     <TableCell className="text-right">
                       {row.totalTips > 0 ? (
-                        <span className="text-green-700">{money(row.totalTips, currency)}</span>
+                        <span className="text-reconciled">{money(row.totalTips, currency)}</span>
                       ) : "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      {row.voids > 0 ? <span className="text-red-600">{row.voids}</span> : "—"}
+                      {row.voids > 0 ? <span className="text-attention">{row.voids}</span> : "—"}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -194,7 +194,7 @@ export default async function StaffReportPage({ searchParams }: Props) {
                 {tipRows.map((row) => (
                   <TableRow key={row.method}>
                     <TableCell className="font-medium capitalize">{row.method}</TableCell>
-                    <TableCell className="text-right text-green-700">{money(row.total, currency)}</TableCell>
+                    <TableCell className="text-right text-reconciled">{money(row.total, currency)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

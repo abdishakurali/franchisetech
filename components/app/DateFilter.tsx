@@ -22,7 +22,7 @@ export function DateFilter({ current }: { current: string }) {
           key={value}
           size="sm"
           variant={active === value ? "default" : "outline"}
-          className={active === value ? "bg-blue-600 text-white hover:bg-blue-700" : "text-slate-600"}
+          className={active === value ? undefined : "text-muted-foreground"}
           onClick={() => {
             const params = new URLSearchParams(searchParams.toString());
             params.set("period", value);

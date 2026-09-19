@@ -15,8 +15,8 @@ type Props = {
 };
 
 const STATE_STYLES: Record<PosConnectionState, string> = {
-  synced: "border-slate-200 bg-white text-slate-600",
-  syncing: "border-blue-200 bg-blue-50 text-blue-800",
+  synced: "border-border bg-white text-mid",
+  syncing: "border-brass/30 bg-accent text-foreground",
   offline: "border-amber-300 bg-amber-50 text-amber-900",
 };
 

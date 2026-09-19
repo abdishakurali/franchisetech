@@ -35,7 +35,7 @@ interface IntegrationCardsProps {
 function StatusBadge({ status, isRO }: { status: MarketplaceStatus; isRO: boolean }) {
   if (status === "active") {
     return (
-      <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100">
+      <Badge className="bg-reconciled/15 text-reconciled border-reconciled/25 hover:bg-reconciled/15">
         <CheckCircle2 className="h-3 w-3 mr-1" />
         {isRO ? "Activ" : "Active"}
       </Badge>
@@ -47,7 +47,7 @@ function StatusBadge({ status, isRO }: { status: MarketplaceStatus; isRO: boolea
 function ProductLogo({ src, name }: { src?: string; name: string }) {
   if (!src) {
     return (
-      <div className="flex h-8 w-32 items-center text-sm font-semibold text-blue-700">
+      <div className="flex h-8 w-32 items-center text-sm font-semibold text-brass">
         FranchiseTech
       </div>
     );
@@ -106,16 +106,16 @@ export async function IntegrationCards({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="mb-1 text-lg font-semibold text-slate-900">
+        <h2 className="mb-1 text-lg font-semibold text-foreground">
           {isRO ? "Marketplace" : "Marketplace"}
         </h2>
-        <p className="mb-4 text-sm text-slate-500">
+        <p className="mb-4 text-sm text-muted-foreground">
           {isRO
             ? "Activează integrările și modulele incluse în planul tău. Dezactivarea ascunde meniurile și câmpurile, fără să șteargă datele."
             : "Enable integrations and modules included in your plan. Turning one off hides menus and fields without deleting data."}
         </p>
         {installError ? (
-          <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
+          <div className="mb-4 flex items-start gap-2 rounded-lg border border-attention/25 bg-attention/10 px-3 py-2 text-sm text-red-800">
             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <p>{installError}</p>
           </div>
@@ -131,16 +131,16 @@ export async function IntegrationCards({
                     <ProductLogo src={card.item.logo} name={name} />
                   </div>
                   <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-sm font-semibold text-slate-800">{name}</CardTitle>
+                    <CardTitle className="text-sm font-semibold text-foreground">{name}</CardTitle>
                     <StatusBadge status={card.status} isRO={isRO} />
                   </div>
                   <CardDescription className="text-xs leading-relaxed mt-1">
                     {card.item.description[locale]}
                   </CardDescription>
-                  <p className="pt-1 text-xs font-semibold text-slate-700">
+                  <p className="pt-1 text-xs font-semibold text-foreground">
                     {addonPriceLabel(card.item, locale)}
                     {(card.id === "fiscalnet" || card.id === "anaf_efactura") && (
-                      <span className="font-normal text-slate-500">
+                      <span className="font-normal text-muted-foreground">
                         {" "}
                         {isRO ? "în FranchiseTech" : "in FranchiseTech"}
                       </span>

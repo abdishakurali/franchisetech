@@ -39,10 +39,10 @@ export function PosCashKeypad({ value, onChange, disabled, clearLabel = "Clear",
           type="button"
           disabled={disabled}
           onClick={() => append(key)}
-          className={`flex h-14 items-center justify-center rounded-xl border text-lg font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 disabled:opacity-40 ${
+          className={`flex h-14 items-center justify-center rounded-xl border text-lg font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40 disabled:opacity-40 ${
             key === "⌫"
-              ? "border-slate-200 bg-slate-100 text-slate-600 hover:bg-slate-200"
-              : "border-slate-200 bg-white text-slate-900 hover:bg-slate-50 active:bg-blue-50"
+              ? "border-border bg-secondary text-mid hover:bg-secondary"
+              : "border-border bg-white text-foreground hover:bg-secondary active:bg-accent"
           }`}
         >
           {key}
@@ -52,7 +52,7 @@ export function PosCashKeypad({ value, onChange, disabled, clearLabel = "Clear",
         type="button"
         disabled={disabled}
         onClick={() => onChange("")}
-        className="col-span-3 flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+        className="col-span-3 flex h-11 items-center justify-center rounded-xl border border-border bg-white text-sm font-semibold text-mid hover:bg-secondary disabled:opacity-40"
       >
         {clearLabel}
       </button>

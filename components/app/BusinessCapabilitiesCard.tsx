@@ -102,15 +102,15 @@ export function BusinessCapabilitiesCard({
             <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
               <p className="font-medium">{t.settings.features.moduleLocked}</p>
               <p className="mt-1">{lockedMessage}</p>
-              <Link href="/app/billing" className="mt-2 inline-block text-blue-700 hover:underline">
+              <Link href="/app/billing" className="mt-2 inline-block text-brass hover:underline">
                 {t.settings.features.viewBilling}
               </Link>
             </div>
           ) : null}
 
           {suggestions.length > 0 ? (
-            <div className="mb-5 flex gap-2 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
-              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+            <div className="mb-5 flex gap-2 rounded-lg bg-accent p-3 text-sm text-foreground">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-brass" />
               <p>
                 <span className="font-medium">{t.settings.features.suggestedFor}</span>{" "}
                 {suggestions.map((s) => localizeCapabilityLabel(s.label, uiLocale)).join(", ")}.
@@ -126,11 +126,11 @@ export function BusinessCapabilitiesCard({
               org.multi_site_ops_enabled,
               org.business_profile,
             ].join("-")}>
-              <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-                <label htmlFor="business_profile" className="text-sm font-medium text-slate-800">
+              <div className="rounded-xl border border-border bg-secondary/50 p-4">
+                <label htmlFor="business_profile" className="text-sm font-medium text-foreground">
                   {t.settings.features.businessLevel}
                 </label>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   {t.settings.features.businessLevelHint}
                 </p>
                 <FormSelect
@@ -147,8 +147,8 @@ export function BusinessCapabilitiesCard({
               {categories.map((category) => (
                 <section key={category.id} className="space-y-3">
                   <div>
-                    <h3 className="text-sm font-semibold text-slate-900">{category.title}</h3>
-                    <p className="text-xs text-slate-500">{category.description}</p>
+                    <h3 className="text-sm font-semibold text-foreground">{category.title}</h3>
+                    <p className="text-xs text-muted-foreground">{category.description}</p>
                   </div>
                   <div className="space-y-2">
                     {category.items.map((item) => {
@@ -174,18 +174,18 @@ export function BusinessCapabilitiesCard({
                           <div
                             key={item.id}
                             className={`flex items-start gap-3 rounded-lg border p-4 ${
-                              allowed || !enabled ? "border-slate-200 bg-white" : "border-slate-100 bg-slate-50"
+                              allowed || !enabled ? "border-border bg-card" : "border-border bg-secondary"
                             }`}
                           >
                             <FormCheckbox
                               name={item.fieldName}
                               defaultChecked={enabled}
                               disabled={toggleDisabled}
-                              className="mt-1 h-5 w-5 rounded border-slate-300"
+                              className="mt-1 h-5 w-5 rounded border-border"
                             />
                             <div className="min-w-0 flex-1">
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="font-medium text-slate-900">{item.label}</span>
+                                <span className="font-medium text-foreground">{item.label}</span>
                                 {isSuggested ? <Badge variant="secondary">{t.settings.features.suggested}</Badge> : null}
                                 {!allowed ? (
                                   <Badge variant="outline" className="gap-1 text-[10px]">
@@ -193,7 +193,7 @@ export function BusinessCapabilitiesCard({
                                   </Badge>
                                 ) : null}
                               </div>
-                              <p className="mt-0.5 text-sm text-slate-500">{item.description}</p>
+                              <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>
                               {!allowed && blockReason ? (
                                 <p className="mt-1 text-xs text-amber-700">{blockReason}</p>
                               ) : null}
@@ -206,7 +206,7 @@ export function BusinessCapabilitiesCard({
                       return (
                         <label
                           key={item.id}
-                          className={`flex items-start gap-3 rounded-lg border border-slate-200 bg-white p-4 ${
+                          className={`flex items-start gap-3 rounded-lg border border-border bg-card p-4 ${
                             disabled ? "opacity-70" : ""
                           }`}
                         >
@@ -214,15 +214,15 @@ export function BusinessCapabilitiesCard({
                             name={item.fieldName}
                             defaultChecked={Boolean(featureValues[item.id])}
                             disabled={disabled}
-                            className="mt-1 h-5 w-5 rounded border-slate-300"
+                            className="mt-1 h-5 w-5 rounded border-border"
                           />
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="font-medium text-slate-900">{item.label}</span>
+                              <span className="font-medium text-foreground">{item.label}</span>
                               {isSuggested ? <Badge variant="secondary">{t.settings.features.suggested}</Badge> : null}
                               {!item.ready ? <Badge variant="outline">{t.settings.features.comingLater}</Badge> : null}
                             </div>
-                            <p className="mt-0.5 text-sm text-slate-500">{item.description}</p>
+                            <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>
                           </div>
                         </label>
                       );
@@ -231,7 +231,7 @@ export function BusinessCapabilitiesCard({
                 </section>
               ))}
 
-              <div className="flex justify-end border-t border-slate-100 pt-4">
+              <div className="flex justify-end border-t border-border pt-4">
                 <Button type="submit" disabled={!canEdit || pending}>
                   {pending ? t.settings.features.saving : t.settings.features.saveOptions}
                 </Button>
@@ -240,13 +240,13 @@ export function BusinessCapabilitiesCard({
           ) : (
             <div className="space-y-4 text-sm">
               <p>
-                <span className="text-slate-500">{t.settings.features.businessLevel}:</span>{" "}
+                <span className="text-muted-foreground">{t.settings.features.businessLevel}:</span>{" "}
                 <span className="font-medium">{profileLabel(profile, uiLocale)}</span>
               </p>
               {categories.map((category) => (
                 <div key={category.id}>
-                  <p className="font-medium text-slate-800">{category.title}</p>
-                  <ul className="mt-1 space-y-0.5 text-slate-600">
+                  <p className="font-medium text-foreground">{category.title}</p>
+                  <ul className="mt-1 space-y-0.5 text-mid">
                     {category.items.map((item) => {
                       const on =
                         item.kind === "module"

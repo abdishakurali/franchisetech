@@ -70,14 +70,14 @@ export default async function TeamSettingsPage() {
   return (
     <div className="settings-page-wrapper max-w-4xl p-4 sm:p-6">
       <div className="settings-page-heading mb-6">
-        <h1 className="text-2xl font-semibold text-slate-950">{isRO ? "Setări" : "Settings"}</h1>
-        <p className="text-sm text-slate-500 mt-1">{isRO ? "Configurează contul și organizația ta" : "Configure your account and organization"}</p>
+        <h1 className="text-2xl font-semibold text-foreground">{isRO ? "Setări" : "Settings"}</h1>
+        <p className="text-sm text-muted-foreground mt-1">{isRO ? "Configurează contul și organizația ta" : "Configure your account and organization"}</p>
       </div>
 
       <SettingsTabNav tabs={tabs} />
 
       {error && (
-        <div className="mb-4 rounded bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-4 rounded bg-attention/10 px-4 py-3 text-sm text-attention">
           Error loading members: {(error as { message?: string }).message}
         </div>
       )}

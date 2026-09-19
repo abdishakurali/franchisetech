@@ -51,19 +51,19 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-4 sm:p-6">
       <div className="flex items-center gap-3">
-        <Link href="/app/products" className="text-sm text-slate-500 hover:text-slate-700">← {pf.backToProducts}</Link>
-        <h1 className="text-2xl font-semibold text-slate-950">
+        <Link href="/app/products" className="text-sm text-muted-foreground hover:text-foreground">← {pf.backToProducts}</Link>
+        <h1 className="text-2xl font-semibold text-foreground">
           {defaultIngredient ? pf.addIngredient : pf.addProduct}
         </h1>
       </div>
 
       <form action={addProduct as unknown as (fd: FormData) => Promise<void>} className="space-y-5" encType="multipart/form-data">
-        <Card className="overflow-hidden border-slate-200/80 shadow-sm">
+        <Card className="overflow-hidden border-border/80 shadow-sm">
           <CardContent className="p-4 sm:p-6">
             <div className="grid gap-6 lg:grid-cols-[200px_1fr] lg:items-start">
               <ImageUploadField inputName="image_file" />
               <div className="space-y-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{pf.basics}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{pf.basics}</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <Label>{pf.productName} *</Label>
@@ -78,7 +78,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                   <div className="sm:col-span-2">
                     <div className="flex items-center justify-between">
                       <Label>{pf.category}</Label>
-                      <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{pf.manageCategories}</Link>
+                      <Link href="/app/settings?tab=products" className="text-xs text-brass hover:underline">{pf.manageCategories}</Link>
                     </div>
                     <SearchableSelect name="category_id" options={categoryOptions} placeholder={pf.none} searchPlaceholder={pf.category} className="mt-1.5" />
                   </div>
@@ -86,7 +86,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
                     <div className="sm:col-span-2">
                       <div className="flex items-center justify-between">
                         <Label>{pf.posCategory}</Label>
-                        <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{pf.manageCategories}</Link>
+                        <Link href="/app/settings?tab=products" className="text-xs text-brass hover:underline">{pf.manageCategories}</Link>
                       </div>
                       <SearchableSelect name="pos_category_id" options={posCategoryOptions} placeholder={pf.none} searchPlaceholder={pf.posCategory} className="mt-1.5" />
                     </div>
@@ -97,9 +97,9 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200/80 shadow-sm">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="space-y-4 p-4 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{pf.pricing}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{pf.pricing}</p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <Label>{pf.salePrice(sym)}{defaultIngredient ? "" : " *"}</Label>
@@ -123,45 +123,45 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200/80 shadow-sm">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="space-y-4 p-4 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{pf.options}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{pf.options}</p>
             <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-3">
-                <input type="checkbox" name="available_in_pos" value="on" defaultChecked={!defaultIngredient} className="mt-0.5 h-4 w-4 accent-blue-600" />
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-card p-3">
+                <input type="checkbox" name="available_in_pos" value="on" defaultChecked={!defaultIngredient} className="mt-0.5 h-4 w-4 accent-brass" />
                 <span>
-                  <span className="block text-sm font-medium text-slate-900">{pf.sellOnPos}</span>
-                  <span className="mt-0.5 block text-xs text-slate-500">{pf.sellOnPosHint}</span>
+                  <span className="block text-sm font-medium text-foreground">{pf.sellOnPos}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">{pf.sellOnPosHint}</span>
                 </span>
               </label>
 
               {visibility.recipeCosting && (
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-3">
-                  <input type="checkbox" name="is_ingredient" value="on" defaultChecked={defaultIngredient} className="mt-0.5 h-4 w-4 accent-blue-600" />
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-card p-3">
+                  <input type="checkbox" name="is_ingredient" value="on" defaultChecked={defaultIngredient} className="mt-0.5 h-4 w-4 accent-brass" />
                   {visibility.inventory && <input type="hidden" name="is_stock_tracked" value="off" />}
                   <span>
-                    <span className="block text-sm font-medium text-slate-900">{visibility.inventory ? pf.stockIngredient : pf.recipeIngredient}</span>
-                    <span className="mt-0.5 block text-xs text-slate-500">{visibility.inventory ? pf.stockHint : pf.ingredientHint}</span>
+                    <span className="block text-sm font-medium text-foreground">{visibility.inventory ? pf.stockIngredient : pf.recipeIngredient}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">{visibility.inventory ? pf.stockHint : pf.ingredientHint}</span>
                   </span>
                 </label>
               )}
 
               {visibility.inventory && !visibility.recipeCosting && (
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-3">
-                  <input type="checkbox" name="is_stock_tracked" value="on" defaultChecked={defaultIngredient} className="mt-0.5 h-4 w-4 accent-blue-600" />
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-card p-3">
+                  <input type="checkbox" name="is_stock_tracked" value="on" defaultChecked={defaultIngredient} className="mt-0.5 h-4 w-4 accent-brass" />
                   <span>
-                    <span className="block text-sm font-medium text-slate-900">{pf.stock}</span>
-                    <span className="mt-0.5 block text-xs text-slate-500">{pf.stockHint}</span>
+                    <span className="block text-sm font-medium text-foreground">{pf.stock}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">{pf.stockHint}</span>
                   </span>
                 </label>
               )}
 
               {visibility.inventory && (
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-3">
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-card p-3">
                   <input type="checkbox" name="is_purchaseable" value="on" defaultChecked={defaultIngredient} className="mt-0.5 h-4 w-4 accent-green-600" />
                   <span>
-                    <span className="block text-sm font-medium text-slate-900">{pf.purchase}</span>
-                    <span className="mt-0.5 block text-xs text-slate-500">{pf.purchaseHint}</span>
+                    <span className="block text-sm font-medium text-foreground">{pf.purchase}</span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">{pf.purchaseHint}</span>
                   </span>
                 </label>
               )}
@@ -176,9 +176,9 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200/80 shadow-sm">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="space-y-4 p-4 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{pf.advanced}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{pf.advanced}</p>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label>{pf.skuOptional}</Label>
@@ -201,9 +201,9 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
           </CardContent>
         </Card>
 
-        <div className="flex gap-3 pt-2 border-t border-slate-100">
+        <div className="flex gap-3 pt-2 border-t border-border">
           <Link href="/app/products"><Button variant="outline" type="button">{t.common.cancel}</Button></Link>
-          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
             {defaultIngredient ? pf.addIngredient : pf.addProduct}
           </Button>
         </div>

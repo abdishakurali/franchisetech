@@ -89,13 +89,13 @@ function Toggle({
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={[
-        "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50",
-        checked ? "bg-slate-900" : "bg-slate-200",
+        "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink disabled:cursor-not-allowed disabled:opacity-50",
+        checked ? "bg-ink" : "bg-secondary",
       ].join(" ")}
     >
       <span
         className={[
-          "pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform",
+          "pointer-events-none block h-4 w-4 rounded-full bg-card shadow-lg ring-0 transition-transform",
           checked ? "translate-x-4" : "translate-x-0",
         ].join(" ")}
       />
@@ -121,8 +121,8 @@ function NotifRow({
     <div className="flex items-start gap-4 py-3">
       <div className="pt-0.5">
         {locked ? (
-          <div className="relative inline-flex h-5 w-9 items-center justify-center rounded-full bg-slate-100 border border-slate-200">
-            <Lock className="h-3 w-3 text-slate-400" />
+          <div className="relative inline-flex h-5 w-9 items-center justify-center rounded-full bg-secondary border border-border">
+            <Lock className="h-3 w-3 text-muted-foreground" />
           </div>
         ) : (
           <Toggle checked={checked} onChange={(v) => onChange(notifKey, v)} />
@@ -130,8 +130,8 @@ function NotifRow({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-medium text-slate-900">{meta.label}</span>
-          <Badge variant="outline" className="text-xs h-5 px-1.5 text-slate-500">
+          <span className="text-sm font-medium text-foreground">{meta.label}</span>
+          <Badge variant="outline" className="text-xs h-5 px-1.5 text-muted-foreground">
             {meta.channel}
           </Badge>
           {locked && (
@@ -140,7 +140,7 @@ function NotifRow({
             </Badge>
           )}
         </div>
-        <p className="text-xs text-slate-500 mt-0.5">{meta.desc}</p>
+        <p className="text-xs text-muted-foreground mt-0.5">{meta.desc}</p>
       </div>
     </div>
   );
@@ -185,10 +185,10 @@ export function NotificationPreferences({
           <CardTitle className="text-base">Operațional</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-xs text-slate-500 mb-2">
+          <p className="text-xs text-muted-foreground mb-2">
             Notificări în timp real despre stoc și operațiuni zilnice. Gratuite, trimise pe email la proprietar.
           </p>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border">
             {(["stock_low", "stock_empty", "bon_consum_generated"] as NotificationKey[]).map((k) => (
               <NotifRow key={k} notifKey={k} checked={prefs[k]} onChange={handleChange} />
             ))}
@@ -201,10 +201,10 @@ export function NotificationPreferences({
           <CardTitle className="text-base">Fiscal</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-xs text-slate-500 mb-2">
+          <p className="text-xs text-muted-foreground mb-2">
             Alerte pentru conformitate e-Factura și integritate NIR. Gratuite.
           </p>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border">
             {(["efactura_rejected", "efactura_deadline", "nir_missing_cui"] as NotificationKey[]).map(
               (k) => (
                 <NotifRow key={k} notifKey={k} checked={prefs[k]} onChange={handleChange} />
@@ -222,10 +222,10 @@ export function NotificationPreferences({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-xs text-slate-500 mb-2">
+          <p className="text-xs text-muted-foreground mb-2">
             Rapoarte automate și alerte de performanță. Incluse în Operations.
           </p>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-border">
             {PAID_KEYS.map((k) => (
               reportsIncluded ? (
                 <NotifRow key={k} notifKey={k} checked={prefs[k]} onChange={handleChange} />
@@ -237,8 +237,8 @@ export function NotificationPreferences({
             ))}
           </div>
           <Separator className="my-4" />
-          <p className="text-xs text-slate-500">
-            <a href="/pricing" className="text-blue-600 hover:underline">
+          <p className="text-xs text-muted-foreground">
+            <a href="/pricing" className="text-brass hover:underline">
               Compară planurile →
             </a>
           </p>

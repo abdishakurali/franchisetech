@@ -79,8 +79,8 @@ export default async function AccountantSettingsPage({
   return (
     <div className="space-y-6 p-6 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-950">Configurare contabilitate</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-semibold text-foreground">Configurare contabilitate</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Tot ce are nevoie contabilul tău pentru a conecta softul de contabilitate la datele POS.
         </p>
       </div>
@@ -88,15 +88,15 @@ export default async function AccountantSettingsPage({
       <SettingsTabNav tabs={TABS} />
 
       {installingSaga && (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-brass/30 bg-accent">
           <CardHeader>
-            <CardTitle className="text-blue-950">Configurare Saga</CardTitle>
-            <CardDescription className="text-blue-800">
+            <CardTitle className="text-foreground">Configurare Saga</CardTitle>
+            <CardDescription className="text-foreground">
               Completează pașii de mai jos doar dacă folosești exportul Saga. Datele POS rămân
               disponibile chiar dacă acest setup nu este finalizat.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-2 text-sm text-blue-900 sm:grid-cols-2">
+          <CardContent className="grid gap-2 text-sm text-foreground sm:grid-cols-2">
             <div>1. Verifică CUI-ul firmei.</div>
             <div>2. Cere contabilului codul de gestiune Saga.</div>
             <div>3. Completează codurile articolelor pentru produse.</div>
@@ -150,15 +150,15 @@ function ScreenCompany({
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-1.5">
-            <Label className="text-slate-500">Denumire legală firmă</Label>
-            <Input value={orgName} readOnly className="bg-slate-50 text-slate-600" />
+            <Label className="text-muted-foreground">Denumire legală firmă</Label>
+            <Input value={orgName} readOnly className="bg-secondary text-mid" />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-slate-500">CUI (Cod de identificare fiscală)</Label>
+            <Label className="text-muted-foreground">CUI (Cod de identificare fiscală)</Label>
             <Input
               value={orgCui}
               readOnly
-              className="bg-slate-50 text-slate-600"
+              className="bg-secondary text-mid"
               placeholder="Necompletat — verifică firma în Business"
             />
             {!orgCui && (
@@ -170,20 +170,20 @@ function ScreenCompany({
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label className="text-slate-500">Adresă ANAF</Label>
-              <Input value={org?.company_address ?? ""} readOnly className="bg-slate-50 text-slate-600" />
+              <Label className="text-muted-foreground">Adresă ANAF</Label>
+              <Input value={org?.company_address ?? ""} readOnly className="bg-secondary text-mid" />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-slate-500">Status TVA</Label>
+              <Label className="text-muted-foreground">Status TVA</Label>
               <Input
                 value={org?.anaf_vat_registered ? "Plătitor TVA" : "Neplătitor TVA"}
                 readOnly
-                className="bg-slate-50 text-slate-600"
+                className="bg-secondary text-mid"
               />
             </div>
           </div>
           {org?.tax_id_verified ? (
-            <p className="text-xs text-green-700">Sursa legală: verificare ANAF salvată în Business.</p>
+            <p className="text-xs text-reconciled">Sursa legală: verificare ANAF salvată în Business.</p>
           ) : (
             <p className="text-xs text-amber-600">
               Verifică firma prin ANAF ca Saga, FiscalNet și e-Factura să folosească aceleași date legale.
@@ -215,11 +215,11 @@ function ScreenCompany({
             <Button type="submit">Salvează</Button>
           </form>
           {org?.saga_gestiune_code ? (
-            <p className="mt-2 text-xs text-green-700 flex items-center gap-1">
+            <p className="mt-2 text-xs text-reconciled flex items-center gap-1">
               <CheckCircle2 className="h-3.5 w-3.5" /> Cod setat: <strong>{org.saga_gestiune_code}</strong>
             </p>
           ) : (
-            <p className="mt-2 text-xs text-slate-400">
+            <p className="mt-2 text-xs text-muted-foreground">
               Poți lăsa necompletat dacă nu folosești exportul Saga XML sau dacă gestiunea este global-valorică.
             </p>
           )}
@@ -235,9 +235,9 @@ function ScreenCompany({
         </CardHeader>
         <CardContent>
           {sites.length === 0 ? (
-            <p className="text-sm text-slate-400">Nu există locații configurate.</p>
+            <p className="text-sm text-muted-foreground">Nu există locații configurate.</p>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-border">
               {sites.map((site) => (
                 <form
                   key={site.id}
@@ -246,8 +246,8 @@ function ScreenCompany({
                 >
                   <input type="hidden" name="site_id" value={site.id} />
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-900">{site.name ?? "Locație"}</p>
-                    <p className="truncate text-xs text-slate-500">
+                    <p className="truncate text-sm font-medium text-foreground">{site.name ?? "Locație"}</p>
+                    <p className="truncate text-xs text-muted-foreground">
                       {[site.address, site.city].filter(Boolean).join(", ") || "Fără adresă"}
                     </p>
                   </div>
@@ -315,14 +315,14 @@ async function ScreenProducts({
         </CardHeader>
         <CardContent>
           <div className="mb-3 flex gap-3 text-sm">
-            <span className="text-green-700 font-medium">{withCode.length} cu cod</span>
-            <span className="text-slate-400">{withoutCode.length} fără cod</span>
+            <span className="text-reconciled font-medium">{withCode.length} cu cod</span>
+            <span className="text-muted-foreground">{withoutCode.length} fără cod</span>
           </div>
 
           {rows.length === 0 ? (
-            <p className="text-sm text-slate-400 py-4 text-center">Niciun produs activ găsit.</p>
+            <p className="text-sm text-muted-foreground py-4 text-center">Niciun produs activ găsit.</p>
           ) : (
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-border">
               {rows.map((product) => (
                 <form
                   key={product.id}
@@ -331,11 +331,11 @@ async function ScreenProducts({
                 >
                   <input type="hidden" name="product_id" value={product.id} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">{product.name}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm font-medium text-foreground truncate">{product.name}</p>
+                    <p className="text-xs text-muted-foreground">
                       {product.unit_of_measure ?? "—"}
                       {product.cost_price != null && (
-                        <span className="ml-2 text-slate-500">CMP: {Number(product.cost_price).toFixed(4)} lei</span>
+                        <span className="ml-2 text-muted-foreground">CMP: {Number(product.cost_price).toFixed(4)} lei</span>
                       )}
                     </p>
                   </div>
@@ -425,16 +425,16 @@ function ScreenChecklist({
           {items.map((item) => (
             <div
               key={item.label}
-              className={`flex items-start gap-3 rounded-lg border p-3.5 ${item.done ? "border-green-200 bg-green-50" : "border-amber-100 bg-amber-50/40"}`}
+              className={`flex items-start gap-3 rounded-lg border p-3.5 ${item.done ? "border-reconciled/25 bg-reconciled/10" : "border-amber-100 bg-amber-50/40"}`}
             >
               <div className="mt-0.5 shrink-0">
                 {item.done
-                  ? <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  ? <CheckCircle2 className="h-5 w-5 text-reconciled" />
                   : <AlertCircle className="h-5 w-5 text-amber-500" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-                <p className="mt-0.5 text-xs text-slate-500">{item.detail}</p>
+                <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{item.detail}</p>
               </div>
               {item.template === "procedures" && (
                 <ProceduresTemplateButton orgName={orgName} orgCui={orgCui} />
@@ -445,7 +445,7 @@ function ScreenChecklist({
               {!item.template && item.href && (
                 <Link
                   href={item.href}
-                  className="shrink-0 text-xs font-medium text-blue-600 hover:underline whitespace-nowrap"
+                  className="shrink-0 text-xs font-medium text-brass hover:underline whitespace-nowrap"
                 >
                   {item.action} →
                 </Link>
@@ -455,7 +455,7 @@ function ScreenChecklist({
         </CardContent>
       </Card>
 
-      <p className="text-xs text-slate-400 px-1">
+      <p className="text-xs text-muted-foreground px-1">
         Elementele fără bifă verde nu blochează utilizarea POS-ului. Sunt cerințe documentare
         pe care contabilul le gestionează independent de software.
       </p>
@@ -573,37 +573,37 @@ function ScreenValuation({ countryCode }: { countryCode: string | null }) {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <label className="flex items-start gap-3 rounded-lg border-2 border-blue-500 bg-blue-50 p-4 cursor-default">
-            <div className="mt-0.5 h-4 w-4 rounded-full border-2 border-blue-600 bg-blue-600 flex items-center justify-center shrink-0">
-              <div className="h-1.5 w-1.5 rounded-full bg-white" />
+          <label className="flex items-start gap-3 rounded-lg border-2 border-brass bg-accent p-4 cursor-default">
+            <div className="mt-0.5 h-4 w-4 rounded-full border-2 border-brass bg-brass flex items-center justify-center shrink-0">
+              <div className="h-1.5 w-1.5 rounded-full bg-card" />
             </div>
             <div>
-              <p className="font-semibold text-slate-900">CMP — Costul Mediu Ponderat (rulant)</p>
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="font-semibold text-foreground">CMP — Costul Mediu Ponderat (rulant)</p>
+              <p className="mt-1 text-sm text-mid">
                 Recomandat pentru restaurante. Costul per ingredient se actualizează automat la
                 fiecare recepție (NIR postat). Calculul este atomic și previne race conditions
                 între recepții simultane.
               </p>
-              <Badge className="mt-2 bg-blue-100 text-blue-800 hover:bg-blue-100">Activ</Badge>
+              <Badge className="mt-2 bg-accent text-foreground hover:bg-accent">Activ</Badge>
             </div>
           </label>
 
-          <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 opacity-60 cursor-not-allowed">
-            <div className="mt-0.5 h-4 w-4 rounded-full border-2 border-slate-300 shrink-0" />
+          <label className="flex items-start gap-3 rounded-lg border border-border bg-secondary p-4 opacity-60 cursor-not-allowed">
+            <div className="mt-0.5 h-4 w-4 rounded-full border-2 border-border shrink-0" />
             <div>
-              <p className="font-semibold text-slate-600">FIFO — Primul Intrat, Primul Ieșit</p>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="font-semibold text-mid">FIFO — Primul Intrat, Primul Ieșit</p>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Necesită urmărirea loturilor individuale per recepție. Indisponibil momentan —
                 confirmați cu contabilul dacă este necesar pentru politicile contabile ale firmei.
               </p>
             </div>
           </label>
 
-          <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 text-xs text-slate-500">
+          <div className="rounded-lg bg-secondary border border-border p-3 text-xs text-muted-foreground">
             <strong>Notă:</strong> Alegerea metodei trebuie documentată în politicile contabile
             anuale ale firmei, semnate de administrator și contabil (OMFP 1802/2014).
             Descarcă template-ul din tab-ul{" "}
-            <Link href="/app/settings/accountant?tab=checklist" className="text-blue-600 underline">
+            <Link href="/app/settings/accountant?tab=checklist" className="text-brass underline">
               Listă de verificare
             </Link>.
           </div>
@@ -615,7 +615,7 @@ function ScreenValuation({ countryCode }: { countryCode: string | null }) {
           <CardHeader>
             <CardTitle className="text-sm">SAF-T D406 — Stocuri</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-slate-500">
+          <CardContent className="text-sm text-muted-foreground">
             Secțiunea Stocuri din D406 se depune doar la cererea ANAF (minimum 30 de zile
             preaviz). Datele necesare (mișcări stoc cu cost unitar la momentul mișcării) sunt
             deja înregistrate în sistem din momentul activării CMP.

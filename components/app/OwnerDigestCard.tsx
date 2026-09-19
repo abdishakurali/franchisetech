@@ -131,7 +131,7 @@ export function OwnerDigestCard({
                     setFrequency("daily");
                   }
                 }}
-                className="h-4 w-4 rounded border-slate-300"
+                className="h-4 w-4 rounded border-border"
               />
               {t.enabled}
             </label>
@@ -169,13 +169,13 @@ export function OwnerDigestCard({
                     className="mt-1"
                     options={dayOptions}
                   />
-                  <p className="mt-1 text-xs text-slate-500">{t.dayOfWeekHint}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t.dayOfWeekHint}</p>
                 </div>
               ) : (
                 <>
                   <input type="hidden" name="owner_digest_day_of_week" value={String(initial.dayOfWeek)} />
                   {frequency === "daily" && (
-                    <div className="rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800">
+                    <div className="rounded-lg border border-brass/25 bg-accent px-3 py-2 text-xs text-foreground">
                       {t.dailyPeriodHint}
                     </div>
                   )}
@@ -205,10 +205,10 @@ export function OwnerDigestCard({
 
             <div>
               <Label>{t.recipients}</Label>
-              <p className="text-xs text-slate-500 mt-0.5 mb-1">
+              <p className="text-xs text-muted-foreground mt-0.5 mb-1">
                 {t.recipientsHint}
               </p>
-              <div className="mt-2 divide-y divide-slate-100 rounded-lg border border-slate-200">
+              <div className="mt-2 divide-y divide-border rounded-lg border border-border">
                 {teamMembers.map((member) => (
                   <label key={member.id} className="flex items-center gap-3 px-3 py-2 text-sm">
                     <input
@@ -216,16 +216,16 @@ export function OwnerDigestCard({
                       name="owner_digest_recipients"
                       value={member.email}
                       defaultChecked={selectedRecipients.has(member.email.toLowerCase())}
-                      className="h-4 w-4 rounded border-slate-300"
+                      className="h-4 w-4 rounded border-border"
                     />
                     <span className="min-w-0 flex-1">
-                      <span className="block font-medium text-slate-900">{member.name || member.email}</span>
-                      <span className="block truncate text-xs text-slate-500">{member.email} · {member.role}</span>
+                      <span className="block font-medium text-foreground">{member.name || member.email}</span>
+                      <span className="block truncate text-xs text-muted-foreground">{member.email} · {member.role}</span>
                     </span>
                   </label>
                 ))}
                 {teamMembers.length === 0 && (
-                  <p className="px-3 py-3 text-sm text-slate-500">{ownerEmail}</p>
+                  <p className="px-3 py-3 text-sm text-muted-foreground">{ownerEmail}</p>
                 )}
               </div>
             </div>
@@ -245,7 +245,7 @@ export function OwnerDigestCard({
             </div>
           </form>
         ) : (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             {initial.enabled
               ? `${t.frequency}: ${
                   initial.frequency === "daily"

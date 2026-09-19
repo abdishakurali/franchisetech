@@ -68,7 +68,7 @@ export function LoyaltySettingsClient({
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Stamp className="h-4 w-4 text-slate-500" />
+            <Stamp className="h-4 w-4 text-muted-foreground" />
             Cum se câștigă recompensa
           </CardTitle>
         </CardHeader>
@@ -105,11 +105,11 @@ export function LoyaltySettingsClient({
                   onClick={() => setRewardType(option.value)}
                   className={cn(
                     "flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-colors",
-                    selected ? "border-amber-300 bg-amber-50/60 ring-1 ring-amber-300" : "border-slate-200 hover:border-slate-300"
+                    selected ? "border-amber-300 bg-amber-50/60 ring-1 ring-amber-300" : "border-border hover:border-border"
                   )}
                 >
-                  <Icon className={cn("h-5 w-5", selected ? "text-amber-700" : "text-slate-400")} />
-                  <span className="text-sm font-semibold text-slate-900">{option.title}</span>
+                  <Icon className={cn("h-5 w-5", selected ? "text-amber-700" : "text-muted-foreground")} />
+                  <span className="text-sm font-semibold text-foreground">{option.title}</span>
                   <span className="text-xs text-muted-foreground">{option.description}</span>
                 </button>
               );
@@ -164,7 +164,7 @@ export function LoyaltySettingsClient({
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Users className="h-4 w-4 text-slate-500" />
+            <Users className="h-4 w-4 text-muted-foreground" />
             Clienți fideli care nu au mai venit
           </CardTitle>
         </CardHeader>

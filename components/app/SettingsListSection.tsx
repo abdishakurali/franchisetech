@@ -129,14 +129,14 @@ export function SettingsListSection({
       const on = Boolean(value);
       return (
         <div className={field.className ?? ""}>
-          <Label className="text-xs text-slate-500 block mb-1">{field.label}</Label>
+          <Label className="text-xs text-muted-foreground block mb-1">{field.label}</Label>
           <button
             type="button"
             onClick={() => setValues((s) => ({ ...s, [field.key]: !on }))}
             className={`h-8 px-3 rounded border text-sm font-medium transition-colors ${
               on
-                ? "bg-green-50 border-green-300 text-green-700"
-                : "bg-slate-50 border-slate-200 text-slate-400"
+                ? "bg-reconciled/10 border-reconciled/30 text-reconciled"
+                : "bg-secondary border-border text-muted-foreground"
             }`}
           >
             {on ? "Active" : "Inactive"}
@@ -147,11 +147,11 @@ export function SettingsListSection({
     if (field.type === "select") {
       return (
         <div className={field.className ?? ""}>
-          <Label className="text-xs text-slate-500">{field.label}</Label>
+          <Label className="text-xs text-muted-foreground">{field.label}</Label>
           <select
             value={value != null ? String(value) : ""}
             onChange={(e) => setValues((s) => ({ ...s, [field.key]: e.target.value }))}
-            className="h-8 rounded border border-slate-200 px-2 text-sm w-full"
+            className="h-8 rounded border border-border px-2 text-sm w-full"
           >
             {field.options?.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>
@@ -163,7 +163,7 @@ export function SettingsListSection({
     if (field.type === "color") {
       return (
         <div className={field.className ?? ""}>
-          <Label className="text-xs text-slate-500">{field.label}</Label>
+          <Label className="text-xs text-muted-foreground">{field.label}</Label>
           <Input
             type="color"
             value={value != null ? String(value) : "#64748b"}
@@ -175,7 +175,7 @@ export function SettingsListSection({
     }
     return (
       <div className={field.className ?? ""}>
-        <Label className="text-xs text-slate-500">{field.label}</Label>
+        <Label className="text-xs text-muted-foreground">{field.label}</Label>
         <Input
           type={field.type === "number" ? "number" : "text"}
           placeholder={field.placeholder}
@@ -194,9 +194,9 @@ export function SettingsListSection({
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent>
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-border">
           {rows.length === 0 && !addingNew ? (
-            <p className="py-3 text-sm text-slate-400">{emptyLabel}</p>
+            <p className="py-3 text-sm text-muted-foreground">{emptyLabel}</p>
           ) : null}
           {rows.map((row) =>
             editingId === row.id ? (
@@ -218,7 +218,7 @@ export function SettingsListSection({
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm">{row.primary}</p>
                   {row.secondary ? (
-                    <p className="text-xs text-slate-400">{row.secondary}</p>
+                    <p className="text-xs text-muted-foreground">{row.secondary}</p>
                   ) : null}
                 </div>
                 {row.badge ? (
@@ -228,7 +228,7 @@ export function SettingsListSection({
                 ) : null}
                 {canEdit && deleteConfirm === row.id ? (
                   <div className="flex items-center gap-1 shrink-0">
-                    <span className="text-xs text-red-600">Delete?</span>
+                    <span className="text-xs text-attention">Delete?</span>
                     <Button size="sm" variant="destructive" className="h-7 px-2 text-xs" onClick={() => handleDelete(row.id)} disabled={isPending}>Yes</Button>
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setDeleteConfirm(null)}>No</Button>
                   </div>
@@ -237,7 +237,7 @@ export function SettingsListSection({
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => startEdit(row)}>
                       Edit
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-red-500 hover:text-red-600" onClick={() => setDeleteConfirm(row.id)}>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-red-500 hover:text-attention" onClick={() => setDeleteConfirm(row.id)}>
                       ✕
                     </Button>
                   </div>
@@ -247,7 +247,7 @@ export function SettingsListSection({
           )}
 
           {canEdit && addingNew && (
-            <div className="py-3 flex flex-wrap items-end gap-2 bg-slate-50 -mx-6 px-6 rounded-b">
+            <div className="py-3 flex flex-wrap items-end gap-2 bg-secondary -mx-6 px-6 rounded-b">
               {addFields.map((f) => (
                 <div key={f.key}>{renderField(f, addValues, setAddValues)}</div>
               ))}

@@ -79,7 +79,7 @@ export function ReportDateRangeFilter({
             type="button"
             size="sm"
             variant="outline"
-            className="text-slate-600"
+            className="text-mid"
             onClick={() => {
               const [f, t2] = p.range();
               setFromValue(f);
@@ -91,7 +91,7 @@ export function ReportDateRangeFilter({
           </Button>
         ))}
       </div>
-      <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1">
+      <div className="flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1">
         <input
           type="date"
           value={fromValue}
@@ -100,7 +100,7 @@ export function ReportDateRangeFilter({
           className="h-8 border-0 px-1 text-sm focus:outline-none"
           aria-label={t.common.from}
         />
-        <span className="text-slate-300">→</span>
+        <span className="text-muted-foreground">→</span>
         <input
           type="date"
           value={toValue}

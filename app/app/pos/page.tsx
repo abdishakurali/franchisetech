@@ -205,9 +205,9 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   const { data: existingCats } = await supabase.from("product_categories").select("id").eq("organisation_id", orgId).limit(1);
   if (!existingCats?.length) {
     await supabase.from("product_categories").insert([
-      { organisation_id: orgId, name: "Drinks", color: "#2563eb", sort_order: 1, category_type: "pos" },
-      { organisation_id: orgId, name: "Food", color: "#16a34a", sort_order: 2, category_type: "pos" },
-      { organisation_id: orgId, name: "Snacks", color: "#f59e0b", sort_order: 3, category_type: "pos" },
+      { organisation_id: orgId, name: "Drinks", color: "#b4903f", sort_order: 1, category_type: "pos" },
+      { organisation_id: orgId, name: "Food", color: "#2f5d50", sort_order: 2, category_type: "pos" },
+      { organisation_id: orgId, name: "Snacks", color: "#8b3a2e", sort_order: 3, category_type: "pos" },
     ]).then(() => null, () => null);
   }
   const { data: existingMethods } = await supabase.from("payment_methods").select("id").eq("organisation_id", orgId).limit(1);

@@ -98,7 +98,7 @@ export function CuiLookupCard({
         <CardTitle className="flex items-center gap-2">
           Date fiscale
           {verified && initialVerified && (
-            <Badge className="bg-green-100 text-green-800 border-0 text-xs gap-1">
+            <Badge className="bg-reconciled/15 text-reconciled border-0 text-xs gap-1">
               <CheckCircle2 className="h-3 w-3" /> Verificat ANAF
             </Badge>
           )}
@@ -130,37 +130,37 @@ export function CuiLookupCard({
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="flex items-center gap-2 rounded-lg bg-attention/10 px-3 py-2 text-sm text-attention">
             <AlertCircle className="h-4 w-4 shrink-0" />
             {error}
           </div>
         )}
 
         {result && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4 space-y-3">
-            <div className="flex items-center gap-2 text-sm font-medium text-green-800">
+          <div className="rounded-lg border border-reconciled/25 bg-reconciled/10 p-4 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium text-reconciled">
               <CheckCircle2 className="h-4 w-4" />
               Firmă verificată ANAF
             </div>
             <div className="grid gap-2 sm:grid-cols-2 text-sm">
               <div>
-                <p className="text-slate-500">Denumire legală firmă</p>
-                <p className="font-medium text-slate-900">{result.denumire || "—"}</p>
+                <p className="text-muted-foreground">Denumire legală firmă</p>
+                <p className="font-medium text-foreground">{result.denumire || "—"}</p>
               </div>
               <div>
-                <p className="text-slate-500">Adresă</p>
-                <p className="font-medium text-slate-900">{result.adresa || "—"}</p>
+                <p className="text-muted-foreground">Adresă</p>
+                <p className="font-medium text-foreground">{result.adresa || "—"}</p>
               </div>
               <div>
-                <p className="text-slate-500">Status TVA</p>
-                <p className="font-medium text-slate-900">
+                <p className="text-muted-foreground">Status TVA</p>
+                <p className="font-medium text-foreground">
                   {result.vatRegistered ? "Plătitor TVA" : "Neplătitor TVA"}
                 </p>
               </div>
               {result.caenCode && (
                 <div>
-                  <p className="text-slate-500">Cod CAEN</p>
-                  <p className="font-medium text-slate-900">{result.caenCode}</p>
+                  <p className="text-muted-foreground">Cod CAEN</p>
+                  <p className="font-medium text-foreground">{result.caenCode}</p>
                 </div>
               )}
             </div>

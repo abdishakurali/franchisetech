@@ -16,7 +16,7 @@ export default async function StockReportPage() {
 
   return (
     <div className="space-y-6 p-6">
-      <div><h1 className="text-2xl font-semibold text-slate-950">{sp.title}</h1><p className="text-sm text-slate-500">{sp.subtitle}</p></div>
+      <div><h1 className="text-2xl font-semibold text-foreground">{sp.title}</h1><p className="text-sm text-muted-foreground">{sp.subtitle}</p></div>
       <div className="grid gap-4 md:grid-cols-3">
         <Card><CardHeader><CardTitle>{sp.stockItems}</CardTitle></CardHeader><CardContent className="text-2xl font-semibold">{stock?.length ?? 0}</CardContent></Card>
         <Card><CardHeader><CardTitle>{sp.lowStock}</CardTitle></CardHeader><CardContent className="text-2xl font-semibold">{lowItems.length}</CardContent></Card>

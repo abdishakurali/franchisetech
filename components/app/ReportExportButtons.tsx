@@ -22,7 +22,7 @@ export function ReportExportButtons({ filename, rows }: { filename: string; rows
       <Button onClick={() => window.print()} variant="outline" className="gap-2"><Printer className="h-4 w-4" />Print</Button>
       <Button onClick={() => downloadCsv(`${filename}.csv`, rows)} variant="outline" className="gap-2"><Download className="h-4 w-4" />Export CSV</Button>
       <Button onClick={exportExcel} variant="outline" className="gap-2"><Download className="h-4 w-4" />Export Excel</Button>
-      <Button onClick={() => window.print()} className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"><Printer className="h-4 w-4" />Export PDF</Button>
+      <Button onClick={() => window.print()} className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"><Printer className="h-4 w-4" />Export PDF</Button>
     </div>
   );
 }

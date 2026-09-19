@@ -15,16 +15,16 @@ export function ActivationBanner({ locale }: Props) {
   const steps = t.activation.dashboardSteps;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-indigo-50/40 shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-brass/30 bg-accent shadow-sm">
       <div className="flex flex-col gap-5 p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-600/20">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-brass text-ink">
               <Sparkles className="h-5 w-5" aria-hidden />
             </div>
             <div>
-              <p className="text-base font-semibold text-slate-950">{t.dashboard.activationTitle}</p>
-              <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-600">
+              <p className="text-base font-semibold text-foreground">{t.dashboard.activationTitle}</p>
+              <p className="mt-1 max-w-xl text-sm leading-relaxed text-mid">
                 {t.dashboard.activationDesc}
               </p>
             </div>
@@ -32,7 +32,7 @@ export function ActivationBanner({ locale }: Props) {
           <div className="flex shrink-0 flex-wrap gap-2">
             <Link
               href="/app/products/new"
-              className="inline-flex h-8 items-center justify-center rounded-md bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-700"
+              className="inline-flex h-8 items-center justify-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               {t.dashboard.addProducts}
               <ArrowRight className="ml-1.5 h-4 w-4" />
@@ -48,18 +48,18 @@ export function ActivationBanner({ locale }: Props) {
               <li
                 key={step.label}
                 className={cn(
-                  "flex items-start gap-3 rounded-xl border px-3 py-3",
-                  current && "border-blue-300 bg-white shadow-sm ring-1 ring-blue-100",
-                  done && "border-green-100 bg-green-50/60",
-                  !done && !current && "border-slate-100 bg-white/60",
+                  "flex items-start gap-3 rounded-md border px-3 py-3",
+                  current && "border-brass/40 bg-card shadow-sm",
+                  done && "border-reconciled/25 bg-reconciled/10",
+                  !done && !current && "border-border bg-card/60",
                 )}
               >
                 <span
                   className={cn(
                     "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
-                    done && "bg-green-600 text-white",
-                    current && "bg-blue-600 text-white",
-                    !done && !current && "bg-slate-100 text-slate-400",
+                    done && "bg-reconciled text-paper",
+                    current && "bg-brass text-ink",
+                    !done && !current && "bg-secondary text-muted-foreground",
                   )}
                 >
                   {done ? (
@@ -69,8 +69,8 @@ export function ActivationBanner({ locale }: Props) {
                   )}
                 </span>
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{step.label}</p>
-                  <p className="text-xs text-slate-500">{step.hint}</p>
+                  <p className="text-sm font-medium text-foreground">{step.label}</p>
+                  <p className="text-xs text-muted-foreground">{step.hint}</p>
                 </div>
               </li>
             );

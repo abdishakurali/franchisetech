@@ -58,8 +58,8 @@ export function SupplierFormFields({ supplier }: { supplier?: SupplierFormValue 
       </div>
       <div><Label>Name *</Label><Input name="name" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Fresh Foods Supplier" /></div>
       <input type="hidden" name="registration_code" value={registrationCode} />
-      <label className="flex items-center gap-2 text-sm text-slate-700">
-        <input type="checkbox" name="vat_registered" checked={vatRegistered} onChange={(e) => setVatRegistered(e.target.checked)} className="h-4 w-4 rounded border-slate-300" />
+      <label className="flex items-center gap-2 text-sm text-foreground">
+        <input type="checkbox" name="vat_registered" checked={vatRegistered} onChange={(e) => setVatRegistered(e.target.checked)} className="h-4 w-4 rounded border-border" />
         Plătitor de TVA
       </label>
       <div><Label>Contact name</Label><Input name="contact_name" defaultValue={supplier?.contact_name ?? ""} placeholder="John Smith" /></div>

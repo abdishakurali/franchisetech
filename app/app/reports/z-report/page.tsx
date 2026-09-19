@@ -132,14 +132,14 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
       )}
       <div className="flex items-center justify-between gap-4 flex-wrap print:hidden">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{zp.title}</h1>
-          <p className="text-sm text-slate-500">{zp.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{zp.title}</h1>
+          <p className="text-sm text-muted-foreground">{zp.subtitle}</p>
         </div>
         <div className="flex gap-3 items-center flex-wrap">
           <ReportDateFilter basePath="/app/reports/z-report" date={reportDate} />
           <Link
             href={`/api/reports/z-report/pdf?date=${reportDate}`}
-            className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium hover:bg-secondary"
           >
             <FileDown className="h-4 w-4" />
             {zp.downloadPdf}
@@ -148,28 +148,28 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
       </div>
 
       {/* Report header */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6 print:border-0">
+      <div className="rounded-xl border border-border bg-card p-6 print:border-0">
         <div className="flex flex-wrap gap-8 text-sm">
-          <div><p className="text-slate-500">{zp.business}</p><p className="font-semibold text-slate-900">{((org as { name?: string | null } | null)?.name) ?? "franchisetech"}</p></div>
-          <div><p className="text-slate-500">{zp.reportDate}</p><p className="font-semibold text-slate-900">{reportDate}</p></div>
-          <div><p className="text-slate-500">{zp.generatedAt}</p><p className="font-semibold text-slate-900">{generatedAt}</p></div>
-          <div><p className="text-slate-500">{zp.generatedBy}</p><p className="font-semibold text-slate-900">{generatedBy}</p></div>
+          <div><p className="text-muted-foreground">{zp.business}</p><p className="font-semibold text-foreground">{((org as { name?: string | null } | null)?.name) ?? "franchisetech"}</p></div>
+          <div><p className="text-muted-foreground">{zp.reportDate}</p><p className="font-semibold text-foreground">{reportDate}</p></div>
+          <div><p className="text-muted-foreground">{zp.generatedAt}</p><p className="font-semibold text-foreground">{generatedAt}</p></div>
+          <div><p className="text-muted-foreground">{zp.generatedBy}</p><p className="font-semibold text-foreground">{generatedBy}</p></div>
         </div>
       </div>
 
       {/* KPI row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">{t.transactions.title}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{completedTx.length}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">{zp.netSales}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(totalNet || (totalGross - totalVat), currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">{zp.vatCollected}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-blue-600">{formatMoney(totalVat, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">{zp.grossExTips}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-green-600">{formatMoney(grossExTips, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{t.transactions.title}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{completedTx.length}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{zp.netSales}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(totalNet || (totalGross - totalVat), currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{zp.vatCollected}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-brass">{formatMoney(totalVat, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{zp.grossExTips}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-reconciled">{formatMoney(grossExTips, currency)}</CardContent></Card>
       </div>
       {totalTips > 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <div className="flex flex-wrap gap-8 text-sm">
-            <div><p className="text-slate-500">{t.reportPages.sales.grossExTipsShort}</p><p className="text-xl font-semibold text-slate-900">{formatMoney(grossExTips, currency)}</p></div>
-            <div><p className="text-slate-500">{t.reportPages.sales.tipsCollected}</p><p className="text-xl font-semibold text-amber-700">{formatMoney(totalTips, currency)}</p></div>
-            <div><p className="text-slate-500">{t.reportPages.sales.totalCollected}</p><p className="text-xl font-bold text-slate-900">{formatMoney(totalGross, currency)}</p></div>
+            <div><p className="text-muted-foreground">{t.reportPages.sales.grossExTipsShort}</p><p className="text-xl font-semibold text-foreground">{formatMoney(grossExTips, currency)}</p></div>
+            <div><p className="text-muted-foreground">{t.reportPages.sales.tipsCollected}</p><p className="text-xl font-semibold text-amber-700">{formatMoney(totalTips, currency)}</p></div>
+            <div><p className="text-muted-foreground">{t.reportPages.sales.totalCollected}</p><p className="text-xl font-bold text-foreground">{formatMoney(totalGross, currency)}</p></div>
           </div>
         </div>
       )}
@@ -179,10 +179,10 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
         <Card>
           <CardHeader><CardTitle>{zp.paymentBreakdown}</CardTitle></CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">{t.common.cash}</span><strong>{formatMoney(cashTotal, currency)}</strong></div>
-            <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">{t.common.card}</span><strong>{formatMoney(cardTotal, currency)}</strong></div>
-            <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">{zp.online}</span><strong>{formatMoney(onlineTotal, currency)}</strong></div>
-            {otherTotal > 0 && <div className="flex justify-between py-2 border-b text-sm"><span className="text-slate-600">{zp.other}</span><strong>{formatMoney(otherTotal, currency)}</strong></div>}
+            <div className="flex justify-between py-2 border-b text-sm"><span className="text-mid">{t.common.cash}</span><strong>{formatMoney(cashTotal, currency)}</strong></div>
+            <div className="flex justify-between py-2 border-b text-sm"><span className="text-mid">{t.common.card}</span><strong>{formatMoney(cardTotal, currency)}</strong></div>
+            <div className="flex justify-between py-2 border-b text-sm"><span className="text-mid">{zp.online}</span><strong>{formatMoney(onlineTotal, currency)}</strong></div>
+            {otherTotal > 0 && <div className="flex justify-between py-2 border-b text-sm"><span className="text-mid">{zp.other}</span><strong>{formatMoney(otherTotal, currency)}</strong></div>}
             <div className="flex justify-between py-2 text-base font-bold"><span>{t.reportPages.sales.totalCollected}</span><span>{formatMoney(totalGross, currency)}</span></div>
           </CardContent>
         </Card>
@@ -192,7 +192,7 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
           <CardHeader><CardTitle>{zp.vatBreakdown}</CardTitle></CardHeader>
           <CardContent>
             {vatByRate.size === 0 ? (
-              <p className="text-sm text-slate-400">{zp.noVatData}</p>
+              <p className="text-sm text-muted-foreground">{zp.noVatData}</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -223,8 +223,8 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
       <Card>
         <CardHeader><CardTitle>{zp.adjustments}</CardTitle></CardHeader>
         <CardContent className="flex gap-8 text-sm">
-          <div><p className="text-slate-500">{zp.voids}</p><p className="text-xl font-bold text-red-600">{voidedTx.length}</p></div>
-          <div><p className="text-slate-500">{zp.refunds}</p><p className="text-xl font-bold text-amber-600">0 <span className="text-sm font-normal text-slate-400">{zp.comingSoon}</span></p></div>
+          <div><p className="text-muted-foreground">{zp.voids}</p><p className="text-xl font-bold text-attention">{voidedTx.length}</p></div>
+          <div><p className="text-muted-foreground">{zp.refunds}</p><p className="text-xl font-bold text-amber-600">0 <span className="text-sm font-normal text-muted-foreground">{zp.comingSoon}</span></p></div>
         </CardContent>
       </Card>
 
@@ -253,13 +253,13 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
           </CardHeader>
           <CardContent>
             <div className='grid grid-cols-2 gap-4 mb-4'>
-              <div className='rounded-lg bg-green-50 border border-green-200 p-3'>
-                <p className='text-xs text-slate-500'>{zp.cashInTotal}</p>
-                <p className='text-xl font-bold text-green-700'>{formatMoney(cashInTotal, currency)}</p>
+              <div className='rounded-lg bg-reconciled/10 border border-reconciled/25 p-3'>
+                <p className='text-xs text-muted-foreground'>{zp.cashInTotal}</p>
+                <p className='text-xl font-bold text-reconciled'>{formatMoney(cashInTotal, currency)}</p>
               </div>
-              <div className='rounded-lg bg-red-50 border border-red-200 p-3'>
-                <p className='text-xs text-slate-500'>{zp.cashOutTotal}</p>
-                <p className='text-xl font-bold text-red-600'>{formatMoney(cashOutTotal, currency)}</p>
+              <div className='rounded-lg bg-attention/10 border border-attention/25 p-3'>
+                <p className='text-xs text-muted-foreground'>{zp.cashOutTotal}</p>
+                <p className='text-xl font-bold text-attention'>{formatMoney(cashOutTotal, currency)}</p>
               </div>
             </div>
             <Table>
@@ -275,12 +275,12 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
                 {(cashMovements ?? []).map((m) => (
                   <TableRow key={m.id}>
                     <TableCell>
-                      <span className={m.movement_type === 'cash_in' ? 'text-green-700 font-medium' : 'text-red-600 font-medium'}>
+                      <span className={m.movement_type === 'cash_in' ? 'text-reconciled font-medium' : 'text-attention font-medium'}>
                         {m.movement_type === 'cash_in' ? zp.cashIn : zp.cashOut}
                       </span>
                     </TableCell>
-                    <TableCell className='text-slate-600'>{m.reason ?? '—'}</TableCell>
-                    <TableCell className='text-xs text-slate-400'>
+                    <TableCell className='text-mid'>{m.reason ?? '—'}</TableCell>
+                    <TableCell className='text-xs text-muted-foreground'>
                       {m.performed_at ? new Intl.DateTimeFormat(intlLocaleForApp(locale), { timeStyle: "short" }).format(new Date(m.performed_at)) : "—"}
                     </TableCell>
                     <TableCell className='text-right font-medium tabular-nums'>
@@ -303,14 +303,14 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
         <CardContent>
           <div className="grid grid-cols-2 gap-8 mt-4 text-sm print:grid-cols-2">
             <div>
-              <p className="text-slate-500 mb-8">{zp.managerSignature}</p>
-              <div className="border-b border-slate-400 w-full" />
-              <p className="text-slate-400 mt-2">{zp.nameDate}</p>
+              <p className="text-muted-foreground mb-8">{zp.managerSignature}</p>
+              <div className="border-b border-mid w-full" />
+              <p className="text-muted-foreground mt-2">{zp.nameDate}</p>
             </div>
             <div>
-              <p className="text-slate-500 mb-8">{zp.countedBy}</p>
-              <div className="border-b border-slate-400 w-full" />
-              <p className="text-slate-400 mt-2">{zp.nameDate}</p>
+              <p className="text-muted-foreground mb-8">{zp.countedBy}</p>
+              <div className="border-b border-mid w-full" />
+              <p className="text-muted-foreground mt-2">{zp.nameDate}</p>
             </div>
           </div>
         </CardContent>

@@ -17,8 +17,8 @@ function QuickTile({ action, onNavigate }: { action: QuickAction; onNavigate: ()
     "flex flex-col items-center justify-center gap-2 rounded-xl border p-4 text-center transition-colors min-h-[88px]";
   const styles =
     action.accent === "danger"
-      ? "border-red-200 bg-red-50 hover:bg-red-100 text-red-800"
-      : "border-slate-200 bg-white hover:border-blue-200 hover:bg-blue-50/40 text-slate-800";
+      ? "border-attention/25 bg-attention/10 hover:bg-attention/15 text-attention"
+      : "border-border bg-white hover:border-brass/30 hover:bg-accent/40 text-foreground";
 
   return (
     <button
@@ -30,7 +30,7 @@ function QuickTile({ action, onNavigate }: { action: QuickAction; onNavigate: ()
       }}
       className={`${base} ${styles} disabled:opacity-40`}
     >
-      <span className="text-blue-600">{action.icon}</span>
+      <span className="text-brass">{action.icon}</span>
       <span className="text-xs font-semibold leading-tight">{action.label}</span>
     </button>
   );
@@ -96,7 +96,7 @@ export function PosQuickAccessSheet({
       <SheetContent side="left" className="w-full sm:max-w-sm overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{t.quickAccess}</SheetTitle>
-          <p className="text-xs text-slate-500">{t.quickAccessHint}</p>
+          <p className="text-xs text-muted-foreground">{t.quickAccessHint}</p>
         </SheetHeader>
         <div className="mt-6 px-4 pb-6">
           <div className="grid grid-cols-2 gap-2">

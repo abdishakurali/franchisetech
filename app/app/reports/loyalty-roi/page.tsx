@@ -46,14 +46,14 @@ export default async function LoyaltyRoiReportPage({
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between gap-4 flex-wrap print:hidden">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
-          <p className="text-sm text-slate-500">{labels.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{labels.title}</h1>
+          <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
         <div className="flex gap-3 items-center flex-wrap">
           <ReportDateRangeFilter basePath="/app/reports/loyalty-roi" from={fromDate} to={toDate} />
           <Link
             href={`/api/reports/loyalty-roi/pdf?from=${fromDate}&to=${toDate}`}
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium hover:bg-secondary"
           >
             <FileDown className="h-4 w-4" />
             {labels.downloadPdf}
@@ -66,14 +66,14 @@ export default async function LoyaltyRoiReportPage({
           <CardHeader><CardTitle className="text-sm">{labels.avgSpendLoyalty}</CardTitle></CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">{formatMoney(report.avgSpendLoyalty, currency)}</div>
-            <p className="text-xs text-slate-500 mt-1">{labels.visitsCount(report.loyaltyVisitCount)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{labels.visitsCount(report.loyaltyVisitCount)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader><CardTitle className="text-sm">{labels.avgSpendNonLoyalty}</CardTitle></CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">{formatMoney(report.avgSpendNonLoyalty, currency)}</div>
-            <p className="text-xs text-slate-500 mt-1">{labels.visitsCount(report.nonLoyaltyVisitCount)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{labels.visitsCount(report.nonLoyaltyVisitCount)}</p>
           </CardContent>
         </Card>
       </div>
@@ -82,7 +82,7 @@ export default async function LoyaltyRoiReportPage({
         <CardHeader><CardTitle className="text-sm">{labels.retentionRate}</CardTitle></CardHeader>
         <CardContent>
           <div className="text-2xl font-semibold">{report.retentionRate}%</div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {labels.retentionDetail(report.customersRetained, report.customersVisited)}
           </p>
         </CardContent>
@@ -93,7 +93,7 @@ export default async function LoyaltyRoiReportPage({
         <CardContent className="overflow-x-auto">
           {report.topRewards.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-sm text-slate-400">{labels.noData}</p>
+              <p className="text-sm text-muted-foreground">{labels.noData}</p>
             </div>
           ) : (
             <Table>

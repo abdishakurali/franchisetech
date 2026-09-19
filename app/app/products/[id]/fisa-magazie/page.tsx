@@ -112,7 +112,7 @@ export default async function FisaMagaziePage({
   const movementTypeLabels = labels.movementTypeLabels as Record<string, string>;
 
   return (
-    <div className={`mx-auto max-w-4xl p-8 print:p-4 text-slate-900 ${sans}`}>
+    <div className={`mx-auto max-w-4xl p-8 print:p-4 text-foreground ${sans}`}>
       <div className="mb-6 flex items-center justify-between gap-4 flex-wrap print:hidden">
         <Link href={`/app/products/${id}`}>
           <Button variant="outline">{t.common.back}</Button>
@@ -131,17 +131,17 @@ export default async function FisaMagaziePage({
           not found anywhere else in this repo and has not been confirmed
           against OMFP 2634/2015 Annex 1 by anyone. Do not treat it as
           settled; get accountant sign-off before relying on it. ── */}
-      <header className="flex items-start justify-between gap-6 border-b-4 border-slate-900 pb-4 mb-6">
+      <header className="flex items-start justify-between gap-6 border-b-4 border-foreground pb-4 mb-6">
         <div>
           <h1 className={`text-2xl font-semibold uppercase tracking-tight leading-tight ${display}`}>
             {labels.title}
           </h1>
-          <p className="mt-1 text-[10px] uppercase tracking-wide text-slate-400">{labels.docCode}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{labels.docCode}</p>
         </div>
         <div className={`text-right text-sm ${mono}`}>
-          <p className="font-semibold text-slate-900">{product.name}</p>
-          <p className="mt-1 text-slate-600">
-            {labels.unitLabel}: <span className="font-medium text-slate-900">{org?.name ?? "—"}</span>
+          <p className="font-semibold text-foreground">{product.name}</p>
+          <p className="mt-1 text-mid">
+            {labels.unitLabel}: <span className="font-medium text-foreground">{org?.name ?? "—"}</span>
           </p>
         </div>
       </header>
@@ -155,20 +155,20 @@ export default async function FisaMagaziePage({
           { label: labels.evaluationMethod, value: labels.evaluationMethodValue },
         ].map((f) => (
           <div key={f.label}>
-            <p className={`text-[10px] uppercase tracking-wider text-slate-400 ${mono}`}>{f.label}</p>
-            <p className="mt-1 font-medium text-slate-900">{f.value}</p>
+            <p className={`text-[10px] uppercase tracking-wider text-muted-foreground ${mono}`}>{f.label}</p>
+            <p className="mt-1 font-medium text-foreground">{f.value}</p>
           </div>
         ))}
       </section>
 
       {rendered.length === 0 ? (
         <div className="py-8 text-center">
-          <p className="text-sm text-slate-400">{labels.noData}</p>
+          <p className="text-sm text-muted-foreground">{labels.noData}</p>
         </div>
       ) : (
         <table className={`w-full text-sm border-collapse mb-2 ${sans}`}>
           <thead>
-            <tr className="border-t-2 border-b-2 border-slate-900">
+            <tr className="border-t-2 border-b-2 border-foreground">
               <th className="text-left py-2 px-1 w-8">{labels.rowNo}</th>
               <th className="text-left py-2 px-1">{labels.date}</th>
               <th className="text-left py-2 px-1">{labels.document}</th>
@@ -181,22 +181,22 @@ export default async function FisaMagaziePage({
           </thead>
           <tbody>
             {rendered.map((m, i) => (
-              <tr key={m.id} className="border-b border-slate-200">
-                <td className="py-2 px-1 text-slate-500">{i + 1}</td>
+              <tr key={m.id} className="border-b border-border">
+                <td className="py-2 px-1 text-muted-foreground">{i + 1}</td>
                 <td className="py-2 px-1 whitespace-nowrap">{m.performed_at.slice(0, 10)}</td>
                 <td className="py-2 px-1">
                   {movementTypeLabels[m.movement_type] ?? m.movement_type}
-                  {m.reason ? <span className="text-slate-400"> — {m.reason}</span> : null}
+                  {m.reason ? <span className="text-muted-foreground"> — {m.reason}</span> : null}
                   {m.source === "reconciled" ? (
                     <span className="ml-1 text-[10px] uppercase tracking-wide text-amber-600">
                       ({labels.reconciledTag})
                     </span>
                   ) : null}
                 </td>
-                <td className={`text-right py-2 px-1 tabular-nums ${mono} ${m.qtyIn != null ? "text-green-700" : ""}`}>
+                <td className={`text-right py-2 px-1 tabular-nums ${mono} ${m.qtyIn != null ? "text-reconciled" : ""}`}>
                   {m.qtyIn != null ? m.qtyIn.toFixed(2) : ""}
                 </td>
-                <td className={`text-right py-2 px-1 tabular-nums ${mono} ${m.qtyOut != null ? "text-red-600" : ""}`}>
+                <td className={`text-right py-2 px-1 tabular-nums ${mono} ${m.qtyOut != null ? "text-attention" : ""}`}>
                   {m.qtyOut != null ? m.qtyOut.toFixed(2) : ""}
                 </td>
                 <td className={`text-right py-2 px-1 tabular-nums font-medium ${mono}`}>{m.balanceAfter.toFixed(2)}</td>
@@ -204,14 +204,14 @@ export default async function FisaMagaziePage({
                   {m.unit_cost != null ? (
                     <>
                       {formatMoney(Number(m.unit_cost), currency)}
-                      <span className="ml-1 text-[9px] text-slate-400">{m.costLabel}</span>
+                      <span className="ml-1 text-[9px] text-muted-foreground">{m.costLabel}</span>
                     </>
                   ) : (
-                    <span className="text-slate-300">—</span>
+                    <span className="text-muted-foreground">—</span>
                   )}
                 </td>
                 <td className={`text-right py-2 px-1 tabular-nums ${mono}`}>
-                  {m.lineValue != null ? formatMoney(m.lineValue, currency) : <span className="text-slate-300">—</span>}
+                  {m.lineValue != null ? formatMoney(m.lineValue, currency) : <span className="text-muted-foreground">—</span>}
                 </td>
               </tr>
             ))}
@@ -219,19 +219,19 @@ export default async function FisaMagaziePage({
         </table>
       )}
 
-      <p className="text-[10px] text-slate-400 leading-relaxed mb-8 print:text-[9px]">{labels.cmpNote}</p>
-      <p className="text-[10px] text-slate-400 leading-relaxed mb-8 print:text-[9px]">{labels.costGapNote}</p>
+      <p className="text-[10px] text-muted-foreground leading-relaxed mb-8 print:text-[9px]">{labels.cmpNote}</p>
+      <p className="text-[10px] text-muted-foreground leading-relaxed mb-8 print:text-[9px]">{labels.costGapNote}</p>
 
       {/* ── Signature: one block — this is a running ledger the gestionar
           maintains, not a per-transaction voucher signed by multiple
           parties like NIR/Bon de Consum. ── */}
-      <footer className="mt-10 border-t border-slate-300 pt-6 text-sm">
+      <footer className="mt-10 border-t border-border pt-6 text-sm">
         <div className="grid gap-8 sm:grid-cols-3">
           <div>
-            <p className={`text-[10px] uppercase tracking-wider text-slate-400 mb-8 ${mono}`}>
+            <p className={`text-[10px] uppercase tracking-wider text-muted-foreground mb-8 ${mono}`}>
               {labels.gestionar}
             </p>
-            <div className="border-b border-slate-400 w-full" />
+            <div className="border-b border-mid w-full" />
           </div>
         </div>
       </footer>

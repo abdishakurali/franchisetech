@@ -362,15 +362,15 @@ export default async function SettingsPage({
           >
             <div className="flex flex-wrap gap-2">
               {DEFAULT_OPERATIONAL_UNITS.map((u) => (
-                <Badge key={u} variant="outline" className="text-slate-600">{unitLabel(u, isRO ? "ro" : "en")}</Badge>
+                <Badge key={u} variant="outline" className="text-mid">{unitLabel(u, isRO ? "ro" : "en")}</Badge>
               ))}
             </div>
             {customUnits.length > 0 ? (
-              <div className="mt-4 border-t border-slate-100 pt-4">
-                <p className="text-xs text-slate-500 mb-2">{isRO ? "Unități personalizate" : "Custom units"}</p>
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground mb-2">{isRO ? "Unități personalizate" : "Custom units"}</p>
                 <div className="flex flex-wrap gap-2">
                   {customUnits.map((u) => (
-                    <Badge key={u.id} variant="outline" className="text-slate-600">
+                    <Badge key={u.id} variant="outline" className="text-mid">
                       {u.name}{u.abbreviation ? ` (${u.abbreviation})` : ""}
                     </Badge>
                   ))}
@@ -441,11 +441,11 @@ export default async function SettingsPage({
               ) : (
                 <div className="text-sm">
                   <p className="font-medium">{primarySite.name}</p>
-                  <p className="text-slate-500">{[primarySite.address, primarySite.city].filter(Boolean).join(", ") || "—"}</p>
+                  <p className="text-muted-foreground">{[primarySite.address, primarySite.city].filter(Boolean).join(", ") || "—"}</p>
                 </div>
               )
             ) : (
-              <p className="text-sm text-slate-400">{isRO ? "Nicio locație configurată." : "No location configured."}</p>
+              <p className="text-sm text-muted-foreground">{isRO ? "Nicio locație configurată." : "No location configured."}</p>
             )}
           </SettingsSection>
         </div>
@@ -528,11 +528,11 @@ export default async function SettingsPage({
             <CardContent>
               <div className="grid gap-3 sm:grid-cols-4 text-sm">
                 <div>
-                  <p className="text-slate-500">Încercări bon fiscal</p>
+                  <p className="text-muted-foreground">Încercări bon fiscal</p>
                   <p className={`font-medium ${fiscalReceiptAttempts === 0 ? "text-amber-700" : ""}`}>{fiscalReceiptAttempts}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500">Ultima încercare</p>
+                  <p className="text-muted-foreground">Ultima încercare</p>
                   <p className="font-medium">
                     {fiscalLastAttemptAt
                       ? `${new Date(fiscalLastAttemptAt).toLocaleString("ro-RO")} (${fiscalLastAttemptStatus ?? "—"})`
@@ -540,11 +540,11 @@ export default async function SettingsPage({
                   </p>
                 </div>
                 <div>
-                  <p className="text-slate-500">Sesiuni închise</p>
+                  <p className="text-muted-foreground">Sesiuni închise</p>
                   <p className="font-medium">{sessionsClosedCount}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500">Rapoarte Z generate</p>
+                  <p className="text-muted-foreground">Rapoarte Z generate</p>
                   <p className="font-medium">
                     {zReportsDoneCount}
                     {lastZReportAt ? ` (ultimul: ${new Date(lastZReportAt).toLocaleDateString("ro-RO")})` : ""}
@@ -561,7 +561,7 @@ export default async function SettingsPage({
               <CardTitle className="flex items-center gap-2">
                 e-Factura
                 {anafConnected ? (
-                  <Badge className="bg-green-100 text-green-800 border-0 text-xs">Conectat</Badge>
+                  <Badge className="bg-reconciled/15 text-reconciled border-0 text-xs">Conectat</Badge>
                 ) : (
                   <Badge className="bg-red-100 text-red-800 border-0 text-xs">Neconectat</Badge>
                 )}
@@ -571,18 +571,18 @@ export default async function SettingsPage({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-lg bg-blue-50 border border-blue-100 p-4 text-sm text-blue-800 space-y-1">
+              <div className="rounded-lg bg-accent border border-brass/25 p-4 text-sm text-foreground space-y-1">
                 <p className="font-medium">De știut:</p>
                 <p>Fiecare factură B2B trebuie transmisă în SPV în <strong>5 zile lucrătoare</strong>. Amenda pentru netransmitere: <strong>1.000–2.500 lei per factură</strong>.</p>
               </div>
               {anafConnected ? (
-                <div className="flex items-center gap-2 text-sm text-green-700">
+                <div className="flex items-center gap-2 text-sm text-reconciled">
                   <CheckCircle2 className="h-4 w-4" />
                   Conectat la ANAF SPV — facturile pot fi transmise automat.
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-3 items-center">
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <AlertCircle className="h-4 w-4 text-amber-500" />
                     Neconectat la ANAF SPV
                   </div>
@@ -593,7 +593,7 @@ export default async function SettingsPage({
               )}
               <Link
                 href="/help/romania-efactura"
-                className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline"
+                className="inline-flex items-center gap-1 text-sm text-brass hover:underline"
               >
                 Ghid complet e-Factura <ExternalLink className="h-3 w-3" />
               </Link>
@@ -620,8 +620,8 @@ export default async function SettingsPage({
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-900">Configurare contabil (Saga, CMP, coduri)</p>
-                  <p className="text-xs text-slate-500 mt-0.5">{accountantStepsDone}/4 pași completați</p>
+                  <p className="text-sm font-medium text-foreground">Configurare contabil (Saga, CMP, coduri)</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{accountantStepsDone}/4 pași completați</p>
                 </div>
                 <Link href="/app/settings/accountant">
                   <Button variant="outline" size="sm">Configurare &rarr;</Button>
@@ -636,9 +636,9 @@ export default async function SettingsPage({
                 ].map(({ label, done }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     {done
-                      ? <CheckCircle2 className="h-3.5 w-3.5 text-green-600 shrink-0" />
-                      : <Circle className="h-3.5 w-3.5 text-slate-300 shrink-0" />}
-                    <span className={done ? "text-slate-700" : "text-slate-400"}>{label}</span>
+                      ? <CheckCircle2 className="h-3.5 w-3.5 text-reconciled shrink-0" />
+                      : <Circle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                    <span className={done ? "text-foreground" : "text-muted-foreground"}>{label}</span>
                   </div>
                 ))}
               </div>
@@ -655,7 +655,7 @@ export default async function SettingsPage({
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-3 text-sm">
                 <div>
-                  <p className="text-slate-500">Serie numere</p>
+                  <p className="text-muted-foreground">Serie numere</p>
                   <p className="font-medium">
                     {bcCount > 0
                       ? `BC-${new Date().getFullYear()}-000001 — ${latestBcNumber ?? "—"}`
@@ -663,21 +663,21 @@ export default async function SettingsPage({
                   </p>
                 </div>
                 <div>
-                  <p className="text-slate-500">Bonuri generate {new Date().getFullYear()}</p>
+                  <p className="text-muted-foreground">Bonuri generate {new Date().getFullYear()}</p>
                   <p className="font-medium">{bcCount}</p>
                 </div>
                 <div>
-                  <p className="text-slate-500">Metodă evaluare stoc</p>
-                  <Badge className="bg-blue-100 text-blue-800 border-0 mt-1">CMP rulant</Badge>
+                  <p className="text-muted-foreground">Metodă evaluare stoc</p>
+                  <Badge className="bg-accent text-foreground border-0 mt-1">CMP rulant</Badge>
                 </div>
               </div>
-              <div className="pt-2 border-t border-slate-100">
-                <Link href="/app/reports/consum" className="text-sm text-blue-600 hover:underline">
+              <div className="pt-2 border-t border-border">
+                <Link href="/app/reports/consum" className="text-sm text-brass hover:underline">
                   Descarcă bon de consum &rarr;
                 </Link>
               </div>
               <div className="pt-1">
-                <Link href="/app/settings/accountant?tab=checklist" className="text-sm text-blue-600 hover:underline">
+                <Link href="/app/settings/accountant?tab=checklist" className="text-sm text-brass hover:underline">
                   Descarcă proceduri interne &rarr;
                 </Link>
               </div>
@@ -723,10 +723,10 @@ export default async function SettingsPage({
   );
 
   return (
-    <div className="settings-page-wrapper mx-auto min-h-full w-full max-w-[1280px] bg-[#FAF8F4] p-4 sm:p-6">
+    <div className="settings-page-wrapper mx-auto min-h-full w-full max-w-[1280px] bg-card p-4 sm:p-6">
       <div className="settings-page-heading mb-8">
-        <h1 className="text-[26px] font-bold tracking-[-0.025em] text-[#0D0F0E]">{t.settings.title}</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{org?.name ?? t.settings.subtitleSimple}{isRO ? ` · ${anafVatRegistered ? "plătitor de TVA" : "neplătitor de TVA"}` : ""}</p>
+        <h1 className="text-[26px] font-bold tracking-[-0.025em] text-foreground">{t.settings.title}</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">{org?.name ?? t.settings.subtitleSimple}{isRO ? ` · ${anafVatRegistered ? "plătitor de TVA" : "neplătitor de TVA"}` : ""}</p>
       </div>
 
       {vatReviewCount > 0 && (
@@ -734,7 +734,7 @@ export default async function SettingsPage({
           href="/app/settings/data-repair"
           className={`mb-6 flex items-start gap-3 rounded-lg border p-4 text-sm ${
             daysUntilEnforcement !== null && daysUntilEnforcement <= 3
-              ? "border-red-300 bg-red-50 text-red-900"
+              ? "border-attention/40 bg-attention/10 text-red-900"
               : "border-amber-300 bg-amber-50 text-amber-900"
           }`}
         >
@@ -774,7 +774,7 @@ export default async function SettingsPage({
       ) : null}
 
       {!coreTab && <SettingsTabNav tabs={tabs} />}
-      {coreTab && <div className="mb-5 flex justify-end"><Link href="?tab=business" className="text-sm font-medium text-[#5B5D57] underline underline-offset-4">Firmă, TVA și cont</Link></div>}
+      {coreTab && <div className="mb-5 flex justify-end"><Link href="?tab=business" className="text-sm font-medium text-mid underline underline-offset-4">Firmă, TVA și cont</Link></div>}
 
       {coreTab && (
         <SettingsCoreLists
@@ -813,23 +813,23 @@ export default async function SettingsPage({
             <CardContent className="space-y-3">
               <div className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-sm text-slate-500">{t.settings.business.businessName}</p>
+                  <p className="text-sm text-muted-foreground">{t.settings.business.businessName}</p>
                   <p className="font-medium">{org?.name ?? "—"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">{t.settings.business.businessType}</p>
+                  <p className="text-sm text-muted-foreground">{t.settings.business.businessType}</p>
                   <p className="font-medium capitalize">{industryLabel(org?.business_type, locale)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">{t.settings.business.yourName}</p>
+                  <p className="text-sm text-muted-foreground">{t.settings.business.yourName}</p>
                   <p className="font-medium">{profile?.full_name ?? "—"}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">{t.settings.business.email}</p>
+                  <p className="text-sm text-muted-foreground">{t.settings.business.email}</p>
                   <p className="font-medium">{user.email}</p>
                 </div>
               </div>
-              <Link href="/app/profile" className="inline-flex text-sm text-blue-600 hover:underline">
+              <Link href="/app/profile" className="inline-flex text-sm text-brass hover:underline">
                 {t.settings.business.editProfile}
               </Link>
             </CardContent>
@@ -857,7 +857,7 @@ export default async function SettingsPage({
               ) : (
                 <p className="text-sm font-medium">{industryLabel(org?.business_type, locale)}</p>
               )}
-              <div className="rounded-lg bg-slate-50 p-3 text-sm text-slate-600">
+              <div className="rounded-lg bg-secondary p-3 text-sm text-mid">
                 {getSuggestedFeaturesForIndustry(org?.business_type).length
                   ? t.settings.business.suggestedFeaturesHighlight
                   : t.settings.business.openFeaturesHint}
@@ -869,7 +869,7 @@ export default async function SettingsPage({
           <Card>
             <CardHeader>
               <CardTitle>{t.settings.business.countryTitle}</CardTitle>
-              <p className="text-sm text-slate-500 mt-1">{t.settings.business.countryDesc}</p>
+              <p className="text-sm text-muted-foreground mt-1">{t.settings.business.countryDesc}</p>
             </CardHeader>
             <CardContent>
               {canEdit ? (
@@ -888,11 +888,11 @@ export default async function SettingsPage({
               ) : (
                 <p className="text-sm font-medium">
                   {COUNTRY_OPTIONS.find((o) => o.code === countryCode)?.label ?? countryCode}
-                  <span className="ml-2 text-xs text-slate-400">{t.settings.business.contactOwner}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{t.settings.business.contactOwner}</span>
                 </p>
               )}
               {isRO && (
-                <p className="mt-3 text-xs text-green-700 bg-green-50 rounded px-3 py-2">
+                <p className="mt-3 text-xs text-reconciled bg-reconciled/10 rounded px-3 py-2">
                   {t.settings.business.receiptsVisible}
                 </p>
               )}
@@ -903,7 +903,7 @@ export default async function SettingsPage({
           <Card>
             <CardHeader>
               <CardTitle>{t.settings.business.currencyTitle}</CardTitle>
-              <p className="text-sm text-slate-500 mt-1">{t.settings.business.currencyDesc}</p>
+              <p className="text-sm text-muted-foreground mt-1">{t.settings.business.currencyDesc}</p>
             </CardHeader>
             <CardContent>
               {canEdit ? (
@@ -933,13 +933,13 @@ export default async function SettingsPage({
                 </form>
               ) : (
                 <p className="text-sm font-medium">{currencyCode}
-                  <span className="ml-2 text-xs text-slate-400">{t.settings.business.contactOwner}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{t.settings.business.contactOwner}</span>
                 </p>
               )}
 
-              <div className="mt-6 border-t border-slate-100 pt-5 space-y-2">
+              <div className="mt-6 border-t border-border pt-5 space-y-2">
                 <Label>{t.settings.business.language}</Label>
-                <p className="text-sm text-slate-500">{t.settings.business.languageDesc}</p>
+                <p className="text-sm text-muted-foreground">{t.settings.business.languageDesc}</p>
                 <AppLocaleSwitcher key={locale} initialLocale={locale} />
               </div>
             </CardContent>
@@ -981,7 +981,7 @@ export default async function SettingsPage({
       {/* ── INTEGRATIONS TAB ─────────────────────────────────────────── */}
       {activeTab === "marketplace" && (
         <div className="space-y-2">
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             {isRO
               ? "Instalează doar modulele de care ai nevoie. Dezinstalarea ascunde meniurile fără să șteargă datele."
               : "Install only the modules you need. Uninstall hides menus without deleting data."}
@@ -1017,31 +1017,31 @@ export default async function SettingsPage({
             <Card>
               <CardHeader>
                 <CardTitle>{t.referrals.title}</CardTitle>
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   {t.referrals.shareBefore}<strong>{t.referrals.shareBold}</strong>{t.referrals.shareAfter}
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-3">
                   <div>
-                    <p className="text-sm text-slate-500">{t.referrals.code}</p>
+                    <p className="text-sm text-muted-foreground">{t.referrals.code}</p>
                     <p className="font-medium">{referral.code}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-500">{t.referrals.creditEarned}</p>
+                    <p className="text-sm text-muted-foreground">{t.referrals.creditEarned}</p>
                     <p className="font-medium">{t.referrals.months(referral.creditMonths)}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-500">{t.referrals.trial}</p>
+                    <p className="text-sm text-muted-foreground">{t.referrals.trial}</p>
                     <p className="font-medium">{referral.daysLeft !== null ? t.referrals.daysLeft(referral.daysLeft) : t.referrals.daysLeftDefault}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="break-all rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{referral.link}</p>
+                  <p className="break-all rounded-lg bg-secondary px-3 py-2 text-sm text-foreground">{referral.link}</p>
                   <CopyReferralButton link={referral.link} />
                 </div>
                 {referral.creditMonths > 0 && (
-                  <p className="text-sm text-blue-700">{t.referrals.creditAppliedNote}</p>
+                  <p className="text-sm text-brass">{t.referrals.creditAppliedNote}</p>
                 )}
                 <div className="space-y-2">
                   <p className="text-sm font-medium">{t.referrals.peopleInvited}</p>
@@ -1049,11 +1049,11 @@ export default async function SettingsPage({
                     referral.referrals.map((r) => (
                       <div key={r.id} className="flex items-center justify-between rounded-lg border p-3 text-sm">
                         <span>{r.referred_email || t.referrals.newBusiness}</span>
-                        <span className="text-slate-500">{r.status ? (t.referrals.status[r.status] ?? r.status) : ""} &middot; {t.referrals.months(r.credit_months ?? 1)}</span>
+                        <span className="text-muted-foreground">{r.status ? (t.referrals.status[r.status] ?? r.status) : ""} &middot; {t.referrals.months(r.credit_months ?? 1)}</span>
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-slate-500">{t.referrals.noReferralsYet}</p>
+                    <p className="text-sm text-muted-foreground">{t.referrals.noReferralsYet}</p>
                   )}
                 </div>
               </CardContent>

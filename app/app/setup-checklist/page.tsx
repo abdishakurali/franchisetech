@@ -27,7 +27,7 @@ export default async function SetupChecklistPage() {
   ].map((step) => ({ ...step, label: ro ? "Continuă" : "Continue", section: "core" }));
   const doneCount = steps.filter((step) => step.done).length;
   return (
-    <div className="flex min-h-[calc(100svh-120px)] items-center bg-[#F3F0E8] px-4 py-8 sm:px-10 sm:py-12">
+    <div className="flex min-h-[calc(100svh-120px)] items-center bg-background px-4 py-8 sm:px-10 sm:py-12">
       <SetupChecklist locale={locale} steps={steps} doneCount={doneCount} totalCount={steps.length} percent={Math.round(doneCount / steps.length * 100)} />
     </div>
   );

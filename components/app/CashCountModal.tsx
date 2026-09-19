@@ -57,13 +57,13 @@ export function CashCountModal({
             />
           ))}
         </div>
-        <div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2.5">
-          <span className="text-sm font-semibold text-slate-700">{labels.total}</span>
-          <span className="text-lg font-bold tabular-nums text-blue-700">{money(total)}</span>
+        <div className="flex items-center justify-between rounded-lg bg-secondary px-3 py-2.5">
+          <span className="text-sm font-semibold text-foreground">{labels.total}</span>
+          <span className="text-lg font-bold tabular-nums text-brass">{money(total)}</span>
         </div>
         <DialogFooter>
           <DialogClose render={<Button type="button" variant="outline" />}>{labels.cancel}</DialogClose>
-          <Button type="button" onClick={handleConfirm} className="bg-blue-600 text-white hover:bg-blue-700">
+          <Button type="button" onClick={handleConfirm} className="bg-primary text-primary-foreground hover:bg-primary/90">
             {labels.confirm}
           </Button>
         </DialogFooter>

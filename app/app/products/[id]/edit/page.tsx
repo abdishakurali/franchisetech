@@ -43,8 +43,8 @@ export default async function ProductEditPage({
   if (!product) {
     return (
       <div className="p-6">
-        <p className="text-slate-500">{t.productsForm.productNotFound}</p>
-        <Link href={returnTo || "/app/products"} className="mt-2 inline-block text-sm text-blue-600 hover:underline">
+        <p className="text-muted-foreground">{t.productsForm.productNotFound}</p>
+        <Link href={returnTo || "/app/products"} className="mt-2 inline-block text-sm text-brass hover:underline">
           ← {t.productsForm.backToProducts}
         </Link>
       </div>
@@ -53,17 +53,17 @@ export default async function ProductEditPage({
 
   return (
     <div className="mx-auto max-w-[720px] px-4 py-5 sm:px-6 sm:py-6">
-      <nav className="mb-5 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
-        <Link href={returnTo || "/app/products"} className="hover:text-slate-800">{t.productsForm.backToProducts}</Link>
+      <nav className="mb-5 flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+        <Link href={returnTo || "/app/products"} className="hover:text-foreground">{t.productsForm.backToProducts}</Link>
         <span aria-hidden>/</span>
-        <Link href={`/app/products/${id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`} className="truncate max-w-[12rem] hover:text-slate-800">
+        <Link href={`/app/products/${id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`} className="truncate max-w-[12rem] hover:text-foreground">
           {product.name}
         </Link>
         <span aria-hidden>/</span>
-        <span className="font-medium text-slate-900">{t.common.edit}</span>
+        <span className="font-medium text-foreground">{t.common.edit}</span>
       </nav>
 
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight text-slate-950">
+      <h1 className="mb-6 text-2xl font-semibold tracking-tight text-foreground">
         {t.productsForm.editProduct}
       </h1>
 
