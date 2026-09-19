@@ -107,7 +107,7 @@ export default async function FisaMagaziePage({
   }, []);
 
   const sans = "font-[family-name:var(--font-body)]";
-  const mono = "font-[family-name:var(--font-plex-mono)]";
+  const mono = "font-[family-name:var(--font-space-mono)]";
   const display = "font-[family-name:var(--font-display)]";
   const movementTypeLabels = labels.movementTypeLabels as Record<string, string>;
 

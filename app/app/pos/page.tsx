@@ -38,11 +38,12 @@ function formatTime(ts: string | null | undefined, locale: "en" | "ro") {
   return new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", { timeStyle: "short", dateStyle: "short" }).format(new Date(ts));
 }
 
-export default async function PosPage({ searchParams }: { searchParams?: Promise<{ welcome?: string; tabId?: string; quick?: string }> }) {
+export default async function PosPage({ searchParams }: { searchParams?: Promise<{ welcome?: string; tabId?: string; quick?: string; onboarding?: string }> }) {
   const params = await searchParams;
   const showWelcome = params?.welcome === "1";
   const tabIdParam = params?.tabId ?? null;
   const quickSale = params?.quick === "1";
+  const fromOnboarding = params?.onboarding === "1";
   const { countryCode, profileLocale, supabase, orgId, currency, currencySymbol, user, membership } = await getKitchenOpsContext();
   const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const subscriptionStatus = await getSubscriptionStatus(orgId).catch(() => null);
@@ -502,6 +503,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       <PosWithTour
         orgId={orgId}
         trackActivationSale={trackActivationSale}
+        redirectAfterSaleTo={fromOnboarding ? "/onboarding/result" : null}
         products={(products ?? []) as never}
         categories={categories ?? []}
         paymentMethods={methods ?? []}

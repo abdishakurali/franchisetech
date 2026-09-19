@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { FISCALNET_SUPPORTED_DEVICES } from "@/lib/fiscalnet/supported-devices";
 
 export const metadata: Metadata = {
   title: "Romania FiscalNet Setup Guide",
@@ -40,17 +41,7 @@ const steps = [
   },
 ];
 
-const supportedDevices = [
-  { brand: "Datecs", models: "DP25, DP150, WP500, WP50, DP05 (fiscal registers); FP800, FP700, FP650 (fiscal printers)" },
-  { brand: "Daisy", models: "eXpert SX, Compact M, Perfect M, Compact S" },
-  { brand: "Custom", models: "KSmart, BigPlus (registers); Q3xF, K3F (printers)" },
-  { brand: "Orgtech", models: "Teo, Nova" },
-  { brand: "Partner", models: "Partner 200, Partner 300, Partner 600" },
-  { brand: "Posiflex", models: "AURA 8900 (fiscal printer)" },
-  { brand: "Sam4S", models: "NR-240, NR-300, NR-440" },
-  { brand: "Tremol", models: "Activa Galaxy Plus, Adpos M, Tremol M20, Excel Master, and others" },
-  { brand: "Incotex", models: "SuccesM7" },
-];
+const supportedDevices = FISCALNET_SUPPORTED_DEVICES;
 
 const checklist = [
   "FiscalNet credentials entered and verified",

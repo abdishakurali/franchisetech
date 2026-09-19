@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Fraunces, Public_Sans, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from "@/lib/marketing/seo";
@@ -10,26 +10,27 @@ import { marketingHtmlLang, marketingOpenGraphLocale } from "@/lib/marketing/loc
 import { getMarketingMessages } from "@/lib/marketing/i18n";
 import { GlobalSeoJsonLd } from "@/components/marketing/GlobalSeoJsonLd";
 
-const spaceGrotesk = Space_Grotesk({
+const fraunces = Fraunces({
   variable: "--font-display",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  subsets: ["latin", "latin-ext"],
+  weight: "variable",
+  axes: ["opsz", "SOFT", "WONK"],
 });
 
-const ibmPlexSans = IBM_Plex_Sans({
+const publicSans = Public_Sans({
   variable: "--font-body",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  subsets: ["latin", "latin-ext"],
+  weight: "variable",
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const spaceMono = Space_Mono({
+  variable: "--font-space-mono",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "700"],
 });
 
 export const viewport: Viewport = {
-  themeColor: "#0D0F0E",
+  themeColor: "#1C1712",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -101,7 +102,7 @@ export default async function RootLayout({
   return (
     <html
       lang={htmlLang}
-      className={`${spaceGrotesk.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${publicSans.variable} ${spaceMono.variable} h-full antialiased`}
     >
       <head>
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM site summary" />

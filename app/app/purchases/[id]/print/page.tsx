@@ -105,7 +105,7 @@ export default async function PurchasePrintPage({ params }: { params: Promise<{ 
     : p.footerDisclaimer;
 
   const sans = "font-[family-name:var(--font-body)]";
-  const mono = "font-[family-name:var(--font-plex-mono)]";
+  const mono = "font-[family-name:var(--font-space-mono)]";
   const display = "font-[family-name:var(--font-display)]";
 
   return (

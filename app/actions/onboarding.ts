@@ -152,6 +152,7 @@ export async function completePosOnboarding(input: {
   await saveOrgModuleFlags(supabase, orgId, {
     business_profile: profile,
     inventory_enabled: modules.inventory_enabled,
+    purchases_enabled: modules.purchases_enabled,
     recipe_costing_enabled: modules.recipe_costing_enabled,
     team_advanced_enabled: modules.team_advanced_enabled,
     multi_site_ops_enabled: modules.multi_site_ops_enabled,
@@ -224,9 +225,13 @@ export async function completePosOnboarding(input: {
 
   // ── Growth milestone: till opened ──────────────────────────────────────
   await recordGrowthMilestone(supabase, orgId, "till_opened", user.id);
-  await supabase.from("organisations").update({ onboarding_completed: true }).eq("id", orgId).then(
+  // Onboarding is NOT complete yet — account creation is step 1 of the
+  // guided journey (modules → menu → fiscal → first sale → result), not
+  // the whole thing. onboarding_completed only flips true at the end, in
+  // completeOnboardingJourney (app/actions/onboarding-steps.ts).
+  await supabase.from("organisations").update({ onboarding_step: "modules" }).eq("id", orgId).then(
     () => null,
-    (e: unknown) => console.error("onboarding_completed_update_failed", e),
+    (e: unknown) => console.error("onboarding_step_update_failed", e),
   );
 
   // ── Preferred plan cookie ──────────────────────────────────────────────
@@ -310,5 +315,5 @@ export async function completePosOnboarding(input: {
   // can open the till and ring up sales first; app/app/layout.tsx only
   // redirects to /onboarding/verify-card once they've had a real preview
   // (Z-report view or a few sales).
-  redirect("/app/setup-checklist?welcome=1");
+  redirect("/onboarding/modules");
 }

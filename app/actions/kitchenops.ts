@@ -287,6 +287,43 @@ export async function addCategory(formData: FormData) {
   revalidatePath("/app/settings");
 }
 
+// Inline category creation — used by the onboarding menu builder and any
+// other quick-add flow that needs a new category without leaving the
+// product form. Returns the created row (no redirect) and defaults to
+// category_type "both" so the single customer-facing "Categorie" field
+// works for both till layout and reporting — see addProductFromPos above
+// and docs/onboarding-redesign-audit-2026-09-19.md Section P/H.
+export async function addCategoryInline(
+  formData: FormData
+): Promise<{ ok: boolean; category?: { id: string; name: string }; error?: string }> {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "products.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
+  const name = stringValue(formData, "name");
+  if (!name) return { ok: false, error: "Numele categoriei este obligatoriu." };
+
+  const { data, error } = await supabase
+    .from("product_categories")
+    .insert({
+      organisation_id: orgId,
+      name,
+      category_type: "both",
+      sort_order: numberValue(formData, "sort_order", 999),
+    })
+    .select("id, name")
+    .single();
+
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/app/products", "page");
+  revalidatePath("/app/pos", "page");
+  return { ok: true, category: { id: data.id as string, name: data.name as string } };
+}
+
 export async function updateCategory(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
@@ -535,11 +572,18 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
   const unit = await resolveSubmittedUnitOfMeasure(supabase, orgId, stringValue(formData, "unit_of_measure") || "each");
   if (!unit.ok) return unit;
 
+  // A quick-added product gets one category, mirrored onto both FK columns.
+  // The two-category split (category_id for reporting, pos_category_id for
+  // till layout) is real and stays available in the full product edit form,
+  // but a product created from a quick-add has no reason to leave one of
+  // them silently null — see docs/onboarding-redesign-audit-2026-09-19.md
+  // Section P/H.
+  const quickAddCategoryId = stringValue(formData, "pos_category_id") || null;
   const { error } = await supabase.from("products").insert({
     organisation_id: orgId,
     name,
-    pos_category_id: stringValue(formData, "pos_category_id") || null,
-    category_id: null,
+    pos_category_id: quickAddCategoryId,
+    category_id: quickAddCategoryId,
     unit_of_measure: unit.unit,
     sale_price: salePrice,
     vat_rate: vat.rate,
@@ -2596,6 +2640,7 @@ export async function updateBusinessCapabilities(formData: FormData): Promise<{ 
   const moduleResult = await saveOrgModuleFlags(supabase, orgId, {
     business_profile: profile,
     inventory_enabled: formCheckboxEnabled(formData, "inventory_enabled"),
+    purchases_enabled: formCheckboxEnabled(formData, "purchases_enabled"),
     recipe_costing_enabled: formCheckboxEnabled(formData, "recipe_costing_enabled"),
     team_advanced_enabled: formCheckboxEnabled(formData, "team_advanced_enabled"),
     multi_site_ops_enabled: formCheckboxEnabled(formData, "multi_site_ops_enabled"),

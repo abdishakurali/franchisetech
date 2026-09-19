@@ -12,7 +12,7 @@ type SupplierRow = { id: string; name: string; contact_name: string | null; emai
 type PurchaseRow = { supplier_id: string | null; total_amount: number | null };
 
 export default async function SuppliersPage() {
-  await requireBusinessModule("inventory");
+  await requireBusinessModule("purchases");
   const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const [suppRes, purchRes] = await Promise.all([

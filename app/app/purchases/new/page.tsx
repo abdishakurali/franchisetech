@@ -6,7 +6,7 @@ import { requireBusinessModule } from "@/lib/module-guard";
 import { listOperationalUnitNames } from "@/lib/units-of-measure";
 
 export default async function PurchasesNewPage() {
-  await requireBusinessModule("inventory");
+  await requireBusinessModule("purchases");
   const { supabase, orgId, currency, membership, user, countryCode } = await getKitchenOpsContext();
   const [suppRes, prodRes, sites, vatRates, units] = await Promise.all([
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),

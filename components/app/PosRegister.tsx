@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addCustomerFromPos, closePosSession, completeSaleReturn, posCashMovement, voidTransaction } from "@/app/actions/kitchenops";
 import { runZReport, recordFiscalReceiptAttempt } from "@/app/actions/fiscalnet";
+import { markFirstSaleDoneForOnboarding } from "@/app/actions/onboarding-steps";
 import { getLoyaltyStampStatus, recordLoyaltyRedemption, type LoyaltyStampStatus } from "@/app/actions/loyalty";
 import { fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
 import { fiscalBrowserReceiptAndLog, type RecordFiscalAttemptInput } from "@/lib/fiscalnet/log-attempt";
@@ -734,6 +735,7 @@ function PosRegisterInner({
   catalogCachedAt = null,
   browserOffline = false,
   trackActivationSale = false,
+  redirectAfterSaleTo = null,
 }: {
   products: Product[];
   categories: Category[];
@@ -774,6 +776,11 @@ function PosRegisterInner({
   browserOffline?: boolean;
   /** Fire PostHog activation_first_sale on the next successful server save */
   trackActivationSale?: boolean;
+  /** When set, the post-sale success screen's primary action navigates here
+   *  instead of resetting to a new sale — used by the onboarding first-sale
+   *  step to continue into /onboarding/result. Table-service flows are
+   *  unaffected (a tab may need more sales before payment completes). */
+  redirectAfterSaleTo?: string | null;
 }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -1939,6 +1946,10 @@ function PosRegisterInner({
                       void refreshPendingTabItems();
                       return;
                     }
+                    if (redirectAfterSaleTo) {
+                      void markFirstSaleDoneForOnboarding().finally(() => router.push(redirectAfterSaleTo));
+                      return;
+                    }
                     setCheckoutStep("order");
                     setPaymentCartSnapshot(null);
                     setLastCompletedSale(null);
@@ -1950,7 +1961,9 @@ function PosRegisterInner({
                     ? "Comandă nouă"
                     : features.tableService && activeTab
                       ? "Înapoi la sală"
-                      : t.newSaleAfter}
+                      : redirectAfterSaleTo
+                        ? "Vezi rezultatul →"
+                        : t.newSaleAfter}
                 </Button>
                 {features.tableService && activeTab && !tabPaymentCompleted && (
                   <Button

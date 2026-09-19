@@ -3,7 +3,7 @@ import type { OrgModuleRow } from "@/lib/business-modules";
 import type { BusinessProfile } from "@/lib/business-profile";
 
 const MODULE_COLUMNS =
-  "business_profile,inventory_enabled,recipe_costing_enabled,team_advanced_enabled,multi_site_ops_enabled,onboarding_completed_at";
+  "business_profile,inventory_enabled,purchases_enabled,recipe_costing_enabled,team_advanced_enabled,multi_site_ops_enabled,onboarding_completed_at";
 
 const MISSING_COLUMN_HINT =
   "Module settings need a one-time database upgrade. Contact support to apply migration 039, or run 039_business_profile_modules.sql in the Supabase SQL editor.";
@@ -11,6 +11,7 @@ const MISSING_COLUMN_HINT =
 export type OrgModuleFlagUpdates = {
   business_profile?: BusinessProfile | string | null;
   inventory_enabled: boolean;
+  purchases_enabled: boolean;
   recipe_costing_enabled: boolean;
   team_advanced_enabled: boolean;
   multi_site_ops_enabled: boolean;
@@ -55,6 +56,7 @@ export async function fetchOrgModuleFlags(
     if (isMissingColumnError(error)) {
       return {
         inventory_enabled: true,
+        purchases_enabled: true,
         recipe_costing_enabled: true,
         team_advanced_enabled: true,
         multi_site_ops_enabled: true,
@@ -62,6 +64,7 @@ export async function fetchOrgModuleFlags(
     }
     return {
       inventory_enabled: false,
+      purchases_enabled: false,
       recipe_costing_enabled: false,
       team_advanced_enabled: false,
       multi_site_ops_enabled: false,
@@ -83,6 +86,7 @@ export async function saveOrgModuleFlags(
 
   const payload: Record<string, unknown> = {
     inventory_enabled: updates.inventory_enabled,
+    purchases_enabled: updates.purchases_enabled,
     recipe_costing_enabled: updates.recipe_costing_enabled,
     team_advanced_enabled: updates.team_advanced_enabled,
     multi_site_ops_enabled: updates.multi_site_ops_enabled,

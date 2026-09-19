@@ -5,6 +5,7 @@ import { planEntitlements, type EntitlementKey } from "@/lib/billing/entitlement
 export type BusinessModuleKey =
   | "pos_core"
   | "inventory"
+  | "purchases"
   | "recipe_costing"
   | "team_advanced"
   | "multi_site"
@@ -33,6 +34,7 @@ const MODULE_ENTITLEMENT: Record<
   EntitlementKey
 > = {
   inventory: "inventory.enabled",
+  purchases: "purchases.nir",
   recipe_costing: "recipes.costing",
   team_advanced: "team.advanced_roles",
   kitchen_ops: "kitchen.enabled",

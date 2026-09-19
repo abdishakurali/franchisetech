@@ -127,12 +127,12 @@ const en = {
     viewFullReport: "Full sales report",
     monthNoVoids: "No voids this month",
     activationTitle: "Next step: your first sale",
-    activationDesc: "Demo products are ready — open POS and complete one sale to see live data on your dashboard.",
+    activationDesc: "Your menu is ready — open POS and complete one sale to see live data on your dashboard.",
     activationCta: "Open POS",
     activationChecklist: "Setup guide",
   },
   activation: {
-    welcomeTitle: "Your demo products are ready",
+    welcomeTitle: "Your menu is ready",
     welcomeBody: "Tap a product, then tap Charge to complete your first sale.",
     welcomeDismiss: "Dismiss welcome banner",
     welcomeTourCta: "Quick guide",
@@ -143,14 +143,14 @@ const en = {
     tourDone: "Done",
     tourSkipAria: "Skip tour",
     dashboardSteps: [
-      { label: "Products ready", hint: "Demo menu loaded" },
-      { label: "First sale", hint: "One test charge at POS" },
+      { label: "Products ready", hint: "Menu created" },
+      { label: "First sale", hint: "One charge at POS" },
       { label: "See dashboard", hint: "Live sales data" },
     ],
     firstSaleTour: [
       {
         title: "Tap a product",
-        content: "Choose any demo item to add it to the order. You can replace these with your own menu later.",
+        content: "Choose an item from your menu to add it to the order.",
       },
       {
         title: "Review the order",
@@ -1519,12 +1519,12 @@ const ro: typeof en = {
     viewFullReport: "Raport complet vânzări",
     monthNoVoids: "Nicio anulare luna aceasta",
     activationTitle: "Pasul următor: prima vânzare la casă",
-    activationDesc: "Produsele demo sunt gata — deschide POS-ul și finalizează o vânzare ca să vezi date live în panou.",
+    activationDesc: "Meniul tău este gata — deschide POS-ul și finalizează o vânzare ca să vezi date live în panou.",
     activationCta: "Deschide POS",
     activationChecklist: "Ghid configurare",
   },
   activation: {
-    welcomeTitle: "Produsele demo sunt gata",
+    welcomeTitle: "Meniul tău este gata",
     welcomeBody: "Apasă un produs, apoi apasă Încasează pentru prima vânzare.",
     welcomeDismiss: "Închide mesajul de bun venit",
     welcomeTourCta: "Ghid rapid",
@@ -1535,14 +1535,14 @@ const ro: typeof en = {
     tourDone: "Gata",
     tourSkipAria: "Sari peste ghid",
     dashboardSteps: [
-      { label: "Produse gata", hint: "Meniu demo încărcat" },
-      { label: "Prima vânzare", hint: "O încasare de test la POS" },
+      { label: "Produse gata", hint: "Meniu creat" },
+      { label: "Prima vânzare", hint: "O încasare la POS" },
       { label: "Vezi panoul", hint: "Date live în dashboard" },
     ],
     firstSaleTour: [
       {
         title: "Alege un produs",
-        content: "Selectați orice articol demo pentru comandă. Le puteți înlocui cu meniul dumneavoastră mai târziu.",
+        content: "Selectați un articol din meniul dumneavoastră pentru comandă.",
       },
       {
         title: "Verifică comanda",

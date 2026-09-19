@@ -7,23 +7,26 @@ type Props = {
   labels: string[];
   current: number;
   timeEstimate?: string;
-  stepOf: (current: number, total: number) => string;
+  /** Pre-formatted "Pasul 2 din 6" / "Step 2 of 6" — a string, not a
+   *  formatter function: this component is rendered from Server Component
+   *  pages, and a function prop can't cross that boundary (RSC). */
+  stepOfLabel: string;
 };
 
-export function OnboardingStepper({ labels, current, timeEstimate, stepOf }: Props) {
+export function OnboardingStepper({ labels, current, timeEstimate, stepOfLabel }: Props) {
   const total = labels.length;
   const progressPct = total > 1 ? Math.round((current / (total - 1)) * 100) : 0;
 
   return (
     <div className="mb-8 space-y-4">
-      <div className="flex items-center justify-between gap-3 text-xs text-slate-500">
-        <span>{stepOf(current + 1, total)}</span>
-        {timeEstimate ? <span className="text-slate-400">{timeEstimate}</span> : null}
+      <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+        <span className="font-[family-name:var(--font-space-mono)]">{stepOfLabel}</span>
+        {timeEstimate ? <span className="font-[family-name:var(--font-space-mono)] text-mid">{timeEstimate}</span> : null}
       </div>
 
-      <div className="h-1.5 overflow-hidden rounded-full bg-slate-200">
+      <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
         <div
-          className="h-full rounded-full bg-blue-600 transition-all duration-500 ease-out"
+          className="h-full rounded-full bg-brass transition-all duration-500 ease-out"
           style={{ width: `${Math.max(8, progressPct)}%` }}
         />
       </div>
@@ -36,18 +39,18 @@ export function OnboardingStepper({ labels, current, timeEstimate, stepOf }: Pro
             <li
               key={label}
               className={cn(
-                "flex items-center gap-2.5 rounded-xl border px-3 py-2.5 transition-colors",
-                active && "border-blue-200 bg-blue-50/80 shadow-sm",
-                done && "border-green-100 bg-green-50/50",
-                !active && !done && "border-slate-100 bg-white",
+                "flex items-center gap-2.5 rounded-md border px-3 py-2.5 transition-colors",
+                active && "border-brass/40 bg-accent shadow-sm",
+                done && "border-reconciled/25 bg-reconciled/10",
+                !active && !done && "border-border bg-card",
               )}
             >
               <span
                 className={cn(
                   "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
-                  active && "bg-blue-600 text-white",
-                  done && "bg-green-600 text-white",
-                  !active && !done && "bg-slate-100 text-slate-500",
+                  active && "bg-brass text-ink",
+                  done && "bg-reconciled text-paper",
+                  !active && !done && "bg-secondary text-muted-foreground",
                 )}
               >
                 {done ? <Check className="h-3.5 w-3.5" strokeWidth={2.5} /> : i + 1}
@@ -55,9 +58,9 @@ export function OnboardingStepper({ labels, current, timeEstimate, stepOf }: Pro
               <span
                 className={cn(
                   "text-xs font-medium leading-tight",
-                  active && "text-blue-900",
-                  done && "text-green-800",
-                  !active && !done && "text-slate-500",
+                  active && "text-foreground",
+                  done && "text-reconciled",
+                  !active && !done && "text-muted-foreground",
                 )}
               >
                 {label}

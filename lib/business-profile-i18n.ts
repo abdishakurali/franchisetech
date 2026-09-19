@@ -9,7 +9,8 @@ export const BUSINESS_PROFILE_LABELS_RO: Record<BusinessProfile, string> = {
 
 export const MODULE_LABELS_RO: Record<BusinessModuleKey, string> = {
   pos_core: "POS și vânzări zilnice",
-  inventory: "Stoc și achiziții",
+  inventory: "Stoc",
+  purchases: "Achiziții",
   recipe_costing: "Costuri rețete",
   team_advanced: "Echipă și audit",
   multi_site: "Operațiuni multi-site",
@@ -30,7 +31,8 @@ export function moduleLabel(module: BusinessModuleKey, locale?: string | null): 
   if (locale === "ro") return MODULE_LABELS_RO[module];
   const labels: Record<BusinessModuleKey, string> = {
     pos_core: "POS & daily sales",
-    inventory: "Stock & purchases",
+    inventory: "Stock",
+    purchases: "Purchases",
     recipe_costing: "Recipe costing",
     team_advanced: "Team & audit",
     multi_site: "Multi-site operations",

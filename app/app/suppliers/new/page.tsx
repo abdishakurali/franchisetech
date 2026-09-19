@@ -7,7 +7,7 @@ import { requireBusinessModule } from "@/lib/module-guard";
 import { SupplierFormFields } from "@/components/app/SupplierForm";
 
 export default async function SuppliersNewPage() {
-  await requireBusinessModule("inventory");
+  await requireBusinessModule("purchases");
   await getKitchenOpsContext();
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-6">

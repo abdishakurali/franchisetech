@@ -36,19 +36,22 @@ interface Props {
 export function FiscalNetSettingsCard(props: Props) {
   const router = useRouter();
   const [enabled,   setEnabled]   = useState(props.enabled);
+  const [mockMode,  setMockMode]  = useState(props.mockMode);
   const [platform,  setPlatform]  = useState<"api" | "file">(props.connectionMode === "file" ? "file" : "api");
   const [apiHost,   setApiHost]   = useState(props.apiHost || "http://localhost:65400");
   const [opCode,    setOpCode]    = useState(props.operatorCode || "1");
 
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [saving, startSave] = useTransition();
+  const [testing, startTest] = useTransition();
+  const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
   function handleSave() {
     setStatus(null);
     startSave(async () => {
       const fd = new FormData();
       fd.set("fiscalnet_enabled",         String(enabled));
-      fd.set("fiscalnet_mock_mode",       "false"); // simulation toggle removed — always real mode
+      fd.set("fiscalnet_mock_mode",       String(mockMode));
       fd.set("fiscalnet_connection_mode", platform);
       fd.set("fiscalnet_api_host",        apiHost);
       fd.set("fiscalnet_operator_code",   opCode);
@@ -59,6 +62,15 @@ export function FiscalNetSettingsCard(props: Props) {
         setStatus({ ok: true,  msg: "Receipt settings saved." });
         router.refresh();
       }
+    });
+  }
+
+  function handleTestConnection() {
+    setTestResult(null);
+    startTest(async () => {
+      const { testFiscalNetConnection } = await import("@/app/actions/fiscalnet");
+      const result = await testFiscalNetConnection();
+      setTestResult({ ok: result.ok, msg: result.message });
     });
   }
 
@@ -80,6 +92,22 @@ export function FiscalNetSettingsCard(props: Props) {
           <p className="text-xs text-slate-500">
             Sales are still recorded in franchisetech. Fiscal receipts will not be sent to your till device.
           </p>
+        )}
+
+        {enabled && (
+          <div className="border-t border-slate-100 pt-4">
+            <Toggle
+              checked={!mockMode}
+              onChange={(v) => setMockMode(!v)}
+              label={mockMode ? "Mod test (nu se trimit bonuri reale)" : "Mod live (bonuri fiscale reale)"}
+              color={mockMode ? "amber" : "blue"}
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              {mockMode
+                ? "Poți exersa vânzări fără să conectezi o casă fiscală reală."
+                : "Bonurile fiscale se trimit către casa configurată mai jos."}
+            </p>
+          </div>
         )}
       </div>
 
@@ -108,6 +136,16 @@ export function FiscalNetSettingsCard(props: Props) {
                   placeholder="http://localhost:65400"
                   className=""
                 />
+                <div className="flex items-center gap-2 pt-1">
+                  <Button type="button" variant="outline" size="sm" onClick={handleTestConnection} disabled={testing}>
+                    {testing ? "Se testează…" : "Testează conexiunea"}
+                  </Button>
+                  {testResult && (
+                    <span className={`text-xs font-medium ${testResult.ok ? "text-green-700" : "text-red-700"}`}>
+                      {testResult.ok ? "✅" : "❌"} {testResult.msg}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
 

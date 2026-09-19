@@ -29,6 +29,7 @@ import {
   buildCashInLines,
   buildCashOutLines,
   buildCommandFilename,
+  buildVoidLines,
   buildXReportLines,
   buildZReportLines,
   linesToFileContent,
@@ -216,6 +217,13 @@ export async function fiscalCashInAction(formData: FormData): Promise<FiscalActi
     return fiscalDownload("cash_in", "CASHIN", buildCashInLines(amount));
   }
 
+  // API mode, non-mock: FiscalNet runs on the cashier PC at localhost:65400.
+  // The cloud server cannot call the cashier's localhost — defer to the
+  // browser, same pattern as runZReport below.
+  if (!config.mockMode) {
+    return { ok: true, message: "Trimitere la casa fiscală...", status: "browser_api_pending" };
+  }
+
   return fiscalCashIn(config, amount, {
     supabase, orgId, performedBy: user.id, sessionId, amountRon: amount,
   });
@@ -248,6 +256,11 @@ export async function fiscalCashOutAction(formData: FormData): Promise<FiscalAct
     return fiscalDownload("cash_out", "CASHOUT", buildCashOutLines(amount));
   }
 
+  // API mode, non-mock: defer to the browser — see fiscalCashInAction above.
+  if (!config.mockMode) {
+    return { ok: true, message: "Trimitere la casa fiscală...", status: "browser_api_pending" };
+  }
+
   return fiscalCashOut(config, amount, {
     supabase, orgId, performedBy: user.id, sessionId, amountRon: amount,
   });
@@ -255,7 +268,7 @@ export async function fiscalCashOutAction(formData: FormData): Promise<FiscalAct
 
 // ── Void last receipt ─────────────────────────────────────────────────────
 
-export async function fiscalVoidLastAction(): Promise<{ ok: boolean; message: string }> {
+export async function fiscalVoidLastAction(): Promise<FiscalActionResult> {
   const { supabase, orgId, membership, user } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, message: "Permission denied." };
   try {
@@ -271,6 +284,15 @@ export async function fiscalVoidLastAction(): Promise<{ ok: boolean; message: st
   }
 
   const config = buildFiscalNetConfig(org);
+  if (config.connectionMode === "file") {
+    return fiscalDownload("void_last", "VOID", buildVoidLines());
+  }
+
+  // API mode, non-mock: defer to the browser — see fiscalCashInAction above.
+  if (!config.mockMode) {
+    return { ok: true, message: "Trimitere la casa fiscală...", status: "browser_api_pending" };
+  }
+
   return fiscalVoidLast(config, { supabase, orgId, performedBy: user.id });
 }
 
@@ -296,6 +318,12 @@ export async function runXReport(): Promise<FiscalActionResult> {
   if (config.connectionMode === "file") {
     return fiscalDownload("x_report", "XREPORT", buildXReportLines());
   }
+
+  // API mode, non-mock: defer to the browser — see fiscalCashInAction above.
+  if (!config.mockMode) {
+    return { ok: true, message: "Trimitere la casa fiscală...", status: "browser_api_pending" };
+  }
+
   return fiscalXReport(config, { supabase, orgId, performedBy: user.id });
 }
 
