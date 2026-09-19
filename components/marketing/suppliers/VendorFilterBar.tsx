@@ -43,7 +43,7 @@ export function VendorFilterBar({
       <select
         value={currentCategory ?? ""}
         onChange={(e) => navigate(e.target.value, currentCounty ?? "")}
-        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
+        className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-brass focus:outline-none"
       >
         <option value="">{locale === "ro" ? "Toate categoriile" : "All categories"}</option>
         {VENDOR_CATEGORIES.map((cat) => (
@@ -57,7 +57,7 @@ export function VendorFilterBar({
         value={currentCounty ?? ""}
         onChange={(e) => navigate(currentCategory ?? "", e.target.value)}
         disabled={!currentCategory}
-        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+        className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-brass focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
       >
         <option value="">{locale === "ro" ? "Toate județele" : "All counties"}</option>
         {counties.map((c) => (

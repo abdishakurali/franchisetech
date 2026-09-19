@@ -17,12 +17,12 @@ export function Section({
 }) {
   const bg =
     tone === "slate"
-      ? "bg-[#F3F0E8]"
+      ? "bg-background"
       : tone === "blue"
-        ? "bg-[#165DFC]/[0.04]"
+        ? "bg-brass/[0.04]"
         : tone === "navy"
-          ? "bg-[#0D0F0E]"
-          : "bg-white";
+          ? "bg-ink"
+          : "bg-card";
   return (
     <section id={id} className={`${bg} px-4 ${marketingSectionY} sm:px-6 lg:px-8`}>
       <div className="mx-auto max-w-7xl">{children}</div>
@@ -44,11 +44,11 @@ export function Faq({
     return (
       <div className="grid gap-x-14 gap-y-0 sm:grid-cols-2">
         {columns.map((column, columnIndex) => (
-          <div key={columnIndex} className="border-t border-[#0D0F0E]">
+          <div key={columnIndex} className="border-t border-ink">
             {column.map((item) => (
-              <div key={item.question} className="border-b border-[#DFDCD2] py-5">
-                <h3 className="font-semibold text-[#0D0F0E]">{item.question}</h3>
-                <p className="mt-1.5 text-sm leading-6 text-[#78786F]">{item.answer}</p>
+              <div key={item.question} className="border-b border-border py-5">
+                <h3 className="font-semibold text-foreground">{item.question}</h3>
+                <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{item.answer}</p>
               </div>
             ))}
           </div>
@@ -57,11 +57,11 @@ export function Faq({
     );
   }
   return (
-    <div className="divide-y divide-[#EDEAE1] rounded-2xl border border-[#DFDCD2] bg-white">
+    <div className="divide-y divide-border rounded-2xl border border-border bg-card">
       {items.map((item) => (
         <div key={item.question} className="px-6 py-5 sm:px-8 sm:py-6">
-          <h3 className="font-medium text-[#0D0F0E]">{item.question}</h3>
-          <p className="mt-2 text-sm leading-7 text-[#78786F]">{item.answer}</p>
+          <h3 className="font-medium text-foreground">{item.question}</h3>
+          <p className="mt-2 text-sm leading-7 text-muted-foreground">{item.answer}</p>
         </div>
       ))}
     </div>
@@ -74,8 +74,8 @@ export function CardGrid({ items }: { items: Array<{ title: string; text: string
       {items.map((item) => {
         const body = (
           <div className={`h-full p-6 ${marketingCard}`}>
-            <h3 className="font-medium text-[#0D0F0E]">{item.title}</h3>
-            <p className="mt-2 text-sm leading-6 text-[#78786F]">{item.text}</p>
+            <h3 className="font-medium text-foreground">{item.title}</h3>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p>
           </div>
         );
         return item.href ? (

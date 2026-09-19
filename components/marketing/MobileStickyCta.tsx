@@ -35,13 +35,13 @@ export function MobileStickyCta() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-[#DFDCD2] bg-white/95 px-4 py-3 backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-4 py-3 backdrop-blur-md md:hidden"
       style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
       <div className="mx-auto max-w-lg">
         <Link
           href={signupHref}
-          className="flex w-full items-center justify-center rounded-[10px] bg-[#165DFC] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#165DFC]"
+          className="flex w-full items-center justify-center rounded-[10px] bg-brass px-4 py-3 text-sm font-semibold text-ink transition hover:bg-brass/90"
           onClick={() =>
             captureClientEvent("marketing_cta_clicked", {
               cta_type: "primary",

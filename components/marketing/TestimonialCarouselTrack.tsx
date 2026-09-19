@@ -29,22 +29,22 @@ export function TestimonialCarouselTrack({ items }: { items: TestimonialItem[] }
         {items.map((item, i) => (
           <div
             key={i}
-            className="w-[85vw] max-w-sm shrink-0 snap-start rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:w-[380px]"
+            className="w-[85vw] max-w-sm shrink-0 snap-start rounded-2xl border border-border bg-card p-6 shadow-sm sm:w-[380px]"
           >
             {item.rating ? (
               <div className="mb-3 flex gap-0.5">
                 {Array.from({ length: 5 }).map((_, s) => (
                   <Star
                     key={s}
-                    className={`h-4 w-4 ${s < item.rating! ? "fill-amber-400 text-amber-400" : "text-slate-200"}`}
+                    className={`h-4 w-4 ${s < item.rating! ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`}
                   />
                 ))}
               </div>
             ) : null}
-            <p className="text-sm leading-relaxed text-slate-700">&ldquo;{item.quote}&rdquo;</p>
+            <p className="text-sm leading-relaxed text-foreground">&ldquo;{item.quote}&rdquo;</p>
             <footer className="mt-4 text-sm">
-              <p className="font-semibold text-slate-900">{item.name || item.companyName}</p>
-              <p className="text-slate-500">
+              <p className="font-semibold text-foreground">{item.name || item.companyName}</p>
+              <p className="text-muted-foreground">
                 {[item.role, item.companyName].filter(Boolean).join(" · ")}
               </p>
             </footer>
@@ -58,7 +58,7 @@ export function TestimonialCarouselTrack({ items }: { items: TestimonialItem[] }
             type="button"
             aria-label="Anterior"
             onClick={() => scrollBy(-1)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-mid hover:border-brass/40 hover:text-brass"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -66,7 +66,7 @@ export function TestimonialCarouselTrack({ items }: { items: TestimonialItem[] }
             type="button"
             aria-label="Următor"
             onClick={() => scrollBy(1)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-mid hover:border-brass/40 hover:text-brass"
           >
             <ChevronRight className="h-4 w-4" />
           </button>

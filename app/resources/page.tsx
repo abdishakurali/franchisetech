@@ -146,17 +146,17 @@ function Card({ card }: { card: ResourceCard }) {
   return (
     <Link
       href={card.href}
-      className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+      className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm transition hover:border-brass/40 hover:shadow-md"
     >
       <div className="mb-3 flex items-center justify-between">
         <span className="text-2xl" aria-hidden="true">{card.icon}</span>
-        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">{card.category}</span>
+        <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground">{card.category}</span>
       </div>
-      <h3 className="font-semibold text-slate-900">{card.title}</h3>
-      <p className="mt-1.5 flex-1 text-sm leading-6 text-slate-500">{card.summary}</p>
+      <h3 className="font-semibold text-foreground">{card.title}</h3>
+      <p className="mt-1.5 flex-1 text-sm leading-6 text-muted-foreground">{card.summary}</p>
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs text-slate-400">{card.readTime}</span>
-        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600">
+        <span className="text-xs text-muted-foreground">{card.readTime}</span>
+        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brass">
           {card.cta} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
         </span>
       </div>
@@ -167,16 +167,16 @@ function Card({ card }: { card: ResourceCard }) {
 function SectionHeader({ id, title, subtitle }: { id?: string; title: string; subtitle?: string }) {
   return (
     <div id={id} className="mb-8 scroll-mt-24">
-      <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
-      {subtitle && <p className="mt-2 text-slate-500">{subtitle}</p>}
+      <h2 className="text-2xl font-bold text-foreground">{title}</h2>
+      {subtitle && <p className="mt-2 text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
 
 function CheckItem({ text }: { text: string }) {
   return (
-    <li className="flex items-start gap-2 text-sm text-slate-700">
-      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" aria-hidden="true" />
+    <li className="flex items-start gap-2 text-sm text-foreground">
+      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brass" aria-hidden="true" />
       {text}
     </li>
   );
@@ -188,13 +188,13 @@ export default function ResourcesPage() {
   return (
     <MarketingShell>
       {/* ── HERO ── */}
-      <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-card px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Resurse</p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brass">Resurse</p>
+          <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Resurse ca să conduceți mai bine afacerea
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-slate-600">
+          <p className="mt-5 max-w-2xl text-lg text-mid">
             Ghiduri, liste de verificare și sfaturi practice pentru cafenele, restaurante, magazine și echipe de servicii care folosesc franchisetech.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -208,7 +208,7 @@ export default function ResourcesPage() {
               <a
                 key={href}
                 href={href}
-                className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-300 hover:text-blue-700"
+                className="rounded-full border border-border bg-secondary px-4 py-1.5 text-sm font-medium text-mid hover:border-brass/40 hover:text-brass"
               >
                 {label}
               </a>
@@ -236,15 +236,15 @@ export default function ResourcesPage() {
               <Link
                 key={card.href}
                 href={card.href}
-                className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-blue-300 hover:shadow-md"
+                className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:border-brass/40 hover:shadow-md"
               >
-                <div className="relative aspect-[16/9] bg-slate-100">
+                <div className="relative aspect-[16/9] bg-secondary">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={card.image} alt="" className="h-full w-full object-cover object-top opacity-90 transition group-hover:opacity-100" />
                 </div>
                 <div className="p-5">
-                  <h3 className="font-semibold text-slate-900 group-hover:text-blue-700">{card.title}</h3>
-                  <p className="mt-1.5 text-sm text-slate-500">{card.summary}</p>
+                  <h3 className="font-semibold text-foreground group-hover:text-brass">{card.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{card.summary}</p>
                 </div>
               </Link>
             ))}
@@ -253,7 +253,7 @@ export default function ResourcesPage() {
       </section>
 
       {/* ── GETTING STARTED ── */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-secondary px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <SectionHeader
             id="getting-started"
@@ -281,7 +281,7 @@ export default function ResourcesPage() {
       </section>
 
       {/* ── OPERATIONS ── */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-secondary px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <SectionHeader
             id="operations"
@@ -309,7 +309,7 @@ export default function ResourcesPage() {
       </section>
 
       {/* ── GROWTH ── */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-secondary px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <SectionHeader
             id="growth"
@@ -331,9 +331,9 @@ export default function ResourcesPage() {
 
           {/* ── POS SETUP CHECKLIST ── */}
           <article id="pos-setup" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Primii pași</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Listă de verificare configurare POS</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Primii pași</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Listă de verificare configurare POS</h2>
+            <p className="mt-3 text-mid">
               Urmați această listă când configurați franchisetech prima dată, ca să vă asigurați că este pregătit pentru folosirea reală.
             </p>
             <ul className="mt-5 space-y-2">
@@ -354,9 +354,9 @@ export default function ResourcesPage() {
 
           {/* ── DAILY CLOSE CHECKLIST ── */}
           <article id="daily-close" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Primii pași</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Listă de verificare închidere zilnică</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Primii pași</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Listă de verificare închidere zilnică</h2>
+            <p className="mt-3 text-mid">
               Parcurgeți această listă la finalul fiecărei zile de lucru ca să închideți corect și să păstrați evidențe clare.
             </p>
             <ul className="mt-5 space-y-2">
@@ -376,14 +376,14 @@ export default function ResourcesPage() {
 
           {/* ── STAFF PERMISSIONS ── */}
           <article id="staff-permissions" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Primii pași</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Listă de verificare permisiuni personal</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Primii pași</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Listă de verificare permisiuni personal</h2>
+            <p className="mt-3 text-mid">
               Setați nivelurile corecte de acces pentru fiecare membru al echipei înainte să înceapă să folosească franchisetech.
             </p>
             <div className="mt-5 grid gap-6 sm:grid-cols-2">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-                <h3 className="font-semibold text-slate-900">Rol casier</h3>
+              <div className="rounded-xl border border-border bg-secondary p-5">
+                <h3 className="font-semibold text-foreground">Rol casier</h3>
                 <ul className="mt-3 space-y-1.5">
                   {[
                     "Acces la casa de marcat",
@@ -394,8 +394,8 @@ export default function ResourcesPage() {
                   ].map((item) => <CheckItem key={item} text={item} />)}
                 </ul>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-                <h3 className="font-semibold text-slate-900">Rol manager</h3>
+              <div className="rounded-xl border border-border bg-secondary p-5">
+                <h3 className="font-semibold text-foreground">Rol manager</h3>
                 <ul className="mt-3 space-y-1.5">
                   {[
                     "Tot accesul de casier",
@@ -408,19 +408,19 @@ export default function ResourcesPage() {
                 </ul>
               </div>
             </div>
-            <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
+            <div className="mt-6 rounded-xl border border-brass/25 bg-accent p-4 text-sm text-foreground">
               <strong>Bună practică:</strong> Atribuiți minimul de permisiuni necesar pentru fiecare rol. Revizuiți periodic permisiunile pe măsură ce echipa se schimbă.
             </div>
           </article>
 
           {/* ── HARDWARE CHECKLIST ── */}
           <article id="hardware" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Hardware și plăți</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Listă de verificare compatibilitate hardware</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Hardware și plăți</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Listă de verificare compatibilitate hardware</h2>
+            <p className="mt-3 text-mid">
               Confirmați dispozitivele suportate și hardware-ul fiscal la configurare, înainte de a folosi franchisetech cu clienți reali.
             </p>
-            <h3 className="mt-6 font-semibold text-slate-900">Verificați înainte de lansare</h3>
+            <h3 className="mt-6 font-semibold text-foreground">Verificați înainte de lansare</h3>
             <ul className="mt-3 space-y-2">
               {[
                 "Un browser modern suportat pe dispozitivul de casă",
@@ -437,9 +437,9 @@ export default function ResourcesPage() {
 
           {/* ── INDUSTRY: CAFÉS ── */}
           <article id="guide-cafes" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Ghid pe domeniu</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Ghid POS pentru cafenele</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru cafenele</h2>
+            <p className="mt-3 text-mid">
               franchisetech se potrivește natural cu ritmul unei tejghele de cafenea — introducere rapidă a comenzilor, urmărire numerar și card, și o închidere de zi clară.
             </p>
             <ul className="mt-5 space-y-2">
@@ -457,9 +457,9 @@ export default function ResourcesPage() {
 
           {/* ── INDUSTRY: TAKEAWAYS ── */}
           <article id="guide-takeaways" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Ghid pe domeniu</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Ghid POS pentru takeaway</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru takeaway</h2>
+            <p className="mt-3 text-mid">
               Viteza contează cel mai mult la fast-food. franchisetech păstrează checkout-ul rapid și vă dă controlul de numerar necesar.
             </p>
             <ul className="mt-5 space-y-2">
@@ -476,9 +476,9 @@ export default function ResourcesPage() {
 
           {/* ── INDUSTRY: BAKERIES ── */}
           <article id="guide-bakeries" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Ghid pe domeniu</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Ghid POS pentru patiserii/brutării</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru patiserii/brutării</h2>
+            <p className="mt-3 text-mid">
               Patiseriile au nevoie de viteză la tejghea, date clare despre cele mai vândute produse și vizibilitate bună a stocului la deschiderea fiecărei zile.
             </p>
             <ul className="mt-5 space-y-2">
@@ -495,9 +495,9 @@ export default function ResourcesPage() {
 
           {/* ── INDUSTRY: FOOD TRUCKS ── */}
           <article id="guide-foodtrucks" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Ghid pe domeniu</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Ghid POS pentru food truck</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru food truck</h2>
+            <p className="mt-3 text-mid">
               franchisetech rulează ca PWA pe orice dispozitiv, ideal pentru configurări mobile cu hardware limitat.
             </p>
             <ul className="mt-5 space-y-2">
@@ -514,9 +514,9 @@ export default function ResourcesPage() {
 
           {/* ── INDUSTRY: RETAIL ── */}
           <article id="guide-retail" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Ghid pe domeniu</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Ghid POS pentru magazine retail</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru magazine retail</h2>
+            <p className="mt-3 text-mid">
               franchisetech gestionează catalogul de produse, reducerile, bonurile și raportarea zilnică de care au nevoie magazinele retail.
             </p>
             <ul className="mt-5 space-y-2">
@@ -533,9 +533,9 @@ export default function ResourcesPage() {
 
           {/* ── INDUSTRY: SALONS ── */}
           <article id="guide-salons" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Ghid pe domeniu</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Ghid POS pentru saloane și frizerii</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru saloane și frizerii</h2>
+            <p className="mt-3 text-mid">
               Saloanele și frizeriile vând o combinație de servicii și produse. franchisetech gestionează ambele într-un checkout simplu.
             </p>
             <ul className="mt-5 space-y-2">
@@ -552,9 +552,9 @@ export default function ResourcesPage() {
 
           {/* ── INDUSTRY: FRANCHISES ── */}
           <article id="guide-franchises" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Ghid pe domeniu</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Ghid POS pentru francize și operatori cu mai multe locații</h2>
-            <p className="mt-3 text-slate-600">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru francize și operatori cu mai multe locații</h2>
+            <p className="mt-3 text-mid">
               franchisetech susține afacerile cu mai multe locații prin configurări consistente de produse, acces pe roluri pentru personal și raportare la nivel de locație.
             </p>
             <ul className="mt-5 space-y-2">
@@ -574,15 +574,15 @@ export default function ResourcesPage() {
       </div>
 
       {/* ── FAQ ── */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-secondary px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-2xl font-bold text-slate-900">Întrebări frecvente</h2>
-          <p className="mt-2 text-slate-500">Răspunsuri oneste despre cum funcționează franchisetech și ce presupune.</p>
+          <h2 className="text-2xl font-bold text-foreground">Întrebări frecvente</h2>
+          <p className="mt-2 text-muted-foreground">Răspunsuri oneste despre cum funcționează franchisetech și ce presupune.</p>
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {FAQ.map(({ q, a }) => (
-              <div key={q} className="rounded-xl border border-slate-200 bg-white p-5">
-                <h3 className="font-semibold text-slate-900">{q}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-500">{a}</p>
+              <div key={q} className="rounded-xl border border-border bg-card p-5">
+                <h3 className="font-semibold text-foreground">{q}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{a}</p>
               </div>
             ))}
           </div>
@@ -593,7 +593,7 @@ export default function ResourcesPage() {
       <section className="px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm font-medium text-slate-500">Pagini asociate:</span>
+            <span className="text-sm font-medium text-muted-foreground">Pagini asociate:</span>
             {[
               ["/compare",                   "Compară POS"],
               ["/resources/pos-software-romania", "Ghid POS România"],
@@ -602,7 +602,7 @@ export default function ResourcesPage() {
               ["/features/z-report",         "Raport Z"],
               ["/pricing",                   "Prețuri"],
             ].map(([href, label]) => (
-              <Link key={href} href={href} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-blue-600 hover:border-blue-300 hover:underline">
+              <Link key={href} href={href} className="rounded-lg border border-border px-3 py-1.5 text-sm text-brass hover:border-brass/40 hover:underline">
                 {label}
               </Link>
             ))}

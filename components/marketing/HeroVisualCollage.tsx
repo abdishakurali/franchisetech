@@ -28,7 +28,7 @@ export function HeroVisualCollage({
   return (
     <div className="marketing-hero-rise marketing-hero-delay-4 perspective-[1200px]">
       <div className="rotate-[1.25deg] transition-transform duration-500 hover:rotate-0 lg:rotate-[1.75deg]">
-        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_24px_64px_-12px_rgba(15,23,42,0.18),0_8px_24px_-8px_rgba(37,99,235,0.12)] ring-1 ring-slate-900/[0.04]">
+        <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-[0_24px_64px_-12px_rgba(15,23,42,0.18),0_8px_24px_-8px_rgba(37,99,235,0.12)] ring-1 ring-ink/[0.04]">
           <Image
             src={dashboardSrc}
             alt={dashboardAlt}
@@ -39,8 +39,8 @@ export function HeroVisualCollage({
             sizes="(max-width: 1024px) 100vw, 64rem"
           />
 
-          <div className="grid grid-cols-1 gap-3 border-t border-slate-100 bg-white p-3 max-sm:hidden sm:grid-cols-2 sm:gap-3 sm:p-3">
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="grid grid-cols-1 gap-3 border-t border-border bg-card p-3 max-sm:hidden sm:grid-cols-2 sm:gap-3 sm:p-3">
+            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
               {floorSrc ? (
                 <Image
                   src={floorSrc}
@@ -58,7 +58,7 @@ export function HeroVisualCollage({
               )}
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
               {tableOrderSrc ? (
                 <Image
                   src={tableOrderSrc}

@@ -33,7 +33,7 @@ export function MarketingBrowserShot({
 
   return (
     <div
-      className={`overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg shadow-slate-200/50 ${className}`}
+      className={`overflow-hidden rounded-2xl border border-border bg-card shadow-lg shadow-border/50 ${className}`}
     >
       <Image
         src={src}

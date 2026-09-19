@@ -10,12 +10,12 @@
  */
 export function ChromeFrame({ path, children }: { path: string; children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-[#DFDCD2] bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-      <div className="flex items-center gap-1.5 border-b border-[#EDEAE1] bg-white px-4 py-2.5">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#DFDCD2]" />
-        <span className="h-1.5 w-1.5 rounded-full bg-[#DFDCD2]" />
-        <span className="h-1.5 w-1.5 rounded-full bg-[#DFDCD2]" />
-        <div className="mx-2 min-w-0 flex-1 truncate font-mono text-[10px] text-[#8F8F86]">
+    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <div className="flex items-center gap-1.5 border-b border-border bg-card px-4 py-2.5">
+        <span className="h-1.5 w-1.5 rounded-full bg-border" />
+        <span className="h-1.5 w-1.5 rounded-full bg-border" />
+        <span className="h-1.5 w-1.5 rounded-full bg-border" />
+        <div className="mx-2 min-w-0 flex-1 truncate font-mono text-[10px] text-muted-foreground">
           franchisetech.ro{path}
         </div>
       </div>
@@ -37,17 +37,17 @@ export function OwnerDashboardProof({ compact = false }: { compact?: boolean }) 
     return (
       <ChromeFrame path="/app">
         <div className="p-3">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Panou</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Panou</p>
           <div className="mt-2 space-y-2">
-            <div className="rounded-lg border border-slate-200 p-2.5">
-              <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Vânzări</p>
-              <p className="mt-0.5 text-base font-semibold text-slate-950">316,00 lei</p>
+            <div className="rounded-lg border border-border p-2.5">
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Vânzări</p>
+              <p className="mt-0.5 text-base font-semibold text-foreground">316,00 lei</p>
               <p className="text-[9px] text-emerald-600">+37,00 lei față de ieri</p>
             </div>
-            <div className="rounded-lg border border-slate-200 p-2.5">
-              <p className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">Numerar în casă</p>
-              <p className="mt-0.5 text-base font-semibold text-slate-950">45,00 lei</p>
-              <p className="text-[9px] text-slate-400">Card 271,00 lei</p>
+            <div className="rounded-lg border border-border p-2.5">
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">Numerar în casă</p>
+              <p className="mt-0.5 text-base font-semibold text-foreground">45,00 lei</p>
+              <p className="text-[9px] text-muted-foreground">Card 271,00 lei</p>
             </div>
           </div>
         </div>
@@ -58,31 +58,31 @@ export function OwnerDashboardProof({ compact = false }: { compact?: boolean }) 
   return (
     <ChromeFrame path="/app">
       <div className="p-4 sm:p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Panou</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Panou</p>
         <div className="mt-3 grid grid-cols-3 gap-3">
-          <div className="rounded-xl border border-slate-200 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Vânzări</p>
-            <p className="mt-1 text-lg font-semibold text-slate-950">316,00 lei</p>
+          <div className="rounded-xl border border-border p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Vânzări</p>
+            <p className="mt-1 text-lg font-semibold text-foreground">316,00 lei</p>
             <p className="text-[10px] text-emerald-600">+37,00 lei față de ieri</p>
           </div>
-          <div className="rounded-xl border border-slate-200 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Tranzacții</p>
-            <p className="mt-1 text-lg font-semibold text-slate-950">21</p>
-            <p className="text-[10px] text-slate-400">Bon mediu: 15,05 lei</p>
+          <div className="rounded-xl border border-border p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Tranzacții</p>
+            <p className="mt-1 text-lg font-semibold text-foreground">21</p>
+            <p className="text-[10px] text-muted-foreground">Bon mediu: 15,05 lei</p>
           </div>
-          <div className="rounded-xl border border-slate-200 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Numerar în casă</p>
-            <p className="mt-1 text-lg font-semibold text-slate-950">45,00 lei</p>
-            <p className="text-[10px] text-slate-400">Card 271,00 lei</p>
+          <div className="rounded-xl border border-border p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Numerar în casă</p>
+            <p className="mt-1 text-lg font-semibold text-foreground">45,00 lei</p>
+            <p className="text-[10px] text-muted-foreground">Card 271,00 lei</p>
           </div>
         </div>
-        <p className="mt-4 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Top produse</p>
+        <p className="mt-4 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Top produse</p>
         <div className="mt-2 space-y-1.5">
           {products.map(([name, qty, total]) => (
-            <div key={name} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-1.5 text-xs">
-              <span className="truncate text-slate-700">{name}</span>
-              <span className="ml-2 shrink-0 text-slate-400">{qty}</span>
-              <span className="ml-2 shrink-0 font-medium text-slate-900">{total}</span>
+            <div key={name} className="flex items-center justify-between rounded-lg bg-secondary px-3 py-1.5 text-xs">
+              <span className="truncate text-foreground">{name}</span>
+              <span className="ml-2 shrink-0 text-muted-foreground">{qty}</span>
+              <span className="ml-2 shrink-0 font-medium text-foreground">{total}</span>
             </div>
           ))}
         </div>
@@ -96,30 +96,30 @@ export function OwnerZReportProof() {
     <ChromeFrame path="/app/reports/z-report">
       <div className="p-4 sm:p-5">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Raport Z zilnic</p>
-          <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-700">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Raport Z zilnic</p>
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-reconciled">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" /> Închis
           </span>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-slate-200 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Vânzări nete</p>
-            <p className="mt-1 text-base font-semibold text-slate-950">263,83 lei</p>
+          <div className="rounded-xl border border-border p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Vânzări nete</p>
+            <p className="mt-1 text-base font-semibold text-foreground">263,83 lei</p>
           </div>
-          <div className="rounded-xl border border-slate-200 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">TVA colectat</p>
-            <p className="mt-1 text-base font-semibold text-[#165DFC]">52,17 lei</p>
+          <div className="rounded-xl border border-border p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">TVA colectat</p>
+            <p className="mt-1 text-base font-semibold text-brass">52,17 lei</p>
           </div>
         </div>
         {/* 231,40 + 32,43 = 263,83 net · 48,60 + 3,57 = 52,17 TVA · totals reconcile to 316,00 lei gross */}
-        <div className="mt-3 space-y-1.5 rounded-xl border border-slate-200 p-3 text-xs">
-          <div className="flex justify-between text-slate-500">
+        <div className="mt-3 space-y-1.5 rounded-xl border border-border p-3 text-xs">
+          <div className="flex justify-between text-muted-foreground">
             <span>Cotă 21%</span>
-            <span className="text-slate-800">231,40 lei net · 48,60 lei TVA</span>
+            <span className="text-foreground">231,40 lei net · 48,60 lei TVA</span>
           </div>
-          <div className="flex justify-between text-slate-500">
+          <div className="flex justify-between text-muted-foreground">
             <span>Cotă 11%</span>
-            <span className="text-slate-800">32,43 lei net · 3,57 lei TVA</span>
+            <span className="text-foreground">32,43 lei net · 3,57 lei TVA</span>
           </div>
         </div>
         <div className="mt-3 flex justify-between rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
@@ -143,25 +143,25 @@ export function OwnerPosProof() {
     <ChromeFrame path="/app/pos">
       <div className="p-4 sm:p-5">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Comandă curentă</p>
-          <span className="text-[10px] font-medium text-slate-400">Cafeneaua Centrală · Casa 1</span>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Comandă curentă</p>
+          <span className="text-[10px] font-medium text-muted-foreground">Cafeneaua Centrală · Casa 1</span>
         </div>
         <div className="mt-3 space-y-1.5">
           {cart.map(([name, qty, price]) => (
-            <div key={name} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-xs">
-              <span className="truncate text-slate-700">{name}</span>
-              <span className="ml-2 shrink-0 text-slate-400">{qty}</span>
-              <span className="ml-2 shrink-0 font-medium text-slate-900">{price}</span>
+            <div key={name} className="flex items-center justify-between rounded-lg bg-secondary px-3 py-2 text-xs">
+              <span className="truncate text-foreground">{name}</span>
+              <span className="ml-2 shrink-0 text-muted-foreground">{qty}</span>
+              <span className="ml-2 shrink-0 font-medium text-foreground">{price}</span>
             </div>
           ))}
         </div>
-        <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 p-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Total</span>
-          <span className="text-lg font-semibold text-slate-950">{total}</span>
+        <div className="mt-3 flex items-center justify-between rounded-xl border border-border p-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Total</span>
+          <span className="text-lg font-semibold text-foreground">{total}</span>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-semibold">
-          <div className="rounded-lg bg-[#165DFC] px-3 py-2 text-center text-white">Card</div>
-          <div className="rounded-lg border border-slate-200 px-3 py-2 text-center text-slate-600">Numerar</div>
+          <div className="rounded-lg bg-brass px-3 py-2 text-center text-ink">Card</div>
+          <div className="rounded-lg border border-border px-3 py-2 text-center text-mid">Numerar</div>
         </div>
       </div>
     </ChromeFrame>
@@ -178,25 +178,25 @@ export function OwnerRecipeProof() {
   return (
     <ChromeFrame path="/app/recipes">
       <div className="p-4 sm:p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Cost rețetă</p>
-        <p className="mt-1 text-sm font-semibold text-slate-950">Croissant cu ciocolată</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Cost rețetă</p>
+        <p className="mt-1 text-sm font-semibold text-foreground">Croissant cu ciocolată</p>
         <div className="mt-3 space-y-1.5">
           {ingredients.map(([name, qty, cost]) => (
-            <div key={name} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-xs">
-              <span className="truncate text-slate-700">{name}</span>
-              <span className="ml-2 shrink-0 text-slate-400">{qty}</span>
-              <span className="ml-2 shrink-0 font-medium text-slate-900">{cost}</span>
+            <div key={name} className="flex items-center justify-between rounded-lg bg-secondary px-3 py-2 text-xs">
+              <span className="truncate text-foreground">{name}</span>
+              <span className="ml-2 shrink-0 text-muted-foreground">{qty}</span>
+              <span className="ml-2 shrink-0 font-medium text-foreground">{cost}</span>
             </div>
           ))}
         </div>
         <div className="mt-3 grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-slate-200 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Cost total</p>
-            <p className="mt-1 text-base font-semibold text-slate-950">4,50 lei</p>
+          <div className="rounded-xl border border-border p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Cost total</p>
+            <p className="mt-1 text-base font-semibold text-foreground">4,50 lei</p>
           </div>
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">Marjă la 12,00 lei</p>
-            <p className="mt-1 text-base font-semibold text-emerald-700">62,5%</p>
+          <div className="rounded-xl border border-reconciled/25 bg-reconciled/10 p-3">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-reconciled">Marjă la 12,00 lei</p>
+            <p className="mt-1 text-base font-semibold text-reconciled">62,5%</p>
           </div>
         </div>
       </div>
@@ -206,23 +206,23 @@ export function OwnerRecipeProof() {
 
 export function OwnerKitchenProof() {
   const columns: { label: string; tone: string; orders: string[] }[] = [
-    { label: "NOI", tone: "border-slate-200 bg-slate-50 text-slate-500", orders: ["Masa 3 — Cappuccino ×2"] },
+    { label: "NOI", tone: "border-border bg-secondary text-muted-foreground", orders: ["Masa 3 — Cappuccino ×2"] },
     { label: "ÎN PREGĂTIRE", tone: "border-amber-200 bg-amber-50 text-amber-700", orders: ["Comandă la pachet — Croissant unt ×1"] },
-    { label: "GATA", tone: "border-emerald-200 bg-emerald-50 text-emerald-700", orders: ["Masa 1 — Flat White ×1"] },
-    { label: "FINALIZATE", tone: "border-slate-200 bg-white text-slate-400", orders: [] },
+    { label: "GATA", tone: "border-reconciled/25 bg-reconciled/10 text-reconciled", orders: ["Masa 1 — Flat White ×1"] },
+    { label: "FINALIZATE", tone: "border-border bg-card text-muted-foreground", orders: [] },
   ];
 
   return (
     <ChromeFrame path="/app/kitchen">
       <div className="p-4 sm:p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Display bucătărie</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Display bucătărie</p>
         <div className="mt-3 grid grid-cols-4 gap-2">
           {columns.map((col) => (
             <div key={col.label} className={`rounded-lg border p-2 ${col.tone}`}>
               <p className="text-[8px] font-bold uppercase tracking-wide">{col.label}</p>
               <div className="mt-1.5 space-y-1">
                 {col.orders.map((order) => (
-                  <div key={order} className="rounded bg-white/70 px-1.5 py-1 text-[8px] font-medium leading-tight text-slate-700 shadow-sm">
+                  <div key={order} className="rounded bg-card/70 px-1.5 py-1 text-[8px] font-medium leading-tight text-foreground shadow-sm">
                     {order}
                   </div>
                 ))}
@@ -247,7 +247,7 @@ export function OwnerStockProof() {
     <ChromeFrame path="/app/stock">
       <div className="p-4 sm:p-5">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Niveluri stoc</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Niveluri stoc</p>
           <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-amber-700">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> 1 stoc redus
           </span>
@@ -256,11 +256,11 @@ export function OwnerStockProof() {
           {rows.map((row) => (
             <div
               key={row.name}
-              className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs ${row.low ? "bg-amber-50" : "bg-slate-50"}`}
+              className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs ${row.low ? "bg-amber-50" : "bg-secondary"}`}
             >
-              <span className="truncate text-slate-700">{row.name}</span>
-              <span className="ml-2 shrink-0 text-slate-400">{row.qty}</span>
-              <span className="ml-2 shrink-0 font-medium text-slate-900">{row.unitCost}</span>
+              <span className="truncate text-foreground">{row.name}</span>
+              <span className="ml-2 shrink-0 text-muted-foreground">{row.qty}</span>
+              <span className="ml-2 shrink-0 font-medium text-foreground">{row.unitCost}</span>
             </div>
           ))}
         </div>
@@ -279,15 +279,15 @@ export function OwnerSuppliersProof() {
   return (
     <ChromeFrame path="/app/suppliers">
       <div className="p-4 sm:p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Furnizori</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Furnizori</p>
         <div className="mt-3 space-y-1.5">
           {suppliers.map(([name, phone, total]) => (
-            <div key={name} className="rounded-lg bg-slate-50 px-3 py-2">
+            <div key={name} className="rounded-lg bg-secondary px-3 py-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="truncate font-medium text-slate-800">{name}</span>
-                <span className="ml-2 shrink-0 font-medium text-slate-900">{total}</span>
+                <span className="truncate font-medium text-foreground">{name}</span>
+                <span className="ml-2 shrink-0 font-medium text-foreground">{total}</span>
               </div>
-              <p className="mt-0.5 text-[10px] text-slate-400">{phone}</p>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">{phone}</p>
             </div>
           ))}
         </div>
@@ -309,26 +309,26 @@ export function OwnerSetupGuideProof() {
     <ChromeFrame path="/app/setup-checklist">
       <div className="p-4 sm:p-5">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Ghid configurare</p>
-          <span className="text-[10px] font-semibold text-slate-500">{doneCount}/{steps.length}</span>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Ghid configurare</p>
+          <span className="text-[10px] font-semibold text-muted-foreground">{doneCount}/{steps.length}</span>
         </div>
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
           <div
-            className="h-full rounded-full bg-emerald-500"
+            className="h-full rounded-full bg-reconciled/100"
             style={{ width: `${(doneCount / steps.length) * 100}%` }}
           />
         </div>
         <div className="mt-3 space-y-1.5">
           {steps.map((step) => (
-            <div key={step.label} className="flex items-center gap-2.5 rounded-lg bg-slate-50 px-3 py-2 text-xs">
+            <div key={step.label} className="flex items-center gap-2.5 rounded-lg bg-secondary px-3 py-2 text-xs">
               <span
                 className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
-                  step.done ? "bg-emerald-500 text-white" : "border border-slate-300 text-transparent"
+                  step.done ? "bg-reconciled/100 text-white" : "border border-border text-transparent"
                 }`}
               >
                 ✓
               </span>
-              <span className={step.done ? "text-slate-500 line-through decoration-slate-300" : "font-medium text-slate-800"}>
+              <span className={step.done ? "text-muted-foreground line-through decoration-border" : "font-medium text-foreground"}>
                 {step.label}
               </span>
             </div>

@@ -95,7 +95,7 @@ export function PartnerContactForm({ programOpen = false }: { programOpen?: bool
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <form onSubmit={onSubmit} className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="name">{t.partners.form.name} *</Label>
@@ -128,7 +128,7 @@ export function PartnerContactForm({ programOpen = false }: { programOpen?: bool
             name="partnerType"
             required
             defaultValue={defaultType}
-            className="mt-1 flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+            className="mt-1 flex h-10 w-full rounded-md border border-border bg-card px-3 text-sm"
           >
             <option value="">{t.partners.form.partnerTypePlaceholder}</option>
             {partnerTypes.map((type) => (
@@ -153,7 +153,7 @@ export function PartnerContactForm({ programOpen = false }: { programOpen?: bool
         <Textarea id="message" name="message" required rows={5} className="mt-1" />
       </div>
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-attention">{error}</p>}
       <Button type="submit" disabled={status === "loading"} className="w-full sm:w-auto">
         {status === "loading"
           ? t.partners.form.sending

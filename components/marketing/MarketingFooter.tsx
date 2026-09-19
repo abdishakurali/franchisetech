@@ -38,16 +38,16 @@ export function MarketingFooterClient() {
   ] as const;
 
   return (
-    <footer className="bg-white px-4 py-12 text-[#5B5D57] sm:px-6">
+    <footer className="bg-card px-4 py-12 text-mid sm:px-6">
       <div className="mx-auto max-w-6xl">
-        <div className="rounded-2xl border border-[#DFDCD2] bg-[#F3F0E8] p-8 md:flex md:items-center md:justify-between">
+        <div className="rounded-2xl border border-border bg-background p-8 md:flex md:items-center md:justify-between">
           <div className="max-w-md">
-            <p className="text-lg font-semibold text-[#0D0F0E]">{t.footer.getStartedTitle}</p>
+            <p className="text-lg font-semibold text-foreground">{t.footer.getStartedTitle}</p>
             <p className="mt-2 text-sm">{t.footer.getStartedText}</p>
           </div>
           <Link
             href="/signup?plan=starter"
-            className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-[#165DFC] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#165DFC] md:mt-0"
+            className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-brass px-6 py-3 text-sm font-medium text-ink transition hover:bg-brass/90 md:mt-0"
             onClick={() =>
               captureClientEvent("marketing_cta_clicked", {
                 cta_type: "primary",
@@ -62,7 +62,7 @@ export function MarketingFooterClient() {
           </Link>
         </div>
 
-        <div className="mt-12 grid gap-8 border-b border-[#DFDCD2] pb-10 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="mt-12 grid gap-8 border-b border-border pb-10 sm:grid-cols-2 lg:grid-cols-6">
           <div className="sm:col-span-2">
             <div className="mb-4">
               <MarketingBrand />
@@ -76,7 +76,7 @@ export function MarketingFooterClient() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`franchisetech on ${label}`}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-[#DFDCD2] text-[#78786F] transition-colors hover:border-[#C7C2B4] hover:bg-[#F3F0E8] hover:text-[#0D0F0E]"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-border hover:bg-background hover:text-foreground"
                 >
                   <Icon className="h-4 w-4" />
                 </a>
@@ -90,8 +90,8 @@ export function MarketingFooterClient() {
         </div>
 
         <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-xs text-[#8F8F86]">{copyright}</p>
-          <div className="flex flex-wrap items-center gap-4 font-mono text-xs text-[#8F8F86]">
+          <p className="font-mono text-xs text-muted-foreground">{copyright}</p>
+          <div className="flex flex-wrap items-center gap-4 font-mono text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <Lock className="h-3.5 w-3.5" aria-hidden />
               {t.footer.sslSecured}
@@ -110,10 +110,10 @@ export function MarketingFooterClient() {
 function FooterColumn({ title, links }: { title: string; links: readonly (readonly [string, string])[] }) {
   return (
     <div>
-      <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-[#8F8F86]">{title}</p>
+      <p className="mb-3 font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{title}</p>
       <div className="space-y-2 text-sm">
         {links.map(([href, label]) => (
-          <Link key={href} href={href} className="block text-[#5B5D57] hover:text-[#0D0F0E]">
+          <Link key={href} href={href} className="block text-mid hover:text-foreground">
             {label}
           </Link>
         ))}

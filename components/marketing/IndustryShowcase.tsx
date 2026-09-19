@@ -40,7 +40,7 @@ export function IndustryShowcase() {
               className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 100vw, 33vw"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/55 via-slate-950/0 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/55 via-ink/0 to-transparent" />
             <p className="absolute bottom-3 left-4 text-sm font-semibold text-white">
               {isRo ? photo.captionRo : photo.captionEn}
             </p>

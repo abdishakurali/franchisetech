@@ -116,17 +116,17 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="flex min-h-svh items-center justify-center bg-[#F3F0E8] px-4 py-10 text-[#0D0F0E]">
+    <main className="flex min-h-svh items-center justify-center bg-background px-4 py-10 text-foreground">
       <div className="w-full max-w-[460px]">
       <AuthBrand />
-      <Card className="rounded-xl border-[#DFDCD2] bg-white py-8 shadow-none">
+      <Card className="rounded-xl border-border bg-card py-8 shadow-none">
         <CardHeader className="space-y-2 text-left sm:px-8">
           <CardTitle className="font-[family-name:var(--font-display)] text-[30px] font-bold leading-[1.1] tracking-[-0.03em]">{a.title}</CardTitle>
           <CardDescription>
             {selectedPlan ? a.descPlan(selectedPlan.name) : a.descDefault}
           </CardDescription>
         </CardHeader>
-        <CardContent className="sm:px-8 [&_input]:h-12 [&_input]:border-[#DFDCD2] [&_input]:bg-white">
+        <CardContent className="sm:px-8 [&_input]:h-12 [&_input]:border-border [&_input]:bg-card">
           {googleAuthEnabled && (
             <>
               <Link href={planParam ? `/auth/google?plan=${planParam}` : "/auth/google"}>
@@ -136,9 +136,9 @@ export default function SignupPage() {
                 </Button>
               </Link>
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-px bg-slate-200 flex-1" />
-                <span className="text-xs text-slate-400">{a.or}</span>
-                <div className="h-px bg-slate-200 flex-1" />
+                <div className="h-px bg-border flex-1" />
+                <span className="text-xs text-muted-foreground">{a.or}</span>
+                <div className="h-px bg-border flex-1" />
               </div>
             </>
           )}
@@ -168,25 +168,25 @@ export default function SignupPage() {
                 placeholder={a.passwordPlaceholder}
               />
             </div>
-            <Button type="submit" className="h-12 w-full rounded-[10px] bg-[#165DFC] text-base hover:bg-[#104bd1]" disabled={loading}>
+            <Button type="submit" className="h-12 w-full rounded-[10px] bg-primary text-base text-primary-foreground hover:bg-primary/90" disabled={loading}>
               {loading ? a.submitting : a.submit}
             </Button>
           </form>
-          <p className="text-center text-xs text-slate-400 mt-4">
+          <p className="text-center text-xs text-muted-foreground mt-4">
             {a.legal}{" "}
-            <Link href="/terms" className="underline hover:text-slate-600">{a.legalTermsLink}</Link>{" "}
+            <Link href="/terms" className="underline hover:text-foreground">{a.legalTermsLink}</Link>{" "}
             {a.legalAnd}{" "}
-            <Link href="/privacy" className="underline hover:text-slate-600">{a.legalPrivacyLink}</Link>.
+            <Link href="/privacy" className="underline hover:text-foreground">{a.legalPrivacyLink}</Link>.
           </p>
-          <p className="text-center text-sm text-slate-500 mt-3">
+          <p className="text-center text-sm text-muted-foreground mt-3">
             {a.hasAccount}{" "}
-            <Link href="/login" className="text-blue-600 hover:underline font-medium">
+            <Link href="/login" className="text-brass hover:underline font-medium">
               {a.signInLink}
             </Link>
           </p>
         </CardContent>
       </Card>
-      <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-slate-400">
+      <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
         <span>{locale === "ro" ? "✓ Probă 15 zile fără card" : "✓ 15-day trial, no card required"}</span>
         <span>{locale === "ro" ? "✓ Configurare ghidată" : "✓ Guided setup"}</span>
       </div>

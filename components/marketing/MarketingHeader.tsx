@@ -102,15 +102,15 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#DFDCD2] bg-white/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-border bg-card/90 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-9 px-4 sm:px-6 lg:h-[4.625rem]">
         <MarketingBrand onClick={closeMenu} />
 
-        <nav className="hidden items-center gap-7 text-sm font-medium text-[#5B5D57] lg:flex" aria-label="Main">
+        <nav className="hidden items-center gap-7 text-sm font-medium text-mid lg:flex" aria-label="Main">
           <div ref={productRef} className="relative">
             <button
               type="button"
-              className="inline-flex items-center gap-1 transition hover:text-[#0D0F0E]"
+              className="inline-flex items-center gap-1 transition hover:text-foreground"
               aria-expanded={productOpen}
               aria-haspopup="true"
               onClick={() => setProductOpen((v) => !v)}
@@ -119,7 +119,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
               <ChevronDown className={`h-4 w-4 transition ${productOpen ? "rotate-180" : ""}`} />
             </button>
             {productOpen && (
-              <div className="absolute left-0 top-full z-50 mt-3 w-52 rounded-2xl border border-[#DFDCD2] bg-white py-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="absolute left-0 top-full z-50 mt-3 w-52 rounded-2xl border border-border bg-card py-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                 {PRODUCT_MENU.map((item) => {
                   const href = isRo ? item.hrefRo : item.hrefEn;
                   const label = isRo ? item.labelRo : item.labelEn;
@@ -127,7 +127,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
                     <Link
                       key={label}
                       href={href}
-                      className="block px-4 py-2.5 text-[#5B5D57] transition hover:bg-[#F3F0E8] hover:text-[#0D0F0E]"
+                      className="block px-4 py-2.5 text-mid transition hover:bg-background hover:text-foreground"
                       onClick={() => {
                         trackNavClick(label, href, "product_nav");
                         setProductOpen(false);
@@ -137,10 +137,10 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
                     </Link>
                   );
                 })}
-                <div className="my-1 border-t border-[#EDEAE1]" />
+                <div className="my-1 border-t border-border" />
                 <Link
                   href="/features"
-                  className="block px-4 py-2 text-xs font-medium text-[#165DFC] hover:text-[#165DFC]"
+                  className="block px-4 py-2 text-xs font-medium text-brass hover:text-brass"
                   onClick={() => {
                     trackNavClick(isRo ? "Toate funcționalitățile" : "All features", "/features", "product_nav");
                     setProductOpen(false);
@@ -155,7 +155,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
           <div ref={industryRef} className="relative">
             <button
               type="button"
-              className="inline-flex items-center gap-1 transition hover:text-[#0D0F0E]"
+              className="inline-flex items-center gap-1 transition hover:text-foreground"
               aria-expanded={industryOpen}
               aria-haspopup="true"
               onClick={() => setIndustryOpen((v) => !v)}
@@ -164,28 +164,28 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
               <ChevronDown className={`h-4 w-4 transition ${industryOpen ? "rotate-180" : ""}`} />
             </button>
             {industryOpen && (
-              <div className="absolute left-0 top-full z-50 mt-3 w-64 rounded-2xl border border-[#DFDCD2] bg-white py-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+              <div className="absolute left-0 top-full z-50 mt-3 w-64 rounded-2xl border border-border bg-card py-2 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
                 {industryNav.map((item) => {
                   const Icon = item.icon;
                   return (
                     <Link
                       key={item.slug}
                       href={item.path}
-                      className="flex items-center gap-3 px-4 py-2.5 text-[#5B5D57] transition hover:bg-[#F3F0E8] hover:text-[#0D0F0E]"
+                      className="flex items-center gap-3 px-4 py-2.5 text-mid transition hover:bg-background hover:text-foreground"
                       onClick={() => {
                         trackNavClick(industryLabel(item), item.path, "industry_nav");
                         setIndustryOpen(false);
                       }}
                     >
-                      <Icon className="h-4 w-4 shrink-0 text-[#8F8F86]" aria-hidden />
+                      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                       <span>{industryLabel(item)}</span>
                     </Link>
                   );
                 })}
-                <div className="my-1 border-t border-[#EDEAE1]" />
+                <div className="my-1 border-t border-border" />
                 <Link
                   href="/industries"
-                  className="block px-4 py-2 text-xs font-medium text-[#165DFC] hover:text-[#165DFC]"
+                  className="block px-4 py-2 text-xs font-medium text-brass hover:text-brass"
                   onClick={() => {
                     trackNavClick(t.nav.industries, "/industries", "industry_nav");
                     setIndustryOpen(false);
@@ -201,7 +201,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
             <Link
               key={link.href}
               href={link.href}
-              className="transition hover:text-[#0D0F0E]"
+              className="transition hover:text-foreground"
               onClick={() => trackNavClick(link.label, link.href, "desktop_nav")}
             >
               {link.label}
@@ -214,14 +214,14 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
           <div className="hidden items-center gap-4 lg:flex">
             {user ? (
               <>
-                <Link href="/app" className="text-sm font-medium text-[#5B5D57] hover:text-[#0D0F0E]">
+                <Link href="/app" className="text-sm font-medium text-mid hover:text-foreground">
                   {t.header.dashboard}
                 </Link>
                 <Link
                   href="/app/profile"
-                  className="flex items-center gap-2 rounded-[10px] border border-[#DFDCD2] bg-white px-2 py-1 text-sm font-medium text-[#5B5D57] hover:bg-[#F3F0E8]"
+                  className="flex items-center gap-2 rounded-[10px] border border-border bg-card px-2 py-1 text-sm font-medium text-mid hover:bg-background"
                 >
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EAF1FF] text-xs font-bold text-[#165DFC]">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-xs font-bold text-brass">
                     {user.initials || "U"}
                   </span>
                   <span className="max-w-32 truncate">{user.displayName}</span>
@@ -229,7 +229,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
               </>
             ) : (
               <>
-                <Link href="/login" className="text-sm font-medium text-[#5B5D57] hover:text-[#0D0F0E]">
+                <Link href="/login" className="text-sm font-medium text-mid hover:text-foreground">
                   {t.header.login}
                 </Link>
                 <Link
@@ -245,7 +245,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#DFDCD2] text-[#5B5D57] lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-border text-mid lg:hidden"
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? t.header.closeMenu : t.header.openMenu}
             onClick={() => setMobileOpen((v) => !v)}
@@ -259,13 +259,13 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
         <>
           <button
             type="button"
-            className="fixed inset-0 z-40 bg-[#0D0F0E]/30 lg:hidden"
+            className="fixed inset-0 z-40 bg-ink/30 lg:hidden"
             aria-label={t.header.closeMenu}
             onClick={closeMenu}
           />
-          <div className="fixed inset-x-0 top-16 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-[#DFDCD2] bg-white px-4 py-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] lg:hidden">
+          <div className="fixed inset-x-0 top-16 z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-border bg-card px-4 py-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] lg:hidden">
             <nav className="flex flex-col gap-1" aria-label="Mobile">
-              <p className="px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] text-[#8F8F86]">
+              <p className="px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
                 {isRo ? "Produs" : "Product"}
               </p>
               {PRODUCT_MENU.map((item) => {
@@ -275,7 +275,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
                   <Link
                     key={label}
                     href={href}
-                    className="rounded-[10px] px-3 py-2.5 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
+                    className="rounded-[10px] px-3 py-2.5 text-base font-medium text-foreground hover:bg-background"
                     onClick={() => {
                       trackNavClick(label, href, "mobile_nav");
                       closeMenu();
@@ -287,13 +287,13 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
               })}
               <Link
                 href="/features"
-                className="rounded-[10px] px-3 py-2 text-sm font-medium text-[#165DFC] hover:bg-[#F3F0E8]"
+                className="rounded-[10px] px-3 py-2 text-sm font-medium text-brass hover:bg-background"
                 onClick={closeMenu}
               >
                 {isRo ? "Toate funcționalitățile →" : "All features →"}
               </Link>
 
-              <p className="mt-3 px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] text-[#8F8F86]">
+              <p className="mt-3 px-3 font-mono text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
                 {t.nav.businessTypes}
               </p>
               {industryNav.map((item) => {
@@ -302,20 +302,20 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
                   <Link
                     key={item.slug}
                     href={item.path}
-                    className="flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
+                    className="flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-base font-medium text-foreground hover:bg-background"
                     onClick={() => {
                       trackNavClick(industryLabel(item), item.path, "industry_nav");
                       closeMenu();
                     }}
                   >
-                    <Icon className="h-4 w-4 shrink-0 text-[#8F8F86]" aria-hidden />
+                    <Icon className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                     {industryLabel(item)}
                   </Link>
                 );
               })}
               <Link
                 href="/industries"
-                className="rounded-[10px] px-3 py-2 text-sm font-medium text-[#165DFC] hover:bg-[#F3F0E8]"
+                className="rounded-[10px] px-3 py-2 text-sm font-medium text-brass hover:bg-background"
                 onClick={() => {
                   trackNavClick(t.nav.industries, "/industries", "mobile_nav");
                   closeMenu();
@@ -328,7 +328,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="rounded-[10px] px-3 py-3 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
+                  className="rounded-[10px] px-3 py-3 text-base font-medium text-foreground hover:bg-background"
                   onClick={() => {
                     trackNavClick(link.label, link.href, "mobile_nav");
                     closeMenu();
@@ -342,14 +342,14 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
                 <>
                   <Link
                     href="/app"
-                    className="rounded-[10px] px-3 py-3 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
+                    className="rounded-[10px] px-3 py-3 text-base font-medium text-foreground hover:bg-background"
                     onClick={closeMenu}
                   >
                     {t.header.dashboard}
                   </Link>
                   <Link
                     href="/app/profile"
-                    className="rounded-[10px] px-3 py-3 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
+                    className="rounded-[10px] px-3 py-3 text-base font-medium text-foreground hover:bg-background"
                     onClick={closeMenu}
                   >
                     {user.displayName}
@@ -358,7 +358,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
               ) : (
                 <Link
                   href="/login"
-                  className="rounded-[10px] px-3 py-3 text-base font-medium text-[#0D0F0E] hover:bg-[#F3F0E8]"
+                  className="rounded-[10px] px-3 py-3 text-base font-medium text-foreground hover:bg-background"
                   onClick={closeMenu}
                 >
                   {t.header.login}
