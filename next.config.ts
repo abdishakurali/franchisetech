@@ -31,6 +31,14 @@ const nextConfig: NextConfig = {
       { source: "/faq", destination: "/help", permanent: true },
       { source: "/support", destination: "/help", permanent: true },
       { source: "/docs", destination: "/help", permanent: true },
+      // Lean café product: retain old bookmarks while retired modules leave the UI.
+      { source: "/app/deliveries", destination: "/app/purchases", permanent: false },
+      { source: "/app/kitchen", destination: "/app/pos", permanent: false },
+      { source: "/app/tables/:path*", destination: "/app/pos", permanent: false },
+      { source: "/app/settings/loyalty", destination: "/app/settings", permanent: false },
+      { source: "/app/reports/loyalty-roi", destination: "/app/reports", permanent: false },
+      { source: "/app/reports/audit-export", destination: "/app/reports", permanent: false },
+      { source: "/app/setup-checklist", destination: "/app", permanent: false },
     ];
   },
   async rewrites() {

@@ -184,6 +184,28 @@ export default function OnboardingPage() {
   });
   const [anafRegistrationCode, setAnafRegistrationCode] = useState("");
 
+  // Keep unfinished onboarding resilient to refreshes and accidental tab closes.
+  // This is deliberately client-only: the server action remains the source of truth.
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem("franchisetech:onboarding-draft");
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as { step?: number; form?: Partial<typeof form> };
+      if (parsed.form) setForm((current) => ({ ...current, ...parsed.form }));
+      if (parsed.step === 0 || parsed.step === 1) setStep(parsed.step);
+    } catch {
+      // Ignore malformed or unavailable browser storage.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("franchisetech:onboarding-draft", JSON.stringify({ step, form }));
+    } catch {
+      // Private browsing may deny storage; onboarding remains fully usable.
+    }
+  }, [step, form]);
+
   useEffect(() => {
     let cancelled = false;
     const supabase = createClient();
@@ -282,6 +304,12 @@ export default function OnboardingPage() {
       if (result && "error" in result && result.error) {
         toast.error(result.error);
         setFiscalAction(null);
+      } else {
+        try {
+          window.localStorage.removeItem("franchisetech:onboarding-draft");
+        } catch {
+          // Ignore storage failures.
+        }
       }
     });
   };
