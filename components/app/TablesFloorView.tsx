@@ -13,8 +13,8 @@ function statusLabel(tab: TableWithStatus["active_tab"]): string {
 
 function statusColor(tab: TableWithStatus["active_tab"]): string {
   if (!tab) return "bg-emerald-500";
-  if (tab.status === "bill_requested") return "bg-blue-500";
-  return "bg-red-500";
+  if (tab.status === "bill_requested") return "bg-primary";
+  return "bg-attention";
 }
 
 function statusBadgeVariant(tab: TableWithStatus["active_tab"]): "default" | "secondary" | "destructive" | "outline" {
@@ -25,8 +25,8 @@ function statusBadgeVariant(tab: TableWithStatus["active_tab"]): "default" | "se
 
 function cardBorder(tab: TableWithStatus["active_tab"]): string {
   if (!tab) return "border-border hover:border-emerald-300";
-  if (tab.status === "bill_requested") return "border-blue-200 bg-blue-50/40 hover:border-blue-400";
-  return "border-red-100 bg-muted/40 hover:border-red-300";
+  if (tab.status === "bill_requested") return "border-brass/25 bg-accent/40 hover:border-brass/40";
+  return "border-attention/15 bg-muted/40 hover:border-attention/30";
 }
 
 function formatDuration(openedAt: string): string {
@@ -93,11 +93,11 @@ export function TablesFloorView({
           Liberă
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-red-500 inline-block" />
+          <span className="h-2.5 w-2.5 rounded-full bg-attention inline-block" />
           Ocupată
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-blue-500 inline-block" />
+          <span className="h-2.5 w-2.5 rounded-full bg-primary inline-block" />
           Solicită nota
         </span>
       </div>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, AlertCircle } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { FISCALNET_SUPPORTED_DEVICES } from "@/lib/fiscalnet/supported-devices";
 
 export const metadata: Metadata = {
@@ -54,7 +55,7 @@ const checklist = [
 
 export default function RomaniaFiscalNetPage() {
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       {/* Breadcrumb */}
       <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
         <div className="mx-auto max-w-4xl text-sm text-slate-500">
@@ -200,6 +201,6 @@ export default function RomaniaFiscalNetPage() {
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

@@ -103,8 +103,8 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{t.recipes.listTitle}</h1>
-          <p className="text-sm text-slate-500">{t.recipes.listSubtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t.recipes.listTitle}</h1>
+          <p className="text-sm text-muted-foreground">{t.recipes.listSubtitle}</p>
         </div>
         <div className="flex gap-2">
           <Link href="/app/products/import-ingredients">
@@ -122,8 +122,8 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
         <Card>
           <CardContent className="space-y-4 pb-10 pt-10 text-center">
             <div className="text-4xl">👨‍🍳</div>
-            <p className="font-medium text-slate-700">{t.recipes.emptyList}</p>
-            <p className="mx-auto max-w-sm text-sm text-slate-400">{t.recipes.emptyListHint}</p>
+            <p className="font-medium text-foreground">{t.recipes.emptyList}</p>
+            <p className="mx-auto max-w-sm text-sm text-muted-foreground">{t.recipes.emptyListHint}</p>
             <div className="flex justify-center gap-3">
               <Link href="/app/products/import-ingredients">
                 <Button variant="outline">{t.recipes.importStock}</Button>
@@ -164,14 +164,14 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
                   }) => (
                     <TableRow key={recipe.id}>
                       <TableCell className="font-medium max-w-[220px]">
-                        <Link href={`/app/recipes/${recipe.id}`} className="block truncate hover:text-blue-600">
+                        <Link href={`/app/recipes/${recipe.id}`} className="block truncate hover:text-brass">
                           {product?.name ?? recipe.name}
                         </Link>
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-slate-600">{ingredientCount}</TableCell>
+                      <TableCell className="text-right tabular-nums text-mid">{ingredientCount}</TableCell>
                       <TableCell className="text-right tabular-nums hidden sm:table-cell">{formatRecipeMoney(salePrice, currency)}</TableCell>
                       <TableCell
-                        className="text-right tabular-nums text-slate-600 hidden md:table-cell"
+                        className="text-right tabular-nums text-mid hidden md:table-cell"
                         title={formatCostAsOf(recipe.cost_computed_at, {
                           basis: t.common.costBasisCmp,
                           asOf: t.common.costAsOf,
@@ -183,12 +183,12 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
                       <TableCell className="text-right">
                         <span
                           className={`tabular-nums font-medium ${
-                            marginPct >= 60 ? "text-green-700" : marginPct >= 30 ? "text-amber-600" : "text-red-600"
+                            marginPct >= 60 ? "text-reconciled" : marginPct >= 30 ? "text-amber-600" : "text-attention"
                           }`}
                         >
                           {marginPct.toFixed(1)}%
                         </span>
-                        <span className="ml-2 hidden tabular-nums text-xs text-slate-500 sm:inline">
+                        <span className="ml-2 hidden tabular-nums text-xs text-muted-foreground sm:inline">
                           ({formatRecipeMoney(margin, currency)})
                         </span>
                       </TableCell>
@@ -197,30 +197,30 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
                           <div>
                             <span
                               className={`tabular-nums font-semibold ${
-                                canMake === 0 ? "text-red-600" : canMake < 5 ? "text-amber-600" : "text-green-700"
+                                canMake === 0 ? "text-attention" : canMake < 5 ? "text-amber-600" : "text-reconciled"
                               }`}
                             >
                               {canMake}
                             </span>
                             {limitingIngName && canMake < 20 ? (
-                              <p className="text-[10px] text-red-500">⚠ {limitingIngName}</p>
+                              <p className="text-[10px] text-attention">⚠ {limitingIngName}</p>
                             ) : null}
                           </div>
                         ) : (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-3">
                           <Link
                             href={`/app/recipes/${recipe.id}`}
-                            className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                            className="text-sm font-medium text-brass hover:text-brass"
                           >
                             {t.recipes.view}
                           </Link>
                           <Link
                             href={`/app/recipes/${recipe.id}/edit`}
-                            className="text-sm font-medium text-slate-500 hover:text-slate-800"
+                            className="text-sm font-medium text-muted-foreground hover:text-foreground"
                           >
                             {t.common.edit}
                           </Link>
@@ -232,7 +232,7 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
               </TableBody>
             </Table>
             {!rows.length ? (
-              <p className="py-8 text-center text-sm text-slate-500">{t.recipes.noMatch}</p>
+              <p className="py-8 text-center text-sm text-muted-foreground">{t.recipes.noMatch}</p>
             ) : null}
           </CardContent>
         </Card>

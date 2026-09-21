@@ -72,7 +72,7 @@ export default async function VerifyCardPage({
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-b from-slate-50 to-slate-100/80 px-4 py-10">
       <section className="w-full max-w-md space-y-6 rounded-2xl bg-white p-6 shadow-xl sm:p-8">
-        <img src="/marketing/franchise-tech-logo.png" alt="franchisetech" className="h-8 w-auto" />
+        <img src="/marketing/franchise-tech-logo.png" alt="franchisetech" className="h-10 w-auto" />
 
         <div className="flex justify-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-blue-600">

@@ -269,7 +269,7 @@ export function TeamClient({
                     </td>
                     <td className="px-4 py-3"><StatusBadge status={m.status} /></td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {new Date(m.created_at).toLocaleDateString()}
+                      {new Date(m.created_at).toLocaleDateString("ro-RO")}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">

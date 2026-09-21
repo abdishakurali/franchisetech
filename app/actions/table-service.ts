@@ -129,7 +129,7 @@ async function loadTabSummaries(
 
 function revalidateFloorPaths() {
   revalidatePath("/app/pos");
-  revalidatePath("/app/settings/tables");
+  revalidatePath("/app/settings");
 }
 
 function canManage(role: string | null) {
@@ -1156,7 +1156,7 @@ export async function setTableServiceEnabled(enabled: boolean): Promise<{ ok: tr
     .eq("id", orgId);
 
   if (error) return { ok: false, error: "Eroare la salvarea setării." };
-  revalidatePath("/app/settings/tables");
+  revalidatePath("/app/settings");
   revalidateFloorPaths();
   revalidatePath("/app/pos");
   revalidatePath("/app", "layout");

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqJsonLd, findPage, resourcePages, SITE_URL } from "@/lib/marketing/seo";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
@@ -29,7 +30,7 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
   if (!page) notFound();
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd data={faqJsonLd(page.faqs)} />
       <JsonLd data={{ "@context": "https://schema.org", "@type": "Article", headline: page.title, description: page.description, author: { "@type": "Organization", name: "franchisetech" }, publisher: { "@type": "Organization", name: "franchisetech" }, mainEntityOfPage: `${SITE_URL}${page.path}` }} />
       <section className="px-4 py-16 sm:px-6 lg:px-8">
@@ -57,6 +58,6 @@ export default async function ResourcePage({ params }: { params: Promise<{ slug:
         </article>
       </section>
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

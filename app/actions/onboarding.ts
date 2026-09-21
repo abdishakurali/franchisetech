@@ -14,6 +14,7 @@ import {
 } from "@/lib/business-profile";
 import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
 import { saveOrgModuleFlags } from "@/lib/org-module-flags";
+import { onboardingStepRoute, type OnboardingStep } from "@/lib/onboarding/steps";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { upsertLoopsContact } from "@/lib/loops";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
@@ -83,30 +84,58 @@ export async function completePosOnboarding(input: {
     .limit(1)
     .maybeSingle();
 
+  let orgId: string | undefined;
+  let siteId: string | undefined;
+
   if (existingMembership?.organisation_id) {
-    revalidatePath("/app");
-    redirect("/app");
-  }
-
-  const { data, error } = await supabase.rpc("create_organisation_with_owner", {
-    p_org_name: input.orgName.trim(),
-    p_business_type: input.businessType || null,
-    p_asset_name: null,
-    p_asset_type: "fridge",
-  });
-
-  if (error) {
-    console.error("onboarding_rpc_failed", {
-      code: error.code,
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
+    // A prior attempt already created the org/membership for this user (the
+    // RPC below is not re-run — it would create a second organisation).
+    // If that attempt also finished this step, send them to wherever they
+    // actually are instead of back through account creation. If it's still
+    // unset, a prior attempt got the org created but failed before finishing
+    // the critical setup below (payment methods / till session) — resume on
+    // the SAME org rather than dead-ending them in a redirect loop back to
+    // this form, which always hit this branch and bounced to /app.
+    orgId = existingMembership.organisation_id;
+    const { data: orgRow } = await supabase
+      .from("organisations")
+      .select("onboarding_step")
+      .eq("id", orgId)
+      .maybeSingle();
+    const step = (orgRow?.onboarding_step ?? null) as OnboardingStep | null;
+    if (step && step !== "location_type" && step !== "business_cui") {
+      redirect(onboardingStepRoute(step, input.countryCode === "RO"));
+    }
+    const { data: existingSite } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("organisation_id", orgId)
+      .limit(1)
+      .maybeSingle();
+    siteId = existingSite?.id;
+  } else {
+    const { data, error } = await supabase.rpc("create_organisation_with_owner", {
+      p_org_name: input.orgName.trim(),
+      p_business_type: input.businessType || null,
+      p_asset_name: null,
+      p_asset_type: "fridge",
     });
-    return { error: "Could not create your workspace. Please try again." };
+
+    if (error) {
+      console.error("onboarding_rpc_failed", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
+      return { error: "Could not create your workspace. Please try again." };
+    }
+
+    const created = Array.isArray(data) ? data[0] : data;
+    orgId = created?.organisation_id as string | undefined;
+    siteId = created?.site_id as string | undefined;
   }
 
-  const created = Array.isArray(data) ? data[0] : data;
-  const orgId = created?.organisation_id as string | undefined;
   if (!orgId) {
     return { error: "Workspace was created but could not be loaded. Please refresh and try again." };
   }
@@ -160,31 +189,43 @@ export async function completePosOnboarding(input: {
 
   await ensureReferralCode(orgId);
 
-  // ── CRITICAL: payment methods ──────────────────────────────────────────
-  const { error: pmError } = await supabase.from("payment_methods").insert([
-    { organisation_id: orgId, name: "Cash", type: "cash" },
-    { organisation_id: orgId, name: "Card", type: "card" },
-  ]);
-  if (pmError) {
-    console.error("onboarding_payment_methods_seed_failed", pmError.message);
-    return { error: "Could not create payment methods. Please try again." };
+  // ── CRITICAL: payment methods (idempotent — resuming a prior attempt
+  // must not duplicate these, and must not fail if they already exist) ────
+  const { data: existingPaymentMethods } = await supabase
+    .from("payment_methods")
+    .select("id")
+    .eq("organisation_id", orgId)
+    .limit(1);
+  if (!existingPaymentMethods?.length) {
+    const { error: pmError } = await supabase.from("payment_methods").insert([
+      { organisation_id: orgId, name: "Cash", type: "cash" },
+      { organisation_id: orgId, name: "Card", type: "card" },
+    ]);
+    if (pmError) {
+      console.error("onboarding_payment_methods_seed_failed", pmError.message);
+      return { error: "Could not create payment methods. Please try again." };
+    }
   }
 
-  // ── WARN-ONLY: product category ──────────────────────────────────────
-  const { data: category, error: categoryError } = await supabase
+  // ── WARN-ONLY: product category (idempotent, same reason) ─────────────
+  const { data: existingCategory } = await supabase
     .from("product_categories")
-    .insert({
+    .select("id")
+    .eq("organisation_id", orgId)
+    .eq("category_type", "pos")
+    .limit(1)
+    .maybeSingle();
+  if (!existingCategory) {
+    const { error: categoryError } = await supabase.from("product_categories").insert({
       organisation_id: orgId,
       name: "Menu",
       color: "#b4903f",
       sort_order: 1,
       category_type: "pos",
-    })
-    .select("id")
-    .single();
-
-  if (categoryError) {
-    console.warn("onboarding_category_seed_failed", categoryError.message);
+    });
+    if (categoryError) {
+      console.warn("onboarding_category_seed_failed", categoryError.message);
+    }
   }
 
   // ── WARN-ONLY: VAT rates ───────────────────────────────────────────────
@@ -203,24 +244,33 @@ export async function completePosOnboarding(input: {
     console.warn("onboarding_vat_seed_failed", vatSeedError);
   }
 
-  // ── CRITICAL: POS session ─────────────────────────────────────────────
-  const siteId = created?.site_id as string | undefined;
+  // ── CRITICAL: POS session (idempotent — never open a second one for the
+  // same org; also the project rule "Do not create duplicate POS sessions") ─
   if (!siteId) {
     console.error("onboarding_no_site_id", { orgId });
     return { error: "Workspace created but no till location was found. Please contact support." };
   }
 
-  const { error: sessionError } = await supabase.from("pos_sessions").insert({
-    organisation_id: orgId,
-    site_id: siteId,
-    opened_by: user.id,
-    opening_cash: 0,
-    expected_cash: 0,
-    status: "open",
-  });
-  if (sessionError) {
-    console.error("onboarding_pos_session_failed", sessionError.message);
-    return { error: "Could not open your till. Please try again." };
+  const { data: existingSession } = await supabase
+    .from("pos_sessions")
+    .select("id")
+    .eq("organisation_id", orgId)
+    .eq("status", "open")
+    .limit(1)
+    .maybeSingle();
+  if (!existingSession) {
+    const { error: sessionError } = await supabase.from("pos_sessions").insert({
+      organisation_id: orgId,
+      site_id: siteId,
+      opened_by: user.id,
+      opening_cash: 0,
+      expected_cash: 0,
+      status: "open",
+    });
+    if (sessionError) {
+      console.error("onboarding_pos_session_failed", sessionError.message);
+      return { error: "Could not open your till. Please try again." };
+    }
   }
 
   // ── Growth milestone: till opened ──────────────────────────────────────

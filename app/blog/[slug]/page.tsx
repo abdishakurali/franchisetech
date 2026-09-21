@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
+import { BlogTopicHeader } from "@/components/marketing/BlogTopicHeader";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { blogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
@@ -62,7 +63,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: post.description,
       type: "article",
       publishedTime: post.publishedAt,
-      ...(post.image ? { images: [{ url: `${SITE_URL}${post.image}`, width: 1200, height: 630 }] } : {}),
+      // Not sourcing post.image here — the existing screenshot set (public/marketing,
+      // public/design-marketing) carries stale pre-pivot demo data (EUR pricing,
+      // 9%/13.5% Irish VAT bands). Falls back to the site-wide default OG image
+      // until real, correct per-post photography exists.
     },
   };
 }
@@ -73,7 +77,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   if (!post) notFound();
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -83,7 +87,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           datePublished: post.publishedAt,
           author: { "@type": "Organization", name: "franchisetech" },
           publisher: { "@type": "Organization", name: "franchisetech", url: SITE_URL },
-          ...(post.image ? { image: `${SITE_URL}${post.image}` } : {}),
         }}
       />
       <JsonLd
@@ -118,11 +121,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {new Date(post.publishedAt).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })}
           </time>
 
-          {post.image && (
-            <div className="mt-8 overflow-hidden rounded-xl border border-slate-100">
-              <Image src={post.image} alt={post.title} width={800} height={450} className="w-full object-cover" />
-            </div>
-          )}
+          <BlogTopicHeader post={post} size="hero" className="mt-8" />
 
           <div className="mt-10 space-y-10">
             {post.sections.map((section) => (
@@ -137,7 +136,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                           {items.map((item, j) => (
                             <li key={j} className="flex gap-2 text-sm leading-6 text-slate-600">
                               <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
-                              <span dangerouslySetInnerHTML={{ __html: item.replace(/^- /, "").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />
+                              <span dangerouslySetInnerHTML={{ __html: item.replace(/^- /, "").replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-600 underline hover:text-blue-700">$1</a>') }} />
                             </li>
                           ))}
                         </ul>
@@ -147,7 +146,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                       <p
                         key={i}
                         className="text-sm leading-7 text-slate-600"
-                        dangerouslySetInnerHTML={{ __html: para.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }}
+                        dangerouslySetInnerHTML={{ __html: para.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-600 underline hover:text-blue-700">$1</a>') }}
                       />
                     );
                   })}
@@ -223,6 +222,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

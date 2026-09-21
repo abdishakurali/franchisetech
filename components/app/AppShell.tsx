@@ -39,6 +39,7 @@ interface AppShellProps {
   setupComplete?: boolean;
   moduleVisibility?: {
     inventory: boolean;
+    purchases: boolean;
     recipeCosting: boolean;
     teamAdvanced: boolean;
     multiSite: boolean;
@@ -100,6 +101,10 @@ export function buildMainNav(t: AppT): NavItem[] {
     // site advertises — it must not decide what a paying customer can reach.
     { href: "/app/recipes", label: t.nav.recipes, icon: BookOpen, exact: false },
     { href: "/app/stock", label: t.nav.stock, icon: Archive, exact: false },
+    // Purchases (NIR/suppliers) is its own paid module since purchases_enabled
+    // became independent of inventory_enabled — gated ONLY on moduleVisibility.
+    // purchases below, never folded back under inventory.
+    { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
     { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
   ];
 
@@ -126,7 +131,7 @@ export function resolveNavItems(
     const accountantNav: NavItem[] = [
       { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
       { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
-      ...(moduleVisibility?.inventory
+      ...(moduleVisibility?.purchases
         ? [
             { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
             { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck, exact: false },
@@ -140,15 +145,15 @@ export function resolveNavItems(
   const mainNav = buildMainNav(t)
     .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
     .filter((item) => item.href !== "/app/stock" || moduleVisibility?.inventory === true)
+    .filter((item) => item.href !== "/app/purchases" || moduleVisibility?.purchases === true)
     .filter((item) => {
       if (!limited) return true;
       return item.href === "/app" || item.href === "/app/pos";
     });
 
-  // Stock / purchases / suppliers are paid Operations modules — gated on the
-  // org's own inventory visibility only, not on the marketing-scope flag.
-  // Keep legacy destinations reachable from their own workflows, but give
-  // the owner a single seven-destination navigation as specified by design.
+  // Stock, recipes, and purchases are each independent paid Operations
+  // modules — every one gated on its own moduleVisibility flag above, never
+  // folded under another module's flag.
   const showStock = false;
   const stockNav: NavItem[] = [];
 
@@ -250,7 +255,7 @@ function AppHeader({
     <div className="print:hidden shrink-0 bg-card border-b border-border">
       <div className="flex h-12 items-center gap-2 sm:gap-3 px-3 sm:px-4">
         <Link href="/app" className="shrink-0" aria-label={t.nav.dashboard}>
-          <FranchiseTechLogo className="h-6 w-auto max-w-[120px] sm:h-7 sm:max-w-[140px]" />
+          <FranchiseTechLogo className="h-8 w-auto max-w-[150px] sm:h-9 sm:max-w-[170px]" />
         </Link>
 
         <nav
@@ -427,7 +432,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
       };
 
   return (
-    <div className={cn("app-shell-h relative flex flex-col overflow-hidden", isPosRoute ? "bg-card" : "bg-background")}>
+    <div className={cn("app-shell app-shell-h relative flex flex-col overflow-hidden", isPosRoute ? "bg-card" : "bg-background")}>
       <div
         className={cn(
           "contents",

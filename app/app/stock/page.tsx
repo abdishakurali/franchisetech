@@ -71,7 +71,7 @@ export default async function StockPage({
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href="#stock-table" className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground hover:border-brass/30 hover:text-brass transition-colors">Mișcare stoc</Link>
-          <Link href="/app/purchases/new" className="inline-flex items-center gap-1.5 rounded-lg bg-brass px-3 py-2 text-sm font-medium text-white hover:bg-brass/90 transition-colors">Recepție marfă</Link>
+          <Link href="/app/purchases/new" className="inline-flex items-center gap-1.5 rounded-lg bg-brass px-3 py-2 text-sm font-medium text-ink hover:bg-brass/90 transition-colors">Recepție marfă</Link>
           <Link href={showArchived ? `/app/stock?filter=${filter}` : `/app/stock?filter=${filter}&archived=1`} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-mid hover:border-brass/30 hover:text-brass transition-colors">
             {showArchived ? t.stock.hideArchived : t.stock.showArchived}
           </Link>

@@ -134,19 +134,19 @@ export default async function PurchaseDetailPage({
     <div className="mx-auto max-w-3xl space-y-6 p-6 print:max-w-none print:p-4">
       <div className="flex items-start justify-between gap-4 print:hidden">
         <div>
-          <Link href="/app/purchases" className="text-sm text-slate-500 hover:text-slate-700">
+          <Link href="/app/purchases" className="text-sm text-muted-foreground hover:text-foreground">
             ← {t.nav.purchases}
           </Link>
-          <h1 className="text-2xl font-semibold text-slate-950 mt-1">
+          <h1 className="text-2xl font-semibold text-foreground mt-1">
             {purchase.nir_number ?? d.purchase}
           </h1>
           {locale === "ro" && purchase.nir_number && (
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {NIR_RO_TITLE} · Cod {NIR_RO_CODE}
             </p>
           )}
           <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span className="text-sm text-slate-500">{dateStr}</span>
+            <span className="text-sm text-muted-foreground">{dateStr}</span>
             <Badge variant="secondary" className={`text-xs border ${badge.className}`}>{badge.label}</Badge>
           </div>
         </div>
@@ -182,12 +182,12 @@ export default async function PurchaseDetailPage({
       </div>
 
       {query.posted === "1" && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 print:hidden">
+        <div className="rounded-lg border border-reconciled/25 bg-reconciled/10 p-4 text-sm text-reconciled print:hidden">
           {d.postedSuccess}
         </div>
       )}
       {errorMsg && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 print:hidden">{errorMsg}</div>
+        <div className="rounded-lg border border-attention/25 bg-attention/10 p-4 text-sm text-attention print:hidden">{errorMsg}</div>
       )}
 
       <div id="nir-print-area" className="space-y-6">
@@ -196,7 +196,7 @@ export default async function PurchaseDetailPage({
           {purchase.nir_number && <p className="text-lg font-semibold mt-1">{purchase.nir_number}</p>}
         </div>
 
-        <Card className="print:shadow-none print:border-slate-300">
+        <Card className="print:shadow-none print:border-border">
           <CardHeader className="print:pb-2">
             <CardTitle>{d.detailsTitle}</CardTitle>
           </CardHeader>
@@ -204,80 +204,80 @@ export default async function PurchaseDetailPage({
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {purchase.nir_number && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{t.tables.nirNo}</p>
-                  <p className="font-medium text-slate-900">{purchase.nir_number}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">{t.tables.nirNo}</p>
+                  <p className="font-medium text-foreground">{purchase.nir_number}</p>
                 </div>
               )}
               <div>
-                <p className="text-xs text-slate-400 mb-0.5">{f.nirDate}</p>
-                <p className="font-medium text-slate-900">{formatDateDisplay(purchase.nir_date ?? purchase.purchase_date, locale)}</p>
+                <p className="text-xs text-muted-foreground mb-0.5">{f.nirDate}</p>
+                <p className="font-medium text-foreground">{formatDateDisplay(purchase.nir_date ?? purchase.purchase_date, locale)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400 mb-0.5">{f.supplier}</p>
-                <p className="font-medium text-slate-900">{supplierName}</p>
+                <p className="text-xs text-muted-foreground mb-0.5">{f.supplier}</p>
+                <p className="font-medium text-foreground">{supplierName}</p>
               </div>
               {invoiceNo && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{f.invoiceNo}</p>
-                  <p className="font-medium text-slate-900">{invoiceNo}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">{f.invoiceNo}</p>
+                  <p className="font-medium text-foreground">{invoiceNo}</p>
                 </div>
               )}
               {purchase.supplier_invoice_date && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{f.invoiceDate}</p>
-                  <p className="font-medium text-slate-900">{formatDateDisplay(purchase.supplier_invoice_date, locale)}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">{f.invoiceDate}</p>
+                  <p className="font-medium text-foreground">{formatDateDisplay(purchase.supplier_invoice_date, locale)}</p>
                 </div>
               )}
               {siteName && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{f.site}</p>
-                  <p className="font-medium text-slate-900">{siteName}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">{f.site}</p>
+                  <p className="font-medium text-foreground">{siteName}</p>
                 </div>
               )}
               {receivedByName && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{d.receivedBy}</p>
-                  <p className="font-medium text-slate-900">{receivedByName}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">{d.receivedBy}</p>
+                  <p className="font-medium text-foreground">{receivedByName}</p>
                 </div>
               )}
               {postedByName && (
                 <div>
-                  <p className="text-xs text-slate-400 mb-0.5">{d.postedBy}</p>
-                  <p className="font-medium text-slate-900">{postedByName}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">{d.postedBy}</p>
+                  <p className="font-medium text-foreground">{postedByName}</p>
                 </div>
               )}
             </div>
             {(purchase.notes || isDraft) && (
-              <div className="rounded-lg bg-slate-50 border border-slate-200 p-3">
-                <p className="text-xs text-slate-400 mb-1">{observationsLabel}</p>
-                <p className="text-slate-700">{purchase.notes || "—"}</p>
+              <div className="rounded-lg bg-secondary border border-border p-3">
+                <p className="text-xs text-muted-foreground mb-1">{observationsLabel}</p>
+                <p className="text-foreground">{purchase.notes || "—"}</p>
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+            <div className="grid grid-cols-3 gap-3 rounded-lg border border-border bg-secondary p-3 text-sm">
               <div>
-                <p className="text-xs text-slate-400">{d.netTotal}</p>
-                <p className="font-semibold text-slate-900">{money(netTotal, currency)}</p>
+                <p className="text-xs text-muted-foreground">{d.netTotal}</p>
+                <p className="font-semibold text-foreground">{money(netTotal, currency)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">{`Total ${taxLabel}`}</p>
-                <p className="font-semibold text-slate-900">{money(taxTotal, currency)}</p>
+                <p className="text-xs text-muted-foreground">{`Total ${taxLabel}`}</p>
+                <p className="font-semibold text-foreground">{money(taxTotal, currency)}</p>
               </div>
               <div>
-                <p className="text-xs text-slate-400">{d.grossTotal}</p>
-                <p className="font-semibold text-slate-900">{money(grossTotal, currency)}</p>
+                <p className="text-xs text-muted-foreground">{d.grossTotal}</p>
+                <p className="font-semibold text-foreground">{money(grossTotal, currency)}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="print:shadow-none print:border-slate-300">
+        <Card className="print:shadow-none print:border-border">
           <CardHeader className="print:pb-2">
             <CardTitle>{d.receivedItems} ({items.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {!items.length ? (
-              <p className="text-sm text-slate-400">{d.noItems}</p>
+              <p className="text-sm text-muted-foreground">{d.noItems}</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -301,7 +301,7 @@ export default async function PurchaseDetailPage({
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">
                           {item.product_id && !locked ? (
-                            <Link href={`/app/products/${item.product_id}`} className="hover:text-blue-600 hover:underline print:no-underline print:text-black">
+                            <Link href={`/app/products/${item.product_id}`} className="hover:text-brass hover:underline print:no-underline print:text-black">
                               {name}
                             </Link>
                           ) : name}
@@ -316,7 +316,7 @@ export default async function PurchaseDetailPage({
                     );
                   })}
                   <TableRow className="border-t-2 font-semibold">
-                    <TableCell colSpan={4} className="text-right text-slate-600">{d.netTotal}</TableCell>
+                    <TableCell colSpan={4} className="text-right text-mid">{d.netTotal}</TableCell>
                     <TableCell className="text-right">{money(netTotal, currency)}</TableCell>
                     <TableCell className="text-right">{money(taxTotal, currency)}</TableCell>
                     <TableCell className="text-right">{money(grossTotal, currency)}</TableCell>
@@ -338,13 +338,13 @@ export default async function PurchaseDetailPage({
             <input type="hidden" name="supplier_invoice_date" value={purchase.supplier_invoice_date ? String(purchase.supplier_invoice_date).slice(0, 10) : ""} />
             {purchase.supplier_id && <input type="hidden" name="supplier_id" value={purchase.supplier_id} />}
             {purchase.site_id && <input type="hidden" name="site_id" value={purchase.site_id} />}
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
               {d.generateNir}
             </Button>
           </form>
           <form action={cancelPurchase as unknown as (fd: FormData) => Promise<void>}>
             <input type="hidden" name="purchase_id" value={id} />
-            <Button type="submit" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50">
+            <Button type="submit" variant="outline" className="border-attention/25 text-attention hover:bg-attention/10">
               {d.cancelDraft}
             </Button>
           </form>
@@ -352,7 +352,7 @@ export default async function PurchaseDetailPage({
       )}
 
       {purchase.status === "cancelled" && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800 print:hidden">
+        <div className="rounded-lg border border-attention/25 bg-attention/10 p-4 text-sm text-attention print:hidden">
           {d.draftCancelled}
         </div>
       )}

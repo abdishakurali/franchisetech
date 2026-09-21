@@ -23,15 +23,17 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
   const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
   const inventoryVisible = isModuleNavVisible({ org: orgModules, module: "inventory", subscriptionPlan: sub?.plan, hasTrial });
   const recipeVisible = isModuleNavVisible({ org: orgModules, module: "recipe_costing", subscriptionPlan: sub?.plan, hasTrial });
-  const { data: settings } = await supabase.from("organisations").select("saga_export_enabled,loyalty_enabled").eq("id", orgId).maybeSingle();
+  // saga_export_enabled/loyalty_enabled already came back on membership.organisations
+  // via getKitchenOpsContext() above — no need for a second organisations query.
+  const orgRow = Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations;
   const [gestiuneVisible, loyaltyEntitled] = await Promise.all([
     hasEntitlement(orgId, "reports.gestiune").catch(() => false),
     hasEntitlement(orgId, "loyalty.enabled").catch(() => false),
   ]);
   const visible = filterReportLinks(t, {
     inventoryVisible, recipeVisible, gestiuneVisible,
-    accountantPackVisible: Boolean(settings?.saga_export_enabled),
-    loyaltyVisible: Boolean(settings?.loyalty_enabled) && loyaltyEntitled,
+    accountantPackVisible: Boolean(orgRow?.saga_export_enabled),
+    loyaltyVisible: Boolean(orgRow?.loyalty_enabled) && loyaltyEntitled,
   });
   const core = visible.filter((report) => CORE_REPORTS.some((key) => report.href === `/app/reports/${key}`));
   const params = await searchParams;
@@ -85,13 +87,15 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
     const totals = [...rates.values()].reduce((sum, row) => ({ net: sum.net + row.net, vat: sum.vat + row.vat, gross: sum.gross + row.gross }), { net: 0, vat: 0, gross: 0 });
     preview = { error: Boolean(error), metrics: [["Net", formatMoney(totals.net, currency)], ["TVA", formatMoney(totals.vat, currency)], ["Brut", formatMoney(totals.gross, currency)]], rows: [...rates.entries()].sort(([a], [b]) => a - b).map(([rate, row]) => [`Cotă ${rate}%`, formatMoney(row.vat, currency)]) };
   } else if (active && selected === "stock") {
-    const { data, error } = await supabase.from("stock_items").select("name,current_qty,cost_per_unit,reorder_level,unit").eq("organisation_id", orgId).order("name");
+    // Same live source /app/stock and /app/reports/stock read
+    // (products.current_stock_qty) — not the unrelated stock_items table.
+    const { data, error } = await supabase.from("products").select("name,current_stock_qty,cost_price,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true").order("name");
     const items = data ?? [];
     preview = { error: Boolean(error), metrics: [
       ["Articole", String(items.length)],
-      ["Sub minim", String(items.filter((item) => item.reorder_level !== null && Number(item.current_qty) <= Number(item.reorder_level)).length)],
-      ["Valoare estimată", formatMoney(items.reduce((sum, item) => sum + Number(item.current_qty ?? 0) * Number(item.cost_per_unit ?? 0), 0), currency)],
-    ], rows: items.slice(0, 5).map((item) => [item.name, `${Number(item.current_qty ?? 0).toLocaleString("ro-RO")} ${item.unit ?? ""}`]) };
+      ["Sub minim", String(items.filter((item) => item.reorder_level !== null && Number(item.current_stock_qty ?? 0) <= Number(item.reorder_level)).length)],
+      ["Valoare estimată", formatMoney(items.reduce((sum, item) => sum + Number(item.current_stock_qty ?? 0) * Number(item.cost_price ?? 0), 0), currency)],
+    ], rows: items.slice(0, 5).map((item) => [item.name, `${Number(item.current_stock_qty ?? 0).toLocaleString("ro-RO")} ${item.unit_of_measure ?? ""}`]) };
   } else if (active && selected === "purchases") {
     const { data, error } = await supabase.from("purchases").select("purchase_date,purchased_at,invoice_number,reference,total_amount,status").eq("organisation_id", orgId).order("purchased_at", { ascending: false }).limit(100);
     const posted = (data ?? []).filter((item) => countsTowardPurchaseSpend(item.status));

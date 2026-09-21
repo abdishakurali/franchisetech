@@ -23,8 +23,8 @@ export default async function InventoryCountsPage() {
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Inventar</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-semibold text-foreground">Inventar</h1>
+          <p className="text-sm text-muted-foreground">
             Numărătoare fizică de stoc — comparați cantitatea numărată cu cea din sistem și aplicați diferențele dintr-o dată.
           </p>
         </div>
@@ -45,7 +45,7 @@ export default async function InventoryCountsPage() {
         </CardHeader>
         <CardContent>
           {!counts?.length ? (
-            <p className="py-8 text-center text-sm text-slate-400">
+            <p className="py-8 text-center text-sm text-muted-foreground">
               Nicio numărătoare de inventar încă.
             </p>
           ) : (
@@ -54,21 +54,21 @@ export default async function InventoryCountsPage() {
                 <Link
                   key={c.id}
                   href={`/app/inventory/${c.id}`}
-                  className="flex items-center justify-between py-3 hover:bg-slate-50 -mx-2 px-2 rounded"
+                  className="flex items-center justify-between py-3 hover:bg-secondary -mx-2 px-2 rounded"
                 >
                   <div>
-                    <p className="text-sm font-medium text-slate-800">
+                    <p className="text-sm font-medium text-foreground">
                       {new Date(c.started_at).toLocaleString("ro-RO")}
                     </p>
                     {c.completed_at ? (
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-muted-foreground">
                         Finalizat {new Date(c.completed_at).toLocaleString("ro-RO")}
                       </p>
                     ) : null}
                   </div>
                   <Badge
                     variant="secondary"
-                    className={c.status === "completed" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}
+                    className={c.status === "completed" ? "bg-reconciled/10 text-reconciled" : "bg-amber-100 text-amber-700"}
                   >
                     {c.status === "completed" ? "Finalizată" : "În curs"}
                   </Badge>

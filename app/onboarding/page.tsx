@@ -39,9 +39,8 @@ const UI_STRINGS = {
     addressLabel: "Adresă",
     registrationCodeLabel: "Nr. Reg. Com.",
     anafResolvedNote: (name: string) => `✓ ${name} — date preluate din ANAF`,
-    yourName: "Numele dumneavoastră",
-    namePlaceholder: "Proprietar sau manager",
     industry: "Tip activitate",
+    optional: "opțional",
     selectType: "Selectează tipul…",
     continueBtn: "Continuă",
     nameRequired: "Numele firmei este obligatoriu.",
@@ -62,9 +61,8 @@ const UI_STRINGS = {
     addressLabel: "Address",
     registrationCodeLabel: "Trade registry no.",
     anafResolvedNote: (name: string) => `✓ ${name} — retrieved from ANAF`,
-    yourName: "Your name",
-    namePlaceholder: "Owner or manager name",
     industry: "Industry",
+    optional: "optional",
     selectType: "Select type…",
     continueBtn: "Continue",
     nameRequired: "Brand/shop name is required.",
@@ -242,7 +240,7 @@ export default function OnboardingPage() {
             <span>{t.hint}</span>
           </div>
           <div>
-            <Label htmlFor="businessType">{t.industry}</Label>
+            <Label htmlFor="businessType">{t.industry} <span className="font-normal text-muted-foreground">({t.optional})</span></Label>
             <Select value={form.businessType} onValueChange={(value) => update({ businessType: value })}>
               <SelectTrigger id="businessType" className="mt-1 w-full">
                 <SelectValue placeholder={t.selectType} />
@@ -258,7 +256,7 @@ export default function OnboardingPage() {
           </div>
           {isRO && (
             <div>
-              <Label htmlFor="anafCif">{t.cuiLabel}</Label>
+              <Label htmlFor="anafCif">{t.cuiLabel} <span className="font-normal text-muted-foreground">({t.optional})</span></Label>
               <div className="mt-1 flex gap-2">
                 <Input
                   id="anafCif"
@@ -301,16 +299,6 @@ export default function OnboardingPage() {
               value={form.name}
               onChange={(e) => update({ name: e.target.value })}
               placeholder={t.brandPlaceholder}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="userName">{t.yourName}</Label>
-            <Input
-              id="userName"
-              value={form.userName}
-              onChange={(e) => update({ userName: e.target.value })}
-              placeholder={t.namePlaceholder}
               className="mt-1"
             />
           </div>

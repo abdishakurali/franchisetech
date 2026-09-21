@@ -34,8 +34,8 @@ function formatDuration(openedAt: string): string {
 
 function statusMeta(tab: TableWithStatus["active_tab"]) {
   if (!tab) return { label: "Liberă", color: "bg-emerald-500", badge: "default" as const, border: "border-emerald-200" };
-  if (tab.status === "bill_requested") return { label: "Solicită nota", color: "bg-blue-500", badge: "secondary" as const, border: "border-blue-300 ring-2 ring-blue-200" };
-  return { label: "Ocupată", color: "bg-red-500", badge: "destructive" as const, border: "border-red-200" };
+  if (tab.status === "bill_requested") return { label: "Solicită nota", color: "bg-primary", badge: "secondary" as const, border: "border-brass/30 ring-2 ring-blue-200" };
+  return { label: "Ocupată", color: "bg-attention", badge: "destructive" as const, border: "border-attention/25" };
 }
 
 export function TableDetailClient({ table, canManage, currency }: Props) {
@@ -117,14 +117,14 @@ export function TableDetailClient({ table, canManage, currency }: Props) {
         <div className="p-4 border-b flex items-center justify-between">
           <h2 className="font-semibold">Detalii</h2>
           {tab && tab.status === "bill_requested" && (
-            <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-100">Notă solicitată</Badge>
+            <Badge className="bg-accent text-brass hover:bg-accent">Notă solicitată</Badge>
           )}
           {!tab && <Badge variant="outline">Liberă</Badge>}
         </div>
 
         <div className="p-4 flex-1 space-y-4">
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{error}</p>
+            <p className="text-sm text-attention bg-attention/10 border border-attention/15 rounded-lg px-3 py-2">{error}</p>
           )}
 
           {!tab ? (
@@ -208,7 +208,7 @@ export function TableDetailClient({ table, canManage, currency }: Props) {
                   </Button>
                   <Button
                     variant="ghost"
-                    className="w-full justify-start gap-2 text-red-600 hover:text-red-700"
+                    className="w-full justify-start gap-2 text-attention hover:text-attention"
                     disabled={pending}
                     onClick={() => {
                       if (!confirm("Anulezi bonul deschis?")) return;

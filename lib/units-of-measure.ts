@@ -32,6 +32,17 @@ export function unitLabel(unit: string, locale: "en" | "ro"): string {
   return UNIT_LABELS_RO[unit as (typeof DEFAULT_OPERATIONAL_UNITS)[number]] ?? unit;
 }
 
+// A custom unit that collides (case-insensitively) with a standard unit's
+// code or Romanian label would be indistinguishable from it on the till and
+// in reports — this is the exact "Buc"/"Units" duplication that made the
+// custom-unit list read-only before. Enforced on add/rename, not just shown.
+export function isReservedUnitName(name: string): boolean {
+  const normalized = name.trim().toLowerCase();
+  if (!normalized) return false;
+  if ((DEFAULT_OPERATIONAL_UNITS as readonly string[]).some((u) => u.toLowerCase() === normalized)) return true;
+  return Object.values(UNIT_LABELS_RO).some((label) => label.toLowerCase() === normalized);
+}
+
 type UnitRow = { name: string | null };
 
 function uniqueUnitNames(names: Array<string | null | undefined>): string[] {

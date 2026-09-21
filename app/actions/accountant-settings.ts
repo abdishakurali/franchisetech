@@ -15,7 +15,7 @@ export async function updateSagaGestiuneCode(formData: FormData): Promise<void> 
     .from("organisations")
     .update({ saga_gestiune_code: code || null })
     .eq("id", orgId);
-  revalidatePath("/app/settings/accountant");
+  revalidatePath("/app/settings");
 }
 
 export async function updateSiteSagaGestiuneCode(formData: FormData): Promise<void> {
@@ -29,7 +29,7 @@ export async function updateSiteSagaGestiuneCode(formData: FormData): Promise<vo
     .update({ saga_gestiune_code: code || null })
     .eq("id", siteId)
     .eq("organisation_id", orgId);
-  revalidatePath("/app/settings/accountant");
+  revalidatePath("/app/settings");
 }
 
 export async function updateProductSagaCode(formData: FormData): Promise<void> {
@@ -43,5 +43,5 @@ export async function updateProductSagaCode(formData: FormData): Promise<void> {
     .update({ saga_article_code: code || null })
     .eq("id", productId)
     .eq("organisation_id", orgId);
-  revalidatePath("/app/settings/accountant");
+  revalidatePath("/app/settings");
 }

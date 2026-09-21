@@ -70,15 +70,15 @@ export default async function InventoryCountDetailPage({
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Link href="/app/inventory" className="text-sm text-slate-500 hover:text-slate-700">
+          <Link href="/app/inventory" className="text-sm text-muted-foreground hover:text-foreground">
             ← Toate numărătorile
           </Link>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-950">
+          <h1 className="mt-2 text-2xl font-semibold text-foreground">
             Numărătoare din {new Date(count.started_at).toLocaleDateString("ro-RO")}
           </h1>
           <Badge
             variant="secondary"
-            className={`mt-1 ${isDraft ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700"}`}
+            className={`mt-1 ${isDraft ? "bg-amber-100 text-amber-700" : "bg-reconciled/10 text-reconciled"}`}
           >
             {isDraft ? "În curs" : "Finalizată"}
           </Badge>
@@ -86,7 +86,7 @@ export default async function InventoryCountDetailPage({
         {isDraft ? (
           <form action={finalizeInventoryCount}>
             <input type="hidden" name="inventory_count_id" value={count.id} />
-            <Button type="submit" disabled={countedCount === 0} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button type="submit" disabled={countedCount === 0} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               Finalizează numărătoarea ({countedCount}/{rows.length} numărate)
             </Button>
           </form>
@@ -94,30 +94,30 @@ export default async function InventoryCountDetailPage({
       </div>
 
       {search?.finalized === "1" ? (
-        <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+        <div className="rounded-xl border border-reconciled/25 bg-reconciled/10 px-4 py-3 text-sm font-medium text-reconciled">
           ✓ Numărătoarea a fost finalizată — {variances.length} diferențe aplicate ca ajustări de stoc.
         </div>
       ) : null}
       {search?.error === "finalize_failed" ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">
+        <div className="rounded-xl border border-attention/25 bg-attention/10 px-4 py-3 text-sm font-medium text-attention">
           Finalizarea a eșuat. Încercați din nou.
         </div>
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Numărate</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Numărate</CardTitle></CardHeader>
           <CardContent className="text-2xl font-bold">{countedCount} / {rows.length}</CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Diferențe găsite</CardTitle></CardHeader>
-          <CardContent className={`text-2xl font-bold ${variances.length > 0 ? "text-amber-600" : "text-green-700"}`}>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Diferențe găsite</CardTitle></CardHeader>
+          <CardContent className={`text-2xl font-bold ${variances.length > 0 ? "text-amber-600" : "text-reconciled"}`}>
             {variances.length}
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Valoare diferențe (CMP)</CardTitle></CardHeader>
-          <CardContent className={`text-2xl font-bold ${varianceValue < 0 ? "text-red-600" : varianceValue > 0 ? "text-green-700" : "text-slate-700"}`}>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Valoare diferențe (CMP)</CardTitle></CardHeader>
+          <CardContent className={`text-2xl font-bold ${varianceValue < 0 ? "text-attention" : varianceValue > 0 ? "text-reconciled" : "text-foreground"}`}>
             {formatMoney(varianceValue, currency)}
           </CardContent>
         </Card>
@@ -141,7 +141,7 @@ export default async function InventoryCountDetailPage({
                 return (
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell className="text-right tabular-nums text-slate-500">
+                    <TableCell className="text-right tabular-nums text-muted-foreground">
                       {Number(product.current_stock_qty ?? 0)} {product.unit_of_measure ?? ""}
                     </TableCell>
                     <TableCell className="text-right">
@@ -162,7 +162,7 @@ export default async function InventoryCountDetailPage({
                     </TableCell>
                     <TableCell
                       className={`text-right tabular-nums font-medium ${
-                        variance == null ? "text-slate-300" : variance < 0 ? "text-red-600" : variance > 0 ? "text-green-700" : "text-slate-400"
+                        variance == null ? "text-muted-foreground" : variance < 0 ? "text-attention" : variance > 0 ? "text-reconciled" : "text-muted-foreground"
                       }`}
                     >
                       {variance != null ? `${variance > 0 ? "+" : ""}${variance.toFixed(2)}` : "—"}

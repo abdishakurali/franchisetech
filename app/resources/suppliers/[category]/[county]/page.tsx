@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
-import { MarketingShell, CTASection } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { VendorFilterBar } from "@/components/marketing/suppliers/VendorFilterBar";
 import { VendorGrid } from "@/components/marketing/suppliers/VendorGrid";
@@ -94,7 +95,7 @@ export default async function VendorCategoryCountyPage({
   const path = `${category.path}/${countySlug}`;
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd
         data={breadcrumbSchema([
           { name: isRo ? "Acasă" : "Home", path: "/" },
@@ -156,6 +157,6 @@ export default async function VendorCategoryCountyPage({
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

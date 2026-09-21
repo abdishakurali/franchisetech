@@ -15,36 +15,30 @@ type DraftRow = { id: number; name: string; price: string };
 
 const STRINGS = {
   ro: {
-    addCategory: "+ Adaugă categorie",
+    addCategory: "+ Categorie",
     newCategoryPlaceholder: "Numele categoriei (ex: Cafea)",
     create: "Adaugă",
     cancel: "Anulează",
-    productHeader: "Produs",
-    priceHeader: "Preț",
-    addRow: "+ Adaugă rând",
-    saveProducts: "Salvează produsele",
-    saving: "Se salvează…",
+    addRow: "+ Produs",
     importMenu: "Importă meniul",
-    continueBtn: "Continuă",
-    continuing: "Se continuă…",
+    continueBtn: "Adaugă produsele și continuă",
+    continuing: "Se salvează…",
     noCategoriesYet: "Nicio categorie încă. Creează prima categorie pentru a începe meniul.",
     currencySuffix: "lei",
+    removeRow: "Șterge rândul",
   },
   en: {
-    addCategory: "+ Add category",
+    addCategory: "+ Category",
     newCategoryPlaceholder: "Category name (e.g. Coffee)",
     create: "Add",
     cancel: "Cancel",
-    productHeader: "Product",
-    priceHeader: "Price",
-    addRow: "+ Add row",
-    saveProducts: "Save products",
-    saving: "Saving…",
+    addRow: "+ Product",
     importMenu: "Import menu",
-    continueBtn: "Continue",
-    continuing: "Continuing…",
+    continueBtn: "Add products and continue",
+    continuing: "Saving…",
     noCategoriesYet: "No categories yet. Create your first category to start the menu.",
     currencySuffix: "",
+    removeRow: "Remove row",
   },
 };
 
@@ -77,13 +71,12 @@ export function MenuBuilder({
   });
   const [draftRows, setDraftRows] = useState<Record<string, DraftRow[]>>(() => {
     const map: Record<string, DraftRow[]> = {};
-    for (const cat of initialCategories) map[cat.id] = blankRows(3);
+    for (const cat of initialCategories) map[cat.id] = blankRows(1);
     return map;
   });
   const [showNewCategory, setShowNewCategory] = useState(categories.length === 0);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, startCreatingCategory] = useTransition();
-  const [savingCategoryId, setSavingCategoryId] = useState<string | null>(null);
   const [continuing, startContinuing] = useTransition();
 
   function createCategory() {
@@ -99,7 +92,7 @@ export function MenuBuilder({
       const category = { id: result.category.id, name: result.category.name };
       setCategories((current) => [...current, category]);
       setProductsByCategory((current) => ({ ...current, [category.id]: [] }));
-      setDraftRows((current) => ({ ...current, [category.id]: blankRows(3) }));
+      setDraftRows((current) => ({ ...current, [category.id]: blankRows(1) }));
       setNewCategoryName("");
       setShowNewCategory(false);
     });
@@ -123,40 +116,55 @@ export function MenuBuilder({
     }));
   }
 
-  async function saveRows(categoryId: string) {
-    const rows = draftRows[categoryId].filter((row) => row.name.trim() && row.price.trim());
-    if (rows.length === 0) return;
-    setSavingCategoryId(categoryId);
-    try {
-      const created: Product[] = [];
-      for (const row of rows) {
-        const fd = new FormData();
-        fd.set("name", row.name.trim());
-        fd.set("sale_price", row.price.trim());
-        fd.set("pos_category_id", categoryId);
-        fd.set("vat_rate", String(defaultVatRate));
-        const result = await addProductFromPos(fd);
-        if (!result.ok) {
-          toast.error(result.error ?? "Nu s-a putut adăuga produsul.");
-          continue;
-        }
-        created.push({ id: crypto.randomUUID(), name: row.name.trim(), sale_price: Number(row.price), category_id: categoryId });
-      }
-      if (created.length) {
-        setProductsByCategory((current) => ({
-          ...current,
-          [categoryId]: [...(current[categoryId] ?? []), ...created],
-        }));
-        setDraftRows((current) => ({ ...current, [categoryId]: blankRows(3) }));
-        toast.success(locale === "ro" ? `${created.length} produse adăugate.` : `${created.length} products added.`);
-      }
-    } finally {
-      setSavingCategoryId(null);
-    }
-  }
-
+  // One page-level save: Continue always flushes every non-empty draft row
+  // across every category first, then advances — there is no separate
+  // per-category save action, so a typed-but-unsaved row can never be
+  // silently dropped by clicking Continue.
   function continueToNext() {
     startContinuing(async () => {
+      const createdByCategory: Record<string, Product[]> = {};
+      let totalCreated = 0;
+      let hadError = false;
+
+      for (const categoryId of Object.keys(draftRows)) {
+        const rows = draftRows[categoryId].filter((row) => row.name.trim() && row.price.trim());
+        if (!rows.length) continue;
+        const created: Product[] = [];
+        for (const row of rows) {
+          const fd = new FormData();
+          fd.set("name", row.name.trim());
+          fd.set("sale_price", row.price.trim());
+          fd.set("pos_category_id", categoryId);
+          fd.set("vat_rate", String(defaultVatRate));
+          const result = await addProductFromPos(fd);
+          if (!result.ok) {
+            hadError = true;
+            toast.error(result.error ?? "Nu s-a putut adăuga produsul.");
+            continue;
+          }
+          created.push({ id: crypto.randomUUID(), name: row.name.trim(), sale_price: Number(row.price), category_id: categoryId });
+          totalCreated += 1;
+        }
+        if (created.length) createdByCategory[categoryId] = created;
+      }
+
+      if (totalCreated > 0) {
+        setProductsByCategory((current) => {
+          const next = { ...current };
+          for (const [categoryId, created] of Object.entries(createdByCategory)) {
+            next[categoryId] = [...(next[categoryId] ?? []), ...created];
+          }
+          return next;
+        });
+        setDraftRows((current) => {
+          const next = { ...current };
+          for (const categoryId of Object.keys(createdByCategory)) next[categoryId] = blankRows(1);
+          return next;
+        });
+      }
+
+      if (hadError) return;
+
       const result = await advanceFromMenu();
       if (result && "error" in result && result.error) {
         toast.error(result.error);
@@ -173,7 +181,7 @@ export function MenuBuilder({
       {categories.map((category) => (
         <div key={category.id} className="rounded-md border border-border bg-card">
           <div className="border-b border-border px-4 py-3">
-            <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold text-foreground">
+            <h3 className="text-sm font-semibold text-foreground">
               {category.name}
             </h3>
           </div>
@@ -192,65 +200,47 @@ export function MenuBuilder({
           )}
 
           <div className="space-y-2 p-4">
-            <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-mid">
-              <span className="flex-1">{t.productHeader}</span>
-              <span className="w-24">{t.priceHeader}</span>
-              <span className="w-8" />
-            </div>
-            {draftRows[category.id]?.map((row) => (
-              <div key={row.id} className="flex items-center gap-2">
-                <Input
-                  value={row.name}
-                  onChange={(e) => updateRow(category.id, row.id, "name", e.target.value)}
-                  placeholder={locale === "ro" ? "ex: Cappuccino" : "e.g. Cappuccino"}
-                  className="flex-1"
-                />
-                <Input
-                  value={row.price}
-                  onChange={(e) => updateRow(category.id, row.id, "price", e.target.value)}
-                  placeholder="14"
-                  inputMode="decimal"
-                  className="w-24 font-[family-name:var(--font-space-mono)]"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeRow(category.id, row.id)}
-                  className="flex h-9 w-8 shrink-0 items-center justify-center text-mid hover:text-attention"
-                  aria-label={locale === "ro" ? "Șterge rândul" : "Remove row"}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-            <div className="flex items-center justify-between pt-2">
-              <button
-                type="button"
-                onClick={() => addRow(category.id)}
-                className="inline-flex items-center gap-1 text-sm font-medium text-brass hover:underline"
-              >
-                <Plus className="h-3.5 w-3.5" /> {t.addRow}
-              </button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={savingCategoryId === category.id}
-                onClick={() => void saveRows(category.id)}
-              >
-                {savingCategoryId === category.id ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t.saving}
-                  </>
-                ) : (
-                  t.saveProducts
-                )}
-              </Button>
-            </div>
+            {draftRows[category.id]?.map((row) => {
+              const hasContent = row.name.trim() || row.price.trim();
+              return (
+                <div key={row.id} className="flex items-center gap-2">
+                  <Input
+                    value={row.name}
+                    onChange={(e) => updateRow(category.id, row.id, "name", e.target.value)}
+                    placeholder={locale === "ro" ? "ex: Cappuccino" : "e.g. Cappuccino"}
+                    className="flex-1"
+                  />
+                  <Input
+                    value={row.price}
+                    onChange={(e) => updateRow(category.id, row.id, "price", e.target.value)}
+                    placeholder="14"
+                    inputMode="decimal"
+                    className="w-24 font-[family-name:var(--font-space-mono)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeRow(category.id, row.id)}
+                    className={hasContent ? "flex h-9 w-8 shrink-0 items-center justify-center text-muted-foreground hover:text-attention" : "h-9 w-8 shrink-0"}
+                    aria-label={t.removeRow}
+                  >
+                    {hasContent ? <Trash2 className="h-4 w-4" /> : null}
+                  </button>
+                </div>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => addRow(category.id)}
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              <Plus className="h-3.5 w-3.5" /> {t.addRow}
+            </button>
           </div>
         </div>
       ))}
 
       {showNewCategory ? (
-        <div className="flex items-center gap-2 rounded-md border border-dashed border-brass/40 bg-accent p-3">
+        <div className="flex items-center gap-2 rounded-md border border-dashed border-border bg-accent p-3">
           <Input
             autoFocus
             value={newCategoryName}
@@ -272,14 +262,14 @@ export function MenuBuilder({
         <button
           type="button"
           onClick={() => setShowNewCategory(true)}
-          className="text-sm font-medium text-brass hover:underline"
+          className="text-sm font-medium text-primary hover:underline"
         >
           {t.addCategory}
         </button>
       )}
 
       <div className="flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <Link href="/app/products/import" className="text-sm font-medium text-brass hover:underline">
+        <Link href="/app/products/import" className="text-sm font-medium text-muted-foreground hover:underline">
           {t.importMenu}
         </Link>
         <Button

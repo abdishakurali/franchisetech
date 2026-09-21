@@ -1891,12 +1891,17 @@ function PosRegisterInner({
               {showActivationCelebrate && lastCompletedSale.status === "saved" && (
                 <div className="mx-auto mt-4 max-w-xs rounded-xl border border-reconciled/25 bg-reconciled/10 px-4 py-3 text-sm text-reconciled">
                   <p>{t.firstSaleCelebrate}</p>
-                  <Link
-                    href="/app"
-                    className="mt-2 inline-flex items-center text-sm font-semibold text-reconciled hover:text-reconciled/80"
-                  >
-                    {t.viewDashboard} →
-                  </Link>
+                  {/* During onboarding, the primary button below already
+                      routes through the result screen — no second, competing
+                      exit straight to the dashboard that would skip it. */}
+                  {!redirectAfterSaleTo && (
+                    <Link
+                      href="/app"
+                      className="mt-2 inline-flex items-center text-sm font-semibold text-reconciled hover:text-reconciled/80"
+                    >
+                      {t.viewDashboard} →
+                    </Link>
+                  )}
                 </div>
               )}
               {features.tableService && activeTab && (

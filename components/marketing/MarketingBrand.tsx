@@ -14,7 +14,7 @@ export function MarketingBrand({ variant = "default", className = "", onClick }:
       <img
         src="/franchise-tech-logo.png"
         alt="franchisetech"
-        className={`h-8 w-auto max-w-[220px] object-contain object-left ${
+        className={`h-10 w-auto max-w-[260px] object-contain object-left ${
           variant === "footer" ? "brightness-0 invert" : ""
         }`}
       />

@@ -12,9 +12,9 @@ export function ReportsTrendChart({ days, currency }: { days: SalesDay[]; curren
   return <div className="mt-3 h-64 w-full" role="img" aria-label="Graficul vânzărilor pe zile">
     <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 256 }}>
       <BarChart data={days} margin={{ top: 12, right: 0, left: 0, bottom: 0 }} barCategoryGap="12%">
-        <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fill: "#64748b", fontSize: 11 }} minTickGap={20} />
-        <Tooltip formatter={(value) => [`${format(Number(value ?? 0))} ${currency}`, "Vânzări"]} contentStyle={{ border: "1px solid #DFDCD2", borderRadius: 10, boxShadow: "0 8px 24px #0d0f0e14" }} />
-        <Bar dataKey="total" radius={[3, 3, 0, 0]}>{days.map((day, index) => <Cell key={`${day.day}-${index}`} fill={index === days.length - 1 ? "#165DFC" : "#B9CCFC"} />)}</Bar>
+        <XAxis dataKey="day" tickLine={false} axisLine={false} tick={{ fill: "#8A7F70", fontSize: 11 }} minTickGap={20} />
+        <Tooltip formatter={(value) => [`${format(Number(value ?? 0))} ${currency}`, "Vânzări"]} contentStyle={{ border: "1px solid #DFDCD2", borderRadius: 10, boxShadow: "0 8px 24px #1c171214" }} />
+        <Bar dataKey="total" radius={[3, 3, 0, 0]}>{days.map((day, index) => <Cell key={`${day.day}-${index}`} fill={index === days.length - 1 ? "#B4903F" : "#E4D5AF"} />)}</Bar>
       </BarChart>
     </ResponsiveContainer>
   </div>;

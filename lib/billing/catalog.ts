@@ -58,7 +58,7 @@ export const INCLUDED_MODULES: Record<IncludedModuleKey, CatalogItem> = {
       ro: "Roluri avansate, echipă și audit numerar.",
       en: "Advanced roles, team controls, and cash audit.",
     },
-    settingsHref: "/app/settings/team",
+    settingsHref: "/app/settings?tab=team",
   },
   multi_site: {
     key: "multi_site",
@@ -95,14 +95,14 @@ export const PAID_ADDONS: Record<PaidAddonKey, CatalogItem> = {
     installKey: "table_service",
     featureColumn: "table_service_enabled",
     entitlement: "kitchen.table_service",
-    onboardingHref: "/app/settings/tables",
+    onboardingHref: "/app/settings?tab=tables",
     navHref: "/app/pos",
     name: { ro: "Gestionare mese", en: "Table management" },
     description: {
       ro: "Plan sală, bonuri pe masă și încasare rapidă din POS.",
       en: "Floor plan, table tabs, and fast checkout from POS.",
     },
-    settingsHref: "/app/settings/tables",
+    settingsHref: "/app/settings?tab=tables",
     selfInstall: true,
   },
   loyalty: {
@@ -131,14 +131,14 @@ export const INCLUDED_INTEGRATIONS: Record<"saga_export", CatalogItem> = {
     installKey: "saga_export",
     featureColumn: "saga_export_enabled",
     entitlement: "reports.accountant_pack",
-    onboardingHref: "/app/settings/accountant?install=saga",
+    onboardingHref: "/app/settings?tab=accountant&install=saga",
     name: { ro: "Saga", en: "Saga" },
     description: {
       ro: "Export XML Saga și rapoarte contabile incluse în planurile eligibile.",
       en: "Saga XML export and accountant reports included in eligible plans.",
     },
     logo: "/integrations/saga.svg",
-    settingsHref: "/app/settings/accountant?install=saga",
+    settingsHref: "/app/settings?tab=accountant&install=saga",
   },
 };
 

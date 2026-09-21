@@ -362,7 +362,7 @@ export function ProductEditForm({
         </details>
       </form>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur-md lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-[720px] items-center justify-between gap-3">
           <Link href={returnTo || `/app/products/${product.id}`}>
             <Button variant="outline" type="button" disabled={saving}>

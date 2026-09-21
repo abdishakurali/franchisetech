@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { ArrowRight, CheckCircle2, Scale, CreditCard, ListChecks, MapPin, Wifi, type LucideIcon } from "lucide-react";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 
 export const metadata: Metadata = {
   title: "Ghiduri POS și închidere zilnică | franchisetech",
@@ -186,7 +187,7 @@ function CheckItem({ text }: { text: string }) {
 
 export default function ResourcesPage() {
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       {/* ── HERO ── */}
       <section className="bg-card px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
@@ -225,22 +226,28 @@ export default function ResourcesPage() {
             subtitle="Ghiduri căutabile cu comparații, liste de verificare și evaluări oneste ale furnizorilor."
           />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { href: "/compare", title: "Compară software POS", summary: "SmartBill, Saga, RezoSoft, Square — logo-uri și tabele de funcționalități.", image: "/marketing/pos-hero.png" },
-              { href: "/resources/pos-software-romania", title: "Software POS România", summary: "FiscalNet, TVA, stoc și raport Z pentru restaurante.", image: "/marketing/pos-hero.png" },
-              { href: "/resources/choose-pos-romania", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", image: "/marketing/reports-zreport.png" },
-              { href: "/industries/romania", title: "POS pentru România", summary: "lei, TVA, FiscalNet, echipă nelimitată.", image: "/marketing/reports-zreport.png" },
-              { href: "/compare/smartbill", title: "vs SmartBill", summary: "Facturare vs operațiuni zilnice — comparație onestă.", image: "/compare/logos/smartbill.png" },
-              { href: "/help/romania-fiscalnet", title: "Ghid FiscalNet", summary: "Configurare pas cu pas pentru bonuri fiscale.", image: "/marketing/reports-zreport.png" },
-            ].map((card) => (
+            {(
+              [
+                { href: "/compare", title: "Compară software POS", summary: "SmartBill, Saga, RezoSoft, Square — logo-uri și tabele de funcționalități.", icon: Scale },
+                { href: "/resources/pos-software-romania", title: "Software POS România", summary: "FiscalNet, TVA, stoc și raport Z pentru restaurante.", icon: CreditCard },
+                { href: "/resources/choose-pos-romania", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", icon: ListChecks },
+                { href: "/industries/romania", title: "POS pentru România", summary: "lei, TVA, FiscalNet, echipă nelimitată.", icon: MapPin },
+                { href: "/compare/smartbill", title: "vs SmartBill", summary: "Facturare vs operațiuni zilnice — comparație onestă.", logo: "/compare/logos/smartbill.png" },
+                { href: "/help/romania-fiscalnet", title: "Ghid FiscalNet", summary: "Configurare pas cu pas pentru bonuri fiscale.", icon: Wifi },
+              ] as Array<{ href: string; title: string; summary: string; icon?: LucideIcon; logo?: string }>
+            ).map((card) => (
               <Link
                 key={card.href}
                 href={card.href}
                 className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:border-brass/40 hover:shadow-md"
               >
-                <div className="relative aspect-[16/9] bg-secondary">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={card.image} alt="" className="h-full w-full object-cover object-top opacity-90 transition group-hover:opacity-100" />
+                <div className="relative flex aspect-[16/9] items-center justify-center bg-secondary">
+                  {card.logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={card.logo} alt="" className="h-10 w-auto opacity-90 transition group-hover:opacity-100" />
+                  ) : (
+                    card.icon && <card.icon className="h-9 w-9 text-brass" strokeWidth={1.5} aria-hidden />
+                  )}
                 </div>
                 <div className="p-5">
                   <h3 className="font-semibold text-foreground group-hover:text-brass">{card.title}</h3>
@@ -611,6 +618,6 @@ export default function ResourcesPage() {
       </section>
 
       <CTASection title="Gata să vă simplificați operațiunile zilnice?" />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

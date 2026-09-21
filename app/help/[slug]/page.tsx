@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { HELP_ARTICLES, HELP_CATEGORIES, getArticle, getArticlesByCategory } from "@/lib/help/articles";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { ChevronRight, ArrowLeft, CheckCircle2 } from "lucide-react";
@@ -82,7 +82,7 @@ export default async function HelpArticlePage({ params }: Props) {
   const morInCat = getArticlesByCategory(article.category).filter((a) => a.slug !== article.slug).slice(0, 3);
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <div className="max-w-3xl mx-auto px-4 py-12">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-8">
@@ -178,6 +178,6 @@ export default async function HelpArticlePage({ params }: Props) {
           </Link>
         </div>
       </div>
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

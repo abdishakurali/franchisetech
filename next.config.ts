@@ -12,6 +12,19 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  experimental: {
+    // Client Router Cache: lets a repeat navigation to a page visited in the
+    // last 30s reuse the already-fetched RSC payload instead of a full
+    // server round-trip (e.g. tab-switching in the app nav, back/forward).
+    // Any server action that mutates data still calls revalidatePath/
+    // router.refresh() as it already does throughout this app, which busts
+    // this cache immediately — this never risks showing stale sales/stock/
+    // till data after a write, only skips a redundant re-fetch when nothing
+    // changed.
+    staleTimes: {
+      dynamic: 30,
+    },
+  },
   async redirects() {
     return [
       ...industryVanityRedirects,

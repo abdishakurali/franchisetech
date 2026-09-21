@@ -1,9 +1,10 @@
-import { ClaudeMarketingShell, DesignPricing } from "@/components/marketing/ClaudeMarketing";
+import { DesignPricing } from "@/components/marketing/ClaudeMarketing";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { PricingPlansSection } from "@/components/billing/PricingPlansSection";
 import { PricingEmailSignup } from "@/components/marketing/PricingEmailSignup";
@@ -27,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PricingPage() {
   const locale = await getMarketingLocale();
-  if (locale === "ro") return <ClaudeMarketingShell><DesignPricing /></ClaudeMarketingShell>;
+  if (locale === "ro") return <ClaudeMarketingShellAuth><DesignPricing /></ClaudeMarketingShellAuth>;
   const market = marketFromMarketingLocale(locale);
   const t = getMarketingMessages(locale);
 
@@ -38,7 +39,7 @@ export default async function PricingPage() {
   ];
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -153,6 +154,6 @@ export default async function PricingPage() {
       </section>
 
       <CTASection title={t.cta.finalTitle} />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

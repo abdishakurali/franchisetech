@@ -75,23 +75,23 @@ export function OpenTillForm({ currencySymbol, currency, orgName, userName, fisc
               value={openingCash}
               onChange={(e) => setOpeningCash(e.target.value)}
             />
-            <p className="mt-1 text-xs text-slate-500">{t.pos.openingFloatHelp}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{t.pos.openingFloatHelp}</p>
           </div>
           <Button
             type="submit"
-            className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base"
+            className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-base"
             disabled={isPending}
           >
             {isPending ? t.pos.openingTill : t.pos.openTill}
           </Button>
           {message && (
-            <div className="rounded-lg border border-blue-100 bg-blue-50 p-3 text-sm text-blue-800">
+            <div className="rounded-lg border border-brass/15 bg-accent p-3 text-sm text-brass">
               <p>{message}</p>
               {lastTxt && (
                 <button
                   type="button"
                   onClick={() => downloadFiscalNetTxt(lastTxt.filename, lastTxt.content)}
-                  className="mt-2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                  className="mt-2 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
                 >
                   {t.pos.downloadTxtAgain}
                 </button>

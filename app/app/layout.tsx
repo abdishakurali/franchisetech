@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app/AppShell";
 import { AppI18nProvider } from "@/lib/app-i18n-context";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
@@ -21,7 +21,7 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getAuthUser();
 
   if (!user) {
     redirect("/login");
@@ -103,6 +103,7 @@ export default async function AppLayout({
   let setupComplete = false;
   let moduleVisibility = {
     inventory: false,
+    purchases: false,
     recipeCosting: false,
     teamAdvanced: false,
     multiSite: false,
@@ -117,6 +118,7 @@ export default async function AppLayout({
 
     moduleVisibility = {
       inventory: isModuleNavVisible({ org: moduleFlags, module: "inventory", subscriptionPlan: subStatus?.plan, hasTrial }),
+      purchases: isModuleNavVisible({ org: moduleFlags, module: "purchases", subscriptionPlan: subStatus?.plan, hasTrial }),
       recipeCosting: isModuleNavVisible({ org: moduleFlags, module: "recipe_costing", subscriptionPlan: subStatus?.plan, hasTrial }),
       teamAdvanced: isModuleNavVisible({ org: moduleFlags, module: "team_advanced", subscriptionPlan: subStatus?.plan, hasTrial }),
       multiSite: isModuleNavVisible({ org: moduleFlags, module: "multi_site", subscriptionPlan: subStatus?.plan, hasTrial }),

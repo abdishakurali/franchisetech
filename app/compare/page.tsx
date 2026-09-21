@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { PersuasionHero } from "@/components/marketing/PersuasionHero";
 import { getCompetitorBrand } from "@/lib/marketing/competitor-brands";
@@ -96,7 +97,7 @@ export default async function CompareHubPage() {
   );
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd data={faqJsonLd(hubFaqs)} />
       <JsonLd
         data={breadcrumbSchema([
@@ -247,6 +248,6 @@ export default async function CompareHubPage() {
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

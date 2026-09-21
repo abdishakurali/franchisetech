@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { ClaudeMarketingShell, DesignHome } from "@/components/marketing/ClaudeMarketing";
+import { DesignHome } from "@/components/marketing/ClaudeMarketing";
 import { HomePageContentTop, HomePageContentBottom } from "@/components/marketing/HomePageContent";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqJsonLd, SITE_URL } from "@/lib/marketing/seo";
 import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
@@ -24,21 +24,22 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t.home.meta.description,
       url: SITE_URL,
       locale: marketingOpenGraphLocale(locale),
-      images: [{ url: "/showcase/reports-dashboard.png", width: 1200, height: 750, alt: t.home.dashboard.alt }],
+      // Not the old /showcase/reports-dashboard.png — stale pre-pivot screenshot.
+      images: [{ url: "/franchise-tech-logo.png", width: 900, height: 237, alt: t.home.dashboard.alt }],
     },
   };
 }
 
 export default async function HomePage() {
   const locale = await getMarketingLocale();
-  if (locale === "ro") return <ClaudeMarketingShell><DesignHome /></ClaudeMarketingShell>;
+  if (locale === "ro") return <ClaudeMarketingShellAuth><DesignHome /></ClaudeMarketingShellAuth>;
   const faq = getHomepageContent(locale).faq;
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd data={faqJsonLd(faq)} />
       <HomePageContentTop />
       <HomePageContentBottom />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

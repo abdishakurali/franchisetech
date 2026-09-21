@@ -63,13 +63,16 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       locale: marketingOpenGraphLocale(locale),
       url: SITE_URL,
-      images: [{ url: "/showcase/reports-dashboard.png", width: 1200, height: 750, alt: "franchisetech owner dashboard" }],
+      // Not the old /showcase/reports-dashboard.png — stale pre-pivot screenshot
+      // (EUR pricing, Irish VAT bands). Falls back to the real logo until a
+      // correct, current OG image exists.
+      images: [{ url: "/franchise-tech-logo.png", width: 900, height: 237, alt: "franchisetech" }],
     },
     twitter: {
       card: "summary_large_image",
       title: t.home.meta.title || DEFAULT_TITLE,
       description: t.home.meta.description || DEFAULT_DESCRIPTION,
-      images: ["/showcase/reports-dashboard.png"],
+      images: ["/franchise-tech-logo.png"],
     },
     icons: {
       icon: [

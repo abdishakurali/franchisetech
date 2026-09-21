@@ -16,13 +16,13 @@ export default async function SupplierEditPage({ params }: { params: Promise<{ i
     .eq("organisation_id", orgId)
     .single();
 
-  if (!supplier) return <div className="p-6 text-slate-500">Supplier not found.</div>;
+  if (!supplier) return <div className="p-6 text-muted-foreground">Supplier not found.</div>;
 
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-6">
       <div className="flex items-center gap-3">
-        <Link href="/app/suppliers" className="text-sm text-slate-500 hover:text-slate-700">← Suppliers</Link>
-        <h1 className="text-2xl font-semibold text-slate-950">Edit supplier</h1>
+        <Link href="/app/suppliers" className="text-sm text-muted-foreground hover:text-foreground">← Suppliers</Link>
+        <h1 className="text-2xl font-semibold text-foreground">Edit supplier</h1>
       </div>
 
       <Card>
@@ -33,19 +33,19 @@ export default async function SupplierEditPage({ params }: { params: Promise<{ i
             <SupplierFormFields supplier={supplier} />
             <div className="flex gap-3 pt-2">
               <Link href="/app/suppliers"><Button variant="outline" type="button">Cancel</Button></Link>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Save changes</Button>
+              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">Save changes</Button>
             </div>
           </form>
         </CardContent>
       </Card>
 
-      <Card className="border-red-200">
-        <CardHeader><CardTitle className="text-red-700">Remove supplier</CardTitle></CardHeader>
+      <Card className="border-attention/25">
+        <CardHeader><CardTitle className="text-attention">Remove supplier</CardTitle></CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-600 mb-3">Hides this supplier from the list. Existing purchases are preserved.</p>
+          <p className="text-sm text-mid mb-3">Hides this supplier from the list. Existing purchases are preserved.</p>
           <form action={deleteSupplier as unknown as (fd: FormData) => Promise<void>}>
             <input type="hidden" name="id" value={id} />
-            <Button type="submit" variant="outline" className="border-red-300 text-red-700 hover:bg-red-50">Remove supplier</Button>
+            <Button type="submit" variant="outline" className="border-attention/30 text-attention hover:bg-attention/10">Remove supplier</Button>
           </form>
         </CardContent>
       </Card>

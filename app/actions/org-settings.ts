@@ -39,7 +39,6 @@ export async function saveOrgCui(formData: FormData): Promise<SaveOrgCuiResult> 
     .eq("id", orgId);
 
   revalidatePath("/app/settings");
-  revalidatePath("/app/settings/accountant");
   revalidatePath("/app/invoices");
   revalidatePath("/app/onboarding");
   return {};
@@ -110,9 +109,9 @@ const MODULE_ENTITLEMENT: Partial<Record<InstallableBusinessModule, Parameters<t
 
 const MODULE_SETUP_HREF: Record<InstallableBusinessModule, string> = {
   kitchen_display: "/app/kitchen",
-  table_service: "/app/settings/tables",
+  table_service: "/app/settings?tab=tables",
   loyalty: "/app/settings/loyalty",
-  saga_export: "/app/settings/accountant?install=saga",
+  saga_export: "/app/settings?tab=accountant&install=saga",
   fiscalnet: "/app/settings?tab=fiscal",
   anaf_efactura: "/app/settings?tab=fiscal",
 };

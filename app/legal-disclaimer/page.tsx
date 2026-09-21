@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 
 const updated = "1 September 2026";
 
 export default function LegalDisclaimerPage() {
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-slate-900">Legal Disclaimer</h1>
         <p className="mt-2 text-sm text-slate-500">Last updated: {updated}</p>
@@ -88,6 +88,6 @@ export default function LegalDisclaimerPage() {
           <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
         </p>
       </main>
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

@@ -18,8 +18,8 @@ export default async function DeliveriesPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Delivery Checks</h1>
-          <p className="text-slate-500 text-sm mt-1">Record supplier, batch, use-by, storage, and delivery evidence.</p>
+          <h1 className="text-2xl font-bold text-foreground">Delivery Checks</h1>
+          <p className="text-muted-foreground text-sm mt-1">Record supplier, batch, use-by, storage, and delivery evidence.</p>
         </div>
         <PageHelp
           title="Deliveries help"
@@ -34,9 +34,9 @@ export default async function DeliveriesPage() {
         </div>
       )}
       {(records ?? []).length === 0 && (
-        <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 flex items-center justify-between gap-4">
-          <p className="text-sm font-medium text-slate-900">No deliveries recorded yet.</p>
-          <a href="#delivery-form" className="text-sm font-medium text-blue-700 hover:underline">Add delivery</a>
+        <div className="mb-6 rounded-lg border border-brass/15 bg-accent px-4 py-3 flex items-center justify-between gap-4">
+          <p className="text-sm font-medium text-foreground">No deliveries recorded yet.</p>
+          <a href="#delivery-form" className="text-sm font-medium text-brass hover:underline">Add delivery</a>
         </div>
       )}
       <div id="delivery-form">

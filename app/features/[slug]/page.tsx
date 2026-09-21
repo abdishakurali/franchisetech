@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, CheckCircle } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { BrowserFrame } from "@/components/marketing/DeviceFrames";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqJsonLd, featurePages, findPage, pageMetadata, SITE_URL } from "@/lib/marketing/seo";
@@ -54,7 +55,7 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
   const page = localizeSeoPage(raw, locale);
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd data={faqJsonLd(page.faqs)} />
       <JsonLd
         data={{
@@ -163,6 +164,6 @@ export default async function FeaturePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

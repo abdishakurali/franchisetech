@@ -12,7 +12,7 @@ export function HeroDashboardPreview() {
   ];
 
   const topProducts = [
-    ["Chicken Caesar Image QA", "x12", "119.50 lei"],
+    ["Cappuccino", "x12", "119.50 lei"],
     ["Banana Oat Smoothie", "x16", "79.98 lei"],
     ["Chicken Salad Lunch Box", "x7", "66.50 lei"],
     ["Americano", "x17", "54.40 lei"],

@@ -30,13 +30,13 @@ type UblAddress = {
 
 function StatusBadge({ status, processingStatus }: { status: string; processingStatus: string | null }) {
   if (status === "accepted") {
-    return <span className="inline-flex items-center rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-700">Acceptată ANAF</span>;
+    return <span className="inline-flex items-center rounded-full bg-reconciled/10 px-3 py-1 text-sm font-medium text-reconciled">Acceptată ANAF</span>;
   }
   if (status === "rejected") {
-    return <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-red-700">Respinsă ANAF</span>;
+    return <span className="inline-flex items-center rounded-full bg-attention/10 px-3 py-1 text-sm font-medium text-attention">Respinsă ANAF</span>;
   }
   if (status === "uploaded" || processingStatus === "in prelucrare") {
-    return <span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">Trimisă la ANAF</span>;
+    return <span className="inline-flex items-center rounded-full bg-accent px-3 py-1 text-sm font-medium text-brass">Trimisă la ANAF</span>;
   }
   if (status === "pending") {
     return <span className="inline-flex items-center rounded-full bg-yellow-50 px-3 py-1 text-sm font-medium text-yellow-700">Se trimite...</span>;
@@ -44,7 +44,7 @@ function StatusBadge({ status, processingStatus }: { status: string; processingS
   if (status === "failed") {
     return <span className="inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-orange-700">Eroare trimitere</span>;
   }
-  return <span className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">Draft</span>;
+  return <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm font-medium text-mid">Draft</span>;
 }
 
 function round2(n: number) {
@@ -111,8 +111,8 @@ export default async function InvoiceDetailPage({
 
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{inv.invoice_number}</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-semibold text-foreground">{inv.invoice_number}</h1>
+          <p className="text-sm text-muted-foreground">
             Emisă la {new Date(inv.issue_date).toLocaleDateString("ro-RO")}
             {inv.due_date && ` · Scadentă la ${new Date(inv.due_date).toLocaleDateString("ro-RO")}`}
           </p>
@@ -121,14 +121,14 @@ export default async function InvoiceDetailPage({
       </div>
 
       {inv.upload_status === "rejected" && inv.error_message && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4">
-          <p className="text-sm font-medium text-red-800">Factură respinsă de ANAF</p>
-          <p className="mt-1 text-sm text-red-700">{inv.error_message}</p>
+        <div className="rounded-lg bg-attention/10 border border-attention/25 p-4">
+          <p className="text-sm font-medium text-attention">Factură respinsă de ANAF</p>
+          <p className="mt-1 text-sm text-attention">{inv.error_message}</p>
         </div>
       )}
 
       {inv.index_incarcare && (
-        <div className="rounded-lg bg-blue-50 border border-blue-100 p-3 text-sm text-blue-700">
+        <div className="rounded-lg bg-accent border border-brass/15 p-3 text-sm text-brass">
           Index încărcare ANAF: <span className="font-mono font-medium">{inv.index_incarcare}</span>
           {inv.id_descarcare && (
             <> · ID descărcare: <span className="font-mono font-medium">{inv.id_descarcare}</span></>
@@ -142,10 +142,10 @@ export default async function InvoiceDetailPage({
           <CardTitle className="text-base">Cumpărător</CardTitle>
         </CardHeader>
         <CardContent className="space-y-1 text-sm">
-          <p className="font-medium text-slate-900">{inv.buyer_name}</p>
-          <p className="text-slate-500">CIF: {inv.buyer_cif}</p>
+          <p className="font-medium text-foreground">{inv.buyer_name}</p>
+          <p className="text-muted-foreground">CIF: {inv.buyer_cif}</p>
           {buyerAddress?.street && (
-            <p className="text-slate-500">{buyerAddress.street}{buyerAddress.city ? `, ${buyerAddress.city}` : ""}</p>
+            <p className="text-muted-foreground">{buyerAddress.street}{buyerAddress.city ? `, ${buyerAddress.city}` : ""}</p>
           )}
         </CardContent>
       </Card>
@@ -158,24 +158,24 @@ export default async function InvoiceDetailPage({
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-100 text-sm">
-              <thead className="bg-slate-50">
+              <thead className="bg-secondary">
                 <tr>
-                  <th className="px-4 py-2.5 text-left font-medium text-slate-500">Denumire</th>
-                  <th className="px-4 py-2.5 text-center font-medium text-slate-500">UM</th>
-                  <th className="px-4 py-2.5 text-right font-medium text-slate-500">Cant.</th>
-                  <th className="px-4 py-2.5 text-right font-medium text-slate-500">Preț fără TVA</th>
-                  <th className="px-4 py-2.5 text-right font-medium text-slate-500">Cotă TVA</th>
-                  <th className="px-4 py-2.5 text-right font-medium text-slate-500">Total fără TVA</th>
+                  <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">Denumire</th>
+                  <th className="px-4 py-2.5 text-center font-medium text-muted-foreground">UM</th>
+                  <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Cant.</th>
+                  <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Preț fără TVA</th>
+                  <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Cotă TVA</th>
+                  <th className="px-4 py-2.5 text-right font-medium text-muted-foreground">Total fără TVA</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-slate-100 bg-card">
                 {lines.map((line) => (
                   <tr key={line.id}>
-                    <td className="px-4 py-2.5 text-slate-800">{line.name}</td>
-                    <td className="px-4 py-2.5 text-center text-slate-500">{line.unitCode}</td>
-                    <td className="px-4 py-2.5 text-right text-slate-700">{line.quantity}</td>
-                    <td className="px-4 py-2.5 text-right text-slate-700">{Number(line.unitPrice).toFixed(2)}</td>
-                    <td className="px-4 py-2.5 text-right text-slate-500">{line.vatRate}%</td>
+                    <td className="px-4 py-2.5 text-foreground">{line.name}</td>
+                    <td className="px-4 py-2.5 text-center text-muted-foreground">{line.unitCode}</td>
+                    <td className="px-4 py-2.5 text-right text-foreground">{line.quantity}</td>
+                    <td className="px-4 py-2.5 text-right text-foreground">{Number(line.unitPrice).toFixed(2)}</td>
+                    <td className="px-4 py-2.5 text-right text-muted-foreground">{line.vatRate}%</td>
                     <td className="px-4 py-2.5 text-right font-medium">
                       {round2(line.quantity * line.unitPrice).toFixed(2)}
                     </td>
@@ -188,18 +188,18 @@ export default async function InvoiceDetailPage({
       </Card>
 
       {/* Totals */}
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-1 text-sm ml-auto max-w-xs">
+      <div className="rounded-xl border border-border bg-secondary p-4 space-y-1 text-sm ml-auto max-w-xs">
         <div className="flex justify-between">
-          <span className="text-slate-500">Total fără TVA</span>
+          <span className="text-muted-foreground">Total fără TVA</span>
           <span className="font-medium">{exclVat.toFixed(2)} RON</span>
         </div>
         {Object.entries(vatBreakdown).map(([rate, amount]) => (
-          <div key={rate} className="flex justify-between text-slate-500">
+          <div key={rate} className="flex justify-between text-muted-foreground">
             <span>TVA {rate}%</span>
             <span>{(amount as number).toFixed(2)} RON</span>
           </div>
         ))}
-        <div className="flex justify-between border-t border-slate-200 pt-1.5 text-base font-bold">
+        <div className="flex justify-between border-t border-border pt-1.5 text-base font-bold">
           <span>Total de plată</span>
           <span>{inclVat.toFixed(2)} RON</span>
         </div>

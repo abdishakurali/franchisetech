@@ -1,12 +1,13 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 
 const MEMBERSHIP_SELECT_WITH_EFACTURA =
-  "id, organisation_id, role, status, organisations(id, name, business_type, country, country_code, currency_code, currency_symbol, kitchen_display_enabled, saga_export_enabled, restaurant_order_flow_enabled, table_service_enabled, order_types_enabled, kitchen_stations_enabled, product_modifiers_enabled, courses_enabled, kitchen_printing_enabled, payment_split_enabled, tips_enabled, compact_workstation_nav_enabled, fiscalnet_enabled, efactura_enabled, fiscalnet_mock_mode, fiscalnet_connection_mode, fiscalnet_api_host, fiscalnet_bonuri_path, fiscalnet_raspuns_path, fiscalnet_auto_print, fiscalnet_ask_before_print, fiscalnet_manual_only, fiscalnet_timeout_ms, fiscalnet_retry_count, fiscalnet_cif, fiscalnet_operator_code, fiscalnet_vat_groups, fiscalnet_payment_type_map, anaf_cif, anaf_vat_registered, tax_id_verified, company_legal_name, company_address, saga_gestiune_code, notification_preferences, owner_digest_enabled, owner_digest_frequency, owner_digest_day_of_week, owner_digest_time_of_day, owner_digest_timezone, owner_digest_recipients)";
+  "id, organisation_id, role, status, organisations(id, name, business_type, country, country_code, currency_code, currency_symbol, kitchen_display_enabled, saga_export_enabled, loyalty_enabled, restaurant_order_flow_enabled, table_service_enabled, order_types_enabled, kitchen_stations_enabled, product_modifiers_enabled, courses_enabled, kitchen_printing_enabled, payment_split_enabled, tips_enabled, compact_workstation_nav_enabled, fiscalnet_enabled, efactura_enabled, fiscalnet_mock_mode, fiscalnet_connection_mode, fiscalnet_api_host, fiscalnet_bonuri_path, fiscalnet_raspuns_path, fiscalnet_auto_print, fiscalnet_ask_before_print, fiscalnet_manual_only, fiscalnet_timeout_ms, fiscalnet_retry_count, fiscalnet_cif, fiscalnet_operator_code, fiscalnet_vat_groups, fiscalnet_payment_type_map, anaf_cif, anaf_vat_registered, tax_id_verified, company_legal_name, company_address, saga_gestiune_code, notification_preferences, owner_digest_enabled, owner_digest_frequency, owner_digest_day_of_week, owner_digest_time_of_day, owner_digest_timezone, owner_digest_recipients)";
 
 const MEMBERSHIP_SELECT_LEGACY =
-  "id, organisation_id, role, status, organisations(id, name, business_type, country, country_code, currency_code, currency_symbol, kitchen_display_enabled, restaurant_order_flow_enabled, table_service_enabled, order_types_enabled, kitchen_stations_enabled, product_modifiers_enabled, courses_enabled, kitchen_printing_enabled, payment_split_enabled, tips_enabled, compact_workstation_nav_enabled, fiscalnet_enabled, fiscalnet_mock_mode, fiscalnet_connection_mode, fiscalnet_api_host, fiscalnet_bonuri_path, fiscalnet_raspuns_path, fiscalnet_auto_print, fiscalnet_ask_before_print, fiscalnet_manual_only, fiscalnet_timeout_ms, fiscalnet_retry_count, fiscalnet_cif, fiscalnet_operator_code, fiscalnet_vat_groups, fiscalnet_payment_type_map, anaf_cif, anaf_vat_registered, tax_id_verified, company_legal_name, company_address, saga_gestiune_code, notification_preferences, owner_digest_enabled, owner_digest_frequency, owner_digest_day_of_week, owner_digest_time_of_day, owner_digest_timezone, owner_digest_recipients)";
+  "id, organisation_id, role, status, organisations(id, name, business_type, country, country_code, currency_code, currency_symbol, kitchen_display_enabled, loyalty_enabled, restaurant_order_flow_enabled, table_service_enabled, order_types_enabled, kitchen_stations_enabled, product_modifiers_enabled, courses_enabled, kitchen_printing_enabled, payment_split_enabled, tips_enabled, compact_workstation_nav_enabled, fiscalnet_enabled, fiscalnet_mock_mode, fiscalnet_connection_mode, fiscalnet_api_host, fiscalnet_bonuri_path, fiscalnet_raspuns_path, fiscalnet_auto_print, fiscalnet_ask_before_print, fiscalnet_manual_only, fiscalnet_timeout_ms, fiscalnet_retry_count, fiscalnet_cif, fiscalnet_operator_code, fiscalnet_vat_groups, fiscalnet_payment_type_map, anaf_cif, anaf_vat_registered, tax_id_verified, company_legal_name, company_address, saga_gestiune_code, notification_preferences, owner_digest_enabled, owner_digest_frequency, owner_digest_day_of_week, owner_digest_time_of_day, owner_digest_timezone, owner_digest_recipients)";
 
 function isMissingEfacturaColumn(error: { code?: string; message?: string } | null): boolean {
   const msg = (error?.message ?? "").toLowerCase();
@@ -21,9 +22,14 @@ type ActiveMembership = {
   organisations: Record<string, unknown> | Record<string, unknown>[] | null;
 };
 
-export async function getActiveOrg() {
+// cache() dedupes this for the lifetime of one request — getKitchenOpsContext,
+// requireBusinessModule, and every page that calls getActiveOrg() directly
+// used to each re-run the auth + membership + profile lookups from scratch
+// (measured: up to 5x per single /app/* navigation). Same result either way,
+// just computed once per request instead of once per call site.
+export const getActiveOrg = cache(async function getActiveOrg() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getAuthUser();
   if (!user) redirect("/login");
 
   const cookieStore = await cookies();
@@ -76,7 +82,7 @@ export async function getActiveOrg() {
   const profileLocale: string | null = (profileRow?.locale as string | null) ?? null;
 
   return { supabase, user, membership, orgId: membership.organisation_id, currency, currencySymbol, countryCode, profileLocale };
-}
+});
 
 export function money(value: number | null | undefined) {
   return formatCurrency(value, "EUR", "€");

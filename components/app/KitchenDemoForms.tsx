@@ -58,10 +58,10 @@ export function DeliveryForm({ orgId, userId, sites, records }: { orgId: string;
 
   return (
     <div className="grid lg:grid-cols-3 gap-6">
-      <Card className="lg:col-span-2 border-slate-100">
+      <Card className="lg:col-span-2 border-border">
         <CardHeader><CardTitle>Delivery label check</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-slate-500">Enter supplier, batch, use-by, storage, and delivery evidence.</p>
+          <p className="text-sm text-muted-foreground">Enter supplier, batch, use-by, storage, and delivery evidence.</p>
           <div className="grid sm:grid-cols-2 gap-3">
             <Field label="Supplier" value={form.supplier} onChange={(supplier) => setForm({ ...form, supplier })} />
             <Field label="Product" value={form.product} onChange={(product) => setForm({ ...form, product })} />
@@ -76,7 +76,7 @@ export function DeliveryForm({ orgId, userId, sites, records }: { orgId: string;
             <SelectBox label="Status" value={form.status} values={[["accepted","Accepted"],["rejected","Rejected"],["conditional","Needs review"]]} onChange={(status) => setForm({ ...form, status })} />
           </div>
           <Textarea placeholder="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-          <Button onClick={save} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white">{saving ? "Saving..." : "Save delivery check"}</Button>
+          <Button onClick={save} disabled={saving} className="bg-primary hover:bg-primary/90 text-primary-foreground">{saving ? "Saving..." : "Save delivery check"}</Button>
         </CardContent>
       </Card>
       <RecentList title="Recent deliveries" records={records.map((r) => `${r.product_name} - ${r.supplier_name} - ${r.status.replace("_", " ")} - ${r.profiles?.full_name ?? r.profiles?.email ?? "Unknown staff"}`)} />
@@ -94,7 +94,7 @@ function SelectBox({ label, value, values, onChange }: { label: string; value: s
     return (
       <div className="space-y-1.5">
         <Label>{label}</Label>
-        <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500">
+        <div className="rounded-md border border-border bg-secondary px-3 py-2 text-sm text-muted-foreground">
           No kitchen found. Complete onboarding or add a kitchen first.
         </div>
       </div>
@@ -105,9 +105,9 @@ function SelectBox({ label, value, values, onChange }: { label: string; value: s
 
 function RecentList({ title, records }: { title: string; records: string[] }) {
   return (
-    <Card className="border-slate-100">
+    <Card className="border-border">
       <CardHeader><CardTitle className="text-base flex items-center gap-2"><ClipboardCheck className="h-4 w-4" />{title}</CardTitle></CardHeader>
-      <CardContent>{records.length ? <div className="space-y-2">{records.slice(0, 8).map((r) => <p key={r} className="text-sm text-slate-600 border-b border-slate-50 pb-2">{r}</p>)}</div> : <p className="text-sm text-slate-400">No checks yet.</p>}</CardContent>
+      <CardContent>{records.length ? <div className="space-y-2">{records.slice(0, 8).map((r) => <p key={r} className="text-sm text-mid border-b border-border pb-2">{r}</p>)}</div> : <p className="text-sm text-muted-foreground">No checks yet.</p>}</CardContent>
     </Card>
   );
 }

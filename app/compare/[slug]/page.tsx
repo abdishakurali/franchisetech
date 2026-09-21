@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { CompareBrandLogosLabeled } from "@/components/marketing/CompareBrandLogos";
 import { competitorLogoForOg } from "@/lib/marketing/competitor-brands";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import {
   breadcrumbSchema,
@@ -45,7 +46,7 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
   const page = localizeComparisonPage(raw, locale);
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd data={faqJsonLd(page.faqs)} />
       <JsonLd
         data={breadcrumbSchema([
@@ -196,6 +197,6 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
       <CTASection />
       <CompareStickyTrialBar competitorSlug={page.slug} locale={locale} />
       <div className="h-20 print:hidden" aria-hidden />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

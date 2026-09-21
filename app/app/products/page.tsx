@@ -88,6 +88,8 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
   ];
 
   const listHrefOpts = { q, type: typeFilter, archived: showArchived };
+  const currentListHref = productsHref({ q, type: typeFilter, archived: showArchived, category: selectedCategory });
+  const addProductHref = `/app/products/new?returnTo=${encodeURIComponent(currentListHref)}`;
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -112,7 +114,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
           <Link href="/app/products/modifiers">
             <Button variant="outline" size="sm">{t.products.modifiers?.title ?? "Modifiers"}</Button>
           </Link>
-          <Link href="/app/products/new">
+          <Link href={addProductHref}>
             <Button size="sm">{t.products.addProduct}</Button>
           </Link>
         </div>
@@ -220,7 +222,7 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
           {!products.length ? (
             <div className="text-center py-10">
               <p className="text-muted-foreground mb-4">{t.products.empty}</p>
-              <Link href="/app/products/new"><Button variant="outline">{t.products.addFirst}</Button></Link>
+              <Link href={addProductHref}><Button variant="outline">{t.products.addFirst}</Button></Link>
             </div>
           ) : (
             <ProductsBulkTable

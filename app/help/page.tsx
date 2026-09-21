@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MarketingShell, CTASection } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { HELP_CATEGORIES, HELP_ARTICLES } from "@/lib/help/articles";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { Search } from "lucide-react";
@@ -42,7 +43,7 @@ export default async function HelpPage() {
   const t = UI[locale];
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       {/* Hero */}
       <section className="bg-gradient-to-b from-accent to-background pt-20 pb-16 px-4">
         <div className="max-w-3xl mx-auto text-center">
@@ -143,6 +144,6 @@ export default async function HelpPage() {
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

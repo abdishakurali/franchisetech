@@ -187,14 +187,14 @@ function PlanFeaturesAccordion({
 }) {
   const categories = getPlanFeatureCategories(planId, market);
   return (
-    <div className="mt-4 space-y-4 border-t border-slate-100 pt-4" aria-label={seeFeatures}>
+    <div className="mt-4 space-y-4 border-t border-border pt-4" aria-label={seeFeatures}>
       {categories.map((category) => (
         <div key={category.title}>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{localizedCategory(locale, category.title)}</p>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{localizedCategory(locale, category.title)}</p>
           <ul className="space-y-2">
             {category.items.map((feature) => (
-              <li key={feature} className="flex items-start gap-2 text-sm text-slate-700">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+              <li key={feature} className="flex items-start gap-2 text-sm text-foreground">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 {localizedFeature(locale, feature)}
               </li>
             ))}
@@ -228,7 +228,7 @@ export function PricingPlansSection({
   return (
     <div className="space-y-10">
       {variant === "marketing" && (
-        <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-center text-sm font-medium text-blue-800">
+        <div className="rounded-2xl border border-border bg-accent px-5 py-4 text-center text-sm font-medium text-foreground">
           {l.freeSetupStrip}
         </div>
       )}
@@ -244,22 +244,22 @@ export function PricingPlansSection({
             <div
               key={plan.id}
               className={`relative rounded-2xl border-2 p-6 text-left sm:p-8 ${
-                plan.highlighted ? "border-blue-600 bg-blue-50/50" : "border-slate-200 bg-white"
+                plan.highlighted ? "border-primary bg-accent/50" : "border-border bg-card"
               }`}
             >
               {plan.highlighted && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-blue-600 px-3 py-0.5 text-xs font-semibold text-white">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
                   {l.mainPlan}
                 </span>
               )}
-              <p className={`text-sm font-semibold uppercase tracking-wide ${plan.highlighted ? "text-blue-700" : "text-slate-500"}`}>
+              <p className={`text-sm font-semibold uppercase tracking-wide ${plan.highlighted ? "text-primary" : "text-muted-foreground"}`}>
                 {shortName}
               </p>
-              <p className="mt-2 text-4xl font-bold text-slate-900">{displayPrice}</p>
-              <p className="text-sm text-slate-500">
+              <p className="mt-2 text-4xl font-bold text-foreground">{displayPrice}</p>
+              <p className="text-sm text-muted-foreground">
                 {localizedText(locale, displayCadence, "/lună")}
               </p>
-              <p className="mt-4 text-sm leading-6 text-slate-600">{localizedPlanDescription(locale, plan.id, market)}</p>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">{localizedPlanDescription(locale, plan.id, market)}</p>
               <PlanFeaturesAccordion planId={plan.id} market={market} seeFeatures={l.seeFeatures} locale={locale} />
               {variant === "marketing" ? (
                 <Link
@@ -274,7 +274,7 @@ export function PricingPlansSection({
                     })
                   }
                 >
-                  <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">{l.getStarted}</Button>
+                  <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">{l.getStarted}</Button>
                 </Link>
               ) : (
                 <div className="mt-6">
@@ -294,20 +294,20 @@ export function PricingPlansSection({
         const scalePrice = scale.price;
         const multiPrice = multi.price;
         return (
-          <div className="rounded-2xl border-2 border-slate-200 bg-white p-6 sm:p-8">
-            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">{l.multiTitle}</p>
+          <div className="rounded-2xl border-2 border-border bg-card p-6 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{l.multiTitle}</p>
             <div className="mt-3 flex flex-wrap items-baseline gap-x-8 gap-y-2">
               <p>
-                <span className="text-2xl font-bold text-slate-900">{scalePrice}</span>
-                <span className="text-sm text-slate-500">{localizedText(locale, "/mo base", "/lună bază")}</span>
+                <span className="text-2xl font-bold text-foreground">{scalePrice}</span>
+                <span className="text-sm text-muted-foreground">{localizedText(locale, "/mo base", "/lună bază")}</span>
               </p>
               <p>
-                <span className="text-2xl font-bold text-slate-900">+{multiPrice}</span>
-                <span className="text-sm text-slate-500">{localizedText(locale, "/additional location/mo", "/locație suplimentară/lună")}</span>
+                <span className="text-2xl font-bold text-foreground">+{multiPrice}</span>
+                <span className="text-sm text-muted-foreground">{localizedText(locale, "/additional location/mo", "/locație suplimentară/lună")}</span>
               </p>
             </div>
-            <p className="mt-3 text-sm leading-6 text-slate-600">{l.multiBody ?? l.multiText}</p>
-            <p className="mt-1 text-xs text-slate-500">{l.multiMinLocations}</p>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">{l.multiBody ?? l.multiText}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{l.multiMinLocations}</p>
             <PlanFeaturesAccordion planId="scale" market={market} seeFeatures={l.seeFeatures} locale={locale} />
             {variant === "marketing" ? (
               <Link
@@ -334,9 +334,9 @@ export function PricingPlansSection({
       })()}
 
       {/* Free self-serve setup */}
-      <div className="rounded-2xl border border-green-200 bg-green-50/50 p-6 sm:p-8">
-        <h2 className="text-lg font-bold text-slate-950">{l.setupFreeTitle}</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
+      <div className="rounded-2xl border border-reconciled/30 bg-reconciled/10 p-6 sm:p-8">
+        <h2 className="text-lg font-bold text-foreground">{l.setupFreeTitle}</h2>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {l.setupFreeText}
         </p>
         {variant === "marketing" && (
@@ -352,7 +352,7 @@ export function PricingPlansSection({
               })
             }
           >
-            <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">{l.getStarted}</Button>
+            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">{l.getStarted}</Button>
           </Link>
         )}
       </div>

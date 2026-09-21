@@ -1,8 +1,9 @@
-import { ClaudeMarketingShell, DesignFeatures } from "@/components/marketing/ClaudeMarketing";
+import { DesignFeatures } from "@/components/marketing/ClaudeMarketing";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, PackagePlus, ReceiptText, ScanLine, ShoppingCart, WifiOff } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { PersuasionHero } from "@/components/marketing/PersuasionHero";
 import { marketingCard } from "@/lib/marketing/tokens";
@@ -27,11 +28,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FeaturesPage() {
   const locale = await getMarketingLocale();
-  if (locale === "ro") return <ClaudeMarketingShell><DesignFeatures /></ClaudeMarketingShell>;
+  if (locale === "ro") return <ClaudeMarketingShellAuth><DesignFeatures /></ClaudeMarketingShellAuth>;
   const t = getMarketingMessages(locale);
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -99,6 +100,6 @@ export default async function FeaturesPage() {
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

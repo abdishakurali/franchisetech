@@ -125,7 +125,7 @@ export default async function OnboardingResultPage() {
           <p className="rounded-md bg-reconciled/10 px-4 py-2.5 text-sm text-reconciled">✓ {t.stockUpdated}</p>
         )}
 
-        <Link href="/app/reports/sales" className="inline-block text-sm font-medium text-brass hover:underline">
+        <Link href="/app/reports/sales" className="inline-block text-sm font-medium text-muted-foreground hover:underline">
           {t.viewReport}
         </Link>
 

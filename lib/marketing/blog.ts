@@ -15,6 +15,24 @@ export type BlogPost = {
  * prior 90 days (PostHog, filterTestAccounts=true). Do not add new posts
  * without a distribution plan (who finds it, how) — volume without
  * distribution is how this list grew to 115 with ~90 at zero visitors.
+ *
+ * 2026-09-19: added 8 posts, deliberately adjacent to the two highest-traffic
+ * posts (bon-fiscal-obligatoriu-cand-si-cum, cum-anulezi-un-bon-fiscal-emis-gresit —
+ * both fiscal-receipt procedural-panic queries), not generic topics. Every legal
+ * claim was checked against primary sources (OUG 28/1999, Legea 296/2023 via an
+ * official ANAF comparison PDF) before publishing.
+ *
+ * 2026-09-21: added 5 more posts, same bar (every legal claim verified against a
+ * primary source — OUG 28/1999, Legea 296/2023, Legea 241/2005, Legea 317/2024,
+ * Legea 141/2025 for the current 21%/11%/0% VAT rates). Also fixed the distribution
+ * gap flagged above: both proven high-traffic posts, plus three of the 2026-09-19
+ * posts, now carry a genuine contextual internal link (via the renderer's new
+ * [text](url) markdown-link support in app/blog/[slug]/page.tsx) into this batch and
+ * back — not just the generic "Mai multe articole" footer. Also fixed a stale 5%
+ * VAT-rate line in cote-tva-diferite-acelasi-bon-cum-se-calculeaza's worked example
+ * (5% hasn't been a valid standalone rate since the Aug 2025 change; replaced with
+ * the real 0% case). Before adding further posts, actually check PostHog traffic on
+ * this batch first — don't repeat the volume-without-verification pattern.
  */
 export const blogPosts: BlogPost[] = [
   {
@@ -366,7 +384,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce riscați dacă nu emiteți bonul fiscal",
-        body: "Neemiterea bonului fiscal este o abatere contravențională, sancționată cu amendă — cuantumul depinde de încadrarea faptei și de eventuala recidivă, așa că verificați valoarea actualizată cu contabilul dumneavoastră sau pe portalul ANAF.\n\nLa recidivă sau la constatarea unui tipar (mai multe vânzări fără bon, nu un incident izolat), riscul crește dincolo de amendă — poate ajunge la suspendarea temporară a activității punctului de lucru.",
+        body: "Neemiterea bonului fiscal este o abatere contravențională, sancționată cu amendă — cuantumul depinde de încadrarea faptei și de eventuala recidivă, așa că verificați valoarea actualizată cu contabilul dumneavoastră sau pe portalul ANAF.\n\nLa recidivă sau la constatarea unui tipar (mai multe vânzări fără bon, nu un incident izolat), riscul crește dincolo de amendă — poate ajunge la suspendarea temporară a activității punctului de lucru. Dacă tocmai ați descoperit că o vânzare a scăpat neînregistrată, [aflați exact ce faceți în continuare](/blog/ati-uitat-sa-emiteti-bonul-fiscal-ce-faceti-acum) — diferența dintre un incident izolat corectat cinstit și un tipar contează enorm pentru cât de gravă rămâne situația.",
       },
       {
         heading: "Cum vă asigurați că nu ratați niciun bon",
@@ -493,7 +511,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Exemplu concret cu trei cote diferite",
-        body: "Un bon cu trei produse, fiecare la o cotă diferită de TVA:\n\n- Produs A, cotă standard 21%: preț 20,00 lei → bază 16,53 lei, TVA 3,47 lei\n- Produs B, cotă redusă 11%: preț 15,00 lei → bază 13,51 lei, TVA 1,49 lei\n- Produs C, cotă redusă 5%: preț 10,00 lei → bază 9,52 lei, TVA 0,48 lei\n\n**Total bon: 45,00 lei** — din care bază impozabilă totală 39,56 lei și TVA total colectat 5,44 lei.\n\nFiecare cotă rămâne vizibilă separat pe bon, nu doar suma finală.",
+        body: "Un bon cu trei produse, fiecare la o cotă diferită de TVA:\n\n- Produs A, cotă standard 21%: preț 20,00 lei → bază 16,53 lei, TVA 3,47 lei\n- Produs B, cotă redusă 11%: preț 15,00 lei → bază 13,51 lei, TVA 1,49 lei\n- Produs C, cotă 0% (scutit): preț 10,00 lei → bază 10,00 lei, TVA 0,00 lei\n\n**Total bon: 45,00 lei** — din care bază impozabilă totală 40,04 lei și TVA total colectat 4,96 lei.\n\nFiecare cotă rămâne vizibilă separat pe bon, nu doar suma finală.",
       },
       {
         heading: "Ce trebuie să apară pe bonul fiscal tipărit",
@@ -534,7 +552,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce nu trebuie să faceți niciodată",
-        body: "- Nu opriți sau nu deconecta manual aparatul fiscal sperând să \"resetați\" problema, fără indicație de la distribuitorul autorizat\n- Nu ștergeți sau nu încercați să resetați jurnalul electronic pe cont propriu — este un document cu regim special\n- Nu ignora eroarea zile la rând sperând că \"se rezolvă singură\" — un aparat care nu a mai transmis date de câteva zile e un semnal de verificat imediat, nu de amânat\n- Nu schimba SIM-ul sau routerul fără să notați ce ați schimbat — dacă distribuitorul trebuie să intervină, are nevoie de acest istoric",
+        body: "- Nu opriți sau nu deconecta manual aparatul fiscal sperând să \"resetați\" problema, fără indicație de la distribuitorul autorizat\n- Nu ștergeți sau nu încercați să resetați jurnalul electronic pe cont propriu — este un document cu regim special\n- Nu ignora eroarea zile la rând sperând că \"se rezolvă singură\" — un aparat care nu a mai transmis date de câteva zile e un semnal de verificat imediat, nu de amânat. Neconectarea la sistemul ANAF are [o amendă separată de cea pentru lipsa bonului fiscal](/blog/amenda-neconectare-casa-marcat-anaf), aplicabilă chiar dacă aparatul emite bonuri corect\n- Nu schimba SIM-ul sau routerul fără să notați ce ați schimbat — dacă distribuitorul trebuie să intervină, are nevoie de acest istoric",
       },
       {
         heading: "Bonul cu cod QR și rolul lui",
@@ -555,7 +573,7 @@ export const blogPosts: BlogPost[] = [
     sections: [
       {
         heading: "Ce este stornarea unui bon fiscal",
-        body: "Odată emis, un bon fiscal nu poate fi șters sau editat — casele de marcat fiscale nu permit asta prin design, tocmai pentru a preveni manipularea vânzărilor. Singura cale legală de a corecta o greșeală este **stornarea**: emiterea unui bon de stornare care anulează valoarea bonului greșit, urmat, dacă e cazul, de emiterea bonului corect. Cadrul legal pentru procedură este dat de normele metodologice de aplicare a OUG 28/1999 (aprobate prin HG 479/2003).\n\nStornarea funcționează cât timp bonul greșit face parte din ziua fiscală curentă, adică înainte de generarea raportului Z de închidere a zilei respective. Pe lângă bonul de stornare emis de aparat, procedura corectă cere și un document scris — un proces-verbal de stornare, cu numărul și ora bonului greșit, motivul anulării și semnătura casierului plus a persoanei responsabile (manager/administrator) — păstrat alături de bonul stornat pentru justificare la un eventual control.",
+        body: "Odată emis, un bon fiscal nu poate fi șters sau editat — casele de marcat fiscale nu permit asta prin design, tocmai pentru a preveni manipularea vânzărilor. Singura cale legală de a corecta o greșeală este **stornarea**: emiterea unui bon de stornare care anulează valoarea bonului greșit, urmat, dacă e cazul, de emiterea bonului corect. Cadrul legal pentru procedură este dat de normele metodologice de aplicare a OUG 28/1999 (aprobate prin HG 479/2003).\n\nStornarea funcționează cât timp bonul greșit face parte din ziua fiscală curentă, adică înainte de generarea raportului Z de închidere a zilei respective. Pe lângă bonul de stornare emis de aparat, procedura corectă cere și un document scris — un proces-verbal de stornare, cu numărul și ora bonului greșit, motivul anulării și semnătura casierului plus a persoanei responsabile (manager/administrator) — păstrat alături de bonul stornat pentru justificare la un eventual control.\n\nProcedura de mai jos e generală, valabilă pentru orice tip de greșeală — produs, cantitate, sumă. Dacă greșeala e specific o cotă de TVA greșită, mai ales dacă a fost deja încasată de la un client care a plecat, situația are o nuanță suplimentară: [cum corectați un bon cu cotă de TVA greșită după emitere](/blog/bon-fiscal-cota-tva-gresita-cum-corectati-dupa-emitere).",
       },
       {
         heading: "Pașii pentru anularea unui bon fiscal emis greșit",
@@ -895,7 +913,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Exemplu complet, o zi de cafenea",
-        body: "Iată cum arată o zi normală într-o cafenea mică:\n\n- **Sold reportat**: 300 lei (fondul de casă de la închiderea zilei anterioare)\n- **Încasări vânzări numerar** (agregat din raportul Z): 842 lei → sold 1.142 lei\n- **Plată furnizor lapte** (numerar, din sertar): −180 lei → sold 962 lei\n- **Depunere la bancă**: −682 lei → sold 280 lei\n- **Sold final**: 280 lei\n\nObservă că soldul final (280 lei) nu este identic cu fondul de casă inițial (300 lei) — diferența de 20 de lei ar trebui să apară undeva explicată (rest dat în plus, o eroare de numărare) sau, dacă fondul dumneavoastră standard e 300 lei, completați din nou până la 300 pentru ziua următoare și notați mișcarea.",
+        body: "Iată cum arată o zi normală într-o cafenea mică:\n\n- **Sold reportat**: 300 lei (fondul de casă de la închiderea zilei anterioare)\n- **Încasări vânzări numerar** (agregat din raportul Z): 842 lei → sold 1.142 lei\n- **Plată furnizor lapte** (numerar, din sertar): −180 lei → sold 962 lei\n- **Depunere la bancă**: −682 lei → sold 280 lei\n- **Sold final**: 280 lei\n\nObservă că soldul final (280 lei) nu este identic cu fondul de casă inițial (300 lei) — diferența de 20 de lei ar trebui să apară undeva explicată (rest dat în plus, o eroare de numărare) sau, dacă fondul dumneavoastră standard e 300 lei, completați din nou până la 300 pentru ziua următoare și notați mișcarea. Pentru pașii exacți de documentat o astfel de diferență, cu surplus sau lipsă, vedeți [diferența de casă la final de zi](/blog/diferenta-de-casa-la-final-de-zi-surplus-sau-lipsa).",
       },
       {
         heading: "Corecțiile se fac prin stornare, nu prin ștersătură",
@@ -1694,6 +1712,470 @@ export const blogPosts: BlogPost[] = [
       {
         heading: "Cum ajută franchisetech să aveți totul la zi",
         body: "franchisetech arhivează automat fiecare raport Z, fiecare NIR emis și registrul de casă aferent, căutabile instant pe dată din aplicație — nu trebuie să căutați printre dosare fizice sau fișiere Excel când un inspector cere documentele. Cotele de TVA se configurează o singură dată per produs și rămân consistente în toate rapoartele generate ulterior, reducând riscul de eroare la aplicarea cotei greșite.",
+      },
+    ],
+  },
+  {
+    slug: "amenda-neeliberare-bon-fiscal-cat-este-si-cum-o-eviti",
+    title: "Amenda pentru neeliberarea bonului fiscal — cât este și cum o evitați",
+    description:
+      "Neemiterea bonului fiscal este contravenția cel mai des constatată la control în HoReCa. Iată exact ce spune legea, cum se calculează amenda pe tranșe și ce se întâmplă la o abatere repetată.",
+    publishedAt: "2026-09-19",
+    locale: "ro",
+    tags: ["fiscal", "amenzi", "bon-fiscal"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/qr-code-receipts",
+    sections: [
+      {
+        heading: "Ce înseamnă, legal, «neemiterea bonului fiscal»",
+        body: "Fapta este definită explicit în OUG nr. 28/1999 (republicată), art. 10 pct. 3 lit. c): constituie contravenție \"neemiterea bonului fiscal pentru toate bunurile livrate sau serviciile prestate, emiterea de bonuri cu o valoare inferioară preţului de vânzare a bunului sau tarifului de prestare a serviciului ori nerespectarea prevederilor art. 1 alin. (8)\" — ultima parte se referă la nerespectarea regulilor de înregistrare în registrul special atunci când aparatul fiscal e defect.\n\nLegea numește suma implicată \"sumă nejustificată\": contravaloarea bunurilor sau serviciilor pentru care nu s-a emis bon, diferența până la prețul real dacă bonul a fost emis cu o valoare mai mică, sau contravaloarea operațiunilor înregistrate greșit în perioada de defectare a aparatului. Practic, orice vânzare care nu ajunge corect în evidența fiscală a zilei intră sub această definiție — indiferent dacă a fost uitare, grabă la oră de vârf sau o înțelegere \"pe repede\" cu un client.",
+      },
+      {
+        heading: "Cât este amenda, concret — pe tranșe, nu o sumă fixă",
+        body: "De la 1 ianuarie 2024 (modificare adusă de Legea nr. 296/2023), amenda pentru această contravenție (art. 11 alin. (1) lit. e) din OUG 28/1999) nu mai e o sumă unică — depinde de mărimea sumei nejustificate și de ponderea ei în vânzările totale ale zilei, înregistrate de aparat și/sau în registrul special:\n\n- Sumă nejustificată **până la 300 lei** și **sub 3%** din vânzările zilei — amendă **2.000 lei**\n- Sumă până la 300 lei, dar **peste 3%** din vânzările zilei — amendă **5.000 lei**\n- Sumă între **300 și 1.000 lei**, sub 3% din vânzări — amendă **6.000 lei**\n- Sumă între 300 și 1.000 lei, peste 3% din vânzări — amendă **12.000 lei**\n- Sumă **peste 1.000 lei**, sub 3% din vânzări — amendă **15.000 lei**\n- Sumă peste 1.000 lei și peste 3% din vânzări — amendă **30.000 lei**\n\nÎn toate cazurile, pe lângă amendă se aplică și **confiscarea sumei nejustificate**. Important: până la 31 decembrie 2023, prima treaptă (suma cea mai mică) putea fi sancționată doar cu avertisment. De la 1 ianuarie 2024, avertismentul a fost eliminat — chiar și cea mai mică abatere constatată pornește de la 2.000 lei amendă fermă.",
+      },
+      {
+        heading: "Recidiva costă mult mai mult",
+        body: "Dacă în 12 luni de la ultima sancționare operatorul economic mai comite cel puțin două abateri din aceeași categorie (una dintre tranșele de mai sus), amenda aplicată devine **triplul** amenzii care s-ar fi aplicat normal, iar pe lângă confiscarea sumei nejustificate se dispune și **suspendarea activității la punctul de lucru respectiv, pentru 15 zile**. Dacă e o singură recidivă în 12 luni (nu două), amenda se **dublează**, fără suspendare.\n\nSuspendarea poate înceta mai devreme: dacă operatorul economic achită amenda plus o sumă egală cu de cinci ori amenda aplicată și de cinci ori suma nejustificată confiscată, suspendarea încetează de drept în 24 de ore de la prezentarea dovezii de plată către organul constatator. Pe durata suspendării, unitatea este sigilată de echipa de control, iar la loc vizibil se afișează un anunț despre această situație.",
+      },
+      {
+        heading: "Fapte conexe care se pedepsesc separat",
+        body: "Legea sancționează distinct și alte situații legate de bon, ca să nu le confundați cu cea de mai sus:\n\n- **Neînmânarea bonului deja emis** către client, sau nefacturarea la cerere (art. 10 lit. g) — amendă **1.000–2.000 lei**, aplicată direct persoanei fizice care operează aparatul (casierul), nu firmei. Este exact situația în care bonul a fost emis corect, dar nu a fost pus fizic la dispoziția clientului.\n- **Documente justificative lipsă** pentru sume introduse sau scoase din casă în afara vânzărilor obișnuite (art. 10 lit. d) — intră sub aceeași grilă de tranșe de mai sus, dacă generează o sumă nejustificată.\n\nDiferența contează la un control: prima e o problemă de proces intern (casierul nu a înmânat bonul), a doua ține de fondul vânzării (bonul nici nu a fost emis).",
+      },
+      {
+        heading: "Cum evitați această amendă, în practică",
+        body: "Rădăcina majorității abaterilor de acest tip nu e frauda intenționată, ci un pas manual sărit la oră de vârf. Câteva măsuri simple reduc semnificativ riscul:\n\n- Fiecare încasare trece prin aparatul fiscal, fără excepții \"doar de data asta\" pentru un produs mic sau un client cunoscut\n- Personalul nou este instruit explicit că bonul se emite **la momentul plății**, nu \"quando am timp\"\n- Există o procedură clară pentru momentele în care aparatul are o problemă (verificați articolul dedicat defecțiunilor aparatului fiscal), ca personalul să nu improvizeze\n\nÎn franchisetech, fiecare vânzare finalizată în POS trimite automat comanda de emitere către aparatul fiscal, în același pas cu confirmarea plății — nu există un buton separat \"emite bonul\" pe care casierul să îl poată uita. Dacă transmiterea către aparat eșuează, starea apare clar în aplicație, nu e ascunsă.",
+      },
+    ],
+  },
+  {
+    slug: "fiscalnet-offline-ce-faceti-cand-vreti-sa-emiteti-bonul",
+    title: "Ce faceți dacă FiscalNet e offline când vreți să emiteți bonul",
+    description:
+      "FiscalNet este integrarea care trimite comanda de emitere către casa de marcat sau imprimanta fiscală — nu aparatul fiscal în sine. Iată ce înseamnă, practic și legal, când pare «offline» chiar în mijlocul unei vânzări.",
+    publishedAt: "2026-09-20",
+    locale: "ro",
+    tags: ["fiscal", "fiscalnet", "pos"],
+    image: "/marketing/dashboard-hero.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "Ce este, de fapt, FiscalNet",
+        body: "FiscalNet este stratul de comunicare (driverul/integrarea) care leagă aplicația de vânzare de pe calculator sau tabletă de casa de marcat sau imprimanta fiscală certificată conectată fizic la stația de lucru — prin USB, rețea locală sau Bluetooth, în funcție de model. Rolul lui este să traducă o vânzare finalizată în POS într-o comandă pe care aparatul fiscal o poate executa și să transmită înapoi rezultatul (bon emis, eroare, în așteptare).\n\nAsta e diferit de conexiunea aparatului fiscal la serverele ANAF (SIM de date sau rețea, cu retransmitere automată când revine semnalul) — aceea e tratată separat, într-un alt articol. Aici vorbim despre legătura dintre calculatorul de la casă și aparatul din fața casierului, care e o problemă locală, de cablu sau rețea, nu de conexiune la internet a aparatului însuși.",
+      },
+      {
+        heading: "De ce contează tipul aparatului dumneavoastră",
+        body: "O **casă de marcat** clasică are propriă tastatură și ecran și poate, în multe cazuri, funcționa și bate manual o vânzare direct de la aparat, chiar dacă legătura cu POS-ul e picată. O **imprimantă fiscală** (fără tastatură proprie) nu poate — depinde integral de comenzi primite de la un calculator conectat, prin exact acest tip de integrare. Dacă FiscalNet e offline și aveți o imprimantă fiscală, aparatul pur și simplu nu are cum să primească vreo comandă de emitere, indiferent cât timp așteptați.\n\nMerită să știți, dinainte, care tip de aparat aveți instalat în local — informația e utilă în secunda în care apare o eroare, nu e ceva de căutat atunci, cu un client la casă.",
+      },
+      {
+        heading: "Primii pași când vedeți eroarea de conexiune",
+        body: "1. Verificați dacă e o problemă generală de rețea — internetul, POS-ul, alte aparate din local funcționează?\n2. Verificați fizic cablul de conectare (USB sau rețea) dintre calculator și aparatul fiscal — un cablu slăbit e cea mai frecventă cauză\n3. Dacă aveți mai multe case, verificați dacă problema e doar la stația respectivă sau la toate\n4. Reporniți aplicația de vânzare — nu aparatul fiscal însuși, decât dacă distribuitorul autorizat vă indică asta\n\nDacă după acești pași aparatul tot nu răspunde, tratați situația ca pe o defecțiune a aparatului fiscal, nu doar ca pe o eroare software trecătoare.",
+      },
+      {
+        heading: "Dacă aparatul chiar nu răspunde — regimul de defectare",
+        body: "Din punct de vedere legal, dacă aparatul fiscal nu poate emite bonuri — indiferent dacă motivul e o defecțiune internă sau imposibilitatea de a primi comenzi — se aplică art. 1 alin. (8) din OUG 28/1999: până la repunerea în funcțiune, înregistrați toate operațiunile într-un **registru special** și emiteți **chitanțe**, nu bonuri fiscale improvizate. Trebuie să anunțați imediat distribuitorul autorizat sau unitatea de service, în modul stabilit la achiziția aparatului, ca să puteți dovedi notificarea la un eventual control.\n\nProcedura completă — ce trebuie să conțină registrul special, cât timp se păstrează și ce se întâmplă când aparatul repornește — este detaliată în articolul dedicat defecțiunilor aparatului fiscal.",
+      },
+      {
+        heading: "Ce nu faceți",
+        body: "- Nu refuzați clienți sau nu opriți vânzarea doar pentru că vedeți un mesaj de eroare — verificați întâi dacă e o problemă reală de emitere, nu doar o întârziere de câteva secunde\n- Nu improvizați un \"bon\" scris de mână care să semene cu unul fiscal — folosiți chitanță, conform procedurii legale\n- Nu lăsați vânzările neconsemnate sperând să \"recuperați\" din memorie mai târziu — notați-le pe loc, în ordine\n- Nu încercați reparații pe cont propriu la aparatul fiscal — doar tehnicieni autorizați au voie să intervină",
+      },
+      {
+        heading: "Cum gestionează franchisetech acest moment",
+        body: "În franchisetech, starea transmiterii către aparatul fiscal este afișată clar la fiecare vânzare — trimis, în așteptare sau eșuat — nu e ascunsă sub un mesaj generic. Vânzarea în sine se salvează local imediat ce plata este confirmată, independent de rezultatul transmiterii către FiscalNet, ca să nu pierdeți evidența comenzii doar pentru că integrarea are o problemă temporară.\n\nCe aplicația nu face: nu marchează o vânzare drept \"finalizată fiscal\" până nu primește o confirmare reală de la aparat. Dacă transmiterea eșuează, vedeți asta imediat, nu abia la sfârșitul zilei când încercați să închideți casa.",
+      },
+    ],
+  },
+  {
+    slug: "imprimanta-fiscala-nu-tipareste-bonul-ce-faceti",
+    title: "Ce faceți dacă imprimanta fiscală nu tipărește bonul, în mijlocul vânzării",
+    description:
+      "Aparatul fiscal s-a blocat exact când aveați un client la casă? Legea are o procedură exactă pentru această situație — registrul special și chitanțele — nu improvizație.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["fiscal", "casa-de-marcat", "defectiune"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "Ce spune legea despre defectarea aparatului fiscal",
+        body: "Situația e prevăzută explicit în OUG nr. 28/1999 (republicată), art. 1 alin. (8): \"În cazul defectării aparatelor de marcat electronice fiscale, până la repunerea în funcţiune a acestora, operatorii economici utilizatori sunt obligaţi să înregistreze într-un registru special, întocmit în acest sens, toate operaţiunile efectuate şi să emită chitanţe, în condiţiile legii, pentru respectivele operaţiuni şi facturi, la cererea clientului.\"\n\nAsta include orice situație în care aparatul nu tipărește — hârtie terminată, cap de imprimare blocat, eroare mecanică sau electronică. Excepția de la obligația registrului special se aplică doar taxiurilor și aparatelor integrate în echipamente nesupravegheate (automate) — nicio excepție relevantă pentru o cafenea sau un restaurant.",
+      },
+      {
+        heading: "Primul pas: anunțați imediat distribuitorul autorizat sau unitatea de service",
+        body: "Art. 1 alin. (8¹) din OUG 28/1999 vă obligă să notificați **imediat** distribuitorul autorizat sau unitatea de service acreditată, în modul stabilit prin contract la momentul achiziționării aparatului — de exemplu telefon urmat de email, sau un formular online, în funcție de furnizor. Legea e explicită: \"Notificarea efectuată în alt mod decât cel stabilit de părţile contractante nu este valabilă\" — deci verificați dinainte, nu în momentul crizei, care e metoda agreată cu furnizorul dumneavoastră.\n\nPăstrați dovada notificării (email trimis, confirmare telefonică notată cu oră și persoană) — la un control, dumneavoastră trebuie să demonstrați că ați anunțat, nu distribuitorul.",
+      },
+      {
+        heading: "Cât timp durează reparația: registrul special",
+        body: "Până la repunerea în funcțiune, toate operațiunile se înregistrează într-un registru special, ținut fizic la punctul de lucru:\n\n- Fiecare vânzare se notează **cronologic**, fără ștersături și fără spații libere lăsate necompletate\n- Pentru fiecare operațiune se emite o **chitanță** (nu bon fiscal) către client\n- Dacă clientul cere factură, i-o eliberați conform legii\n\nRegistrul special și raportul fiscal de închidere zilnică sunt documentele pe care organele fiscale le au în vedere la verificarea veniturilor care stau la baza impozitelor datorate — nu sunt o formalitate secundară. Registrul special se arhivează și se păstrează **10 ani**, aceeași perioadă ca memoria fiscală a aparatului.",
+      },
+      {
+        heading: "Ce nu înlocuiește chitanța — și de ce nu vă opriți din vânzare",
+        body: "Chitanța emisă manual în această perioadă nu este un document fiscal echivalent bonului — este documentul-punte prevăzut de lege exact pentru acest interval. Nu o confundați cu o factură și nu încercați să \"recreați\" ulterior bonuri fiscale retroactiv pentru vânzările din perioada de defectare — asta nu este posibil și nici legal.\n\nDefecțiunea aparatului nu este un motiv să opriți vânzarea sau să refuzați clienți \"până se repară aparatul\". Vânzarea tot trebuie să aibă loc și să fie înregistrată — doar că prin registrul special și chitanță, nu prin bon fiscal, cât timp aparatul e indisponibil.",
+      },
+      {
+        heading: "Când aparatul revine în funcțiune",
+        body: "La repunerea în funcțiune, tehnicianul de service care intervine trebuie să noteze în registrul special sau în cartea de intervenții data și ora la care aparatul și-a reluat funcționarea, sub semnătură și cu numele în clar. Acest pas nu este opțional — face parte din documentația care demonstrează, la un eventual control, perioada exactă de indisponibilitate și că ați respectat procedura pe toată durata ei.\n\nPăstrați cartea de intervenții și registrul special împreună, accesibile rapid — sunt exact documentele cerute primele la un control, alături de rapoartele Z.",
+      },
+      {
+        heading: "Cum reduceți riscul unei defecțiuni la oră de vârf",
+        body: "Câteva măsuri simple reduc frecvența și impactul defecțiunilor:\n\n- Păstrați întotdeauna o rolă de hârtie de rezervă lângă aparat, de tipul recomandat în manualul de utilizare\n- Nu permiteți intervenții tehnice decât persoanelor autorizate — legea interzice explicit accesul altor persoane la componentele aparatului\n- Păstrați la îndemână cartea de intervenții și datele de contact ale distribuitorului autorizat, nu doar \"undeva în birou\"\n\nfranchisetech trimite comanda de emitere către aparatul fiscal conectat, dar nu înlocuiește procedura legală de mai sus — dacă aparatul fizic e defect, registrul special și chitanțele rămân responsabilitatea dumneavoastră la punctul de lucru, indiferent de software-ul folosit pentru vânzare.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-suma-gresita-clientul-a-plecat-ce-faceti",
+    title: "Bon fiscal emis cu suma greșită, dar clientul a plecat — ce faceți",
+    description:
+      "Ați observat abia după ce a plecat clientul că bonul avea suma greșită. Stornoul rămâne procedura corectă, dar fără clientul de față, grija reală este alta: cum documentați diferența de bani.",
+    publishedAt: "2026-09-22",
+    locale: "ro",
+    tags: ["pos", "storno", "fiscal"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "De ce situația asta e diferită de o corecție obișnuită",
+        body: "Dacă observați o greșeală de sumă pe bon **cât clientul e încă la casă**, corectarea e directă: stornați, discutați cu clientul, îi dați rest sau îi cereți diferența, emiteți bonul corect. Situația de aici e alta — clientul a plecat deja, iar dumneavoastră (sau un coleg) observați abia acum că suma de pe bon nu corespunde cu ce ar fi trebuit facturat.\n\nProcedura fiscală de bază rămâne aceeași — stornarea bonului greșit, în cadrul aceleiași zile fiscale — dar fără clientul de față, nu mai puteți rezolva pe loc diferența de bani. Aici e de fapt miezul problemei: nu documentul, ci banii.",
+      },
+      {
+        heading: "Stornoul nu cere prezența fizică a clientului",
+        body: "Procedura de stornare a unui bon fiscal este reglementată prin normele metodologice de aplicare a OUG 28/1999 (aprobate prin HG 479/2003), art. 36. Documentele necesare pentru dosarul de anulare sunt, în esență, interne:\n\n- O **notă explicativă** (proces-verbal) din partea persoanei care a emis bonul greșit, cu motivul, numărul și ora bonului\n- **Aprobarea scrisă** a directorului financiar-contabil, contabilului-șef sau a persoanei responsabile cu gestiunea\n- Dacă eroarea a fost de preț, o notă cu diferența corectă\n- Înregistrarea contabilă a operațiunii de anulare\n\nNiciunul dintre aceste documente nu presupune, prin natura lui, semnătura sau prezența clientului — stornarea este, procedural, o operațiune internă. Pentru situații neobișnuite sau cu sume mari, confirmați totuși abordarea cu contabilul dumneavoastră înainte să închideți cazul.",
+      },
+      {
+        heading: "Dacă suma încasată a fost mai mare",
+        body: "Dacă bonul greșit a fost la o sumă mai mare decât cea corectă, aveți în sertar bani în plus față de vânzarea reală a zilei — nu îi tratați ca pe un \"surplus\" convenabil. Stornați bonul greșit, emiteți bonul corect cu suma reală și documentați clar, în procesul-verbal, ce s-a întâmplat cu diferența: dacă rămâne disponibilă pentru returnare în cazul în care clientul revine sau vă contactează, notați asta explicit.\n\nDacă aveți datele de contact ale clientului (de exemplu de la o comandă telefonică sau o rezervare), cea mai simplă abordare este să îl informați direct. Pentru sume mari sau situații care se repetă, cereți contabilului dumneavoastră tratamentul corect al banilor nerevendicați — nu este un aspect pe care să îl decideți singur, din instinct.",
+      },
+      {
+        heading: "Dacă suma încasată a fost mai mică",
+        body: "Dacă bonul greșit a fost la o sumă mai mică decât cea corectă, aveți o lipsă reală în încasările zilei față de ce s-ar fi cuvenit — și clientul a plecat fără să știe că mai datorează ceva. În practică, recuperarea diferenței de la client este rareori realistă sau merită efortul.\n\nCeea ce contează este să nu ascundeți diferența ca pe o \"neconcordanță de sertar\" nejustificată la închiderea zilei. Stornați bonul, emiteți intern bonul corect (chiar dacă suma suplimentară nu mai poate fi încasată efectiv) și notați explicit motivul în registrul de casă. O lipsă documentată și explicată e o problemă operațională minoră; o lipsă nedocumentată, recurentă, e exact tiparul pe care un control fiscal îl caută.",
+      },
+      {
+        heading: "Termenul care contează: înainte de raportul Z",
+        body: "Stornarea prin sistemul POS/aparatul fiscal este posibilă cât timp bonul greșit face parte din **ziua fiscală curentă** — adică înainte de generarea raportului Z de închidere a acelei zile. Nu contează dacă au trecut deja câteva ore de când clientul a plecat; atât timp cât raportul Z al zilei respective nu a fost generat, stornarea rămâne posibilă prin procedura obișnuită.\n\nDacă raportul Z a fost deja generat când observați greșeala, jurnalul electronic al zilei respective este definitiv — stornarea prin aparat nu mai este posibilă. Corecția se face atunci doar prin proceduri contabile separate, discutate direct cu contabilul dumneavoastră, nu prin POS.",
+      },
+      {
+        heading: "Cum preveniți să ajungeți în situația asta",
+        body: "Cea mai eficientă prevenție este confirmarea sumei cu clientul **înainte** de finalizarea plății, nu după — mai ales la plata cash, unde nu mai există un extras de cont care să arate automat suma reală. Un obicei simplu de instruit la personal: spuneți suma cu voce tare înainte de a încasa, nu doar de a o afișa pe ecran.\n\nÎn franchisetech, totalul comenzii rămâne vizibil pe ecranul de vânzare pe tot parcursul construirii comenzii, înainte de apăsarea butonului de finalizare — nu apare abia după ce plata a fost deja procesată. Asta nu elimină complet riscul de eroare umană, dar reduce fereastra în care o greșeală de sumă ajunge pe bon nesesizată.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-pierdut-sau-deteriorat-ce-faci",
+    title: "Bon fiscal pierdut sau deteriorat — ce dovadă mai aveți",
+    description:
+      "Un client vine fără bon și cere retur, sau dumneavoastră ați pierdut bonul unui echipament cumpărat pentru local. Ce spune legea despre dovada achiziției și ce puteți accepta sau folosi în loc.",
+    publishedAt: "2026-09-09",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "garantie"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "La ce servește bonul fiscal după ce s-a plătit",
+        body: "Bonul fiscal nu e important doar în momentul plății — rolul lui real începe după aceea, ca dovadă a **datei achiziției**. Conform Legii nr. 449/2003 privind vânzarea produselor și garanțiile asociate acestora (republicată), răspunderea vânzătorului pentru un produs neconform este angajată dacă defectul apare într-un termen de 2 ani de la livrare (art. 16) — iar acest termen curge de la data de pe bon sau factură, nu de la o dată estimată ulterior.\n\nPentru produsele de folosință îndelungată (echipamente de bucătărie, electronice, mobilier), comerciantul are și obligația să le însoțească de un certificat de garanție, conform art. 20 alin. (3) din OG nr. 21/1992 privind protecția consumatorilor. Certificatul arată ce acoperă garanția; bonul sau factura arată de când curge termenul. Fără niciunul dintre cele două, discuția despre garanție pornește mult mai greu.",
+      },
+      {
+        heading: "Un client vine fără bon — sunteți obligați să-l refuzați?",
+        body: "Nu automat. Legea nu condiționează dreptul la retur sau reclamație de prezentarea exclusivă a bonului fiscal — cere doar dovada că tranzacția a avut loc la dumneavoastră. Practica ANPC recunoaște ca dovezi alternative: extrasul de cont bancar (dacă plata a fost cu cardul), factura (dacă a fost cerută la momentul plății), o confirmare de plată prin SMS sau email, sau chiar eticheta produsului dacă indică vânzătorul.\n\nRefuzul automat al unei reclamații doar pe motiv că lipsește bonul fizic poate fi tratat ca o încălcare a drepturilor consumatorului. Asta nu înseamnă că trebuie să acceptați orice afirmație necontrolată — puteți și ar trebui să verificați intern dacă vânzarea a avut loc, cum arătăm în secțiunea următoare — dar «nu am bonul» nu e, singur, un motiv legal suficient pentru refuz.",
+      },
+      {
+        heading: "Cum verificați o vânzare fără bonul fizic",
+        body: "Bonul fizic e doar hârtia — vânzarea în sine rămâne înregistrată în jurnalul electronic al casei de marcat și, dacă folosiți un POS conectat, în istoricul digital al aplicației. Dacă un client vine fără bon dar știe aproximativ data, ora și ce a cumpărat, puteți căuta tranzacția în sistem înainte să decideți cum procedați.\n\nAsta contează mai ales la sume mai mari sau la produse cu garanție extinsă, unde confirmarea reală a tranzacției contează mai mult decât un bon fizic care oricum nu poate fi «reemis» de o casă de marcat fiscală — odată emis, un bon nu se poate genera a doua oară identic, doar stornat dacă e nevoie de corecție. Pentru verificare, jurnalul digital e mai de încredere decât memoria oricui. Situația e și mai strictă dacă [Raportul Z al zilei respective e deja închis](/blog/bon-fiscal-cerut-dupa-raportul-z-inchis-ce-faceti) — acolo nici stornarea nu mai e o opțiune tehnică.",
+      },
+      {
+        heading: "Când dumneavoastră ați pierdut bonul unui echipament cumpărat",
+        body: "Situația se întoarce și către dumneavoastră, ca afacere — de exemplu, ați cumpărat o mașină de cafea sau un echipament de bucătărie și, câteva luni mai târziu, aveți nevoie de garanție, dar bonul s-a decolorat sau s-a rătăcit. Dacă ați plătit cu cardul, extrasul de cont bancar arată data și furnizorul și poate susține solicitarea de garanție — de altfel, pentru plățile cu cardul, extrasul de cont ține deja, prin lege, locul bonului fiscal ca mijloc de probă a achiziției (Legea nr. 317/2024, care a modificat OUG nr. 28/1999).\n\nDacă furnizorul v-a emis și factură (frecvent la echipamente, pentru că firma cumpărătoare are nevoie de ea pentru contabilitate), aceea rămâne cea mai solidă dovadă — păstrați facturile de echipamente separat de bonurile de consumabile zilnice, tocmai pentru cazurile de garanție.",
+      },
+      {
+        heading: "Ce nu e clar reglementat — verificați cazurile punctuale",
+        body: "Nici Legea nr. 449/2003, nici OG nr. 21/1992 nu descriu explicit procedura exactă pentru un bon fiscal plătit cash și pierdut complet, fără nicio altă urmă (fără extras de card, fără factură, fără martori). Practic, în lipsa unei dovezi de orice fel, comerciantul are libertatea să decidă dacă acceptă reclamația — legea protejează consumatorul de refuzul arbitrar bazat *doar* pe lipsa bonului, nu garantează rezolvarea favorabilă indiferent de circumstanțe.\n\nPentru situații ambigue sau sume mari, cel mai sigur e să verificați direct cu ANPC (pentru dumneavoastră ca și comerciant) sau cu un consultant fiscal, în loc să vă bazați pe o interpretare generală — inclusiv a acestui articol.",
+      },
+      {
+        heading: "Cum reduceți dependența de hârtie",
+        body: "În franchisetech, fiecare vânzare finalizată în POS rămâne în istoricul digital al aplicației, căutabil după dată, oră și produs — nu doar pe bonul de hârtie pe care clientul îl poate pierde sau pe care termalul îl poate decolora în câteva luni. Dacă un client revine fără bon, puteți verifica rapid dacă și când a avut loc tranzacția, în loc să vă bazați doar pe memoria personalului sau pe cuvântul clientului.\n\nAsta nu înlocuiește bonul fiscal ca document legal — bonul rămas emis de casa de marcat fiscală certificată — dar vă dă un instrument intern rapid de verificare atunci când hârtia lipsește.",
+      },
+    ],
+  },
+  {
+    slug: "ce-risti-daca-nu-ai-bon-fiscal-la-un-control-anaf",
+    title: "Ce riscați dacă lipsește bonul fiscal la un control ANAF",
+    description:
+      "Nu «amenda generică» — mecanismul exact prin care un inspector transformă un bon lipsă într-o sancțiune, pragurile de amendă în vigoare din 2024 și ce se întâmplă dacă situația se repetă.",
+    publishedAt: "2026-09-11",
+    locale: "ro",
+    tags: ["fiscal", "control-anaf", "amenzi"],
+    image: "/marketing/reports-zreport.png",
+    sections: [
+      {
+        heading: "Cum descoperă efectiv inspectorul un bon lipsă",
+        body: "Un inspector nu «știe» din start că un bon lipsește — îl constată printr-o comparație. La momentul controlului sau la sfârșitul zilei, se compară valoarea bunurilor livrate sau a serviciilor prestate cu ce arată aparatul de marcat electronic fiscal (AMEF) și/sau registrul special. Diferența dintre ce s-a vândut efectiv și ce a fost înregistrat fiscal se numește, în text legal, **sumă nejustificată** — și e exact mecanismul prin care o vânzare fără bon devine o contravenție cu amendă atașată.\n\nAsta înseamnă că riscul nu vine doar din «a uitat casierul să bată un bon» — vine din orice neconcordanță pe care inspectorul o poate demonstra la momentul verificării, indiferent de motivul din spate.",
+      },
+      {
+        heading: "Amenzile pe praguri, în vigoare din 1 ianuarie 2024",
+        body: "Legea nr. 296/2023 (publicată în Monitorul Oficial nr. 977/27.10.2023) a modificat art. 11 din OUG nr. 28/1999 și a înlocuit vechiul sistem (care includea și un avertisment pentru sume mici) cu amenzi fixe pe praguri, calculate după mărimea sumei nejustificate:\n\n- **2.000 lei** — sumă nejustificată de până la 300 lei inclusiv, sub 3% din valoarea totală a bunurilor/serviciilor înregistrate\n- **5.000 lei** — până la 300 lei, dar peste 3% din total\n- **6.000 lei** — între 300 și 1.000 lei, sub 3% din total\n- **12.000 lei** — între 300 și 1.000 lei, peste 3% din total\n- **15.000 lei** — peste 1.000 lei, sub 3% din total\n- **30.000 lei** — peste 1.000 lei și peste 3% din total\n\nÎn toate cazurile, suma nejustificată se confiscă suplimentar față de amendă. Aceste cifre sunt cele confirmate în materialul explicativ oficial al ANAF (DGRFP Brașov) la modificarea din 2023 — verificați totuși cu contabilul dumneavoastră dacă nu a mai apărut o actualizare între timp, fiindcă amenzile fiscale se revizuiesc periodic.",
+      },
+      {
+        heading: "Ce se întâmplă dacă situația se repetă",
+        body: "Legea tratează diferit un incident izolat față de un tipar repetat. Dacă în 12 luni de la o sancționare pentru sumă nejustificată apare o nouă abatere din aceeași categorie, amenda se dublează față de suma inițial aplicabilă pentru acel prag. Dacă în 12 luni se constată **cel puțin două** astfel de abateri noi, amenda se triplează, iar pe lângă confiscarea sumei nejustificate se dispune și **suspendarea activității punctului de lucru pentru 15 zile**.\n\nSuspendarea poate înceta mai devreme decât cele 15 zile doar dacă operatorul economic achită amenda plus o sumă egală cu de cinci ori amenda aplicată și de cinci ori suma confiscată — caz în care sancțiunea complementară încetează la 24 de ore de la prezentarea dovezii de plată. În practică, costul real al recidivei nu e amenda de bază, ci multiplicatorul plus riscul de a sta închis fizic 15 zile la vârf de sezon.",
+      },
+      {
+        heading: "De ce «a fost o singură dată» nu vă protejează la control",
+        body: "Din perspectiva inspectorului, un bon lipsă constatat în ziua controlului nu vine cu context — nu poate distinge «a fost o excepție azi» de «se întâmplă des, dar azi ați fost prinși». Suma nejustificată se calculează din ce lipsește la momentul verificării, nu din istoricul intențiilor dumneavoastră. Un incident real izolat tot generează amendă conform pragurilor de mai sus — legea nu prevede o toleranță pentru prima abatere, cu excepția cazului deja acoperit de prag (sub 300 lei și sub 3%, care rămâne totuși sancționat, doar la nivelul minim de 2.000 lei, nu cu avertisment cum era înainte de 2024).\n\nSingurul lucru care contează practic e să nu se repete — pentru că acolo intervine multiplicarea amenzii și suspendarea.",
+      },
+      {
+        heading: "Cum reduceți riscul ca un bon să lipsească fără să observați",
+        body: "Cea mai frecventă cauză a unui bon lipsă nu e frauda, ci un pas manual sărit la oră de vârf — o vânzare cash încasată «repede», fără să treacă prin POS. Riscul scade dacă fiscalizarea nu mai depinde de un pas separat: în franchisetech, fiecare vânzare finalizată în POS trimite automat comanda către FiscalNet, care declanșează emiterea bonului la casa fiscală, **când integrarea e configurată** — nu există un moment în care casierul trebuie «să nu uite» să bată vânzarea separat.\n\nAsta nu elimină nevoia de verificare zilnică a sertarului și a rapoartelor — dar reduce exact tipul de discrepanță pe care se bazează mecanismul sumei nejustificate descris mai sus.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-vs-bon-nefiscal-diferenta-si-cand-gresiti",
+    title: "Bon fiscal vs. bon nefiscal — diferența și când greșiți",
+    description:
+      "Nota de plată, comanda tipărită din softul de gestiune sau bonul de test al casei de marcat nu sunt bon fiscal. Iată diferența reală și cele trei greșeli frecvente prin care cafenelele și restaurantele le confundă.",
+    publishedAt: "2026-09-14",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "pos"],
+    image: "/marketing/dashboard-hero.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "Ce este, de fapt, un bon nefiscal",
+        body: "Un bon nefiscal este orice document tipărit care arată ca o listă de produse și un total, dar care **nu a trecut prin jurnalul electronic fiscal** al AMEF — nu are valoare fiscală, nu e transmis către sistemul ANAF și nu poate sta la baza obligației de a fiscaliza vânzarea. În HoReCa, cele mai frecvente exemple legitime sunt: **nota de plată** (pre-bilul pe care ospătarul îl aduce la masă pentru confirmare, înainte de plata efectivă), un bon de test generat la pornirea casei de marcat, sau o comandă internă tipărită pentru bucătărie.\n\nUtilizarea unui bon nefiscal nu e, în sine, o problemă — devine una doar când e tratat sau prezentat ca și cum ar fi bonul fiscal final al unei vânzări încheiate.",
+      },
+      {
+        heading: "Ce este bonul fiscal și de ce diferă legal",
+        body: "Bonul fiscal este documentul emis de aparatul de marcat electronic fiscal (AMEF) la momentul încasării, conform OUG nr. 28/1999 privind obligația operatorilor economici de a utiliza aparate de marcat electronice fiscale. Spre deosebire de bonul nefiscal, el ajunge în jurnalul electronic al casei, colectează și raportează TVA-ul, și este documentul pe care legea îl cere la orice încasare de la o persoană fizică, indiferent de sumă.\n\nDin perspectiva unui control, diferența nu e stilistică — un bon nefiscal dat clientului în locul celui fiscal echivalează, practic, cu o vânzare nefiscalizată, chiar dacă pe hârtie arată aproape identic cu bonul real.",
+      },
+      {
+        heading: "Greșeala #1: vă opriți la nota de plată",
+        body: "Tiparul clasic în restaurante: ospătarul aduce nota de plată, clientul confirmă și plătește cash direct la masă sau la ieșire, iar la aglomerație pasul final — baterea efectivă a bonului fiscal la casă — se amână «pentru mai târziu» sau se omite complet, pentru că din perspectiva echipei «clientul deja a plătit, deci e rezolvat».\n\nDin perspectivă fiscală, nu e rezolvat — nota de plată nu are nicio valoare fiscală. Dacă acea vânzare nu ajunge separat, în aceeași zi, în jurnalul AMEF, ea devine exact tipul de neconcordanță descrisă în mecanismul sumei nejustificate la un eventual control.",
+      },
+      {
+        heading: "Greșeala #2: bonul din softul de gestiune, dat ca fiscal",
+        body: "Multe softuri de gestiune sau POS-uri mai vechi pot genera un bon printat local, cu logo și listă de produse, fără să fie conectate efectiv la AMEF. Dacă acel bon ajunge la client fără ca vânzarea să fi trecut și prin casa fiscală, clientul crede că are dovada fiscală a achiziției — dar documentul nu există în jurnalul ANAF.\n\nAsta creează un risc dublu: pentru afacere, la control, ca vânzare nefiscalizată; pentru client, dacă cere ulterior factură sau garanție pe baza acelui bon, care nu poate fi legat de o tranzacție fiscală reală.",
+      },
+      {
+        heading: "Greșeala #3: folosirea bonului nefiscal în contabilitate",
+        body: "Un bon nefiscal nu poate sta la baza înregistrărilor contabile ale afacerii care l-a emis și nu e recunoscut ca document justificativ pentru deducerea TVA de către cel care îl primește la o achiziție. Regulile exacte despre ce praguri și condiții se aplică bonurilor fiscale simple (fără CUI) în contabilitate diferă și se schimbă — verificați cu contabilul dumneavoastră ce documente acceptă exact pentru pontarea unei cheltuieli, în loc să presupuneți că orice bon tipărit e suficient.\n\nCa regulă generală simplă: dacă un document nu a trecut prin AMEF, tratați-l ca informativ, nu ca document fiscal — indiferent cât de oficial arată.",
+      },
+      {
+        heading: "Cum evitați confuzia în flux",
+        body: "Cel mai sigur proces are o singură regulă: nota de plată e mereu urmată, în aceeași interacțiune, de apăsarea finalizării plății în POS — pasul care declanșează efectiv emiterea bonului fiscal prin AMEF. Niciun document tipărit înainte de acel moment nu înlocuiește bonul fiscal, oricât de complet ar arăta.\n\nÎn franchisetech, fiecare vânzare finalizată în POS trimite automat comanda spre fiscalizare — nu există un pas manual separat de «acum bat bonul real», ceea ce reduce riscul ca personalul să confunde nota de plată cu finalizarea efectivă a vânzării.",
+      },
+    ],
+  },
+  {
+    slug: "e-obligatoriu-qr-code-pe-bonul-fiscal",
+    title: "E obligatoriu cod QR pe bonul fiscal? Ce se schimbă în 2026",
+    description:
+      "Bonul fiscal digital cu cod QR nu mai e doar o discuție teoretică — Ministerul Finanțelor a pus în dezbatere publică un proiect de HG cu termen 1 noiembrie 2026. Iată ce e deja lege, ce e încă proiect și ce nu se schimbă.",
+    publishedAt: "2026-09-17",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "casa-de-marcat"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/qr-code-receipts",
+    sections: [
+      {
+        heading: "Da, premisa e reală — dar verificați stadiul exact",
+        body: "Spre deosebire de multe subiecte fiscale «se zvonește că», codul QR pe bonul fiscal chiar este pe agenda oficială a Ministerului Finanțelor. La 1 aprilie 2026, MF a lansat în dezbatere publică un proiect de Hotărâre de Guvern care introduce bonul fiscal digital, cu cod QR, identificator unic și transmitere a datelor către ANAF într-un format standardizat.\n\nImportant: la momentul redactării acestui articol, e vorba despre un **proiect** aflat în dezbatere publică, nu despre o lege deja publicată în Monitorul Oficial. Verificați stadiul curent înainte să luați decizii de buget sau de implementare bazate pe acest termen — proiectele fiscale românești se modifică frecvent între dezbatere și forma finală.",
+      },
+      {
+        heading: "Termenul: 1 noiembrie 2026",
+        body: "Conform proiectului, operatorii economici au la dispoziție termenul de 1 noiembrie 2026 pentru a-și adapta sistemele și pentru a transmite noile date către ANAF. Nu e prima dată când apare acest gen de termen — obligația de a avea cod QR pe bon există în principiu din 2024, sancțiunile pentru lipsa lui au fost programate inițial pentru septembrie 2025, apoi suspendate printr-o ordonanță din decembrie 2025 chiar până la 1 noiembrie 2026, motivat oficial de faptul că aproximativ 900.000 de case de marcat din România aveau nevoie de actualizare software și certificare tehnică la ICI București.\n\nCu alte cuvinte, termenul a tot fost amânat — ceea ce e un motiv în plus să nu tratați 1 noiembrie 2026 ca fiind sigur imuabil, ci ca cea mai recentă variantă cunoscută.",
+      },
+      {
+        heading: "Ce conține, concret, bonul digital cu QR",
+        body: "Conform proiectului aflat în dezbatere, codul QR de pe bon ar urma să fie însoțit de data și ora exactă a emiterii, un identificator unic al bonului și, la cererea clientului, codul de identificare fiscală al comerciantului. Scopul declarat e ca un client sau un inspector să poată verifica instant validitatea bonului, iar ANAF să primească automat confirmarea tranzacției.\n\nProiectul discută și reducerea perioadei de arhivare a jurnalelor electronice de la 10 la 5 ani, dar acesta e un detaliu tehnic care poate suferi modificări până la forma finală — nu vă bazați operațional pe el încă.",
+      },
+      {
+        heading: "Ce e deja lege, nu doar proiect: bonul la plata cu cardul",
+        body: "Spre deosebire de codul QR, o schimbare conexă e deja în vigoare: Legea nr. 317/2024, care a modificat OUG nr. 28/1999, prevede că la plata cu cardul de debit sau credit, comerciantul **nu mai are obligația să tipărească și să înmâneze** bonul fiscal — doar la cererea explicită a clientului. Lipsa bonului tipărit nu afectează drepturile consumatorului: extrasul de cont bancar ține locul bonului ca mijloc de probă a achiziției.\n\nAtenție la ce nu s-a schimbat: tranzacția tot trebuie fiscalizată prin AMEF în momentul plății — legea a scutit doar pasul de tipărire pe hârtie, nu obligația de a trece vânzarea prin casa de marcat.",
+      },
+      {
+        heading: "Ce înseamnă pentru dumneavoastră ca afacere",
+        body: "Codul QR, când va deveni obligatoriu, va fi generat de **casa de marcat fiscală certificată**, nu de un soft de gestiune sau de un POS extern — exact cum se întâmplă și acum cu bonul fiscal standard. franchisetech nu generează codul QR de pe bon și nu promite asta: trimite datele vânzării către casa fiscală prin FiscalNet, **când integrarea este configurată**, iar emiterea efectivă a bonului — cu sau fără QR — rămâne responsabilitatea aparatului certificat.\n\nCe puteți face util acum, fără să reacționați exagerat la un proiect încă în dezbatere: întrebați furnizorul casei de marcat dacă are deja un plan de actualizare pentru termenul din proiect, ca să nu vă prindă pe ultima sută de metri dacă termenul rămâne 1 noiembrie 2026.",
+      },
+    ],
+  },
+  {
+    slug: "diferenta-de-casa-la-final-de-zi-surplus-sau-lipsa",
+    title: "Diferență de casă la final de zi — surplus sau lipsă, ce faceți și cum o documentați",
+    description:
+      "Sertarul nu se potrivește exact cu raportul Z? O diferență de casă nu e automat o problemă cu ANAF — dar modul în care o documentați poate deveni una. Ce spune legea, ce e doar practică internă și cum notați corect surplusul sau lipsa.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["numerar", "registru-de-casa", "raport-z", "operatiuni"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/z-report",
+    sections: [
+      {
+        heading: "O diferență de casă nu este, prin ea însăși, o contravenție",
+        body: "OUG nr. 28/1999, legea de bază a caselor de marcat, nu sancționează faptul în sine că numerarul numărat în sertar nu coincide exact cu totalul de numerar așteptat din raportul Z. Nu există un articol care să spună „diferența de casă e contravenție\" — și n-ar trebui să inventați unul din frică, pentru că nu ajută la nimic dacă la control explicați ceva ce legea nu cere.\n\nCe sancționează efectiv OUG 28/1999, la art. 10, sunt alte fapte: neemiterea bonului fiscal pentru o vânzare (art. 10 pct. 3 lit. c), neînmânarea bonului deja emis către client (art. 10 lit. g) și, cel mai apropiat de subiectul de aici, lipsa documentelor justificative pentru sume introduse sau scoase din casă în afara vânzărilor obișnuite (art. 10 lit. d). Ultima cade sub aceeași grilă de amenzi pe tranșe ca neemiterea bonului — între 2.000 și 30.000 lei, în funcție de sumă și de cât reprezintă din vânzările zilei, plus confiscarea sumei nejustificate. Diferența practică: nu vă amendează nimeni pentru că sertarul are 30 de lei în minus. V-ar putea amenda dacă acei 30 de lei (sau orice sumă introdusă ori scoasă din casă) nu au niciun document care să explice de unde vin sau unde s-au dus.",
+      },
+      {
+        heading: "Ce e cu adevărat obligatoriu: registrul de casă",
+        body: "Ce este obligatoriu, conform Legii contabilității nr. 82/1991 și normelor date prin Ordinul MFP nr. 2634/2015, este completarea registrului de casă — documentul care înregistrează cronologic, zilnic, fiecare încasare și plată în numerar. Normele generale din anexa 1 a ordinului sunt explicite: documentele financiar-contabile nu admit ștersături, modificări sau spații libere între operațiuni; erorile se corectează prin tăierea cu o linie a cifrei greșite și înscrierea alături a cifrei corecte, cu semnătură și dată. Pentru documentele pe baza cărora se justifică numerarul — exact categoria din care face parte registrul de casă — regula e și mai strictă: documentul completat greșit se anulează integral și rămâne în carnet, nu se corectează prin suprascriere.\n\nAsta înseamnă, concret, că o diferență de casă găsită la închiderea zilei nu \"dispare\" dacă nu o notați nicăieri — ea trebuie să apară undeva, cu explicație, în evidența pe care o păstrați. Am detaliat structura exactă pe coloane și un exemplu complet, zi de zi, în [Cum completați corect Registrul de casă, pas cu pas](/blog/cum-completezi-registrul-de-casa-corect) — dacă nu sunteți sigur cum arată un rând corect completat, plecați de acolo.",
+      },
+      {
+        heading: "Cum documentați corect o diferență, pas cu pas",
+        body: "1. Numărați fizic tot numerarul din sertar, bănuț cu bănuț, nu \"cam atât\"\n2. Scădeți fondul de deschidere al zilei (suma cu care ați pornit tura)\n3. Comparați rezultatul cu numerarul așteptat conform raportului Z\n4. Dacă cele două cifre coincid — nu aveți nimic de documentat suplimentar\n5. Dacă nu coincid, identificați, dacă puteți, cauza probabilă (rest greșit, o anulare nedocumentată, o vânzare neîncasată)\n6. Notați suma exactă a diferenței, semnul ei (plus sau minus) și explicația găsită — sau \"cauză neidentificată\" dacă nu găsiți una — direct în registrul de casă sau într-o notă atașată lui, cu data și semnătura persoanei care a numărat\n\nUn pas des sărit: diferențele mici, sub 10-20 de lei, sunt tratate ca \"nu merită notate\". Practic nu contează mărimea — contează faptul că, peste trei luni, nimeni nu-și mai amintește dacă acea diferență repetată de 15 lei e o eroare de rest normală sau un tipar care merită investigat mai serios.",
+      },
+      {
+        heading: "Surplus vs. lipsă — și ce nu aveți voie să faceți cu o lipsă",
+        body: "Un surplus (mai mulți bani în sertar decât arată raportul Z) și o lipsă nu se tratează la fel. Un surplus e, cel mai adesea, o eroare de rest dat în minus către un client — deci prima reacție corectă e să verificați dacă nu cumva ați \"câștigat\" acei bani dintr-o greșeală, nu să-i tratați automat ca venit. Dacă, după verificare, cauza chiar nu poate fi identificată, contabilul dumneavoastră va ști cum să înregistreze surplusul; nu e o decizie pe care ar trebui s-o luați singur, la fața locului, fără să consultați pe cineva care vede toată luna, nu doar o zi.\n\nO lipsă repetată sau mare ridică o întrebare diferită: cine răspunde pentru ea? Aici atenție la o greșeală frecventă — angajatorul nu poate scădea pur și simplu suma din salariul casierului. Codul muncii, art. 254, permite recuperarea unui prejudiciu cauzat din vina salariatului doar prin acordul scris al acestuia (sumă care, prin acord, nu poate depăși echivalentul a 5 salarii minime brute pe economie) sau, dacă nu există acord, printr-o hotărâre judecătorească definitivă. O reținere unilaterală din statul de plată, fără niciuna dintre cele două, nu e o soluție legală, oricât de clar ar părea cazul.",
+      },
+      {
+        heading: "Cele mai frecvente cauze ale diferenței de casă",
+        body: "- **Rest calculat sau dat greșit** — cea mai frecventă cauză de departe; câțiva lei pe tranzacție, care se adună pe parcursul unei zile aglomerate\n- **Anulări (storno) sau reduceri aplicate după încasare, nedocumentate** — casierul anulează o linie din bon după ce clientul a plătit deja cash, dar nu notează de ce\n- **Vânzare neînregistrată în sistem** — plata s-a încasat, dar produsul nu a fost trecut prin POS, deci nu apare în totalul așteptat de raportul Z\n- **Scoateri de numerar din sertar nedocumentate** — o plată rapidă către un furnizor \"din cash-ul zilei\", fără chitanță sau dispoziție de plată notată pe loc\n- **Furt** — cea mai rară cauză statistic, dar singura pentru care lipsa se repetă constant la aceeași persoană sau tură, fără nicio altă explicație plauzibilă\n\nDacă o diferență similară apare la aceeași oră sau la aceeași persoană, în mod repetat, nu mai e \"o zi proastă\" — e un tipar care merită investigat specific, nu doar notat și trecut mai departe.",
+      },
+      {
+        heading: "Cum funcționează în franchisetech",
+        body: "Raportul Z din franchisetech calculează automat numerarul așteptat — vânzări în numerar plus fondul de deschidere — deci comparația cu ce numărați fizic în sertar pornește de la o cifră corectă, nu de la o estimare. Dacă apare o diferență, o puteți nota direct ca mișcare în registrul de casă generat automat din sesiunea POS, cu oră și utilizator, fără să completați manual un formular separat.\n\nfranchisetech nu decide pentru dumneavoastră dacă o diferență e o eroare de rest sau ceva mai serios — asta rămâne o evaluare pe care o faceți dumneavoastră sau contabilul, cu contextul zilei respective. Ce oferă sistemul e o cifră de plecare exactă și un istoric complet, căutabil pe dată, ca să nu reconstituiți o diferență din memorie peste trei luni.",
+      },
+    ],
+  },
+  {
+    slug: "ati-uitat-sa-emiteti-bonul-fiscal-ce-faceti-acum",
+    title: "Ați uitat să emiteți bonul fiscal pentru o vânzare — ce faceți acum",
+    description:
+      "Descoperiți abia la închiderea zilei, sau a doua zi, că o vânzare n-a trecut deloc prin bon fiscal? Fapta e deja comisă legal — dar diferența dintre un incident izolat corectat cinstit și un tipar de venituri needeclarate contează enorm pentru cât de gravă rămâne situația.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "amenzi", "control-anaf"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/z-report",
+    sections: [
+      {
+        heading: "Ce înseamnă, legal, o vânzare descoperită fără bon, după fapt",
+        body: "Fapta e definită în OUG nr. 28/1999 (republicată), art. 10 pct. 3 lit. c): neemiterea bonului fiscal pentru bunurile livrate sau serviciile prestate este contravenție, indiferent de motivul din spate — grabă la oră de vârf, o eroare de operare sau, exact situația de aici, o vânzare care pur și simplu nu a mai ajuns prin aparatul fiscal. Legea nu face, la nivelul acestei fapte, nicio distincție între «am uitat» și «am ales să nu bat bonul»: contravenția se consumă juridic în momentul vânzării, nu în momentul în care o descoperiți dumneavoastră, la închiderea zilei sau abia a doua zi, la reconciliere.\n\nAsta e important de acceptat de la început, ca să nu vă bazați pe o presupunere greșită: descoperirea ulterioară, din proprie inițiativă, nu vă mută într-o categorie juridică separată sau mai blândă doar pentru că nu a fost un inspector cel care a găsit diferența. Ce diferă cu adevărat, în funcție de ce faceți din acel moment încolo, e cât de gravă rămâne situația — nu dacă fapta a existat. Pentru mecanismul exact al amenzii, pe tranșe, aveți deja un articol dedicat: [Amenda pentru neeliberarea bonului fiscal — cât este și cum o evitați](/blog/amenda-neeliberare-bon-fiscal-cat-este-si-cum-o-eviti). Articolul de față pornește de unde se oprește acela — nu cum preveniți fapta, ci ce faceți după ce ați constatat-o deja, pe cont propriu.",
+      },
+      {
+        heading: "Nu există o cale de a «emite» retroactiv bonul — dar tot aveți ce face",
+        body: "Prima reacție firească e să vă întrebați dacă puteți, pur și simplu, «bate acum bonul, cu data de azi», pentru vânzarea uitată. Nu puteți, iar dacă ați putea din punct de vedere tehnic, nu ar corecta nimic legal — ar crea doar o discrepanță nouă, o încasare care apare fiscal într-o zi în care nu a avut loc, fără să rezolve nimic în ziua în care vânzarea chiar s-a produs. Aparatele de marcat electronice fiscale înregistrează operațiunile cu data și ora reală a tranzacției; nu există un mecanism legal de emitere retroactivă a unui bon fiscal pentru o vânzare deja încheiată altfel.\n\nNu confundați situația cu procedura de la art. 1 alin. (8) din OUG 28/1999 — registrul special și chitanțele emise cât timp aparatul e efectiv defect. Acea procedură se aplică doar cât timp aparatul chiar nu funcționează, în timp real; nu se poate invoca retroactiv, pentru o zi în care aparatul a funcționat normal, dar operațiunea a fost pur și simplu omisă. La un control, jurnalul intern al aparatului și istoricul de service arată clar dacă a existat sau nu o defecțiune reală — nu încercați să «acoperiți» o vânzare uitată cu o defecțiune care nu s-a întâmplat.\n\nCe puteți controla, în schimb, e partea contabilă: venitul din vânzarea respectivă tot trebuie să ajungă în evidența contabilă și în declarația de TVA sau de impozit pe profit aferentă perioadei corecte, chiar dacă bonul fiscal, ca document, nu mai poate fi emis pentru acea tranzacție.",
+      },
+      {
+        heading: "Diferența care contează cu adevărat: incident izolat vs. tipar de venituri needeclarate",
+        body: "Aici e diferența care contează cu adevărat pentru cât de gravă rămâne situația dumneavoastră — și de multe ori nu e explicată clar. Neemiterea bonului, ca faptă izolată, e o contravenție conform OUG 28/1999: amendă pe tranșe (de la 2.000 lei până la 30.000 lei, în funcție de sumă și de ponderea ei din vânzările zilei — detaliile complete sunt în articolul despre amenda pentru neeliberarea bonului fiscal, linkuit mai sus), plus confiscarea sumei nejustificate. Se aplică per faptă constatată, indiferent de intenție.\n\nCu totul altceva e situația în care venitul nedeclarat nu rămâne un incident izolat, corectat intern, ci devine un tipar — vânzări care nu ajung nici prin bon, nici în contabilitate, nici în declarațiile fiscale, în mod repetat. Legea nr. 241/2005 pentru prevenirea și combaterea evaziunii fiscale sancționează, la art. 9 alin. (1) lit. b), ca infracțiune — nu ca simplă contravenție — «omisiunea, în tot sau în parte, a evidenţierii, în actele contabile ori în alte documente legale, a operaţiunilor comerciale efectuate sau a veniturilor realizate», atunci când fapta e comisă «în scopul sustragerii de la îndeplinirea obligaţiilor fiscale». Pedeapsa e închisoarea — conform ultimelor modificări legislative, între 3 și 10 ani, cu majorări dacă prejudiciul e mare — nu o amendă pe care o plătiți și treceți mai departe. Legea prevede și o cale de reducere sau înlăturare a pedepsei dacă prejudiciul e acoperit integral înainte de primul termen de judecată, dar acel mecanism e gândit pentru fapte deja calificate drept infracțiune, nu e un motiv să tratați ușor o vânzare uitată.\n\nDiferența practică, pentru dumneavoastră: o vânzare uitată, descoperită și corectată cinstit în contabilitate rămâne, dacă e găsită la un control, un risc de amendă contravențională. Venituri needeclarate constant, pe mai multe zile sau săptămâni, riscă să treacă granița spre evaziune fiscală — unde vorbim de altă lege, alt tip de răspundere și alte mize. Cifrele exacte ale pedepsei se modifică periodic; pentru o evaluare corectă a riscului într-un caz concret, aveți nevoie de un avocat sau de un consultant fiscal, nu de un articol de blog.",
+      },
+      {
+        heading: "Ce NU faceți când descoperiți gaura asta",
+        body: "- Nu emiteți un bon «de completare», cu data curentă, pentru o vânzare din trecut — nu corectează nimic legal, doar creează o neconcordanță nouă\n- Nu modificați sau ștergeți diferența din Registrul de casă ca să «iasă» cifrele — e document legal; orice corecție se face vizibil, cu explicație atașată, nu prin rescriere\n- Nu așteptați până la finalul lunii sau al anului, sperând că «se pierde în cifre» — cu cât trece mai mult timp între vânzare și descoperire, cu atât e mai greu de explicat, cu bună-credință, de ce ați aflat abia atunci\n- Nu ascundeți situația de contabilul dumneavoastră — el sau ea are nevoie de detaliile reale ca să reflecte corect venitul în declarații, nu doar diferența de casă\n- Nu tratați asta ca pe un incident «rezolvat» doar pentru că ați acoperit lipsa din sertar din bani proprii — lipsa fizică din casă și obligația fiscală pentru venitul nedeclarat sunt două lucruri separate",
+      },
+      {
+        heading: "Ce faceți, concret, chiar acum",
+        body: "1. Notați ce știți cât mai repede — data, ora aproximativă, suma, ce s-a vândut, cine a operat casa — cât timp încă vă amintiți detaliile, nu peste o săptămână\n2. Discutați cu contabilul dumneavoastră în aceeași săptămână, nu la următorul raport lunar — el sau ea decide cum se reflectă corect venitul în contabilitate și în declarația de TVA sau de impozit pe profit aferentă\n3. Verificați dacă e un caz izolat sau dacă găsiți diferențe similare în zilele anterioare — dacă da, tratați-l ca pe un semnal de proces, nu ca pe o excepție\n4. Dacă situația se repetă sau implică sume mari, cereți explicit contabilului sau unui consultant fiscal o evaluare de risc — nu e o discuție de amânat, oricât de neplăcută pare\n\nCu cât descoperiți mai devreme o astfel de diferență, cu atât rămâne mai ușor de explicat și de corectat — și cu atât scade riscul să devină un tipar, care e exact linia dintre o contravenție și o problemă mult mai serioasă. În franchisetech, diferența dintre numerarul așteptat și cel numărat apare direct în Raportul Z, în aceeași zi, nu abia la o reconciliere lunară — motivul pentru care majoritatea unor astfel de goluri ajung să fie descoperite la câteva ore de la vânzare, nu la câteva săptămâni.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-cota-tva-gresita-cum-corectati-dupa-emitere",
+    title: "Bon fiscal emis cu cotă de TVA greșită — cum corectați după emitere",
+    description:
+      "Ați bătut 21% în loc de 11% (sau invers) și bonul s-a tipărit deja — poate clientul a și plecat. Iată ce puteți corecta prin stornare și ce rămâne, real, doar în mâna contabilului.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["tva", "storno", "fiscal"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "Prin ce diferă o cotă de TVA greșită de o sumă sau un produs greșit",
+        body: "Mecanismul legal de corectare a unui bon fiscal emis greșit este același indiferent ce anume ați greșit — produsul, cantitatea, suma sau cota de TVA: stornarea, cu bază în normele de aplicare a OUG 28/1999 (aprobate prin HG 479/2003). [Pașii concreți, documentele necesare și ce faceți dacă observați greșeala abia după închiderea zilei sunt explicate pe larg aici](/blog/cum-anulezi-un-bon-fiscal-emis-gresit) — nu le repetăm în articolul de față.\n\nCe e diferit la o cotă de TVA greșită — de exemplu un produs bătut la 21% când trebuia 11%, sau invers — e ce se întâmplă cu banii deja încasați. La o eroare de sumă, diferența e, practic, banii afacerii: fie ați luat în plus de la client, fie în minus. La o eroare de cotă TVA, o parte din suma încasată e declarată explicit pe bon drept TVA — bani colectați, formal, în numele statului, nu venit propriu. Asta schimbă exact ce puteți repara doar printr-o notă contabilă internă și ce nu, mai ales dacă între timp clientul a plecat.",
+      },
+      {
+        heading: "Cotele curente de TVA — ca să știți precis ce ați greșit",
+        body: "Cotele de TVA din România s-au schimbat prin Legea nr. 141/2025, cu normele de aplicare date prin HG 602/2025, ambele cu efect din 1 august 2025: cota standard a urcat de la 19% la **21%**, iar fostele cote reduse de 9% și 5% au fost unificate într-o singură cotă redusă de **11%**. Pentru un local HoReCa, cota de 11% acoperă serviciile de restaurant și catering, precum și alimentele în general — cu excepția băuturilor alcoolice, a băuturilor nealcoolice îndulcite încadrate la codul NC 2202 și a alimentelor cu conținut mare de zahăr adăugat, care rămân la cota standard de 21%. Cota 0% rămâne rezervată operațiunilor scutite prin lege — nu e o cotă pe care o alegeți pentru un client obișnuit la masă.\n\nÎn practică, o sursă frecventă chiar a erorii de cotă e obișnuința cu cifrele vechi: cineva care a lucrat cu sistemul dinainte de august 2025 poate încă \"gândi\" în 19% sau 9%, sau confundă cota redusă actuală cu fosta cotă suplimentară de 5%, care nu mai funcționează ca atare pentru alimentație. Dacă un produs din sistem are o cotă care nu e nici 21%, nici 11%, nici 0%, verificați configurarea înainte de orice altceva — poate să nu fie o greșeală de moment, ci o setare veche, nemodificată de la schimbarea legii.",
+      },
+      {
+        heading: "Ați prins greșeala în aceeași zi, cu clientul încă la casă",
+        body: "Dacă observați eroarea de cotă chiar în timpul vânzării, înainte ca bonul să fie tipărit, corectarea e directă. Conform art. 33 lit. B.c din normele de aplicare a OUG 28/1999 (HG 479/2003), o eroare poate fi corectată la momentul respectiv, fără dosar separat, cât timp bonul nu a fost încă emis și corecția nu duce valoarea totală în negativ.\n\nDacă bonul greșit a apucat deja să fie tipărit, dar clientul e tot la casă, se aplică aceeași procedură de stornare: stornați bonul, restituiți efectiv banii încasați de la client, apoi emiteți bonul corect cu cota de TVA corectă setată pe produs. Pentru că banii se întorc fizic la client, iar tranzacția corectă e una nouă și completă, nu rămâne nimic de reglat ulterior pe cota greșită — ea pur și simplu nu mai există în vânzările zilei.",
+      },
+      {
+        heading: "Clientul a plecat deja, dar ziua fiscală nu s-a închis",
+        body: "Aici lucrurile se complică față de o simplă eroare de sumă. Tehnic, stornarea prin aparatul fiscal rămâne posibilă cât timp raportul Z al zilei nu a fost generat — ziua fiscală e încă deschisă. Dar o stornare pentru eroare de cotă TVA presupune, în esență, să declarați că suma încasată de la un client pe care nu îl mai aveți în față conținea, de fapt, un alt TVA decât cel scris pe bon — și asta ridică o problemă pe care o eroare de sumă nu o are.\n\nPotrivit unui răspuns de specialitate din consultanța fiscal-contabilă, pe exact acest tip de speță, odată ce TVA-ul a fost efectiv încasat pe bon de la o persoană fizică, o simplă \"reglare contabilă\" care ar muta diferența de TVA la veniturile firmei ar însemna, practic, o îmbogățire fără justă cauză în detrimentul statului — pentru că acel TVA a fost colectat în numele statului, nu ca venit al afacerii (raționament bazat pe art. 330 din Codul Fiscal și art. 33 și 36 din normele de aplicare a OUG 28/1999). Cu alte cuvinte: stornarea bonului și reemiterea unuia cu cota corectă nu înseamnă automat că diferența de TVA poate trece, pur și simplu, la profitul firmei. Pentru un caz ca acesta, discutați explicit cu contabilul dumneavoastră înainte să considerați situația rezolvată — nu e o decizie de luat singur, doar din ecranul POS-ului.",
+      },
+      {
+        heading: "Dacă observați abia după închiderea zilei",
+        body: "Dacă raportul Z al zilei a fost deja generat, jurnalul electronic al acelei zile e definitiv — stornarea prin aparatul fiscal nu mai e o opțiune, la fel ca la orice altă corectare de bon după închidere. Pentru o eroare de cotă TVA, asta separă problema în două:\n\n1. **Pentru viitor** — corectați imediat cota de TVA configurată pe produsul respectiv, ca eroarea să nu se repete pe fiecare bon următor. Cu cât durează mai mult până corectați setarea, cu atât se adună mai multe bonuri greșite de tratat retroactiv.\n2. **Pentru trecut** — TVA-ul deja colectat la cota greșită, pe bonurile deja emise, nu se repară printr-o simplă notă în POS. Devine subiect de discuție directă cu contabilul dumneavoastră, care stabilește tratamentul corect — inclusiv dacă e nevoie de regularizare cu ANAF pentru perioada afectată.\n\nCu cât greșeala de cotă e descoperită mai târziu — după mai multe zile sau săptămâni, nu doar după o singură închidere — cu atât perioada de regularizat pentru contabil e mai mare. E un motiv concret să verificați periodic, nu doar la control, dacă produsele din meniu au cotele de TVA setate corect.",
+      },
+      {
+        heading: "Cum reduceți riscul în franchisetech",
+        body: "Cota de TVA se configurează o singură dată, la nivel de produs, în franchisetech — nu se alege manual de casier la fiecare vânzare și nu depinde de canalul prin care se vinde produsul (masă, livrare, take-away). Asta elimină cea mai frecventă sursă de eroare umană: alegerea greșită a cotei în mijlocul unei vânzări aglomerate.\n\nRaportul Z arată TVA-ul colectat defalcat pe fiecare cotă prezentă în vânzările zilei. Dacă un produs are cota setată greșit, discrepanța devine vizibilă rapid — de multe ori chiar în aceeași zi, ceea ce vă lasă varianta mai simplă de stornare prin aparat, descrisă mai sus, în loc de o corecție contabilă ulterioară. Dacă totuși o greșeală de cotă ajunge să fie descoperită după închiderea zilei, franchisetech păstrează istoricul complet al vânzărilor și al modificărilor de produs, ca să aveți exact datele de care contabilul are nevoie pentru regularizare.",
+      },
+    ],
+  },
+  {
+    slug: "amenda-neconectare-casa-marcat-anaf",
+    title: "Amenda pentru neconectarea casei de marcat la sistemul ANAF — cât este și cum o evitați",
+    description:
+      "Legea obligă orice casă de marcat fiscală să transmită date către ANAF în timp real — nu doar să existe. Amenda pentru neconectare e diferită de cea pentru lipsa bonului fiscal. Iată exact cât este, cu ce articol se aplică și ce înseamnă „conectat” din punct de vedere tehnic.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["fiscal", "casa-de-marcat", "amenzi", "control-anaf"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/qr-code-receipts",
+    sections: [
+      {
+        heading: "Obligația de conectare — și de ce e diferită de „aveți casă de marcat certificată”",
+        body: "OUG 28/1999 (republicată) tratează, de fapt, două obligații diferite, cu sancțiuni diferite. Prima este simpla deținere a unei case de marcat electronice fiscale (AMEF) certificate — obligația generală de la art. 1 alin. (1). Nerespectarea acesteia se sancționează separat, prin art. 10 lit. cc), cu amenda de la art. 11 alin. (1) lit. f), plus confiscarea sumelor nejustificate și suspendarea activității punctului de lucru.\n\nA doua obligație, distinctă, e cea de care se ocupă acest articol: chiar dacă aveți un aparat certificat și funcțional, legea vă cere separat, prin art. 3¹ alin. (4) din OUG 28/1999, ca operatorii economici să \"asigure conectarea la distanță a aparatelor de marcat electronice fiscale, în vederea transmiterii de date fiscale către Agenția Națională de Administrare Fiscală\". Un aparat fiscal care emite bonuri corect, dar nu transmite datele către serverele ANAF, încalcă tot legea — doar un articol diferit, cu o amendă diferită de cea pentru lipsa aparatului sau pentru lipsa bonului.",
+      },
+      {
+        heading: "Amenda pentru neconectare: cât este, exact, și cu ce articol",
+        body: "Nerespectarea obligației de conectare este calificată drept contravenție separat, la art. 10 lit. ff) din OUG 28/1999: \"nerespectarea de către utilizatorii aparatelor de marcat electronice fiscale a dispozițiilor prevăzute la art. 3¹ alin. (4)\".\n\nAmenda corespunzătoare e stabilită la art. 11 alin. (1) — care, până la 31 decembrie 2023, o încadra la litera j), iar de la 1 ianuarie 2024, odată cu restructurarea grilei de amenzi prin Legea nr. 296/2023 (publicată în Monitorul Oficial nr. 977/27.10.2023), a mutat-o la litera l), fără să-i schimbe valoarea: **amendă de la 8.000 lei la 10.000 lei**. Suma nu s-a schimbat prin reforma fiscală din 2024 — doar litera de la care se citează articolul, pentru cine caută textul exact în lege sau găsește materiale mai vechi care încă citează litera j).",
+      },
+      {
+        heading: "E o amendă per aparat, recurentă, sau per control? Ce spune legea, ce nu spune",
+        body: "Textul legii nu prevede, pentru această faptă, o amendă zilnică sau cumulativă — este o sumă fixă în intervalul de mai sus, aplicată de agentul constatator pentru fapta constatată la momentul controlului. Spre deosebire de alte litere din același articol (de exemplu cele pentru sume nejustificate în casă, la art. 11 alin. (1) lit. e), care au reguli explicite de recidivă — amendă dublată sau triplată dacă fapta se repetă în 12 luni), legea nu prevede, pentru litera care acoperă neconectarea, o clauză separată de recidivă.\n\nCât despre distincția „niciodată conectat” vs. „offline temporar dintr-o pană de internet” — legea nu publică un număr exact de ore de toleranță. Ce rezultă clar din text: obligația de la art. 3¹ alin. (4) este să **asigurați** conectarea, nu ca aceasta să fie neîntreruptă în orice secundă. Ghidul oficial ANAF de conectare a AMEF cere operatorilor „asigurarea, cu caracter permanent, a condițiilor pentru menținerea conexiunii (de exemplu, neîntreruperea serviciilor de internet)” — un standard de diligență rezonabilă, nu de conexiune perfectă. Un aparat care a parcurs deja procedura de conectare și are o pană scurtă de semnal e într-o situație diferită, tehnic și juridic, de unul care nu a fost conectat niciodată. Pentru pașii practici când apare o eroare de conectare la casă — și ce faceți concret în fața unui client — vedeți [erorile frecvente de conectare la ANAF și cum le rezolvați](/blog/conectare-casa-marcat-anaf-erori-frecvente).",
+      },
+      {
+        heading: "Ce înseamnă, tehnic, „conectat” — nu e doar despre SIM",
+        body: "„Conectat” nu înseamnă doar că aparatul are un SIM cu date sau e băgat într-o rețea cu internet — deși ambele sunt condiții necesare. Conform procedurii oficiale ANAF, conectarea propriu-zisă se face de distribuitorul autorizat sau unitatea de service acreditată, în patru pași: instalarea certificatului digital ANAF în aparat, instalarea fișierului de profil care trece aparatul „online”, generarea unui raport Z de închidere zilnică prin care se verifică transmiterea reușită la sistemul informatic MF-ANAF, și atașarea acelui raport Z la cartea tehnică de intervenții a aparatului.\n\nÎn practică, un raport Z transmis cu succes este dovada tehnică a conexiunii — nu declarația dumneavoastră de intenție. Odată conectat, aparatul transmite automat datele către ANAF după fiecare raport Z de închidere zilnică, fără să mai fie nevoie de declarația lunară A4200 (care rămâne obligatorie doar pentru perioada dinaintea conectării sau pentru fișierele semnalate ca netransmise). Puteți verifica oricând, prin Spațiul Privat Virtual, dacă sistemul ANAF a semnalat fișiere netransmise de la aparatul dumneavoastră — cel mai simplu mod de a confirma că nu aveți o problemă de conectare fără să așteptați un control.",
+      },
+      {
+        heading: "Când neconectarea devine mai mult decât o amendă administrativă",
+        body: "Amenda de 8.000–10.000 lei de mai sus este sancțiunea contravențională — cea aplicată pentru simpla constatare a neconectării. Din 16 mai 2024, odată cu intrarea în vigoare a Legii nr. 126/2024, care a modificat Legea nr. 241/2005 pentru prevenirea și combaterea evaziunii fiscale, a apărut și o variantă penală a unei fapte înrudite.\n\nArt. 9 alin. (1) lit. i) din Legea 241/2005 (introdusă prin Legea 126/2024) califică drept infracțiune de evaziune fiscală \"utilizarea de aparate de marcat electronice fiscale care nu sunt conectate la sistemul informatic național de supraveghere și monitorizare a datelor fiscale, potrivit legii, sau alterarea aparatelor de marcat electronice fiscale pentru netransmiterea unor date fiscale sau transmiterea unor date fiscale nereale” — pedepsită cu închisoare de la 3 la 10 ani și interzicerea unor drepturi, sau cu amendă.\n\nCondiția care contează practic: art. 9 alin. (1) se aplică doar faptelor \"săvârșite în scopul sustragerii de la îndeplinirea obligațiilor fiscale\" — adică unde există intenția de a evita taxe, nu o simplă neglijență administrativă sau o problemă tehnică nerezolvată la timp. O casă de marcat neconectată din cauza unui SIM expirat sau a unui certificat neactualizat rămâne, în mod normal, în zona amenzii contravenționale de mai sus; varianta penală vizează aparatele alterate deliberat sau ținute offline cu bună știință pentru a ascunde vânzări.",
+      },
+      {
+        heading: "Cum reduceți riscul, practic — și cum ajută franchisetech",
+        body: "Câteva verificări simple reduc riscul unei amenzi pentru neconectare:\n\n- **Verificați statusul în SPV** — Spațiul Privat Virtual arată dacă ANAF a semnalat fișiere netransmise de la aparatul dumneavoastră\n- **Nu lăsați abonamentul de date al SIM-ului fiscal să expire** — e cea mai frecventă cauză practică de neconectare prelungită, nu o defecțiune a aparatului\n- **Păstrați raportul Z generat la conectare**, atașat la cartea tehnică — e dovada că procedura a fost dusă la capăt corect\n- **Aflați dinainte de la distribuitorul autorizat** care e canalul agreat de notificare în caz de problemă, ca să nu-l căutați în mijlocul unui control\n\nfranchisetech nu gestionează certificatul digital sau SIM-ul aparatului fiscal — acestea rămân, prin lege, în responsabilitatea distribuitorului autorizat și a operatorului economic. Ce arată aplicația, la fiecare vânzare, este starea reală a transmiterii către aparatul fiscal conectat — trimis, în așteptare sau eșuat — vizibil direct din POS, nu descoperit abia la o reconciliere de sfârșit de lună sau, mai rău, la un control.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-cerut-dupa-raportul-z-inchis-ce-faceti",
+    title: "Un client cere bon fiscal după ce ați închis Raportul Z — ce faceți",
+    description:
+      "Raportul Z de ieri (sau de acum trei săptămâni) e deja generat, iar clientul vrea o dovadă a cumpărăturii. Ce poate și ce nu poate face, tehnic și legal, casa de marcat pentru o zi deja închisă — și ce alternative reale aveți.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "raport-z"],
+    image: "/marketing/pos-hero.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "De ce Raportul Z schimbă complet răspunsul",
+        body: "Raportul Z nu e doar un rezumat al zilei — este momentul în care ziua fiscală respectivă devine definitivă. Așa cum arătăm și în ghidul de stornare corectă, odată generat raportul Z, ziua fiscală se închide și jurnalul electronic al acelei zile rămâne definitiv — nu mai există, prin procedura obișnuită de casă, nicio operațiune care să modifice, să anuleze sau să regenereze o vânzare din acea zi. Cadrul legal pentru ce se poate face cu un bon deja emis, cât timp ziua e încă deschisă, e dat de normele metodologice de aplicare a OUG nr. 28/1999 (aprobate prin HG nr. 479/2003, art. 36) — iar condiția de bază pentru orice corecție e ca operațiunea să aibă loc **înainte** de raportul Z.\n\nSituația dumneavoastră e mai strictă decât un bon pur și simplu pierdut de client. Acolo, bonul a existat și e doar hârtia care lipsește. Aici, dacă ziua e deja închisă, nici casa de marcat fizică nu mai poate „scoate” ceva nou pentru acea zi — indiferent cât de sinceră e cererea clientului.",
+      },
+      {
+        heading: "Duplicat sau retipărire — ce spune practica, nu doar bunul-simț",
+        body: "Legea nu obligă un comerciant să elibereze un „duplicat” de bon fiscal — nu există în OUG nr. 28/1999 sau în normele sale de aplicare o prevedere care să reglementeze explicit un duplicat identic al unui bon deja emis. Motivul e și tehnic, nu doar administrativ: fiecare bon se înregistrează o singură dată, progresiv, în memoria fiscală a aparatului, iar echipamentele actuale nici nu mai păstrează fizic o a doua copie pe hârtie, cum se întâmpla cu vechile role-indigo — tipăresc un singur exemplar.\n\nCe există, la unele case de marcat, e o funcție de **retipărire** — retrimiterea comenzii de printare către imprimantă. Dar ea are sens doar în condiții stricte:\n\n- Incidentul are loc **în aceeași sesiune**, de obicei chiar în timpul sau imediat după tranzacția blocată\n- Bonul **nu a apărut încă** în raportul Z al zilei respective — altfel, retipărirea îl înregistrează a doua oară, o eroare reală de raportare, nu o soluție\n- Ziua fiscală curentă **nu s-a închis încă** prin Raportul Z\n\nPentru o zi cu Raportul Z deja generat, posibil cu zile sau săptămâni în urmă, niciuna dintre aceste condiții nu mai e valabilă — ziua respectivă nu mai este „sesiunea curentă” a niciunei case, iar mecanismul de retipărire nu se aplică.",
+      },
+      {
+        heading: "Ce puteți face concret: verificați tranzacția, chiar dacă nu o puteți retipări",
+        body: "Bonul fizic nu poate fi recreat, dar vânzarea în sine a rămas înregistrată — în jurnalul electronic al casei de marcat și, dacă folosiți un POS conectat, în istoricul digital al aplicației. E același principiu descris în ghidul pentru [un bon fiscal pierdut sau deteriorat](/blog/bon-fiscal-pierdut-sau-deteriorat-ce-faci): jurnalul digital nu înlocuiește un document fiscal nou, dar vă spune rapid dacă, când și pentru cât s-a făcut vânzarea, înainte să decideți cum ajutați clientul.\n\nÎn franchisetech, fiecare vânzare finalizată rămâne căutabilă în istoricul POS după dată, oră și produs, indiferent cât de veche e — nu depinde de memoria personalului sau de hârtia pe care a pierdut-o clientul. Confirmarea internă contează mai ales când cererea vine cu detalii vagi („cred că am fost acum vreo două săptămâni”) — verificați înainte de a promite ceva ce, oricum, casa de marcat fizic nu mai poate emite pentru ziua respectivă.",
+      },
+      {
+        heading: "Dacă a plătit cu cardul, extrasul de cont e deja o dovadă legală",
+        body: "Pentru plățile cu cardul, aveți un răspuns concret care nu depinde deloc de starea Raportului Z. Legea nr. 317/2024, care a modificat OUG nr. 28/1999, prevede că extrasul de cont bancar funcționează ca dovadă a plății, alături de sau în locul bonului fiscal — indiferent dacă bonul a fost tipărit, pierdut sau nu mai poate fi reemis pentru că ziua e deja închisă fiscal. Clientul își poate verifica singur extrasul de cont pentru data și suma respectivă; dumneavoastră puteți confirma, din istoricul intern, că suma corespunde unei vânzări reale din local.\n\nPentru numerar, situația e mai grea, pentru că nu există un al treilea martor electronic independent de casa dumneavoastră. Acolo, verificarea internă din secțiunea anterioară rămâne singurul instrument practic — și, la fel ca la un bon pierdut fără nicio altă urmă, decizia de a accepta cererea clientului rămâne, în lipsa unei dovezi, la latitudinea dumneavoastră.",
+      },
+      {
+        heading: "Dacă ce vrea de fapt e o factură, nu un bon fiscal",
+        body: "Multe cereri de genul „îmi mai dați un bon” ascund, de fapt, o nevoie diferită: clientul are nevoie de un document pe care să-l deconteze la propria firmă sau la contabilul lui, nu literalmente de o hârtie identică cu cea pierdută. Dacă e cazul, răspunsul corect nu e să încercați o retipărire care oricum nu funcționează pentru o zi închisă, ci să discutați despre o factură — [factura și bonul fiscal](/blog/factura-vs-bon-fiscal-diferenta) sunt documente diferite, iar o factură se poate emite ulterior, separat, dacă clientul furnizează CUI-ul firmei.\n\nAtenție: procedura de a emite o factură pe baza unui bon fiscal simplu, fără CUI comunicat la momentul plății, este mai greoaie și depinde de termenele aplicabile — verificați cu contabilul dumneavoastră care e fereastra reală în cazul dumneavoastră, mai ales dacă ziua vânzării e deja la câteva săptămâni distanță.",
+      },
+      {
+        heading: "Cum funcționează în franchisetech",
+        body: "franchisetech nu poate — și nu are cum, tehnic — să recreeze un bon fiscal pentru o zi cu Raportul Z deja generat; niciun POS conectat la o casă de marcat certificată nu poate face asta, indiferent de furnizor. Ce oferă e istoricul complet al vânzărilor, căutabil instant pe dată, oră sau produs, ca să aveți răspunsul corect în câteva secunde, nu să promiteți ceva ce nu se poate livra.\n\nÎn plus, generarea Raportului Z necesită drepturi de administrator sau manager, nu e la îndemâna oricărui casier — exact pentru a reduce riscul unei închideri premature care ar transforma o cerere obișnuită de bon într-o discuție despre o zi deja închisă fiscal, cu ore bune înainte ca locația să se închidă efectiv.",
       },
     ],
   },

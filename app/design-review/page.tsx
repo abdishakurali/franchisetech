@@ -1,8 +1,19 @@
 import { notFound } from "next/navigation";
 import { SettingsWorkspace } from "@/components/app/SettingsWorkspace";
+import { SettingsSectionNav } from "@/components/app/SettingsSectionNav";
 import { SetupChecklist } from "@/components/app/SetupChecklist";
 import { ReportsTrendChart } from "@/components/app/ReportsTrendChart";
 import type { SetupStep } from "@/lib/setup-progress";
+
+const DEMO_SECTIONS = [
+  { id: "demo-business", label: "Business" },
+  { id: "demo-fiscal", label: "Fiscal" },
+  { id: "demo-units", label: "Unități de măsură" },
+  { id: "demo-payments", label: "Metode de plată" },
+  { id: "demo-categories", label: "Categorii" },
+  { id: "demo-location", label: "Locație" },
+  { id: "demo-marketplace", label: "Marketplace" },
+];
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +28,17 @@ export default async function DesignReviewPage({ searchParams }: { searchParams:
       <SettingsWorkspace locale="ro" initialSection={section} canEdit units={["bucată", "kg", "g", "litru", "ml", "porție"]} customUnits={[]} payments={[{ name: "Numerar", type: "cash", active: true }, { name: "Card", type: "card", active: true }]} categories={["Cafea", "Ceai", "Răcoritoare", "Patiserie", "Sandvișuri", "Altele"]} location="Cafeneaua demonstrativă" fiscal={{ configured: true, attempts: 0, sessions: 0, zReports: 0, lastAttempt: null, status: null }} editors={{ units: editor, payments: editor, categories: editor, location: editor, fiscal: editor }} />
       <section id="setup" className="mt-12 border-t border-[#DFDCD2] py-10"><SetupChecklist locale="ro" steps={steps} doneCount={2} totalCount={5} percent={40} /></section>
       <section className="rounded-2xl border border-[#DFDCD2] bg-white p-6"><h2>Vânzări pe zi — exemplu</h2><ReportsTrendChart currency="RON" days={[{ day: "Lun", total: 200 }, { day: "Mar", total: 350 }, { day: "Mie", total: 280 }, { day: "Joi", total: 400 }]} /></section>
+
+      <div className="mt-16 border-t border-[#DFDCD2] pt-10">
+        <p className="mb-4 text-sm text-[#78786F]">Previzualizare: nav secțiuni settings (sticky + secțiune activă)</p>
+        <SettingsSectionNav sections={DEMO_SECTIONS} />
+        {DEMO_SECTIONS.map((s) => (
+          <section key={s.id} id={s.id} className="scroll-mt-20 border-b border-[#DFDCD2] py-16">
+            <h2 className="text-lg font-semibold">{s.label}</h2>
+            <p className="mt-2 text-sm text-[#78786F]">Conținut demonstrativ pentru secțiunea &quot;{s.label}&quot;.</p>
+          </section>
+        ))}
+      </div>
     </div>
   </main>;
 }

@@ -122,7 +122,7 @@ export function TableShape({
             {formatTabDuration(tab.opened_at)}
           </span>
           {tab.status === "bill_requested" && (
-            <span className="text-[9px] font-semibold uppercase tracking-wide text-blue-700">Notă</span>
+            <span className="text-[9px] font-semibold uppercase tracking-wide text-brass">Notă</span>
           )}
         </div>
       )}

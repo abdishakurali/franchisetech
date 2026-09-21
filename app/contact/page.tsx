@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/marketing/ContactForm";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function ContactPage() {
   const isRo = (await getMarketingLocale()) === "ro";
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <main className="px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
         <div className="mx-auto grid max-w-5xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
           <div>
@@ -24,6 +24,6 @@ export default async function ContactPage() {
           <ContactForm />
         </div>
       </main>
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

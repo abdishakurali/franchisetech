@@ -4,25 +4,35 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { CreditCard, ChefHat, Package, TrendingUp, ShoppingCart, Wifi, Receipt, FileBarChart } from "lucide-react";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { pricingPlans } from "@/lib/billing/plans";
+import { HomeFlowDiagram } from "@/components/marketing/HomeFlowDiagram";
+import { PRIMARY_INDUSTRY_NAV, PRIMARY_INDUSTRY_SLUGS } from "@/lib/marketing/industry-verticals";
+import { primaryIndustryPages } from "@/lib/marketing/industry-page-content";
+import { localizeSeoPage } from "@/lib/marketing/i18n";
 import s from "./ClaudeMarketing.module.css";
 
-const pages = [["/", "Acasă"], ["/features", "Funcționalități"], ["/industries", "Industrii"], ["/features/echipamente", "Echipamente"], ["/pricing", "Prețuri"], ["/compare", "Comparații"], ["/blog", "Ghiduri"]] as const;
+const pages = [["/", "Acasă"], ["/features", "Funcționalități"], ["/industries", "Industrii"], ["/features/echipamente", "Echipamente"], ["/pricing", "Prețuri"], ["/compare", "Comparații"], ["/blog", "Ghiduri"], ["/contact", "Contact"]] as const;
+
+export type ClaudeMarketingUser = { displayName: string; initials: string };
 
 export function DesignTrialLink({ location, plan = "starter", children = "Începe gratuit 15 zile" }: { location: string; plan?: "starter" | "pro"; children?: ReactNode }) {
   return <Link className={s.button} href={`/signup?plan=${plan}`} onClick={() => captureClientEvent("cta_clicked", { location, destination: `/signup?plan=${plan}` })}>{children}</Link>;
 }
 
-export function ClaudeMarketingShell({ children }: { children: ReactNode }) {
+export function ClaudeMarketingShell({ children, user = null }: { children: ReactNode; user?: ClaudeMarketingUser | null }) {
   const pathname = usePathname();
   const links = pages.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); captureClientEvent("nav_link_clicked", { label, href, location: "design_navigation" }); }}>{label}</Link>);
+  const accountLinks = user
+    ? <><Link href="/app">Panou</Link><Link href="/app/profile" className="inline-block max-w-[160px] truncate align-bottom">{user.displayName}</Link></>
+    : <><Link href="/login">Autentificare</Link><Link href="/signup?plan=starter">Începeți trialul</Link></>;
   return <div className={s.site}>
     <header className={s.header}><div className={`${s.container} ${s.headerInner}`}>
       <Link href="/" aria-label="FranchiseTech — Acasă"><Image src="/design-marketing/franchise-tech-logo.svg" alt="FranchiseTech" width={190} height={26} className={s.logo} priority /></Link>
       <nav className={s.nav} aria-label="Navigare principală">{links}</nav>
-      <div className={s.account}><Link href="/login">Autentificare</Link><Link href="/signup?plan=starter">Începeți trialul</Link></div>
-      <details className={s.mobile}><summary aria-label="Deschide meniul">Meniu</summary><nav className={s.nav} aria-label="Navigare mobilă">{links}<Link href="/login">Autentificare</Link></nav></details>
+      <div className={s.account}>{accountLinks}</div>
+      <details className={s.mobile}><summary aria-label="Deschide meniul">Meniu</summary><nav className={s.nav} aria-label="Navigare mobilă">{links}{accountLinks}</nav></details>
     </div></header>
     <main>{children}</main>
     <footer className={s.footer}><div className={`${s.container} ${s.footerInner}`}>
@@ -66,32 +76,49 @@ export function DesignFeatures() {
 
 export function DesignHome() {
   const highlights = [
-    ["Vinzi în câteva atingeri", "Produsele direct pe ecran, cu TVA-ul pe fiecare linie. Numerar sau card — două butoane pentru încasare.", "pos-hero.png"],
-    ["Costul apare din rețetă, nu din memorie", "Treci o dată gramajele. Costurile din recepții alimentează rețetele, folosind metoda de calcul configurată în aplicație.", "recipe-costing-hero.png"],
-    ["Stocul se mișcă singur", "Recepții cu NIR, bonuri de consum, fișă de magazie pe articol. Vezi ce e sub minim înainte să rămâi fără.", "stock-report.png"],
-    ["Marja, nu doar încasarea", "Food cost pe produs, marjă pe meniu și rapoarte pentru contabil, în același loc.", "margins-report.png"],
+    ["Vinzi în câteva atingeri", "Produsele direct pe ecran, cu TVA-ul pe fiecare linie. Numerar sau card — două butoane pentru încasare.", ShoppingCart],
+    ["Costul apare din rețetă, nu din memorie", "Treci o dată gramajele. Costurile din recepții alimentează rețetele, folosind metoda de calcul configurată în aplicație.", ChefHat],
+    ["Stocul se mișcă singur", "Recepții cu NIR, bonuri de consum, fișă de magazie pe articol. Vezi ce e sub minim înainte să rămâi fără.", Package],
+    ["Marja, nu doar încasarea", "Food cost pe produs, marjă pe meniu și rapoarte pentru contabil, în același loc.", TrendingUp],
+  ] as const;
+  const saleFlow = [
+    { icon: CreditCard, label: "Vânzare la POS", detail: "Produse, TVA și metodă de plată alese o dată, corect." },
+    { icon: Receipt, label: "Emitere bon fiscal", detail: "Comanda pleacă spre FiscalNet, când integrarea e configurată." },
+    { icon: FileBarChart, label: "Raport Z zilnic", detail: "Vânzări, TVA și diferența de numerar, calculate automat." },
+  ];
+  const offlineFlow = [
+    { icon: Wifi, label: "Cade internetul", detail: "POS-ul rămâne deschis, vânzarea continuă normal." },
+    { icon: Package, label: "Coadă locală", detail: "Maximum 20 de vânzări, păstrate pe stația de lucru." },
+    { icon: CreditCard, label: "Sincronizare automată", detail: "Totul se trimite când revine conexiunea — fără pași manuali." },
   ];
   return <>
     <section className={s.glow}><div className={`${s.container} ${s.hero}`}><div className={s.stack}>
       <p className={s.eyebrow}>POS + gestiune pentru cafenele</p><h1>Știi cât te costă de fapt un cappuccino.</h1>
       <p className={s.lead}>Casa de marcat îți spune cât ai vândut. FranchiseTech îți spune cât ai consumat, cât a costat și cât ți-a rămas — din rețete și stoc reale.</p>
       <div className={s.actions}><DesignTrialLink location="homepage_hero" /><Link href="/features" className={`${s.button} ${s.secondary}`}>Vezi ce face</Link></div><p className={s.meta}>Fără card la înscriere · suport în română</p>
-    </div><div className={s.stack}><div className={s.imageFrame}><Image src="/design-marketing/pos-hero.png" alt="Ecranul de vânzare FranchiseTech" width={1280} height={800} priority /></div><p className={s.meta}>Ecranul de vânzare, din platformă</p></div></div></section>
-    <section className={`${s.container} ${s.section}`}><p className={s.eyebrow}>Ce face, pe scurt</p><h2>Patru lucruri, legate între ele.</h2><div className={s.highlights}>{highlights.map(([title, body, asset], i) => <article className={s.highlight} key={title}><div className={s.stack}><span className={s.number}>0{i + 1}</span><h3>{title}</h3><p className={s.body}>{body}</p></div><div className={s.imageFrame}><Image src={`/design-marketing/${asset}`} alt={title} width={1280} height={800} /></div></article>)}</div></section>
-    <section className={s.dark}><div className={`${s.container} ${s.split}`}><div className={s.stack}><p className={s.eyebrow}>Mod offline</p><h2>Cade internetul. Casa vinde mai departe.</h2><p className={s.body}>Cu POS-ul deja deschis, vânzările intră într-o coadă locală de maximum 20 de intrări și se sincronizează când revine conexiunea.</p><p className={s.notice}>Înregistrarea vânzării și emiterea bonului fiscal sunt etape separate. Bonul fiscal depinde de FiscalNet și de echipamentul din local — în POS vezi ce a rămas de emis.</p></div><div className={s.imageFrame}><Image src="/design-marketing/reports-zreport.png" alt="Raport de închidere a zilei" width={1280} height={800} /></div></div></section>
+    </div><div className={s.stack}><div className={s.imageFrame}><HomeFlowDiagram steps={saleFlow} tone="dark" /></div><p className={s.meta}>Fluxul unei vânzări, din platformă</p></div></div></section>
+    <section className={`${s.container} ${s.section}`}><p className={s.eyebrow}>Ce face, pe scurt</p><h2>Patru lucruri, legate între ele.</h2><div className={s.highlights}>{highlights.map(([title, body, Icon], i) => <article className={s.highlight} key={title as string}><div className={s.stack}><span className={s.number}>0{i + 1}</span><h3>{title}</h3><p className={s.body}>{body}</p></div><div className={`${s.imageFrame} flex aspect-[16/10] items-center justify-center bg-secondary`}><Icon className="h-10 w-10 text-brass" strokeWidth={1.5} aria-hidden /></div></article>)}</div></section>
+    <section className={s.dark}><div className={`${s.container} ${s.split}`}><div className={s.stack}><p className={s.eyebrow}>Mod offline</p><h2>Cade internetul. Casa vinde mai departe.</h2><p className={s.body}>Cu POS-ul deja deschis, vânzările intră într-o coadă locală de maximum 20 de intrări și se sincronizează când revine conexiunea.</p><p className={s.notice}>Înregistrarea vânzării și emiterea bonului fiscal sunt etape separate. Bonul fiscal depinde de FiscalNet și de echipamentul din local — în POS vezi ce a rămas de emis.</p></div><div className={s.imageFrame}><HomeFlowDiagram steps={offlineFlow} tone="dark" /></div></div></section>
     <DesignFinalCta />
   </>;
 }
 
-const industries = [
-  { title: "Cafenele", img: "industry-cafe.png", body: "Viteză la rush hour și marje clare pe cafea. Cele mai multe produse au 2–3 ingrediente, deci costul real se calculează din rețetă.", meta: "clientul nostru activ e o cafenea" },
-  { title: "Restaurante mici", img: "industry-restaurant.png", body: "Meniu care se schimbă, rețete cu mai multe ingrediente și un food cost care trebuie urmărit pe fiecare fel.", meta: "rețete și cost pe fiecare produs" },
-  { title: "Patiserii și bucătării de producție", img: "industry-kitchen.png", body: "Produci dintr-un semipreparat alt produs. Bonul de consum și fișa de magazie sunt documentele zilnice.", meta: "bon de consum · fișă de magazie" },
-  { title: "Food truck și puncte mici", img: "industry-food-truck.png", body: "Internet nesigur și o singură casă. Modul offline și închiderea zilei fac diferența.", meta: "coadă locală de 20 de vânzări" },
-];
+const industries = PRIMARY_INDUSTRY_SLUGS.map((slug) => {
+  const page = primaryIndustryPages.find((p) => p.slug === slug)!;
+  return localizeSeoPage(page, "ro");
+});
 
 export function DesignIndustries() {
-  return <><PageHero eyebrow="Industrii" title="Construit pentru localuri mici, cu bucătărie.">Dacă vinzi ceva ce se prepară din ingrediente, costul real e întrebarea care contează. Dacă vinzi produse ambalate, alte sisteme îți sunt mai potrivite — o spunem înainte să plătești.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={s.grid}>{industries.map((industry) => <article key={industry.title} className={`${s.card} ${s.imageCard}`}><Image src={`/design-marketing/${industry.img}`} alt={industry.title} width={800} height={450} /><div className={s.cardContent}><h2>{industry.title}</h2><p className={s.body}>{industry.body}</p><p className={s.meta}>{industry.meta}</p></div></article>)}</div></section><DesignFinalCta /></>;
+  return <><PageHero eyebrow="Industrii" title="Construit pentru localuri mici, cu bucătărie.">Dacă vinzi ceva ce se prepară din ingrediente, costul real e întrebarea care contează. Dacă vinzi produse ambalate, alte sisteme îți sunt mai potrivite — o spunem înainte să plătești.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={s.grid}>{industries.map((industry) => {
+    const nav = PRIMARY_INDUSTRY_NAV.find((n) => n.slug === industry.slug);
+    const Icon = nav?.icon;
+    return <Link key={industry.slug} href={industry.path} className={`${s.card} ${s.imageCard}`}>
+      <div className="flex aspect-[16/9] items-center justify-center bg-secondary">
+        {Icon && <Icon className="h-10 w-10 text-brass" strokeWidth={1.5} aria-hidden />}
+      </div>
+      <div className={s.cardContent}><h2>{industry.h1}</h2><p className={s.body}>{industry.heroSubheadline ?? industry.intro}</p><p className={s.meta}>{industry.eyebrow}</p></div>
+    </Link>;
+  })}</div></section><DesignFinalCta /></>;
 }
 
 const devices = [

@@ -114,9 +114,9 @@ function PurchasesImportContent() {
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <div>
-          <Link href="/app/purchases" className="text-sm text-slate-500 hover:text-slate-700">← Back to purchases</Link>
-          <h1 className="text-2xl font-semibold text-slate-950 mt-1">Import purchases</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <Link href="/app/purchases" className="text-sm text-muted-foreground hover:text-foreground">← Back to purchases</Link>
+          <h1 className="text-2xl font-semibold text-foreground mt-1">Import purchases</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Use this to add stock purchases. Purchases increase stock.
           </p>
         </div>
@@ -131,23 +131,23 @@ function PurchasesImportContent() {
 
       {/* Result banner */}
       {result && (
-        <div className={`rounded-xl border p-4 ${result.ok ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
+        <div className={`rounded-xl border p-4 ${result.ok ? "border-reconciled/25 bg-reconciled/10" : "border-attention/25 bg-attention/10"}`}>
           {result.ok ? (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
-                <p className="font-semibold text-green-800">Import complete!</p>
+                <CheckCircle2 className="h-5 w-5 text-reconciled shrink-0" />
+                <p className="font-semibold text-reconciled">Import complete!</p>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
                 {[
-                  { label: "Items imported",   value: result.items_imported ?? 0,   color: "text-green-700" },
-                  { label: "Purchases created", value: result.purchases_created ?? 0, color: "text-green-700" },
-                  { label: "Suppliers created", value: result.suppliers_created ?? 0, color: "text-blue-700" },
-                  { label: "Products created",  value: result.products_created ?? 0,  color: "text-blue-700" },
+                  { label: "Items imported",   value: result.items_imported ?? 0,   color: "text-reconciled" },
+                  { label: "Purchases created", value: result.purchases_created ?? 0, color: "text-reconciled" },
+                  { label: "Suppliers created", value: result.suppliers_created ?? 0, color: "text-brass" },
+                  { label: "Products created",  value: result.products_created ?? 0,  color: "text-brass" },
                 ].map((stat) => (
-                  <div key={stat.label} className="rounded-lg bg-white border border-green-200 p-3 text-center">
+                  <div key={stat.label} className="rounded-lg bg-card border border-reconciled/25 p-3 text-center">
                     <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{stat.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -158,16 +158,16 @@ function PurchasesImportContent() {
                 </div>
               )}
               <div className="flex gap-3 mt-2">
-                <Link href="/app/purchases" className="text-sm text-blue-600 hover:underline">View purchases →</Link>
-                <Link href="/app/stock" className="text-sm text-blue-600 hover:underline">View stock →</Link>
+                <Link href="/app/purchases" className="text-sm text-brass hover:underline">View purchases →</Link>
+                <Link href="/app/stock" className="text-sm text-brass hover:underline">View stock →</Link>
               </div>
             </div>
           ) : (
             <div className="flex items-start gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-attention shrink-0 mt-0.5" />
               <div>
-                <p className="font-semibold text-red-800">{result.error ?? "Import failed"}</p>
-                {result.errors?.map((e, i) => <p key={i} className="text-xs text-red-600 mt-0.5">• {e}</p>)}
+                <p className="font-semibold text-attention">{result.error ?? "Import failed"}</p>
+                {result.errors?.map((e, i) => <p key={i} className="text-xs text-attention mt-0.5">• {e}</p>)}
               </div>
             </div>
           )}
@@ -182,7 +182,7 @@ function PurchasesImportContent() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <p className="text-xs text-slate-500 mb-1 font-medium">Upload a CSV file:</p>
+              <p className="text-xs text-muted-foreground mb-1 font-medium">Upload a CSV file:</p>
               <Input
                 type="file"
                 accept=".csv,text/csv"
@@ -190,16 +190,16 @@ function PurchasesImportContent() {
               />
             </div>
             <div>
-              <p className="text-xs text-slate-400 mb-1">Or paste CSV directly:</p>
+              <p className="text-xs text-muted-foreground mb-1">Or paste CSV directly:</p>
               <textarea
                 value={csv}
                 onChange={(e) => setCsv(e.target.value)}
-                className="min-h-48 w-full rounded-md border border-slate-200 p-3 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+                className="min-h-48 w-full rounded-md border border-border p-3 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-brass/30"
               />
             </div>
 
             {clientErrors.length > 0 && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              <div className="rounded-lg border border-attention/25 bg-attention/10 p-3 text-sm text-attention">
                 <p className="font-medium mb-1">Fix these before importing:</p>
                 {clientErrors.slice(0, 5).map((e, i) => <p key={i} className="text-xs">• {e}</p>)}
               </div>
@@ -208,7 +208,7 @@ function PurchasesImportContent() {
             <Button
               type="submit"
               disabled={submitting || !rows.length || clientErrors.length > 0}
-              className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white"
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {submitting ? (
                 <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Importing…</>
@@ -227,7 +227,7 @@ function PurchasesImportContent() {
             <div className="flex items-center justify-between">
               <CardTitle>Preview ({rows.length} rows)</CardTitle>
               {totalCost > 0 && (
-                <span className="text-sm font-semibold text-slate-700">
+                <span className="text-sm font-semibold text-foreground">
                   Total: €{totalCost.toFixed(2)}
                 </span>
               )}
@@ -237,7 +237,7 @@ function PurchasesImportContent() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b text-left text-xs text-slate-400">
+                  <tr className="border-b text-left text-xs text-muted-foreground">
                     <th className="py-2 pr-4">Supplier</th>
                     <th className="py-2 pr-4">Product</th>
                     <th className="py-2 pr-4">Qty</th>
@@ -249,18 +249,18 @@ function PurchasesImportContent() {
                   {rows.slice(0, 15).map((r, i) => {
                     const lineTotal = (Number(r.quantity) || 0) * (Number(r.unit_cost) || 0);
                     return (
-                      <tr key={i} className="border-b last:border-0 hover:bg-slate-50/50">
-                        <td className="py-2 pr-4 text-slate-500">{r.supplier_name || "—"}</td>
+                      <tr key={i} className="border-b last:border-0 hover:bg-secondary/50">
+                        <td className="py-2 pr-4 text-muted-foreground">{r.supplier_name || "—"}</td>
                         <td className="py-2 pr-4 font-medium">{r.product_name}</td>
                         <td className="py-2 pr-4 tabular-nums">{r.quantity} {r.unit}</td>
                         <td className="py-2 pr-4 tabular-nums">€{r.unit_cost}</td>
-                        <td className="py-2 tabular-nums text-slate-600">€{lineTotal.toFixed(2)}</td>
+                        <td className="py-2 tabular-nums text-mid">€{lineTotal.toFixed(2)}</td>
                       </tr>
                     );
                   })}
                   {rows.length > 15 && (
                     <tr>
-                      <td colSpan={5} className="py-2 text-xs text-slate-400 text-center">
+                      <td colSpan={5} className="py-2 text-xs text-muted-foreground text-center">
                         + {rows.length - 15} more rows not shown
                       </td>
                     </tr>
@@ -273,9 +273,9 @@ function PurchasesImportContent() {
       )}
 
       {/* Info box */}
-      <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
+      <div className="rounded-xl border border-brass/15 bg-accent p-4 text-sm text-brass">
         <p className="font-semibold mb-2">What happens when you import</p>
-        <ul className="space-y-1 text-xs text-blue-700">
+        <ul className="space-y-1 text-xs text-brass">
           <li>• Suppliers are created automatically if they don&apos;t exist</li>
           <li>• Products are created as ingredients if they don&apos;t exist yet</li>
           <li>• Stock levels are increased by the quantity purchased</li>
@@ -290,7 +290,7 @@ function PurchasesImportContent() {
 
 export default function PurchasesImportPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-slate-400">Loading…</div>}>
+    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
       <PurchasesImportContent />
     </Suspense>
   );

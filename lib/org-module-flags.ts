@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { OrgModuleRow } from "@/lib/business-modules";
 import type { BusinessProfile } from "@/lib/business-profile";
@@ -40,8 +41,15 @@ export async function orgModuleColumnsAvailable(supabase: SupabaseClient): Promi
   return !error;
 }
 
-/** Load module flags when migration 039 is present. */
-export async function fetchOrgModuleFlags(
+/**
+ * Load module flags when migration 039 is present. cache()-wrapped: this
+ * was being re-queried 2-3x per request (layout, module-guard, page all
+ * call it independently) — dedupe by (supabase, orgId) for one request.
+ * saveOrgModuleFlags() below writes straight to the DB and every caller
+ * re-renders via revalidatePath, so a fresh request always gets a fresh
+ * cache() instance — this never risks serving stale flags across requests.
+ */
+export const fetchOrgModuleFlags = cache(async function fetchOrgModuleFlags(
   supabase: SupabaseClient,
   orgId: string
 ): Promise<OrgModuleRow> {
@@ -72,7 +80,7 @@ export async function fetchOrgModuleFlags(
   }
 
   return (data ?? {}) as OrgModuleRow;
-}
+});
 
 export async function saveOrgModuleFlags(
   supabase: SupabaseClient,

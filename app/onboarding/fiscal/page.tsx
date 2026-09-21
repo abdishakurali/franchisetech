@@ -6,7 +6,7 @@ import { onboardingStepLabels, onboardingStepOfLabel } from "@/lib/onboarding/st
 
 export default async function OnboardingFiscalPage() {
   const { supabase, orgId, countryCode } = await getActiveOrg();
-  if (countryCode !== "RO") redirect("/onboarding/first-sale");
+  if (countryCode !== "RO") redirect("/app/pos?onboarding=1&welcome=1");
 
   const { data: org } = await supabase
     .from("organisations")

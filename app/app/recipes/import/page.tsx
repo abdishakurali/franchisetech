@@ -69,20 +69,20 @@ export default function RecipeImportClient() {
   return (
     <div className="space-y-6 p-6 max-w-3xl">
       <div className="flex items-center gap-3">
-        <Link href="/app/recipes" className="text-sm text-slate-500 hover:text-slate-700">← Recipes</Link>
+        <Link href="/app/recipes" className="text-sm text-muted-foreground hover:text-foreground">← Recipes</Link>
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Import recipes from CSV</h1>
-          <p className="mt-1 text-sm text-slate-500">Use this to connect products to ingredients.</p>
+          <h1 className="text-2xl font-semibold text-foreground">Import recipes from CSV</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Use this to connect products to ingredients.</p>
         </div>
       </div>
 
       <Card>
         <CardHeader><CardTitle>CSV format</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          <p className="text-sm text-slate-500">Required columns: <code className="bg-slate-100 px-1 rounded text-xs">finished_product_name, ingredient_name, quantity_required, unit_of_measure</code></p>
-          <p className="text-sm text-slate-500">Optional: <code className="bg-slate-100 px-1 rounded text-xs">ingredient_cost</code> (falls back to product cost_price)</p>
+          <p className="text-sm text-muted-foreground">Required columns: <code className="bg-secondary px-1 rounded text-xs">finished_product_name, ingredient_name, quantity_required, unit_of_measure</code></p>
+          <p className="text-sm text-muted-foreground">Optional: <code className="bg-secondary px-1 rounded text-xs">ingredient_cost</code> (falls back to product cost_price)</p>
           <textarea
-            className="w-full h-40 rounded-md border border-slate-200 p-3 text-sm font-mono"
+            className="w-full h-40 rounded-md border border-border p-3 text-sm font-mono"
             placeholder={SAMPLE_CSV}
             value={csvText}
             onChange={(e) => setCsvText(e.target.value)}
@@ -101,20 +101,20 @@ export default function RecipeImportClient() {
           </CardHeader>
           <CardContent className="space-y-4">
             {Object.entries(grouped).map(([product, ingredients]) => (
-              <div key={product} className="rounded-lg border border-slate-200 p-4">
+              <div key={product} className="rounded-lg border border-border p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <p className="font-semibold text-slate-900">{product}</p>
+                  <p className="font-semibold text-foreground">{product}</p>
                   <Badge variant="secondary">{ingredients.length} ingredients</Badge>
                 </div>
                 <table className="w-full text-sm">
-                  <thead><tr className="text-left text-slate-400"><th className="pb-1">Ingredient</th><th className="pb-1 text-right">Qty</th><th className="pb-1">Unit</th><th className="pb-1 text-right">Cost/unit</th></tr></thead>
+                  <thead><tr className="text-left text-muted-foreground"><th className="pb-1">Ingredient</th><th className="pb-1 text-right">Qty</th><th className="pb-1">Unit</th><th className="pb-1 text-right">Cost/unit</th></tr></thead>
                   <tbody>
                     {ingredients.map((ing, i) => (
                       <tr key={i} className="border-t">
                         <td className="py-1">{ing.ingredient_name}</td>
                         <td className="py-1 text-right">{ing.quantity_required}</td>
                         <td className="py-1 pl-2">{ing.unit_of_measure}</td>
-                        <td className="py-1 text-right text-slate-400">{ing.ingredient_cost ? `€${ing.ingredient_cost.toFixed(3)}` : "—"}</td>
+                        <td className="py-1 text-right text-muted-foreground">{ing.ingredient_cost ? `€${ing.ingredient_cost.toFixed(3)}` : "—"}</td>
                       </tr>
                     ))}
                   </tbody>

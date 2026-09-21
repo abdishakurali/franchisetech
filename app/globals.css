@@ -142,14 +142,34 @@
   --sidebar-ring: var(--brass);
 }
 
-/* Claude Design: quiet back-office hierarchy for the consolidated settings surface. */
-.settings-page-wrapper h1,
-.settings-page-wrapper h2,
-.settings-page-wrapper h3 {
-  font-family: var(--font-display), var(--font-body), sans-serif;
-  letter-spacing: -0.02em;
+/* Operational app scope (authenticated app + onboarding): a restrained,
+   neutral palette independent of the marketing site's editorial brass/ink/
+   paper identity. Marketing pages keep :root untouched — this class is only
+   applied at the app/onboarding layout roots (AppShell, OnboardingShell).
+   Semantic tokens (--reconciled/--attention success/danger) are intentionally
+   left as-is: they're already legitimate green/red, not marketing color. */
+.app-shell {
+  --background: #f6f6f7;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --secondary: #f0f0f1;
+  --secondary-foreground: #18181b;
+  --muted: #f0f0f1;
+  --muted-foreground: #71717a;
+  --accent: #f0f0f1;
+  --accent-foreground: #18181b;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #18181b;
 }
 
+/* Quiet back-office hierarchy for the consolidated settings surface — sans
+   throughout, no serif/display font (operational UI, not editorial). */
 .settings-page-wrapper .tabular-nums,
 .settings-page-wrapper input[type="number"] {
   font-family: var(--font-space-mono), ui-monospace, monospace;

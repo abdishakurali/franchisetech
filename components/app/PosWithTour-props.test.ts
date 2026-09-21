@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("next/navigation", () => ({ useSearchParams: vi.fn() }));
 vi.mock("@/components/app/PosRegister", () => ({ PosRegister: vi.fn() }));
-vi.mock("@/components/app/PosFirstSaleTour", () => ({ PosFirstSaleTour: vi.fn() }));
-vi.mock("@/components/app/TourOverlay", () => ({ resetTour: vi.fn() }));
 vi.mock("@/lib/pos-offline-queue", () => ({
   invalidateProbeCache: vi.fn(),
   probeServerOnline: vi.fn(),

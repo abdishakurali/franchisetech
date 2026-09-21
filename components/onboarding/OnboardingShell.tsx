@@ -14,11 +14,11 @@ type Props = {
 };
 
 /**
- * The shared centered, calm shell every /onboarding/* route renders inside.
- * No app navbar, no dashboard chrome — onboarding IS the product until the
- * user reaches /onboarding/result (see docs/onboarding-redesign-audit-
- * 2026-09-19.md Section 19/29). The receipt-edge motif at the card's foot
- * is the redesign's signature detail, not decoration.
+ * The shared calm, operational shell every /onboarding/* route renders
+ * inside. No app navbar, no dashboard chrome — onboarding IS the product
+ * until the user reaches /onboarding/result. Uses the .app-shell token
+ * scope (neutral, sans) rather than the marketing site's editorial brass/
+ * serif identity — onboarding is a setup task, not a landing page.
  */
 export function OnboardingShell({
   stepLabels,
@@ -31,29 +31,29 @@ export function OnboardingShell({
   children,
 }: Props) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="app-shell min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
           <img src="/marketing/franchise-tech-logo.png" alt="franchisetech" className="h-8 w-auto" />
           {trialBadge ? (
-            <span className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-foreground ring-1 ring-brass/25">
+            <span className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-muted-foreground">
               {trialBadge}
             </span>
           ) : null}
         </div>
       </header>
 
-      <main className="mx-auto max-w-[768px] px-4 py-8 pb-16 sm:py-10">
+      <main className="mx-auto max-w-[640px] px-4 py-8 pb-16 sm:py-10">
         <OnboardingStepper labels={stepLabels} current={currentStepIndex} timeEstimate={timeEstimate} stepOfLabel={stepOfLabel} />
 
-        <div className="receipt-edge-bottom overflow-hidden rounded-xl border border-border bg-card pb-4">
-          <div className="p-5 sm:p-10">
-            <div className="mb-8">
-              <h1 className="font-[family-name:var(--font-display)] text-[30px] font-semibold leading-[1.1] tracking-[-0.02em] text-foreground sm:text-[34px]">
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
+          <div className="p-5 sm:p-8">
+            <div className="mb-6">
+              <h1 className="text-xl font-semibold leading-tight text-foreground sm:text-2xl">
                 {title}
               </h1>
               {subtitle ? (
-                <p className="mt-3 max-w-xl text-[17px] leading-[1.55] text-mid">{subtitle}</p>
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">{subtitle}</p>
               ) : null}
             </div>
             {children}

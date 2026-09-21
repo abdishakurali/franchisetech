@@ -3,8 +3,13 @@ import {
   updateOrgCountry, updateOrgCurrency, updateOrganisationIndustry,
   addPaymentMethod, updatePaymentMethod, deletePaymentMethod,
   addVatRate, updateVatRate, deleteVatRate, seedDefaultVatRates,
+  addUnit, updateUnit, deleteUnit,
   updateSite,
+  approveProductVat, updateSgrPolicy,
+  updateBusinessProfileAndModules,
 } from "@/app/actions/kitchenops";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PRODUCT_INVENTORY_CATEGORY_EMBED } from "@/lib/supabase/product-selects";
 import { SettingsSection } from "@/components/app/SettingsSection";
 import { SettingsListSection } from "@/components/app/SettingsListSection";
 import { unitLabel } from "@/lib/units-of-measure";
@@ -23,7 +28,8 @@ import Link from "next/link";
 import { CopyReferralButton } from "@/components/app/CopyReferralButton";
 import { ensureReferralCode } from "@/lib/referrals";
 import { FiscalNetSettingsCard } from "@/components/app/FiscalNetSettingsCard";
-import { SettingsTabNav } from "@/components/app/SettingsTabNav";
+import { ScrollToAnchor } from "@/components/app/ScrollToAnchor";
+import { SettingsSectionNav } from "@/components/app/SettingsSectionNav";
 import { FormSelect } from "@/components/app/FormSelect";
 import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
@@ -34,9 +40,24 @@ import { getSuggestedFeaturesForIndustry } from "@/lib/restaurant-features";
 import { DEFAULT_OPERATIONAL_UNITS } from "@/lib/units-of-measure";
 import { CuiLookupCard } from "@/components/app/CuiLookupCard";
 import { OwnerDigestCard, type OwnerDigestTeamMember } from "@/components/app/OwnerDigestCard";
+import { NotificationPreferences } from "@/components/app/NotificationPreferences";
+import type { NotificationKey } from "@/app/actions/org-settings";
 import { BillingPanel } from "@/components/billing/BillingPanel";
 import { CheckCircle2, Circle, AlertCircle, ExternalLink } from "lucide-react";
-import { SettingsWorkspace as SettingsCoreLists } from "@/components/app/SettingsWorkspace";
+import dynamic from "next/dynamic";
+import { getAllTables, getFloorSections } from "@/app/actions/table-service";
+import { listAccessibleSites, requireActiveSite } from "@/lib/site-context";
+import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
+import { LEAN_PRODUCT_SCOPE_ENABLED } from "@/lib/product-scope";
+import { getSubscriptionStatus } from "@/lib/billing/subscription";
+import type { BillingPlan } from "@/lib/billing/plans";
+import { BusinessModulesCard } from "@/components/app/BusinessModulesCard";
+import { TeamClient } from "@/app/app/settings/team/TeamClient";
+import { AccountantSettingsSection, type AccountingOrg } from "@/components/app/AccountantSettingsSection";
+
+const TablesSettingsClient = dynamic(() =>
+  import("@/components/app/TablesSettingsClient").then((m) => m.TablesSettingsClient)
+);
 
 const COUNTRY_OPTIONS = [
   { code: "IE", label: "Ireland" },
@@ -105,12 +126,11 @@ function canManage(role: string | null | undefined) {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ tab?: string; locked?: string; msg?: string; reason?: string; checkout?: string; install_error?: string }>;
+  searchParams?: Promise<{ tab?: string; locked?: string; msg?: string; reason?: string; checkout?: string; install_error?: string; install?: string }>;
 }) {
   const params = await searchParams;
   const rawTab = params?.tab ?? "overview";
   const activeTab = TAB_ALIASES[rawTab] ?? rawTab;
-  const coreTab = ["overview", "units", "payment-methods", "categories", "location", "fiscal"].includes(activeTab);
   const lockedModule = params?.locked ?? null;
   const lockedMessage = params?.msg ? decodeURIComponent(params.msg) : null;
 
@@ -203,13 +223,11 @@ export default async function SettingsPage({
     lastZReportAt = zReportsAgg.data?.[0]?.fiscal_z_report_at ?? null;
   }
 
-  // Units — read-only. The normalization migration (20260915010000) settled
-  // this org's units onto the canonical set; the only place a free-text unit
-  // name could ever re-enter the system was this settings page's old "add a
-  // unit" form, which nothing here has used (confirmed: zero rows in
-  // units_of_measure, org-specific or global, for every org checked). Not
-  // rebuilding that input. If a custom unit genuinely exists for an org, it
-  // still shows here — just without a way to type a new one.
+  // Units — full CRUD. addUnit/updateUnit/deleteUnit (app/actions/kitchenops.ts)
+  // reject any name that collides (case-insensitively) with a standard unit's
+  // code or Romanian label via isReservedUnitName(), so a custom unit can't
+  // re-create the old "Buc"/"Units" duplication this list used to guard
+  // against by being read-only.
   const { data: customUnitRows } = await supabase
     .from("units_of_measure")
     .select("id,name,abbreviation")
@@ -318,6 +336,89 @@ export default async function SettingsPage({
     ? Math.ceil((new Date(complianceEnforcementAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
+  // Data repair (merged from the former /app/settings/data-repair route) —
+  // RO-only, same gate as the VAT review banner above: the VAT queue and SGR
+  // policy concepts are meaningless outside Romanian fiscal compliance.
+  let dataRepairProducts: Array<{ id: string; name: string; vat_rate: number; vat_status: string | null; category: string | null; inventory_category: unknown }> = [];
+  let dataRepairRates: Array<{ id: string; name: string; rate: number }> = [];
+  let dataRepairBatches: Array<{ id: string; repair_type: string; status: string; summary: unknown; created_at: string; completed_at: string | null }> = [];
+  let sgrPolicy: { sgr_policy: string | null; sgr_deposit_amount: number | null; sgr_vat_rate: number | null } | null = null;
+  if (isRO) {
+    const [{ data: repairProductsData }, { data: ratesData }, { data: batchesData }, { data: sgrData }] = await Promise.all([
+      supabase.from("products")
+        .select(`id,name,vat_rate,vat_status,category,${PRODUCT_INVENTORY_CATEGORY_EMBED}(name)`)
+        .eq("organisation_id", orgId)
+        .in("vat_status", ["pending", "ambiguous"])
+        .eq("active", true)
+        .order("name"),
+      supabase.from("vat_rates").select("id,name,rate").eq("organisation_id", orgId).eq("active", true).order("sort_order"),
+      supabase.from("repair_batches").select("id,repair_type,status,summary,created_at,completed_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(20),
+      supabase.from("organisations").select("sgr_policy,sgr_deposit_amount,sgr_vat_rate").eq("id", orgId).single(),
+    ]);
+    dataRepairProducts = (repairProductsData ?? []) as typeof dataRepairProducts;
+    dataRepairRates = ratesData ?? [];
+    dataRepairBatches = batchesData ?? [];
+    sgrPolicy = sgrData ?? null;
+  }
+
+  // Modules — subscriptionPlan/hasTrial computed the same way app/app/layout.tsx
+  // does for module-nav visibility, reused here to gate which toggles are locked.
+  const subStatus = await getSubscriptionStatus(orgId).catch(() => null);
+  const hasTrialForModules = subStatus?.state === "trialing" || subStatus?.state === "soft_trial";
+
+  // Tables (merged from the former /app/settings/tables route). Gated the
+  // same way app/app/pos/page.tsx gates its own table-service UI — parked
+  // behind LEAN_PRODUCT_SCOPE_ENABLED regardless of the org's DB flag, so
+  // Settings never offers to configure something POS won't actually show.
+  const tableServiceEnabled = !LEAN_PRODUCT_SCOPE_ENABLED && Boolean(orgRow?.table_service_enabled);
+  const orgModuleFlags = await fetchOrgModuleFlags(supabase, orgId);
+  const multiSiteTables = orgModuleFlags.multi_site_ops_enabled === true;
+  let tablesActiveSiteId: string | null = null;
+  let tablesSites: { id: string; name: string }[] = [];
+  let tables: Awaited<ReturnType<typeof getAllTables>> = [];
+  let floorSections: Awaited<ReturnType<typeof getFloorSections>> = [];
+  if (tableServiceEnabled) {
+    if (multiSiteTables) {
+      tablesSites = await listAccessibleSites(supabase, orgId, membership.id, membership.role);
+      const resolved = await requireActiveSite(supabase, orgId, membership.id, membership.role);
+      tablesActiveSiteId = resolved.siteId;
+    }
+    const tablesSiteFilter = multiSiteTables ? tablesActiveSiteId : undefined;
+    [tables, floorSections] = await Promise.all([
+      getAllTables(tablesSiteFilter),
+      getFloorSections(tablesSiteFilter),
+    ]);
+  }
+
+  // Team (merged from the former /app/settings/team route) — admin-client
+  // read because RLS blocks reading other members' profiles/roles directly.
+  // Kept as its own query rather than reusing digestTeamMembers above: that
+  // one is active-members-only with a narrower profile select (built for the
+  // digest recipient picker), while Team needs every member (including
+  // disabled ones) plus role_title/phone for the management table.
+  type TeamProfile = { id: string; full_name: string | null; email: string | null; role_title: string | null; phone: string | null };
+  type TeamMember = { id: string; user_id: string; role: string; status: string; created_at: string; invited_by: string | null; disabled_at: string | null; profile: TeamProfile | null };
+  let teamMembers: TeamMember[] = [];
+  let teamMembersError: string | null = null;
+  let advancedRolesAllowed = false;
+  if (canEdit) {
+    const admin = await createServiceClient();
+    const { data: rawMembers, error: teamError } = await admin
+      .from("organisation_members")
+      .select("id,user_id,role,status,created_at,invited_by,disabled_at")
+      .eq("organisation_id", orgId)
+      .order("created_at");
+    teamMembersError = teamError?.message ?? null;
+    const teamUserIds = (rawMembers ?? []).map((m) => m.user_id);
+    const { data: teamProfiles } = await admin
+      .from("profiles")
+      .select("id,full_name,email,role_title,phone")
+      .in("id", teamUserIds.length ? teamUserIds : ["00000000-0000-0000-0000-000000000000"]);
+    const teamProfileMap = new Map((teamProfiles ?? []).map((p) => [p.id, p as TeamProfile]));
+    teamMembers = (rawMembers ?? []).map((m) => ({ ...m, profile: teamProfileMap.get(m.user_id) ?? null }));
+    advancedRolesAllowed = await hasEntitlement(orgId, "team.advanced_roles", { write: true });
+  }
+
   const sagaGestiuneCode = (orgRow?.saga_gestiune_code as string | null) ?? null;
   const sagaInstalled = Boolean(orgRow?.saga_export_enabled ?? false);
   const accountantStepsDone = [
@@ -327,37 +428,55 @@ export default async function SettingsPage({
     false, // compliance documents — cannot check in DB
   ].filter(Boolean).length;
 
-  // ── Tabs ─────────────────────────────────────────────────────────────
-  // Step 8: units / payment methods / categories / location / fiscal are
-  // the five core operational sections, in that order — the list pattern
-  // built once, used five times. Business profile, Marketplace,
-  // notifications, billing, team, and data-repair are unrelated concerns
-  // and keep their own tabs; nothing about them changes here.
-  const tabs = [
-    { id: "overview",         label: isRO ? "Setări" : "Settings" },
+  // Accountant (merged from the former /app/settings/accountant route).
+  // orgRow already carries every AccountingOrg field via MEMBERSHIP_SELECT —
+  // no separate organisations query needed. Sites need saga_gestiune_code,
+  // which the hub's own "location" sites query above doesn't select, so this
+  // stays a small dedicated query, matching the original page exactly.
+  const installingSaga = params?.install === "saga";
+  let accountantSites: Array<{ id: string; name: string | null; city: string | null; address: string | null; saga_gestiune_code: string | null }> = [];
+  let accountantEntitled = false;
+  if (sagaInstalled) {
+    const [{ data: siteRows }, entitled] = await Promise.all([
+      supabase.from("sites").select("id, name, city, address, saga_gestiune_code").eq("organisation_id", orgId).order("name"),
+      hasEntitlement(orgId, "reports.accountant_pack"),
+    ]);
+    accountantSites = siteRows ?? [];
+    accountantEntitled = entitled;
+  }
+
+  // ── Section nav ──────────────────────────────────────────────────────
+  // One scrollable page — every destination is either an anchored section
+  // below or, for Team/Accountant/Data repair (formerly separate routes),
+  // merged directly into the page as sections too. Old URLs redirect here.
+  const sectionNav: Array<{ id: string; label: string }> = [
     { id: "business",         label: t.settings.tabBusiness },
+    ...(isRO && (fiscalnetEnabled || efacturaEnabled || sagaInstalled)
+      ? [{ id: "fiscal", label: "Fiscal" }]
+      : []),
+    ...(sagaInstalled ? [{ id: "accountant", label: "Contabilitate" }] : []),
+    { id: "modules",          label: isRO ? "Module" : "Modules" },
     { id: "units",            label: isRO ? "Unități de măsură" : "Units" },
     { id: "payment-methods",  label: isRO ? "Metode de plată" : "Payment methods" },
     { id: "categories",       label: isRO ? "Categorii" : "Categories" },
     { id: "location",         label: isRO ? "Locație" : "Location" },
-    ...(isRO && (fiscalnetEnabled || efacturaEnabled || sagaInstalled)
-      ? [{ id: "fiscal", label: "Fiscal" }]
-      : []),
-    { id: "marketplace", label: "Marketplace" },
-    { id: "notifications",label: isRO ? "Notificări" : t.settings.tabNotifications },
-    { id: "billing",      label: t.settings.tabBilling },
-    { id: "team", label: isRO ? "Echipă" : "Team", href: "/app/settings/team" },
-    ...(isRO ? [{ id: "data-repair", label: "Controlul datelor", href: "/app/settings/data-repair" }] : []),
+    ...(canEdit ? [{ id: "team", label: isRO ? "Echipă" : "Team" }] : []),
+    { id: "marketplace",      label: "Marketplace" },
+    ...(tableServiceEnabled ? [{ id: "tables", label: isRO ? "Mese" : "Tables" }] : []),
+    { id: "notifications",    label: isRO ? "Notificări" : t.settings.tabNotifications },
+    ...(isRO ? [{ id: "data-repair", label: "Controlul datelor" }] : []),
+    { id: "billing",          label: t.settings.tabBilling },
   ];
+  const scrollTarget = activeTab !== "overview" ? activeTab : null;
 
   const unitsEditor = (
 <div className="space-y-6">
           <SettingsSection
-            title={isRO ? "Unități de măsură" : "Units of measurement"}
+            title={isRO ? "Unități standard" : "Standard units"}
             description={
               isRO
-                ? "Unitățile standard sunt fixe — un articol precum „Buc”/„Units” care ar duplica una dintre ele nu mai poate fi introdus aici."
-                : "The standard set is fixed — a free-text entry that would duplicate one of these (like the old \"Buc\"/\"Units\" split) is no longer offered here."
+                ? "Acestea sunt mereu disponibile și nu pot fi editate."
+                : "Always available, and can't be edited."
             }
           >
             <div className="flex flex-wrap gap-2">
@@ -365,19 +484,37 @@ export default async function SettingsPage({
                 <Badge key={u} variant="outline" className="text-mid">{unitLabel(u, isRO ? "ro" : "en")}</Badge>
               ))}
             </div>
-            {customUnits.length > 0 ? (
-              <div className="mt-4 border-t border-border pt-4">
-                <p className="text-xs text-muted-foreground mb-2">{isRO ? "Unități personalizate" : "Custom units"}</p>
-                <div className="flex flex-wrap gap-2">
-                  {customUnits.map((u) => (
-                    <Badge key={u.id} variant="outline" className="text-mid">
-                      {u.name}{u.abbreviation ? ` (${u.abbreviation})` : ""}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </SettingsSection>
+
+          <SettingsListSection
+            title={isRO ? "Unități personalizate" : "Custom units"}
+            description={
+              isRO
+                ? "Un nume care ar duplica o unitate standard (ex. „Buc”/„Units”) nu este acceptat."
+                : "A name that would duplicate a standard unit (e.g. \"Buc\"/\"Units\") is rejected."
+            }
+            rows={customUnits.map((u: { id: string; name: string; abbreviation: string | null }) => ({
+              id: u.id,
+              primary: u.name,
+              secondary: u.abbreviation || null,
+              editValues: { name: u.name, abbreviation: u.abbreviation ?? "" },
+            }))}
+            canEdit={canEdit}
+            addFields={[
+              { key: "name", label: isRO ? "Nume" : "Name", type: "text", placeholder: isRO ? "ex. cutie mică" : "e.g. small box" },
+              { key: "abbreviation", label: isRO ? "Abreviere (opțional)" : "Abbreviation (optional)", type: "text", placeholder: "ex. cut." },
+            ]}
+            editFields={[
+              { key: "name", label: isRO ? "Nume" : "Name", type: "text" },
+              { key: "abbreviation", label: isRO ? "Abreviere" : "Abbreviation", type: "text" },
+            ]}
+            addDefaults={{ name: "", abbreviation: "" }}
+            addAction={addUnit as unknown as (fd: FormData) => Promise<void>}
+            updateAction={updateUnit as unknown as (fd: FormData) => Promise<void>}
+            deleteAction={deleteUnit as unknown as (fd: FormData) => Promise<void>}
+            addLabel={isRO ? "+ Adaugă unitate" : "+ Add unit"}
+            emptyLabel={isRO ? "Nicio unitate personalizată încă." : "No custom units yet."}
+          />
         </div>
   );
 
@@ -586,7 +723,7 @@ export default async function SettingsPage({
                     <AlertCircle className="h-4 w-4 text-amber-500" />
                     Neconectat la ANAF SPV
                   </div>
-                  <Link href="/app/settings?tab=marketplace">
+                  <Link href="#marketplace">
                     <Button size="sm">Conectează cu ANAF SPV &rarr;</Button>
                   </Link>
                 </div>
@@ -623,7 +760,7 @@ export default async function SettingsPage({
                   <p className="text-sm font-medium text-foreground">Configurare contabil (Saga, CMP, coduri)</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{accountantStepsDone}/4 pași completați</p>
                 </div>
-                <Link href="/app/settings/accountant">
+                <Link href="#accountant">
                   <Button variant="outline" size="sm">Configurare &rarr;</Button>
                 </Link>
               </div>
@@ -677,7 +814,7 @@ export default async function SettingsPage({
                 </Link>
               </div>
               <div className="pt-1">
-                <Link href="/app/settings/accountant?tab=checklist" className="text-sm text-brass hover:underline">
+                <Link href="#accountant" className="text-sm text-brass hover:underline">
                   Descarcă proceduri interne &rarr;
                 </Link>
               </div>
@@ -713,7 +850,7 @@ export default async function SettingsPage({
                 <CardDescription>Alege e-Factura, FiscalNet sau Saga doar dacă le folosești.</CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/app/settings?tab=marketplace">
+                <Link href="#marketplace">
                   <Button>Deschide Marketplace</Button>
                 </Link>
               </CardContent>
@@ -731,7 +868,7 @@ export default async function SettingsPage({
 
       {vatReviewCount > 0 && (
         <Link
-          href="/app/settings/data-repair"
+          href="#data-repair"
           className={`mb-6 flex items-start gap-3 rounded-lg border p-4 text-sm ${
             daysUntilEnforcement !== null && daysUntilEnforcement <= 3
               ? "border-attention/40 bg-attention/10 text-red-900"
@@ -752,13 +889,11 @@ export default async function SettingsPage({
         </Link>
       )}
 
-      {/* Rendered here, not inside a specific tab: this banner comes from
-          module-guard.ts's redirect (?tab=operations&locked=X&msg=Y), and
-          "operations" no longer names a real section since categories and
-          units moved to their own tabs. A cross-cutting notice like this
-          shouldn't depend on which tab happens to be active when someone
-          lands here — that dependency is exactly what made the original
-          redirect target silently wrong for as long as it was. */}
+      {/* Rendered here, not inside a specific section: this banner comes from
+          module-guard.ts's redirect (?tab=operations&locked=X&msg=Y). A
+          cross-cutting notice like this shouldn't depend on scroll
+          position — that's exactly what made the original redirect target
+          silently wrong for as long as it was. */}
       {lockedModule && lockedMessage ? (
         <Card className="mb-6 border-amber-200 bg-amber-50">
           <CardHeader>
@@ -766,33 +901,27 @@ export default async function SettingsPage({
             <CardDescription>{lockedMessage}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/app/settings?tab=marketplace">
+            <Link href="#marketplace">
               <Button variant="outline">Deschide Marketplace</Button>
             </Link>
           </CardContent>
         </Card>
       ) : null}
 
-      {!coreTab && <SettingsTabNav tabs={tabs} />}
-      {coreTab && <div className="mb-5 flex justify-end"><Link href="?tab=business" className="text-sm font-medium text-mid underline underline-offset-4">Firmă, TVA și cont</Link></div>}
+      {/* One scrollable page, no tabs, no "Gestionează" accordion — every
+          section below is always visible and always editable inline,
+          including former separate routes (Team, Accountant, Data repair)
+          now merged in as sections too. Sticks to the top on scroll and
+          highlights whichever section is actually in view. */}
+      <SettingsSectionNav sections={sectionNav} />
 
-      {coreTab && (
-        <SettingsCoreLists
-          locale={locale}
-          initialSection={activeTab}
-          editors={{ units: unitsEditor, payments: paymentsEditor, categories: categoriesEditor, location: locationEditor, fiscal: isRO ? fiscalEditor : null }}
-          canEdit={canEdit}
-          units={DEFAULT_OPERATIONAL_UNITS.map((u) => unitLabel(u, isRO ? "ro" : "en"))}
-          customUnits={customUnits.map((u) => `${u.name}${u.abbreviation ? ` (${u.abbreviation})` : ""}`)}
-          payments={((paymentMethods ?? []) as Array<{ name: string; type: string; active: boolean }>).map((m) => ({ name: m.name, type: m.type, active: m.active }))}
-          categories={(categories ?? []).map((c) => c.name as string)}
-          location={primarySite ? `${primarySite.name}${primarySite.city ? ` · ${primarySite.city}` : ""}` : (isRO ? "Nicio locație" : "No location")}
-          fiscal={{ configured: fiscalnetEnabled, attempts: fiscalReceiptAttempts, sessions: sessionsClosedCount, zReports: zReportsDoneCount, lastAttempt: fiscalLastAttemptAt, status: fiscalLastAttemptStatus }}
-        />
-      )}
+      <ScrollToAnchor targetId={scrollTarget} />
 
-      {/* ── BUSINESS TAB ─────────────────────────────────────────────── */}
-      {activeTab === "business" && (
+      <div className="space-y-12">
+
+      {/* ── BUSINESS ─────────────────────────────────────────────────── */}
+      <section id="business" className="scroll-mt-20">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">{t.settings.tabBusiness}</h2>
         <div className="space-y-6">
 
           {/* CUI autofill (RO only) */}
@@ -966,20 +1095,84 @@ export default async function SettingsPage({
           />
 
         </div>
+      </section>
+
+      {/* ── FISCAL (RO only) ─────────────────────────────────────────── */}
+      {isRO && (fiscalnetEnabled || efacturaEnabled || sagaInstalled) && (
+        <section id="fiscal" className="scroll-mt-20">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Fiscal</h2>
+          {fiscalEditor}
+        </section>
       )}
 
-      {/* ── UNITS TAB ────────────────────────────────────────────────── */}
+      {/* ── ACCOUNTANT ───────────────────────────────────────────────── */}
+      {sagaInstalled && (
+        <section id="accountant" className="scroll-mt-20">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Contabilitate</h2>
+          <AccountantSettingsSection
+            supabase={supabase}
+            orgId={orgId}
+            countryCode={countryCode}
+            org={orgRow as unknown as AccountingOrg}
+            sites={accountantSites}
+            installingSaga={installingSaga}
+            entitled={accountantEntitled}
+          />
+        </section>
+      )}
 
-      {/* ── PAYMENT METHODS TAB ──────────────────────────────────────── */}
+      {/* ── MODULES ──────────────────────────────────────────────────── */}
+      <section id="modules" className="scroll-mt-20">
+        <BusinessModulesCard
+          org={orgModuleFlags}
+          canEdit={canEdit}
+          subscriptionPlan={(subStatus?.plan as BillingPlan | null) ?? null}
+          hasTrial={hasTrialForModules}
+          locale={locale}
+          updateAction={updateBusinessProfileAndModules}
+        />
+      </section>
 
-      {/* ── LOCATION TAB ─────────────────────────────────────────────── */}
+      {/* ── UNITS ────────────────────────────────────────────────────── */}
+      <section id="units" className="scroll-mt-20">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">{isRO ? "Unități de măsură" : "Units"}</h2>
+        {unitsEditor}
+      </section>
 
-      {/* ── CATEGORIES TAB ───────────────────────────────────────────── */}
+      {/* ── PAYMENT METHODS ──────────────────────────────────────────── */}
+      <section id="payment-methods" className="scroll-mt-20">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">{isRO ? "Metode de plată" : "Payment methods"}</h2>
+        {paymentsEditor}
+      </section>
 
-      {/* ── FISCAL & CONTABILITATE TAB (RO only) ─────────────────────── */}
+      {/* ── CATEGORIES ───────────────────────────────────────────────── */}
+      <section id="categories" className="scroll-mt-20">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">{isRO ? "Categorii" : "Categories"}</h2>
+        {categoriesEditor}
+      </section>
 
-      {/* ── INTEGRATIONS TAB ─────────────────────────────────────────── */}
-      {activeTab === "marketplace" && (
+      {/* ── LOCATION ─────────────────────────────────────────────────── */}
+      <section id="location" className="scroll-mt-20">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">{isRO ? "Locație" : "Location"}</h2>
+        {locationEditor}
+      </section>
+
+      {/* ── TEAM ─────────────────────────────────────────────────────── */}
+      {canEdit && (
+        <section id="team" className="scroll-mt-20">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">{isRO ? "Echipă" : "Team"}</h2>
+          {teamMembersError && (
+            <div className="mb-4 rounded bg-attention/10 px-4 py-3 text-sm text-attention">
+              Error loading members: {teamMembersError}
+            </div>
+          )}
+          <TeamClient initialMembers={teamMembers} advancedRolesAllowed={advancedRolesAllowed} />
+        </section>
+      )}
+
+      {/* ── MARKETPLACE ──────────────────────────────────────────────── */}
+      <section id="marketplace" className="scroll-mt-20">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">Marketplace</h2>
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground mb-4">
             {isRO
@@ -993,11 +1186,33 @@ export default async function SettingsPage({
             returnTo="/app/settings?tab=marketplace"
           />
         </div>
+      </section>
+
+      {/* ── TABLES ───────────────────────────────────────────────────── */}
+      {tableServiceEnabled && (
+        <section id="tables" className="scroll-mt-20">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">{isRO ? "Mese" : "Tables"}</h2>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground mb-4">
+              {isRO
+                ? "Configurează planul sălii — secțiuni, layout și mese. Ospătarii aleg masa direct din POS."
+                : "Configure the floor plan — sections, layout, and tables. Staff pick the table directly in POS."}
+            </p>
+            <TablesSettingsClient
+              tables={tables}
+              sections={floorSections}
+              sites={tablesSites}
+              multiSite={multiSiteTables}
+              activeSiteId={tablesActiveSiteId}
+            />
+          </div>
+        </section>
       )}
 
-      {/* ── NOTIFICATIONS TAB ────────────────────────────────────────── */}
-      {activeTab === "notifications" && (
-        <div className="space-y-2">
+      {/* ── NOTIFICATIONS ────────────────────────────────────────────── */}
+      <section id="notifications" className="scroll-mt-20">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">{isRO ? "Notificări" : t.settings.tabNotifications}</h2>
+        <div className="space-y-6">
           {digestAllowed && (
             <OwnerDigestCard
               locale={locale}
@@ -1007,11 +1222,111 @@ export default async function SettingsPage({
               teamMembers={digestTeamMembers}
             />
           )}
+          <NotificationPreferences
+            initialPrefs={(orgRow?.notification_preferences as Partial<Record<NotificationKey, boolean>>) ?? {}}
+            canEdit={canEdit}
+            reportsIncluded={digestAllowed}
+          />
         </div>
+      </section>
+
+      {/* ── DATA REPAIR (RO only) ────────────────────────────────────── */}
+      {isRO && (
+        <section id="data-repair" className="scroll-mt-20">
+          <h2 className="mb-4 text-lg font-semibold text-foreground">Controlul datelor</h2>
+          <div className="space-y-6">
+            <p className="text-sm text-muted-foreground">Excepțiile sunt blocate din POS până la validare și fiecare corecție rămâne în audit.</p>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="border-l-4 border-red-500 bg-card p-4">
+                <p className="text-sm text-muted-foreground">TVA de validat</p>
+                <p className="mt-1 text-2xl font-semibold">{dataRepairProducts.length}</p>
+              </div>
+              <div className="border-l-4 border-amber-500 bg-card p-4">
+                <p className="text-sm text-muted-foreground">Blocarea începe</p>
+                <p className="mt-1 text-sm font-semibold">{complianceEnforcementAt ? new Date(complianceEnforcementAt).toLocaleString("ro-RO") : "Imediat"}</p>
+              </div>
+              <div className="border-l-4 border-emerald-600 bg-card p-4">
+                <p className="text-sm text-muted-foreground">Loturi finalizate</p>
+                <p className="mt-1 text-2xl font-semibold">{dataRepairBatches.filter((batch) => batch.status === "completed").length}</p>
+              </div>
+            </div>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Coada TVA</CardTitle></CardHeader>
+              <CardContent className="overflow-x-auto">
+                <Table>
+                  <TableHeader><TableRow><TableHead>Produs</TableHead><TableHead>Categorie</TableHead><TableHead>Stare</TableHead><TableHead>Cotă aprobată</TableHead></TableRow></TableHeader>
+                  <TableBody>
+                    {dataRepairProducts.map((product) => {
+                      const categoryRelation = product.inventory_category as unknown as { name?: string | null } | Array<{ name?: string | null }> | null;
+                      const category = Array.isArray(categoryRelation) ? categoryRelation[0]?.name : categoryRelation?.name;
+                      return (
+                        <TableRow key={product.id}>
+                          <TableCell className="font-medium">{product.name}</TableCell>
+                          <TableCell>{category ?? product.category ?? "Fără categorie"}</TableCell>
+                          <TableCell><Badge variant="secondary">{product.vat_status === "ambiguous" ? "Ambiguu" : "În așteptare"}</Badge></TableCell>
+                          <TableCell>
+                            {canEdit ? (
+                              <form action={approveProductVat} className="flex min-w-56 gap-2">
+                                <input type="hidden" name="product_id" value={product.id} />
+                                <select name="vat_rate" defaultValue={String(product.vat_rate)} className="h-9 flex-1 rounded-md border bg-card px-2 text-sm">
+                                  {dataRepairRates.map((rate) => <option key={rate.id} value={Number(rate.rate)}>{rate.name} ({Number(rate.rate)}%)</option>)}
+                                </select>
+                                <button className="h-9 rounded-md bg-ink px-3 text-sm font-medium text-white">Aprobă</button>
+                              </form>
+                            ) : "Doar proprietarul sau managerul poate aproba."}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {!dataRepairProducts.length && <TableRow><TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">Nu există produse blocate pentru TVA.</TableCell></TableRow>}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Politica SGR aprobată de contabil</CardTitle></CardHeader>
+              <CardContent>
+                <form action={updateSgrPolicy} className="grid gap-3 sm:grid-cols-[1fr_9rem_9rem_auto] sm:items-end">
+                  <label className="text-sm">Tratament
+                    <select name="sgr_policy" defaultValue={sgrPolicy?.sgr_policy ?? "accountant_approval_required"} className="mt-1 h-10 w-full rounded-md border bg-card px-2">
+                      <option value="accountant_approval_required">Necesită aprobarea contabilului</option>
+                      <option value="outside_vat_scope">În afara bazei TVA</option>
+                      <option value="included_in_taxable_base">Inclus în baza taxabilă</option>
+                    </select>
+                  </label>
+                  <label className="text-sm">Garanție
+                    <input name="sgr_deposit_amount" type="number" min="0" step="0.01" defaultValue={Number(sgrPolicy?.sgr_deposit_amount ?? 0.5)} className="mt-1 h-10 w-full rounded-md border px-2" />
+                  </label>
+                  <label className="text-sm">TVA
+                    <input name="sgr_vat_rate" type="number" min="0" step="0.01" defaultValue={Number(sgrPolicy?.sgr_vat_rate ?? 0)} className="mt-1 h-10 w-full rounded-md border px-2" />
+                  </label>
+                  <button className="h-10 rounded-md bg-ink px-4 text-sm font-medium text-white">Salvează</button>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Jurnal loturi de reparație</CardTitle></CardHeader>
+              <CardContent className="space-y-2">
+                {dataRepairBatches.map((batch) => (
+                  <div key={batch.id} className="flex items-center justify-between border-b py-2 text-sm">
+                    <span>{batch.repair_type} · {new Date(batch.created_at).toLocaleString("ro-RO")}</span>
+                    <Badge variant="outline">{batch.status}</Badge>
+                  </div>
+                ))}
+                {!dataRepairBatches.length && <p className="py-6 text-center text-sm text-muted-foreground">Nu există loturi de reparație.</p>}
+              </CardContent>
+            </Card>
+          </div>
+        </section>
       )}
 
-      {/* ── BILLING TAB ──────────────────────────────────────────────── */}
-      {activeTab === "billing" && (
+      {/* ── BILLING ──────────────────────────────────────────────────── */}
+      <section id="billing" className="scroll-mt-20">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">{t.settings.tabBilling}</h2>
         <div className="space-y-6">
           {referral.available && referral.link && (
             <Card>
@@ -1067,7 +1382,9 @@ export default async function SettingsPage({
             searchParams={{ reason: params?.reason, checkout: params?.checkout }}
           />
         </div>
-      )}
+      </section>
+
+      </div>
 
       <div className="mt-8">
         <TestimonialPromptCard />

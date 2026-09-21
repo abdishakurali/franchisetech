@@ -22,7 +22,7 @@ export default async function SetupChecklistPage() {
     { id: "business", title: ro ? "Datele firmei" : "Business details", text: ro ? "CUI, adresă, cote TVA" : "Tax ID, address, VAT rates", href: "/app/settings?tab=business", done: Boolean(org?.name && org?.country && org?.currency_code) },
     { id: "products", title: ro ? "Adaugă produsele" : "Add your products", text: products.count ? `${products.count} ${ro ? "produse în catalog" : "products in your catalogue"}` : (ro ? "Adaugă manual sau importă din CSV" : "Add manually or import a CSV"), href: "/app/products", done: (products.count ?? 0) > 0 },
     { id: "fiscal", title: ro ? "Conectează casa de marcat" : "Connect your till", text: ro ? "Doar din browserul casierului" : "From the cashier’s browser only", href: countryCode === "RO" ? "/app/settings?tab=fiscal" : "/app/pos", done: countryCode === "RO" ? Boolean(org?.fiscalnet_enabled) : (sales.count ?? 0) > 0 },
-    { id: "team", title: ro ? "Invită echipa" : "Invite your team", text: ro ? "Casieri și manageri · opțional" : "Cashiers and managers · optional", href: "/app/settings/team", done: (members.count ?? 0) > 1 },
+    { id: "team", title: ro ? "Invită echipa" : "Invite your team", text: ro ? "Casieri și manageri · opțional" : "Cashiers and managers · optional", href: "/app/settings?tab=team", done: (members.count ?? 0) > 1 },
     { id: "first_sale", title: ro ? "Prima vânzare" : "Your first sale", text: ro ? "Deschide casa și înregistrează prima vânzare" : "Open your till and record the first sale", href: "/app/pos?welcome=1", done: (sales.count ?? 0) > 0 },
   ].map((step) => ({ ...step, label: ro ? "Continuă" : "Continue", section: "core" }));
   const doneCount = steps.filter((step) => step.done).length;

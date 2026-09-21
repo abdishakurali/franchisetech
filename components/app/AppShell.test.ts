@@ -25,6 +25,7 @@ function hrefs(items: { href: string }[]) {
 
 function moduleVisibility(overrides: Partial<{
   inventory: boolean;
+  purchases: boolean;
   recipeCosting: boolean;
   teamAdvanced: boolean;
   multiSite: boolean;
@@ -32,6 +33,7 @@ function moduleVisibility(overrides: Partial<{
 }> = {}) {
   return {
     inventory: false,
+    purchases: false,
     recipeCosting: false,
     teamAdvanced: false,
     multiSite: false,
@@ -48,6 +50,7 @@ describe("buildMainNav", () => {
       "/app/products",
       "/app/recipes",
       "/app/stock",
+      "/app/purchases",
       "/app/reports",
     ]);
   });
@@ -68,13 +71,13 @@ describe("resolveNavItems", () => {
   });
 
   it("gives an accountant only the enabled operations destinations", () => {
-    const withoutInventory = resolveNavItems("accountant", t, true, moduleVisibility(), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
-    expect(hrefs(withoutInventory.mainNav)).toEqual(["/app", "/app/reports"]);
+    const withoutPurchases = resolveNavItems("accountant", t, true, moduleVisibility(), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
+    expect(hrefs(withoutPurchases.mainNav)).toEqual(["/app", "/app/reports"]);
 
-    const withoutEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ inventory: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
+    const withoutEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ purchases: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
     expect(hrefs(withoutEfactura.mainNav)).toEqual(["/app", "/app/reports", "/app/purchases", "/app/suppliers"]);
 
-    const withEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ inventory: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true });
+    const withEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ purchases: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true });
     expect(hrefs(withEfactura.mainNav)).toEqual(["/app", "/app/reports", "/app/purchases", "/app/suppliers", "/app/invoices"]);
   });
 
@@ -91,14 +94,22 @@ describe("resolveNavItems", () => {
     expect(hrefs(stockNav)).toEqual([]);
   });
 
-  it("keeps all seven destinations for an entitled owner, with no extra module links", () => {
+  it("keeps all destinations for an entitled owner, with no extra module links", () => {
     const { mainNav } = resolveNavItems(
       "owner",
       t,
       false,
-      moduleVisibility({ recipeCosting: true, inventory: true }),
+      moduleVisibility({ recipeCosting: true, inventory: true, purchases: true }),
       { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true, kitchen_display_enabled: true, loyalty_enabled: true },
     );
-    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/recipes", "/app/stock", "/app/reports"]);
+    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/recipes", "/app/stock", "/app/purchases", "/app/reports"]);
+  });
+
+  it("shows purchases in the owner nav only when the purchases module is visible", () => {
+    const withoutPurchases = resolveNavItems("owner", t, true, moduleVisibility({ inventory: true }), { id: "org1", name: "Org" });
+    expect(hrefs(withoutPurchases.mainNav)).not.toContain("/app/purchases");
+
+    const withPurchases = resolveNavItems("owner", t, true, moduleVisibility({ purchases: true }), { id: "org1", name: "Org" });
+    expect(hrefs(withPurchases.mainNav)).toContain("/app/purchases");
   });
 });

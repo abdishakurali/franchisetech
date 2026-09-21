@@ -25,9 +25,9 @@ export function onboardingStepRoute(step: OnboardingStep | null | undefined, isR
     case "recipe_setup":
       return "/onboarding/menu";
     case "fiscal":
-      return isRO ? "/onboarding/fiscal" : "/onboarding/first-sale";
+      return isRO ? "/onboarding/fiscal" : "/app/pos?onboarding=1&welcome=1";
     case "first_sale":
-      return "/onboarding/first-sale";
+      return "/app/pos?onboarding=1&welcome=1";
     case "result":
       return "/onboarding/result";
     case "complete":

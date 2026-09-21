@@ -37,7 +37,7 @@ import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEventAsync } from "@/lib/posthog-server";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
 import { resolveCsvVatRate, validatePurchaseVatRate, validateVatRateForOrg, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
-import { listOperationalUnitNames, validateOperationalUnit } from "@/lib/units-of-measure";
+import { listOperationalUnitNames, validateOperationalUnit, isReservedUnitName } from "@/lib/units-of-measure";
 import {
   assertEntitlement,
   hasEntitlement,
@@ -411,7 +411,7 @@ export async function approveProductVat(formData: FormData) {
     completed_at: new Date().toISOString(),
   }).eq("id", batch.id);
 
-  revalidatePath("/app/settings/data-repair");
+  revalidatePath("/app/settings");
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
 }
@@ -426,15 +426,17 @@ export async function updateSgrPolicy(formData: FormData) {
     sgr_deposit_amount: numberValue(formData, "sgr_deposit_amount", 0.5),
     sgr_vat_rate: numberValue(formData, "sgr_vat_rate", 0),
   }).eq("id", orgId);
-  revalidatePath("/app/settings/data-repair");
+  revalidatePath("/app/settings");
 }
 
 export async function addUnit(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
   await assertEntitlement(orgId, "products.enabled");
-  const name = stringValue(formData, "name");
-  if (!name) return;
+  const name = stringValue(formData, "name").trim();
+  if (!name || isReservedUnitName(name)) return;
+  const existing = await listOperationalUnitNames(supabase, orgId);
+  if (existing.some((u) => u.toLowerCase() === name.toLowerCase())) return;
   await supabase.from("units_of_measure").insert({
     organisation_id: orgId, name,
     abbreviation: stringValue(formData, "abbreviation") || null,
@@ -448,8 +450,10 @@ export async function updateUnit(formData: FormData) {
   if (!canManage(membership.role)) return;
   await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
-  const name = stringValue(formData, "name");
-  if (!id || !name) return;
+  const name = stringValue(formData, "name").trim();
+  if (!id || !name || isReservedUnitName(name)) return;
+  const existing = await listOperationalUnitNames(supabase, orgId);
+  if (existing.some((u) => u.toLowerCase() === name.toLowerCase())) return;
   await supabase.from("units_of_measure").update({
     name,
     abbreviation: stringValue(formData, "abbreviation") || null,
@@ -469,12 +473,19 @@ export async function deleteUnit(formData: FormData) {
   revalidatePath("/app/settings");
 }
 
-export async function addProduct(formData: FormData) {
+export async function addProduct(
+  formData: FormData,
+): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const { supabase, membership, user, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
-  await assertEntitlement(orgId, "products.enabled");
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "products.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
   const name = stringValue(formData, "name");
-  if (!name) return;
+  if (!name) return { ok: false, error: "Product name is required." };
   const availableInPos = formData.get("available_in_pos") === "on";
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const visibility = productModuleVisibility(moduleFlags);
@@ -482,11 +493,11 @@ export async function addProduct(formData: FormData) {
   const isSellable = availableInPos || formData.get("is_sellable") === "on";
   const openingStock = visibility.inventory ? nullableNum(formData, "opening_stock") : null;
   const vat = await resolveSubmittedVatRate(supabase, orgId, formData, "vat_rate");
-  if (!vat.ok) throw new Error(vat.error);
+  if (!vat.ok) return vat;
   const unit = await resolveSubmittedUnitOfMeasure(supabase, orgId, stringValue(formData, "unit_of_measure") || "each");
-  if (!unit.ok) throw new Error(unit.error);
+  if (!unit.ok) return unit;
 
-  const { data: inserted } = await supabase.from("products").insert({
+  const { data: inserted, error: insertError } = await supabase.from("products").insert({
     organisation_id: orgId,
     name,
     category_id: stringValue(formData, "category_id") || null,
@@ -512,6 +523,8 @@ export async function addProduct(formData: FormData) {
     current_stock_qty: openingStock ?? 0,
     active: true,
   }).select("id").single();
+
+  if (insertError || !inserted) return { ok: false, error: insertError?.message ?? "Could not save product." };
 
   // Handle image upload after insert so we can use the product ID in the path
   const imageFile = formData.get("image_file") as File | null;
@@ -550,7 +563,7 @@ export async function addProduct(formData: FormData) {
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
   revalidatePath("/app/stock");
-  redirect("/app/products");
+  return { ok: true, id: inserted.id };
 }
 
 /** Minimal POS quick-add — no redirect; returns result for in-till dialog. */
@@ -2705,6 +2718,7 @@ export async function updateBusinessProfileAndModules(formData: FormData): Promi
 
   const profile = String(formData.get("business_profile") ?? "").trim();
   const inventory = formCheckboxEnabled(formData, "inventory_enabled");
+  const purchases = formCheckboxEnabled(formData, "purchases_enabled");
   const recipeCosting = formCheckboxEnabled(formData, "recipe_costing_enabled");
   const teamAdvanced = formCheckboxEnabled(formData, "team_advanced_enabled");
   const multiSite = formCheckboxEnabled(formData, "multi_site_ops_enabled");
@@ -2714,6 +2728,7 @@ export async function updateBusinessProfileAndModules(formData: FormData): Promi
     updates.business_profile = profile;
   }
   updates.inventory_enabled = inventory;
+  updates.purchases_enabled = purchases;
   updates.recipe_costing_enabled = recipeCosting;
   updates.team_advanced_enabled = teamAdvanced;
   updates.multi_site_ops_enabled = multiSite;

@@ -80,14 +80,14 @@ export function PosQuickAddProduct({
             <Label>{t.salePrice} ({currencyLabel})</Label>
             <Input name="sale_price" type="number" step="0.01" min="0" required placeholder="0.00" className="mt-1" />
           </div>
-          <div className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+          <div className="rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground">
             <span className="font-medium">{t.vatInherited(defaultVatRate)}</span>
           </div>
           <div>
             <Label>{t.category}</Label>
             <select
               name="pos_category_id"
-              className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+              className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 text-sm"
             >
               <option value="">{t.noCategory}</option>
               {categories.map((c) => (
@@ -96,7 +96,7 @@ export function PosQuickAddProduct({
             </select>
           </div>
           {status && (
-            <p className={`text-sm font-medium ${status.ok ? "text-green-700" : "text-red-600"}`}>{status.msg}</p>
+            <p className={`text-sm font-medium ${status.ok ? "text-reconciled" : "text-attention"}`}>{status.msg}</p>
           )}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => handleClose(false)} disabled={pending}>
@@ -105,7 +105,7 @@ export function PosQuickAddProduct({
             <Button type="submit" name="intent" value="add_another" variant="outline" disabled={pending}>
               {t.saveAddAnother}
             </Button>
-            <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700" disabled={pending}>
+            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90" disabled={pending}>
               {pending ? t.processing : t.addProduct}
             </Button>
           </DialogFooter>

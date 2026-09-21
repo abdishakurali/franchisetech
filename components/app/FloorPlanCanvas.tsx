@@ -95,7 +95,7 @@ export function FloorPlanCanvas({
                     : "bg-primary text-primary-foreground border-primary shadow-sm"
                   : immersive
                     ? "bg-black/25 text-amber-50 border-amber-200/30 hover:bg-black/35 backdrop-blur-sm"
-                    : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                    : "bg-card text-foreground border-border hover:border-border hover:bg-secondary"
               )}
             >
               {section.name}
@@ -114,11 +114,11 @@ export function FloorPlanCanvas({
           Liberă
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-red-500 inline-block" />
+          <span className="h-2.5 w-2.5 rounded-full bg-attention inline-block" />
           Ocupată
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-blue-500 inline-block" />
+          <span className="h-2.5 w-2.5 rounded-full bg-primary inline-block" />
           Solicită nota
         </span>
       </div>
@@ -138,7 +138,7 @@ export function FloorPlanCanvas({
       >
         <div className="absolute inset-0" style={{ aspectRatio: "10 / 7" }}>
           {displayTables.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center text-sm text-slate-600 bg-black/5">
+            <div className="absolute inset-0 flex items-center justify-center text-sm text-mid bg-black/5">
               Nicio masă în această secțiune
             </div>
           )}

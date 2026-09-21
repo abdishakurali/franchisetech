@@ -69,7 +69,7 @@ export async function advanceFromMenu(): Promise<{ error: string } | void> {
   const nextStep = isRO ? "fiscal" : "first_sale";
 
   await supabase.from("organisations").update({ onboarding_step: nextStep }).eq("id", orgId);
-  redirect(isRO ? "/onboarding/fiscal" : "/onboarding/first-sale");
+  redirect(isRO ? "/onboarding/fiscal" : "/app/pos?onboarding=1&welcome=1");
 }
 
 // ── Step: FiscalNet (RO only) ───────────────────────────────────────────
@@ -77,21 +77,23 @@ export async function advanceFromMenu(): Promise<{ error: string } | void> {
 // action (app/actions/fiscalnet.ts) — this is only the "Continuă" /
 // "Continuă în mod test" transition. Fiscal setup is explicitly not a
 // first-sale blocker (docs/lean-cafe-platform-audit-2026-09-17.md: fiscal
-// is "conditional, not an activation blocker").
+// is "conditional, not an activation blocker"). Goes straight to POS — no
+// "everything is ready, click here" interstitial in between.
 export async function advanceFromFiscal(): Promise<{ error: string } | void> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { error: "Permission denied." };
   await supabase.from("organisations").update({ onboarding_step: "first_sale" }).eq("id", orgId);
-  redirect("/onboarding/first-sale");
+  redirect("/app/pos?onboarding=1&welcome=1");
 }
 
 // Called from PosRegister right as it navigates to /onboarding/result after
 // a completed onboarding first sale (see redirectAfterSaleTo). Without this,
-// app/onboarding/layout.tsx's resume guard sees onboarding_step still at
-// "first_sale" and bounces the org straight back to /onboarding/first-sale —
-// the guard's job is exactly to enforce "resume where the DB says", so the
-// DB has to actually say "result" before that page is reachable. No
-// redirect() here: the caller is already client-side navigating.
+// app/onboarding/layout.tsx's resume guard would see onboarding_step still
+// at "first_sale" and bounce a re-entering org straight back to POS via
+// onboardingStepRoute — the guard's job is exactly to enforce "resume where
+// the DB says", so the DB has to actually say "result" before the result
+// page is reachable. No redirect() here: the caller is already client-side
+// navigating.
 export async function markFirstSaleDoneForOnboarding(): Promise<{ error: string } | void> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { error: "Permission denied." };

@@ -1,26 +1,33 @@
 import Link from "next/link";
-import { ActivationBanner } from "@/components/app/ActivationBanner";
-import { startOfDay, startOfMonth, startOfWeek, subDays, subWeeks, subMonths, endOfDay } from "date-fns";
+import { startOfDay, subDays } from "date-fns";
+import { DashboardSparkline } from "@/components/app/DashboardSparkline";
 import {
-  ArrowRight,
+  AlertTriangle,
   Banknote,
   BarChart3,
-  CreditCard,
+  CheckCircle2,
+  ChefHat,
+  Info,
   Package,
-  TrendingUp,
+  PlusCircle,
   Receipt,
+  ShoppingBag,
+  ShoppingCart,
+  TrendingUp,
+  Heart,
+  XCircle,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
-import { DateFilter } from "@/components/app/DateFilter";
+import { ActivationBanner } from "@/components/app/ActivationBanner";
 import { DashboardSalesHighlight } from "@/components/app/DashboardSalesHighlight";
+import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { isModuleEnabled } from "@/lib/business-modules";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
-import { filterReportLinks } from "@/lib/app-report-links";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
-import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
+import { moduleLabel } from "@/lib/business-profile-i18n";
+import { getDashboardAttention } from "@/lib/dashboard/attention";
+import type { OnboardingStep } from "@/lib/onboarding/steps";
 import { Suspense } from "react";
 
 function money(v: number, cur = "EUR") {
@@ -28,259 +35,169 @@ function money(v: number, cur = "EUR") {
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: cur || "EUR" }).format(v);
 }
 
-function pctDiff(curr: number, prev: number): string {
-  if (prev === 0) return curr > 0 ? "+100%" : "—";
-  const pct = ((curr - prev) / prev) * 100;
-  return `${pct >= 0 ? "+" : ""}${pct.toFixed(0)}%`;
-}
-
-type Props = { searchParams: Promise<{ period?: string }> };
-
-export default async function DashboardPage({ searchParams }: Props) {
-  const { period: rawPeriod = "today" } = await searchParams;
-  const period = ["today", "week", "month"].includes(rawPeriod) ? rawPeriod : "today";
-
-  const now = new Date();
-  let rangeStart: Date;
-  let prevStart: Date;
-  let prevEnd: Date;
-
-  if (period === "week") {
-    rangeStart = startOfWeek(now, { weekStartsOn: 1 });
-    prevEnd = rangeStart;
-    prevStart = subWeeks(rangeStart, 1);
-  } else if (period === "month") {
-    rangeStart = startOfMonth(now);
-    prevEnd = rangeStart;
-    prevStart = subMonths(now, 1);
-  } else {
-    rangeStart = startOfDay(now);
-    prevEnd = rangeStart;
-    prevStart = subDays(rangeStart, 1);
-  }
-
-  // Same weekday last week (only used for "today" view)
-  const sameWeekdayStart = subWeeks(startOfDay(now), 1);
-  const sameWeekdayEnd = subWeeks(endOfDay(now), 1);
-
-  const monthStart = startOfMonth(now).toISOString();
-  const weekAgo = subDays(now, 7).toISOString();
+export default async function DashboardPage() {
+  const todayStart = startOfDay(new Date()).toISOString();
 
   const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
   const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
-  const periodLabel =
-    period === "week" ? t.period.vsLastWeek : period === "month" ? t.period.vsLastMonth : t.period.vsYesterday;
+  const isRO = countryCode === "RO";
 
   const orgModules = await fetchOrgModuleFlags(supabase, orgId);
   const inventoryVisible = isModuleEnabled(orgModules, "inventory");
   const recipeVisible = isModuleEnabled(orgModules, "recipe_costing");
-  const { data: orgSettings } = await supabase
+  const purchasesVisible = isModuleEnabled(orgModules, "purchases");
+
+  const { data: orgRow } = await supabase
     .from("organisations")
-    .select("saga_export_enabled")
+    .select("onboarding_step,fiscalnet_enabled,loyalty_enabled")
     .eq("id", orgId)
     .maybeSingle();
-  const accountantPackVisible = Boolean(orgSettings?.saga_export_enabled);
-  const gestiuneVisible = await hasEntitlement(orgId, "reports.gestiune").catch(() => false);
-  const visibleReports = filterReportLinks(t, { inventoryVisible, recipeVisible, accountantPackVisible, gestiuneVisible });
+  const onboardingStep = (orgRow?.onboarding_step ?? null) as OnboardingStep | null;
+  const fiscalnetEnabled = isRO && Boolean(orgRow?.fiscalnet_enabled);
+  const loyaltyVisible = Boolean(orgRow?.loyalty_enabled);
 
-  const [
-    currentTxResult,
-    prevTxResult,
-    sameWeekdayResult,
-    sessionResult,
-    monthTxResult,
-    voidedCountResult,
-    lowStockResult,
-    purchaseWeekResult,
-    todayItemsResult,
-    allTimeTxCountResult,
-  ] = await Promise.all([
-    // sold_at is the real sale date; created_at is row-insert time, which for
-    // migrated historical sales is the bulk-import timestamp, not when the
-    // sale actually happened.
+  const last7Start = startOfDay(subDays(new Date(), 6)).toISOString();
+
+  const [todayTxResult, sessionResult, allTimeTxCountResult, last7TxResult] = await Promise.all([
     supabase
       .from("pos_transactions")
       .select("total,tip_amount,payment_methods(type)")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
-      .gte("sold_at", rangeStart.toISOString()),
+      .gte("sold_at", todayStart),
+    supabase.from("pos_sessions").select("expected_cash,status").eq("organisation_id", orgId).eq("status", "open").limit(1).maybeSingle(),
+    supabase.from("pos_transactions").select("*", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "completed"),
     supabase
       .from("pos_transactions")
-      .select("total")
+      .select("total,sold_at")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
-      .gte("sold_at", prevStart.toISOString())
-      .lt("sold_at", prevEnd.toISOString()),
-    period === "today"
-      ? supabase
-          .from("pos_transactions")
-          .select("total")
-          .eq("organisation_id", orgId)
-          .eq("status", "completed")
-          .gte("sold_at", sameWeekdayStart.toISOString())
-          .lte("sold_at", sameWeekdayEnd.toISOString())
-      : Promise.resolve({ data: [] as { total: number }[], error: null }),
-    supabase.from("pos_sessions").select("expected_cash,status").eq("organisation_id", orgId).eq("status", "open").limit(1).maybeSingle(),
-    supabase.from("pos_transactions").select("total").eq("organisation_id", orgId).eq("status", "completed").gte("sold_at", monthStart),
-    supabase.from("pos_transactions").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "voided").gte("sold_at", monthStart),
-    inventoryVisible
-      ? supabase.from("products").select("id,name,current_stock_qty,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true")
-      : Promise.resolve({ data: [], error: null }),
-    // purchase_date is the real receiving date; created_at is row-insert
-    // time, which for migrated historical purchases doesn't match (54/62
-    // mismatched for this org) -- same class of bug as the sales queries above.
-    inventoryVisible
-      ? supabase.from("purchases").select("total_amount,status").eq("organisation_id", orgId).gte("purchase_date", weekAgo)
-      : Promise.resolve({ data: [], error: null }),
-    // Scoped via the parent transaction's sold_at (see comment above), not
-    // pos_transaction_items.created_at.
-    supabase
-      .from("pos_transactions")
-      .select("pos_transaction_items(product_name,quantity,gross_amount,line_total)")
-      .eq("organisation_id", orgId)
-      .gte("sold_at", rangeStart.toISOString()),
-    supabase
-      .from("pos_transactions")
-      .select("*", { count: "exact", head: true })
-      .eq("organisation_id", orgId)
-      .eq("status", "completed"),
+      .gte("sold_at", last7Start),
   ]);
 
-  const currentTx = currentTxResult.data ?? [];
-  const prevTx = prevTxResult.data ?? [];
-  const sameWeekdayTx = sameWeekdayResult.data ?? [];
-  const sessionData = sessionResult.data;
-  const monthTx = monthTxResult.data ?? [];
-  const voidedCount = voidedCountResult.count ?? 0;
-  const lowStockResultData = lowStockResult.data ?? [];
-  const purchaseWeek = purchaseWeekResult.data ?? [];
-  type DashboardItem = { product_name: string; quantity: number | null; gross_amount: number | null; line_total: number | null };
-  const todayItems: DashboardItem[] = (todayItemsResult.data ?? []).flatMap(
-    (tx) => (tx as unknown as { pos_transaction_items?: DashboardItem[] }).pos_transaction_items ?? []
-  );
   const allTimeTxCount = allTimeTxCountResult.count ?? 0;
   const showActivationBanner = allTimeTxCount === 0;
 
-  const currentTotal = currentTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
-  const currentTips = currentTx.reduce((s, tx) => s + Number(tx.tip_amount ?? 0), 0);
-  const currentSalesExTips = currentTotal - currentTips;
-  const currentCount = currentTx.length;
-  const avgTicket = currentCount > 0 ? currentSalesExTips / currentCount : 0;
-
-  const prevTotal = prevTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
-  const sameWeekdayTotal = sameWeekdayTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
-
-  const isGrowing = currentSalesExTips >= prevTotal;
-  const salesColor = prevTotal === 0 && currentTotal === 0 ? "text-foreground" : isGrowing ? "text-reconciled" : "text-attention";
-  const diffSign = isGrowing ? "+" : "";
-  const diffAmount = currentSalesExTips - prevTotal;
-
-  const currentCash = currentTx.filter((tx) => (tx.payment_methods as { type?: string } | null)?.type === "cash").reduce((s, tx) => s + Number(tx.total ?? 0), 0);
-  const currentCard = currentTotal - currentCash;
-  const expectedCash = Number(sessionData?.expected_cash ?? 0);
-  const monthTotal = monthTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
-  const purchaseSpend = purchaseWeek
-    .filter((p) => p.status === "posted" || p.status === "received")
-    .reduce((s, p) => s + Number(p.total_amount ?? 0), 0);
-
-  const lowStock = lowStockResultData.filter((p) => Number(p.reorder_level ?? 0) > 0 && Number(p.current_stock_qty ?? 0) <= Number(p.reorder_level ?? 0));
-
-  // Top 5 products by revenue in current period
-  const byProduct = new Map<string, { qty: number; total: number }>();
-  for (const item of todayItems) {
-    const row = byProduct.get(item.product_name) ?? { qty: 0, total: 0 };
-    row.qty += Number(item.quantity ?? 1);
-    row.total += Number(item.gross_amount ?? item.line_total ?? 0);
-    byProduct.set(item.product_name, row);
+  if (showActivationBanner) {
+    return (
+      <div className="space-y-6 p-4 sm:p-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">{t.dashboard.title}</h1>
+          <p className="text-sm text-muted-foreground">{t.dashboard.subtitle}</p>
+        </div>
+        <ActivationBanner locale={locale} onboardingStep={onboardingStep} isRO={isRO} />
+      </div>
+    );
   }
-  const topProducts = [...byProduct.entries()]
-    .map(([name, row]) => ({ name, ...row }))
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
 
-  const attentionCols = 1 + (inventoryVisible ? 1 : 0) + (recipeVisible ? 1 : 0);
-  const showAttentionRow = attentionCols > 0 || inventoryVisible;
+  const todayTx = todayTxResult.data ?? [];
+  const todayTotal = todayTx.reduce((s, tx) => s + Number(tx.total ?? 0), 0);
+  const todayTips = todayTx.reduce((s, tx) => s + Number(tx.tip_amount ?? 0), 0);
+  const salesToday = todayTotal - todayTips;
+  const ordersToday = todayTx.length;
+  const avgTicket = ordersToday > 0 ? salesToday / ordersToday : 0;
+
+  const sessionData = sessionResult.data;
+  const expectedCash = Number(sessionData?.expected_cash ?? 0);
+
+  const last7ByDay = new Map<string, number>();
+  for (let i = 6; i >= 0; i--) {
+    last7ByDay.set(startOfDay(subDays(new Date(), i)).toISOString().slice(0, 10), 0);
+  }
+  for (const tx of last7TxResult.data ?? []) {
+    const day = String(tx.sold_at ?? "").slice(0, 10);
+    if (last7ByDay.has(day)) last7ByDay.set(day, (last7ByDay.get(day) ?? 0) + Number(tx.total ?? 0));
+  }
+  const last7Values = [...last7ByDay.values()];
+
+  const attentionItems = await getDashboardAttention(supabase, {
+    orgId,
+    locale,
+    currency,
+    inventoryVisible,
+    recipeVisible,
+    fiscalnetEnabled,
+  });
+
+  const moduleCards = [
+    inventoryVisible ? { href: "/app/stock", label: moduleLabel("inventory", locale), Icon: Package } : null,
+    recipeVisible ? { href: "/app/recipes", label: moduleLabel("recipe_costing", locale), Icon: ChefHat } : null,
+    purchasesVisible ? { href: "/app/purchases", label: moduleLabel("purchases", locale), Icon: ShoppingBag } : null,
+    loyaltyVisible ? { href: "/app/customers", label: isRO ? "Fidelizare" : "Loyalty", Icon: Heart } : null,
+  ].filter((m): m is { href: string; label: string; Icon: typeof Package } => m !== null);
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
-      {showActivationBanner && <ActivationBanner locale={locale} />}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{t.dashboard.title}</h1>
           <p className="text-sm text-muted-foreground">{t.dashboard.subtitle}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {sessionData ? (
-            <div className="flex items-center gap-2 rounded-full border border-reconciled/25 bg-reconciled/10 px-3 py-1 text-sm text-reconciled">
-              <span className="inline-flex h-2 w-2 rounded-full bg-reconciled" />
-              {t.dashboard.tillOpen}
-            </div>
-          ) : null}
-          <DateFilter current={period} />
-          {!showActivationBanner ? (
-            <Link href="/app/setup-checklist"><Button variant="outline">{t.dashboard.setupGuide}</Button></Link>
-          ) : null}
-          <Link href="/app/pos"><Button className="bg-primary hover:bg-primary/90 text-primary-foreground">{t.dashboard.openPos}</Button></Link>
-        </div>
+        {sessionData ? (
+          <div className="flex items-center gap-2 rounded-full border border-reconciled/25 bg-reconciled/10 px-3 py-1 text-sm text-reconciled">
+            <span className="inline-flex h-2 w-2 rounded-full bg-reconciled" />
+            {t.dashboard.tillOpen}
+          </div>
+        ) : null}
       </div>
 
-      {/* Empty accounts need one clear next action; metrics become useful after the first sale. */}
-      {!showActivationBanner ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Suspense fallback={
-          <Card>
-            <CardHeader className="pb-1">
-              <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                <BarChart3 className="h-4 w-4" />{t.dashboard.sales}{currentTips > 0 ? t.common.exTips : ""}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className={`text-2xl font-bold ${salesColor}`}>{money(currentSalesExTips, currency)}</p>
-            </CardContent>
-          </Card>
-        }>
+      {/* ── Top metrics ── */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Suspense
+          fallback={
+            <Card>
+              <CardHeader className="pb-1">
+                <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <BarChart3 className="h-4 w-4" />{t.dashboard.salesToday}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-bold text-foreground">{money(salesToday, currency)}</p>
+              </CardContent>
+            </Card>
+          }
+        >
           <DashboardSalesHighlight>
             <Card>
               <CardHeader className="pb-1">
                 <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  <BarChart3 className="h-4 w-4" />{t.dashboard.sales}{currentTips > 0 ? t.common.exTips : ""}
+                  <BarChart3 className="h-4 w-4" />{t.dashboard.salesToday}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className={`text-2xl font-bold ${salesColor}`}>{money(currentSalesExTips, currency)}</p>
-                <p className="text-xs text-muted-foreground">{t.common.transactions(currentCount)}{currentTips > 0 ? ` · +${money(currentTips, currency)} ${t.common.tips}` : ""}</p>
-                {prevTotal > 0 || currentTotal > 0 ? (
-                  <p className={`text-xs mt-0.5 ${isGrowing ? "text-reconciled" : "text-attention"}`}>
-                    {diffSign}{money(diffAmount, currency)} {periodLabel}
-                  </p>
+                <p className="text-2xl font-bold text-foreground">{money(salesToday, currency)}</p>
+                {todayTips > 0 ? (
+                  <p className="text-xs text-muted-foreground">+{money(todayTips, currency)} {t.common.tips}</p>
                 ) : null}
+                <DashboardSparkline values={last7Values} />
               </CardContent>
             </Card>
           </DashboardSalesHighlight>
         </Suspense>
 
-        {/* Transactions + avg ticket */}
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              <Receipt className="h-4 w-4" />{t.dashboard.transactions ?? "Transactions"}
+              <Receipt className="h-4 w-4" />{t.dashboard.ordersToday}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-foreground">{currentCount}</p>
-            {currentCount > 0 ? (
-              <p className="text-xs text-muted-foreground">{t.dashboard.avgTicket ?? "Avg ticket"}: {money(avgTicket, currency)}</p>
-            ) : (
-              <p className="text-xs text-muted-foreground">{t.dashboard.noSalesYet ?? "No sales yet"}</p>
-            )}
-            {period === "today" && sameWeekdayTotal > 0 ? (
-              <p className={`text-xs mt-0.5 ${currentSalesExTips >= sameWeekdayTotal ? "text-reconciled" : "text-muted-foreground"}`}>
-                {pctDiff(currentSalesExTips, sameWeekdayTotal)} {t.dashboard.vsSameWeekday ?? "vs same day last week"}
-              </p>
-            ) : null}
+            <p className="text-2xl font-bold text-foreground">{ordersToday}</p>
+            {ordersToday === 0 ? <p className="text-xs text-muted-foreground">{t.dashboard.noSalesYet}</p> : null}
           </CardContent>
         </Card>
 
-        {/* Cash/card split */}
+        <Card>
+          <CardHeader className="pb-1">
+            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <TrendingUp className="h-4 w-4" />{t.dashboard.avgTicket}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-foreground">{money(avgTicket, currency)}</p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -288,167 +205,98 @@ export default async function DashboardPage({ searchParams }: Props) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{money(expectedCash, currency)}</p>
-            <p className="text-xs text-muted-foreground">{sessionData ? t.dashboard.tillIsOpen : t.dashboard.openTillHint}</p>
-            {currentCount > 0 ? (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {t.common.cash} {money(currentCash, currency)} · {t.common.card} {money(currentCard, currency)}
-              </p>
-            ) : null}
+            {sessionData ? (
+              <p className="text-2xl font-bold text-foreground">{money(expectedCash, currency)}</p>
+            ) : (
+              <p className="text-2xl font-bold text-muted-foreground">{t.dashboard.tillIsClosed}</p>
+            )}
+            {!sessionData ? <p className="text-xs text-muted-foreground">{t.dashboard.openTillHint}</p> : null}
           </CardContent>
         </Card>
+      </div>
 
-        {/* Month total */}
-        <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              <CreditCard className="h-4 w-4" />{t.dashboard.thisMonth}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{money(monthTotal, currency)}</p>
-            <p className="text-xs text-muted-foreground">
-              {voidedCount > 0 ? `${t.common.voided}: ${voidedCount}` : t.dashboard.monthNoVoids ?? "No voids this month"}
-            </p>
-          </CardContent>
-        </Card>
-      </div> : null}
-
-      {/* ── Top products + stock watch ── */}
-      {!showActivationBanner && (topProducts.length > 0 || (inventoryVisible && lowStock.length > 0)) ? (
-        <div className="grid gap-4 lg:grid-cols-2">
-          {topProducts.length > 0 && (
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">{t.dashboard.topProducts ?? "Top products"}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {topProducts.map((p, i) => (
-                  <div key={p.name} className="flex items-center justify-between gap-2 text-sm">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-5 shrink-0 text-xs font-medium text-muted-foreground">{i + 1}.</span>
-                      <span className="truncate text-foreground">{p.name}</span>
-                    </div>
-                    <div className="shrink-0 flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">×{p.qty}</span>
-                      <span className="font-semibold text-foreground">{money(p.total, currency)}</span>
-                    </div>
-                  </div>
-                ))}
-                <Link href="/app/reports/sales" className="inline-flex items-center gap-1 text-xs text-brass hover:underline pt-1">
-                  {t.dashboard.viewFullReport ?? "Full sales report"} <ArrowRight className="h-3 w-3" />
-                </Link>
-              </CardContent>
-            </Card>
+      {/* ── Attention ── */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">{t.dashboard.attention}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {attentionItems.length === 0 ? (
+            <div className="flex items-center gap-2 text-sm text-reconciled">
+              <CheckCircle2 className="h-4 w-4" />
+              {t.dashboard.allClear}
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {attentionItems.map((item) => (
+                <li key={item.message}>
+                  <Link
+                    href={item.href}
+                    className="flex items-start gap-2.5 rounded-lg border p-3 text-sm transition hover:border-brass/40 hover:bg-accent"
+                  >
+                    {item.severity === "critical" ? (
+                      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-attention" />
+                    ) : (
+                      <Info className="mt-0.5 h-4 w-4 shrink-0 text-brass" />
+                    )}
+                    <span className="text-foreground">{item.message}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           )}
-          {inventoryVisible && (
-            <Card>
-              <CardHeader><CardTitle className="text-base">{t.dashboard.stockWatch}</CardTitle></CardHeader>
-              <CardContent className="space-y-2">
-                {lowStock.length ? lowStock.slice(0, 5).map((p) => (
-                  <div key={p.id} className="flex items-center justify-between text-sm">
-                    <span>{p.name}</span>
-                    <Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge>
-                  </div>
-                )) : (
-                  <p className="text-sm text-muted-foreground">{t.dashboard.stockOk}</p>
-                )}
-                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-brass hover:underline">
-                  {t.dashboard.viewStock} <ArrowRight className="h-3 w-3" />
-                </Link>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      ) : null}
+        </CardContent>
+      </Card>
 
-      {!showActivationBanner && showAttentionRow && !topProducts.length ? (
-        <div className={`grid gap-4 ${inventoryVisible ? "lg:grid-cols-3" : ""}`}>
-          <Card className={inventoryVisible ? "lg:col-span-2" : ""}>
-            <CardHeader><CardTitle className="text-base">{t.dashboard.attention}</CardTitle></CardHeader>
-            <CardContent className={`grid gap-3 ${attentionCols >= 3 ? "sm:grid-cols-3" : attentionCols === 2 ? "sm:grid-cols-2" : ""}`}>
-              <Link href="/app/products/new" className="rounded-xl border p-4 hover:border-brass/40 hover:bg-accent">
-                <Package className="mb-2 h-5 w-5 text-brass" />
-                <p className="font-semibold">{t.dashboard.addProducts}</p>
-                <p className="text-xs text-muted-foreground">{t.dashboard.addProductsDesc}</p>
-              </Link>
-              {inventoryVisible ? (
-                <Link href="/app/stock" className="rounded-xl border p-4 hover:border-brass/40 hover:bg-accent">
-                  <Package className="mb-2 h-5 w-5 text-brass" />
-                  <p className="font-semibold">{t.dashboard.manageStock}</p>
-                  <p className="text-xs text-muted-foreground">{t.dashboard.manageStockDesc}</p>
-                </Link>
-              ) : null}
-              {recipeVisible ? (
-                <Link href="/app/recipes/new" className="rounded-xl border p-4 hover:border-brass/40 hover:bg-accent">
-                  <TrendingUp className="mb-2 h-5 w-5 text-brass" />
-                  <p className="font-semibold">{t.dashboard.createRecipe}</p>
-                  <p className="text-xs text-muted-foreground">{t.dashboard.createRecipeDesc}</p>
-                </Link>
-              ) : null}
-            </CardContent>
-          </Card>
-          {inventoryVisible ? (
-            <Card>
-              <CardHeader><CardTitle className="text-base">{t.dashboard.stockWatch}</CardTitle></CardHeader>
-              <CardContent className="space-y-2">
-                {lowStock.length ? lowStock.slice(0, 5).map((p) => (
-                  <div key={p.id} className="flex items-center justify-between text-sm">
-                    <span>{p.name}</span>
-                    <Badge variant="outline">{Number(p.current_stock_qty ?? 0)} {p.unit_of_measure ?? ""}</Badge>
-                  </div>
-                )) : (
-                  <p className="text-sm text-muted-foreground">{t.dashboard.stockOk}</p>
-                )}
-                <Link href="/app/stock" className="inline-flex items-center gap-1 text-sm text-brass hover:underline">
-                  {t.dashboard.viewStock} <ArrowRight className="h-3 w-3" />
-                </Link>
-              </CardContent>
-            </Card>
-          ) : null}
-        </div>
-      ) : null}
-
-      {/* Reports are deliberately deferred until the workspace has real activity. */}
-      {!showActivationBanner ? <div>
-        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold text-foreground">{t.dashboard.reports}</h2>
-          {inventoryVisible ? (
-            <p className="text-xs text-muted-foreground">
-              {t.dashboard.purchases7d(money(purchaseSpend, currency))}
-              {lowStock.length > 0 ? (
-                <span className="ml-2 text-amber-600">
-                  · {t.dashboard.lowStock(lowStock.length)}
-                </span>
-              ) : null}
-            </p>
-          ) : null}
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {visibleReports.map((r) => (
-            <Link
-              key={r.href}
-              href={r.href}
-              className="group block rounded-xl border border-border bg-card p-5 shadow-sm hover:shadow-md hover:border-brass/40 transition-all"
-            >
-              <div className="flex items-start gap-3">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${r.color}`}>
-                  <r.icon className="h-5 w-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-foreground group-hover:text-brass transition-colors">{r.title}</p>
-                    {r.tag ? (
-                      <span className="text-[10px] rounded-full bg-secondary px-2 py-0.5 text-muted-foreground font-medium">{r.tag}</span>
-                    ) : null}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{r.desc}</p>
-                </div>
-              </div>
+      {/* ── Quick actions ── */}
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-foreground">{t.dashboard.quickActions}</h2>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/app/pos">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+              <ShoppingCart className="mr-1.5 h-4 w-4" />{t.dashboard.openPos}
+            </Button>
+          </Link>
+          <Link href="/app/products/new">
+            <Button variant="outline">
+              <PlusCircle className="mr-1.5 h-4 w-4" />{t.dashboard.addProduct}
+            </Button>
+          </Link>
+          {sessionData ? (
+            <Link href="/app/pos">
+              <Button variant="outline">
+                <XCircle className="mr-1.5 h-4 w-4" />{t.dashboard.closeTill}
+              </Button>
             </Link>
-          ))}
+          ) : null}
+          <Link href="/app/reports">
+            <Button variant="outline">
+              <BarChart3 className="mr-1.5 h-4 w-4" />{t.dashboard.viewReports}
+            </Button>
+          </Link>
         </div>
-      </div> : null}
+      </div>
+
+      {/* ── Optional module cards ── */}
+      {moduleCards.length > 0 ? (
+        <div>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">{t.dashboard.modulesHeading}</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {moduleCards.map(({ href, label, Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex items-center gap-3 rounded-xl border border-border bg-card p-4 shadow-sm transition hover:border-brass/40 hover:shadow-md"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-brass">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <p className="font-semibold text-foreground">{label}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

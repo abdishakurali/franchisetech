@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 export type SubState =
@@ -87,7 +88,10 @@ function humanLabel(
   }
 }
 
-export async function getSubscriptionStatus(orgId: string): Promise<SubscriptionStatus> {
+// cache() by orgId: layout.tsx and requireBusinessModule() (via the
+// module-guard path) both call this independently on the same navigation —
+// dedupe to one query pair per request, same as fetchOrgModuleFlags above.
+export const getSubscriptionStatus = cache(async function getSubscriptionStatus(orgId: string): Promise<SubscriptionStatus> {
   const supabase = await createClient();
   const service = await createServiceClient();
 
@@ -189,4 +193,4 @@ export async function getSubscriptionStatus(orgId: string): Promise<Subscription
     trialDaysLeft: trialDays,
     graceDaysLeft,
   };
-}
+});

@@ -2,18 +2,23 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { OrgVatRate } from "@/lib/vat-rates";
 import { VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 
-export async function listActiveVatRates(
-  supabase: SupabaseClient,
-  orgId: string
-): Promise<OrgVatRate[]> {
-  const { data } = await supabase
-    .from("vat_rates")
-    .select("id,name,rate,is_default,active,fiscalnet_vat_group,sort_order")
-    .eq("organisation_id", orgId)
-    .eq("active", true)
-    .order("sort_order")
-    .order("rate");
-  return (data ?? []).map((row) => ({
+export const VAT_RATE_COLUMNS = "id,name,rate,is_default,active,fiscalnet_vat_group,sort_order";
+
+type VatRateRow = {
+  id: unknown;
+  name: unknown;
+  rate: unknown;
+  is_default: unknown;
+  active: unknown;
+  fiscalnet_vat_group: unknown;
+  sort_order: unknown;
+};
+
+/** Shared row->OrgVatRate mapping, also usable by callers that already have
+ * a `vat_rates` result (selected with VAT_RATE_COLUMNS) and want to avoid a
+ * second round-trip through listActiveVatRates/listAllVatRates. */
+export function mapVatRateRows(rows: VatRateRow[] | null | undefined): OrgVatRate[] {
+  return (rows ?? []).map((row) => ({
     id: row.id as string,
     name: row.name as string,
     rate: Number(row.rate),
@@ -22,6 +27,20 @@ export async function listActiveVatRates(
     fiscalnet_vat_group: row.fiscalnet_vat_group as number | null,
     sort_order: row.sort_order as number | null,
   }));
+}
+
+export async function listActiveVatRates(
+  supabase: SupabaseClient,
+  orgId: string
+): Promise<OrgVatRate[]> {
+  const { data } = await supabase
+    .from("vat_rates")
+    .select(VAT_RATE_COLUMNS)
+    .eq("organisation_id", orgId)
+    .eq("active", true)
+    .order("sort_order")
+    .order("rate");
+  return mapVatRateRows(data);
 }
 
 export async function listAllVatRates(

@@ -508,52 +508,6 @@ export const industryPages: SeoPage[] = [
     image: "/showcase/reports-dashboard.png",
     heroComponent: OwnerDashboardProof,
   },
-  {
-    slug: "salons",
-    path: "/industries/salons",
-    eyebrow: "Salons & Barbers",
-    title: "POS System for Salons, Barbers & Beauty Businesses",
-    metaTitle: "Salon POS System | Barber POS | Staff Sales & Cash Tracking | franchisetech",
-    description: "franchisetech helps salons, barbers, and beauty businesses handle walk-ins, service sales, retail products, staff attribution, cash tracking, and daily reports.",
-    h1: "POS and daily operations for salons and barbers",
-    intro: "Salons and barbers need a fast till, clear staff accountability, combined service and retail sales, and simple end-of-day cash totals — without expensive appointment software or complex setup.",
-    bullets: [
-      "Service and retail product sales from one POS",
-      "Staff attribution — know who sold what",
-      "Cash, card, and other payment tracking",
-      "Discounts and refunds with reason",
-      "Daily sales totals and Z-report",
-      "Unlimited staff — no per-seat fees",
-      "Works in EUR (Ireland) and lei / RON (Romania)",
-    ],
-    sections: [
-      {
-        title: "Services and retail in one till",
-        body: "Create service items (haircuts, colours, treatments) and retail products (shampoos, styling products) in the same catalogue. The POS checkout handles both in a single transaction.",
-      },
-      {
-        title: "Staff attribution and accountability",
-        body: "Every sale can be linked to a customer and is always linked to the staff member who processed it. Owners and managers can review individual performance in transaction reports.",
-      },
-      {
-        title: "Simple cash-up at end of day",
-        body: "Open with a float, record cash in and out, close with a Z-report showing expected cash versus what was counted. Clear daily records without a complicated back office.",
-      },
-    ],
-    faqs: [
-      { question: "Does franchisetech support appointment booking?", answer: "Not currently. franchisetech focuses on POS, cash control, stock, and operations records. Appointment features are planned but not yet available." },
-      { question: "Can I sell retail products alongside services?", answer: "Yes. Products and services live in the same catalogue and can be mixed in one checkout transaction." },
-      { question: "Can I track which staff member made each sale?", answer: "Yes. Every transaction is linked to the logged-in user, and managers can filter reports by staff." },
-      { question: "Does it work for Irish and Romanian salons?", answer: "Yes. EUR currency and Irish VAT for Ireland; lei/RON and Romanian TVA for Romania, with FiscalNet fiscal receipts available when configured." },
-    ],
-    related: [
-      { label: "POS register", href: "/features/pos" },
-      { label: "Z-report and till closing", href: "/features/z-report" },
-      { label: "Romania", href: "/industries/romania" },
-    ],
-    image: "/showcase/pos-grid.png",
-    heroComponent: OwnerPosProof,
-  },
 ];
 
 export type ResourcePage = {
@@ -621,7 +575,10 @@ export function pageMetadata(
   },
   locale: MarketingLocale = "en",
 ): Metadata {
-  const image = page.image ?? "/showcase/pos-grid.png";
+  // Not sourcing page.image (or the old /showcase/pos-grid.png fallback) for
+  // OG/Twitter cards — every current value in the seo.ts data is one of the
+  // stale pre-pivot screenshots (EUR pricing, Irish VAT bands). Falls back
+  // to the site-wide default OG image in app/layout.tsx.
   return {
     title: page.metaTitle,
     description: page.description,
@@ -632,13 +589,11 @@ export function pageMetadata(
       description: page.description,
       url: page.path,
       locale: marketingOpenGraphLocale(locale),
-      images: [{ url: image, width: 1200, height: 750, alt: page.metaTitle }],
     },
     twitter: {
       card: "summary_large_image",
       title: page.metaTitle,
       description: page.description,
-      images: [image],
     },
   };
 }
