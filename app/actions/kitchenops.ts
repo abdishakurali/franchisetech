@@ -281,10 +281,17 @@ export async function addCategory(formData: FormData) {
     organisation_id: orgId, name,
     color: stringValue(formData, "color") || null,
     sort_order: numberValue(formData, "sort_order"),
-    category_type: stringValue(formData, "category_type") || "inventory",
+    // Defaults to "both", not "inventory" — a category created without an
+    // explicit type must stay sellable in POS. Prior default silently made
+    // every category created from this action POS-invisible (products in it
+    // couldn't be assigned a pos_category_id and got no POS tab), which is
+    // exactly the "category exists in admin, not in POS" bug a customer hit.
+    // Matches addCategoryInline's already-established default below.
+    category_type: stringValue(formData, "category_type") || "both",
   });
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
+  revalidatePath("/app/pos");
 }
 
 // Inline category creation — used by the onboarding menu builder and any

@@ -27,19 +27,17 @@ export default async function AppLayout({
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  const { data: memberships } = await supabase
-    .from("organisation_members")
-    .select("*, organisations(*)")
-    .eq("user_id", user.id)
-    .or("status.is.null,status.eq.active")
-    .order("created_at", { ascending: true })
-    .limit(1);
+  const [{ data: profile }, { data: memberships }, headersList] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase
+      .from("organisation_members")
+      .select("*, organisations(*)")
+      .eq("user_id", user.id)
+      .or("status.is.null,status.eq.active")
+      .order("created_at", { ascending: true })
+      .limit(1),
+    headers(),
+  ]);
 
   const membership = memberships?.[0] ?? null;
   const activeOrgFull = membership?.organisations ?? null;
@@ -51,12 +49,19 @@ export default async function AppLayout({
     : null;
   const userRole = membership?.role ?? null;
 
-  const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? "";
 
-  const subStatus = activeOrg?.id
-    ? await getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null)
-    : null;
+  const [subStatus, completedTxCount] = activeOrg?.id
+    ? await Promise.all([
+        getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null),
+        supabase
+          .from("pos_transactions")
+          .select("*", { count: "exact", head: true })
+          .eq("organisation_id", activeOrg.id)
+          .eq("status", "completed")
+          .then(({ count }) => count ?? 0),
+      ])
+    : [null, 0];
 
   const subscriptionBlocked = isSubscriptionBlockedForApp(subStatus);
 
@@ -68,15 +73,7 @@ export default async function AppLayout({
   // Completed-sale count is needed both for the delayed verification gate
   // below and for setupComplete further down — computed once here so a new
   // signup only pays the query cost a single time per request.
-  let txCount = 0;
-  if (activeOrg?.id) {
-    const { count } = await supabase
-      .from("pos_transactions")
-      .select("*", { count: "exact", head: true })
-      .eq("organisation_id", activeOrg.id)
-      .eq("status", "completed");
-    txCount = count ?? 0;
-  }
+  const txCount = completedTxCount;
 
   // New signups get a fully unrestricted 5-day trial (see
   // lib/billing/subscription.ts's created_at-based fallback) — no forced
