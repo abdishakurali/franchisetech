@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { DB_ROLES, canManageTeam, type DbRole } from "@/lib/access-control";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
+import { normalizeAccountantPermissions } from "@/lib/accountant/permissions";
 
 const VALID_ROLES = DB_ROLES;
 type Role = DbRole;
@@ -29,7 +30,7 @@ export async function GET() {
 
     const { data: members, error } = await admin
       .from("organisation_members")
-      .select("id,user_id,role,status,created_at,invited_by,disabled_at")
+      .select("id,user_id,role,status,created_at,invited_by,disabled_at,accountant_permissions")
       .eq("organisation_id", orgId)
       .order("created_at");
 
@@ -73,13 +74,14 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { email, fullName, role, phone, temporaryPassword, sendInvite } = body as {
+    const { email, fullName, role, phone, temporaryPassword, sendInvite, accountantPermissions } = body as {
       email: string;
       fullName: string;
       role: Role;
       phone?: string;
       temporaryPassword?: string;
       sendInvite?: boolean;
+      accountantPermissions?: unknown;
     };
 
     if (!email || !fullName || !role) {
@@ -104,6 +106,10 @@ export async function POST(req: NextRequest) {
     }
 
     const admin = makeAdminClient();
+    const permissions = role === "accountant" ? normalizeAccountantPermissions(accountantPermissions) : [];
+    if (role === "accountant" && permissions.length === 0) {
+      return NextResponse.json({ error: "Selectează cel puțin o categorie de acces." }, { status: 400 });
+    }
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://franchisetech.ro";
     const redirectTo = `${appUrl}/auth/callback`;
 
@@ -191,7 +197,7 @@ export async function POST(req: NextRequest) {
     if (existingMember) {
       const { error: memberUpdateError } = await admin
         .from("organisation_members")
-        .update({ role, status: "active", disabled_at: null })
+        .update({ role, status: "active", disabled_at: null, accountant_permissions: permissions })
         .eq("id", existingMember.id);
       if (memberUpdateError) {
         return NextResponse.json(
@@ -208,6 +214,7 @@ export async function POST(req: NextRequest) {
           role,
           status: "active",
           invited_by: user.id,
+          accountant_permissions: permissions,
         });
       if (memberInsertError) {
         return NextResponse.json(
@@ -224,7 +231,7 @@ export async function POST(req: NextRequest) {
       target_user_id: authUserId,
       action: existingMember ? "user_added_to_org" : "user_created",
       new_role: role,
-      metadata: { email, fullName },
+      metadata: { email, fullName, accountant_permissions: permissions },
     });
 
     return NextResponse.json({ status: resultStatus, userId: authUserId, role, resetLink });
