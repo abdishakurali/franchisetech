@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ActivationBanner } from "@/components/app/ActivationBanner";
 import { DashboardSalesHighlight } from "@/components/app/DashboardSalesHighlight";
+import { DashboardSalesChart } from "@/components/app/DashboardSalesChart";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { isModuleEnabled } from "@/lib/business-modules";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
@@ -109,6 +110,22 @@ export default async function DashboardPage() {
     if (last7ByDay.has(day)) last7ByDay.set(day, (last7ByDay.get(day) ?? 0) + Number(tx.total ?? 0));
   }
   const last7Values = [...last7ByDay.values()];
+
+  const paymentTotals = new Map<string, number>();
+  for (const tx of todayTx) {
+    const method = Array.isArray(tx.payment_methods) ? tx.payment_methods[0] : tx.payment_methods;
+    const type = String(method?.type ?? "other").toLowerCase();
+    paymentTotals.set(type, (paymentTotals.get(type) ?? 0) + Number(tx.total ?? 0) - Number(tx.tip_amount ?? 0));
+  }
+  const paymentMix = [
+    { label: "Numerar", value: paymentTotals.get("cash") ?? 0, color: "bg-emerald-500" },
+    { label: "Card", value: paymentTotals.get("card") ?? 0, color: "bg-sky-500" },
+    { label: "Online / altele", value: (paymentTotals.get("online") ?? 0) + (paymentTotals.get("other") ?? 0), color: "bg-violet-500" },
+  ];
+  const salesDays = [...last7ByDay.entries()].map(([date, value]) => ({
+    label: new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", { weekday: "short" }).format(new Date(`${date}T12:00:00`)).replace(".", ""),
+    value,
+  }));
 
   const attentionItems = await getDashboardAttention(supabase, {
     orgId,
@@ -214,6 +231,8 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <DashboardSalesChart days={salesDays} paymentMix={paymentMix} currency={currency} />
 
       {/* ── Attention ── */}
       <Card>
