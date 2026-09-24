@@ -1,6 +1,6 @@
 /**
  * Drawn replacements for the two real screenshots that used to sit here
- * (/showcase/reports-dashboard.png, /showcase/z-report.png). Both showed
+ * (/marketing/live/dashboard.png, /marketing/live/reports.png). Both showed
  * English UI, EUR pricing, a 9% VAT line (the rate Romania stopped using),
  * and "Chicken Caesar Image QA" as a top-selling product — QA test data,
  * on the second section of the homepage a Romanian visitor sees. Replaced

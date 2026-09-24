@@ -187,21 +187,21 @@ export const en = {
         headline: "Till matches the drawer",
         body: "Expected cash, card totals and the difference — visible before you lock the door.",
         href: "/features/z-report",
-        img: "/showcase/reports-dashboard.png",
+        img: "/marketing/live/dashboard.png",
         imgAlt: "franchisetech dashboard — expected cash and till status",
       },
       {
         headline: "Sell fast at the till",
         body: "Product grid, cash or card checkout, fiscal receipt — new staff can sell on day one.",
         href: "/features/pos",
-        img: "/showcase/pos-grid.png",
+        img: "/marketing/live/pos.png",
         imgAlt: "franchisetech POS — product grid, cart, and charge",
       },
       {
         headline: "Fiscal receipt through FiscalNet",
         body: "Configure the local register, payment methods, and VAT groups before the first real sale.",
         href: "/help/romania-fiscalnet",
-        img: "/showcase/recipe-costing.png",
+        img: "/marketing/live/recipes.png",
         imgAlt: "franchisetech recipe costing — ingredient cost and margin",
       },
     ],
@@ -245,7 +245,7 @@ export const en = {
       },
       items: [
         { title: "Cafes", text: "Counter service and recipe margins.", bestFor: "Counter service, 1–2 tills, recipe-led menus", href: "/industries/cafes", image: "/marketing/industry-cafe.png" },
-        { title: "Takeaways", text: "Speed at the till, clear end-of-day.", bestFor: "High-volume till, fast checkout, daily Z-report", href: "/industries/takeaways", image: "/showcase/pos-grid.png", imageType: "screenshot" as const },
+        { title: "Takeaways", text: "Speed at the till, clear end-of-day.", bestFor: "High-volume till, fast checkout, daily Z-report", href: "/industries/takeaways", image: "/marketing/live/pos.png", imageType: "screenshot" as const },
       ],
     },
     steps: {

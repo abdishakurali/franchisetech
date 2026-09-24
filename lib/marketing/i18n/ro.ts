@@ -190,21 +190,21 @@ export const ro: MarketingMessages = {
         headline: "Sertarul bate cu casa",
         body: "Numerar așteptat, card și diferența — vizibile înainte să închideți ușa.",
         href: "/features/z-report",
-        img: "/showcase/reports-dashboard.png",
+        img: "/marketing/live/dashboard.png",
         imgAlt: "Panou franchisetech — numerar așteptat și status casă",
       },
       {
         headline: "Vinzi rapid la casă",
         body: "Grilă produse, încasare cash sau card, bon fiscal — personal nou vinde din prima zi.",
         href: "/features/pos",
-        img: "/showcase/pos-grid.png",
+        img: "/marketing/live/pos.png",
         imgAlt: "POS franchisetech — grilă produse, coș și încasare",
       },
       {
         headline: "Bon fiscal prin FiscalNet",
         body: "Configurați casa locală, metodele de plată și grupele TVA înainte de prima vânzare reală.",
         href: "/help/romania-fiscalnet",
-        img: "/showcase/recipe-costing.png",
+        img: "/marketing/live/recipes.png",
         imgAlt: "Cost rețete franchisetech — cost ingrediente și marjă",
       },
     ],
@@ -248,7 +248,7 @@ export const ro: MarketingMessages = {
       },
       items: [
         { title: "Cafenele", text: "Serviciu la tejghea și marje pe rețete.", bestFor: "Tejghea, 1–2 case, meniuri pe rețete", href: "/industries/cafes", image: "/marketing/industry-cafe.png" },
-        { title: "Takeaway", text: "Viteză la casă, închidere clară.", bestFor: "Volum mare la casă, checkout rapid, raport Z", href: "/industries/takeaways", image: "/showcase/pos-grid.png", imageType: "screenshot" as const },
+        { title: "Takeaway", text: "Viteză la casă, închidere clară.", bestFor: "Volum mare la casă, checkout rapid, raport Z", href: "/industries/takeaways", image: "/marketing/live/pos.png", imageType: "screenshot" as const },
       ],
     },
     steps: {

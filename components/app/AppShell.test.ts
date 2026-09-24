@@ -70,15 +70,15 @@ describe("resolveNavItems", () => {
     expect(limited).toBe(true);
   });
 
-  it("gives an accountant only the enabled operations destinations", () => {
+  it("keeps accountants inside the dedicated client portal", () => {
     const withoutPurchases = resolveNavItems("accountant", t, true, moduleVisibility(), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
-    expect(hrefs(withoutPurchases.mainNav)).toEqual(["/app", "/app/reports"]);
+    expect(hrefs(withoutPurchases.mainNav)).toEqual(["/accountant"]);
 
     const withoutEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ purchases: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
-    expect(hrefs(withoutEfactura.mainNav)).toEqual(["/app", "/app/reports", "/app/purchases", "/app/suppliers"]);
+    expect(hrefs(withoutEfactura.mainNav)).toEqual(["/accountant"]);
 
     const withEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ purchases: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true });
-    expect(hrefs(withEfactura.mainNav)).toEqual(["/app", "/app/reports", "/app/purchases", "/app/suppliers", "/app/invoices"]);
+    expect(hrefs(withEfactura.mainNav)).toEqual(["/accountant"]);
   });
 
   it("shows only the seven design destinations while preserving recipe and stock entitlements", () => {

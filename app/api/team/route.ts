@@ -41,10 +41,22 @@ export async function GET() {
       .select("id,full_name,email,role_title,phone")
       .in("id", userIds.length ? userIds : ["00000000-0000-0000-0000-000000000000"]);
 
+    const { data: accessEvents } = await admin
+      .from("team_audit_events")
+      .select("actor_user_id,created_at")
+      .eq("organisation_id", orgId)
+      .eq("action", "accounting_package_downloaded")
+      .order("created_at", { ascending: false });
+    const lastAccess = new Map<string, string>();
+    for (const event of accessEvents ?? []) {
+      if (!lastAccess.has(event.actor_user_id)) lastAccess.set(event.actor_user_id, event.created_at);
+    }
+
     const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]));
     const result = (members ?? []).map((m) => ({
       ...m,
       profile: profileMap[m.user_id] ?? null,
+      last_access_at: lastAccess.get(m.user_id) ?? null,
     }));
     return NextResponse.json({ members: result });
   } catch (err) {
@@ -79,6 +91,8 @@ export async function POST(req: NextRequest) {
     if (role === "owner" && membership.role !== "owner") {
       return NextResponse.json({ error: "Only owners can add other owners" }, { status: 403 });
     }
+    // External accountants are deliberately free and read-only. They are not
+    // advanced employee seats and must never be put behind team entitlements.
     if (ADVANCED_ROLES.has(role)) {
       try {
         await assertEntitlement(orgId, "team.advanced_roles");

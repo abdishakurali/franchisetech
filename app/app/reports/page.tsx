@@ -12,6 +12,7 @@ import { computeSalesReport } from "@/lib/reports/sales-data";
 import { countsTowardPurchaseSpend } from "@/lib/nir/purchase";
 import { CORE_REPORTS, selectCoreReport } from "@/lib/reports/hub-selection";
 import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendChart";
+import { AccountantAccessCard } from "@/components/app/AccountantAccessCard";
 
 type Preview = { metrics: Array<[string, string]>; rows: Array<[string, string]>; error?: boolean };
 
@@ -75,17 +76,6 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
       ["Numerar așteptat", latest ? formatMoney(latest.expected_cash, currency) : "—"],
       ["Diferență", latest ? formatMoney(latest.cash_difference, currency) : "—"],
     ], rows: (data ?? []).map((row) => [row.closed_at ? new Intl.DateTimeFormat("ro-RO", { dateStyle: "medium" }).format(new Date(row.closed_at)) : "—", formatMoney(row.counted_cash, currency)]) };
-  } else if (active && selected === "vat") {
-    const { data, error } = await supabase.from("canonical_sales_lines").select("vat_rate,net_amount,vat_amount,gross_amount").eq("organisation_id", orgId).gte("sold_at", start).lte("sold_at", end);
-    const rates = new Map<number, { net: number; vat: number; gross: number }>();
-    for (const line of data ?? []) {
-      const rate = Number(line.vat_rate ?? 0);
-      const row = rates.get(rate) ?? { net: 0, vat: 0, gross: 0 };
-      row.net += Number(line.net_amount ?? 0); row.vat += Number(line.vat_amount ?? 0); row.gross += Number(line.gross_amount ?? 0);
-      rates.set(rate, row);
-    }
-    const totals = [...rates.values()].reduce((sum, row) => ({ net: sum.net + row.net, vat: sum.vat + row.vat, gross: sum.gross + row.gross }), { net: 0, vat: 0, gross: 0 });
-    preview = { error: Boolean(error), metrics: [["Net", formatMoney(totals.net, currency)], ["TVA", formatMoney(totals.vat, currency)], ["Brut", formatMoney(totals.gross, currency)]], rows: [...rates.entries()].sort(([a], [b]) => a - b).map(([rate, row]) => [`Cotă ${rate}%`, formatMoney(row.vat, currency)]) };
   } else if (active && selected === "stock") {
     // Same live source /app/stock and /app/reports/stock read
     // (products.current_stock_qty) — not the unrelated stock_items table.
@@ -126,7 +116,7 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
       })}</nav></div>
       <section aria-label={active?.title ?? "Previzualizare raport"} className="min-w-0 rounded-[10px] border border-border bg-card p-4 sm:p-6">
         {active ? <>
-          <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-foreground">{active.title}</h2><p className="mt-1 text-[13px] text-muted-foreground">{active.desc}</p></div>{(selected === "sales" || selected === "vat") && <nav aria-label="Perioada raportului" className="flex gap-1.5">{([["today", "Azi"], ["week", "7 zile"], ["month", "Luna aceasta"]] as const).map(([value, label]) => <Link key={value} href={`/app/reports?report=${selected}&period=${value}`} aria-current={period === value ? "true" : undefined} className={`rounded-md border px-3 py-2 text-xs font-semibold ${period === value ? "border-brass bg-accent text-foreground" : "border-border text-muted-foreground"}`}>{label}</Link>)}</nav>}</div>
+          <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-foreground">{active.title}</h2><p className="mt-1 text-[13px] text-muted-foreground">{active.desc}</p></div>{selected === "sales" && <nav aria-label="Perioada raportului" className="flex gap-1.5">{([["today", "Azi"], ["week", "7 zile"], ["month", "Luna aceasta"]] as const).map(([value, label]) => <Link key={value} href={`/app/reports?report=${selected}&period=${value}`} aria-current={period === value ? "true" : undefined} className={`rounded-md border px-3 py-2 text-xs font-semibold ${period === value ? "border-brass bg-accent text-foreground" : "border-border text-muted-foreground"}`}>{label}</Link>)}</nav>}</div>
           {preview.error ? <p role="alert" className="py-8 text-sm text-attention">Datele raportului nu au putut fi încărcate. Deschide raportul pentru detalii.</p> : <>
             <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">Date reale · {selected === "z-report" ? "ultimele 5 închideri" : selected === "stock" ? "stoc curent" : selected === "purchases" || selected === "margins" ? "ultimele 100 înregistrări" : `${from} – ${to}`}</p>
             <div className="mt-5 grid grid-cols-2 gap-px border border-border bg-border xl:grid-cols-4">{preview.metrics.map(([label, value]) => <div key={label} className="bg-card p-4"><p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{label}</p><p className="mt-1 break-words font-[family-name:var(--font-display)] text-[23px] font-semibold tracking-tight tabular-nums text-foreground">{value}</p></div>)}</div>
@@ -138,5 +128,7 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
         </> : <p className="text-sm text-mid">Nu există rapoarte disponibile pentru acest cont.</p>}
       </section>
     </div>
+    <section className="mt-6"><h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-muted-foreground">Instrumente operaționale</h2><div className="grid gap-3 sm:grid-cols-2"><Link href="/app/transactions" className="rounded-xl border border-border bg-card p-4 transition hover:border-brass/40"><span className="font-semibold">Tranzacții</span><span className="mt-1 block text-sm text-muted-foreground">Caută bonuri, vânzări, retururi și anulări.</span></Link><Link href="/app/reports/staff" className="rounded-xl border border-border bg-card p-4 transition hover:border-brass/40"><span className="font-semibold">Personal</span><span className="mt-1 block text-sm text-muted-foreground">Activitate casieri, reduceri, anulări și vânzări.</span></Link></div></section>
+    {(membership.role === "owner" || membership.role === "manager") && <section className="mt-6"><h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contabilitate</h2><AccountantAccessCard compact /><Link href="/app/settings?tab=accountant#accountant" className="mt-3 inline-flex text-sm font-semibold text-brass">Gestionează accesul contabilului →</Link></section>}
   </div>;
 }

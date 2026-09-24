@@ -1,4 +1,4 @@
-export const CORE_REPORTS = ["sales", "z-report", "vat", "stock", "purchases", "margins"] as const;
+export const CORE_REPORTS = ["sales", "z-report", "stock", "purchases", "margins"] as const;
 export type CoreReport = (typeof CORE_REPORTS)[number];
 
 export function selectCoreReport(requested: string | undefined, visible: string[]): CoreReport {

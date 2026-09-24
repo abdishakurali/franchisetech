@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { CreditCard, ChefHat, Package, TrendingUp, ShoppingCart, Wifi, Receipt, FileBarChart } from "lucide-react";
+import { CreditCard, Package, Wifi, Receipt, FileBarChart } from "lucide-react";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { pricingPlans } from "@/lib/billing/plans";
 import { HomeFlowDiagram } from "@/components/marketing/HomeFlowDiagram";
@@ -76,10 +76,10 @@ export function DesignFeatures() {
 
 export function DesignHome() {
   const highlights = [
-    ["Vinzi în câteva atingeri", "Produsele direct pe ecran, cu TVA-ul pe fiecare linie. Numerar sau card — două butoane pentru încasare.", ShoppingCart],
-    ["Costul apare din rețetă, nu din memorie", "Treci o dată gramajele. Costurile din recepții alimentează rețetele, folosind metoda de calcul configurată în aplicație.", ChefHat],
-    ["Stocul se mișcă singur", "Recepții cu NIR, bonuri de consum, fișă de magazie pe articol. Vezi ce e sub minim înainte să rămâi fără.", Package],
-    ["Marja, nu doar încasarea", "Food cost pe produs, marjă pe meniu și rapoarte pentru contabil, în același loc.", TrendingUp],
+    ["Vinzi în câteva atingeri", "Produsele direct pe ecran, cu TVA-ul pe fiecare linie. Numerar sau card — două butoane pentru încasare.", "/marketing/live/pos.png"],
+    ["Costul apare din rețetă, nu din memorie", "Treci o dată gramajele. Costurile din recepții alimentează rețetele, folosind metoda de calcul configurată în aplicație.", "/marketing/live/recipes.png"],
+    ["Stocul se mișcă singur", "Recepții cu NIR, bonuri de consum, fișă de magazie pe articol. Vezi ce e sub minim înainte să rămâi fără.", "/marketing/live/stock.png"],
+    ["Marja, nu doar încasarea", "Food cost pe produs, marjă pe meniu și rapoarte pentru contabil, în același loc.", "/marketing/live/dashboard.png"],
   ] as const;
   const saleFlow = [
     { icon: CreditCard, label: "Vânzare la POS", detail: "Produse, TVA și metodă de plată alese o dată, corect." },
@@ -96,8 +96,10 @@ export function DesignHome() {
       <p className={s.eyebrow}>POS + gestiune pentru cafenele</p><h1>Știi cât te costă de fapt un cappuccino.</h1>
       <p className={s.lead}>Casa de marcat îți spune cât ai vândut. FranchiseTech îți spune cât ai consumat, cât a costat și cât ți-a rămas — din rețete și stoc reale.</p>
       <div className={s.actions}><DesignTrialLink location="homepage_hero" /><Link href="/features" className={`${s.button} ${s.secondary}`}>Vezi ce face</Link></div><p className={s.meta}>Fără card la înscriere · suport în română</p>
-    </div><div className={s.stack}><div className={s.imageFrame}><HomeFlowDiagram steps={saleFlow} tone="dark" /></div><p className={s.meta}>Fluxul unei vânzări, din platformă</p></div></div></section>
-    <section className={`${s.container} ${s.section}`}><p className={s.eyebrow}>Ce face, pe scurt</p><h2>Patru lucruri, legate între ele.</h2><div className={s.highlights}>{highlights.map(([title, body, Icon], i) => <article className={s.highlight} key={title as string}><div className={s.stack}><span className={s.number}>0{i + 1}</span><h3>{title}</h3><p className={s.body}>{body}</p></div><div className={`${s.imageFrame} flex aspect-[16/10] items-center justify-center bg-secondary`}><Icon className="h-10 w-10 text-brass" strokeWidth={1.5} aria-hidden /></div></article>)}</div></section>
+    </div><div className={s.stack}><div className={s.heroProduct}><Image src="/marketing/live/dashboard.png" alt="Panoul FranchiseTech cu vânzări, încasări și produse" width={1600} height={1000} priority /></div><p className={s.meta}>Panoul proprietarului — vânzări, încasări și produse într-un singur ecran</p></div></div></section>
+    <section className={`${s.container} ${s.productTour}`}><div className={s.tourHeading}><div><p className={s.eyebrow}>Vezi platforma înainte să începi</p><h2>De la prima vânzare la raportul zilei.</h2></div><p className={s.body}>Acestea sunt ecrane reale din FranchiseTech. Urmărește traseul pe care îl folosește echipa în fiecare zi.</p></div><div className={s.tourGrid}>{saleFlow.map((step, index) => { const Icon = step.icon; return <article className={s.tourStep} key={step.label}><span className={s.number}>0{index + 1}</span><Icon aria-hidden /><div><h3>{step.label}</h3><p>{step.detail}</p></div></article>; })}</div><div className={s.demoVideo}><video controls playsInline preload="metadata" poster="/marketing/live/pos.png" aria-label="Demonstrație înregistrată a platformei FranchiseTech"><source src="/showcase/product-demo.mp4" type="video/mp4" /></video><div><p className={s.eyebrow}>Demonstrație înregistrată</p><h3>Vezi cum se înregistrează o vânzare.</h3><p className={s.body}>Produsele, bonul curent și plata sunt vizibile în același ecran. Pornește clipul pentru o prezentare rapidă.</p></div></div></section>
+    <section className={`${s.container} ${s.section}`}><p className={s.eyebrow}>Ce face, pe scurt</p><h2>Patru lucruri, legate între ele.</h2><div className={s.highlights}>{highlights.map(([title, body, image], i) => <article className={s.highlight} key={title}><div className={s.stack}><span className={s.number}>0{i + 1}</span><h3>{title}</h3><p className={s.body}>{body}</p></div><div className={s.imageFrame}><Image src={image} alt={`${title} în FranchiseTech`} width={1600} height={1000} /></div></article>)}</div></section>
+    <section className={s.customerVideoSection}><div className={`${s.container} ${s.customerVideoGrid}`}><div className={s.customerVideoCopy}><p className={s.eyebrow}>Folosit într-un local real</p><h2>FranchiseTech, la lucru în Dolce Nera.</h2><p className={s.body}>Nu este o machetă. Clipul arată platforma folosită la punctul de vânzare, în timpul programului.</p><div className={s.customerIdentity}><Image src="/clients/dolce-nera.png" alt="Dolce Nera" width={160} height={80} /><span>Client FranchiseTech</span></div></div><div className={s.customerVideo}><video controls playsInline preload="metadata" poster="/marketing/product-proof/pos-in-cafe-poster.jpg" aria-label="FranchiseTech folosit la Dolce Nera"><source src="/marketing/product-proof/pos-in-cafe.mp4" type="video/mp4" /></video></div></div></section>
     <section className={s.dark}><div className={`${s.container} ${s.split}`}><div className={s.stack}><p className={s.eyebrow}>Mod offline</p><h2>Cade internetul. Casa vinde mai departe.</h2><p className={s.body}>Cu POS-ul deja deschis, vânzările intră într-o coadă locală de maximum 20 de intrări și se sincronizează când revine conexiunea.</p><p className={s.notice}>Înregistrarea vânzării și emiterea bonului fiscal sunt etape separate. Bonul fiscal depinde de FiscalNet și de echipamentul din local — în POS vezi ce a rămas de emis.</p></div><div className={s.imageFrame}><HomeFlowDiagram steps={offlineFlow} tone="dark" /></div></div></section>
     <DesignFinalCta />
   </>;

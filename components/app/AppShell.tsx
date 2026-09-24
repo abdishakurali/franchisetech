@@ -8,8 +8,8 @@ import { User } from "@supabase/supabase-js";
 import {
   LayoutDashboard, Package, BarChart3,
   LogOut, Menu, X, ChevronDown, Archive,
-  CreditCard, Truck, ShoppingBag,
-  Gift, BookOpen, FileText,
+  CreditCard, ShoppingBag,
+  Gift, BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -116,28 +116,15 @@ export function resolveNavItems(
   t: AppT,
   setupComplete: boolean,
   moduleVisibility: AppShellProps["moduleVisibility"],
-  activeOrg: AppShellProps["activeOrg"],
+  _activeOrg: AppShellProps["activeOrg"],
 ) {
+  void _activeOrg;
   const limited = userRole === "cashier" || userRole === "kitchen";
   const accountant = userRole === "accountant";
 
-  const showEfactura = activeOrg?.country_code === "RO" && activeOrg?.efactura_enabled === true;
-
   if (accountant) {
-    // Accountants share the read-only operations surface, but optional stock
-    // destinations must follow the same capability contract as owner nav.
-    // Routes remain available (and continue to be guarded/redirected) for
-    // bookmarked links; this only removes unavailable modules from chrome.
     const accountantNav: NavItem[] = [
-      { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
-      { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
-      ...(moduleVisibility?.purchases
-        ? [
-            { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
-            { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck, exact: false },
-          ]
-        : []),
-      ...(showEfactura ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }] : []),
+      { href: "/accountant", label: "Clienții mei", icon: LayoutDashboard, exact: true },
     ];
     return { mainNav: accountantNav, stockNav: [], showStock: false, limited: false };
   }

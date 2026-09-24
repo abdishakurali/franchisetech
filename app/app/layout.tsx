@@ -51,6 +51,10 @@ export default async function AppLayout({
 
   const pathname = headersList.get("x-pathname") ?? "";
 
+  // External accountants use a deliberately narrow, read-only product
+  // surface. Do not expose operational pages even if they know a URL.
+  if (userRole === "accountant") redirect("/accountant");
+
   const [subStatus, completedTxCount] = activeOrg?.id
     ? await Promise.all([
         getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null),

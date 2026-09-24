@@ -36,7 +36,7 @@ export function HomePageContentTop() {
           </div>
           <div className="relative">
             <div className="absolute -inset-12 rounded-full bg-brass/20 blur-3xl" />
-            <div className="relative overflow-hidden rounded-xl border border-white/15 bg-card shadow-2xl"><Image src="/showcase/pos-cart.png" alt="Ecranul de vânzare FranchiseTech" width={1600} height={1000} priority className="h-auto w-full" /></div>
+            <div className="relative overflow-hidden rounded-xl border border-white/15 bg-card shadow-2xl"><Image src="/marketing/live/pos.png" alt="Ecranul de vânzare FranchiseTech" width={1600} height={1000} priority className="h-auto w-full" /></div>
             <p className="mt-3 text-center text-xs text-white/45">{locale === "ro" ? "Ecranul de vânzare, din platformă" : "The sales screen, inside the platform"}</p>
           </div>
         </div>
@@ -50,7 +50,7 @@ export function HomePageContentTop() {
   );
 }
 
-const featureImages = ["/showcase/pos-cart.png", "/showcase/recipe-costing.png", "/showcase/stock-levels.png", "/showcase/reports-dashboard.png"] as const;
+const featureImages = ["/marketing/live/pos.png", "/marketing/live/recipes.png", "/marketing/live/stock.png", "/marketing/live/dashboard.png"] as const;
 
 export function HomePageContentBottom() {
   const { locale } = useMarketingLocaleContext();

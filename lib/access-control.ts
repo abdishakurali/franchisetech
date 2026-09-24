@@ -1,4 +1,4 @@
-export const DB_ROLES = ["owner", "manager", "staff", "cashier", "auditor", "kitchen"] as const;
+export const DB_ROLES = ["owner", "manager", "staff", "cashier", "auditor", "kitchen", "accountant"] as const;
 
 export type DbRole = (typeof DB_ROLES)[number];
 
@@ -19,7 +19,7 @@ export function canUsePos(role: string | null | undefined) {
 }
 
 export function canViewReports(role: string | null | undefined) {
-  return role === "owner" || role === "manager" || role === "auditor";
+  return role === "owner" || role === "manager" || role === "auditor" || role === "accountant";
 }
 
 export function canUpdateKitchen(role: string | null | undefined) {

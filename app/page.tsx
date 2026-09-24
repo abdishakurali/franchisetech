@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t.home.meta.description,
       url: SITE_URL,
       locale: marketingOpenGraphLocale(locale),
-      // Not the old /showcase/reports-dashboard.png — stale pre-pivot screenshot.
+      // Not the old /marketing/live/dashboard.png — stale pre-pivot screenshot.
       images: [{ url: "/franchise-tech-logo.png", width: 900, height: 237, alt: t.home.dashboard.alt }],
     },
   };

@@ -4,8 +4,8 @@ import { CORE_REPORTS, selectCoreReport } from "./hub-selection";
 describe("reports hub selection", () => {
   const allVisible = CORE_REPORTS.map((key) => `/app/reports/${key}`);
 
-  it("exposes only the six core reports", () => {
-    expect(CORE_REPORTS).toEqual(["sales", "z-report", "vat", "stock", "purchases", "margins"]);
+  it("exposes only the five preview reports", () => {
+    expect(CORE_REPORTS).toEqual(["sales", "z-report", "stock", "purchases", "margins"]);
   });
 
   it("selects an entitled report", () => {

@@ -26,7 +26,7 @@ interface Member {
   profile: Profile | null;
 }
 
-const VALID_ROLES = ["owner","manager","staff","cashier","kitchen","auditor"];
+const VALID_ROLES = ["owner","manager","staff","cashier","kitchen","auditor","accountant"];
 const ADVANCED_ROLES = new Set(["manager", "kitchen", "auditor"]);
 
 const ROLE_LABELS: Record<string, string> = {
@@ -36,6 +36,7 @@ const ROLE_LABELS: Record<string, string> = {
   cashier: "Cashier",
   kitchen: "Kitchen",
   auditor: "Auditor",
+  accountant: "Contabil extern",
 };
 
 function StatusBadge({ status }: { status: string }) {

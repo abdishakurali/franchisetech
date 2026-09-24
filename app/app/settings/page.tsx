@@ -54,6 +54,7 @@ import type { BillingPlan } from "@/lib/billing/plans";
 import { BusinessModulesCard } from "@/components/app/BusinessModulesCard";
 import { TeamClient } from "@/app/app/settings/team/TeamClient";
 import { AccountantSettingsSection, type AccountingOrg } from "@/components/app/AccountantSettingsSection";
+import { AccountantAccessCard } from "@/components/app/AccountantAccessCard";
 
 const TablesSettingsClient = dynamic(() =>
   import("@/components/app/TablesSettingsClient").then((m) => m.TablesSettingsClient)
@@ -454,7 +455,7 @@ export default async function SettingsPage({
     ...(isRO && (fiscalnetEnabled || efacturaEnabled || sagaInstalled)
       ? [{ id: "fiscal", label: "Fiscal" }]
       : []),
-    ...(sagaInstalled ? [{ id: "accountant", label: "Contabilitate" }] : []),
+    ...(isRO ? [{ id: "accountant", label: "Contabilitate" }] : []),
     { id: "modules",          label: isRO ? "Module" : "Modules" },
     { id: "units",            label: isRO ? "Unități de măsură" : "Units" },
     { id: "payment-methods",  label: isRO ? "Metode de plată" : "Payment methods" },
@@ -1106,10 +1107,11 @@ export default async function SettingsPage({
       )}
 
       {/* ── ACCOUNTANT ───────────────────────────────────────────────── */}
-      {sagaInstalled && (
+      {isRO && (
         <section id="accountant" className="scroll-mt-20">
           <h2 className="mb-4 text-lg font-semibold text-foreground">Contabilitate</h2>
-          <AccountantSettingsSection
+          <div className="space-y-6"><AccountantAccessCard />
+          {sagaInstalled && <AccountantSettingsSection
             supabase={supabase}
             orgId={orgId}
             countryCode={countryCode}
@@ -1117,7 +1119,7 @@ export default async function SettingsPage({
             sites={accountantSites}
             installingSaga={installingSaga}
             entitled={accountantEntitled}
-          />
+          />}</div>
         </section>
       )}
 

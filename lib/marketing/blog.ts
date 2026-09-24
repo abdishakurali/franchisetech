@@ -43,7 +43,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["raport-z", "pos", "inchidere-zi"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -76,7 +76,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["nir", "achizitii", "furnizori", "contabilitate"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     sections: [
       {
         heading: "Ce este NIR-ul?",
@@ -108,7 +108,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["retete", "cost-reteta", "marja", "menu-engineering"],
-    image: "/marketing/recipe-costing-hero.png",
+    image: "/marketing/live/recipes.png",
     sections: [
       {
         heading: "De ce contează costul rețetei?",
@@ -140,7 +140,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["bon-de-consum", "contabilitate", "stoc", "retete"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce este bonul de consum?",
@@ -172,7 +172,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["saga", "export-contabil", "contabilitate", "nir"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce este exportul Saga?",
@@ -363,7 +363,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-05",
     locale: "ro",
     tags: ["fiscal","bon-fiscal","conformitate"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/qr-code-receipts",
     sections: [
       {
@@ -400,7 +400,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-06",
     locale: "ro",
     tags: ["fiscal","factura","bon-fiscal"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     relatedFeature: "/features/qr-code-receipts",
     sections: [
       {
@@ -465,7 +465,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-07",
     locale: "ro",
     tags: ["tva","fiscal","delivery"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -498,7 +498,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-07",
     locale: "ro",
     tags: ["tva","fiscal","pos"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -568,7 +568,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-09",
     locale: "ro",
     tags: ["pos","storno","fiscal"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -601,7 +601,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-10",
     locale: "ro",
     tags: ["pos","storno"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -667,7 +667,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-12",
     locale: "ro",
     tags: ["pos","reconciliere","raport-z"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -700,7 +700,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-14",
     locale: "ro",
     tags: ["stoc","inventar"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Ce înseamnă stoc scriptic și stoc fizic",
@@ -736,7 +736,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-17",
     locale: "ro",
     tags: ["stoc","materii-prime"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Ce înseamnă, în practică, fiecare tip de stoc",
@@ -800,7 +800,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-17",
     locale: "ro",
     tags: ["stoc","stoc-negativ"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Ce înseamnă stoc negativ și de ce e un semnal de alarmă",
@@ -832,7 +832,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-19",
     locale: "ro",
     tags: ["stoc","nir","furnizori"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Situația: marfa a ajuns, factura nu",
@@ -864,7 +864,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-19",
     locale: "ro",
     tags: ["retete","pret","marja"],
-    image: "/marketing/recipe-costing-hero.png",
+    image: "/marketing/live/recipes.png",
     sections: [
       {
         heading: "Greșeala de a copia prețul de la vecini",
@@ -900,7 +900,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-24",
     locale: "ro",
     tags: ["registru-de-casa","raport-z"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -937,7 +937,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-25",
     locale: "ro",
     tags: ["raport-z","raport-x"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -970,7 +970,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-25",
     locale: "ro",
     tags: ["raport-z","multi-casierie"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -1003,7 +1003,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-26",
     locale: "ro",
     tags: ["numerar","banca"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -1036,7 +1036,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-27",
     locale: "ro",
     tags: ["personal","pontaj"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "De ce pontajul clasic nu ține pasul cu HoReCa",
@@ -1109,7 +1109,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-29",
     locale: "ro",
     tags: ["personal","vanzari"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "De ce targetul «un număr pentru toată lumea» nu funcționează",
@@ -1141,7 +1141,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-29",
     locale: "ro",
     tags: ["personal","legal"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "Durata normală a timpului de lucru",
@@ -1205,7 +1205,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-02",
     locale: "ro",
     tags: ["contabilitate","export"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "Diferența simplă dintre CSV și XML",
@@ -1237,7 +1237,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-03",
     locale: "ro",
     tags: ["contabilitate","conformitate"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "De ce nu puteți improviza lista asta",
@@ -1273,7 +1273,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-03",
     locale: "ro",
     tags: ["contabilitate","cheltuieli"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "De ce contează distincția, nu doar la control",
@@ -1309,7 +1309,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-04",
     locale: "ro",
     tags: ["contabilitate","rapoarte"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "De ce contabilul cere aceleași documente în fiecare lună",
@@ -1415,7 +1415,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-05",
     locale: "ro",
     tags: ["patiserie","stoc","risipa"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Risipa la patiserie e diferită de risipa la restaurant",
@@ -1488,7 +1488,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-07",
     locale: "ro",
     tags: ["dark-kitchen","delivery"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -1521,7 +1521,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-07",
     locale: "ro",
     tags: ["catering","facturare"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce e diferit la catering față de o vânzare normală la casă",
@@ -1553,7 +1553,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-08",
     locale: "ro",
     tags: ["breakeven","marja","financiar"],
-    image: "/marketing/margins-report.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce este pragul de rentabilitate și de ce trebuie să-l știți",
@@ -1585,7 +1585,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-09",
     locale: "ro",
     tags: ["costuri","financiar"],
-    image: "/marketing/margins-report.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce sunt costurile fixe și ce sunt costurile variabile",
@@ -1617,7 +1617,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-10",
     locale: "ro",
     tags: ["kpi","rapoarte"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -1650,7 +1650,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-12",
     locale: "ro",
     tags: ["raport-z","greseli"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -1723,7 +1723,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-19",
     locale: "ro",
     tags: ["fiscal", "amenzi", "bon-fiscal"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/qr-code-receipts",
     sections: [
       {
@@ -1756,7 +1756,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-20",
     locale: "ro",
     tags: ["fiscal", "fiscalnet", "pos"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -1793,7 +1793,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["fiscal", "casa-de-marcat", "defectiune"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -1830,7 +1830,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-22",
     locale: "ro",
     tags: ["pos", "storno", "fiscal"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -1867,7 +1867,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-09",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "garantie"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -1904,7 +1904,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-11",
     locale: "ro",
     tags: ["fiscal", "control-anaf", "amenzi"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Cum descoperă efectiv inspectorul un bon lipsă",
@@ -1936,7 +1936,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-14",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "pos"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -1973,7 +1973,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-17",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "casa-de-marcat"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/qr-code-receipts",
     sections: [
       {
@@ -2006,7 +2006,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["numerar", "registru-de-casa", "raport-z", "operatiuni"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -2043,7 +2043,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "amenzi", "control-anaf"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -2076,7 +2076,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["tva", "storno", "fiscal"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -2113,7 +2113,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["fiscal", "casa-de-marcat", "amenzi", "control-anaf"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/qr-code-receipts",
     sections: [
       {
@@ -2150,7 +2150,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "raport-z"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {

@@ -30,6 +30,7 @@ import { moduleLabel } from "@/lib/business-profile-i18n";
 import { getDashboardAttention } from "@/lib/dashboard/attention";
 import type { OnboardingStep } from "@/lib/onboarding/steps";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -39,7 +40,8 @@ function money(v: number, cur = "EUR") {
 export default async function DashboardPage() {
   const todayStart = startOfDay(new Date()).toISOString();
 
-  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { countryCode, profileLocale, supabase, orgId, currency, membership } = await getKitchenOpsContext();
+  if (membership.role === "accountant") redirect("/accountant");
   const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const isRO = countryCode === "RO";
 

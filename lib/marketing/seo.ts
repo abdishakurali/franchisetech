@@ -93,7 +93,7 @@ export const featurePages: SeoPage[] = [
       { question: "How many staff can use the register?", answer: "Unlimited. Add cashiers, managers, and kitchen roles at no extra per-user cost." },
     ],
     related: [{ label: "Z-report", href: "/features/z-report" }, { label: "Cafes", href: "/industries/cafes" }],
-    image: "/showcase/pos-grid.png",
+    image: "/marketing/live/pos.png",
     heroComponent: OwnerPosProof,
   },
   {
@@ -118,7 +118,7 @@ export const featurePages: SeoPage[] = [
       { question: "Can I transfer stock between locations?", answer: "Not yet. Stock transfer between locations is on the roadmap — today, each location's stock is tracked separately." },
     ],
     related: [{ label: "Recipe costing", href: "/features/recipe-costing" }, { label: "Stock control article", href: "/blog/stoc-negativ-cauze-si-solutii" }, { label: "Restaurants", href: "/industries/restaurants" }],
-    image: "/showcase/stock-levels.png",
+    image: "/marketing/live/stock.png",
     heroComponent: OwnerStockProof,
   },
   {
@@ -142,7 +142,7 @@ export const featurePages: SeoPage[] = [
       { question: "Can recipes connect to POS?", answer: "Yes. Recipe products can be sold through POS and used for stock calculations." },
     ],
     related: [{ label: "Stock management", href: "/features/stock-management" }],
-    image: "/showcase/recipe-costing.png",
+    image: "/marketing/live/recipes.png",
     heroComponent: OwnerRecipeProof,
   },
   {
@@ -166,7 +166,7 @@ export const featurePages: SeoPage[] = [
       { question: "Does this replace my accountant?", answer: "No. franchisetech helps keep organised sales and till records. Professional tax and accounting advice remains your responsibility." },
     ],
     related: [{ label: "Z-report explained", href: "/resources/z-report-explained" }, { label: "POS feature", href: "/features/pos" }],
-    image: "/showcase/reports-dashboard.png",
+    image: "/marketing/live/dashboard.png",
     heroComponent: OwnerZReportProof,
   },
   {
@@ -189,7 +189,7 @@ export const featurePages: SeoPage[] = [
       { question: "Is this a full ERP?", answer: "No. It is practical purchase tracking for small food operators, not enterprise procurement." },
     ],
     related: [{ label: "Stock management", href: "/features/stock-management" }, { label: "Recipe costing", href: "/features/recipe-costing" }],
-    image: "/showcase/suppliers.png",
+    image: "/marketing/live/stock.png",
     heroComponent: OwnerSuppliersProof,
   },
   {
@@ -226,7 +226,7 @@ export const featurePages: SeoPage[] = [
       { label: "Purchases & suppliers", href: "/features/purchases-suppliers" },
       { label: "Romania", href: "/industries/romania" },
     ],
-    image: "/showcase/suppliers.png",
+    image: "/marketing/live/stock.png",
     heroComponent: OwnerSuppliersProof,
   },
   {
@@ -262,7 +262,7 @@ export const featurePages: SeoPage[] = [
       { label: "Z-report", href: "/features/z-report" },
       { label: "Romania", href: "/industries/romania" },
     ],
-    image: "/showcase/pos-grid.png",
+    image: "/marketing/live/pos.png",
     heroComponent: OwnerPosProof,
   },
   {
@@ -285,7 +285,7 @@ export const featurePages: SeoPage[] = [
       { question: "Can I skip steps?", answer: "Yes. The guide is a checklist, not a blocker. You can return to any step later." },
     ],
     related: [{ label: "POS", href: "/features/pos" }, { label: "Pricing", href: "/pricing" }],
-    image: "/showcase/setup-guide.png",
+    image: "/marketing/live/dashboard.png",
     heroComponent: OwnerSetupGuideProof,
   },
   {
@@ -345,7 +345,7 @@ export const featurePages: SeoPage[] = [
       { label: "POS for Romania", href: "/industries/romania" },
       { label: "Z-report and daily closing", href: "/features/z-report" },
     ],
-    image: "/showcase/pos-grid.png",
+    image: "/marketing/live/pos.png",
     heroComponent: OwnerPosProof,
   },
   {
@@ -414,7 +414,7 @@ export const featurePages: SeoPage[] = [
       { label: "Stock management", href: "/features/stock-management" },
       { label: "QR code on receipts", href: "/features/qr-code-receipts" },
     ],
-    image: "/showcase/reports-dashboard.png",
+    image: "/marketing/live/dashboard.png",
     heroComponent: OwnerDashboardProof,
   },
   {
@@ -505,7 +505,7 @@ export const industryPages: SeoPage[] = [
       { label: "Z-report", href: "/features/z-report" },
       { label: "Cafenele & cofetării", href: "/industries/cafes" },
     ],
-    image: "/showcase/reports-dashboard.png",
+    image: "/marketing/live/dashboard.png",
     heroComponent: OwnerDashboardProof,
   },
 ];
@@ -575,7 +575,7 @@ export function pageMetadata(
   },
   locale: MarketingLocale = "en",
 ): Metadata {
-  // Not sourcing page.image (or the old /showcase/pos-grid.png fallback) for
+  // Not sourcing page.image (or the old /marketing/live/pos.png fallback) for
   // OG/Twitter cards — every current value in the seo.ts data is one of the
   // stale pre-pivot screenshots (EUR pricing, Irish VAT bands). Falls back
   // to the site-wide default OG image in app/layout.tsx.
@@ -629,7 +629,7 @@ export function seoMeta({
   title,
   description,
   path,
-  image = "/showcase/pos-grid.png",
+  image = "/marketing/live/pos.png",
   locale = "en" as MarketingLocale,
 }: {
   title: string;

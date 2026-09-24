@@ -63,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       locale: marketingOpenGraphLocale(locale),
       url: SITE_URL,
-      // Not the old /showcase/reports-dashboard.png — stale pre-pivot screenshot
+      // Not the old /marketing/live/dashboard.png — stale pre-pivot screenshot
       // (EUR pricing, Irish VAT bands). Falls back to the real logo until a
       // correct, current OG image exists.
       images: [{ url: "/franchise-tech-logo.png", width: 900, height: 237, alt: "franchisetech" }],

@@ -158,7 +158,7 @@ function XReportCard() {
 /**
  * Shift handover panel, drawn rather than screenshotted.
  *
- * The existing /showcase/z-report.png capture is English, in EUR, and shows a 9%
+ * The existing /marketing/live/reports.png capture is English, in EUR, and shows a 9%
  * VAT line — a rate Romania no longer uses — so it is deliberately not reused here.
  * Romanian test data with the current 21% / 11% rates is the honest stand-in until
  * a clean Romanian screenshot exists.
