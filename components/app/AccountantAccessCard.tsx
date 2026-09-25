@@ -53,7 +53,7 @@ export function AccountantAccessCard({ compact = false }: { compact?: boolean })
       body: JSON.stringify({ email, fullName, role: "accountant", sendInvite: true, accountantPermissions: formData.getAll("accountantPermissions") }),
     });
     const payload = await response.json().catch(() => ({}));
-    setMessage(response.ok ? "Accesul a fost acordat. Contabilul poate folosi contul gratuit." : (payload.error ?? "Invitația nu a putut fi trimisă."));
+    setMessage(response.ok ? "Invitația securizată a fost trimisă. Contabilul poate activa gratuit accesul din email." : (payload.error ?? "Invitația nu a putut fi trimisă."));
     if (response.ok) await load();
     setSaving(false);
   }

@@ -28,6 +28,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { SubscriptionStatus } from "@/lib/billing/subscription";
 import { HeaderBillingNotice } from "@/components/billing/HeaderBillingNotice";
+import { AccountantAccessCard } from "@/components/app/AccountantAccessCard";
 import { resetPosTillOpen, subscribePosTillOpen } from "@/lib/pos-till-state";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import type { AppT } from "@/lib/app-i18n";
@@ -193,6 +194,10 @@ function HeaderNavLink({
   );
 }
 
+function HeaderNavAction({ label, onClick, className }: { label: string; onClick: () => void; className?: string }) {
+  return <button type="button" onClick={onClick} className={cn("rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground whitespace-nowrap", className)}>{label}</button>;
+}
+
 function AppHeader({
   pathname,
   activeOrg,
@@ -209,6 +214,7 @@ function AppHeader({
   onMobileToggle,
   onLogout,
   onReferralOpen,
+  onAccountantOpen,
   accessibleSites = [],
   activeSiteId = null,
   userRole,
@@ -228,6 +234,7 @@ function AppHeader({
   onMobileToggle: () => void;
   onLogout: () => void;
   onReferralOpen: () => void;
+  onAccountantOpen: () => void;
   accessibleSites?: { id: string; name: string }[];
   activeSiteId?: string | null;
   userRole: string | null;
@@ -252,7 +259,9 @@ function AppHeader({
           className="hidden lg:flex flex-1 items-center gap-0.5 min-w-0 overflow-x-auto"
           aria-label={t.shell.mainNav}
         >
-          {mainNav.map((item) => (
+          {mainNav.map((item) => item.href === "/app/settings/accountant" ? (
+            <HeaderNavAction key={item.href} label={item.label} onClick={onAccountantOpen} />
+          ) : (
             <HeaderNavLink
               key={item.href}
               href={item.href}
@@ -342,7 +351,9 @@ function AppHeader({
             </div>
           )}
 
-          {mainNav.map((item) => (
+          {mainNav.map((item) => item.href === "/app/settings/accountant" ? (
+            <HeaderNavAction key={item.href} label={item.label} onClick={() => { closeMobile(); onAccountantOpen(); }} className="block w-full text-left" />
+          ) : (
             <HeaderNavLink
               key={item.href}
               href={item.href}
@@ -377,6 +388,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   const { t, locale } = useAppI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
+  const [accountantOpen, setAccountantOpen] = useState(false);
   const [posTillOpen, setPosTillOpenState] = useState(false);
 
   const isPosRoute = pathname.startsWith("/app/pos");
@@ -448,6 +460,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           onMobileToggle={() => setMobileOpen((v) => !v)}
           onLogout={handleLogout}
           onReferralOpen={() => setReferralOpen(true)}
+          onAccountantOpen={() => setAccountantOpen(true)}
           accessibleSites={accessibleSites}
           activeSiteId={activeSiteId}
         />
@@ -470,6 +483,16 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           </DialogContent>
         </Dialog>
       )}
+
+      <Dialog open={accountantOpen} onOpenChange={setAccountantOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Conectează contabilul</DialogTitle>
+            <DialogDescription>Introdu emailul și alege datele disponibile. Contabilul primește un link securizat de activare, cu codul inclus automat, apoi firma apare în portalul său.</DialogDescription>
+          </DialogHeader>
+          <AccountantAccessCard />
+        </DialogContent>
+      </Dialog>
 
       <main
         className={cn(
