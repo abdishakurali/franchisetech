@@ -490,7 +490,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
             <DialogTitle>Conectează contabilul</DialogTitle>
             <DialogDescription>Introdu emailul și alege datele disponibile. Contabilul primește un link securizat de activare, cu codul inclus automat, apoi firma apare în portalul său.</DialogDescription>
           </DialogHeader>
-          <AccountantAccessCard />
+          <AccountantAccessCard showHeader={false} />
         </DialogContent>
       </Dialog>
 

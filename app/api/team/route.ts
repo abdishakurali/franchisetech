@@ -4,6 +4,7 @@ import { getActiveOrg } from "@/lib/kitchenops/data";
 import { DB_ROLES, canManageTeam, type DbRole } from "@/lib/access-control";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 import { normalizeAccountantPermissions } from "@/lib/accountant/permissions";
+import { sendAccountantInviteEmail } from "@/lib/email/accountant-invite";
 
 const VALID_ROLES = DB_ROLES;
 type Role = DbRole;
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Selectează cel puțin o categorie de acces." }, { status: 400 });
     }
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://franchisetech.ro";
-    const redirectTo = `${appUrl}/auth/callback`;
+    const redirectTo = `${appUrl}/api/auth/callback?next=/accountant`;
 
     // ── Check if auth user already exists ──────────────────────────────────
     const { data: existingList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
@@ -224,6 +225,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    let deliveryId: string | undefined;
+    if (role === "accountant" && sendInvite) {
+      if (!resetLink) return NextResponse.json({ error: "Linkul securizat nu a putut fi generat. Reîncearcă." }, { status: 502 });
+      const { data: organisation } = await admin.from("organisations").select("company_legal_name,name").eq("id", orgId).single();
+      const delivery = await sendAccountantInviteEmail({ to: email, companyName: organisation?.company_legal_name || organisation?.name || "Client franchisetech", activationUrl: resetLink });
+      if (!delivery.success) {
+        await admin.from("team_audit_events").insert({ organisation_id: orgId, actor_user_id: user.id, target_user_id: authUserId, action: "accountant_invite_delivery_failed", metadata: { email, error: delivery.error } });
+        return NextResponse.json({ error: `Accesul a fost creat, dar emailul nu a fost livrat: ${delivery.error}` }, { status: 502 });
+      }
+      deliveryId = delivery.messageId;
+    }
+
     // ── Audit ───────────────────────────────────────────────────────────────
     await admin.from("team_audit_events").insert({
       organisation_id: orgId,
@@ -231,10 +244,10 @@ export async function POST(req: NextRequest) {
       target_user_id: authUserId,
       action: existingMember ? "user_added_to_org" : "user_created",
       new_role: role,
-      metadata: { email, fullName, accountant_permissions: permissions },
+      metadata: { email, fullName, accountant_permissions: permissions, invite_message_id: deliveryId },
     });
 
-    return NextResponse.json({ status: resultStatus, userId: authUserId, role, resetLink });
+    return NextResponse.json({ status: resultStatus, userId: authUserId, role, emailDelivered: Boolean(deliveryId) });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }

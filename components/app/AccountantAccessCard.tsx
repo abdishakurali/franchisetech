@@ -20,7 +20,7 @@ const permissions = [
   ["purchases", "Achiziții"], ["documents", "Documente"],
 ] as const;
 
-export function AccountantAccessCard({ compact = false }: { compact?: boolean }) {
+export function AccountantAccessCard({ compact = false, showHeader = true }: { compact?: boolean; showHeader?: boolean }) {
   const [accountants, setAccountants] = useState<Accountant[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,10 +66,10 @@ export function AccountantAccessCard({ compact = false }: { compact?: boolean })
   }
 
   return <Card className={compact ? "border-brass/30" : undefined}>
-    <CardHeader>
+    {showHeader && <CardHeader>
       <CardTitle>Contabil</CardTitle>
       <CardDescription>Contabilul primește acces gratuit, doar pentru citire, la datele necesare. Îl poți revoca oricând.</CardDescription>
-    </CardHeader>
+    </CardHeader>}
     <CardContent className="space-y-5">
       {loading ? <Loader2 className="size-4 animate-spin text-muted-foreground" /> : accountants.length > 0 ? (
         <div className="space-y-2">{accountants.map((accountant) => <div key={accountant.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
