@@ -3,10 +3,12 @@ import { buildAccountantInviteEmail } from "./accountant-invite";
 
 describe("accountant invitation email", () => {
   it("links directly to the secure activation and explains the portal", () => {
-    const email = buildAccountantInviteEmail({ companyName: "Dolce & Nera", activationUrl: "https://example.test/activate?token=abc" });
+    const email = buildAccountantInviteEmail({ companyName: "Dolce & Nera", legalName: "DOLCE NERA SRL", taxId: "RO12345678", activationUrl: "https://example.test/activate?token=abc" });
     expect(email.subject).toContain("Dolce & Nera");
     expect(email.html).toContain("https://example.test/activate?token=abc");
     expect(email.html).toContain("Dolce &amp; Nera");
     expect(email.html).toContain("Clienții mei");
+    expect(email.html).toContain("DOLCE NERA SRL");
+    expect(email.html).toContain("CUI:</strong> RO12345678");
   });
 });

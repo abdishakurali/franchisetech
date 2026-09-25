@@ -111,8 +111,9 @@ export async function POST(req: NextRequest) {
     if (role === "accountant" && permissions.length === 0) {
       return NextResponse.json({ error: "Selectează cel puțin o categorie de acces." }, { status: 400 });
     }
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://franchisetech.ro";
-    const redirectTo = `${appUrl}/api/auth/callback?next=/accountant`;
+    const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const appUrl = process.env.NODE_ENV === "production" ? "https://www.franchisetech.ro" : configuredAppUrl;
+    const redirectTo = `${appUrl.replace(/\/$/, "")}/activate-accountant`;
 
     // ── Check if auth user already exists ──────────────────────────────────
     const { data: existingList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
@@ -228,8 +229,8 @@ export async function POST(req: NextRequest) {
     let deliveryId: string | undefined;
     if (role === "accountant" && sendInvite) {
       if (!resetLink) return NextResponse.json({ error: "Linkul securizat nu a putut fi generat. Reîncearcă." }, { status: 502 });
-      const { data: organisation } = await admin.from("organisations").select("company_legal_name,name").eq("id", orgId).single();
-      const delivery = await sendAccountantInviteEmail({ to: email, companyName: organisation?.company_legal_name || organisation?.name || "Client franchisetech", activationUrl: resetLink });
+      const { data: organisation } = await admin.from("organisations").select("company_legal_name,name,anaf_cif").eq("id", orgId).single();
+      const delivery = await sendAccountantInviteEmail({ to: email, companyName: organisation?.name || organisation?.company_legal_name || "Client franchisetech", legalName: organisation?.company_legal_name, taxId: organisation?.anaf_cif, activationUrl: resetLink });
       if (!delivery.success) {
         await admin.from("team_audit_events").insert({ organisation_id: orgId, actor_user_id: user.id, target_user_id: authUserId, action: "accountant_invite_delivery_failed", metadata: { email, error: delivery.error } });
         return NextResponse.json({ error: `Accesul a fost creat, dar emailul nu a fost livrat: ${delivery.error}` }, { status: 502 });
