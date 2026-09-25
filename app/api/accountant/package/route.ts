@@ -1,11 +1,12 @@
 import JSZip from "jszip";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { monthRange, normalizeMonth } from "@/lib/accountant/period";
+import { accountantDateRange } from "@/lib/accountant/period";
 import { ACCOUNTANT_PERMISSIONS, normalizeAccountantPermissions, packageSections, type PackageSection } from "@/lib/accountant/permissions";
 import { createXlsx } from "@/lib/accountant/xlsx";
 import { buildPackageFilePlan } from "@/lib/accountant/package-files";
 import { amountPerUnit } from "@/lib/accountant/export-rows";
+import { buildCashLedger } from "@/lib/accountant/cash-ledger";
 
 export const dynamic = "force-dynamic";
 const cell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
@@ -14,15 +15,17 @@ const decimal = (value: unknown) => Number(value ?? 0).toFixed(2).replace(".", "
 type Dataset = { name: string; headers: string[]; rows: unknown[][] };
 
 export async function GET(request: Request) {
-  const url = new URL(request.url); const orgId = url.searchParams.get("org"); const month = normalizeMonth(url.searchParams.get("month"));
+  const url = new URL(request.url); const orgId = url.searchParams.get("org");
   if (!orgId) return new Response("Firma lipsește.", { status: 400 });
-  const range = monthRange(month); const supabase = await createClient();
+  const range = accountantDateRange(url.searchParams.get("from"), url.searchParams.get("to")); const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response("Autentificare necesară.", { status: 401 });
   const { data: membership } = await supabase.from("organisation_members").select("role,accountant_permissions").eq("organisation_id", orgId).eq("user_id", user.id).or("status.is.null,status.eq.active").maybeSingle();
   if (!membership || !["owner", "manager", "accountant"].includes(membership.role)) return new Response("Acces interzis.", { status: 403 });
   const permissions = membership.role === "accountant" ? normalizeAccountantPermissions(membership.accountant_permissions) : [...ACCOUNTANT_PERMISSIONS];
-  const sections = new Set(packageSections(permissions));
+  const allowedSections = packageSections(permissions);
+  const requestedSections = url.searchParams.getAll("section").filter((value): value is PackageSection => allowedSections.includes(value as PackageSection));
+  const sections = new Set(requestedSections.length ? requestedSections : allowedSections);
   const filePlan = new Set(buildPackageFilePlan(permissions));
   if (!sections.size) return new Response("Nu există categorii permise pentru export.", { status: 403 });
 
@@ -44,20 +47,22 @@ export async function GET(request: Request) {
   const vat = new Map<number, { net: number; tax: number; gross: number }>();
   for (const row of salesResult.data ?? []) { const rate = Number(row.vat_rate ?? 0); const current = vat.get(rate) ?? { net: 0, tax: 0, gross: 0 }; current.net += Number(row.net_amount ?? 0); current.tax += Number(row.vat_amount ?? 0); current.gross += Number(row.gross_amount ?? 0); vat.set(rate, current); }
   const purchasesById = new Map((purchasesResult.data ?? []).map((purchase) => [purchase.id, purchase]));
+  const openingCash = Number(closesResult.data?.[0]?.opening_cash ?? 0);
+  const cashLedger = buildCashLedger(openingCash, cashMovementsResult.data ?? [], paymentsResult.data ?? []);
   const datasets: Array<[PackageSection, Dataset]> = [
     ["sales", { name: "Vanzari", headers: ["Document", "Data", "Produs", "Cantitate", "Preț unitar net", "Preț unitar vânzare", "TVA", "Net", "TVA valoare", "Brut", "Tip"], rows: (salesResult.data ?? []).map((r) => [r.transaction_number, r.sold_at, r.product_name, Number(r.quantity), amountPerUnit(r.net_amount, r.quantity), amountPerUnit(r.gross_amount, r.quantity), `${r.vat_rate}%`, Number(r.net_amount ?? 0), Number(r.vat_amount ?? 0), Number(r.gross_amount ?? 0), Number(r.direction) < 0 ? "Retur" : "Vânzare"]) }],
     ["sales", { name: "Vanzari-pe-cote-TVA", headers: ["Cotă TVA", "Net", "TVA", "Brut"], rows: [...vat.entries()].map(([rate, v]) => [`${rate}%`, v.net, v.tax, v.gross]) }],
     ["sales", { name: "Retururi", headers: ["Document retur", "Data", "Produs", "Cantitate", "Preț unitar", "Net", "TVA", "Brut"], rows: (salesResult.data ?? []).filter((r) => Number(r.direction) < 0).map((r) => [r.transaction_number, r.sold_at, r.product_name, Math.abs(Number(r.quantity)), amountPerUnit(r.gross_amount, r.quantity), Math.abs(Number(r.net_amount ?? 0)), Math.abs(Number(r.vat_amount ?? 0)), Math.abs(Number(r.gross_amount ?? 0))]) }],
     ["sales", { name: "Nomenclator-produse", headers: ["Produs", "SKU", "UM", "Preț vânzare", "Cost", "TVA", "Activ"], rows: (productsResult.data ?? []).map((r) => [r.name, r.sku, r.unit_of_measure, r.sale_price == null ? "LIPSĂ" : Number(r.sale_price), r.cost_price == null ? "LIPSĂ" : Number(r.cost_price), `${Number(r.vat_rate ?? 0)}%`, r.active ? "Da" : "Nu"]) }],
     ["payments", { name: "Incasari-pe-metode-plata", headers: ["Document", "Data", "Metodă", "Total", "Bacșiș", "Status"], rows: (paymentsResult.data ?? []).map((r) => { const method = Array.isArray(r.payment_methods) ? r.payment_methods[0] : r.payment_methods; return [r.transaction_number, r.sold_at, method?.name || method?.type || "Necunoscut", Number(r.total ?? 0), Number(r.tip_amount ?? 0), r.status]; }) }],
-    ["cash", { name: "Registru-de-casa", headers: ["Data și ora", "Tip mișcare", "Explicație", "Încasare", "Plată", "Sesiune POS"], rows: (cashMovementsResult.data ?? []).map((r) => { const amount = Number(r.amount ?? 0); return [r.performed_at, r.movement_type, r.reason || "LIPSĂ EXPLICAȚIE", amount > 0 ? amount : 0, amount < 0 ? Math.abs(amount) : 0, r.session_id]; }) }],
-    ["cash", { name: "Inchideri-casa-si-Z", headers: ["Deschis", "Închis", "Sold inițial", "Numerar așteptat", "Numerar numărat", "Diferență", "Status sesiune", "Raport Z fiscal confirmat", "Data confirmării Z"], rows: (closesResult.data ?? []).map((r) => [r.opened_at, r.closed_at, Number(r.opening_cash ?? 0), Number(r.expected_cash ?? 0), Number(r.counted_cash ?? 0), Number(r.cash_difference ?? 0), r.status, r.fiscal_z_report_done ? "Da" : "Nu", r.fiscal_z_report_at]) }],
+    ["cash", { name: "Registru-de-casa-operativ", headers: ["Data și ora", "Document", "Explicație", "Încasare", "Plată", "Sold"], rows: cashLedger.map((r) => [r.at, r.document, r.explanation, r.cashIn, r.cashOut, r.balance]) }],
+    ["cash", { name: "Reconciliere-inchideri-si-Z", headers: ["Deschis", "Închis", "Sold inițial", "Numerar așteptat", "Numerar numărat", "Diferență", "Status sesiune", "Confirmare emitere Z fiscal", "Data confirmării"], rows: (closesResult.data ?? []).map((r) => [r.opened_at, r.closed_at, Number(r.opening_cash ?? 0), Number(r.expected_cash ?? 0), Number(r.counted_cash ?? 0), Number(r.cash_difference ?? 0), r.status, r.fiscal_z_report_done ? "Da" : "Nu", r.fiscal_z_report_at]) }],
     ["purchases", { name: "Achizitii", headers: ["Data recepției", "Data facturii", "Factură", "Furnizor", "CUI furnizor", "Net", "TVA", "Brut", "NIR", "Data NIR", "Status"], rows: (purchasesResult.data ?? []).map((r) => { const supplier = Array.isArray(r.suppliers) ? r.suppliers[0] : r.suppliers; return [r.purchase_date, r.supplier_invoice_date, r.invoice_number, supplier?.name || r.supplier, supplier?.tax_id, Number(r.subtotal_amount ?? 0), Number(r.tax_total ?? 0), Number(r.total_amount ?? 0), r.nir_number, r.nir_date, r.status]; }) }],
     ["purchases", { name: "Achizitii-detaliu", headers: ["Data", "Factură", "Furnizor", "CUI furnizor", "Produs", "UM", "Cantitate facturată", "Cantitate recepționată", "Preț unitar furnizor", "Net linie", "Cotă TVA", "TVA linie", "Brut linie", "NIR"], rows: (purchaseItemsResult.data ?? []).map((r) => { const purchase = purchasesById.get(r.purchase_id); const supplier = Array.isArray(purchase?.suppliers) ? purchase?.suppliers[0] : purchase?.suppliers; return [purchase?.purchase_date, purchase?.invoice_number, supplier?.name || purchase?.supplier, supplier?.tax_id, r.product_name || r.item_name, r.unit_of_measure, Number(r.quantity ?? 0), Number(r.received_quantity ?? r.quantity ?? 0), Number(r.unit_cost ?? 0), Number(r.total_cost ?? 0), `${Number(r.tax_rate ?? 0)}%`, Number(r.tax_amount ?? 0), Number(r.total_cost ?? 0) + Number(r.tax_amount ?? 0), purchase?.nir_number]; }) }],
     ["stock", { name: "Balanta-stoc", headers: ["Produs", "UM", "Cantitate registru", "Cantitate curentă", "Diferență", "CMP", "Activ"], rows: (stockResult.data ?? []).map((r) => [r.name, r.unit_of_measure, Number(r.ledger_quantity ?? 0), Number(r.recorded_quantity ?? 0), Number(r.variance ?? 0), Number(r.cost_price ?? 0), r.active ? "Da" : "Nu"]) }],
   ];
   const zip = new JSZip(); const org = orgResult.data;
-  zip.file("README.txt", `Pachet de date POS — ${org?.company_legal_name || org?.name || "Firmă"}\nPerioada: ${month}\nGenerat: ${new Date().toISOString()}\nCategorii incluse: ${permissions.join(", ")}\n\nFișierele sunt exporturi operaționale pentru verificarea contabilului și nu sunt declarate registre contabile oficiale.`);
+  zip.file("README.txt", `Dosar de lucru pentru contabil — ${org?.company_legal_name || org?.name || "Firmă"}\nPerioada: ${range.from} — ${range.to}\nGenerat direct din baza de date: ${new Date().toISOString()}\nSecțiuni incluse: ${[...sections].join(", ")}\n\nIMPORTANT: exporturile sunt date operative pentru verificare. Confirmarea Z nu înlocuiește raportul fiscal emis de aparatul de marcat. Registrul de casă operativ trebuie validat pe baza documentelor justificative. Registrele contabile obligatorii și balanța se întocmesc în programul contabil.`);
   for (const [section, dataset] of datasets) {
     if (!sections.has(section)) continue;
     const csvName = `${dataset.name}.csv`; const xlsxName = `${dataset.name}.xlsx`;
@@ -65,8 +70,8 @@ export async function GET(request: Request) {
     if (filePlan.has(xlsxName)) zip.file(xlsxName, await createXlsx(dataset.headers, dataset.rows));
   }
   const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { autoRefreshToken: false, persistSession: false } });
-  await admin.from("team_audit_events").insert({ organisation_id: orgId, actor_user_id: user.id, action: "accounting_package_downloaded", metadata: { month, format: "zip-csv-xlsx", permissions } });
+  await admin.from("team_audit_events").insert({ organisation_id: orgId, actor_user_id: user.id, action: "accounting_package_downloaded", metadata: { from: range.from, to: range.to, sections: [...sections], format: "zip-csv-xlsx", permissions } });
   const body = await zip.generateAsync({ type: "uint8array", compression: "DEFLATE", compressionOptions: { level: 6 } });
   const output = new ArrayBuffer(body.byteLength); new Uint8Array(output).set(body);
-  return new Response(output, { headers: { "Content-Type": "application/zip", "Content-Disposition": `attachment; filename="Pachet-contabil-${month}.zip"`, "Cache-Control": "no-store" } });
+  return new Response(output, { headers: { "Content-Type": "application/zip", "Content-Disposition": `attachment; filename="Dosar-contabil-${range.from}-${range.to}.zip"`, "Cache-Control": "no-store" } });
 }

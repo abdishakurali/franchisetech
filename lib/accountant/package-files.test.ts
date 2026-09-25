@@ -7,7 +7,7 @@ describe("accounting package file plan", () => {
       "Vanzari.csv", "Vanzari.xlsx", "Vanzari-pe-cote-TVA.csv", "Vanzari-pe-cote-TVA.xlsx",
       "Retururi.csv", "Retururi.xlsx", "Nomenclator-produse.csv", "Nomenclator-produse.xlsx",
       "Incasari-pe-metode-plata.csv", "Incasari-pe-metode-plata.xlsx",
-      "Registru-de-casa.csv", "Registru-de-casa.xlsx", "Inchideri-casa-si-Z.csv", "Inchideri-casa-si-Z.xlsx",
+      "Registru-de-casa-operativ.csv", "Registru-de-casa-operativ.xlsx", "Reconciliere-inchideri-si-Z.csv", "Reconciliere-inchideri-si-Z.xlsx",
     ]);
   });
 
