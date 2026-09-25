@@ -13,7 +13,7 @@ describe("simplified homepage content", () => {
     },
   );
 
-  it("keeps the Romanian assisted-trial CTA", () => {
-    expect(getHomepageContent("ro").trial).toContain("15 zile");
+  it("keeps the Romanian free-forever CTA (trial retired 2026-09)", () => {
+    expect(getHomepageContent("ro").trial).toContain("gratuit");
   });
 });

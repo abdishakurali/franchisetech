@@ -10,13 +10,13 @@ const STRINGS = {
     title: "Construiește meniul",
     subtitle: "Adaugă categoriile și produsele tale — apar imediat în POS.",
     timeEstimate: "~3 minute",
-    trialBadge: "Probă 15 zile · fără card necesar",
+    trialBadge: "Gratuit pentru totdeauna · fără card necesar",
   },
   en: {
     title: "Build your menu",
     subtitle: "Add your categories and products — they show up in POS immediately.",
     timeEstimate: "~3 minutes",
-    trialBadge: "15-day trial · no card required",
+    trialBadge: "Free forever · no card required",
   },
 };
 

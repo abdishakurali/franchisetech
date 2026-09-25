@@ -35,6 +35,9 @@ const PLAN_SHORT_NAMES: Record<BillingPlan, string> = {
   operations: "Operations",
   scale: "Scale",
   multi_location: "Multi-location",
+  free: "Free",
+  growth: "Pro",
+  team: "Multi",
 };
 
 const CATEGORY_TRANSLATIONS: Record<string, string> = {
@@ -101,6 +104,11 @@ const FEATURE_TRANSLATIONS: Record<string, string> = {
   "Site switching": "Comutare între locații",
   "Per-site sales & reports": "Vânzări & rapoarte per locație",
   "FiscalNet receipt integration (when enabled in Settings)": "Integrare bonuri FiscalNet (când este activată în Setări)",
+  "Products & categories (up to 50)": "Produse & categorii (până la 50)",
+  "1 location": "1 locație",
+  "No card required, free forever": "Fără card necesar, gratuit pentru totdeauna",
+  "€29/extra location/month": "29€/locație suplimentară/lună",
+  "Everything in Pro": "Tot ce include Pro",
 };
 
 const FEATURE_EN_TRANSLATIONS: Record<string, string> = {
@@ -109,6 +117,7 @@ const FEATURE_EN_TRANSLATIONS: Record<string, string> = {
   "Export XML Saga pentru contabil": "Saga XML export for accountant",
   "Pachete CSV audit complet": "Complete audit CSV packs",
   "Owner digest email zilnic": "Daily owner digest email",
+  "Pachet export contabil (CSV + XML)": "Accountant export pack (CSV + XML)",
 };
 
 const PLAN_DESCRIPTIONS_RO: Record<BillingPlan, string> = {
@@ -118,6 +127,9 @@ const PLAN_DESCRIPTIONS_RO: Record<BillingPlan, string> = {
   operations: "Pentru manageri care vor stoc, cost rețete, flux bucătărie și controale mai bune pentru personal.",
   scale: "Pentru afaceri mature operațional care vor toate modulele, suport prioritar și spațiu de creștere.",
   multi_location: "Pentru afaceri cu două sau mai multe locații. Necesită planul de bază Scale.",
+  free: "Pentru o locație la început de drum — POS, FiscalNet, bonuri fiscale, până la 50 de produse, 1 locație. Fără card, fără expirare.",
+  growth: "Pentru o locație care vrea stoc, cost rețete, flux bucătărie și pachetul de export pentru contabil — produse nelimitate.",
+  team: "Pentru afaceri cu două sau mai multe locații — tot din Pro, plus multi-locație și suport prioritar.",
 };
 
 const DEFAULT_LABELS: Record<PricingLocale, PricingLabels> = {
@@ -125,25 +137,25 @@ const DEFAULT_LABELS: Record<PricingLocale, PricingLabels> = {
     mainPlan: "Most popular",
     seeFeatures: "See all features",
     getStarted: "Get started",
-    freeSetupStrip: "15-day trial without a card. Guided in-app setup included.",
+    freeSetupStrip: "Free forever, no card required. Guided in-app setup included.",
     setupFreeTitle: "Free in-app setup",
     setupFreeText: "New account -> demo products -> open till -> first sale. Step-by-step guide, no cost.",
-    multiTitle: "Multi-location",
+    multiTitle: "Multi",
     multiText: "For businesses running 2+ locations.",
-    multiBody: "Everything in Scale, billed per additional location. Central reporting and dedicated support.",
-    multiMinLocations: "Minimum 2 locations",
+    multiBody: "Everything in Pro, billed per additional location. Central reporting and priority support.",
+    multiMinLocations: "1 location included, additional locations billed per month",
   },
   ro: {
     mainPlan: "Cel mai popular",
     seeFeatures: "Vezi toate funcțiile",
     getStarted: "Începeți acum",
-    freeSetupStrip: "Probă 15 zile fără card. Configurare ghidată în aplicație inclusă.",
+    freeSetupStrip: "Gratuit pentru totdeauna, fără card. Configurare ghidată în aplicație inclusă.",
     setupFreeTitle: "Setup gratuit în aplicație",
     setupFreeText: "Cont nou -> produse demo -> deschidere casă -> prima vânzare. Ghid pas cu pas, fără cost.",
-    multiTitle: "Multi-locație",
+    multiTitle: "Multi",
     multiText: "Pentru afaceri cu 2+ locații.",
-    multiBody: "Tot din Scale, facturat pe locație suplimentară. Raportare centrală și suport dedicat.",
-    multiMinLocations: "Minimum 2 locații",
+    multiBody: "Tot din Pro, facturat pe locație suplimentară. Raportare centrală și suport prioritar.",
+    multiMinLocations: "1 locație inclusă, locațiile suplimentare se facturează lunar",
   },
 };
 
@@ -223,7 +235,7 @@ export function PricingPlansSection({
   const interval: "month" | "year" = "month";
   const l = labels ?? DEFAULT_LABELS[locale];
 
-  const mainPlans = pricingPlans.filter((plan) => plan.id === "starter" || plan.id === "pro");
+  const mainPlans = pricingPlans.filter((plan) => plan.id === "free" || plan.id === "growth");
 
   return (
     <div className="space-y-10">
@@ -276,6 +288,12 @@ export function PricingPlansSection({
                 >
                   <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">{l.getStarted}</Button>
                 </Link>
+              ) : plan.id === "free" ? (
+                // Free has no Stripe price — nothing to check out. In the
+                // billing panel it's shown for comparison only.
+                <Button disabled variant="outline" className="mt-6 w-full">
+                  {localizedText(locale, "No card required", "Fără card necesar")}
+                </Button>
               ) : (
                 <div className="mt-6">
                   <PricingCheckoutButton plan={plan.id} loggedIn={loggedIn} configured={configured} interval={interval} />
@@ -286,47 +304,44 @@ export function PricingPlansSection({
         })}
       </div>
 
-      {/* Scale + Multi-location — for multi-site operators, the segment the brand is named for */}
+      {/* Team (Multi) — a single self-serve plan with a per-location line item, not a base+add-on pair like the legacy Scale/Multi-location split */}
       {(() => {
-        const scale = pricingPlans.find((p) => p.id === "scale");
-        const multi = pricingPlans.find((p) => p.id === "multi_location");
-        if (!scale || !multi) return null;
-        const scalePrice = scale.price;
-        const multiPrice = multi.price;
+        const team = pricingPlans.find((p) => p.id === "team");
+        if (!team) return null;
         return (
           <div className="rounded-2xl border-2 border-border bg-card p-6 sm:p-8">
             <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{l.multiTitle}</p>
             <div className="mt-3 flex flex-wrap items-baseline gap-x-8 gap-y-2">
               <p>
-                <span className="text-2xl font-bold text-foreground">{scalePrice}</span>
+                <span className="text-2xl font-bold text-foreground">{team.price}</span>
                 <span className="text-sm text-muted-foreground">{localizedText(locale, "/mo base", "/lună bază")}</span>
               </p>
               <p>
-                <span className="text-2xl font-bold text-foreground">+{multiPrice}</span>
+                <span className="text-2xl font-bold text-foreground">+€29</span>
                 <span className="text-sm text-muted-foreground">{localizedText(locale, "/additional location/mo", "/locație suplimentară/lună")}</span>
               </p>
             </div>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">{l.multiBody ?? l.multiText}</p>
             <p className="mt-1 text-xs text-muted-foreground">{l.multiMinLocations}</p>
-            <PlanFeaturesAccordion planId="scale" market={market} seeFeatures={l.seeFeatures} locale={locale} />
+            <PlanFeaturesAccordion planId="team" market={market} seeFeatures={l.seeFeatures} locale={locale} />
             {variant === "marketing" ? (
               <Link
-                href="/contact?topic=multi-location"
+                href="/signup?plan=team"
                 className="mt-6 block"
                 onClick={() =>
                   captureClientEvent("pricing_cta_clicked", {
-                    plan: "multi_location",
+                    plan: "team",
                     interval,
-                    location: "multi_location_card",
+                    location: "team_card",
                     cta_text: l.getStarted,
                   })
                 }
               >
-                <Button variant="outline" className="w-full">{localizedText(locale, "Talk to us about multi-location", "Discutați despre multi-locație")}</Button>
+                <Button variant="outline" className="w-full">{l.getStarted}</Button>
               </Link>
             ) : (
               <div className="mt-6">
-                <PricingCheckoutButton plan="scale" loggedIn={loggedIn} configured={configured} interval={interval} />
+                <PricingCheckoutButton plan="team" loggedIn={loggedIn} configured={configured} interval={interval} />
               </div>
             )}
           </div>
@@ -341,11 +356,11 @@ export function PricingPlansSection({
         </p>
         {variant === "marketing" && (
           <Link
-            href="/signup?plan=starter"
+            href="/signup?plan=free"
             className="mt-6 block"
             onClick={() =>
               captureClientEvent("pricing_cta_clicked", {
-                plan: "starter",
+                plan: "free",
                 interval,
                 location: "free_setup",
                 cta_text: l.getStarted,

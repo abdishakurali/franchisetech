@@ -109,6 +109,25 @@ const SCALE_ENTITLEMENTS: readonly EntitlementKey[] = [
   "support.priority",
 ];
 
+// ── New pricing generation (2026-09) — Free / Pro ("growth") / Multi ("team") ──
+// FREE mirrors CORE_ENTITLEMENTS exactly (till, products, VAT, fiscal, basic
+// reports) — it's the permanent no-card tier every signup lands on. GROWTH is
+// OPERATIONS_ENTITLEMENTS plus the accountant export pack (moved down from
+// legacy Scale-only, per the pricing restructure). TEAM adds multi-site on
+// top of GROWTH. None of this touches CORE/OPERATIONS/SCALE above — those
+// stay exactly as they are for the 2 legacy subscribers.
+const FREE_ENTITLEMENTS: readonly EntitlementKey[] = [...CORE_ENTITLEMENTS];
+
+const GROWTH_ENTITLEMENTS: readonly EntitlementKey[] = [
+  ...OPERATIONS_ENTITLEMENTS,
+  "reports.accountant_pack",
+];
+
+const TEAM_ENTITLEMENTS: readonly EntitlementKey[] = [
+  ...GROWTH_ENTITLEMENTS,
+  "support.priority",
+];
+
 /**
  * Static per-plan entitlement set — what a plan TIER grants in principle.
  * Deliberately NOT the same question as resolveEntitlements(orgId), which
@@ -124,5 +143,8 @@ export function planEntitlements(plan: PlanCode | null): EntitlementKey[] {
   if (plan === "scale") return [...SCALE_ENTITLEMENTS];
   if (plan === "operations") return [...OPERATIONS_ENTITLEMENTS];
   if (plan === "core") return [...CORE_ENTITLEMENTS];
+  if (plan === "team") return [...TEAM_ENTITLEMENTS];
+  if (plan === "growth") return [...GROWTH_ENTITLEMENTS];
+  if (plan === "free") return [...FREE_ENTITLEMENTS];
   return [];
 }

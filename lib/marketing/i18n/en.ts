@@ -18,7 +18,7 @@ export const en = {
     language: "Language",
   },
   announcement: {
-    text: "15 days to see whether every evening closes cleanly — free in-app setup included.",
+    text: "Free forever, so you can see whether every evening closes cleanly — free in-app setup included.",
     cta: "Start now",
   },
   footer: {
@@ -26,7 +26,7 @@ export const en = {
     subtagline: "Sell, track stock, close the till, and see real numbers — without POS lock-in or per-seat fees.",
     getStartedTitle: "Ready to get started?",
     getStartedText: "Tell us about your business and we will help configure your first location.",
-    getStartedCta: "Start your 15-day trial",
+    getStartedCta: "Create a free account",
     features: "Features",
     industries: "Industries",
     company: "Company",
@@ -61,10 +61,10 @@ export const en = {
     },
   },
   cta: {
-    getStarted: "Open till free — 15 days",
+    getStarted: "Open till free — forever",
     talkToSales: "Talk to sales",
-    startTrial: "Start 15-day trial",
-    parallelTrial: "15-day parallel trial — same team, same end-of-day close",
+    startTrial: "Create free account",
+    parallelTrial: "Free parallel test — same team, same end-of-day close",
     seePricing: "See pricing",
     seeFeatures: "See features",
     learnMore: "Learn more",
@@ -75,12 +75,12 @@ export const en = {
   },
   seoPage: {
     getStarted: "Get started",
-    startTrial: "Start 15-day trial",
+    startTrial: "Create free account",
     allFeatures: "All features",
     faq: "FAQ",
     related: "Related",
     readyTitle: "Ready to try it?",
-    readyText: "Start a 15-day assisted trial with setup help for products, till, and first sale.",
+    readyText: "Free forever, with setup help for products, till, and first sale.",
     startTrialLink: "Get started",
     viewFeature: "View feature",
     viewIndustry: "View industry",
@@ -321,7 +321,7 @@ export const en = {
     faq: {
       title: "Questions from owners",
       items: [
-        { question: "How does the 15-day trial work?", answer: "The trial starts when the account is created, with no card required. Monthly billing begins only if you choose a plan at the end." },
+        { question: "How does the free plan work?", answer: "The Free plan is available when the account is created, with no card required, and never expires. Monthly billing begins only if you choose a paid plan." },
         { question: "Do I need special POS hardware?", answer: "The app runs in a browser on supported devices. Fiscal hardware and FiscalNet compatibility are checked separately." },
         { question: "Can I see margins on menu items?", answer: "Yes. Recipe costing links ingredients to sale price so you see cost per portion and gross margin before you change the menu." },
         { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
@@ -384,7 +384,7 @@ export const en = {
     howItWorks: [
       { step: "1", title: "You introduce the client", text: "A restaurant or café in your portfolio — we never ask you to run the install." },
       { step: "2", title: "We onboard the client", text: "Products, till, first sale, Z-report — franchisetech leads the setup." },
-      { step: "3", title: "Client pays subscription", text: "15-day trial, then Core or Operations — clear pricing, no per-seat fees." },
+      { step: "3", title: "Client pays subscription", text: "Free plan forever, then upgrade to Pro or Multi when needed — clear pricing, no per-seat fees." },
       { step: "4", title: "You earn recurring commission", text: "A share of the subscription while the client stays active. Exact terms confirmed when the program opens." },
     ],
     accountantsLabel: "For accountants",
@@ -443,15 +443,15 @@ export const en = {
   },
   pricing: {
     title: "franchisetech Pricing",
-    description: "Core is €49/location/month and Operations is €79/location/month. The 15-day trial starts when the account is created, with no card required.",
+    description: "Free is free forever, Pro is €49/location/month, and Multi is €79/location/month + €29/extra location. No card required at signup.",
     badge: "Simple pricing",
     heroTitle: "Two plans with clear per-location pricing.",
-    heroText: "Core covers sales and daily close. Operations adds stock, purchasing, and recipes.",
+    heroText: "Free covers sales and daily close, forever. Pro adds stock, purchasing, and recipes.",
     heroStatFrom: "No card required",
-    heroStatTrial: "15-day trial",
+    heroStatTrial: "Free forever",
     heroStatTill: "No long-term contract",
     seeFeatures: "See all features",
-    freeSetupStrip: "15-day trial without a card. Guided in-app setup included.",
+    freeSetupStrip: "Free forever, without a card. Guided in-app setup included.",
     setupFreeTitle: "Free in-app setup",
     setupFreeText: "New account → demo products → open till → first sale. Step-by-step guide, no cost.",
     embeddedSignupTitle: "Get started today",
@@ -472,7 +472,7 @@ export const en = {
     fairnessItems: [
       "Unlimited staff — no per-user fees",
       "No hardware lock-in or terminal contracts",
-      "15-day trial without a card",
+      "Free forever, without a card",
       "Cancel anytime — no long-term lock-in",
       "Existing subscribers keep their rate when prices change",
     ],
@@ -552,7 +552,7 @@ export const en = {
     faqs: [
       ["Do I need special hardware?", "The web app runs on supported devices. Fiscal receipts require compatible fiscal hardware and FiscalNet configured locally."],
       ["Can you set up my products?", "Guided in-app setup is included. Large migrations, team training, and on-site fiscal setup are separate services."],
-      ["Can I cancel after the trial?", "Yes. The trial is 15 days. Payment starts only if you continue."],
+      ["Do I have to pay to start?", "No. The Free plan is free forever. Payment starts only if you choose a paid plan."],
       ["Is pricing per company or location?", "The displayed prices are per location, per month. Request a quote for a multi-location configuration."],
       ["Will my price go up later?", "If we change list prices, existing paying customers keep their current rate unless they change plans."],
     ] as const,
@@ -581,14 +581,14 @@ export const en = {
     homeTeaser: {
       label: "Pricing",
       title: "One workspace. One price per shop.",
-      text: "From {starter}/location/month. 15-day trial without a card. No long-term contract.",
+      text: "Free forever, then from {starter}/location/month. No card at signup. No long-term contract.",
       cta: "See all plans",
     },
   },
   auth: {
     loginTitle: "Sign in to franchisetech",
     signupTitle: "Start your free account",
-    signupDescription: "Guided setup. The 15-day trial starts when the account is created, with no card required.",
+    signupDescription: "Guided setup. The Free plan is available when the account is created, with no card required, and never expires.",
     signupLegal: "By signing up you agree that franchisetech supports your records — it does not replace your legal obligations as a food business operator.",
     email: "Email",
     password: "Password",
@@ -629,7 +629,7 @@ export const en = {
     backToBlog: "Back to blog",
     published: "Published",
     ctaTitle: "Try franchisetech on your till",
-    ctaText: "15-day assisted trial. Setup help for products, payment methods, and your first sale.",
+    ctaText: "Free forever. Setup help for products, payment methods, and your first sale.",
   },
 } as const;
 

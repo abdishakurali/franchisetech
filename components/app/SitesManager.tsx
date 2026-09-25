@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { createClient } from "@/lib/supabase/client";
+import { addSite } from "@/app/actions/kitchenops";
 import { toast } from "sonner";
 
 type Site = {
@@ -24,12 +24,10 @@ type Site = {
 interface Props {
   sites: Site[];
   assetCounts: Record<string, number>;
-  orgId: string;
   canManage: boolean;
 }
 
-export function SitesManager({ sites: initialSites, assetCounts, orgId, canManage }: Props) {
-  const supabase = createClient();
+export function SitesManager({ sites: initialSites, assetCounts, canManage }: Props) {
   const [sites, setSites] = useState(initialSites);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -38,14 +36,15 @@ export function SitesManager({ sites: initialSites, assetCounts, orgId, canManag
   const handleAdd = async () => {
     if (!form.name) { toast.error("Site name is required"); return; }
     setSaving(true);
-    const { data, error } = await supabase
-      .from("sites")
-      .insert({ organisation_id: orgId, name: form.name, address: form.address || null, city: form.city || null, eircode: form.eircode || null })
-      .select()
-      .single();
+    const fd = new FormData();
+    fd.set("name", form.name);
+    fd.set("address", form.address);
+    fd.set("city", form.city);
+    fd.set("eircode", form.eircode);
+    const result = await addSite(fd);
     setSaving(false);
-    if (error) { toast.error("Failed to add site: " + error.message); return; }
-    setSites((prev) => [...prev, data]);
+    if (!result.ok) { toast.error("Failed to add site: " + result.error); return; }
+    setSites((prev) => [...prev, result.site]);
     setOpen(false);
     setForm({ name: "", address: "", city: "", eircode: "" });
     toast.success("Site added");

@@ -170,10 +170,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                       {fearCta.label} <ArrowRight className="h-4 w-4" />
                     </Link>
                     <Link
-                      href="/signup?plan=starter"
+                      href="/signup?plan=free"
                       className="inline-flex items-center justify-center rounded-md border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 hover:border-blue-300"
                     >
-                      Deschide casa gratuit 15 zile
+                      Deschide casa gratuit, pentru totdeauna
                     </Link>
                   </div>
                 </div>

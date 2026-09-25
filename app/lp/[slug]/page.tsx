@@ -125,7 +125,7 @@ export default async function SkagLandingPage({
               href={signupHref}
               className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white transition sm:w-auto sm:py-3 ${marketingCtaPrimary}`}
             >
-              Începe proba de 15 zile <ArrowRight className="h-4 w-4" />
+              Creează cont gratuit <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/pricing"
@@ -170,14 +170,14 @@ export default async function SkagLandingPage({
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600">
             Configurați produsele, deschideți tura și faceți prima vânzare test — fără instalare,
-            merge pe orice tabletă sau calculator. Suport în limba română pe tot parcursul probei.
+            merge pe orice tabletă sau calculator. Suport în limba română, gratuit pentru totdeauna.
           </p>
           <div className="mt-8">
             <Link
               href={signupHref}
               className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white transition ${marketingCtaPrimary}`}
             >
-              Începe proba de 15 zile <ArrowRight className="h-4 w-4" />
+              Creează cont gratuit <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>

@@ -1,8 +1,12 @@
-// Card verification → trial start. The 15-day trial begins only after the
-// one-time €1 card verification payment is confirmed. Called from both the
-// verification success page (authed user) and the Stripe webhook (no session),
-// so the trial-start update must be idempotent: only the call that flips
-// trial_started_at from NULL fires the trial_started events.
+// Card verification → legacy trial-start bookkeeping. Trial retired 2026-09:
+// entitlement resolution (lib/billing/entitlement-resolver.ts) and app access
+// (lib/billing/subscription.ts) no longer read trial_started_at/trial_ends_at
+// at all — every org is permanently on Free until it subscribes — so this
+// still writes those columns and fires trial_started events for whichever
+// analytics still key off them, but it no longer gates anything. Called from
+// both the verification success page (authed user) and the Stripe webhook (no
+// session), so the update must stay idempotent: only the call that flips
+// trial_started_at from NULL fires the events.
 
 import { createServiceClient } from "@/lib/supabase/server";
 import { trackLoopsEvent, upsertLoopsContact } from "@/lib/loops";

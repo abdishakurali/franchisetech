@@ -69,7 +69,7 @@ const GETTING_STARTED: ResourceCard[] = [
     icon: "🔁",
     category: "Primii pași",
     title: "Cum migrezi de la Ebriza la franchisetech",
-    summary: "Comparație de preț reală și cum rulați un trial paralel de 15 zile înainte să mutați fluxul principal.",
+    summary: "Comparație de preț reală și cum rulați un test paralel gratuit înainte să mutați fluxul principal.",
     readTime: "6 min citire",
     href: "/compare/ebriza",
     cta: "Citește ghidul",

@@ -1339,7 +1339,7 @@ export default async function SettingsPage({
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <div>
                     <p className="text-sm text-muted-foreground">{t.referrals.code}</p>
                     <p className="font-medium">{referral.code}</p>
@@ -1347,10 +1347,6 @@ export default async function SettingsPage({
                   <div>
                     <p className="text-sm text-muted-foreground">{t.referrals.creditEarned}</p>
                     <p className="font-medium">{t.referrals.months(referral.creditMonths)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t.referrals.trial}</p>
-                    <p className="font-medium">{referral.daysLeft !== null ? t.referrals.daysLeft(referral.daysLeft) : t.referrals.daysLeftDefault}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">

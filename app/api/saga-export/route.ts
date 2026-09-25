@@ -15,6 +15,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
+import { hasAccountantPartnerAccess } from "@/lib/accountant/permissions";
 import {
   generateFacturiXml,
   formatSagaDate,
@@ -102,7 +103,7 @@ export async function GET(req: Request) {
     return new NextResponse("Saga module is not installed", { status: 403 });
   }
   const entitled = await hasEntitlement(orgId, "reports.accountant_pack");
-  if (!entitled) {
+  if (!entitled && !(await hasAccountantPartnerAccess(supabase, orgId))) {
     return new NextResponse("Plan upgrade required for Saga export", { status: 403 });
   }
 

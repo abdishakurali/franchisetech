@@ -2,8 +2,9 @@ import { cache } from "react";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 export type SubState =
-  | "trialing"           // Stripe trial active
-  | "soft_trial"         // No Stripe sub yet, within org trial window
+  | "trialing"           // Stripe trial active (a Stripe-native trial on the subscription itself)
+  | "soft_trial"         // Retired 2026-09 with the trial-to-Free pricing restructure — never produced anymore, kept for type compatibility with existing comparisons
+  | "free"               // No Stripe sub — permanent Free plan (replaces the old time-limited soft trial)
   | "active"             // Paid and current
   | "past_due"           // Payment failed, within 3-day grace period
   | "past_due_expired"   // Grace period elapsed, billing is urgent but POS remains available
@@ -48,6 +49,7 @@ export function isAccessAllowed(sub: SubscriptionStatus): boolean {
     sub.state === "active" ||
     sub.state === "trialing" ||
     sub.state === "soft_trial" ||
+    sub.state === "free" ||
     sub.state === "past_due" ||   // within grace period — still allowed
     sub.state === "past_due_expired" // overdue, but restaurants must keep selling
   );
@@ -75,6 +77,7 @@ function humanLabel(
   switch (state) {
     case "trialing":          return `Stripe trial — ${days ?? "?"} day${days === 1 ? "" : "s"} left`;
     case "soft_trial":        return `Free trial — ${days ?? "?"} day${days === 1 ? "" : "s"} left`;
+    case "free":              return "Free plan";
     case "active":            return cancelAtEnd
                                 ? `${plan ?? "Plan"} · cancels at period end`
                                 : `${plan ?? "Plan"} · active`;
@@ -98,7 +101,7 @@ export const getSubscriptionStatus = cache(async function getSubscriptionStatus(
   const [{ data: org }, { data: sub }] = await Promise.all([
     supabase
       .from("organisations")
-      .select("trial_ends_at, referral_credit_months, stripe_customer_id, created_at")
+      .select("referral_credit_months, stripe_customer_id")
       .eq("id", orgId)
       .maybeSingle(),
     service
@@ -112,35 +115,20 @@ export const getSubscriptionStatus = cache(async function getSubscriptionStatus(
 
   const creditMonths = Number(org?.referral_credit_months ?? 0);
   const stripeCustomerId = sub?.stripe_customer_id ?? org?.stripe_customer_id ?? null;
-  // A brand-new signup has no trial_ends_at at all (nothing writes it — the €1
-  // card-verification flow that used to set it is no longer part of onboarding),
-  // which would resolve to state "none" (blocked, "trial expired") on day zero,
-  // before they'd seen the product. Falling back to created_at + 15 days gives
-  // every new org a fully unrestricted 15-day look before any paywall applies,
-  // without misreporting a new account as an expired one.
-  //
-  // This is THE number the public site quotes as "15 zile" / "15-day trial" in
-  // ~130 places. It is the real trial length for every signup — keep the two in
-  // sync, or the site starts making a false promise again.
-  // (5 → 12 on 2026-08-25 when funnel data showed the card ask was the dominant
-  // drop-off point; 12 → 15 on 2026-08-31 to match the advertised offer once the
-  // card ask was dropped from the marketing entirely.)
-  const SOFT_TRIAL_DAYS = 15;
-  const impliedTrialEndsAt = org?.created_at
-    ? new Date(new Date(org.created_at).getTime() + SOFT_TRIAL_DAYS * 86_400_000).toISOString()
-    : null;
-  const trialEndsAt = org?.trial_ends_at ?? impliedTrialEndsAt;
-  const softTrialDays = daysUntil(trialEndsAt);
 
+  // Trial retired 2026-09 with the pricing restructure: a brand-new signup
+  // with no billing_subscriptions row is now permanently on the Free plan,
+  // not a time-limited trial. No expiry date, no countdown. (Previously this
+  // fell back to created_at + 15 days — see git history if that ever needs
+  // to be resurrected.)
   if (!sub) {
-    const state: SubState = softTrialDays !== null && softTrialDays > 0 ? "soft_trial" : "none";
     return {
-      state,
-      plan: null,
-      label: humanLabel(state, null, softTrialDays, false, null),
-      urgent: state === "none",
+      state: "free",
+      plan: "free",
+      label: humanLabel("free", "free", null, false, null),
+      urgent: false,
       showUpgradeCTA: true,
-      trialEndsAt,
+      trialEndsAt: null,
       stripeTrialEnd: null,
       periodEnd: null,
       gracePeriodEndsAt: null,
@@ -148,10 +136,14 @@ export const getSubscriptionStatus = cache(async function getSubscriptionStatus(
       creditMonths,
       stripeCustomerId,
       stripeSubscriptionId: null,
-      trialDaysLeft: softTrialDays,
+      trialDaysLeft: null,
       graceDaysLeft: null,
     };
   }
+
+  // A real subscription row exists — org-level implied trial no longer applies.
+  const softTrialDays: number | null = null;
+  const trialEndsAt: string | null = null;
 
   const status = sub.status as string;
   const stripeTrialEnd = sub.trial_end ?? null;

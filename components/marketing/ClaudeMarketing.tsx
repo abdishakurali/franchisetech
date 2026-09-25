@@ -17,7 +17,7 @@ const pages = [["/", "Acasă"], ["/features", "Funcționalități"], ["/industri
 
 export type ClaudeMarketingUser = { displayName: string; initials: string };
 
-export function DesignTrialLink({ location, plan = "starter", children = "Începe gratuit 15 zile" }: { location: string; plan?: "starter" | "pro"; children?: ReactNode }) {
+export function DesignTrialLink({ location, plan = "free", children = "Creați cont gratuit" }: { location: string; plan?: "starter" | "pro" | "free" | "growth" | "team"; children?: ReactNode }) {
   return <Link className={s.button} href={`/signup?plan=${plan}`} onClick={() => captureClientEvent("cta_clicked", { location, destination: `/signup?plan=${plan}` })}>{children}</Link>;
 }
 
@@ -152,13 +152,32 @@ export const designFaq = [
   { q: "Merge dacă nu sunt plătitor de TVA?", a: "Da. TVA-ul de la furnizor intră în costul mărfii, iar TVA-ul de vânzare se configurează separat. Cotele de achiziție rămân disponibile pentru facturile furnizorilor." },
   { q: "Bonul fiscal se emite și offline?", a: "Înregistrarea vânzării și emiterea bonului sunt etape separate. Vânzarea intră în coada locală; emiterea bonului depinde de FiscalNet și de echipamentul local. În POS vezi ce a rămas de emis." },
   { q: "Ce se întâmplă dacă cade internetul?", a: "Cu POS-ul deja deschis, vinzi mai departe: maximum 20 de vânzări în coada locală, sincronizate automat când revine conexiunea." },
-  { q: "Am două locații. Merge?", a: "Da. Prețul pentru locații suplimentare depinde de plan. Contactează-ne ca să verificăm configurația potrivită pentru afacerea ta." },
+  { q: "Am două locații. Merge?", a: "Da — planul Multi include locația de bază și adaugă 29€/lună pentru fiecare locație în plus, cu raportare centrală și comutare între locații." },
 ];
 
+const DESIGN_PRICING_CARD_COPY: Record<"free" | "growth" | "team", { body: string; features: string[]; cta: string; badge?: string }> = {
+  free: {
+    body: "Pentru un local la început de drum — vânzare, conectare FiscalNet, bonuri fiscale și rapoartele zilei. Fără card, fără expirare.",
+    features: ["POS fără limită de bonuri", "Până la 50 de produse", "1 locație", "Închidere casă și raport Z", "Registru de casă", "Conectare FiscalNet"],
+    cta: "Creați cont gratuit",
+  },
+  growth: {
+    body: "Pentru proprietarii care vor stoc, cost pe rețetă și marja reală, plus pachetul de export pentru contabil. Ăsta e planul pentru care există produsul.",
+    features: ["Tot din planul Free, produse nelimitate", "Stoc și recepții (NIR)", "Rețete și cost pe produs", "Food cost și marjă pe meniu", "Bon de consum și fișă de magazie", "Inventar și consum teoretic vs. real", "Pachet export contabil (CSV + XML)"],
+    cta: "Începeți Pro",
+    badge: "GESTIUNE",
+  },
+  team: {
+    body: "Pentru afaceri cu două sau mai multe locații — tot din Pro, plus raportare centrală, comutare între locații și suport prioritar.",
+    features: ["Tot din planul Pro", "Locații multiple", "Comutare între locații", "Rapoarte per locație", "29€/locație suplimentară/lună", "Suport prioritar"],
+    cta: "Începeți Multi",
+  },
+};
+
 export function DesignPricing() {
-  return <><PageHero eyebrow="Prețuri" title="Două planuri, cu preț clar pe locație.">Core pentru vânzare și închidere zilnică. Operations adaugă stoc, achiziții și rețete. 15 zile de trial, fără card.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={`${s.grid} ${s.plans}`}>{pricingPlans.filter((plan) => plan.id === "starter" || plan.id === "pro").map((plan) => {
-    const operations = plan.id === "pro";
-    const features = operations ? ["Tot din planul Core", "Stoc și recepții (NIR)", "Rețete și cost pe produs", "Food cost și marjă pe meniu", "Bon de consum și fișă de magazie", "Inventar și consum teoretic vs. real", "Rapoarte pentru contabil"] : ["POS fără limită de bonuri", "Produse și categorii", "Închidere casă și raport Z", "Registru de casă", "Conectare FiscalNet"];
-    return <article className={`${s.card} ${s.plan} ${operations ? s.featured : ""}`} key={plan.id}><div className={s.cardTitle}><h2>{plan.name}</h2>{operations && <span className={`${s.badge} ${s.blueBadge}`}>GESTIUNE</span>}</div><div className={s.price}><strong>{plan.price}</strong><span>/ locație / lună</span></div><p className={s.body}>{operations ? "Pentru proprietarii care vor stoc, cost pe rețetă și marja reală. Ăsta e planul pentru care există produsul." : "Pentru un local care are nevoie de vânzare, conectare FiscalNet, bonuri fiscale și rapoartele zilei."}</p><ul className={s.features}>{features.map((feature) => <li key={feature}>{feature}</li>)}</ul><DesignTrialLink location="pricing_plan" plan={operations ? "pro" : "starter"}>Începeți trial {operations ? "Operations" : "Core"}</DesignTrialLink></article>;
-  })}</div><p className={s.smallPrint}>Prețurile nu includ TVA. FiscalNet, echipamentele și serviciile terțe se plătesc separat. Anulare oricând, fără contract pe termen lung. Pentru mai multe locații, <Link href="/contact">vorbește cu noi</Link>.</p></section><section className={`${s.container} ${s.bottomSpace}`}><h2 className={s.sectionTitle}>Întrebări frecvente</h2><div className={`${s.grid} ${s.faq}`}>{designFaq.map(({ q, a }) => <article className={s.card} key={q}><h3>{q}</h3><p className={s.body}>{a}</p></article>)}</div></section><DesignFinalCta /></>;
+  const plansToShow = pricingPlans.filter((plan): plan is typeof plan & { id: "free" | "growth" | "team" } => plan.id === "free" || plan.id === "growth" || plan.id === "team");
+  return <><PageHero eyebrow="Prețuri" title="Trei planuri, cu preț clar pe locație.">Free pentru vânzare și închidere zilnică, fără card. Pro adaugă stoc, achiziții și rețete. Multi e pentru mai multe locații.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={`${s.grid} ${s.plans}`}>{plansToShow.map((plan) => {
+    const copy = DESIGN_PRICING_CARD_COPY[plan.id];
+    return <article className={`${s.card} ${s.plan} ${plan.id === "growth" ? s.featured : ""}`} key={plan.id}><div className={s.cardTitle}><h2>{plan.name}</h2>{copy.badge && <span className={`${s.badge} ${s.blueBadge}`}>{copy.badge}</span>}</div><div className={s.price}><strong>{plan.price}</strong><span>{plan.id === "free" ? " / pentru totdeauna" : " / locație / lună"}</span></div><p className={s.body}>{copy.body}</p><ul className={s.features}>{copy.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><DesignTrialLink location="pricing_plan" plan={plan.id}>{copy.cta}</DesignTrialLink></article>;
+  })}</div><p className={s.smallPrint}>Prețurile nu includ TVA. FiscalNet, echipamentele și serviciile terțe se plătesc separat. Anulare oricând, fără contract pe termen lung.</p></section><section className={`${s.container} ${s.bottomSpace}`}><h2 className={s.sectionTitle}>Întrebări frecvente</h2><div className={`${s.grid} ${s.faq}`}>{designFaq.map(({ q, a }) => <article className={s.card} key={q}><h3>{q}</h3><p className={s.body}>{a}</p></article>)}</div></section><DesignFinalCta /></>;
 }

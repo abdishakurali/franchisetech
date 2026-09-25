@@ -43,7 +43,7 @@ export default function SignupPage() {
     if (isPreferredBillingPlan(planParam)) {
       writePreferredPlanClient(planParam);
     } else {
-      writePreferredPlanClient("starter");
+      writePreferredPlanClient("free");
     }
   }, [planParam]);
 
@@ -187,7 +187,7 @@ export default function SignupPage() {
         </CardContent>
       </Card>
       <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-        <span>{locale === "ro" ? "✓ Probă 15 zile fără card" : "✓ 15-day trial, no card required"}</span>
+        <span>{locale === "ro" ? "✓ Gratuit pentru totdeauna, fără card" : "✓ Free forever, no card required"}</span>
         <span>{locale === "ro" ? "✓ Configurare ghidată" : "✓ Guided setup"}</span>
       </div>
       </div>

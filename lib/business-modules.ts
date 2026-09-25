@@ -118,7 +118,8 @@ export function canUseModule(input: {
   if (input.module === "pos_core") return true;
   if (!isModuleEnabled(input.org, input.module)) return false;
   if (input.module === "multi_site") {
-    return input.subscriptionPlan === "multi_location" || normalizePlan(input.subscriptionPlan) === "scale";
+    const normalized = normalizePlan(input.subscriptionPlan);
+    return input.subscriptionPlan === "multi_location" || normalized === "scale" || normalized === "team";
   }
   const effectivePlan = resolveEffectivePlan({
     subscriptionPlan: input.subscriptionPlan,
@@ -182,5 +183,8 @@ export function effectivePlanLabel(plan: EffectiveBillingPlan): string {
   if (plan === "core") return "Core";
   if (plan === "pro") return "Operations";
   if (plan === "starter") return "Core";
+  if (plan === "team") return "Multi";
+  if (plan === "growth") return "Pro";
+  if (plan === "free") return "Free";
   return "Core";
 }

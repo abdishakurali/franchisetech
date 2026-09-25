@@ -3,7 +3,9 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { invalidateEntitlementCache } from "@/lib/billing/entitlement-resolver";
 import { getPriceId, STRIPE_CANONICAL_PRICE_IDS, type BillingPlan } from "@/lib/billing/plans";
 
-const VALID_PLANS: BillingPlan[] = ["starter", "core", "pro", "operations", "multi_location", "scale"];
+// "free" is excluded — it never has a Stripe subscription, so it never syncs
+// from one.
+const VALID_PLANS: BillingPlan[] = ["starter", "core", "pro", "operations", "multi_location", "scale", "growth", "team"];
 
 type SubscriptionWithPeriods = Stripe.Subscription & {
   trial_start?: number | null;
@@ -156,10 +158,12 @@ export async function syncStripeSubscription(
 
   invalidateEntitlementCache(organisationId);
 
-  // Revoke scale-only module access when plan drops below scale.
-  // saga_export requires reports.accountant_pack which is scale-only.
-  // This ensures plan downgrades are enforced even if the install flag was set previously.
-  if (plan !== "scale") {
+  // Revoke accountant-pack-only module access when the plan drops below one
+  // that grants reports.accountant_pack. That's scale (legacy) plus growth
+  // and team (new pricing, 2026-09) — see lib/billing/entitlement-catalog.ts.
+  // This ensures plan downgrades are enforced even if the install flag was
+  // set previously.
+  if (plan !== "scale" && plan !== "growth" && plan !== "team") {
     await supabase
       .from("organisations")
       .update({ saga_export_enabled: false })

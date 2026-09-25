@@ -60,8 +60,8 @@ export const comparisonPages: ComparisonPage[] = [
         body: "Multe restaurante folosesc SmartBill pentru facturi către furnizori și e-Factura, dar încă reconciliază casa și stocul în Excel. franchisetech țintește golul dintre bonul fiscal și marja reală pe produs.",
       },
       {
-        title: "Trial paralel",
-        body: "Rulați 15 zile în paralel: aceleași produse, aceeași echipă, comparați raportul zilnic și timpul de reconciliere înainte de a muta fluxul principal.",
+        title: "Test paralel gratuit",
+        body: "Rulați gratuit în paralel, cât timp aveți nevoie: aceleași produse, aceeași echipă, comparați raportul zilnic și timpul de reconciliere înainte de a muta fluxul principal.",
       },
     ],
     faqs: [
@@ -98,7 +98,7 @@ export const comparisonPages: ComparisonPage[] = [
     intro:
       "Expressoft acoperă restaurante și retail cu un portofoliu larg și implementări consacrate la lanțuri. franchisetech nu concurează la rollout enterprise de săptămâni — țintește operatorii care vor casă, stoc, marje și închidere de zi în zile, nu luni, cu preț transparent și personal nelimitat.",
     betterFor:
-      "Expressoft poate câștiga la rețele mari (5+ locații) cu echipă IT, training dedicat și fluxuri custom. franchisetech merită evaluat pentru cafenea, restaurant mic sau lanț 2–5 locații care vrea trial self-serve, raport Z inclus și coexistență cu SmartBill/Oblio pentru facturare.",
+      "Expressoft poate câștiga la rețele mari (5+ locații) cu echipă IT, training dedicat și fluxuri custom. franchisetech merită evaluat pentru cafenea, restaurant mic sau lanț 2–5 locații care vrea cont gratuit self-serve, raport Z inclus și coexistență cu SmartBill/Oblio pentru facturare.",
     competitorStrengths: [
       "Portofoliu larg HoReCa + retail — module mature pentru lanțuri",
       "Implementări la operatori consacrați — experiență enterprise",
@@ -106,7 +106,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Suport și relație comercială pentru proiecte complexe",
     ],
     franchisetechStrengths: [
-      "Time-to-first-sale în zile — trial 15 zile, setup checklist, onboarding ghidat",
+      "Time-to-first-sale în zile — plan gratuit permanent, setup checklist, onboarding ghidat",
       "Preț listat pe site (Core 49€, Operations 79€) — personal nelimitat",
       "Raport Z, vânzări și TVA incluse în Starter — fără add-on doar pentru raportare",
       "Multi-location 89€/locație suplimentară — fără suite enterprise obligatorie",
@@ -114,8 +114,8 @@ export const comparisonPages: ComparisonPage[] = [
     ],
     sections: [
       {
-        title: "Enterprise rollout vs self-serve trial",
-        body: "Expressoft shine când aveți buget și timp pentru implementare structurată. franchisetech optimizează primele 48h: produse, deschidere casă, vânzare test, raport Z — comparați în trial paralel înainte de a angaja un proiect de migrare.",
+        title: "Enterprise rollout vs self-serve gratuit",
+        body: "Expressoft shine când aveți buget și timp pentru implementare structurată. franchisetech optimizează primele 48h: produse, deschidere casă, vânzare test, raport Z — comparați gratuit, în paralel, înainte de a angaja un proiect de migrare.",
       },
       {
         title: "2–5 locații fără complexitate inutilă",
@@ -183,7 +183,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Raport vânzări, raport Z și raport TVA incluse în Core (49€) — fără add-on Insights",
       "Fără taxă per angajat; personal nelimitat pe plan",
       "Stoc, NIR, rețete și rapoarte marjă pe Operations (79€) — fără salt la 99€+ doar pentru gestiune",
-      "Browser POS — trial 15 zile de la crearea contului, fără card; FiscalNet când este configurat",
+      "Browser POS — gratuit permanent de la crearea contului, fără card; FiscalNet când este configurat",
     ],
     sections: [
       {
@@ -195,8 +195,8 @@ export const comparisonPages: ComparisonPage[] = [
         body: "Ebriza Premium (99€) și Titanium (179€) adaugă gestiune, NIR automat și rapoarte avansate. franchisetech Operations (79€) acoperă stoc, furnizori, achiziții/NIR și cost rețete pentru majoritatea cafenelelor și restaurantelor mici — cu rapoarte incluse, nu ca add-on.",
       },
       {
-        title: "Cum să testați în 15 zile",
-        body: "Rulați paralel: aceleași produse, aceeași echipă, aceeași închidere de zi. Verificați cât plătiți efectiv (plan + add-on-uri) vs cât timp pierdeți reconciliind fără rapoarte clare. franchisetech nu cere card la înscriere — testați complet întâi și decideți după.",
+        title: "Cum să testați gratuit",
+        body: "Rulați paralel, cât timp aveți nevoie: aceleași produse, aceeași echipă, aceeași închidere de zi. Verificați cât plătiți efectiv (plan + add-on-uri) vs cât timp pierdeți reconciliind fără rapoarte clare. franchisetech nu cere card la înscriere — testați complet întâi și decideți după.",
       },
     ],
     faqs: [
@@ -326,9 +326,9 @@ export const comparisonPages: ComparisonPage[] = [
       "Comparație onestă franchisetech vs POSnet: ambele au Saga C. POSnet adaugă import automat livrare, licență definitivă și funcționare offline; franchisetech adaugă rețete cu marje și preț lunar listat.",
     h1: "franchisetech vs POSnet — comparație onestă pentru HoReCa România",
     intro:
-      "POSnet este un POS pentru restaurante din România, cu funcții diferite de cele oferite de franchisetech. franchisetech oferă casă, stoc și cost rețete în browser, cu preț lunar listat și trial 15 zile de la crearea contului, fără card. Verificați funcțiile și compatibilitatea fiecărui produs înainte de alegere.",
+      "POSnet este un POS pentru restaurante din România, cu funcții diferite de cele oferite de franchisetech. franchisetech oferă casă, stoc și cost rețete în browser, cu preț lunar listat și plan gratuit permanent de la crearea contului, fără card. Verificați funcțiile și compatibilitatea fiecărui produs înainte de alegere.",
     betterFor:
-      "POSnet câștigă dacă preferați licență definitivă fără abonament lunar, aveți nevoie de funcționare offline sau chioșc self-ordering. franchisetech câștigă dacă vreți cloud fără server local de menținut, cost rețete și marje per preparat, preț lunar listat transparent și trial fără angajament.",
+      "POSnet câștigă dacă preferați licență definitivă fără abonament lunar, aveți nevoie de funcționare offline sau chioșc self-ordering. franchisetech câștigă dacă vreți cloud fără server local de menținut, cost rețete și marje per preparat, preț lunar listat transparent și un plan gratuit permanent fără angajament.",
     competitorStrengths: [
       "Import automat comenzi Glovo, Bolt, Wolt — fără introducere manuală",
       "Integrare Saga C pentru contabilitate — direct din sistem",
@@ -342,7 +342,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Browser cloud — fără instalare, server local sau mentenanță IT",
       "Cost rețete per porție — știți marja brută înainte de a schimba meniul",
       "Preț lunar listat pe site: 49€ Core, 79€ Operations, 89€/locație Multi-location",
-      "Trial 15 zile de la crearea contului, fără card — configurare ghidată în aplicație",
+      "Plan gratuit permanent de la crearea contului, fără card — configurare ghidată în aplicație",
       "Multi-location la 89€/locație — dashboard unificat, rapoarte separate",
     ],
     sections: [
@@ -373,7 +373,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Ce are franchisetech și POSnet nu detaliază?",
         answer:
-          "franchisetech include cost rețete per porție, preț lunar listat și trial 15 zile de la crearea contului, fără card. Verificați direct cu fiecare furnizor disponibilitatea și condițiile funcțiilor comparate.",
+          "franchisetech include cost rețete per porție, preț lunar listat și un plan gratuit permanent de la crearea contului, fără card. Verificați direct cu fiecare furnizor disponibilitatea și condițiile funcțiilor comparate.",
       },
     ],
     related: [
@@ -390,7 +390,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Chioșc self-ordering", "Nu este inclus", "Da — disponibil la POSnet"],
       ["KDS bucătărie", "Pro", "Da — disponibil la POSnet"],
       ["Deploy", "Browser cloud — fără instalare", "Aplicație locală — necesită instalare și server"],
-      ["Trial", "15 zile de la crearea contului, fără card", "Contactați furnizorul pentru condiții"],
+      ["Plan gratuit", "Permanent, de la crearea contului, fără card", "Contactați furnizorul pentru condiții"],
     ],
   },
   {

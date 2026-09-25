@@ -22,7 +22,6 @@ type TxRow = {
   sold_at?: string | null;
   created_at?: string | null;
   status?: string | null;
-  payment_methods: { type?: string } | { type?: string }[] | null;
 };
 
 type TxItemRow = {
@@ -188,41 +187,47 @@ function txTimestamp(tx: TxRow): string {
   return tx.sold_at ?? tx.created_at ?? "";
 }
 
-function paymentType(tx: TxRow): string {
-  const pm = tx.payment_methods;
-  const row = Array.isArray(pm) ? pm[0] : pm;
-  return row?.type ?? "other";
-}
-
 function aggregateSales(transactions: TxRow[]) {
   let salesTotal = 0;
   let vatTotal = 0;
-  let cashTotal = 0;
-  let cardTotal = 0;
-  let onlineTotal = 0;
-  let otherTotal = 0;
 
   for (const tx of transactions) {
     const total = Number(tx.total ?? 0);
     salesTotal += total;
     vatTotal += Number(tx.tax_total ?? 0);
-    const type = paymentType(tx);
-    if (type === "cash") cashTotal += total;
-    else if (type === "card") cardTotal += total;
-    else if (type === "online") onlineTotal += total;
-    else otherTotal += total;
   }
 
   return {
     salesTotal,
     salesCount: transactions.length,
     vatTotal,
-    cashTotal,
-    cardTotal,
-    onlineTotal,
-    otherTotal,
     avgTicket: transactions.length ? salesTotal / transactions.length : 0,
   };
+}
+
+type PaymentRow = { method: string | null; amount: number | string | null };
+
+/**
+ * Cash/card/online/other breakdown from sale_payments (populated by
+ * post_pos_document) — the real per-method split, including split-payment
+ * sales, not the single payment_methods FK join on pos_transactions itself.
+ * A split cash+card sale has one pos_transactions row but two sale_payments
+ * rows; using the FK join would attribute the whole sale total to whichever
+ * method that join happens to resolve to. No split-payment sales exist in
+ * production yet (checked directly), so this hasn't produced a wrong digest
+ * so far — but it would as soon as the entitled pos.split_payments feature
+ * gets used, since the FK join can only ever reflect one method per sale.
+ */
+export function aggregatePayments(payments: PaymentRow[]) {
+  let cashTotal = 0, cardTotal = 0, onlineTotal = 0, otherTotal = 0;
+  for (const p of payments) {
+    const amount = Number(p.amount ?? 0);
+    if (p.method === "cash") cashTotal += amount;
+    else if (p.method === "card") cardTotal += amount;
+    else if (p.method === "online") onlineTotal += amount;
+    else otherTotal += amount;
+  }
+  return { cashTotal, cardTotal, onlineTotal, otherTotal };
 }
 
 function dayKey(iso: string, timeZone: string, businessDayCutoffTime?: string | null): string {
@@ -421,14 +426,14 @@ export async function fetchOwnerDigestData(
   ] = await Promise.all([
     supabase
       .from("pos_transactions")
-      .select("id,total,tax_total,tip_amount,sold_at,created_at,status,payment_methods(type)")
+      .select("id,total,tax_total,tip_amount,sold_at,created_at,status")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
       .gte("sold_at", rangeIso.start)
       .lt("sold_at", rangeIso.end),
     supabase
       .from("pos_transactions")
-      .select("total,sold_at,created_at,status,payment_methods(type)")
+      .select("total,sold_at,created_at,status")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
       .gte("sold_at", priorIso.start)
@@ -535,13 +540,22 @@ export async function fetchOwnerDigestData(
   const txIds = (txResult.data ?? []).map((t) => (t as { id: string }).id).filter(Boolean);
   let topProducts: OwnerDigestData["topProducts"] = [];
   let vatBreakdown: OwnerDigestVatBreakdown[] = [];
+  let paymentBreakdown = aggregatePayments([]);
   if (txIds.length > 0) {
-    const { data: items } = await supabase
-      .from("pos_transaction_items")
-      .select("product_name,quantity,gross_amount,line_total,net_amount,vat_amount,vat_rate")
-      .eq("organisation_id", orgId)
-      .in("transaction_id", txIds);
+    const [{ data: items }, { data: payments }] = await Promise.all([
+      supabase
+        .from("pos_transaction_items")
+        .select("product_name,quantity,gross_amount,line_total,net_amount,vat_amount,vat_rate")
+        .eq("organisation_id", orgId)
+        .in("transaction_id", txIds),
+      supabase
+        .from("sale_payments")
+        .select("method,amount")
+        .eq("organisation_id", orgId)
+        .in("sale_id", txIds),
+    ]);
 
+    paymentBreakdown = aggregatePayments((payments ?? []) as PaymentRow[]);
     const itemRows = (items ?? []) as TxItemRow[];
     vatBreakdown = buildVatBreakdown(itemRows);
     const productMap = new Map<string, { qty: number; revenue: number }>();
@@ -609,10 +623,10 @@ export async function fetchOwnerDigestData(
     frequency,
     salesTotal: current.salesTotal,
     salesCount: current.salesCount,
-    cashTotal: current.cashTotal,
-    cardTotal: current.cardTotal,
-    onlineTotal: current.onlineTotal,
-    otherTotal: current.otherTotal,
+    cashTotal: paymentBreakdown.cashTotal,
+    cardTotal: paymentBreakdown.cardTotal,
+    onlineTotal: paymentBreakdown.onlineTotal,
+    otherTotal: paymentBreakdown.otherTotal,
     vatTotal: current.vatTotal,
     vatBreakdown,
     avgTicket: current.avgTicket,

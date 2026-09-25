@@ -24,7 +24,7 @@ export default async function OnboardingFiscalPage() {
       subtitle="Poți exersa în mod test acum și conecta hardware-ul real mai târziu."
       timeEstimate="~1 minut"
       stepOfLabel={onboardingStepOfLabel(3, stepLabels.length, "ro")}
-      trialBadge="Probă 15 zile · fără card necesar"
+      trialBadge="Gratuit pentru totdeauna · fără card necesar"
     >
       <FiscalOnboardingCard
         initial={{

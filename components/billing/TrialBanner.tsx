@@ -18,6 +18,36 @@ export function TrialBanner({ subStatus, daysLeft, creditMonths, referral, onRef
 
   if (state === "active" && !subStatus?.cancelAtPeriodEnd) return null;
 
+  // Free is the permanent baseline (trial retired 2026-09) — no expiry, no
+  // day countdown. Falling through to the generic trial branch below would
+  // show a false "X days left" that never counts down, since Free orgs never
+  // have a trialDaysLeft value to begin with.
+  if (state === "free") {
+    return (
+      <div className="trial-banner flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-blue-50 px-4 py-2.5 text-sm">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-slate-700">
+          <span className="font-medium">Free plan · up to 50 products, 1 location</span>
+          <span className="hidden text-slate-300 sm:inline">|</span>
+          <Link href="/app/billing" className="text-blue-700 hover:underline">
+            Upgrade for stock, recipes &amp; more
+          </Link>
+          {creditMonths > 0 ? (
+            <>
+              <span className="hidden text-slate-300 sm:inline">|</span>
+              <span>Referral credit: {creditMonths} free month{creditMonths === 1 ? "" : "s"}</span>
+            </>
+          ) : null}
+        </div>
+        {referral?.link ? (
+          <Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700 shrink-0" onClick={onReferralOpen}>
+            <Gift className="h-4 w-4" />
+            Refer
+          </Button>
+        ) : null}
+      </div>
+    );
+  }
+
   if (state === "past_due_expired") {
     return (
       <div className="flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-red-300 bg-red-100 px-4 py-2.5 text-sm">

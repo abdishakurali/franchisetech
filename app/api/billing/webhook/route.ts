@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { NextResponse, after } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { creditReferralOnFirstPayment } from "@/lib/referrals";
+import { grantAccountantPartnerAccess } from "@/lib/accountant/partner-access";
 import { trackLoopsEvent } from "@/lib/loops";
 import { syncStripeSubscription } from "@/lib/billing/stripe-sync";
 import { startTrialAfterCardVerification } from "@/lib/billing/verification";
@@ -160,8 +161,10 @@ export async function POST(request: Request) {
         session.metadata?.purpose === "card_verification" &&
         session.payment_status === "paid"
       ) {
-        // €1 card verification paid — start the 15-day trial. Idempotent: the
-        // success page may have already started it; only the first caller wins.
+        // €1 card verification paid — legacy trial-start bookkeeping (see
+        // lib/billing/verification.ts; trial retired 2026-09, this no longer
+        // gates access). Idempotent: the success page may have already run
+        // it; only the first caller wins.
         const verifyOrgId = session.metadata?.organisation_id ?? session.client_reference_id;
         if (verifyOrgId) {
           await startTrialAfterCardVerification({
@@ -293,7 +296,7 @@ export async function POST(request: Request) {
             const { data: org } = await supabase
               .from("organisations")
               .select(
-                "referred_by_code, referral_credit_months, acquisition_gclid, acquisition_gbraid, acquisition_wbraid, acquisition_ga_client_id"
+                "referred_by_code, accountant_partner_code, referral_credit_months, acquisition_gclid, acquisition_gbraid, acquisition_wbraid, acquisition_ga_client_id"
               )
               .eq("id", subOrgId)
               .maybeSingle();
@@ -315,6 +318,30 @@ export async function POST(request: Request) {
 
             if (org?.referred_by_code) {
               await creditReferralOnFirstPayment(subOrgId).catch(() => null);
+            }
+
+            // Accountant-partner referral — separate system, separate column
+            // (see app/actions/onboarding.ts). credit_accountant_referral is
+            // idempotent (ON CONFLICT DO NOTHING + status check), safe to call
+            // on every real payment, not just the first. Portal access is a
+            // separate step, run only after the RPC succeeds.
+            if (org?.accountant_partner_code) {
+              const { error: creditError } = await supabase.rpc("credit_accountant_referral", { p_org_id: subOrgId });
+              if (creditError) {
+                console.error("[billing webhook] credit_accountant_referral failed", creditError.message);
+              } else {
+                const { data: partner } = await supabase
+                  .from("accountant_partners")
+                  .select("user_id")
+                  .eq("referral_code", org.accountant_partner_code)
+                  .eq("status", "active")
+                  .maybeSingle();
+                if (partner?.user_id) {
+                  await grantAccountantPartnerAccess(subOrgId, partner.user_id).catch((err: unknown) =>
+                    console.error("[billing webhook] grantAccountantPartnerAccess failed", err),
+                  );
+                }
+              }
             }
 
             const creditMonths = Number(org?.referral_credit_months ?? 0);

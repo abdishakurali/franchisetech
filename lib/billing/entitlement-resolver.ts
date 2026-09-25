@@ -16,7 +16,7 @@ type EntitlementStatus =
   | "unpaid"
   | "canceled";
 
-type EntitlementLimitKey = "kitchen.screen_limit";
+type EntitlementLimitKey = "kitchen.screen_limit" | "products.limit" | "locations.limit";
 
 export type EntitlementErrorBody = {
   error: "entitlement_denied";
@@ -115,12 +115,14 @@ const REQUIRED_PLAN: Record<EntitlementKey | EntitlementLimitKey, PlanCode | "mu
   "kitchen.screen_limit": "operations",
   "team.advanced_roles": "operations",
   "owner_digest.enabled": "operations",
-  "reports.accountant_pack": "scale",
-  "support.priority": "scale",
+  "reports.accountant_pack": "growth",
+  "support.priority": "team",
   "multi_site.enabled": "multi_site",
   "multi_site.site_switching": "multi_site",
   "reports.per_site": "multi_site",
   "fiscal.multi_site": "multi_site",
+  "products.limit": "growth",
+  "locations.limit": "team",
 };
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -148,10 +150,21 @@ export function invalidateEntitlementCache(orgId?: string | null): void {
 
 export const normalizePlan = _normalizePlan;
 
-function limitForPlan(plan: PlanCode | null): number | "unlimited" {
-  if (plan === "scale") return "unlimited";
-  if (plan === "operations") return 3;
+function kitchenScreenLimitForPlan(plan: PlanCode | null): number | "unlimited" {
+  if (plan === "scale" || plan === "team") return "unlimited";
+  if (plan === "operations" || plan === "growth") return 3;
   return 0;
+}
+
+// New pricing generation only (2026-09) — legacy core/operations/scale never
+// had a product or location cap, so they stay "unlimited" here; their site
+// limits are governed separately by the multi_site.* entitlements below.
+function productsLimitForPlan(plan: PlanCode | null): number | "unlimited" {
+  return plan === "free" ? 50 : "unlimited";
+}
+
+function locationsLimitForPlan(plan: PlanCode | null): number | "unlimited" {
+  return plan === "free" || plan === "growth" ? 1 : "unlimited";
 }
 
 function future(iso: string | null | undefined): boolean {
@@ -214,7 +227,7 @@ export async function resolveEntitlements(orgId: string): Promise<ResolvedEntitl
   const [{ data: org }, { data: sub }] = await Promise.all([
     service
       .from("organisations")
-      .select("trial_ends_at,multi_site_ops_enabled")
+      .select("multi_site_ops_enabled")
       .eq("id", orgId)
       .maybeSingle(),
     service
@@ -226,18 +239,25 @@ export async function resolveEntitlements(orgId: string): Promise<ResolvedEntitl
       .maybeSingle(),
   ]);
 
-  const softTrial = !sub && future(org?.trial_ends_at);
-  const status = softTrial
-    ? "trialing"
-    : resolveStatus(sub?.status ?? null, sub?.current_period_end ?? null, sub?.grace_period_ends_at ?? null);
-  const currentPlan = softTrial || status === "trialing" ? "operations" : normalizePlan(sub?.plan ?? null);
+  // No subscription row = permanent Free plan (trial retired 2026-09 — see
+  // lib/billing/subscription.ts). Never "trialing"/expired-by-date anymore;
+  // Free simply never expires.
+  const status: EntitlementStatus = sub
+    ? resolveStatus(sub.status ?? null, sub.current_period_end ?? null, sub.grace_period_ends_at ?? null)
+    : "active";
+  const currentPlan: PlanCode | null = sub ? normalizePlan(sub.plan ?? null) : "free";
   const fallback = status === "expired" || status === "unpaid" || status === "canceled";
   const entitlements = new Set<EntitlementKey>(fallback ? FALLBACK_ENTITLEMENTS : planEntitlements(currentPlan));
   const limits: Record<EntitlementLimitKey, number | "unlimited"> = {
-    "kitchen.screen_limit": fallback ? 0 : limitForPlan(currentPlan),
+    "kitchen.screen_limit": fallback ? 0 : kitchenScreenLimitForPlan(currentPlan),
+    "products.limit": fallback ? 0 : productsLimitForPlan(currentPlan),
+    "locations.limit": fallback ? 0 : locationsLimitForPlan(currentPlan),
   };
 
-  const multiSiteEnabled = (sub?.plan === "multi_location") || (currentPlan === "scale" && Boolean(org?.multi_site_ops_enabled));
+  const multiSiteEnabled =
+    (sub?.plan === "multi_location") ||
+    currentPlan === "team" ||
+    (currentPlan === "scale" && Boolean(org?.multi_site_ops_enabled));
   if (!fallback && multiSiteEnabled) {
     for (const key of MULTI_SITE_ENTITLEMENTS) entitlements.add(key);
   }

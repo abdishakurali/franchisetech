@@ -48,7 +48,7 @@ const UI_STRINGS = {
     title: "Spune-ne cine este firma",
     subtitle: "Câteva detalii rapide — puteți schimba totul mai târziu din Setări.",
     timeEstimate: "~2 minute",
-    trialBadge: "Probă 15 zile · fără card necesar",
+    trialBadge: "Gratuit pentru totdeauna · fără card necesar",
     hint: "Datele firmei apar pe bonuri și rapoarte.",
   },
   en: {
@@ -70,7 +70,7 @@ const UI_STRINGS = {
     title: "Tell us about your business",
     subtitle: "A couple of quick details — you can change everything later in Settings.",
     timeEstimate: "~2 minutes",
-    trialBadge: "15-day trial · no card required",
+    trialBadge: "Free forever · no card required",
     hint: "Business details appear on receipts and reports.",
   },
 };

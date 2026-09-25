@@ -22,7 +22,7 @@ export const skagLandingPages: SkagLandingPage[] = [
     subhead:
       "POS, stocuri și rapoarte zilnice într-o singură platformă. Știi exact banii din casă la finalul zilei.",
     metaDescription:
-      "Program de gestiune pentru cafenele: POS, stocuri în timp real, raport Z zilnic. Probă 15 zile, suport în română.",
+      "Program de gestiune pentru cafenele: POS, stocuri în timp real, raport Z zilnic. Gratuit pentru totdeauna, suport în română.",
     trustSignals: ["Configurare în aceeași zi", "Suport în limba română", "Raport Z în 2 minute"],
   },
   {
@@ -31,7 +31,7 @@ export const skagLandingPages: SkagLandingPage[] = [
     subhead:
       "POS, stocuri și rapoarte zilnice într-o singură platformă. Știi exact banii din casă la finalul zilei.",
     metaDescription:
-      "Sistem de gestiune pentru cafenele: POS, stocuri în timp real, raport Z zilnic. Probă 15 zile, suport în română.",
+      "Sistem de gestiune pentru cafenele: POS, stocuri în timp real, raport Z zilnic. Gratuit pentru totdeauna, suport în română.",
     trustSignals: ["Configurare în aceeași zi", "Suport în limba română", "Raport Z în 2 minute"],
   },
   {
@@ -40,7 +40,7 @@ export const skagLandingPages: SkagLandingPage[] = [
     subhead:
       "POS, stocuri de băuturi și rapoarte zilnice într-o singură platformă. Știi exact banii din casă la finalul zilei.",
     metaDescription:
-      "Program de gestiune pentru baruri: POS, stocuri băuturi în timp real, raport Z zilnic. Probă 15 zile, suport în română.",
+      "Program de gestiune pentru baruri: POS, stocuri băuturi în timp real, raport Z zilnic. Gratuit pentru totdeauna, suport în română.",
     trustSignals: ["Configurare în aceeași zi", "Suport în limba română", "Raport Z în 2 minute"],
   },
   {
@@ -49,7 +49,7 @@ export const skagLandingPages: SkagLandingPage[] = [
     subhead:
       "POS, stocuri și rapoarte zilnice într-o singură platformă. Știi exact banii din casă la finalul zilei.",
     metaDescription:
-      "Soft de gestiune pentru cafenele: POS, stocuri în timp real, raport Z zilnic. Probă 15 zile, suport în română.",
+      "Soft de gestiune pentru cafenele: POS, stocuri în timp real, raport Z zilnic. Gratuit pentru totdeauna, suport în română.",
     trustSignals: ["Configurare în aceeași zi", "Suport în limba română", "Raport Z în 2 minute"],
   },
   {
@@ -58,7 +58,7 @@ export const skagLandingPages: SkagLandingPage[] = [
     subhead:
       "Raport Z generat automat la închiderea zilei — numerar, card și TVA într-un singur ecran. Casa se potrivește cu sertarul, fără calcule manuale.",
     metaDescription:
-      "Raport Z automat pentru casa de marcat: numerar, card și TVA calculate la închidere. Probă 15 zile, suport în română.",
+      "Raport Z automat pentru casa de marcat: numerar, card și TVA calculate la închidere. Gratuit pentru totdeauna, suport în română.",
     trustSignals: ["Configurare în aceeași zi", "Suport în limba română", "Raport Z în 2 minute"],
   },
   {
@@ -67,7 +67,7 @@ export const skagLandingPages: SkagLandingPage[] = [
     subhead:
       "Raport X oricând în timpul zilei — vânzări, numerar, card și TVA de până acum. Nu resetează totalurile și nu închide ziua.",
     metaDescription:
-      "Raport X pentru casa de marcat: citire intermediară cu vânzări, numerar și TVA, fără să închideți ziua. Probă 15 zile, suport în română.",
+      "Raport X pentru casa de marcat: citire intermediară cu vânzări, numerar și TVA, fără să închideți ziua. Gratuit pentru totdeauna, suport în română.",
     trustSignals: ["Nu resetează totalurile", "Oricâte rapoarte X pe zi", "Suport în limba română"],
   },
 ];

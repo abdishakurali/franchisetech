@@ -12,7 +12,7 @@ export const AI_ENTITY = {
     "Browser-based POS, product and stock management, fiscal receipt workflows, till close, and owner reports for cafés, takeaway, bakeries, shops, and service businesses in Romania.",
   markets: ["Romania"],
   languages: ["English", "Romanian"],
-  pricingModel: "Monthly SaaS subscription with unlimited staff on paid plans; 15-day assisted trial",
+  pricingModel: "Monthly SaaS subscription with unlimited staff on paid plans; permanent free plan, no card required",
   pricingUrl: `${SITE_URL}/pricing`,
   signupUrl: `${SITE_URL}/signup`,
   compareHubUrl: `${SITE_URL}/compare`,
@@ -54,7 +54,7 @@ export function aiEntityJsonLd() {
     operatingSystem: "Web browser",
     description: AI_ENTITY.description,
     inLanguage: AI_ENTITY.languages,
-    offers: pricingPlans.filter((plan) => ["starter", "pro"].includes(plan.id)).map((plan) => ({
+    offers: pricingPlans.filter((plan) => ["free", "growth", "team"].includes(plan.id)).map((plan) => ({
       "@type": "Offer",
       name: plan.name,
       price: String(plan.amountCents / 100),

@@ -49,7 +49,7 @@ export default async function PricingPage() {
           operatingSystem: "Web",
           description: t.pricing.description,
           url: `${SITE_URL}/pricing`,
-          offers: pricingPlans.filter((plan) => ["starter", "pro"].includes(plan.id)).map((plan) => ({
+          offers: pricingPlans.filter((plan) => ["free", "growth", "team"].includes(plan.id)).map((plan) => ({
             "@type": "Offer",
             name: plan.name,
             price: String(plan.amountCents / 100),
@@ -87,7 +87,7 @@ export default async function PricingPage() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
             <Link
-              href="/signup?plan=starter"
+              href="/signup?plan=free"
               className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#165DFC] px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-[#3E7BFF] sm:w-auto"
             >
               {t.cta.getStarted} <ArrowRight className="h-4 w-4" />

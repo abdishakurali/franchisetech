@@ -114,7 +114,7 @@
 .smallPrint { font-size:13px; color:var(--mid); line-height:1.65; max-width:78ch; margin-top:22px!important; }
 .card a:not(.button) { color:var(--brass); }
 .emphasis { border:2px solid var(--ink); }
-.plans { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.plans { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .plan { padding:28px; gap:12px; }
 .featured { background:var(--ink); border-color:var(--ink); color:var(--paper); }
 .featured .body { color:#cfc6b2; }
@@ -138,6 +138,6 @@
 .footer .logo { height:30px; filter:brightness(0) invert(1); }
 .footerLinks { display:flex; flex-wrap:wrap; gap:14px; }
 .footer a,.footer span { font-family:var(--font-space-mono),monospace; font-size:11px; color:#a89e8a; }
-@media(max-width:1060px) { .nav { display:none; } .mobile { display:block; position:relative; } .mobile summary { padding:10px; cursor:pointer; font-size:14px; } .mobile nav { position:absolute; right:0; top:100%; width:230px; padding:8px; border:1px solid var(--border); border-radius:12px; background:var(--paper); display:flex; flex-direction:column; align-items:stretch; } .mobile nav a { padding:12px; } .faq { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:1060px) { .nav { display:none; } .mobile { display:block; position:relative; } .mobile summary { padding:10px; cursor:pointer; font-size:14px; } .mobile nav { position:absolute; right:0; top:100%; width:230px; padding:8px; border:1px solid var(--border); border-radius:12px; background:var(--paper); display:flex; flex-direction:column; align-items:stretch; } .mobile nav a { padding:12px; } .faq,.plans { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:700px) { .hero,.split,.plans,.tourHeading,.demoVideo,.customerVideoGrid { grid-template-columns:1fr; } .tourGrid { grid-template-columns:1fr; } .highlight,.highlight:nth-child(even) { flex-direction:column; align-items:stretch; } .headerInner { gap:8px; } .logo { max-width:180px; height:28px; } .account a:first-child { display:none; } .account a:last-child { font-size:12px; padding:10px; } .container { padding-inline:20px; } .hero { padding-top:48px; } .heroProduct { transform:none; } .faq { grid-template-columns:1fr; } .customerVideo video { aspect-ratio:9/14; } }
 @media(prefers-reduced-motion:reduce) { .site * { scroll-behavior:auto!important; transition:none!important; } }

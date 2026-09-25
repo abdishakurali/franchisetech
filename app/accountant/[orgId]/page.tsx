@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AlertTriangle, ArrowLeft, CheckCircle2, Clock3, Download, FileCheck2, RefreshCw } from "lucide-react";
+import { AlertTriangle, ArrowLeft, CheckCircle2, Clock3, Download, FileCheck2, FileWarning, RefreshCw } from "lucide-react";
 import { accountantDateRange } from "@/lib/accountant/period";
 import { accountantReadinessIssues } from "@/lib/accountant/export-rows";
 import { ACCOUNTANT_EXPORTS } from "@/lib/accountant/export-catalog";
 import { normalizeAccountantPermissions, packageSections, type PackageSection } from "@/lib/accountant/permissions";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
+import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
+import { hasAccountantPartnerAccess } from "@/lib/accountant/permissions";
 
 const SECTION_COPY: Record<PackageSection, { label: string; description: string; legal: string }> = {
   sales: { label: "Vânzări și TVA", description: "Bonuri POS, retururi, preț unitar și centralizare pe cote TVA.", legal: "Date de control; raportul Z fiscal rămâne documentul pentru venitul zilnic." },
@@ -32,7 +34,7 @@ export default async function AccountantWorkspace({ params, searchParams }: { pa
   const activeSections = selected.length ? selected : available;
   const org = Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations;
 
-  const [sales, closes, cashMovements, purchases, productsWithoutSalePrice, stockWithoutCost, latestStock] = await Promise.all([
+  const [sales, closes, cashMovements, purchases, productsWithoutSalePrice, stockWithoutCost, latestStock, saftEntitled] = await Promise.all([
     supabase.from("pos_transactions").select("id,sold_at,total,status,payment_methods(type)", { count: "exact" }).eq("organisation_id", orgId).gte("sold_at", range.start).lte("sold_at", range.end).order("sold_at", { ascending: false }),
     supabase.from("pos_sessions").select("id,closed_at,cash_difference,fiscal_z_report_done", { count: "exact" }).eq("organisation_id", orgId).not("closed_at", "is", null).gte("closed_at", range.start).lte("closed_at", range.end).order("closed_at", { ascending: false }),
     supabase.from("pos_cash_movements").select("id,reason,performed_at", { count: "exact" }).eq("organisation_id", orgId).gte("performed_at", range.start).lte("performed_at", range.end).order("performed_at", { ascending: false }),
@@ -40,6 +42,7 @@ export default async function AccountantWorkspace({ params, searchParams }: { pa
     supabase.from("products").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("active", true).is("sale_price", null),
     supabase.from("canonical_stock_balances").select("product_id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("active", true).is("cost_price", null),
     supabase.from("stock_movements").select("created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    hasEntitlement(orgId, "reports.accountant_pack").then((e) => e || hasAccountantPartnerAccess(supabase, orgId)),
   ]);
   const purchaseIds = (purchases.data ?? []).map((row) => row.id);
   const { count: purchaseLinesWithoutCost } = await supabase.from("purchase_items").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("purchase_id", purchaseIds.length ? purchaseIds : ["00000000-0000-0000-0000-000000000000"]).or("unit_cost.is.null,unit_cost.lte.0");
@@ -71,7 +74,19 @@ export default async function AccountantWorkspace({ params, searchParams }: { pa
 
     <section className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5"><Metric label="Vânzări brute" value={money(salesTotal)} /><Metric label="Tranzacții" value={String(completedSales.length)} /><Metric label="Numerar POS" value={money(cashSales)} /><Metric label="Zile cu vânzări" value={String(activeDays)} /><Metric label="Achiziții" value={money((purchases.data ?? []).reduce((sum, row) => sum + Number(row.total_amount ?? 0), 0))} /></section>
 
-    <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]"><section><div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-lg font-semibold">Documente disponibile</h2><p className="text-sm text-muted-foreground">Alege raportul și formatul. Fișierele folosesc exact perioada și categoriile selectate mai sus.</p></div><a href={`/api/accountant/package?${download}`} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-brass px-4 text-sm font-bold text-ink"><Download className="size-4" />Descarcă toate · ZIP</a></div><div className="mt-3 overflow-hidden rounded-xl border border-border bg-card">{availableExports.map((item) => { const base = new URLSearchParams(download); base.set("report", item.id); return <article key={item.id} className="flex flex-col gap-3 border-b border-border p-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:p-5"><div className="flex gap-3"><FileCheck2 className="mt-0.5 size-5 shrink-0 text-brass" /><div><h3 className="font-semibold">{item.title}</h3><p className="mt-1 text-sm text-muted-foreground">{item.description}</p></div></div><div className="flex shrink-0 gap-2"><a href={`/api/accountant/package?${base}&format=csv`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold hover:bg-muted">CSV</a><a href={`/api/accountant/package?${base}&format=xlsx`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold hover:bg-muted">Excel</a></div></article>})}</div></section>
+    <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]"><section><div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-lg font-semibold">Documente disponibile</h2><p className="text-sm text-muted-foreground">Alege raportul și formatul. Fișierele folosesc exact perioada și categoriile selectate mai sus.</p></div><a href={`/api/accountant/package?${download}`} className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-brass px-4 text-sm font-bold text-ink"><Download className="size-4" />Descarcă toate · ZIP</a></div><div className="mt-3 overflow-hidden rounded-xl border border-border bg-card">{availableExports.map((item) => { const base = new URLSearchParams(download); base.set("report", item.id); return <article key={item.id} className="flex flex-col gap-3 border-b border-border p-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:p-5"><div className="flex gap-3"><FileCheck2 className="mt-0.5 size-5 shrink-0 text-brass" /><div><h3 className="font-semibold">{item.title}</h3><p className="mt-1 text-sm text-muted-foreground">{item.description}</p></div></div><div className="flex shrink-0 gap-2"><a href={`/api/accountant/package?${base}&format=csv`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold hover:bg-muted">CSV</a><a href={`/api/accountant/package?${base}&format=xlsx`} className="inline-flex min-h-10 items-center rounded-lg border border-border px-3 text-sm font-semibold hover:bg-muted">Excel</a></div></article>})}
+      {saftEntitled && activeSections.includes("purchases") && (
+        <article className="flex flex-col gap-3 border-t-2 border-border bg-muted/20 p-4 sm:p-5">
+          <div className="flex gap-3"><FileWarning className="mt-0.5 size-5 shrink-0 text-brass" /><div><h3 className="font-semibold">SAF-T D406 — mișcări de stoc (XML)</h3><p className="mt-1 text-sm text-muted-foreground">Recepții (NIR), vânzări, scăzăminte, ajustări, retururi și sold inițial pe lună, în formatul ANAF.</p></div></div>
+          <form action="/api/saft-export" method="get" className="flex flex-wrap items-center gap-2">
+            <input type="hidden" name="org" value={orgId} />
+            <input type="month" name="ym" defaultValue={new Date().toISOString().slice(0, 7)} className="min-h-10 rounded-lg border border-border bg-background px-3 text-sm" />
+            <button type="submit" className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-border px-3 text-sm font-semibold hover:bg-muted"><Download className="size-4" />Descarcă SAF-T D406 (XML)</button>
+          </form>
+          <p className="text-xs text-muted-foreground">Generat conform schemei ANAF D406 — confirmați obligația de depunere și validați rezultatul împreună cu contabilul înainte de a-l depune.</p>
+        </article>
+      )}
+      </div></section>
       <aside className="rounded-xl border border-border bg-card p-5"><div className="flex items-center gap-2"><AlertTriangle className="size-5 text-attention" /><h2 className="font-semibold">De clarificat înainte de înregistrare</h2></div><p className="mt-1 text-xs text-muted-foreground">Acestea sunt controale automate, nu concluzii contabile.</p>{issues.length ? <div className="mt-3 divide-y divide-border">{issues.map((issue) => <div key={issue.label} className="flex justify-between gap-3 py-3 text-sm"><span>{issue.label}</span><strong>{issue.count}</strong></div>)}</div> : <div className="mt-4 flex gap-2 text-sm text-reconciled"><CheckCircle2 className="size-5" />Nu au fost găsite lipsuri automate.</div>}</aside></div>
 
     <section className="mt-6 rounded-xl border border-border bg-muted/30 p-5"><h2 className="font-semibold">Ce nu pretindem că generăm</h2><p className="mt-2 text-sm text-muted-foreground">Raportul Z fiscal este emis de aparatul de marcat. Registrul-jurnal, Registrul-inventar, Cartea mare, balanța de verificare și declarațiile fiscale se întocmesc în sistemul contabil, după verificarea documentelor-sursă.</p></section>

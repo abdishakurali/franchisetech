@@ -59,7 +59,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Majoritatea cafenelelor înregistrează numerarul numărat și revizuiesc raportul Z în câteva minute după deschiderea sesiunii.",
       },
     ],
-    ctaTitle: "Deschide casa gratuit — 15 zile",
+    ctaTitle: "Deschide casa gratuit — pentru totdeauna",
     ctaSubtitle: "Setup ghidat pentru cafenele: produse demo, prima vânzare și raport Z.",
   },
   restaurants: {
@@ -112,7 +112,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Rapoartele de vânzări și exporturile includ TVA pe cote pentru organizațiile din România.",
       },
     ],
-    ctaTitle: "Încearcă POS restaurant — 15 zile gratuit",
+    ctaTitle: "Încearcă POS restaurant — gratuit pentru totdeauna",
     ctaSubtitle: "Vânzări, stoc, rețete și închidere casă — pentru control zilnic.",
   },
   takeaways: {
@@ -164,7 +164,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Da. Rapoartele de vânzări arată top produse pe orice interval; Operations adaugă cost pe porție și marjă.",
       },
     ],
-    ctaTitle: "Pornește POS takeaway — 15 zile gratuit",
+    ctaTitle: "Pornește POS takeaway — gratuit pentru totdeauna",
     ctaSubtitle: "Casă rapidă, bon fiscal prin FiscalNet și raport Z într-un singur setup.",
   },
   "bar-pub": {
@@ -217,7 +217,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Nu. Browser pe tabletă la bar e suficient; FiscalNet rulează pe PC-ul fiscal conectat.",
       },
     ],
-    ctaTitle: "Deschide POS bar — 15 zile gratuit",
+    ctaTitle: "Deschide POS bar — gratuit pentru totdeauna",
     ctaSubtitle: "Mese pe plan, stoc și închidere casă — fără taxă per loc.",
   },
   "patisserie-bakery": {
@@ -270,7 +270,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Da, când e activ pe PC-ul de casă — același flux ca la alte afaceri alimentare.",
       },
     ],
-    ctaTitle: "Începe POS patiserie — 15 zile gratuit",
+    ctaTitle: "Începe POS patiserie — gratuit pentru totdeauna",
     ctaSubtitle: "Rețete, bon de consum și vânzare la tejghea într-un singur loc.",
   },
   "food-trucks": {
@@ -323,7 +323,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "O organizație; aceeași listă de produse. Add-on multi-locație când aveți site-uri juridice separate.",
       },
     ],
-    ctaTitle: "Încearcă POS food truck — 15 zile gratuit",
+    ctaTitle: "Încearcă POS food truck — gratuit pentru totdeauna",
     ctaSubtitle: "Casă pe tabletă, coadă offline și raport Z.",
   },
   "multi-site": {

@@ -362,7 +362,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         title: "Configurare ghidată, self-serve",
-        body: "Înregistrarea generează automat produse demo și metode de plată. Checklist-ul ghidat urmărește progresul de la primul produs la prima vânzare — trialul de 15 zile începe de la crearea contului, fără card.",
+        body: "Înregistrarea generează automat produse demo și metode de plată. Checklist-ul ghidat urmărește progresul de la primul produs la prima vânzare — planul gratuit e disponibil de la crearea contului, fără card, și nu expiră.",
       },
     ],
     faqs: [

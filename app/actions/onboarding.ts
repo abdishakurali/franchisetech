@@ -148,8 +148,36 @@ export async function completePosOnboarding(input: {
   const countryLabel = COUNTRY_LABELS[input.countryCode] ?? COUNTRY_LABELS.OTHER;
   const { code: currencyCode, symbol: currencySymbol } = currencyForCountry(input.countryCode);
 
-  // Explicit trial timestamps are not set here. Subscription status falls back
-  // to a 15-day trial from organisation creation for new accounts.
+  // Trial retired 2026-09: no trial timestamps are set here or anywhere else
+  // in onboarding. Every new org is permanently on the Free plan (see
+  // lib/billing/entitlement-resolver.ts / lib/billing/subscription.ts) until
+  // it subscribes.
+
+  // ── Accountant-partner referral capture ─────────────────────────────────
+  // Resolved BEFORE the consumer referral fallback below, and written to its
+  // own accountant_partner_code column — never referred_by_code, so the two
+  // referral systems can never collide on the same org. accountant_partners
+  // has RLS restricting SELECT to auth.uid() = user_id, so this lookup (by
+  // referral_code, on behalf of an org that isn't the partner's own) needs
+  // the service role, same as ensureReferralCode's cross-org RPC calls.
+  const rawReferralCode = input.referralCode?.trim() || null;
+  let accountantPartnerCode: string | null = null;
+  let consumerReferralCode: string | null = rawReferralCode;
+  if (rawReferralCode?.startsWith("AP-")) {
+    const { createServiceClient } = await import("@/lib/supabase/server");
+    const service = await createServiceClient();
+    const { data: partner } = await service
+      .from("accountant_partners")
+      .select("referral_code")
+      .eq("referral_code", rawReferralCode)
+      .eq("status", "active")
+      .maybeSingle();
+    if (partner) {
+      accountantPartnerCode = partner.referral_code;
+      consumerReferralCode = null;
+    }
+  }
+
   const { error: orgUpdateError } = await supabase.from("organisations").update({
     business_type: input.businessType || null,
     country: countryLabel,
@@ -161,7 +189,8 @@ export async function completePosOnboarding(input: {
     company_address: input.countryCode === "RO" ? input.anafAddress?.trim() || null : null,
     currency_code: currencyCode,
     currency_symbol: currencySymbol,
-    referred_by_code: input.referralCode?.trim() || null,
+    referred_by_code: consumerReferralCode,
+    accountant_partner_code: accountantPartnerCode,
     acquisition_source: input.acquisition?.utm_source || null,
     acquisition_campaign: input.acquisition?.utm_campaign || null,
     acquisition_content: input.acquisition?.utm_content || null,
@@ -296,12 +325,12 @@ export async function completePosOnboarding(input: {
   }
 
   // ── Loops: non-blocking ────────────────────────────────────────────────
-  // The card-verification flow records its own milestone when used; ordinary
-  // new accounts receive the soft trial through subscription status fallback.
+  // Trial retired 2026-09 — every new org lands permanently on Free until it
+  // subscribes; no card verification step exists anymore.
   if (user.email) {
     void upsertLoopsContact(user.email, {
       firstName: input.userName?.trim(),
-      plan: input.preferredPlan ?? "starter",
+      plan: input.preferredPlan ?? "free",
     }).catch((e: unknown) => console.error("onboarding_loops_contact_failed", e));
   }
   // Fire-and-forget capture; flush before the action's request scope ends.
@@ -312,7 +341,7 @@ export async function completePosOnboarding(input: {
     {
       organisation_id: orgId,
       country_code: input.countryCode,
-      plan: input.preferredPlan ?? "starter",
+      plan: input.preferredPlan ?? "free",
       business_type: input.businessType ?? null,
     },
     { organisation: orgId },

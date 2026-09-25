@@ -40,7 +40,9 @@ import { resolveCsvVatRate, validatePurchaseVatRate, validateVatRateForOrg, VAT_
 import { listOperationalUnitNames, validateOperationalUnit, isReservedUnitName } from "@/lib/units-of-measure";
 import {
   assertEntitlement,
+  assertUsageBelowLimit,
   hasEntitlement,
+  resolveEntitlements,
   EntitlementDeniedError,
 } from "@/lib/billing/entitlement-resolver";
 
@@ -487,6 +489,12 @@ export async function addProduct(
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
   try {
     await assertEntitlement(orgId, "products.enabled");
+    const { count: activeProductCount } = await supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("active", true);
+    await assertUsageBelowLimit(orgId, "products.limit", activeProductCount ?? 0);
   } catch (error) {
     if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
     throw error;
@@ -579,6 +587,12 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
   try {
     await assertEntitlement(orgId, "products.enabled");
+    const { count: activeProductCount } = await supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("active", true);
+    await assertUsageBelowLimit(orgId, "products.limit", activeProductCount ?? 0);
   } catch (error) {
     if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
     throw error;
@@ -1559,6 +1573,14 @@ export async function importProductsCsv(formData: FormData) {
   await assertEntitlement(orgId, "products.enabled");
   const rows = parseCsv(await csvText(formData));
   let imported = 0, skipped = 0;
+  // Plan product cap: count rows against remaining headroom rather than
+  // hard-failing the whole import — rows past the limit are skipped, same as
+  // any other invalid row, and the redirect below already reports skipped.
+  const { limits: productLimits } = await resolveEntitlements(orgId);
+  const productsLimit = productLimits["products.limit"];
+  let activeProductCount = productsLimit === "unlimited" ? 0 : (
+    (await supabase.from("products").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("active", true)).count ?? 0
+  );
   const { data: existingCats } = await supabase.from("product_categories").select("id,name,category_type").eq("organisation_id", orgId);
   const categories = new Map((existingCats ?? []).map((c) => [String(c.name).toLowerCase(), c.id]));
   const posCategories = new Map((existingCats ?? []).filter((c) => c.category_type === "pos").map((c) => [String(c.name).toLowerCase(), c.id]));
@@ -1607,6 +1629,7 @@ export async function importProductsCsv(formData: FormData) {
   for (const row of rows) {
     const name = row.name?.trim();
     if (!name) { skipped++; continue; }
+    if (productsLimit !== "unlimited" && activeProductCount >= productsLimit) { skipped++; continue; }
     let categoryId = null;
     let posCategoryId = null;
     const categoryName = row.category?.trim();
@@ -1647,7 +1670,7 @@ export async function importProductsCsv(formData: FormData) {
       reorder_level: row.reorder_level ? Number(row.reorder_level) : 0,
       image_url: row.image_url || null, active: true,
     });
-    if (error) skipped++; else imported++;
+    if (error) skipped++; else { imported++; activeProductCount++; }
   }
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
@@ -2081,9 +2104,11 @@ export async function updateOrgCountry(formData: FormData): Promise<void> {
 }
 
 // ── updateSite (Step 8: Location section) ───────────────────────
-// No addSite/deleteSite: every org here has exactly one site, and there's
-// no multi-site switcher to manage more than that yet. Add those when a
-// second location genuinely exists, not before.
+// Single-site orgs edit their one location here. Orgs with the multi_site
+// entitlement (legacy scale/multi_location, or the new "team" plan) add
+// further locations through addSite below, gated on the plan's
+// locations.limit — everyone else never reaches that surface at all, since
+// /app/sites itself requires the multi_site module (see lib/module-guard.ts).
 export async function updateSite(formData: FormData): Promise<void> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
@@ -2100,6 +2125,47 @@ export async function updateSite(formData: FormData): Promise<void> {
     .eq("id", id)
     .eq("organisation_id", orgId);
   revalidatePath("/app/settings");
+}
+
+export type AddSiteResult =
+  | { ok: true; site: { id: string; organisation_id: string; name: string; address: string | null; city: string | null; eircode: string | null; created_at: string } }
+  | { ok: false; error: string };
+
+// Belt-and-suspenders alongside the page-level requireBusinessModule("multi_site")
+// guard on /app/sites: that guard already keeps Free/Growth orgs off this
+// surface entirely, but the limit is enforced here too so a second location
+// can never be created for an org above its plan's locations.limit, from any
+// call path.
+export async function addSite(formData: FormData): Promise<AddSiteResult> {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  const name = stringValue(formData, "name");
+  if (!name) return { ok: false, error: "Site name is required." };
+  try {
+    await assertEntitlement(orgId, "multi_site.enabled");
+    const { count: siteCount } = await supabase
+      .from("sites")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", orgId);
+    await assertUsageBelowLimit(orgId, "locations.limit", siteCount ?? 0);
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
+  const { data, error } = await supabase
+    .from("sites")
+    .insert({
+      organisation_id: orgId,
+      name,
+      address: stringValue(formData, "address") || null,
+      city: stringValue(formData, "city") || null,
+      eircode: stringValue(formData, "eircode") || null,
+    })
+    .select()
+    .single();
+  if (error || !data) return { ok: false, error: error?.message ?? "Could not add site." };
+  revalidatePath("/app/sites");
+  return { ok: true, site: data };
 }
 
 // ── updateOrgCurrency ────────────────────────────────────────────────────────

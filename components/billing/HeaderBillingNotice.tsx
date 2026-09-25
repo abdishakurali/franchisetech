@@ -23,6 +23,14 @@ export function HeaderBillingNotice({ subStatus, daysLeft, t, className }: Props
     return null;
   }
 
+  // Free is the permanent baseline (trial retired 2026-09), not a countdown
+  // state — no urgency chip, same as "active". TrialBanner (the main banner)
+  // still surfaces the upgrade nudge; this compact header notice is reserved
+  // for things that need attention.
+  if (state === "free") {
+    return null;
+  }
+
   if (state === "past_due_expired") {
     return (
       <Link

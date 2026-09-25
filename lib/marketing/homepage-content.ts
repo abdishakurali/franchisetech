@@ -27,9 +27,9 @@ const ro = {
   title: "Știi cât te costă de fapt un cappuccino.",
   intro:
     "Casa de marcat îți spune cât ai vândut. FranchiseTech îți spune cât ai consumat, cât a costat și cât ți-a rămas — din rețete și stoc reale.",
-  trial: "Începe trialul de 15 zile",
+  trial: "Creează cont gratuit",
   watch: "Vezi ce face",
-  trialNote: "Probă 15 zile · fără card necesar · suport în română",
+  trialNote: "Gratuit pentru totdeauna · fără card necesar · suport în română",
   quickLinks: [
     "Vânzări și stoc",
     "Mod offline",
@@ -180,9 +180,9 @@ const ro = {
         "Da. Româna și engleza sunt disponibile pe site, în aplicație și în POS, cu o preferință comună în browser. Fotografiile, capturile de ecran și clipurile își păstrează limba originală.",
     },
     {
-      question: "Cum începe proba?",
+      question: "Cum funcționează planul gratuit?",
       answer:
-        "Proba durează 15 zile și începe la crearea contului, fără card. Configurarea ghidată a produselor și fluxului de vânzare este disponibilă în aplicație.",
+        "Planul Free e disponibil imediat la crearea contului, fără card, și nu expiră. Configurarea ghidată a produselor și fluxului de vânzare este disponibilă în aplicație.",
     },
   ],
   finalTitle: "Următoarea tură, cu mai multă claritate.",
@@ -195,9 +195,9 @@ const en: typeof ro = {
   title: "POS and operations for a business that wants to know what remains.",
   intro:
     "Sales, fiscal receipts, stock and margins in one place. With offline queuing for short internet outages and a clear view of your day.",
-  trial: "Start your 15-day trial",
+  trial: "Create a free account",
   watch: "Watch a customer's story",
-  trialNote: "15-day trial · no card required · Romanian support",
+  trialNote: "Free forever · no card required · Romanian support",
   quickLinks: ["Sales and stock", "Offline mode", "Hardware", "Customer story"],
   galleryLabel: "The platform in practice",
   galleryTitle: "From the first order to closing time.",
@@ -343,9 +343,9 @@ const en: typeof ro = {
         "Yes. Romanian and English are available on the website, in the app and in the POS, with a shared browser preference. Photos, screenshots and videos retain their original language.",
     },
     {
-      question: "How does the trial start?",
+      question: "How does the free plan work?",
       answer:
-        "The 15-day trial starts when you create your account, with no card required. In-app guidance helps configure products and the sales workflow.",
+        "The Free plan is available immediately when you create your account, with no card required, and never expires. In-app guidance helps configure products and the sales workflow.",
     },
   ],
   finalTitle: "Start your next shift with a clearer picture.",
