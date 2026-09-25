@@ -22,9 +22,9 @@ export default async function AccountantWorkspace({ params, searchParams }: { pa
   const [{ orgId }, query] = await Promise.all([params, searchParams]);
   const range = accountantDateRange(query.from, query.to);
   const supabase = await createClient(); const { data: { user } } = await getAuthUser();
-  const { data: membership } = await supabase.from("organisation_members").select("accountant_permissions,organisations(name,company_legal_name,anaf_cif)").eq("user_id", user!.id).eq("organisation_id", orgId).eq("role", "accountant").or("status.is.null,status.eq.active").maybeSingle();
+  const { data: membership } = await supabase.from("organisation_members").select("role,accountant_permissions,organisations(name,company_legal_name,anaf_cif)").eq("user_id", user!.id).eq("organisation_id", orgId).in("role", ["owner", "manager", "accountant"]).or("status.is.null,status.eq.active").maybeSingle();
   if (!membership) notFound();
-  const permissions = normalizeAccountantPermissions(membership.accountant_permissions);
+  const permissions = membership.role === "accountant" ? normalizeAccountantPermissions(membership.accountant_permissions) : normalizeAccountantPermissions(undefined);
   const available = packageSections(permissions);
   const requested = Array.isArray(query.section) ? query.section : query.section ? [query.section] : [];
   const selected = requested.filter((value): value is PackageSection => available.includes(value as PackageSection));
