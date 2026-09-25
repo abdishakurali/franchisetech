@@ -1,7 +1,7 @@
 // Server-side only — never import in client components
 import { Resend } from "resend";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://franchisetech.ro";
+const BASE_URL = process.env.NODE_ENV === "production" ? "https://www.franchisetech.ro" : (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000");
 
 export interface BillingReminderEmailParams {
   to: string[];
@@ -9,6 +9,7 @@ export interface BillingReminderEmailParams {
   reminderType: "trial_expired" | "past_due_grace" | "past_due_final";
   graceDaysLeft?: number | null;
   billingUrl?: string;
+  idempotencyKey?: string;
 }
 
 function esc(s: string): string {
@@ -21,7 +22,7 @@ function esc(s: string): string {
 }
 
 function buildBillingHtml(params: BillingReminderEmailParams): { subject: string; html: string } {
-  const url = params.billingUrl ?? `${BASE_URL}/app/billing`;
+  const url = esc(params.billingUrl ?? `${BASE_URL}/app/billing`);
   const biz = esc(params.businessName);
 
   let subject: string;
@@ -32,32 +33,32 @@ function buildBillingHtml(params: BillingReminderEmailParams): { subject: string
 
   switch (params.reminderType) {
     case "trial_expired":
-      subject = "Your franchisetech trial has ended — choose a plan to continue";
-      headline = "Your free trial has ended";
-      body = `The free trial for <strong>${biz}</strong> has ended. Choose a plan to keep your data and continue using franchisetech. Your records are safe and waiting.`;
-      ctaLabel = "Choose a plan →";
+      subject = "Perioada de test franchisetech s-a încheiat";
+      headline = "Perioada de test s-a încheiat";
+      body = `Perioada de test pentru <strong>${biz}</strong> s-a încheiat. Alege un abonament pentru a păstra accesul la date și pentru a continua utilizarea franchisetech. Datele tale sunt în siguranță.`;
+      ctaLabel = "Alege abonamentul →";
       headerColor = "#d97706"; // amber
       break;
 
     case "past_due_grace":
-      subject = `Payment failed — ${params.graceDaysLeft ?? 3} day${params.graceDaysLeft === 1 ? "" : "s"} to update your card`;
-      headline = "Payment failed";
-      body = `The most recent payment for <strong>${biz}</strong> did not go through. You have <strong>${params.graceDaysLeft ?? 3} day${params.graceDaysLeft === 1 ? "" : "s"}</strong> to update your payment details before access is restricted.`;
-      ctaLabel = "Update payment →";
+      subject = `Plata nu a reușit — actualizează metoda de plată`;
+      headline = "Plata nu a reușit";
+      body = `Cea mai recentă plată pentru <strong>${biz}</strong> nu a fost procesată. Mai ai <strong>${params.graceDaysLeft ?? 3} zile</strong> pentru a actualiza metoda de plată înainte de restricționarea accesului.`;
+      ctaLabel = "Actualizează plata →";
       headerColor = "#dc2626"; // red
       break;
 
     case "past_due_final":
-      subject = "franchisetech access restricted — payment required";
-      headline = "Access restricted — payment required";
-      body = `The grace period for <strong>${biz}</strong> has ended. Update your payment details to restore full access immediately.`;
-      ctaLabel = "Restore access →";
+      subject = "Acces franchisetech restricționat — plata este necesară";
+      headline = "Acces restricționat";
+      body = `Perioada de grație pentru <strong>${biz}</strong> s-a încheiat. Actualizează metoda de plată pentru a restabili imediat accesul complet.`;
+      ctaLabel = "Restabilește accesul →";
       headerColor = "#991b1b"; // dark red
       break;
   }
 
   const html = `<!DOCTYPE html>
-<html lang="en">
+<html lang="ro">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f8fafc;margin:0;padding:0;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:32px 16px;">
@@ -73,8 +74,8 @@ function buildBillingHtml(params: BillingReminderEmailParams): { subject: string
         </td></tr>
         <tr><td style="padding:16px 24px;border-top:1px solid #e2e8f0;background:#f8fafc;">
           <p style="margin:0;color:#94a3b8;font-size:12px;line-height:1.6;">
-            You are the owner or billing contact for ${biz} on franchisetech.<br>
-            To manage your subscription visit <a href="${url}" style="color:#3b82f6;">franchisetech Billing</a>.
+            Primești acest mesaj deoarece ești proprietarul sau persoana de contact pentru facturarea ${biz}.<br>
+            Gestionează abonamentul din <a href="${url}" style="color:#3b82f6;">Facturare franchisetech</a>.
           </p>
         </td></tr>
       </table>
@@ -99,7 +100,10 @@ export async function sendBillingReminderEmail(params: BillingReminderEmailParam
   const resend = new Resend(apiKey);
 
   try {
-    const { data, error } = await resend.emails.send({ from, to: params.to, subject, html });
+    const { data, error } = await resend.emails.send(
+      { from, to: params.to, subject, html },
+      params.idempotencyKey ? { headers: { "Idempotency-Key": params.idempotencyKey } } : undefined,
+    );
     if (error) return { success: false, error: error.message };
     return { success: true, messageId: data?.id };
   } catch (err) {

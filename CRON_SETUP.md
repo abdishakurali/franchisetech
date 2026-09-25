@@ -1,16 +1,11 @@
-# FridgeProof Reminder Cron Setup
+# Customer notification schedules
 
-Env vars needed on server (add to /var/www/fridgeproof/.env.local):
-  RESEND_API_KEY=re_...  (already set)
-  RESEND_FROM_EMAIL=FridgeProof <reminders@yourdomain.com>
-  CRON_SECRET=$(openssl rand -hex 32)
-  SUPABASE_SERVICE_ROLE_KEY=...  (Supabase project -> API keys)
+Production reminders run through Vercel Cron and Resend. They do not depend on n8n.
 
-Script /usr/local/bin/fridgeproof-send-reminders.sh:
-  #!/bin/bash
-  set -a; source /var/www/fridgeproof/.env.local; set +a
-  curl -s -X POST https://fridgeproof.franchisetech.ro/api/cron/send-reminders
-    -H "Authorization: Bearer ${CRON_SECRET}"
-    >> /var/log/fridgeproof-reminders.log 2>&1
+Schedules are declared in `vercel.json`:
 
-crontab entry: */5 * * * * /usr/local/bin/fridgeproof-send-reminders.sh
+- Billing reminders: daily at 08:00 UTC.
+
+Vercel sends `Authorization: Bearer $CRON_SECRET`. The route also accepts authenticated POST requests for operational retries.
+
+Billing reminders use the trial end or grace-period end as a stable incident key. A customer receives at most one email of each type for each billing incident.
