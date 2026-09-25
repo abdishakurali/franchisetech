@@ -26,6 +26,8 @@ export async function GET(request: Request) {
   const allowedSections = packageSections(permissions);
   const requestedSections = url.searchParams.getAll("section").filter((value): value is PackageSection => allowedSections.includes(value as PackageSection));
   const sections = new Set(requestedSections.length ? requestedSections : allowedSections);
+  const requestedReport = url.searchParams.get("report");
+  const requestedFormat = url.searchParams.get("format");
   const filePlan = new Set(buildPackageFilePlan(permissions));
   if (!sections.size) return new Response("Nu există categorii permise pentru export.", { status: 403 });
 
@@ -61,6 +63,19 @@ export async function GET(request: Request) {
     ["purchases", { name: "Achizitii-detaliu", headers: ["Data", "Factură", "Furnizor", "CUI furnizor", "Produs", "UM", "Cantitate facturată", "Cantitate recepționată", "Preț unitar furnizor", "Net linie", "Cotă TVA", "TVA linie", "Brut linie", "NIR"], rows: (purchaseItemsResult.data ?? []).map((r) => { const purchase = purchasesById.get(r.purchase_id); const supplier = Array.isArray(purchase?.suppliers) ? purchase?.suppliers[0] : purchase?.suppliers; return [purchase?.purchase_date, purchase?.invoice_number, supplier?.name || purchase?.supplier, supplier?.tax_id, r.product_name || r.item_name, r.unit_of_measure, Number(r.quantity ?? 0), Number(r.received_quantity ?? r.quantity ?? 0), Number(r.unit_cost ?? 0), Number(r.total_cost ?? 0), `${Number(r.tax_rate ?? 0)}%`, Number(r.tax_amount ?? 0), Number(r.total_cost ?? 0) + Number(r.tax_amount ?? 0), purchase?.nir_number]; }) }],
     ["stock", { name: "Balanta-stoc", headers: ["Produs", "UM", "Cantitate registru", "Cantitate curentă", "Diferență", "CMP", "Activ"], rows: (stockResult.data ?? []).map((r) => [r.name, r.unit_of_measure, Number(r.ledger_quantity ?? 0), Number(r.recorded_quantity ?? 0), Number(r.variance ?? 0), Number(r.cost_price ?? 0), r.active ? "Da" : "Nu"]) }],
   ];
+  if (requestedReport || requestedFormat) {
+    if (!requestedReport || !["csv", "xlsx"].includes(requestedFormat ?? "")) return new Response("Raport sau format invalid.", { status: 400 });
+    const selected = datasets.find(([section, dataset]) => sections.has(section) && dataset.name === requestedReport);
+    if (!selected) return new Response("Raport indisponibil pentru accesul curent.", { status: 403 });
+    const dataset = selected[1];
+    const isCsv = requestedFormat === "csv";
+    const generated = isCsv ? null : await createXlsx(dataset.headers, dataset.rows);
+    const body: BodyInit = isCsv
+      ? csv(dataset.headers, dataset.rows.map((row) => row.map((value) => typeof value === "number" ? decimal(value) : value)))
+      : new Uint8Array(generated!).slice().buffer;
+    await adminAudit(orgId, user.id, range.from, range.to, [...sections], requestedFormat!, dataset.name, permissions);
+    return new Response(body, { headers: { "Content-Type": isCsv ? "text/csv; charset=utf-8" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Content-Disposition": `attachment; filename="${dataset.name}-${range.from}-${range.to}.${requestedFormat}"`, "Cache-Control": "no-store" } });
+  }
   const zip = new JSZip(); const org = orgResult.data;
   zip.file("README.txt", `Dosar de lucru pentru contabil — ${org?.company_legal_name || org?.name || "Firmă"}\nPerioada: ${range.from} — ${range.to}\nGenerat direct din baza de date: ${new Date().toISOString()}\nSecțiuni incluse: ${[...sections].join(", ")}\n\nIMPORTANT: exporturile sunt date operative pentru verificare. Confirmarea Z nu înlocuiește raportul fiscal emis de aparatul de marcat. Registrul de casă operativ trebuie validat pe baza documentelor justificative. Registrele contabile obligatorii și balanța se întocmesc în programul contabil.`);
   for (const [section, dataset] of datasets) {
@@ -69,9 +84,13 @@ export async function GET(request: Request) {
     if (filePlan.has(csvName)) zip.file(csvName, csv(dataset.headers, dataset.rows.map((row) => row.map((value) => typeof value === "number" ? decimal(value) : value))));
     if (filePlan.has(xlsxName)) zip.file(xlsxName, await createXlsx(dataset.headers, dataset.rows));
   }
-  const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { autoRefreshToken: false, persistSession: false } });
-  await admin.from("team_audit_events").insert({ organisation_id: orgId, actor_user_id: user.id, action: "accounting_package_downloaded", metadata: { from: range.from, to: range.to, sections: [...sections], format: "zip-csv-xlsx", permissions } });
+  await adminAudit(orgId, user.id, range.from, range.to, [...sections], "zip-csv-xlsx", null, permissions);
   const body = await zip.generateAsync({ type: "uint8array", compression: "DEFLATE", compressionOptions: { level: 6 } });
   const output = new ArrayBuffer(body.byteLength); new Uint8Array(output).set(body);
   return new Response(output, { headers: { "Content-Type": "application/zip", "Content-Disposition": `attachment; filename="Dosar-contabil-${range.from}-${range.to}.zip"`, "Cache-Control": "no-store" } });
+}
+
+async function adminAudit(orgId: string, userId: string, from: string, to: string, sections: PackageSection[], format: string, report: string | null, permissions: unknown) {
+  const admin = createAdminClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { autoRefreshToken: false, persistSession: false } });
+  await admin.from("team_audit_events").insert({ organisation_id: orgId, actor_user_id: userId, action: "accounting_package_downloaded", metadata: { from, to, sections, format, report, permissions } });
 }
