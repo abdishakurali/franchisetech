@@ -10,6 +10,7 @@ import {
   LogOut, Menu, X, ChevronDown, Archive,
   CreditCard, ShoppingBag,
   Gift, BookOpen,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -106,6 +107,7 @@ export function buildMainNav(t: AppT): NavItem[] {
     // purchases below, never folded back under inventory.
     { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
     { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
+    { href: "/app/settings/accountant", label: "Contabil", icon: BriefcaseBusiness, exact: false },
   ];
 
   return nav;
@@ -133,6 +135,7 @@ export function resolveNavItems(
     .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
     .filter((item) => item.href !== "/app/stock" || moduleVisibility?.inventory === true)
     .filter((item) => item.href !== "/app/purchases" || moduleVisibility?.purchases === true)
+    .filter((item) => item.href !== "/app/settings/accountant" || userRole === "owner" || userRole === "manager")
     .filter((item) => {
       if (!limited) return true;
       return item.href === "/app" || item.href === "/app/pos";
