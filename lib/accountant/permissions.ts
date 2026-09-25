@@ -15,6 +15,7 @@ export function packageSections(value: unknown): PackageSection[] {
   if (permissions.includes("cash")) sections.push("cash");
   if (permissions.includes("stock")) sections.push("stock");
   if (permissions.includes("purchases")) sections.push("purchases");
-  if (permissions.includes("documents")) sections.push("documents");
+  // Source documents stay hidden until every exported row can be linked to
+  // an actual stored file. An empty category would mislead the accountant.
   return sections;
 }

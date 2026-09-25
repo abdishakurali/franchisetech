@@ -13,6 +13,6 @@ describe("accountant permissions", () => {
 
   it("maps permissions to the monthly package sections", () => {
     expect(packageSections(["sales", "purchases"])).toEqual(["sales", "payments", "purchases"]);
-    expect(packageSections(["cash", "stock", "documents"])).toEqual(["cash", "stock", "documents"]);
+    expect(packageSections(["cash", "stock", "documents"])).toEqual(["cash", "stock"]);
   });
 });
