@@ -12,6 +12,8 @@ export function accountantReadinessIssues(input: {
   purchaseLinesWithoutCost: number;
   stockWithoutCost: number;
   cashDiscrepancies: number;
+  missingFiscalZ: number;
+  cashMovementsWithoutReason: number;
 }): AccountantIssue[] {
   return [
     input.identityMissing && { label: "Denumirea legală sau CUI lipsesc", count: 1 },
@@ -20,5 +22,7 @@ export function accountantReadinessIssues(input: {
     input.purchaseLinesWithoutCost > 0 && { label: "Linii de achiziție fără preț furnizor", count: input.purchaseLinesWithoutCost },
     input.stockWithoutCost > 0 && { label: "Produse în stoc fără cost", count: input.stockWithoutCost },
     input.cashDiscrepancies > 0 && { label: "Închideri cu diferență de numerar", count: input.cashDiscrepancies },
+    input.missingFiscalZ > 0 && { label: "Zile închise fără raport Z fiscal confirmat", count: input.missingFiscalZ },
+    input.cashMovementsWithoutReason > 0 && { label: "Mișcări de numerar fără explicație", count: input.cashMovementsWithoutReason },
   ].filter(Boolean) as AccountantIssue[];
 }

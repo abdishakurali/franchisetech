@@ -3,7 +3,7 @@ import { packageSections } from "./permissions";
 const SECTION_FILES = {
   sales: ["Vanzari", "Vanzari-pe-cote-TVA", "Retururi", "Nomenclator-produse"],
   payments: ["Incasari-pe-metode-plata"],
-  cash: ["Inchideri-casa"],
+  cash: ["Registru-de-casa", "Inchideri-casa-si-Z"],
   purchases: ["Achizitii", "Achizitii-detaliu"],
   stock: ["Balanta-stoc"],
   documents: [],

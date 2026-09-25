@@ -8,10 +8,12 @@ describe("accountant export rows", () => {
   });
 
   it("lists only material handoff gaps", () => {
-    expect(accountantReadinessIssues({ identityMissing: false, productsWithoutSalePrice: 2, purchasesWithoutDocument: 0, purchaseLinesWithoutCost: 3, stockWithoutCost: 0, cashDiscrepancies: 1 })).toEqual([
+    expect(accountantReadinessIssues({ identityMissing: false, productsWithoutSalePrice: 2, purchasesWithoutDocument: 0, purchaseLinesWithoutCost: 3, stockWithoutCost: 0, cashDiscrepancies: 1, missingFiscalZ: 2, cashMovementsWithoutReason: 1 })).toEqual([
       { label: "Produse fără preț de vânzare", count: 2 },
       { label: "Linii de achiziție fără preț furnizor", count: 3 },
       { label: "Închideri cu diferență de numerar", count: 1 },
+      { label: "Zile închise fără raport Z fiscal confirmat", count: 2 },
+      { label: "Mișcări de numerar fără explicație", count: 1 },
     ]);
   });
 });
