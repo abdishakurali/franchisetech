@@ -1,10 +1,10 @@
 import { packageSections } from "./permissions";
 
 const SECTION_FILES = {
-  sales: ["Vanzari", "Vanzari-pe-cote-TVA"],
+  sales: ["Vanzari", "Vanzari-pe-cote-TVA", "Retururi", "Nomenclator-produse"],
   payments: ["Incasari-pe-metode-plata"],
   cash: ["Inchideri-casa"],
-  purchases: ["Achizitii"],
+  purchases: ["Achizitii", "Achizitii-detaliu"],
   stock: ["Balanta-stoc"],
   documents: [],
 } as const;
