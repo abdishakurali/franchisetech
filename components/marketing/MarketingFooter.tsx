@@ -46,14 +46,14 @@ export function MarketingFooterClient() {
             <p className="mt-2 text-sm">{t.footer.getStartedText}</p>
           </div>
           <Link
-            href="/signup?plan=starter"
+            href="/signup?plan=free"
             className="mt-6 inline-flex items-center gap-2 rounded-[10px] bg-brass px-6 py-3 text-sm font-medium text-ink transition hover:bg-brass/90 md:mt-0"
             onClick={() =>
               captureClientEvent("marketing_cta_clicked", {
                 cta_type: "primary",
                 cta_location: "footer",
                 cta_text: t.footer.getStartedCta,
-                href: "/signup?plan=starter",
+                href: "/signup?plan=free",
                 plan: null,
               })
             }

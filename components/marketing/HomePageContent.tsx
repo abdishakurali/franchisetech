@@ -13,7 +13,7 @@ function TrialLink({ location, className = "" }: { location: string; className?:
   const { locale } = useMarketingLocaleContext();
   const c = getHomepageContent(locale);
   return (
-    <Link href="/signup?plan=starter" className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-brass px-6 text-sm font-semibold text-ink transition hover:bg-brass/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass ${className}`} onClick={() => captureClientEvent("cta_clicked", { location, destination: "/signup?plan=starter" })}>
+    <Link href="/signup?plan=free" className={`inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-brass px-6 text-sm font-semibold text-ink transition hover:bg-brass/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass ${className}`} onClick={() => captureClientEvent("cta_clicked", { location, destination: "/signup?plan=free" })}>
       {c.trial}<ArrowRight size={17} aria-hidden />
     </Link>
   );
@@ -55,7 +55,7 @@ const featureImages = ["/marketing/live/pos.png", "/marketing/live/recipes.png",
 export function HomePageContentBottom() {
   const { locale } = useMarketingLocaleContext();
   const c = getHomepageContent(locale);
-  const starter = pricingPlans.find((plan) => plan.id === "starter")!;
+  const growth = pricingPlans.find((plan) => plan.id === "growth")!;
   return (
     <>
       <section id="ce-face" className="scroll-mt-20 bg-card px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
@@ -73,7 +73,7 @@ export function HomePageContentBottom() {
       <section id="customer-proof" className="bg-background px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-20"><div><p className="font-mono text-xs font-semibold uppercase tracking-[0.14em] text-brass">{c.customerProof.label}</p><h2 className="mt-4 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-[-0.025em] text-foreground">{c.customerProof.title}</h2><p className="mt-5 text-base leading-7 text-mid">{c.customerProof.caption}</p></div><dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border">{[["3.814", locale === "ro" ? "bonuri" : "receipts"], ["9.513", locale === "ro" ? "mișcări stoc" : "stock movements"], ["238", locale === "ro" ? "produse" : "products"], ["115", locale === "ro" ? "rețete" : "recipes"]].map(([value, text]) => <div key={text} className="bg-card p-6 sm:p-8"><dd className="font-mono text-3xl font-semibold text-foreground">{value}</dd><dt className="mt-2 text-sm text-mid">{text}</dt></div>)}</dl></div>
       </section>
-      <section id="final-cta" className="bg-brass px-4 py-16 text-ink sm:px-6 sm:py-20 lg:px-8"><div className="mx-auto flex max-w-5xl flex-col items-center text-center"><h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold tracking-[-0.025em] sm:text-5xl">{locale === "ro" ? "Începe cu rețetele tale. Vezi cifrele în aceeași zi." : "Start with your recipes. See the numbers the same day."}</h2><p className="mt-5 max-w-2xl text-base leading-7 text-white/75">{locale === "ro" ? `Începe proba de 15 zile fără card. Adaugă produsele cu ghidul din aplicație. Starter de la ${Math.round(starter.amountCents / 100)} €/lună.` : `Start your 15-day trial without a card. Add products with in-app guidance. Starter from €${Math.round(starter.amountCents / 100)}/month.`}</p><TrialLink location="homepage_final" className="mt-8 !bg-card !text-foreground hover:!bg-background" /></div></section>
+      <section id="final-cta" className="bg-brass px-4 py-16 text-ink sm:px-6 sm:py-20 lg:px-8"><div className="mx-auto flex max-w-5xl flex-col items-center text-center"><h2 className="font-[family-name:var(--font-display)] text-3xl font-semibold tracking-[-0.025em] sm:text-5xl">{locale === "ro" ? "Începe cu rețetele tale. Vezi cifrele în aceeași zi." : "Start with your recipes. See the numbers the same day."}</h2><p className="mt-5 max-w-2xl text-base leading-7 text-white/75">{locale === "ro" ? `Gratuit pentru totdeauna, fără card. Adaugă produsele cu ghidul din aplicație. Pro de la ${Math.round(growth.amountCents / 100)} €/lună.` : `Free forever, no card required. Add products with in-app guidance. Pro from €${Math.round(growth.amountCents / 100)}/month.`}</p><TrialLink location="homepage_final" className="mt-8 !bg-card !text-foreground hover:!bg-background" /></div></section>
     </>
   );
 }

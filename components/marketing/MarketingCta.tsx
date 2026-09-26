@@ -24,7 +24,7 @@ export function CtaRow({
 }) {
   const t = useMarketingMessages();
   const secondary = secondaryLabel ?? t.cta.seePricing;
-  const signupHref = plan ? `/signup?plan=${plan}` : "/signup?plan=starter";
+  const signupHref = plan ? `/signup?plan=${plan}` : "/signup?plan=free";
   const ctaLocation = className.includes("justify-center") ? "final_cta" : "cta_row";
 
   return (

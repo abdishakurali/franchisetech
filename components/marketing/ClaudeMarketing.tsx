@@ -26,7 +26,7 @@ export function ClaudeMarketingShell({ children, user = null }: { children: Reac
   const links = pages.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); captureClientEvent("nav_link_clicked", { label, href, location: "design_navigation" }); }}>{label}</Link>);
   const accountLinks = user
     ? <><Link href="/app">Panou</Link><Link href="/app/profile" className="inline-block max-w-[160px] truncate align-bottom">{user.displayName}</Link></>
-    : <><Link href="/login">Autentificare</Link><Link href="/signup?plan=starter">Începeți trialul</Link></>;
+    : <><Link href="/login">Autentificare</Link><Link href="/signup?plan=free">Cont gratuit</Link></>;
   return <div className={s.site}>
     <header className={s.header}><div className={`${s.container} ${s.headerInner}`}>
       <Link href="/" aria-label="FranchiseTech — Acasă"><Image src="/design-marketing/franchise-tech-logo.svg" alt="FranchiseTech" width={190} height={26} className={s.logo} priority /></Link>
@@ -46,7 +46,7 @@ export function ClaudeMarketingShell({ children, user = null }: { children: Reac
 export function DesignFinalCta() {
   return <section id="final-cta" className={s.glow}><div className={`${s.container} ${s.finalCta}`}>
     <h2>Începe cu rețetele tale. Vezi cifrele în aceeași zi.</h2>
-    <p className={s.lead}>Adaugă produsele din ce ai acum — Excel sau alt POS. Te ghidăm la primii pași. 15 zile de trial, fără card.</p>
+    <p className={s.lead}>Adaugă produsele din ce ai acum — Excel sau alt POS. Te ghidăm la primii pași. Gratuit pentru totdeauna, fără card.</p>
     <div className={s.actions}><DesignTrialLink location="marketing_final" /><Link href="/contact" className={`${s.button} ${s.secondary}`}>Vorbește cu noi</Link></div>
   </div></section>;
 }

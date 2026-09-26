@@ -26,7 +26,7 @@ const flow = [
 const faqs = [
   [
     "Am nevoie de card la înscriere?",
-    "Trialul asistat de 15 zile începe de la crearea contului, fără card. Plata lunară începe numai dacă alegeți un plan după perioada de probă.",
+    "Planul Free e disponibil de la crearea contului, fără card, și nu expiră. Plata lunară începe numai dacă alegeți un plan plătit.",
   ],
   [
     "franchisetech generează QR-ul de pe bon?",
@@ -64,7 +64,7 @@ function PrimaryCta({ signupHref, compact = false }: { signupHref: string; compa
 function TrialMicrocopy({ dark = false }: { dark?: boolean }) {
   return (
     <p className={`mt-3 text-xs leading-6 ${dark ? "text-white/60" : "text-slate-500"}`}>
-      fără card necesar · 15 zile cu configurare asistată · fără plată lunară în perioada de probă · anulare oricând
+      fără card necesar · gratuit pentru totdeauna · upgrade oricând · anulare oricând
     </p>
   );
 }

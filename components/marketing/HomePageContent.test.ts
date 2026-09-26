@@ -20,8 +20,8 @@ describe("homepage structure", () => {
     }
   });
 
-  it("keeps the primary trial route and analytics", () => {
-    expect(source).toContain('/signup?plan=starter');
+  it("keeps the primary signup route and analytics (trial retired 2026-09 — Free is permanent)", () => {
+    expect(source).toContain('/signup?plan=free');
     expect(source).toContain('captureClientEvent("cta_clicked"');
   });
 });

@@ -96,7 +96,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
       cta_type: "header_signup",
       cta_location: location,
       cta_text: locale === "ro" ? "Începe trialul" : "Start trial",
-      href: "/signup?plan=starter",
+      href: "/signup?plan=free",
       plan: null,
     });
   }
@@ -233,7 +233,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
                   {t.header.login}
                 </Link>
                 <Link
-                  href="/signup?plan=starter"
+                  href="/signup?plan=free"
                   className={`rounded-[10px] px-5 py-2.5 text-sm font-semibold text-white transition ${marketingCtaPrimary}`}
                   onClick={() => trackHeaderSignup("desktop_header")}
                 >
@@ -368,7 +368,7 @@ export function MarketingHeader({ user }: { user: UserChip | null }) {
 
             {!user && (
               <Link
-                href="/signup?plan=starter"
+                href="/signup?plan=free"
                 className={`mt-5 flex w-full items-center justify-center rounded-[10px] px-5 py-3 text-sm font-semibold text-white ${marketingCtaPrimary}`}
                 onClick={() => {
                   trackHeaderSignup("mobile_header");

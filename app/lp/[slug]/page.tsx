@@ -68,7 +68,7 @@ export default async function SkagLandingPage({
   if (!forwarded.has("utm_source")) forwarded.set("utm_source", "google");
   if (!forwarded.has("utm_medium")) forwarded.set("utm_medium", "cpc");
   if (!forwarded.has("utm_campaign")) forwarded.set("utm_campaign", page.slug);
-  const signupHref = `/signup?plan=starter&${forwarded.toString()}`;
+  const signupHref = `/signup?plan=free&${forwarded.toString()}`;
 
   // Slugs with a purpose-built page. Everything else falls through to the generic
   // SKAG template below.
