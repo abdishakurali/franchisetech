@@ -1,54 +1,11 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { normalizePlan as _normalizePlan, type PlanCode as _PlanCode } from "@/lib/billing/plan-codes";
+import { planEntitlements, type EntitlementKey } from "@/lib/billing/entitlement-catalog";
 
 export type PlanCode = _PlanCode;
-export type EntitlementKey =
-  | "pos.enabled"
-  | "pos.discounts"
-  | "pos.transaction_history"
-  | "pos.till_sessions"
-  | "pos.offline_queue"
-  | "products.enabled"
-  | "products.csv"
-  | "vat.enabled"
-  | "reports.sales"
-  | "reports.till_close"
-  | "reports.vat"
-  | "fiscal.fiscalnet"
-  | "fiscal.z_report"
-  | "fiscal.x_report"
-  | "fiscal.vat_groups"
-  | "fiscal.efactura"
-  | "team.owner_role"
-  | "team.staff_roles"
-  | "team.unlimited_staff"
-  | "pos.split_payments"
-  | "pos.tips"
-  | "inventory.enabled"
-  | "inventory.stock_movements"
-  | "purchases.suppliers"
-  | "purchases.nir"
-  | "reports.stock"
-  | "reports.audit"
-  | "recipes.enabled"
-  | "recipes.costing"
-  | "recipes.stock_depletion"
-  | "kitchen.enabled"
-  | "kitchen.order_flow"
-  | "kitchen.stations"
-  | "kitchen.order_types"
-  | "kitchen.table_service"
-  | "loyalty.enabled"
-  | "team.advanced_roles"
-  | "owner_digest.enabled"
-  | "reports.gestiune"
-  | "reports.accountant_pack"
-  | "support.priority"
-  | "multi_site.enabled"
-  | "multi_site.site_switching"
-  | "reports.per_site"
-  | "fiscal.multi_site";
+export type { EntitlementKey } from "@/lib/billing/entitlement-catalog";
+export { planEntitlements } from "@/lib/billing/entitlement-catalog";
 
 type EntitlementStatus =
   | "trialing"
@@ -59,7 +16,7 @@ type EntitlementStatus =
   | "unpaid"
   | "canceled";
 
-type EntitlementLimitKey = "kitchen.screen_limit";
+type EntitlementLimitKey = "kitchen.screen_limit" | "products.limit" | "locations.limit";
 
 export type EntitlementErrorBody = {
   error: "entitlement_denied";
@@ -76,58 +33,6 @@ type ResolvedEntitlements = {
   entitlements: Set<EntitlementKey>;
   limits: Record<EntitlementLimitKey, number | "unlimited">;
 };
-
-const CORE_ENTITLEMENTS: readonly EntitlementKey[] = [
-  "pos.enabled",
-  "pos.discounts",
-  "pos.transaction_history",
-  "pos.till_sessions",
-  "pos.offline_queue",
-  "products.enabled",
-  "products.csv",
-  "vat.enabled",
-  "reports.sales",
-  "reports.till_close",
-  "reports.vat",
-  "fiscal.fiscalnet",
-  "fiscal.z_report",
-  "fiscal.x_report",
-  "fiscal.vat_groups",
-  "fiscal.efactura",
-  "team.owner_role",
-  "team.staff_roles",
-  "team.unlimited_staff",
-];
-
-const OPERATIONS_ENTITLEMENTS: readonly EntitlementKey[] = [
-  ...CORE_ENTITLEMENTS,
-  "pos.split_payments",
-  "pos.tips",
-  "inventory.enabled",
-  "inventory.stock_movements",
-  "purchases.suppliers",
-  "purchases.nir",
-  "reports.stock",
-  "reports.audit",
-  "reports.gestiune",
-  "recipes.enabled",
-  "recipes.costing",
-  "recipes.stock_depletion",
-  "kitchen.enabled",
-  "kitchen.order_flow",
-  "kitchen.stations",
-  "kitchen.order_types",
-  "kitchen.table_service",
-  "loyalty.enabled",
-  "team.advanced_roles",
-  "owner_digest.enabled",
-];
-
-const SCALE_ENTITLEMENTS: readonly EntitlementKey[] = [
-  ...OPERATIONS_ENTITLEMENTS,
-  "reports.accountant_pack",
-  "support.priority",
-];
 
 const MULTI_SITE_ENTITLEMENTS: readonly EntitlementKey[] = [
   "multi_site.enabled",
@@ -210,12 +115,14 @@ const REQUIRED_PLAN: Record<EntitlementKey | EntitlementLimitKey, PlanCode | "mu
   "kitchen.screen_limit": "operations",
   "team.advanced_roles": "operations",
   "owner_digest.enabled": "operations",
-  "reports.accountant_pack": "scale",
-  "support.priority": "scale",
+  "reports.accountant_pack": "growth",
+  "support.priority": "team",
   "multi_site.enabled": "multi_site",
   "multi_site.site_switching": "multi_site",
   "reports.per_site": "multi_site",
   "fiscal.multi_site": "multi_site",
+  "products.limit": "growth",
+  "locations.limit": "team",
 };
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -243,17 +150,21 @@ export function invalidateEntitlementCache(orgId?: string | null): void {
 
 export const normalizePlan = _normalizePlan;
 
-function planEntitlements(plan: PlanCode | null): EntitlementKey[] {
-  if (plan === "scale") return [...SCALE_ENTITLEMENTS];
-  if (plan === "operations") return [...OPERATIONS_ENTITLEMENTS];
-  if (plan === "core") return [...CORE_ENTITLEMENTS];
-  return [];
+function kitchenScreenLimitForPlan(plan: PlanCode | null): number | "unlimited" {
+  if (plan === "scale" || plan === "team") return "unlimited";
+  if (plan === "operations" || plan === "growth") return 3;
+  return 0;
 }
 
-function limitForPlan(plan: PlanCode | null): number | "unlimited" {
-  if (plan === "scale") return "unlimited";
-  if (plan === "operations") return 3;
-  return 0;
+// New pricing generation only (2026-09) — legacy core/operations/scale never
+// had a product or location cap, so they stay "unlimited" here; their site
+// limits are governed separately by the multi_site.* entitlements below.
+function productsLimitForPlan(plan: PlanCode | null): number | "unlimited" {
+  return plan === "free" ? 50 : "unlimited";
+}
+
+function locationsLimitForPlan(plan: PlanCode | null): number | "unlimited" {
+  return plan === "free" || plan === "growth" ? 1 : "unlimited";
 }
 
 function future(iso: string | null | undefined): boolean {
@@ -316,7 +227,7 @@ export async function resolveEntitlements(orgId: string): Promise<ResolvedEntitl
   const [{ data: org }, { data: sub }] = await Promise.all([
     service
       .from("organisations")
-      .select("trial_ends_at,multi_site_ops_enabled")
+      .select("multi_site_ops_enabled")
       .eq("id", orgId)
       .maybeSingle(),
     service
@@ -328,18 +239,25 @@ export async function resolveEntitlements(orgId: string): Promise<ResolvedEntitl
       .maybeSingle(),
   ]);
 
-  const softTrial = !sub && future(org?.trial_ends_at);
-  const status = softTrial
-    ? "trialing"
-    : resolveStatus(sub?.status ?? null, sub?.current_period_end ?? null, sub?.grace_period_ends_at ?? null);
-  const currentPlan = softTrial || status === "trialing" ? "operations" : normalizePlan(sub?.plan ?? null);
+  // No subscription row = permanent Free plan (trial retired 2026-09 — see
+  // lib/billing/subscription.ts). Never "trialing"/expired-by-date anymore;
+  // Free simply never expires.
+  const status: EntitlementStatus = sub
+    ? resolveStatus(sub.status ?? null, sub.current_period_end ?? null, sub.grace_period_ends_at ?? null)
+    : "active";
+  const currentPlan: PlanCode | null = sub ? normalizePlan(sub.plan ?? null) : "free";
   const fallback = status === "expired" || status === "unpaid" || status === "canceled";
   const entitlements = new Set<EntitlementKey>(fallback ? FALLBACK_ENTITLEMENTS : planEntitlements(currentPlan));
   const limits: Record<EntitlementLimitKey, number | "unlimited"> = {
-    "kitchen.screen_limit": fallback ? 0 : limitForPlan(currentPlan),
+    "kitchen.screen_limit": fallback ? 0 : kitchenScreenLimitForPlan(currentPlan),
+    "products.limit": fallback ? 0 : productsLimitForPlan(currentPlan),
+    "locations.limit": fallback ? 0 : locationsLimitForPlan(currentPlan),
   };
 
-  const multiSiteEnabled = (sub?.plan === "multi_location") || (currentPlan === "scale" && Boolean(org?.multi_site_ops_enabled));
+  const multiSiteEnabled =
+    (sub?.plan === "multi_location") ||
+    currentPlan === "team" ||
+    (currentPlan === "scale" && Boolean(org?.multi_site_ops_enabled));
   if (!fallback && multiSiteEnabled) {
     for (const key of MULTI_SITE_ENTITLEMENTS) entitlements.add(key);
   }

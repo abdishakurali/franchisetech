@@ -18,7 +18,7 @@ export function CompareBrandLogos({ competitorSlug, size = "md" }: Props) {
 
   return (
     <div className={`flex items-center ${s.gap}`} aria-hidden="true">
-      <div className={`relative ${s.box} shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-sm`}>
+      <div className={`relative ${s.box} shrink-0 overflow-hidden rounded-xl border border-border bg-card p-1.5 shadow-sm`}>
         <Image
           src={FRANCHISETECH_BRAND.logoFallbackSrc}
           alt=""
@@ -27,11 +27,11 @@ export function CompareBrandLogos({ competitorSlug, size = "md" }: Props) {
           className="h-full w-full object-contain"
         />
       </div>
-      <span className={`font-semibold text-slate-400 ${s.vs}`}>vs</span>
+      <span className={`font-semibold text-muted-foreground ${s.vs}`}>vs</span>
       {brand ? (
         <div
           className={`relative ${s.box} shrink-0 overflow-hidden rounded-xl border p-1.5 shadow-sm ${
-            brand.logoNeedsDarkChip ? "border-transparent" : "border-slate-200 bg-white"
+            brand.logoNeedsDarkChip ? "border-transparent" : "border-border bg-card"
           }`}
           style={{
             boxShadow: `0 0 0 1px ${brand.accent}22`,
@@ -60,13 +60,13 @@ export function CompareBrandLogosLabeled({ competitorSlug }: { competitorSlug: s
       <div className="flex items-center gap-3">
         <CompareBrandLogos competitorSlug={competitorSlug} size="lg" />
       </div>
-      <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
         <span>
-          <strong className="text-slate-800">{FRANCHISETECH_BRAND.name}</strong> — POS + stoc + rețete
+          <strong className="text-foreground">{FRANCHISETECH_BRAND.name}</strong> — POS + stoc + rețete
         </span>
         {brand ? (
           <span>
-            <strong className="text-slate-800">{brand.name}</strong>
+            <strong className="text-foreground">{brand.name}</strong>
           </span>
         ) : null}
       </div>

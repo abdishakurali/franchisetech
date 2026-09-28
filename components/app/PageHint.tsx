@@ -16,7 +16,7 @@ export function PageHint({ id, children }: { id: string; children: React.ReactNo
   if (!visible) return null;
 
   return (
-    <div className="flex items-start justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
+    <div className="flex items-start justify-between gap-3 rounded-xl border border-brass/25 bg-accent p-4 text-sm text-foreground">
       <div>{children}</div>
       <button
         type="button"
@@ -24,7 +24,7 @@ export function PageHint({ id, children }: { id: string; children: React.ReactNo
           localStorage.setItem(key, "dismissed");
           setVisible(false);
         }}
-        className="rounded-md p-1 text-blue-500 hover:bg-blue-100 hover:text-blue-700"
+        className="rounded-md p-1 text-brass hover:bg-accent hover:text-brass"
         aria-label="Dismiss tip"
       >
         <X className="h-4 w-4" />

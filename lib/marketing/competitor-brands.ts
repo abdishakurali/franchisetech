@@ -53,7 +53,10 @@ export function competitorLogoForOg(slug: string): string {
   return brand?.logoSrc ?? `/compare/logos/${slug}.svg`;
 }
 
-export function featuredCompareSlugs(locale: "en" | "ro"): string[] {
-  if (locale === "ro") return ["ebriza", "nexuserp", "boogit", "expressoft"];
-  return ["square", "sumup", "smartbill"];
+// Only slugs with a live page in lib/marketing/comparisons.ts belong here —
+// every one of these renders as a real link (/compare/<slug>), so a stale
+// entry is a 404 on the homepage. All live comparisons are RO-market
+// (comparisons.ts has no "global" entries yet), so both locales share this list.
+export function featuredCompareSlugs(_locale: "en" | "ro"): string[] {
+  return ["ebriza", "smartbill", "expressoft", "boogit"];
 }

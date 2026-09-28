@@ -40,15 +40,15 @@ export function ZReportCashForm({
       </CardHeader>
       <CardContent className="space-y-4">
         {saved ? (
-          <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800 font-medium">
+          <div className="rounded-lg bg-reconciled/10 border border-reconciled/25 px-4 py-3 text-sm text-reconciled font-medium">
             {cc.saved(reportDate)}
           </div>
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-3 text-sm">
-              <div className="rounded-lg bg-slate-50 p-4">
-                <p className="text-slate-500">{cc.expectedCash}</p>
-                <p className="text-xl font-bold text-slate-900">{money(expectedCash, currency)}</p>
+              <div className="rounded-lg bg-secondary p-4">
+                <p className="text-muted-foreground">{cc.expectedCash}</p>
+                <p className="text-xl font-bold text-foreground">{money(expectedCash, currency)}</p>
               </div>
               <div>
                 <Label>
@@ -66,8 +66,8 @@ export function ZReportCashForm({
                 />
               </div>
               <div className="rounded-lg p-4" style={{ backgroundColor: difference >= 0 ? "#f0fdf4" : "#fef2f2" }}>
-                <p className="text-slate-500 text-sm">{cc.difference}</p>
-                <p className={`text-xl font-bold ${difference >= 0 ? "text-green-700" : "text-red-700"}`}>
+                <p className="text-muted-foreground text-sm">{cc.difference}</p>
+                <p className={`text-xl font-bold ${difference >= 0 ? "text-reconciled" : "text-attention"}`}>
                   {counted ? (difference >= 0 ? "+" : "") + money(difference, currency) : "—"}
                 </p>
               </div>

@@ -14,6 +14,7 @@ export type { BusinessModuleKey } from "@/lib/billing/entitlements";
 export type OrgModuleRow = {
   business_profile?: BusinessProfile | string | null;
   inventory_enabled?: boolean | null;
+  purchases_enabled?: boolean | null;
   recipe_costing_enabled?: boolean | null;
   team_advanced_enabled?: boolean | null;
   multi_site_ops_enabled?: boolean | null;
@@ -35,17 +36,25 @@ export const BUSINESS_MODULE_DEFINITIONS: readonly {
   },
   {
     key: "inventory",
-    label: "Stock & purchases",
-    description: "Stock levels, suppliers, and purchase receiving.",
+    label: "Stock",
+    description: "Stock levels and inventory counts.",
     settingsKey: "inventory_enabled",
     routes: [
       "/app/stock",
-      "/app/purchases",
-      "/app/suppliers",
       "/app/products/import-ingredients",
       "/app/reports/stock",
-      "/app/reports/purchases",
       "/app/operations",
+    ],
+  },
+  {
+    key: "purchases",
+    label: "Purchases",
+    description: "Suppliers and purchase receiving (NIR).",
+    settingsKey: "purchases_enabled",
+    routes: [
+      "/app/purchases",
+      "/app/suppliers",
+      "/app/reports/purchases",
     ],
   },
   {
@@ -83,6 +92,7 @@ export const BUSINESS_MODULE_DEFINITIONS: readonly {
 
 const MODULE_COLUMN: Record<Exclude<BusinessModuleKey, "pos_core" | "kitchen_ops">, keyof OrgModuleRow> = {
   inventory: "inventory_enabled",
+  purchases: "purchases_enabled",
   recipe_costing: "recipe_costing_enabled",
   team_advanced: "team_advanced_enabled",
   multi_site: "multi_site_ops_enabled",
@@ -108,7 +118,8 @@ export function canUseModule(input: {
   if (input.module === "pos_core") return true;
   if (!isModuleEnabled(input.org, input.module)) return false;
   if (input.module === "multi_site") {
-    return input.subscriptionPlan === "multi_location" || normalizePlan(input.subscriptionPlan) === "scale";
+    const normalized = normalizePlan(input.subscriptionPlan);
+    return input.subscriptionPlan === "multi_location" || normalized === "scale" || normalized === "team";
   }
   const effectivePlan = resolveEffectivePlan({
     subscriptionPlan: input.subscriptionPlan,
@@ -172,5 +183,8 @@ export function effectivePlanLabel(plan: EffectiveBillingPlan): string {
   if (plan === "core") return "Core";
   if (plan === "pro") return "Operations";
   if (plan === "starter") return "Core";
+  if (plan === "team") return "Multi";
+  if (plan === "growth") return "Pro";
+  if (plan === "free") return "Free";
   return "Core";
 }

@@ -53,11 +53,11 @@ function Badge({ children, variant = "neutral" }: {
   variant?: "neutral" | "mock" | "live" | "ok" | "fail" | "warn";
 }) {
   const cls: Record<string, string> = {
-    neutral: "bg-slate-100 text-slate-700",
+    neutral: "bg-secondary text-foreground",
     mock:    "bg-amber-100 text-amber-800 border border-amber-300",
     live:    "bg-emerald-100 text-emerald-800 border border-emerald-300",
-    ok:      "bg-green-100 text-green-800",
-    fail:    "bg-red-100 text-red-800",
+    ok:      "bg-reconciled/10 text-reconciled",
+    fail:    "bg-attention/10 text-attention",
     warn:    "bg-amber-100 text-amber-800",
   };
   return (
@@ -78,10 +78,10 @@ function Btn({
 }) {
   const base = "inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
   const v = danger
-    ? "bg-red-600 hover:bg-red-700 text-white"
+    ? "bg-attention hover:bg-attention/90 text-white"
     : variant === "outline"
-      ? "border border-slate-300 hover:bg-slate-50 text-slate-700"
-      : "bg-blue-600 hover:bg-blue-700 text-white";
+      ? "border border-border hover:bg-secondary text-foreground"
+      : "bg-primary hover:bg-primary/90 text-primary-foreground";
   return (
     <button className={`${base} ${v}`} onClick={onClick} disabled={disabled}>
       {children}
@@ -91,8 +91,8 @@ function Btn({
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 className="mb-3 text-sm font-semibold text-slate-500 uppercase tracking-wide">{title}</h2>
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <h2 className="mb-3 text-sm font-semibold text-muted-foreground uppercase tracking-wide">{title}</h2>
       <div className="flex flex-wrap gap-2">{children}</div>
     </div>
   );
@@ -111,27 +111,27 @@ function ZReportModal({ onClose, onConfirm, busy }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl">
         <div className="mb-4 flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 text-xl">⚠️</div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-attention/10 text-attention text-xl">⚠️</div>
           <div>
-            <h2 className="text-lg font-semibold text-slate-900">Confirm Z Report</h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <h2 className="text-lg font-semibold text-foreground">Confirm Z Report</h2>
+            <p className="mt-1 text-sm text-mid">
               This will <strong>close today&apos;s fiscal day</strong> on the printer.
               All daily totals will be reset. <strong>This cannot be undone.</strong>
             </p>
           </div>
         </div>
 
-        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">
+        <div className="mb-4 rounded-lg bg-attention/10 border border-attention/25 p-3 text-sm text-attention">
           <strong>Date:</strong> {new Date().toLocaleDateString("ro-RO", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
         </div>
 
-        <label className="block text-sm font-medium text-slate-700 mb-1">
-          Type <code className="rounded bg-slate-100 px-1">{CONFIRM_PHRASE}</code> to confirm
+        <label className="block text-sm font-medium text-foreground mb-1">
+          Type <code className="rounded bg-secondary px-1">{CONFIRM_PHRASE}</code> to confirm
         </label>
         <input
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 mb-4"
+          className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 mb-4"
           placeholder={CONFIRM_PHRASE}
           value={phrase}
           onChange={(e) => setPhrase(e.target.value)}
@@ -153,11 +153,11 @@ function ZReportModal({ onClose, onConfirm, busy }: {
 
 function PreviewPanel({ content, label }: { content: string; label: string }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 className="mb-2 text-sm font-semibold text-slate-500 uppercase tracking-wide">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+      <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
         Last Command — {label}
       </h2>
-      <pre className="overflow-x-auto rounded-lg bg-slate-950 p-3 text-xs text-green-300 leading-relaxed">
+      <pre className="overflow-x-auto rounded-lg bg-ink p-3 text-xs text-reconciled leading-relaxed">
         {content || "(no command sent yet)"}
       </pre>
     </div>
@@ -171,17 +171,17 @@ function LogPanel({ entries }: { entries: LogEntry[] }) {
 
   if (entries.length === 0)
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <h2 className="mb-2 text-sm font-semibold text-slate-500 uppercase tracking-wide">Operation Log</h2>
-        <p className="text-sm text-slate-400 italic">No operations yet. Use the buttons above to test commands.</p>
+      <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+        <h2 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">Operation Log</h2>
+        <p className="text-sm text-muted-foreground italic">No operations yet. Use the buttons above to test commands.</p>
       </div>
     );
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-        <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide">Operation Log</h2>
-        <span className="text-xs text-slate-400">{entries.length} entries</span>
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Operation Log</h2>
+        <span className="text-xs text-muted-foreground">{entries.length} entries</span>
       </div>
       <div className="divide-y divide-slate-100 max-h-96 overflow-y-auto">
         {entries.map((e) => (
@@ -189,17 +189,17 @@ function LogPanel({ entries }: { entries: LogEntry[] }) {
             <div className="flex items-start justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
                 <span>{e.ok ? "✅" : e.message.includes("timeout") ? "⚠️" : "❌"}</span>
-                <span className="text-sm font-medium text-slate-800 truncate">{e.label}</span>
+                <span className="text-sm font-medium text-foreground truncate">{e.label}</span>
                 {e.mock && <Badge variant="mock">mock</Badge>}
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 {e.duration && (
-                  <span className="text-xs text-slate-400">{e.duration}ms</span>
+                  <span className="text-xs text-muted-foreground">{e.duration}ms</span>
                 )}
-                <span className="text-xs text-slate-400">{e.ts}</span>
+                <span className="text-xs text-muted-foreground">{e.ts}</span>
                 {e.content && (
                   <button
-                    className="text-xs text-blue-500 hover:underline"
+                    className="text-xs text-brass hover:underline"
                     onClick={() => setExpanded(expanded === e.id ? null : e.id)}
                   >
                     {expanded === e.id ? "hide" : "cmd"}
@@ -207,11 +207,11 @@ function LogPanel({ entries }: { entries: LogEntry[] }) {
                 )}
               </div>
             </div>
-            <p className={`mt-0.5 text-xs ${e.ok ? "text-green-700" : "text-red-600"}`}>
+            <p className={`mt-0.5 text-xs ${e.ok ? "text-reconciled" : "text-attention"}`}>
               {e.message}
             </p>
             {expanded === e.id && e.content && (
-              <pre className="mt-2 overflow-x-auto rounded bg-slate-950 p-2 text-xs text-green-300 leading-relaxed">
+              <pre className="mt-2 overflow-x-auto rounded bg-ink p-2 text-xs text-reconciled leading-relaxed">
                 {e.content}
               </pre>
             )}
@@ -277,8 +277,8 @@ export default function FiscalTestPage() {
     <div className="mx-auto max-w-4xl space-y-5 p-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">FiscalNet Test Console</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-2xl font-bold text-foreground">FiscalNet Test Console</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Internal engineering tool — test every fiscal command against your printer configuration.
           All operations are logged. Z report requires double confirmation.
         </p>
@@ -286,7 +286,7 @@ export default function FiscalTestPage() {
 
       {/* Danger warning — every button below sends a real command to whatever
           fiscal printer is actually connected, printing on real paper. */}
-      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+      <div className="rounded-xl border border-attention/25 bg-attention/10 px-4 py-3 text-sm text-attention">
         <p className="font-semibold">⚠️ This sends real commands to your connected fiscal printer.</p>
         <p className="mt-1">
           Every button prints on the physical device, not a simulator — including &ldquo;Non-Fiscal&rdquo; and &ldquo;Cancel
@@ -297,15 +297,15 @@ export default function FiscalTestPage() {
       </div>
 
       {/* Status bar */}
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-        <span className="text-sm text-slate-600 font-medium">Status:</span>
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-secondary px-4 py-3">
+        <span className="text-sm text-mid font-medium">Status:</span>
         <Badge variant="mock">Mock mode (safe)</Badge>
-        <span className="text-slate-300">·</span>
-        <span className="text-xs text-slate-500">
+        <span className="text-muted-foreground">·</span>
+        <span className="text-xs text-muted-foreground">
           Real transactions will not be sent until Mock Mode is disabled in Settings → FiscalNet.
         </span>
         <span className="ml-auto">
-          {isPending && <span className="text-xs text-blue-600 animate-pulse">Running…</span>}
+          {isPending && <span className="text-xs text-brass animate-pulse">Running…</span>}
         </span>
       </div>
 
@@ -334,7 +334,7 @@ export default function FiscalTestPage() {
 
       <Section title="Reports">
         <Btn variant="outline" onClick={() => run("X Report", () => runTestXReport())}>
-          📊 X Report <span className="text-slate-400 text-xs">(non-closing)</span>
+          📊 X Report <span className="text-muted-foreground text-xs">(non-closing)</span>
         </Btn>
         <Btn danger onClick={() => setShowZ(true)}>
           ⚠️ Z Report <span className="text-xs opacity-80">(close fiscal day)</span>

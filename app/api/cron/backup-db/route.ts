@@ -4,6 +4,11 @@
 // Prerequisites on do-server:
 //   apt-get install -y postgresql-client-17
 //   Add DIRECT_DB_URL to /var/www/fridgeproof/.env.local (Session mode URI from Supabase dashboard)
+//   Optional: BACKUP_HEARTBEAT_URL — a dead man's switch monitor URL (e.g.
+//   healthchecks.io). Pinged on every successful backup; the monitor alerts
+//   on a MISSED ping, so it catches the scheduler itself going silent —
+//   which a self-check inside this route cannot, since this route only
+//   runs at all when the scheduler calls it.
 
 import { NextRequest, NextResponse } from "next/server";
 import { exec } from "child_process";
@@ -13,10 +18,9 @@ import { mkdir, stat, readdir } from "fs/promises";
 export const dynamic = "force-dynamic";
 
 const execAsync = promisify(exec);
-const BACKUP_DIR = "/var/www/fp-releases/backups";
+const BACKUP_DIR = process.env.BACKUP_DIR ?? "/var/www/fp-releases/backups";
 const RETENTION_DAYS = 7;
-// Use the versioned binary — system pg_dump may lag behind Supabase's Postgres version
-const PG_DUMP = "/usr/lib/postgresql/17/bin/pg_dump";
+const PG_DUMP = process.env.PG_DUMP ?? "/usr/lib/postgresql/17/bin/pg_dump";
 
 export async function POST(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
@@ -59,6 +63,22 @@ export async function POST(req: NextRequest) {
 
     const remaining = await readdir(BACKUP_DIR);
     const backupsKept = remaining.filter((f) => f.startsWith("backup_") && f.endsWith(".sql.gz")).length;
+
+    // Dead man's switch: ping an external monitor on success. The monitor
+    // alerts on a MISSED ping — silence is the alarm. Deliberately not a
+    // self-check: this route only pings when it runs at all, so it can't
+    // catch "the scheduler stopped calling this route" — the exact failure
+    // this backup already had once (the n8n workflow was never activated).
+    const heartbeatUrl = process.env.BACKUP_HEARTBEAT_URL;
+    if (heartbeatUrl) {
+      try {
+        await fetch(heartbeatUrl, { method: "GET", signal: AbortSignal.timeout(10_000) });
+      } catch (heartbeatErr) {
+        // Never fail the backup because the heartbeat ping failed — the
+        // backup already succeeded. Log so it's visible locally too.
+        console.error("[backup-db] heartbeat ping failed:", heartbeatErr);
+      }
+    }
 
     return NextResponse.json({ success: true, timestamp, sizeBytes, backupsKept, path: backupFile });
   } catch (err) {

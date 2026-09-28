@@ -191,12 +191,12 @@ export function InvoiceDraftForm({
   return (
     <div className="space-y-6 p-6 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-950">Factură nouă</h1>
-        <p className="text-sm text-slate-500">Emite o e-Factură conformă ANAF/UBL 2.1</p>
+        <h1 className="text-2xl font-semibold text-foreground">Factură nouă</h1>
+        <p className="text-sm text-muted-foreground">Emite o e-Factură conformă ANAF/UBL 2.1</p>
       </div>
 
       {initialDraft?.sourcePurchaseId && (
-        <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+        <div className="rounded-lg border border-brass/15 bg-accent px-4 py-3 text-sm text-brass">
           Draft precompletat din NIR{initialDraft.sourcePurchaseLabel ? ` ${initialDraft.sourcePurchaseLabel}` : ""}. Verifică datele furnizorului, produsele, TVA-ul și unitățile înainte de trimitere.
         </div>
       )}
@@ -249,7 +249,7 @@ export function InvoiceDraftForm({
         <Card className="overflow-visible">
           <CardHeader><CardTitle className="text-base">Produse / servicii</CardTitle></CardHeader>
           <CardContent className="space-y-3 overflow-visible">
-            <div className="hidden lg:grid lg:grid-cols-[minmax(220px,1.25fr)_minmax(240px,1.4fr)_minmax(130px,.8fr)_minmax(110px,.65fr)_minmax(130px,.75fr)_minmax(160px,.9fr)_40px] gap-2 text-xs font-medium text-slate-500 px-1">
+            <div className="hidden lg:grid lg:grid-cols-[minmax(220px,1.25fr)_minmax(240px,1.4fr)_minmax(130px,.8fr)_minmax(110px,.65fr)_minmax(130px,.75fr)_minmax(160px,.9fr)_40px] gap-2 text-xs font-medium text-muted-foreground px-1">
               <span>Produs</span><span>Denumire</span><span>UM</span><span>Cantitate</span><span>Preț fără TVA</span><span>Cotă TVA</span><span></span>
             </div>
             {lines.map((line, i) => (
@@ -282,7 +282,7 @@ export function InvoiceDraftForm({
                 <Input type="number" min="0" step="any" placeholder="0.00" value={line.unitPrice} onChange={(e) => updateLine(i, "unitPrice", e.target.value)} required />
                 <VatRateSelect rates={vatRates} value={line.vatRate} onChange={(rate) => updateLine(i, "vatRate", rate)} name={`vat_rate_${i}`} compact settingsHint={false} />
                 <Button type="button" variant="ghost" size="sm" onClick={() => removeLine(i)} disabled={lines.length === 1}>
-                  <Trash2 className="h-4 w-4 text-slate-400" />
+                  <Trash2 className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </div>
             ))}
@@ -292,13 +292,13 @@ export function InvoiceDraftForm({
           </CardContent>
         </Card>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
-          <div className="flex justify-between"><span className="text-slate-500">Total fără TVA</span><span className="font-medium">{totals.exclVat.toFixed(2)} RON</span></div>
-          <div className="flex justify-between mt-1"><span className="text-slate-500">TVA</span><span className="font-medium">{totals.vat.toFixed(2)} RON</span></div>
-          <div className="flex justify-between mt-2 border-t border-slate-200 pt-2 text-base font-bold"><span>Total de plată</span><span>{totals.inclVat.toFixed(2)} RON</span></div>
+        <div className="rounded-xl border border-border bg-secondary p-4 text-sm">
+          <div className="flex justify-between"><span className="text-muted-foreground">Total fără TVA</span><span className="font-medium">{totals.exclVat.toFixed(2)} RON</span></div>
+          <div className="flex justify-between mt-1"><span className="text-muted-foreground">TVA</span><span className="font-medium">{totals.vat.toFixed(2)} RON</span></div>
+          <div className="flex justify-between mt-2 border-t border-border pt-2 text-base font-bold"><span>Total de plată</span><span>{totals.inclVat.toFixed(2)} RON</span></div>
         </div>
 
-        {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
+        {error && <p className="rounded-lg bg-attention/10 p-3 text-sm text-attention">{error}</p>}
 
         <div className="flex gap-3">
           <Button type="submit" disabled={isPending}>

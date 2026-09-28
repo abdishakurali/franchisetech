@@ -5,9 +5,10 @@ import { CARD_VERIFICATION_AMOUNT_CENTS, getCardVerificationPriceId } from "@/li
 
 export const dynamic = "force-dynamic";
 
-// Creates the one-time €1 card verification Checkout Session that gates the
-// 15-day trial. The card is saved for later off-session use so the eventual
-// subscription checkout reuses the same Stripe customer.
+// Creates the one-time €1 card verification Checkout Session. Trial retired
+// 2026-09 — this no longer gates anything (every org is permanently on Free
+// until it subscribes), but the card is still saved for later off-session use
+// so an eventual subscription checkout reuses the same Stripe customer.
 export async function POST() {
   if (!process.env.STRIPE_SECRET_KEY) {
     return NextResponse.json({ error: "Billing is not configured yet" }, { status: 503 });

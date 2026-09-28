@@ -20,7 +20,7 @@ export function PublicNavAuth({ email, name }: { email?: string | null; name?: s
     return (
       <div className="flex items-center gap-3">
         <Link href="/login"><Button variant="ghost" size="sm">Log in</Button></Link>
-        <Link href="/signup"><Button size="sm" className="bg-blue-600 text-white hover:bg-blue-700">Start free trial</Button></Link>
+        <Link href="/signup"><Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">Începeți proba</Button></Link>
       </div>
     );
   }
@@ -29,14 +29,14 @@ export function PublicNavAuth({ email, name }: { email?: string | null; name?: s
 
   return (
     <details className="relative">
-      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm">
-        <UserCircle className="h-4 w-4 text-blue-600" />
+      <summary className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm">
+        <UserCircle className="h-4 w-4 text-brass" />
         <span className="hidden max-w-36 truncate sm:inline">{displayName}</span>
       </summary>
-      <div className="absolute right-0 mt-2 w-48 rounded-lg border border-slate-100 bg-white p-2 shadow-lg">
-        <Link href="/app" className="block rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Dashboard</Link>
-        <Link href="/app/profile" className="block rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Profile</Link>
-        <button onClick={logout} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50">
+      <div className="absolute right-0 mt-2 w-48 rounded-lg border border-border bg-card p-2 shadow-lg">
+        <Link href="/app" className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-secondary">Dashboard</Link>
+        <Link href="/app/profile" className="block rounded-md px-3 py-2 text-sm text-foreground hover:bg-secondary">Profile</Link>
+        <button onClick={logout} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-attention hover:bg-attention/10">
           <LogOut className="h-4 w-4" />
           Logout
         </button>

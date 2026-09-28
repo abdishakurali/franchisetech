@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { DB_ROLES, canManageTeam, type DbRole } from "@/lib/access-control";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
+import { normalizeAccountantPermissions } from "@/lib/accountant/permissions";
+import { sendAccountantInviteEmail } from "@/lib/email/accountant-invite";
 
 const VALID_ROLES = DB_ROLES;
 type Role = DbRole;
@@ -29,7 +31,7 @@ export async function GET() {
 
     const { data: members, error } = await admin
       .from("organisation_members")
-      .select("id,user_id,role,status,created_at,invited_by,disabled_at")
+      .select("id,user_id,role,status,created_at,invited_by,disabled_at,accountant_permissions")
       .eq("organisation_id", orgId)
       .order("created_at");
 
@@ -41,10 +43,22 @@ export async function GET() {
       .select("id,full_name,email,role_title,phone")
       .in("id", userIds.length ? userIds : ["00000000-0000-0000-0000-000000000000"]);
 
+    const { data: accessEvents } = await admin
+      .from("team_audit_events")
+      .select("actor_user_id,created_at")
+      .eq("organisation_id", orgId)
+      .eq("action", "accounting_package_downloaded")
+      .order("created_at", { ascending: false });
+    const lastAccess = new Map<string, string>();
+    for (const event of accessEvents ?? []) {
+      if (!lastAccess.has(event.actor_user_id)) lastAccess.set(event.actor_user_id, event.created_at);
+    }
+
     const profileMap = Object.fromEntries((profiles ?? []).map((p) => [p.id, p]));
     const result = (members ?? []).map((m) => ({
       ...m,
       profile: profileMap[m.user_id] ?? null,
+      last_access_at: lastAccess.get(m.user_id) ?? null,
     }));
     return NextResponse.json({ members: result });
   } catch (err) {
@@ -61,13 +75,14 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { email, fullName, role, phone, temporaryPassword, sendInvite } = body as {
+    const { email, fullName, role, phone, temporaryPassword, sendInvite, accountantPermissions } = body as {
       email: string;
       fullName: string;
       role: Role;
       phone?: string;
       temporaryPassword?: string;
       sendInvite?: boolean;
+      accountantPermissions?: unknown;
     };
 
     if (!email || !fullName || !role) {
@@ -79,6 +94,8 @@ export async function POST(req: NextRequest) {
     if (role === "owner" && membership.role !== "owner") {
       return NextResponse.json({ error: "Only owners can add other owners" }, { status: 403 });
     }
+    // External accountants are deliberately free and read-only. They are not
+    // advanced employee seats and must never be put behind team entitlements.
     if (ADVANCED_ROLES.has(role)) {
       try {
         await assertEntitlement(orgId, "team.advanced_roles");
@@ -90,8 +107,13 @@ export async function POST(req: NextRequest) {
     }
 
     const admin = makeAdminClient();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://franchisetech.ro";
-    const redirectTo = `${appUrl}/auth/callback`;
+    const permissions = role === "accountant" ? normalizeAccountantPermissions(accountantPermissions) : [];
+    if (role === "accountant" && permissions.length === 0) {
+      return NextResponse.json({ error: "Selectează cel puțin o categorie de acces." }, { status: 400 });
+    }
+    const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const appUrl = process.env.NODE_ENV === "production" ? "https://www.franchisetech.ro" : configuredAppUrl;
+    const redirectTo = `${appUrl.replace(/\/$/, "")}/activate-accountant`;
 
     // ── Check if auth user already exists ──────────────────────────────────
     const { data: existingList } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
@@ -177,7 +199,7 @@ export async function POST(req: NextRequest) {
     if (existingMember) {
       const { error: memberUpdateError } = await admin
         .from("organisation_members")
-        .update({ role, status: "active", disabled_at: null })
+        .update({ role, status: "active", disabled_at: null, accountant_permissions: permissions })
         .eq("id", existingMember.id);
       if (memberUpdateError) {
         return NextResponse.json(
@@ -194,6 +216,7 @@ export async function POST(req: NextRequest) {
           role,
           status: "active",
           invited_by: user.id,
+          accountant_permissions: permissions,
         });
       if (memberInsertError) {
         return NextResponse.json(
@@ -203,6 +226,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    let deliveryId: string | undefined;
+    if (role === "accountant" && sendInvite) {
+      if (!resetLink) return NextResponse.json({ error: "Linkul securizat nu a putut fi generat. Reîncearcă." }, { status: 502 });
+      const { data: organisation } = await admin.from("organisations").select("company_legal_name,name,anaf_cif").eq("id", orgId).single();
+      const delivery = await sendAccountantInviteEmail({ to: email, companyName: organisation?.name || organisation?.company_legal_name || "Client franchisetech", legalName: organisation?.company_legal_name, taxId: organisation?.anaf_cif, activationUrl: resetLink });
+      if (!delivery.success) {
+        await admin.from("team_audit_events").insert({ organisation_id: orgId, actor_user_id: user.id, target_user_id: authUserId, action: "accountant_invite_delivery_failed", metadata: { email, error: delivery.error } });
+        return NextResponse.json({ error: `Accesul a fost creat, dar emailul nu a fost livrat: ${delivery.error}` }, { status: 502 });
+      }
+      deliveryId = delivery.messageId;
+    }
+
     // ── Audit ───────────────────────────────────────────────────────────────
     await admin.from("team_audit_events").insert({
       organisation_id: orgId,
@@ -210,10 +245,10 @@ export async function POST(req: NextRequest) {
       target_user_id: authUserId,
       action: existingMember ? "user_added_to_org" : "user_created",
       new_role: role,
-      metadata: { email, fullName },
+      metadata: { email, fullName, accountant_permissions: permissions, invite_message_id: deliveryId },
     });
 
-    return NextResponse.json({ status: resultStatus, userId: authUserId, role, resetLink });
+    return NextResponse.json({ status: resultStatus, userId: authUserId, role, emailDelivered: Boolean(deliveryId) });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }

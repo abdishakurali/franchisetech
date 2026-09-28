@@ -14,7 +14,7 @@ export const PRODUCT_EXPORT_SELECT =
   `*,${PRODUCT_INVENTORY_CATEGORY_EMBED}(name),${PRODUCT_POS_CATEGORY_EMBED}(name)` as const;
 
 export const STOCK_PRODUCT_SELECT =
-  `id,name,current_stock_qty,reorder_level,unit_of_measure,cost_price,active,${PRODUCT_INVENTORY_CATEGORY_EMBED}(name)` as const;
+  `id,name,current_stock_qty,reorder_level,unit_of_measure,cost_price,active,${PRODUCT_INVENTORY_CATEGORY_EMBED}(name),supplier:suppliers!products_supplier_id_fkey(name)` as const;
 
 export const OPERATIONS_PRODUCT_SELECT =
   `id,name,current_stock_qty,reorder_level,unit_of_measure,cost_price,${PRODUCT_INVENTORY_CATEGORY_EMBED}(name)` as const;

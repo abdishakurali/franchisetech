@@ -40,7 +40,7 @@ export function PricingCheckoutButton({
   if (!loggedIn) {
     return (
       <Link href={`/signup?plan=${plan}`}>
-        <Button className="w-full bg-blue-600 text-white hover:bg-blue-700">
+        <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
           {text.createAccount} <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </Link>
@@ -76,7 +76,7 @@ export function PricingCheckoutButton({
   };
 
   return (
-    <Button onClick={startCheckout} disabled={loading} className="w-full bg-blue-600 text-white hover:bg-blue-700">
+    <Button onClick={startCheckout} disabled={loading} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
       {loading ? text.opening : text.subscribe}
     </Button>
   );

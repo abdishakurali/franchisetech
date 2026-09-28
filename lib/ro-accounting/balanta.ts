@@ -27,6 +27,9 @@ export type BalantaItem = {
   integrityStatus?: BalantaIntegrityStatus;
   catalogQty?: number;
   ledgerQty?: number;
+  /** True if at least one contributing movement had no recorded cost — its
+   * quantity is still reflected above, but not its value. */
+  hasUnknownCost?: boolean;
 };
 
 export type BalantaData = {

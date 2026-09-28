@@ -49,8 +49,8 @@ export function IndustryTabs() {
             onClick={() => setActive(i)}
             className={`rounded-full px-4 py-2 text-sm font-medium transition ${
               i === active
-                ? "bg-blue-600 text-white"
-                : "border border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                ? "bg-brass text-ink"
+                : "border border-border bg-card text-mid hover:border-border"
             }`}
           >
             {tab.title}
@@ -65,26 +65,26 @@ export function IndustryTabs() {
               alt={current.title}
               width={640}
               height={400}
-              className={`h-full w-full ${"imageType" in current && current.imageType === "screenshot" ? "object-contain object-top bg-slate-100" : "object-cover"}`}
+              className={`h-full w-full ${"imageType" in current && current.imageType === "screenshot" ? "object-contain object-top bg-secondary" : "object-cover"}`}
               unoptimized
             />
           </div>
           <div className="flex flex-col justify-center p-8">
-            <h3 className="text-xl font-semibold text-slate-900">{current.title}</h3>
+            <h3 className="text-xl font-semibold text-foreground">{current.title}</h3>
             {"bestFor" in current && current.bestFor ? (
-              <p className="mt-1 text-sm font-medium text-blue-600">{current.bestFor}</p>
+              <p className="mt-1 text-sm font-medium text-brass">{current.bestFor}</p>
             ) : null}
-            <p className="mt-2 text-slate-500">{current.text}</p>
+            <p className="mt-2 text-muted-foreground">{current.text}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
                 href="/signup"
-                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                className="inline-flex items-center gap-2 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink hover:bg-brass/90"
               >
                 {t.cta.getStarted} <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
                 href={current.href}
-                className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline"
+                className="inline-flex items-center gap-2 text-sm font-medium text-brass hover:underline"
               >
                 {t.cta.learnMore} <ArrowRight className="h-4 w-4" />
               </Link>

@@ -1,57 +1,134 @@
-import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { getKitchenOpsContext, formatMoney } from "@/lib/kitchenops/metrics";
 import { isModuleNavVisible } from "@/lib/business-modules";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { filterReportLinks } from "@/lib/app-report-links";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
-import { ReportsSearch } from "@/components/app/ReportsSearch";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
-import Link from "next/link";
+import { listAccessibleSites } from "@/lib/site-context";
+import { computeSalesReport } from "@/lib/reports/sales-data";
+import { countsTowardPurchaseSpend } from "@/lib/nir/purchase";
+import { CORE_REPORTS, selectCoreReport } from "@/lib/reports/hub-selection";
+import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendChart";
+import { AccountantAccessCard } from "@/components/app/AccountantAccessCard";
 
-export default async function ReportsHubPage() {
-  const { countryCode, profileLocale, supabase, orgId } = await getKitchenOpsContext();
+type Preview = { metrics: Array<[string, string]>; rows: Array<[string, string]>; error?: boolean };
+
+export default async function ReportsHubPage({ searchParams }: { searchParams: Promise<{ report?: string; period?: string }> }) {
+  const { countryCode, profileLocale, supabase, orgId, currency, membership } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const orgModules = await fetchOrgModuleFlags(supabase, orgId);
   const sub = await getSubscriptionStatus(orgId).catch(() => null);
   const hasTrial = sub?.state === "trialing" || sub?.state === "soft_trial";
   const inventoryVisible = isModuleNavVisible({ org: orgModules, module: "inventory", subscriptionPlan: sub?.plan, hasTrial });
   const recipeVisible = isModuleNavVisible({ org: orgModules, module: "recipe_costing", subscriptionPlan: sub?.plan, hasTrial });
-  const { data: orgSettings } = await supabase
-    .from("organisations")
-    .select("saga_export_enabled,loyalty_enabled")
-    .eq("id", orgId)
-    .maybeSingle();
-  // reports.gestiune (the on-screen/PDF Raport de Gestiune) is independent of
-  // the Saga XML/DBF connector -- accountantPackVisible below gates only the
-  // Saga-specific features (Balanta, audit export, Saga export itself).
-  const accountantPackVisible = Boolean(orgSettings?.saga_export_enabled);
-  const gestiuneVisible = await hasEntitlement(orgId, "reports.gestiune").catch(() => false);
-  // Loyalty ROI requires both the plan entitlement and the owner having
-  // actually turned the stamp-card program on -- otherwise the tile would
-  // show for Operations orgs that never adopted the feature.
-  const loyaltyVisible = Boolean(orgSettings?.loyalty_enabled)
-    && await hasEntitlement(orgId, "loyalty.enabled").catch(() => false);
-  const visibleReports = filterReportLinks(t, { inventoryVisible, recipeVisible, accountantPackVisible, gestiuneVisible, loyaltyVisible });
-  const showCoreUpgradePrompt = !inventoryVisible && !hasTrial;
+  // saga_export_enabled/loyalty_enabled already came back on membership.organisations
+  // via getKitchenOpsContext() above — no need for a second organisations query.
+  const orgRow = Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations;
+  const [gestiuneVisible, loyaltyEntitled] = await Promise.all([
+    hasEntitlement(orgId, "reports.gestiune").catch(() => false),
+    hasEntitlement(orgId, "loyalty.enabled").catch(() => false),
+  ]);
+  const visible = filterReportLinks(t, {
+    inventoryVisible, recipeVisible, gestiuneVisible,
+    accountantPackVisible: Boolean(orgRow?.saga_export_enabled),
+    loyaltyVisible: Boolean(orgRow?.loyalty_enabled) && loyaltyEntitled,
+  });
+  const core = visible.filter((report) => CORE_REPORTS.some((key) => report.href === `/app/reports/${key}`));
+  const params = await searchParams;
+  const period = params.period === "today" || params.period === "week" ? params.period : "month";
+  const selected = selectCoreReport(params.report, core.map((report) => report.href));
+  const active = core.find((report) => report.href === `/app/reports/${selected}`) ?? core[0];
+  const now = new Date();
+  const from = new Date(period === "today" ? Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) : period === "week" ? Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6) : Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString().slice(0, 10);
+  const to = now.toISOString().slice(0, 10);
+  const start = `${from}T00:00:00.000Z`;
+  const end = `${to}T23:59:59.999Z`;
+  let preview: Preview = { metrics: [], rows: [] };
+  let salesDays: SalesDay[] = [];
 
-  return (
-    <div className="space-y-6 p-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-950">{t.reports.pageTitle}</h1>
-        <p className="text-sm text-slate-500">{t.reports.pageSubtitle}</p>
-      </div>
-      {showCoreUpgradePrompt && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-950">
-          Want stock reports and recipes?{" "}
-          <Link href="/pricing" className="font-semibold underline underline-offset-4">
-            Upgrade to Operations — €79/mo.
-          </Link>
-        </div>
-      )}
-      <ReportsSearch
-        reports={visibleReports.map((r) => ({ ...r, icon: <r.icon className="h-5 w-5" /> }))}
-        searchPlaceholder={t.reports.searchPlaceholder ?? "Caută raport…"}
-      />
+  if (active && selected === "sales") {
+    const sites = await listAccessibleSites(supabase, orgId, membership.id, membership.role);
+    const siteIds = sites.map((site) => site.id);
+    const data = await computeSalesReport(supabase, orgId, siteIds, start, end, t.common.unknown);
+    const linesQuery = supabase.from("canonical_sales_lines").select("sold_at,gross_amount").eq("organisation_id", orgId).gte("sold_at", start).lte("sold_at", end);
+    const { data: chartLines, error: chartError } = await (siteIds.length ? linesQuery.in("site_id", siteIds) : linesQuery.eq("site_id", "00000000-0000-0000-0000-000000000000"));
+    const byDay = new Map<string, number>();
+    for (const line of chartLines ?? []) {
+      const day = String(line.sold_at ?? "").slice(0, 10);
+      if (day) byDay.set(day, (byDay.get(day) ?? 0) + Number(line.gross_amount ?? 0));
+    }
+    salesDays = [...byDay.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([day, total]) => ({ day: new Intl.DateTimeFormat("ro-RO", { day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`)), total }));
+    preview = { metrics: [
+      ["Vânzări", formatMoney(data.grossExTips, currency)],
+      ["Tranzacții", String(data.transactionCount)],
+      ["Bon mediu", formatMoney(data.transactionCount ? data.grossExTips / data.transactionCount : 0, currency)],
+      ["Anulate", String(data.voidedCount)],
+    ], rows: data.productRows.slice(0, 5).map((row) => [row.name, formatMoney(row.total, currency)]), error: Boolean(chartError) };
+  } else if (active && selected === "z-report") {
+    const { data, error } = await supabase.from("pos_sessions").select("closed_at,counted_cash,expected_cash,cash_difference").eq("organisation_id", orgId).not("closed_at", "is", null).order("closed_at", { ascending: false }).limit(5);
+    const latest = data?.[0];
+    preview = { error: Boolean(error), metrics: [
+      ["Închideri recente", String(data?.length ?? 0)],
+      ["Numerar numărat", latest ? formatMoney(latest.counted_cash, currency) : "—"],
+      ["Numerar așteptat", latest ? formatMoney(latest.expected_cash, currency) : "—"],
+      ["Diferență", latest ? formatMoney(latest.cash_difference, currency) : "—"],
+    ], rows: (data ?? []).map((row) => [row.closed_at ? new Intl.DateTimeFormat("ro-RO", { dateStyle: "medium" }).format(new Date(row.closed_at)) : "—", formatMoney(row.counted_cash, currency)]) };
+  } else if (active && selected === "stock") {
+    // Same live source /app/stock and /app/reports/stock read
+    // (products.current_stock_qty) — not the unrelated stock_items table.
+    const { data, error } = await supabase.from("products").select("name,current_stock_qty,cost_price,reorder_level,unit_of_measure").eq("organisation_id", orgId).eq("active", true).or("is_stock_tracked.eq.true,is_ingredient.eq.true").order("name");
+    const items = data ?? [];
+    preview = { error: Boolean(error), metrics: [
+      ["Articole", String(items.length)],
+      ["Sub minim", String(items.filter((item) => item.reorder_level !== null && Number(item.current_stock_qty ?? 0) <= Number(item.reorder_level)).length)],
+      ["Valoare estimată", formatMoney(items.reduce((sum, item) => sum + Number(item.current_stock_qty ?? 0) * Number(item.cost_price ?? 0), 0), currency)],
+    ], rows: items.slice(0, 5).map((item) => [item.name, `${Number(item.current_stock_qty ?? 0).toLocaleString("ro-RO")} ${item.unit_of_measure ?? ""}`]) };
+  } else if (active && selected === "purchases") {
+    const { data, error } = await supabase.from("purchases").select("purchase_date,purchased_at,invoice_number,reference,total_amount,status").eq("organisation_id", orgId).order("purchased_at", { ascending: false }).limit(100);
+    const posted = (data ?? []).filter((item) => countsTowardPurchaseSpend(item.status));
+    preview = { error: Boolean(error), metrics: [
+      ["Recepții recente", String(posted.length)],
+      ["Valoare recepționată", formatMoney(posted.reduce((sum, item) => sum + Number(item.total_amount ?? 0), 0), currency)],
+    ], rows: posted.slice(0, 5).map((item) => [item.invoice_number || item.reference || item.purchase_date || "Recepție", formatMoney(item.total_amount, currency)]) };
+  } else if (active && selected === "margins") {
+    const { data, error } = await supabase.from("recipes").select("name,yield_qty,products(name,sale_price),recipe_items(quantity,unit_cost,total_cost)").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(100);
+    const rows = (data ?? []).map((recipe): [string, string] => {
+      const product = Array.isArray(recipe.products) ? recipe.products[0] : recipe.products;
+      const price = Number(product?.sale_price ?? 0);
+      const batchCost = (recipe.recipe_items ?? []).reduce((sum, item) => sum + (Number(item.total_cost ?? 0) > 0 ? Number(item.total_cost) : Number(item.unit_cost ?? 0) * Number(item.quantity ?? 0)), 0);
+      const cost = batchCost / Math.max(Number(recipe.yield_qty ?? 1), 1);
+      return [product?.name || recipe.name, price > 0 ? `${(((price - cost) / price) * 100).toLocaleString("ro-RO", { maximumFractionDigits: 1 })}%` : "—"];
+    });
+    preview = { error: Boolean(error), metrics: [["Rețete recente", String(rows.length)]], rows: rows.slice(0, 5) };
+  }
+
+  return <div className="min-h-full bg-background p-4 sm:p-6">
+    <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+      <div><div className="mb-5"><h1 className="font-[family-name:var(--font-display)] text-[26px] font-bold tracking-[-0.025em] text-foreground">{t.reports.pageTitle}</h1><p className="mt-1 text-sm text-muted-foreground">{core.length} rapoarte · o singură sursă de adevăr</p></div>
+      <nav aria-label="Alege raportul" className="overflow-hidden rounded-[10px] border border-border bg-card">{core.map((report) => {
+        const isActive = report.href === active?.href;
+        return <Link key={report.href} href={`/app/reports?report=${report.href.split("/").pop()}&period=${period}`} aria-current={isActive ? "page" : undefined} className={`flex min-h-[76px] items-center justify-between gap-3 border-b border-border px-[18px] py-4 last:border-b-0 transition-colors ${isActive ? "border-l-[3px] border-l-brass bg-accent text-foreground" : "text-foreground hover:bg-card"}`}>
+          <span className="min-w-0"><span className="block font-semibold text-foreground">{report.title}</span><span className="block text-xs text-mid">{report.desc}</span></span>
+        </Link>;
+      })}</nav></div>
+      <section aria-label={active?.title ?? "Previzualizare raport"} className="min-w-0 rounded-[10px] border border-border bg-card p-4 sm:p-6">
+        {active ? <>
+          <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-foreground">{active.title}</h2><p className="mt-1 text-[13px] text-muted-foreground">{active.desc}</p></div>{selected === "sales" && <nav aria-label="Perioada raportului" className="flex gap-1.5">{([["today", "Azi"], ["week", "7 zile"], ["month", "Luna aceasta"]] as const).map(([value, label]) => <Link key={value} href={`/app/reports?report=${selected}&period=${value}`} aria-current={period === value ? "true" : undefined} className={`rounded-md border px-3 py-2 text-xs font-semibold ${period === value ? "border-brass bg-accent text-foreground" : "border-border text-muted-foreground"}`}>{label}</Link>)}</nav>}</div>
+          {preview.error ? <p role="alert" className="py-8 text-sm text-attention">Datele raportului nu au putut fi încărcate. Deschide raportul pentru detalii.</p> : <>
+            <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">Date reale · {selected === "z-report" ? "ultimele 5 închideri" : selected === "stock" ? "stoc curent" : selected === "purchases" || selected === "margins" ? "ultimele 100 înregistrări" : `${from} – ${to}`}</p>
+            <div className="mt-5 grid grid-cols-2 gap-px border border-border bg-border xl:grid-cols-4">{preview.metrics.map(([label, value]) => <div key={label} className="bg-card p-4"><p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{label}</p><p className="mt-1 break-words font-[family-name:var(--font-display)] text-[23px] font-semibold tracking-tight tabular-nums text-foreground">{value}</p></div>)}</div>
+            {selected === "sales" && <><h3 className="mt-6 text-sm font-semibold text-foreground">Vânzări pe zi</h3><ReportsTrendChart days={salesDays} currency={currency} /></>}
+            <h3 className="mt-6 text-sm font-semibold text-foreground">{selected === "sales" ? "Top produse" : "Detalii recente"}</h3>
+            {preview.rows.length ? <div className="mt-2 divide-y divide-border">{preview.rows.map(([label, value], index) => <div key={`${label}-${index}`} className="flex justify-between gap-3 py-3 text-sm"><span className="text-foreground">{label}</span><span className="text-right font-mono font-medium tabular-nums text-foreground">{value}</span></div>)}</div> : <p className="mt-3 text-sm text-muted-foreground">Nu există date pentru această perioadă.</p>}
+          </>}
+          <div className="mt-5 flex flex-wrap gap-2.5 border-t border-border pt-4">{selected === "sales" && <a href={`/api/reports/sales/pdf?from=${from}&to=${to}`} className="inline-flex min-h-[42px] items-center rounded-lg bg-brass px-[18px] text-sm font-bold text-ink">Descarcă PDF</a>}<Link href={`${active.href}?from=${from}&to=${to}`} className="inline-flex min-h-[42px] items-center gap-2 rounded-lg border border-border px-[18px] text-sm font-semibold text-foreground">Deschide raportul <ArrowUpRight className="size-4" /></Link></div>
+        </> : <p className="text-sm text-mid">Nu există rapoarte disponibile pentru acest cont.</p>}
+      </section>
     </div>
-  );
+    <section className="mt-6"><h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-muted-foreground">Instrumente operaționale</h2><div className="grid gap-3 sm:grid-cols-2"><Link href="/app/transactions" className="rounded-xl border border-border bg-card p-4 transition hover:border-brass/40"><span className="font-semibold">Tranzacții</span><span className="mt-1 block text-sm text-muted-foreground">Caută bonuri, vânzări, retururi și anulări.</span></Link><Link href="/app/reports/staff" className="rounded-xl border border-border bg-card p-4 transition hover:border-brass/40"><span className="font-semibold">Personal</span><span className="mt-1 block text-sm text-muted-foreground">Activitate casieri, reduceri, anulări și vânzări.</span></Link></div></section>
+    {(membership.role === "owner" || membership.role === "manager") && <section className="mt-6"><h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contabilitate</h2><AccountantAccessCard compact /><Link href="/app/settings?tab=accountant#accountant" className="mt-3 inline-flex text-sm font-semibold text-brass">Gestionează accesul contabilului →</Link></section>}
+  </div>;
 }

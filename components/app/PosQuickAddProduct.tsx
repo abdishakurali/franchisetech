@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { addProductFromPos } from "@/app/actions/kitchenops";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePosI18n } from "@/lib/pos-i18n-context";
+import { friendlySaleError } from "@/lib/pos-i18n";
 
 type Category = { id: string; name: string };
 
@@ -24,10 +25,11 @@ export function PosQuickAddProduct({
   defaultVatRate: number;
   currency?: string;
 }) {
-  const { t } = usePosI18n();
+  const { t, locale } = usePosI18n();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const currencyLabel = currency === "RON" ? "lei" : currency;
 
   function handleClose(next: boolean) {
@@ -40,14 +42,25 @@ export function PosQuickAddProduct({
     e.preventDefault();
     setStatus(null);
     const fd = new FormData(e.currentTarget);
+    const keepOpen = fd.get("intent") === "add_another";
     startTransition(async () => {
       const res = await addProductFromPos(fd);
       if (!res.ok) {
-        setStatus({ ok: false, msg: res.error ?? t.somethingWrong });
+        // Same fix as ProductAddForm.tsx: addProductFromPos forwards the bare
+        // EntitlementDeniedError code, not a message — route it through the
+        // existing translator instead of showing it verbatim.
+        setStatus({ ok: false, msg: res.error ? friendlySaleError(res.error, locale) : t.somethingWrong });
         return;
       }
       setStatus({ ok: true, msg: t.productAdded });
       router.refresh();
+      if (keepOpen) {
+        formRef.current?.reset();
+        // Keep the business VAT default explicit for the next product.
+        const vat = formRef.current?.elements.namedItem("vat_rate") as HTMLInputElement | null;
+        if (vat) vat.value = String(defaultVatRate);
+        return;
+      }
       setTimeout(() => {
         setStatus(null);
         onOpenChange(false);
@@ -61,7 +74,7 @@ export function PosQuickAddProduct({
         <DialogHeader>
           <DialogTitle>{t.addProductTitle}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
           <input type="hidden" name="vat_rate" value={defaultVatRate} />
           <div>
             <Label>{t.productName}</Label>
@@ -71,11 +84,14 @@ export function PosQuickAddProduct({
             <Label>{t.salePrice} ({currencyLabel})</Label>
             <Input name="sale_price" type="number" step="0.01" min="0" required placeholder="0.00" className="mt-1" />
           </div>
+          <div className="rounded-md border border-border bg-secondary px-3 py-2 text-sm text-foreground">
+            <span className="font-medium">{t.vatInherited(defaultVatRate)}</span>
+          </div>
           <div>
             <Label>{t.category}</Label>
             <select
               name="pos_category_id"
-              className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+              className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 text-sm"
             >
               <option value="">{t.noCategory}</option>
               {categories.map((c) => (
@@ -84,13 +100,16 @@ export function PosQuickAddProduct({
             </select>
           </div>
           {status && (
-            <p className={`text-sm font-medium ${status.ok ? "text-green-700" : "text-red-600"}`}>{status.msg}</p>
+            <p className={`text-sm font-medium ${status.ok ? "text-reconciled" : "text-attention"}`}>{status.msg}</p>
           )}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => handleClose(false)} disabled={pending}>
               {t.cancel}
             </Button>
-            <Button type="submit" className="bg-blue-600 text-white hover:bg-blue-700" disabled={pending}>
+            <Button type="submit" name="intent" value="add_another" variant="outline" disabled={pending}>
+              {t.saveAddAnother}
+            </Button>
+            <Button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90" disabled={pending}>
               {pending ? t.processing : t.addProduct}
             </Button>
           </DialogFooter>

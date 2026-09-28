@@ -39,9 +39,9 @@ export function YouTubeFacade({ youtubeId, title }: { youtubeId: string; title: 
         aria-hidden
         className="h-full w-full object-cover"
       />
-      <span className="absolute inset-0 bg-slate-950/15 transition group-hover:bg-slate-950/25" />
+      <span className="absolute inset-0 bg-ink/15 transition group-hover:bg-ink/25" />
       <span className="absolute inset-0 flex items-center justify-center">
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/95 shadow-lg transition group-hover:scale-105">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-card/95 shadow-lg transition group-hover:scale-105">
           <Play className="ml-0.5 h-6 w-6 fill-[#1a3ab8] text-[#1a3ab8]" />
         </span>
       </span>

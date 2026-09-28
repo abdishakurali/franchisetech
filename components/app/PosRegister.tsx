@@ -4,16 +4,19 @@ import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { addCustomerFromPos, closePosSession, completeSaleReturn, posCashMovement, voidTransaction } from "@/app/actions/kitchenops";
-import { runZReport } from "@/app/actions/fiscalnet";
+import { runZReport, recordFiscalReceiptAttempt } from "@/app/actions/fiscalnet";
+import { markFirstSaleDoneForOnboarding } from "@/app/actions/onboarding-steps";
 import { getLoyaltyStampStatus, recordLoyaltyRedemption, type LoyaltyStampStatus } from "@/app/actions/loyalty";
-import { fiscalBrowserReceipt, fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
+import { fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
+import { fiscalBrowserReceiptAndLog, type RecordFiscalAttemptInput } from "@/lib/fiscalnet/log-attempt";
+import { computeCategoryTileMode, tileModeForProduct, type PosTileMode } from "@/lib/pos-tile-mode";
 import { useFiscalNetActive } from "@/lib/fiscalnet/use-fiscalnet-active";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Banknote, Check, ChevronDown, Coffee, Droplets, Equal, Gift, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, RefreshCcw, StickyNote, UserPlus, Utensils, Zap } from "lucide-react";
+import { Banknote, Check, ChevronDown, Coffee, Droplets, Equal, Gift, LayoutGrid, Loader2, LockKeyhole, MoreHorizontal, Package, Percent, Plus, ReceiptText, RefreshCcw, ShoppingBag, StickyNote, UserPlus, Users, Utensils, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -23,6 +26,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PosPaymentPanel } from "@/components/app/PosPaymentPanel";
+import { selectPrimaryPaymentMethods } from "@/lib/pos-payment-tiles";
 import { PosTableContextBar, type PosActiveTable } from "@/components/app/PosTableContextBar";
 import { sendTabOrder, getTabPendingItems, type TabPendingItem } from "@/app/actions/table-service";
 import { PreBillPrintButton } from "@/components/app/PreBillPrintButton";
@@ -30,6 +34,7 @@ import { PosOfflineBar } from "@/components/app/PosOfflineBar";
 import { CashCountModal } from "@/components/app/CashCountModal";
 import { friendlySaleErrorFromCode, paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
 import { classifySaleFailure } from "@/lib/pos-sale-failure";
+import { flushPendingSalesSequentially } from "@/lib/pos-offline-sync";
 import { PosI18nProvider, usePosI18n, posIntlLocale } from "@/lib/pos-i18n-context";
 import {
   readCartBackupFromStorage,
@@ -57,11 +62,17 @@ import {
   listOfflineQueue,
   listPendingSync,
   markOfflineSaleSynced,
+  markOfflineSaleNeedsAttention,
+  OfflineQueueFullError,
   payloadToFormData,
   removeOfflineSale,
   markOfflineSaleSyncFailed,
+  getLastSyncedAt,
+  setLastSyncedAt,
   type QueuedSale,
 } from "@/lib/pos-offline-queue";
+import { computeConnectionStatus } from "@/lib/pos-connection-status";
+import { PosConnectionIndicator } from "@/components/app/PosConnectionIndicator";
 import { PosQuickAddProduct } from "@/components/app/PosQuickAddProduct";
 import { PosQuickAccessSheet } from "@/components/app/PosQuickAccessSheet";
 import { sortCategoriesByName } from "@/lib/product-categories";
@@ -134,10 +145,10 @@ type PlaceholderCfg = {
 const PLACEHOLDER_STYLES: Record<string, PlaceholderCfg> = {
   coffee: { bg: "bg-amber-50", iconColor: "text-amber-400", icon: Coffee },
   drink: { bg: "bg-sky-50", iconColor: "text-sky-400", icon: Droplets },
-  food: { bg: "bg-emerald-50", iconColor: "text-emerald-500", icon: Utensils },
+  food: { bg: "bg-reconciled/10", iconColor: "text-reconciled", icon: Utensils },
   snack: { bg: "bg-yellow-50", iconColor: "text-yellow-500", icon: Utensils },
-  ingredient: { bg: "bg-slate-100", iconColor: "text-slate-400", icon: Package },
-  other: { bg: "bg-slate-100", iconColor: "text-slate-400", icon: Package },
+  ingredient: { bg: "bg-secondary", iconColor: "text-muted-foreground", icon: Package },
+  other: { bg: "bg-secondary", iconColor: "text-muted-foreground", icon: Package },
 };
 
 function productPlaceholderCfg(
@@ -154,6 +165,26 @@ function productPlaceholderCfg(
     return { bg: "", iconColor: "text-white/80", icon: Package, style: { backgroundColor: categoryColor } };
   }
   return PLACEHOLDER_STYLES.other;
+}
+
+/**
+ * Adapts the server action's FormData signature to fiscalBrowserReceiptAndLog's
+ * RecordFiscalAttempt shape. Module-level (not a hook) — it has no closure
+ * dependencies, it's just marshalling.
+ */
+async function recordFiscalAttempt(
+  input: RecordFiscalAttemptInput,
+): Promise<{ ok: boolean; attemptId?: string; error?: string }> {
+  const fd = new FormData();
+  fd.set("transaction_id", input.transactionId);
+  fd.set("attempt_number", String(input.attemptNumber));
+  fd.set("status", input.status);
+  fd.set("mock_mode", String(input.mockMode));
+  if (input.responseContent) fd.set("response_content", input.responseContent);
+  if (input.receiptNumber) fd.set("receipt_number", input.receiptNumber);
+  if (input.errorCode) fd.set("error_code", input.errorCode);
+  if (input.errorInfo) fd.set("error_info", input.errorInfo);
+  return recordFiscalReceiptAttempt(fd);
 }
 
 function ProductTileMedia({
@@ -174,7 +205,7 @@ function ProductTileMedia({
 
   if (showImage) {
     return (
-      <div className="h-10 w-full shrink-0 overflow-hidden bg-slate-100 sm:h-11">
+      <div className="h-10 w-full shrink-0 overflow-hidden bg-secondary sm:h-11">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imageUrl!}
@@ -207,6 +238,7 @@ function ProductGridTile({
   placeholderType,
   categoryName,
   categoryColor,
+  tileMode,
   inCartQty,
   selected,
   onClick,
@@ -217,6 +249,11 @@ function ProductGridTile({
   placeholderType: string | null | undefined;
   categoryName: string | null | undefined;
   categoryColor: string | null | undefined;
+  /** Decided per category (computeCategoryTileMode), not per product — a
+   *  category below the photo-coverage threshold gets name tiles across the
+   *  board, even for its few products that do have a photo, rather than a
+   *  patchwork grid. */
+  tileMode: PosTileMode;
   inCartQty: number;
   selected: boolean;
   onClick: () => void;
@@ -226,27 +263,52 @@ function ProductGridTile({
       type="button"
       onClick={onClick}
       className={cn(
-        "relative flex flex-col overflow-hidden rounded-xl border text-left shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300",
-        selected ? "border-blue-400 bg-blue-50/30 ring-1 ring-blue-100" : "border-slate-200 bg-white hover:border-blue-300",
+        "relative flex min-h-[132px] flex-col overflow-hidden rounded-[10px] border text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40",
+        selected ? "border-brass bg-accent ring-1 ring-brass/20" : "border-border bg-card hover:border-brass/40",
       )}
     >
-      <ProductTileMedia
-        imageUrl={imageUrl}
-        name={name}
-        placeholderType={placeholderType}
-        categoryName={categoryName}
-        categoryColor={categoryColor}
-      />
+      {tileMode === "photo" ? (
+        <ProductTileMedia
+          imageUrl={imageUrl}
+          name={name}
+          placeholderType={placeholderType}
+          categoryName={categoryName}
+          categoryColor={categoryColor}
+        />
+      ) : (
+        <div
+          className="h-1.5 w-full shrink-0"
+          style={{ backgroundColor: categoryColor ?? "#78786F" }}
+          aria-hidden
+        />
+      )}
       {inCartQty > 0 && (
-        <span className="absolute right-1.5 top-1.5 rounded-md bg-blue-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm sm:text-xs">
+        <span className="absolute right-1.5 top-1.5 rounded-md bg-brass px-1.5 py-0.5 text-[10px] font-bold text-ink shadow-sm sm:text-xs">
           ×{inCartQty}
         </span>
       )}
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-0.5 p-1.5 sm:p-2">
-        <span className="line-clamp-2 text-[11px] font-semibold leading-snug text-slate-900 [overflow-wrap:anywhere] sm:text-xs">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col justify-between gap-3 p-3 sm:p-4",
+          tileMode === "name" && "py-4",
+        )}
+      >
+        <span
+          className={cn(
+            "line-clamp-2 font-semibold leading-snug text-foreground [overflow-wrap:anywhere]",
+            tileMode === "photo" ? "text-[11px] sm:text-xs" : "text-sm sm:text-base",
+          )}
+        >
           {name}
         </span>
-        <span className="text-[10px] font-bold tabular-nums text-slate-700 sm:text-[11px]">{priceLabel}</span>
+        <span
+          className={cn(
+            "font-mono font-bold tabular-nums text-foreground",
+            tileMode === "photo" ? "text-sm" : "text-base sm:text-[17px]",
+          )}
+        >
+          {priceLabel}
+        </span>
       </div>
     </button>
   );
@@ -326,30 +388,30 @@ function TillDialog({
         <form action={handleCashMovement} className="space-y-3">
           <input type="hidden" name="session_id" value={sessionId ?? ""} />
           <input type="hidden" name="movement_type" value={movementType} />
-          <div className="grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1">
+          <div className="grid grid-cols-2 gap-2 rounded-lg bg-secondary p-1">
             <button type="button" onClick={() => setMovementType("cash_in")}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${movementType === "cash_in" ? "bg-white text-blue-700 shadow-sm" : "text-slate-500"}`}>
+              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${movementType === "cash_in" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
               {t.cashIn}
             </button>
             <button type="button" onClick={() => setMovementType("cash_out")}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${movementType === "cash_out" ? "bg-white text-blue-700 shadow-sm" : "text-slate-500"}`}>
+              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${movementType === "cash_out" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
               {t.cashOut}
             </button>
           </div>
           <div>
             <Label>{t.amount} ({currencySymbol})</Label>
             <Input name="amount" type="number" step="0.01" min="0.01" required />
-            <p className="mt-1 text-xs text-slate-500">{movementType === "cash_in" ? t.cashInHint : t.cashOutHint}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{movementType === "cash_in" ? t.cashInHint : t.cashOutHint}</p>
           </div>
           <div><Label>{t.reason}</Label><Input name="reason" required placeholder={movementType === "cash_in" ? t.extraFloatPlaceholder : t.supplierPaymentPlaceholder} /></div>
           {message && (
-            <div className={`rounded-lg p-3 text-sm ${message.startsWith("✓") ? "border border-green-200 bg-green-50 text-green-800" : "border border-red-200 bg-red-50 text-red-700"}`}>
+            <div className={`rounded-lg p-3 text-sm ${message.startsWith("✓") ? "border border-reconciled/25 bg-reconciled/10 text-reconciled" : "border border-attention/25 bg-attention/10 text-attention"}`}>
               <p>{message}</p>
               {lastTxt && (
                 <button
                   type="button"
                   onClick={() => downloadFiscalNetTxt(lastTxt.filename, lastTxt.content)}
-                  className="mt-2 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-700"
+                  className="mt-2 rounded-md bg-brass px-3 py-1.5 text-xs font-semibold text-ink "
                 >
                   {t.downloadTxtAgain}
                 </button>
@@ -358,7 +420,7 @@ function TillDialog({
           )}
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" />}>{t.cancel}</DialogClose>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={pending}>
+            <Button type="submit" className="bg-brass hover:bg-primary/90 text-primary-foreground" disabled={pending}>
               {pending ? t.recording : t.confirm}
             </Button>
           </DialogFooter>
@@ -416,21 +478,21 @@ function RefundDialog({
         {done ? (
           <div className="py-6 text-center space-y-2">
             <div className="text-3xl">✅</div>
-            <p className="font-semibold text-slate-900">{t.transactionVoided}</p>
+            <p className="font-semibold text-foreground">{t.transactionVoided}</p>
           </div>
         ) : (
           <form action={handleVoid} className="space-y-3">
-            <select name="transaction_id" required className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm">
+            <select name="transaction_id" required className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm">
               <option value="">{t.selectRecentTransaction}</option>
               {recentTransactions.filter((tx) => tx.status === "completed").map((tx) => (
                 <option key={tx.id} value={tx.id}>{tx.transaction_number} · {money(Number(tx.total ?? 0), currency)}</option>
               ))}
             </select>
             <Input name="reason" required placeholder={t.reasonRequired} />
-            <p className="text-xs text-slate-500">{t.fullRefundOnly}</p>
+            <p className="text-xs text-muted-foreground">{t.fullRefundOnly}</p>
             <DialogFooter>
               <DialogClose render={<Button type="button" variant="outline" />}>{t.cancel}</DialogClose>
-              <Button type="submit" variant="outline" className="border-red-300 text-red-700" disabled={pending}>
+              <Button type="submit" variant="outline" className="border-attention/40 text-attention" disabled={pending}>
                 {pending ? t.processing : t.refundVoid}
               </Button>
             </DialogFooter>
@@ -480,34 +542,34 @@ function CloseTillFormBody({
   return (
     <>
       <input type="hidden" name="session_id" value={sessionId ?? ""} />
-      <div className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm">
+      <div className="grid gap-2 rounded-lg bg-secondary p-3 text-sm">
         <div className="flex justify-between"><span>{t.openingCash}</span><strong>{money(summary.openingCash, currency)}</strong></div>
         {summary.cashInTotal > 0 && (
-          <div className="flex justify-between text-green-700"><span>{t.cashInTotal}</span><strong>{money(summary.cashInTotal, currency)}</strong></div>
+          <div className="flex justify-between text-reconciled"><span>{t.cashInTotal}</span><strong>{money(summary.cashInTotal, currency)}</strong></div>
         )}
         {summary.cashOutTotal > 0 && (
-          <div className="flex justify-between text-red-600"><span>{t.cashOutTotal}</span><strong>{money(summary.cashOutTotal, currency)}</strong></div>
+          <div className="flex justify-between text-attention"><span>{t.cashOutTotal}</span><strong>{money(summary.cashOutTotal, currency)}</strong></div>
         )}
         <div className="flex justify-between"><span>{t.cashSales}</span><strong>{money(summary.cashSales, currency)}</strong></div>
         <div className="flex justify-between"><span>{t.cardSales}</span><strong>{money(summary.cardSales, currency)}</strong></div>
-        <div className="flex justify-between border-t pt-2"><span className="font-medium">{t.expectedCash}</span><strong className="text-blue-700">{money(summary.expectedCash, currency)}</strong></div>
+        <div className="flex justify-between border-t pt-2"><span className="font-medium">{t.expectedCash}</span><strong className="text-brass">{money(summary.expectedCash, currency)}</strong></div>
       </div>
       {summary.cashOperations.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t.cashOperations}</p>
-          <div className="max-h-44 overflow-y-auto rounded-lg border border-slate-200 divide-y divide-slate-100 bg-white">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.cashOperations}</p>
+          <div className="max-h-44 overflow-y-auto rounded-lg border border-border divide-y divide-border bg-card">
             {summary.cashOperations.map((op) => (
               <div key={op.id} className="flex items-start justify-between gap-3 px-3 py-2.5 text-sm">
                 <div className="min-w-0 flex-1">
-                  <p className={`font-medium ${op.movement_type === "cash_in" ? "text-green-700" : "text-red-600"}`}>
+                  <p className={`font-medium ${op.movement_type === "cash_in" ? "text-reconciled" : "text-attention"}`}>
                     {op.movement_type === "cash_in" ? `+ ${t.cashIn}` : `− ${t.cashOut}`}
                   </p>
-                  <p className="truncate text-xs text-slate-500">{op.reason || "—"}</p>
+                  <p className="truncate text-xs text-muted-foreground">{op.reason || "—"}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="font-semibold tabular-nums text-slate-900">{money(op.amount, currency)}</p>
+                  <p className="font-semibold tabular-nums text-foreground">{money(op.amount, currency)}</p>
                   {op.performedAt && (
-                    <p className="text-[10px] text-slate-400">
+                    <p className="text-[10px] text-muted-foreground">
                       {new Intl.DateTimeFormat(intlLocale, { timeStyle: "short" }).format(new Date(op.performedAt))}
                     </p>
                   )}
@@ -536,7 +598,7 @@ function CloseTillFormBody({
             onClick={handleSetToExpected}
             aria-label={t.setToExpected}
             title={t.setToExpected}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700 disabled:opacity-50"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-mid hover:border-brass/40 hover:text-brass disabled:opacity-50"
           >
             <Equal className="h-4 w-4" />
           </button>
@@ -547,13 +609,13 @@ function CloseTillFormBody({
               onClick={() => setCashCountModalOpen(true)}
               aria-label={t.cashBreakdownLabel}
               title={t.cashBreakdownLabel}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-700 disabled:opacity-50"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-card text-mid hover:border-brass/40 hover:text-brass disabled:opacity-50"
             >
               <Banknote className="h-4 w-4" />
             </button>
           )}
         </div>
-        <p className="mt-1 text-xs text-slate-500">
+        <p className="mt-1 text-xs text-muted-foreground">
           {cashBreakdown ? t.cashBreakdownFromCounter : t.howMuchInDrawer}
         </p>
         <input type="hidden" name="cash_breakdown_json" value={cashBreakdown ? JSON.stringify(cashBreakdown) : ""} />
@@ -574,7 +636,7 @@ function CloseTillFormBody({
       )}
       <div><Label>{t.notes}</Label><Input name="notes" disabled={pending} /></div>
       {pending && (
-        <div className="flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2.5 text-sm text-blue-800">
+        <div className="flex items-center gap-2 rounded-lg border border-brass/25 bg-accent px-3 py-2.5 text-sm text-foreground">
           <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
           <span>{t.closingTill}</span>
         </div>
@@ -584,7 +646,7 @@ function CloseTillFormBody({
         <Button
           type="submit"
           disabled={pending}
-          className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+          className="gap-2 bg-brass hover:bg-primary/90 text-primary-foreground"
         >
           {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />}
           {pending ? t.closingTillShort : t.closeTill}
@@ -671,7 +733,9 @@ function PosRegisterInner({
   defaultVatRate = 0,
   catalogOffline = false,
   catalogCachedAt = null,
+  browserOffline = false,
   trackActivationSale = false,
+  redirectAfterSaleTo = null,
 }: {
   products: Product[];
   categories: Category[];
@@ -708,8 +772,15 @@ function PosRegisterInner({
   defaultVatRate?: number;
   catalogOffline?: boolean;
   catalogCachedAt?: string | null;
+  /** Verified server connectivity state owned by PosWithTour. */
+  browserOffline?: boolean;
   /** Fire PostHog activation_first_sale on the next successful server save */
   trackActivationSale?: boolean;
+  /** When set, the post-sale success screen's primary action navigates here
+   *  instead of resetting to a new sale — used by the onboarding first-sale
+   *  step to continue into /onboarding/result. Table-service flows are
+   *  unaffected (a tab may need more sales before payment completes). */
+  redirectAfterSaleTo?: string | null;
 }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -881,13 +952,21 @@ function PosRegisterInner({
 
   const [heldOpen, setHeldOpen] = useState(false);
   const [offlineQueue, setOfflineQueue] = useState<QueuedSale[]>(() => listOfflineQueue());
-  // Offline detection disabled — always treat as online; legacy queue items can still be dismissed/retried
-  const [browserOffline] = useState(false);
   const showCatalogOfflineBanner = clientMounted && catalogOffline && !browserOffline;
   const [syncingOffline, setSyncingOffline] = useState(false);
   const [quickAccessOpen, setQuickAccessOpen] = useState(false);
   const [addProductOpen, setAddProductOpen] = useState(false);
   const syncingOfflineRef = useRef(false);
+  // Seeded null (matches what the server renders) rather than reading
+  // localStorage synchronously — same reason PosWithTour seeds offline=true
+  // before probing: reading real client-only state during the render that
+  // gets hydrated against server HTML risks a hydration mismatch. Upgraded
+  // for real in the effect below, after mount.
+  const [lastSyncedAt, setLastSyncedAtState] = useState<string | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- runs once on mount (empty deps) to upgrade from the server-safe null seed; can't cascade
+    setLastSyncedAtState(getLastSyncedAt());
+  }, []);
 
   const pendingSyncSales = useMemo(
     () => offlineQueue.filter((q) => q.status === "pending_sync"),
@@ -895,6 +974,10 @@ function PosRegisterInner({
   );
   const pendingFiscalSales = useMemo(
     () => offlineQueue.filter((q) => q.status === "pending_fiscal"),
+    [offlineQueue]
+  );
+  const pendingAttentionSales = useMemo(
+    () => offlineQueue.filter((q) => q.status === "needs_attention"),
     [offlineQueue]
   );
 
@@ -1007,14 +1090,30 @@ function PosRegisterInner({
 
   function queueCurrentSale(saleCart: CartItem[], dueTotal: number) {
     const fd = buildSaleFormData(saleCart, dueTotal);
-    enqueueOfflineSale(
-      formDataToPayload(fd),
-      t.offlineQueueLabel(saleCart.length, money(dueTotal)),
-    );
+    const payload = formDataToPayload(fd);
+    const amountLabel = money(dueTotal);
+    try {
+      enqueueOfflineSale(payload, t.offlineQueueLabel(saleCart.length, amountLabel));
+    } catch (queueErr) {
+      if (queueErr instanceof OfflineQueueFullError) {
+        // Queue is at capacity — block the sale instead of silently evicting an
+        // older, still-unsynced one. Cart and retry payload are preserved so the
+        // cashier can retry once the queue is synced or cleared.
+        setSaleStatus({ ok: false, msg: t.offlineQueueFull });
+        setSalePending(false);
+        setLastCompletedSale((prev) =>
+          prev
+            ? { ...prev, status: "failed", retryPayload: payload, errorMsg: t.offlineQueueFull }
+            : { amountLabel, status: "failed", retryPayload: payload, errorMsg: t.offlineQueueFull },
+        );
+        return;
+      }
+      throw queueErr;
+    }
     resetCartAfterSale();
     setPaymentCartSnapshot(null);
     setOfflineQueue(listOfflineQueue());
-    setLastCompletedSale({ amountLabel: money(dueTotal), status: "queued" });
+    setLastCompletedSale({ amountLabel, status: "queued" });
     setCheckoutStep("complete");
     setSalePending(false);
   }
@@ -1077,7 +1176,10 @@ function PosRegisterInner({
       }
       setCheckoutStep("complete");
       if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
-        void fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType).then((fnRes) => {
+        void fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
+          transactionId: res.transactionId,
+          recordAttempt: recordFiscalAttempt,
+        }).then((fnRes) => {
           if (fiscalActive && fnRes.filename && fnRes.content) {
             setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
           }
@@ -1107,7 +1209,24 @@ function PosRegisterInner({
         return;
       }
       if (action === "queue") {
-        enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
+        try {
+          enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
+        } catch (queueErr) {
+          if (queueErr instanceof OfflineQueueFullError) {
+            // Queue is at capacity — block the sale instead of silently evicting an
+            // older, still-unsynced one. Cart and retry payload are preserved so the
+            // cashier can retry once the queue is synced or cleared.
+            setSaleStatus({ ok: false, msg: t.offlineQueueFull });
+            setSalePending(false);
+            setLastCompletedSale((prev) =>
+              prev
+                ? { ...prev, status: "failed", retryPayload: payload, errorMsg: t.offlineQueueFull }
+                : { amountLabel, status: "failed", retryPayload: payload, errorMsg: t.offlineQueueFull },
+            );
+            return;
+          }
+          throw queueErr;
+        }
         clearCartBackupFromStorage();
         resetCartAfterSale();
         setPaymentCartSnapshot(null);
@@ -1143,6 +1262,11 @@ function PosRegisterInner({
 
   const posProducts = useMemo(() =>
     products.filter((p) => p.available_in_pos !== false && p.is_ingredient !== true), [products]);
+
+  // Computed from the full sellable set, not the search/category-filtered
+  // `filtered` list below — which category gets photo tiles shouldn't
+  // change as the cashier types into the search box.
+  const categoryTileModes = useMemo(() => computeCategoryTileMode(posProducts), [posProducts]);
 
   const filtered = useMemo(() =>
     posProducts.filter((p) => {
@@ -1267,7 +1391,10 @@ function PosRegisterInner({
       );
       const res = await Promise.race([syncPromise, timeoutPromise]);
       if (!res.ok || !res.transactionId) {
-        markOfflineSaleSyncFailed(
+        // The server gave a definite answer (not a network/timeout exception), so retrying
+        // the identical payload will fail again — mark it terminal so the 60s/reconnect
+        // auto-sync stops hammering it. A human can still trigger a manual resend below.
+        markOfflineSaleNeedsAttention(
           entry.id,
           !res.ok ? friendlySaleErrorFromCode(res.code, res.error, locale) : t.saleSaveFailed,
         );
@@ -1276,7 +1403,10 @@ function PosRegisterInner({
       let fiscalDone = !res.fiscalApiPending;
       if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
         try {
-          const fnRes = await fiscalBrowserReceipt(fiscalNet, res.items, res.total, res.paymentType);
+          const fnRes = await fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
+            transactionId: res.transactionId,
+            recordAttempt: recordFiscalAttempt,
+          });
           if (fiscalActive && fnRes.filename && fnRes.content) {
             setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
           }
@@ -1304,21 +1434,26 @@ function PosRegisterInner({
   }
 
   async function flushAllPending() {
-    if (syncingOfflineRef.current) return;
+    if (browserOffline || syncingOfflineRef.current) return;
     const pending = listPendingSync();
-    if (!pending.length) return;
+    if (!pending.length) {
+      // Nothing to flush and we're confirmed online — that's a synced
+      // moment worth recording for the connection indicator's last-sync time.
+      setLastSyncedAt();
+      setLastSyncedAtState(getLastSyncedAt());
+      return;
+    }
     syncingOfflineRef.current = true;
     setSyncingOffline(true);
     setSaleStatus({ ok: true, msg: t.offlineSyncing });
-    let synced = 0;
-    for (const entry of pending) {
-      if (await syncQueuedEntry(entry)) synced++;
-    }
+    const synced = await flushPendingSalesSequentially(browserOffline, pending, syncQueuedEntry);
     syncingOfflineRef.current = false;
     setSyncingOffline(false);
     setOfflineQueue(listOfflineQueue());
     if (synced > 0) {
       setSaleStatus({ ok: true, msg: t.offlineSyncDone(synced) });
+      setLastSyncedAt();
+      setLastSyncedAtState(getLastSyncedAt());
     } else {
       setSaleStatus(null);
     }
@@ -1327,7 +1462,11 @@ function PosRegisterInner({
 
   async function resendQueuedSale(id: string) {
     if (syncingOfflineRef.current) return;
-    const entry = listOfflineQueue().find((q) => q.id === id && q.status === "pending_sync");
+    // Manual resend (unlike the automatic 60s/reconnect flush) is allowed for
+    // needs_attention entries too — staff use it after fixing the underlying issue.
+    const entry = listOfflineQueue().find(
+      (q) => q.id === id && (q.status === "pending_sync" || q.status === "needs_attention"),
+    );
     if (!entry) return;
     syncingOfflineRef.current = true;
     setSyncingOffline(true);
@@ -1338,17 +1477,14 @@ function PosRegisterInner({
   }
 
   useEffect(() => {
-    const onOnline = () => { void flushAllPending(); };
-    window.addEventListener("online", onOnline);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- async fn, setState runs after await, not synchronously in the effect body
     void flushAllPending();
     const timer = setInterval(() => { void flushAllPending(); }, 60_000);
     return () => {
-      window.removeEventListener("online", onOnline);
       clearInterval(timer);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps -- flush uses stable sale/fiscal helpers
-  }, [t.offlineSyncDone, t.offlineSyncing, fiscalActive, fiscalNet, locale]);
+  }, [browserOffline, t.offlineSyncDone, t.offlineSyncing, fiscalActive, fiscalNet, locale]);
 
   useEffect(() => {
     // State changes occur after the server promise resolves; this is a tab refresh subscription.
@@ -1371,8 +1507,21 @@ function PosRegisterInner({
     (pendingTabItems.length > 0 || cart.length > 0) &&
     (!tableTabLocked || canManage);
 
+  const connectionStatus = computeConnectionStatus({
+    browserOffline,
+    syncing: syncingOffline,
+    queuedCount: pendingSyncSales.length + pendingAttentionSales.length,
+  });
+
   return (
-    <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-white">
+    <div className="relative flex min-h-0 w-full flex-1 flex-col overflow-hidden bg-card">
+      <PosConnectionIndicator
+        t={t}
+        locale={locale}
+        state={connectionStatus.state}
+        queuedCount={connectionStatus.queuedCount}
+        lastSyncedAt={lastSyncedAt}
+      />
       {features.tableService && activeTab && (
         <PosTableContextBar
           activeTab={activeTab}
@@ -1384,9 +1533,9 @@ function PosRegisterInner({
       <div className="relative grid min-h-0 w-full flex-1 grid-rows-[minmax(0,1fr)_auto] overflow-hidden lg:flex lg:flex-row">
       {/* Left: Products column — order step only */}
       {checkoutStep === "order" && (
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white lg:min-h-0 lg:min-w-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-background lg:min-h-0 lg:min-w-0">
         {/* Top bar: quick access + add product + new sale */}
-        <div className="flex items-center gap-2 border-b border-slate-100 px-4 py-3 shrink-0">
+        <div className="flex items-center gap-2 border-b border-border px-4 py-3 shrink-0">
           <Button
             type="button"
             variant="outline"
@@ -1400,13 +1549,58 @@ function PosRegisterInner({
             <Button
               type="button"
               variant="outline"
-              className="h-11 px-3 shrink-0 border-blue-200 text-blue-700 hover:bg-blue-50"
+              className="h-11 px-3 shrink-0 border-brass/30 text-brass hover:bg-accent"
               onClick={() => setAddProductOpen(true)}
             >
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">{t.addProduct}</span>
             </Button>
           )}
+          {/* Everything Gate B moved out of the 4-item quick-access sheet
+              (Customers, recent transactions, held orders, Z report) lives
+              here instead — still one tap away, not crowding that sheet. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button type="button" variant="outline" className="h-11 px-3 shrink-0 relative">
+                  <MoreHorizontal className="h-4 w-4" />
+                  {heldSales.length > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brass px-1 text-[10px] font-bold text-ink">
+                      {heldSales.length}
+                    </span>
+                  )}
+                </Button>
+              }
+            />
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={() => setCustomersSheetOpen(true)}>
+                <Users className="h-4 w-4" />
+                {t.customers}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOrdersSheetOpen(true)}>
+                <ReceiptText className="h-4 w-4" />
+                {t.ordersTransactions}
+              </DropdownMenuItem>
+              {heldSales.length > 0 && (
+                <DropdownMenuItem onClick={() => setHeldOpen(true)}>
+                  <ShoppingBag className="h-4 w-4" />
+                  {`${t.heldOrders} (${heldSales.length})`}
+                </DropdownMenuItem>
+              )}
+              {fiscalActive && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    disabled={zReportDone || zReportPending}
+                    onClick={() => setZReportOpen(true)}
+                  >
+                    <ReceiptText className="h-4 w-4" />
+                    {zReportPending ? t.zReportProcessing : zReportDone ? t.zReportDone : t.zReport}
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <div className="flex-1" />
           <Button
             type="button"
@@ -1423,7 +1617,7 @@ function PosRegisterInner({
           </Button>
         </div>
         {/* Products toolbar */}
-        <div className="shrink-0 space-y-2 border-b border-slate-100 px-3 py-2 sm:px-4">
+        <div className="shrink-0 space-y-2 border-b border-border px-3 py-2 sm:px-4">
           {showCatalogOfflineBanner && (
             <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900">
               {t.catalogOfflineMenu}
@@ -1442,8 +1636,8 @@ function PosRegisterInner({
               className={cn(
                 "shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
                 activeCategory === "all"
-                  ? "border-blue-600 bg-blue-600 text-white"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-foreground hover:border-border",
               )}
             >
               {t.allCategories}
@@ -1458,8 +1652,8 @@ function PosRegisterInner({
                 className={cn(
                   "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
                   activeCategory === c.id
-                    ? "border-blue-600 bg-blue-50 text-blue-800"
-                    : "border-slate-200 bg-white text-slate-700 hover:border-slate-300",
+                    ? "border-brass bg-accent text-foreground"
+                    : "border-border bg-card text-foreground hover:border-border",
                 )}
               >
                 {c.color ? (
@@ -1487,7 +1681,7 @@ function PosRegisterInner({
           style={{ WebkitOverflowScrolling: "touch" }}
           data-tour="pos-product"
         >
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 xl:grid-cols-6">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
           {filtered.map((p) => {
             const inCart = cart.find((i) => i.product_id === p.id);
             return (
@@ -1498,6 +1692,7 @@ function PosRegisterInner({
                 placeholderType={p.placeholder_type}
                 categoryName={p.pos_category?.name}
                 categoryColor={p.pos_category?.color}
+                tileMode={tileModeForProduct(categoryTileModes, p)}
                 priceLabel={money(Number(p.sale_price))}
                 inCartQty={inCart?.quantity ?? 0}
                 selected={Boolean(inCart)}
@@ -1506,10 +1701,10 @@ function PosRegisterInner({
             );
           })}
           {!filtered.length && (
-            <div className="col-span-full rounded-xl border border-dashed p-8 text-center text-sm text-slate-400 space-y-3">
+            <div className="col-span-full rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground space-y-3">
               <p>{posProducts.length === 0 ? t.noProductsYet : t.noProductsMatch}</p>
               {canManage && posProducts.length === 0 && (
-                <Button type="button" className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => setAddProductOpen(true)}>
+                <Button type="button" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => setAddProductOpen(true)}>
                   <Plus className="h-4 w-4" />
                   {t.addProduct}
                 </Button>
@@ -1522,9 +1717,6 @@ function PosRegisterInner({
           open={quickAccessOpen}
           onOpenChange={setQuickAccessOpen}
           canManage={canManage}
-          onAddProduct={() => setAddProductOpen(true)}
-          onCustomers={() => setCustomersSheetOpen(true)}
-          onOrders={() => setOrdersSheetOpen(true)}
           onRefund={() => setRefundDialogOpen(true)}
           onCashMovement={() => setTillDialogOpen(true)}
           onCloseTill={() => setCloseTillDialogOpen(true)}
@@ -1536,12 +1728,6 @@ function PosRegisterInner({
               setCheckoutStep("order");
             }
           }}
-          heldCount={heldSales.length}
-          onHeldOrders={() => setHeldOpen(true)}
-          fiscalActive={fiscalActive}
-          onZReport={() => setZReportOpen(true)}
-          zReportDone={zReportDone}
-          zReportPending={zReportPending}
           cartHasItems={cart.length > 0}
         />
         {canManage && (
@@ -1564,10 +1750,10 @@ function PosRegisterInner({
                     key={c.id}
                     type="button"
                     onClick={() => { setSelectedCustomer(c); setCustomersSheetOpen(false); }}
-                    className="w-full rounded-lg border p-3 text-left hover:bg-slate-50"
+                    className="w-full rounded-lg border p-3 text-left hover:bg-secondary"
                   >
                     <p className="font-medium">{c.name}</p>
-                    <p className="text-xs text-slate-500">{[c.phone, c.email].filter(Boolean).join(" · ") || t.noContact}</p>
+                    <p className="text-xs text-muted-foreground">{[c.phone, c.email].filter(Boolean).join(" · ") || t.noContact}</p>
                   </button>
                 ))}
               </div>
@@ -1593,10 +1779,10 @@ function PosRegisterInner({
                     <span className="font-medium">{money(Number(tx.total ?? 0))}</span>
                   </div>
                   {Number(tx.discount_total ?? 0) > 0 && (
-                    <p className="text-xs text-blue-600 font-medium mt-0.5">−{money(Number(tx.discount_total ?? 0))} discount</p>
+                    <p className="text-xs text-brass font-medium mt-0.5">−{money(Number(tx.discount_total ?? 0))} discount</p>
                   )}
-                  <p className="text-xs text-slate-500 mt-0.5">{tx.customer_name || t.walkIn} · {tx.payment_methods?.name ? paymentTypeLabel(tx.payment_methods.type ?? "other", tx.payment_methods.name, locale) : t.paymentGeneric}</p>
-                  <a className="text-blue-600 hover:underline text-xs mt-2 inline-block" href={`/app/transactions/${tx.id}`}>{t.viewReceipt}</a>
+                  <p className="text-xs text-muted-foreground mt-0.5">{tx.customer_name || t.walkIn} · {tx.payment_methods?.name ? paymentTypeLabel(tx.payment_methods.type ?? "other", tx.payment_methods.name, locale) : t.paymentGeneric}</p>
+                  <a className="text-brass hover:underline text-xs mt-2 inline-block" href={`/app/transactions/${tx.id}`}>{t.viewReceipt}</a>
                 </div>
               ))}
             </div>
@@ -1609,13 +1795,13 @@ function PosRegisterInner({
           <Dialog open={zReportOpen} onOpenChange={setZReportOpen}>
             <DialogContent className="sm:max-w-sm">
               <DialogHeader><DialogTitle>{t.zReportConfirmTitle}</DialogTitle></DialogHeader>
-              <p className="text-sm text-slate-600">{t.zReportConfirmBody}</p>
+              <p className="text-sm text-mid">{t.zReportConfirmBody}</p>
               {fiscalNet?.mockMode && (
                 <p className="text-xs text-amber-700 bg-amber-50 rounded p-2">{t.zReportMockMode}</p>
               )}
               <DialogFooter>
                 <DialogClose render={<Button type="button" variant="outline" />}>{t.cancel}</DialogClose>
-                <Button type="button" className="bg-red-600 hover:bg-red-700 text-white" disabled={zReportPending} onClick={async () => {
+                <Button type="button" className="bg-attention hover:bg-attention/90 text-paper" disabled={zReportPending} onClick={async () => {
                   setZReportPending(true);
                   setZReportOpen(false);
                   try {
@@ -1653,6 +1839,10 @@ function PosRegisterInner({
       <form onSubmit={(e) => {
         e.preventDefault();
         if (!checkoutCart.length || checkoutStep !== "payment" || salePending) return;
+        if (browserOffline) {
+          queueCurrentSale(checkoutCart, checkoutTotalDue);
+          return;
+        }
         const fd = buildSaleFormData(checkoutCart, checkoutTotalDue);
         const amountLabel = money(checkoutTotalDue);
         const cartSnapshot = checkoutCart;
@@ -1663,13 +1853,13 @@ function PosRegisterInner({
         setSalePending(true);
         void persistSaleInBackground(fd, cartSnapshot, amountLabel);
       }} className={cn(
-        "flex min-h-0 flex-col bg-white",
+        "flex min-h-0 flex-col bg-card",
         focusedCheckout
-          ? "fixed inset-0 z-[60] flex flex-col bg-white"
+          ? "fixed inset-0 z-[60] flex flex-col bg-card"
           : tableTabMode
-            ? "w-full max-h-[min(58vh,34rem)] shrink-0 border-t border-slate-200 sm:max-h-[min(62vh,36rem)]"
-            : "w-full max-h-[min(48vh,28rem)] shrink-0 border-t border-slate-200 sm:max-h-[min(52vh,32rem)]",
-        !focusedCheckout && "lg:min-h-0 lg:max-h-none lg:w-[400px] lg:shrink-0 lg:overflow-hidden lg:border-t-0 lg:border-l lg:border-slate-100",
+            ? "w-full max-h-[min(58vh,34rem)] shrink-0 border-t border-border sm:max-h-[min(62vh,36rem)]"
+            : "w-full max-h-[min(48vh,28rem)] shrink-0 border-t border-border sm:max-h-[min(52vh,32rem)]",
+        !focusedCheckout && "lg:min-h-0 lg:max-h-none lg:w-[400px] lg:shrink-0 lg:overflow-hidden lg:border-t-0 lg:border-l lg:border-border",
       )} data-tour="pos-cart">
         {!focusedCheckout && (
         <PosOfflineBar
@@ -1677,6 +1867,7 @@ function PosRegisterInner({
           browserOffline={browserOffline}
           pendingSync={pendingSyncSales}
           pendingFiscal={pendingFiscalSales}
+          needsAttention={pendingAttentionSales}
           syncing={syncingOffline}
           onQueueChange={() => setOfflineQueue(listOfflineQueue())}
           onSyncAll={() => void flushAllPending()}
@@ -1692,41 +1883,46 @@ function PosRegisterInner({
         {checkoutStep === "complete" && lastCompletedSale ? (
           <div className="flex w-full max-w-sm flex-col items-center justify-center py-8 sm:py-10">
             <div className="w-full text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-reconciled/15 text-reconciled">
                 <Check className="h-8 w-8" strokeWidth={2.5} aria-hidden />
               </div>
-              <p className="mt-4 text-sm font-medium text-slate-500">{t.saleComplete}</p>
-              <p className="mt-1 text-4xl font-bold tabular-nums text-slate-950">{lastCompletedSale.amountLabel}</p>
+              <p className="mt-4 text-sm font-medium text-muted-foreground">{t.saleComplete}</p>
+              <p className="mt-1 text-4xl font-bold tabular-nums text-foreground">{lastCompletedSale.amountLabel}</p>
               {showActivationCelebrate && lastCompletedSale.status === "saved" && (
-                <div className="mx-auto mt-4 max-w-xs rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+                <div className="mx-auto mt-4 max-w-xs rounded-xl border border-reconciled/25 bg-reconciled/10 px-4 py-3 text-sm text-reconciled">
                   <p>{t.firstSaleCelebrate}</p>
-                  <Link
-                    href="/app"
-                    className="mt-2 inline-flex items-center text-sm font-semibold text-green-700 hover:text-green-900"
-                  >
-                    {t.viewDashboard} →
-                  </Link>
+                  {/* During onboarding, the primary button below already
+                      routes through the result screen — no second, competing
+                      exit straight to the dashboard that would skip it. */}
+                  {!redirectAfterSaleTo && (
+                    <Link
+                      href="/app"
+                      className="mt-2 inline-flex items-center text-sm font-semibold text-reconciled hover:text-reconciled/80"
+                    >
+                      {t.viewDashboard} →
+                    </Link>
+                  )}
                 </div>
               )}
               {features.tableService && activeTab && (
-                <p className="mt-2 text-sm font-medium text-blue-800">Masa {activeTab.tableName}</p>
+                <p className="mt-2 text-sm font-medium text-foreground">Masa {activeTab.tableName}</p>
               )}
               {lastCompletedSale.status === "saving" && (
-                <p className="mt-2 text-sm font-medium text-slate-400">{t.saleSaving}</p>
+                <p className="mt-2 text-sm font-medium text-muted-foreground">{t.saleSaving}</p>
               )}
               {lastCompletedSale.status === "queued" && (
                 <p className="mt-2 text-sm font-medium text-amber-700">{t.offlineQueued}</p>
               )}
               {lastCompletedSale.status === "failed" && (
                 <div className="mt-3 space-y-2">
-                  <p className="text-sm font-medium text-red-600">
+                  <p className="text-sm font-medium text-attention">
                     {lastCompletedSale.errorMsg ?? t.saleSaveFailed}
                   </p>
                   {lastCompletedSale.retryPayload && (
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-10 border-red-200 text-red-700"
+                      className="h-10 border-attention/30 text-attention"
                       onClick={() =>
                         void retryFailedSale(lastCompletedSale.retryPayload!, lastCompletedSale.amountLabel)
                       }
@@ -1739,7 +1935,7 @@ function PosRegisterInner({
               <div className="mt-8 grid grid-cols-2 gap-2">
                 <Button
                   type="button"
-                  className="h-12 bg-blue-600 text-white hover:bg-blue-700"
+                  className="h-12 bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={() => {
                     if (features.tableService && activeTab && tabPaymentCompleted) {
                       router.push("/app/pos");
@@ -1755,6 +1951,10 @@ function PosRegisterInner({
                       void refreshPendingTabItems();
                       return;
                     }
+                    if (redirectAfterSaleTo) {
+                      void markFirstSaleDoneForOnboarding().finally(() => router.push(redirectAfterSaleTo));
+                      return;
+                    }
                     setCheckoutStep("order");
                     setPaymentCartSnapshot(null);
                     setLastCompletedSale(null);
@@ -1766,7 +1966,9 @@ function PosRegisterInner({
                     ? "Comandă nouă"
                     : features.tableService && activeTab
                       ? "Înapoi la sală"
-                      : t.newSaleAfter}
+                      : redirectAfterSaleTo
+                        ? "Vezi rezultatul →"
+                        : t.newSaleAfter}
                 </Button>
                 {features.tableService && activeTab && !tabPaymentCompleted && (
                   <Button
@@ -1797,7 +1999,7 @@ function PosRegisterInner({
               {fiscalActive && lastFiscalTxt && (
                 <button
                   type="button"
-                  className="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800"
+                  className="mt-4 text-sm font-medium text-brass hover:text-foreground"
                   onClick={() => downloadFiscalNetTxt(lastFiscalTxt.filename, lastFiscalTxt.content)}
                 >
                   {t.printReceipt}
@@ -1811,7 +2013,7 @@ function PosRegisterInner({
               <button
                 type="button"
                 onClick={() => setSplitOpen(true)}
-                className={`mx-3 mb-2 mt-2 w-[calc(100%-1.5rem)] rounded-xl border px-3 py-2.5 text-left text-sm transition-colors sm:mx-0 sm:w-full ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-green-300 bg-green-50 text-green-800"}`}
+                className={`mx-3 mb-2 mt-2 w-[calc(100%-1.5rem)] rounded-xl border px-3 py-2.5 text-left text-sm transition-colors sm:mx-0 sm:w-full ${splitRemaining > 0.01 ? "border-amber-300 bg-amber-50 text-amber-800" : "border-reconciled/30 bg-reconciled/10 text-reconciled"}`}
               >
                 <span className="font-semibold">{t.splitPayment}</span>
                 {" · "}{t.splitPaid(money(splitPaid))}
@@ -1859,8 +2061,8 @@ function PosRegisterInner({
           </div>
         ) : (
         <>
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-100 px-3 py-2.5 sm:px-4">
-          <span className="text-sm font-semibold text-slate-800">{t.currentSale(cartItemCount)}</span>
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-2.5 sm:px-4">
+          <span className="text-sm font-semibold text-foreground">{t.currentSale(cartItemCount)}</span>
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
               type="button"
@@ -1869,7 +2071,7 @@ function PosRegisterInner({
                 "flex max-w-[9rem] items-center gap-1 truncate rounded-full text-xs font-medium sm:max-w-[12rem] sm:text-sm",
                 !selectedCustomer && features.loyalty
                   ? "border border-amber-200 bg-amber-50 px-2.5 py-1 text-amber-800 hover:bg-amber-100"
-                  : "text-blue-600 hover:text-blue-800",
+                  : "text-brass hover:text-foreground",
               )}
             >
               {!selectedCustomer && features.loyalty ? (
@@ -1880,7 +2082,7 @@ function PosRegisterInner({
               <span className="truncate">{selectedCustomer ? selectedCustomer.name : t.addCustomerBtn}</span>
             </button>
           {cart.length > 0 && (
-              <button type="button" onClick={() => setCart([])} className="shrink-0 text-xs text-slate-400 hover:text-red-500">{t.clearAll}</button>
+              <button type="button" onClick={() => setCart([])} className="shrink-0 text-xs text-muted-foreground hover:text-attention">{t.clearAll}</button>
           )}
           </div>
         </div>
@@ -1891,41 +2093,41 @@ function PosRegisterInner({
             const lineTotal = lineGrossAfter(item);
             const lineList = lineGrossBefore(item);
             return (
-            <div key={item.product_id} className="rounded-xl border border-slate-100 bg-white p-2.5 shadow-sm sm:p-3">
+            <div key={item.product_id} className="border-b border-border bg-card py-3">
               <button type="button" onClick={() => openItemOptions(item.product_id)} className="mb-2 w-full text-left">
-                <p className="line-clamp-2 break-words text-sm font-semibold leading-snug text-slate-900 sm:text-base">{item.product_name}</p>
+                <p className="line-clamp-2 break-words text-sm font-semibold leading-snug text-foreground sm:text-base">{item.product_name}</p>
                 {linePct > 0 && (
-                  <span className="mt-1 inline-flex rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">{t.discountBadge(linePct)}</span>
+                  <span className="mt-1 inline-flex rounded-md bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-brass">{t.discountBadge(linePct)}</span>
                 )}
               </button>
               <div className="flex items-center gap-2">
-              <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-slate-100 bg-slate-50/80 p-0.5">
-                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity - 1); }} aria-label={t.decreaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-slate-600 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:h-10 sm:w-10">−</button>
+              <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-border bg-secondary/80 p-0.5">
+                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity - 1); }} aria-label={t.decreaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-mid hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40 sm:h-10 sm:w-10">−</button>
                 <span className="w-6 text-center text-sm font-bold tabular-nums sm:w-7">{item.quantity}</span>
-                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity + 1); }} aria-label={t.increaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-slate-600 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:h-10 sm:w-10">+</button>
+                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity + 1); }} aria-label={t.increaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-mid hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40 sm:h-10 sm:w-10">+</button>
               </div>
               <div className="ml-auto shrink-0 text-right">
-                {linePct > 0 && <p className="text-[10px] text-slate-400 line-through tabular-nums">{money(lineList)}</p>}
-                <p className="text-sm font-bold tabular-nums text-slate-950 sm:text-base">{money(lineTotal)}</p>
+                {linePct > 0 && <p className="text-[10px] text-muted-foreground line-through tabular-nums">{money(lineList)}</p>}
+                <p className="text-sm font-bold tabular-nums text-foreground sm:text-base">{money(lineTotal)}</p>
               </div>
-              <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, 0); }} aria-label={t.removeItem} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-200 sm:h-9 sm:w-9">×</button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, 0); }} aria-label={t.removeItem} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-attention/10 hover:text-attention focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-attention/30 sm:h-9 sm:w-9">×</button>
               </div>
             </div>
           );})}
-          {!cart.length && <p className="py-8 text-center text-sm text-slate-300 sm:py-10">{t.tapToAdd}</p>}
+          {!cart.length && <p className="py-8 text-center text-sm text-muted-foreground sm:py-10">{t.tapToAdd}</p>}
         </div>
         )}
-        <div className="shrink-0 space-y-3 border-t border-slate-100 bg-white px-3 pt-3 pb-3 shadow-[0_-6px_16px_rgba(15,23,42,0.06)] sm:px-4 sm:pb-4 lg:shadow-none">
+        <div className="shrink-0 space-y-3 border-t border-border bg-card px-3 pt-3 pb-3 shadow-[0_-6px_16px_rgba(15,23,42,0.06)] sm:px-4 sm:pb-4 lg:shadow-none">
               {features.loyalty && selectedCustomer && loyaltyStatus?.enabled && (() => {
                 const rewardReady = loyaltyStatus.rewardReady && !loyaltyRewardApplied;
                 const progressPct = Math.min(100, (loyaltyStatus.stamps / loyaltyStatus.required) * 100);
                 return (
                   <div className={cn(
                     "rounded-xl border p-3",
-                    rewardReady || loyaltyRewardApplied ? "border-amber-200 bg-amber-50/50" : "border-slate-200 bg-slate-50/40"
+                    rewardReady || loyaltyRewardApplied ? "border-amber-200 bg-amber-50/50" : "border-border bg-secondary/40"
                   )}>
                     <div className="flex items-center justify-between gap-3">
-                      <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+                      <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
                         <Gift className="h-4 w-4 text-amber-600" />
                         {t.loyaltyPanelTitle}
                       </span>
@@ -1937,7 +2139,7 @@ function PosRegisterInner({
                             if (loyaltyStatus.rewardType === "discount") setCartDiscountLei(0);
                             setLoyaltyRewardAppliedForCustomerId(null);
                           }}
-                          className="shrink-0 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 hover:bg-emerald-200"
+                          className="shrink-0 rounded-full bg-reconciled/15 px-2.5 py-1 text-xs font-semibold text-reconciled hover:bg-reconciled/25"
                         >
                           ✓ {loyaltyStatus.rewardType === "free_item" ? t.loyaltyFreeItemHint : t.loyaltyRewardApplied}
                         </button>
@@ -1962,13 +2164,13 @@ function PosRegisterInner({
                           🎁 {loyaltyStatus.rewardDescription || t.loyaltyRewardReady}
                         </button>
                       ) : (
-                        <span className="shrink-0 text-xs font-semibold tabular-nums text-slate-600">
+                        <span className="shrink-0 text-xs font-semibold tabular-nums text-mid">
                           {loyaltyStatus.stamps}/{loyaltyStatus.required}
                         </span>
                       )}
                     </div>
                     {!loyaltyRewardApplied && !rewardReady && (
-                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+                      <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
                         <div className="h-full rounded-full bg-amber-400 transition-all" style={{ width: `${progressPct}%` }} />
                       </div>
                     )}
@@ -1980,11 +2182,11 @@ function PosRegisterInner({
                 return (
                 <div className={cn(
                   "rounded-xl border p-3",
-                  loyaltyDiscountActive ? "border-amber-200 bg-amber-50/40" : "border-blue-100 bg-blue-50/30"
+                  loyaltyDiscountActive ? "border-amber-200 bg-amber-50/40" : "border-brass/25 bg-accent/30"
                 )}>
                   <div className="mb-2.5 flex items-center justify-between gap-3">
-                    <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
-                      <Percent className="h-4 w-4 text-slate-500" />
+                    <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                      <Percent className="h-4 w-4 text-muted-foreground" />
                       {t.discount}
                       {loyaltyDiscountActive && (
                         <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
@@ -1993,16 +2195,16 @@ function PosRegisterInner({
                       )}
                     </span>
                     {discountAmount > 0 && (
-                      <span className={cn("text-sm font-bold tabular-nums", loyaltyDiscountActive ? "text-amber-700" : "text-blue-600")}>−{money(discountAmount)}</span>
+                      <span className={cn("text-sm font-bold tabular-nums", loyaltyDiscountActive ? "text-amber-700" : "text-brass")}>−{money(discountAmount)}</span>
                     )}
                   </div>
-                  <div className="mb-2 flex gap-1 rounded-lg bg-slate-100 p-0.5">
+                  <div className="mb-2 flex gap-1 rounded-lg bg-secondary p-0.5">
                     <button
                       type="button"
                       onClick={() => switchDiscountMode("pct")}
                       className={cn(
                         "flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors",
-                        discountMode === "pct" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                        discountMode === "pct" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                       )}
                     >
                       {t.discountModePct}
@@ -2012,7 +2214,7 @@ function PosRegisterInner({
                       onClick={() => switchDiscountMode("lei")}
                       className={cn(
                         "flex-1 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors",
-                        discountMode === "lei" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+                        discountMode === "lei" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
                       )}
                     >
                       {t.discountModeLei}
@@ -2031,7 +2233,7 @@ function PosRegisterInner({
                         aria-label={t.discountPctAria}
                         className="h-11 flex-1 text-center text-lg font-bold tabular-nums"
                       />
-                      <span className="w-6 shrink-0 text-sm font-semibold text-slate-400">%</span>
+                      <span className="w-6 shrink-0 text-sm font-semibold text-muted-foreground">%</span>
                     </div>
                   ) : (
                     <div>
@@ -2046,10 +2248,10 @@ function PosRegisterInner({
                           aria-label={t.discountLeiAria}
                           className="h-11 flex-1 text-center text-lg font-bold tabular-nums"
                         />
-                        <span className="w-10 shrink-0 text-right text-sm font-semibold text-slate-400">lei</span>
+                        <span className="w-10 shrink-0 text-right text-sm font-semibold text-muted-foreground">lei</span>
                       </div>
                       {cartDiscountLei > discountAmount && (
-                        <p className="mt-1.5 text-xs text-slate-500">{t.discountCappedNote(money(discountAmount))}</p>
+                        <p className="mt-1.5 text-xs text-muted-foreground">{t.discountCappedNote(money(discountAmount))}</p>
                       )}
                     </div>
                   )}
@@ -2061,47 +2263,47 @@ function PosRegisterInner({
                 <button
                   type="button"
                   onClick={() => setOptionsOpen((v) => !v)}
-                  className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50/50 px-3.5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+                  className="flex w-full items-center justify-between rounded-xl border border-border bg-secondary/50 px-3.5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
                 >
                   <span>{t.moreOptions}</span>
-                  <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${optionsOpen ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${optionsOpen ? "rotate-180" : ""}`} />
                 </button>
               {optionsOpen && (
-                <div className="space-y-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+                <div className="space-y-3 rounded-xl border border-border bg-secondary/70 p-3">
                   {(features.kitchenDisplay || features.restaurantOrderFlow || features.tips || features.splitPayments) && (
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {(features.kitchenDisplay || features.restaurantOrderFlow) && (
                       <button type="button" onClick={() => setNotesOpen(true)}
-                        className={`flex min-h-[3.5rem] flex-col justify-center rounded-xl border px-3 py-2.5 text-left transition-colors ${(kitchenNote || customerNote) ? "border-blue-300 bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-white"}`}>
-                        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                          <StickyNote className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                        className={`flex min-h-[3.5rem] flex-col justify-center rounded-xl border px-3 py-2.5 text-left transition-colors ${(kitchenNote || customerNote) ? "border-brass/40 bg-accent" : "border-border bg-card hover:border-border hover:bg-card"}`}>
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                          <StickyNote className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                           {t.notes}
                         </span>
-                        {(kitchenNote || customerNote) && <span className="mt-1 text-[11px] font-medium text-blue-600">●</span>}
+                        {(kitchenNote || customerNote) && <span className="mt-1 text-[11px] font-medium text-brass">●</span>}
                       </button>
                     )}
                     {features.tips && (
                       <button type="button" onClick={() => setTipOpen(true)}
-                        className={`flex min-h-[3.5rem] flex-col justify-center rounded-xl border px-3 py-2.5 text-left transition-colors ${safeTipAmount > 0 ? "border-emerald-300 bg-emerald-50" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-white"}`}>
-                        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                          <Banknote className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                        className={`flex min-h-[3.5rem] flex-col justify-center rounded-xl border px-3 py-2.5 text-left transition-colors ${safeTipAmount > 0 ? "border-reconciled/30 bg-reconciled/10" : "border-border bg-card hover:border-border hover:bg-card"}`}>
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                          <Banknote className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                           {t.tip}
                         </span>
                         {safeTipAmount > 0
-                          ? <span className="mt-1 text-sm font-bold tabular-nums text-emerald-700">{money(safeTipAmount)}</span>
-                          : <span className="mt-1 text-[11px] text-slate-400">{t.addTip}</span>}
+                          ? <span className="mt-1 text-sm font-bold tabular-nums text-reconciled">{money(safeTipAmount)}</span>
+                          : <span className="mt-1 text-[11px] text-muted-foreground">{t.addTip}</span>}
                       </button>
                     )}
                     {features.splitPayments && (
                       <button type="button" onClick={() => setSplitOpen(true)}
-                        className={`flex min-h-[3.5rem] flex-col justify-center rounded-xl border px-3 py-2.5 text-left transition-colors ${activeSplitPayments.length > 0 ? "border-violet-300 bg-violet-50" : "border-slate-200 bg-white hover:border-slate-300 hover:bg-white"}`}>
-                        <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                          <Zap className="h-3.5 w-3.5 shrink-0 text-slate-500" />
+                        className={`flex min-h-[3.5rem] flex-col justify-center rounded-xl border px-3 py-2.5 text-left transition-colors ${activeSplitPayments.length > 0 ? "border-brass/30 bg-accent" : "border-border bg-card hover:border-border hover:bg-card"}`}>
+                        <span className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                          <Zap className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                           {t.splitPayment}
                         </span>
                         {activeSplitPayments.length > 0
-                          ? <span className="mt-1 text-sm font-bold tabular-nums text-violet-700">{activeSplitPayments.length}×</span>
-                          : <span className="mt-1 text-[11px] text-slate-400">{t.splitAmount}</span>}
+                          ? <span className="mt-1 text-sm font-bold tabular-nums text-brass">{activeSplitPayments.length}×</span>
+                          : <span className="mt-1 text-[11px] text-muted-foreground">{t.splitAmount}</span>}
                       </button>
                     )}
                     </div>
@@ -2110,30 +2312,30 @@ function PosRegisterInner({
               )}
                 </div>
               )}
-              <div className="space-y-1.5 rounded-xl bg-slate-50 px-3.5 py-3">
+              <div className="space-y-1.5 rounded-xl bg-secondary px-3.5 py-3">
               {showTableOrderActions && pendingTabSubtotal > 0 && (
-                <div className="flex justify-between text-xs text-slate-600 pb-1 border-b border-slate-200/80">
+                <div className="flex justify-between text-xs text-mid pb-1 border-b border-border/80">
                   <span>Deja pe masă</span>
                   <span className="font-semibold tabular-nums">{money(pendingTabSubtotal)}</span>
                 </div>
               )}
-              {discountAmount > 0 && <div className="flex justify-between text-xs text-slate-500"><span>{t.subtotal}</span><span className="tabular-nums">{money(grossTotal)}</span></div>}
-              {discountAmount > 0 && <div className="flex justify-between text-xs text-blue-600"><span>{t.discount}</span><span className="font-medium tabular-nums">−{money(discountAmount)}</span></div>}
-              {safeTipAmount > 0 && <div className="flex justify-between text-xs text-emerald-700"><span>{t.tip}</span><span className="font-medium tabular-nums">{money(safeTipAmount)}</span></div>}
+              {discountAmount > 0 && <div className="flex justify-between text-xs text-muted-foreground"><span>{t.subtotal}</span><span className="tabular-nums">{money(grossTotal)}</span></div>}
+              {discountAmount > 0 && <div className="flex justify-between text-xs text-brass"><span>{t.discount}</span><span className="font-medium tabular-nums">−{money(discountAmount)}</span></div>}
+              {safeTipAmount > 0 && <div className="flex justify-between text-xs text-reconciled"><span>{t.tip}</span><span className="font-medium tabular-nums">{money(safeTipAmount)}</span></div>}
               <div className="flex items-baseline justify-between pt-1">
-                <span className="text-sm font-semibold text-slate-700 sm:text-base">
+                <span className="text-sm font-semibold text-foreground sm:text-base">
                   {showTableOrderActions ? "Total de încasat" : t.total}
                 </span>
-                <span className="text-2xl font-bold tabular-nums text-slate-950 sm:text-3xl">
+                <span className="font-mono text-[34px] font-bold tracking-tight tabular-nums text-foreground">
                   {money(showTableOrderActions ? tabCheckoutTotal : totalDue)}
                 </span>
               </div>
               </div>
               {orderSentMessage && showTableOrderActions && (
-                <p className="text-xs font-medium text-emerald-700 text-center">{orderSentMessage}</p>
+                <p className="text-xs font-medium text-reconciled text-center">{orderSentMessage}</p>
               )}
               {tableTabLocked && (
-                <p className="text-sm text-blue-800 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                <p className="text-sm text-foreground bg-accent border border-brass/30 rounded-lg px-3 py-2">
                   Masa este blocată — nota de plată a fost solicitată. Doar un manager poate încasa.
                 </p>
               )}
@@ -2144,7 +2346,7 @@ function PosRegisterInner({
                       <Button
                         type="button"
                         disabled={!canSendTabOrder || sendOrderPending}
-                        className="h-12 w-full rounded-xl bg-emerald-600 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50 sm:text-base"
+                        className="h-12 w-full rounded-xl bg-reconciled text-sm font-bold text-paper hover:bg-reconciled/90 disabled:opacity-50 sm:text-base"
                         onClick={() => void handleSendTabOrder()}
                       >
                         {sendOrderPending ? "…" : "Trimite"}
@@ -2154,7 +2356,7 @@ function PosRegisterInner({
                       type="button"
                       disabled={!canPayTabTotal || !paymentMethods.length || sendOrderPending}
                       data-tour="pos-charge"
-                      className="h-12 w-full rounded-xl bg-blue-600 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50 sm:text-base"
+                      className="h-12 w-full rounded-xl bg-brass text-sm font-bold text-ink  disabled:opacity-50 sm:text-base"
                       onClick={startTabCheckout}
                     >
                       {!paymentMethods.length
@@ -2181,18 +2383,24 @@ function PosRegisterInner({
                     disabled={tableTabLocked && !canManage}
                   />
                 )}
-                <Button
+                <div className="grid grid-cols-2 gap-2.5">
+                {selectPrimaryPaymentMethods(paymentMethods).map((method) => <Button
+                  key={method.id}
                   type="button"
                   disabled={!cart.length || !paymentMethods.length || tableTabLocked}
                   data-tour="pos-charge"
-                  className="h-12 w-full rounded-xl bg-blue-600 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-40 sm:h-14 sm:text-lg"
+                  className={`h-16 w-full rounded-[10px] text-lg font-bold disabled:opacity-40 ${method.type === "cash" ? "bg-reconciled text-paper hover:bg-reconciled/90" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
                   onClick={() => {
+                    setPaymentMethodId(method.id);
+                    setCashReceived(method.type === "cash" ? cashExactAmount : "");
                     setPaymentCartSnapshot(normalizeCartLines(cart, txDiscountPct));
                     setCheckoutStep("payment");
                   }}
                 >
-                  {!paymentMethods.length ? t.setupPaymentMethods : cart.length === 0 ? t.addItems : t.chargeAmount(money(totalDue))}
-                </Button>
+                  {paymentTypeLabel(method.type, method.name, locale)}
+                </Button>)}
+                {!paymentMethods.length && <p className="col-span-2 text-center text-sm text-amber-800">{t.setupPaymentMethods}</p>}
+                </div>
               </div>
               )}
         </div>
@@ -2225,25 +2433,25 @@ function PosRegisterInner({
               <div className="space-y-3">
                 {(features.kitchenDisplay || features.restaurantOrderFlow) && (
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-600">{t.kitchenNote}</label>
+                    <label className="mb-1 block text-xs font-semibold text-mid">{t.kitchenNote}</label>
                     <textarea
                       value={kitchenNote}
                       onChange={(e) => setKitchenNote(e.target.value)}
                       placeholder={t.kitchenNotePlaceholder}
                       rows={2}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none"
+                      className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brass/30 resize-none"
                     />
                   </div>
                 )}
                 {features.restaurantOrderFlow && (
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-600">{t.customerNote}</label>
+                    <label className="mb-1 block text-xs font-semibold text-mid">{t.customerNote}</label>
                     <textarea
                       value={customerNote}
                       onChange={(e) => setCustomerNote(e.target.value)}
                       placeholder={t.customerNotePlaceholder}
                       rows={2}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none"
+                      className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brass/30 resize-none"
                     />
                   </div>
                 )}
@@ -2261,10 +2469,10 @@ function PosRegisterInner({
               <DialogHeader><DialogTitle>{t.orderType}</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 {features.orderTypes && (
-                  <div className="grid grid-cols-3 gap-1 rounded-lg bg-slate-50 p-1">
+                  <div className="grid grid-cols-3 gap-1 rounded-lg bg-secondary p-1">
                     {(["dine-in", "takeaway", "delivery"] as const).map((type) => (
                       <button key={type} type="button" onClick={() => setOrderType(type)}
-                        className={`rounded-md px-2 py-2 text-xs font-semibold transition-colors ${orderType === type ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-white"}`}>
+                        className={`rounded-md px-2 py-2 text-xs font-semibold transition-colors ${orderType === type ? "bg-primary text-primary-foreground shadow-sm" : "text-mid hover:bg-card"}`}>
                         {orderTypeLabel(type, t)}
                       </button>
                     ))}
@@ -2272,7 +2480,7 @@ function PosRegisterInner({
                 )}
                 {features.tableService && (
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-600">{t.tableSeat}</label>
+                    <label className="mb-1 block text-xs font-semibold text-mid">{t.tableSeat}</label>
                     <Input value={tableLabel} onChange={(e) => setTableLabel(e.target.value)} placeholder={t.tablePlaceholder} className="h-9" />
                   </div>
                 )}
@@ -2293,17 +2501,17 @@ function PosRegisterInner({
                   {[0, 5, 10, 15].map((pct) => (
                     <button key={pct} type="button"
                       onClick={() => setTipAmount(pct === 0 ? 0 : Number((afterDiscount * pct / 100).toFixed(2)))}
-                      className={`rounded-lg border py-2 text-xs font-semibold transition-colors ${(pct === 0 && safeTipAmount === 0) || (pct > 0 && Math.abs(safeTipAmount - afterDiscount * pct / 100) < 0.02) ? "border-blue-600 bg-blue-600 text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"}`}>
+                      className={`rounded-lg border py-2 text-xs font-semibold transition-colors ${(pct === 0 && safeTipAmount === 0) || (pct > 0 && Math.abs(safeTipAmount - afterDiscount * pct / 100) < 0.02) ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-foreground hover:bg-secondary"}`}>
                       {pct === 0 ? t.noTip : `${pct}%`}
                     </button>
                   ))}
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600">{t.customAmount}</label>
+                  <label className="mb-1 block text-xs font-semibold text-mid">{t.customAmount}</label>
                   <Input type="number" min="0" step="0.01" value={tipAmount || ""} onChange={(e) => setTipAmount(Number(e.target.value) || 0)} placeholder="0.00" className="h-9" />
                 </div>
                 {safeTipAmount > 0 && (
-                  <p className="text-center text-sm font-semibold text-green-700">{t.tipAmountLabel(money(safeTipAmount))}</p>
+                  <p className="text-center text-sm font-semibold text-reconciled">{t.tipAmountLabel(money(safeTipAmount))}</p>
                 )}
               </div>
               <DialogFooter>
@@ -2317,23 +2525,23 @@ function PosRegisterInner({
           <Dialog open={splitOpen} onOpenChange={setSplitOpen}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader><DialogTitle>{t.splitPayment}</DialogTitle></DialogHeader>
-              <p className="text-xs text-slate-500">{t.splitVoucherHint}</p>
+              <p className="text-xs text-muted-foreground">{t.splitVoucherHint}</p>
               <div className="space-y-3">
                 {splitPayments.map((row) => (
                   <div key={row.id} className="grid grid-cols-[1fr_100px_32px] gap-2">
                     <select value={row.payment_method_id} onChange={(e) => setSplitPayments((rows) => rows.map((r) => r.id === row.id ? { ...r, payment_method_id: e.target.value } : r))}
-                      className="h-9 rounded-md border border-slate-200 bg-white px-2 text-sm">
+                      className="h-9 rounded-md border border-border bg-card px-2 text-sm">
                       {paymentMethods.map((m) => <option key={m.id} value={m.id}>{paymentTypeLabel(m.type, m.name, locale)}</option>)}
                     </select>
                     <Input type="number" min="0" step="0.01" value={row.amount || ""} onChange={(e) => setSplitPayments((rows) => rows.map((r) => r.id === row.id ? { ...r, amount: Number(e.target.value) || 0 } : r))} className="h-9" />
-                    <button type="button" onClick={() => setSplitPayments((rows) => rows.filter((r) => r.id !== row.id))} className="flex h-9 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-red-50 hover:text-red-500">×</button>
+                    <button type="button" onClick={() => setSplitPayments((rows) => rows.filter((r) => r.id !== row.id))} className="flex h-9 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-attention/10 hover:text-attention">×</button>
                   </div>
                 ))}
                 <Button type="button" variant="outline" size="sm" className="w-full" onClick={() => {
                   const first = paymentMethods[0]?.id ?? "";
                   setSplitPayments((rows) => [...rows, { id: (crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2) + Date.now().toString(36)), payment_method_id: first, amount: Math.max(0, Number(splitRemaining.toFixed(2))) }]);
                 }}>{t.addPaymentRow}</Button>
-                <div className={`rounded-lg p-2.5 text-xs font-medium ${splitRemaining > 0.01 ? "bg-amber-50 text-amber-700" : "bg-green-50 text-green-700"}`}>
+                <div className={`rounded-lg p-2.5 text-xs font-medium ${splitRemaining > 0.01 ? "bg-amber-50 text-amber-700" : "bg-reconciled/10 text-reconciled"}`}>
                   {t.totalDueLabel}: {money(totalDue)} · {t.paidLabel}: {money(splitPaid)} ·{" "}
                   {splitRemaining > 0.01 ? t.splitRemaining(money(splitRemaining)) : splitRemaining < -0.01 ? `${t.changeLabel} ${money(Math.abs(splitRemaining))}` : t.splitFullyPaid}
                 </div>
@@ -2356,7 +2564,7 @@ function PosRegisterInner({
                 return (
               <div className="space-y-4">
                 <div>
-                  <Label className="text-xs text-slate-500">Qty</Label>
+                  <Label className="text-xs text-muted-foreground">Qty</Label>
                   <div className="mt-1 flex items-center gap-2">
                     <button type="button" onClick={() => setQty(item.product_id, item.quantity - 1)} className="flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-bold">−</button>
                     <span className="w-10 text-center text-lg font-bold tabular-nums">{item.quantity}</span>
@@ -2379,7 +2587,7 @@ function PosRegisterInner({
                     }}
                     className="mt-1 text-right text-lg font-bold"
                   />
-                  <p className="mt-1 text-sm text-slate-500">{t.lineAfterDiscount}: {money(preview)}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t.lineAfterDiscount}: {money(preview)}</p>
                 </div>
               </div>
                 );
@@ -2398,13 +2606,13 @@ function PosRegisterInner({
               <DialogHeader><DialogTitle>{t.heldOrders}</DialogTitle></DialogHeader>
               <div className="space-y-2 max-h-72 overflow-y-auto">
                 {heldSales.length === 0 && (
-                  <p className="text-sm text-slate-400 py-4 text-center">{t.noHeldOrders}</p>
+                  <p className="text-sm text-muted-foreground py-4 text-center">{t.noHeldOrders}</p>
                 )}
                 {heldSales.map((held) => (
                   <div key={held.id} className="flex items-center justify-between gap-3 rounded-lg border p-3">
                     <div className="min-w-0">
-                      <p className="font-medium text-slate-900 truncate">{held.label}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="font-medium text-foreground truncate">{held.label}</p>
+                      <p className="text-xs text-muted-foreground">
                         {t.payItems(held.cart.reduce((s, i) => s + i.quantity, 0))}
                         {held.cart.some((i) => (i.discount_pct ?? 0) > 0)
                           ? ` · ${t.discountBadge(Math.max(...held.cart.map((i) => i.discount_pct ?? 0)))}`

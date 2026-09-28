@@ -100,17 +100,17 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
             </Button>
 
             {!anafConnected && (
-              <p className="self-center text-xs text-slate-500">
+              <p className="self-center text-xs text-muted-foreground">
                 Conexiune ANAF necesară —{" "}
-                <a href="/app/settings?tab=anaf" className="underline text-blue-600">configurează în Setări</a>
+                <a href="/app/settings?tab=anaf" className="underline text-brass">configurează în Setări</a>
               </p>
             )}
           </>
         )}
 
         {isSubmitted && (
-          <div className="flex items-center gap-2 text-sm text-slate-600">
-            <CheckCircle className="h-4 w-4 text-green-500" />
+          <div className="flex items-center gap-2 text-sm text-mid">
+            <CheckCircle className="h-4 w-4 text-reconciled" />
             Factură trimisă la ANAF
           </div>
         )}
@@ -134,14 +134,14 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
       </div>
 
       {submitResult && (
-        <div className="rounded-lg bg-green-50 border border-green-200 p-3 text-sm text-green-700">
+        <div className="rounded-lg bg-reconciled/10 border border-reconciled/25 p-3 text-sm text-reconciled">
           Factură trimisă! Index încărcare ANAF:{" "}
           <span className="font-mono font-medium">{submitResult.indexIncarcare}</span>
         </div>
       )}
 
       {xmlResult && (
-        <div className={`rounded-lg border p-3 text-sm ${xmlResult.valid ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700"}`}>
+        <div className={`rounded-lg border p-3 text-sm ${xmlResult.valid ? "bg-reconciled/10 border-reconciled/25 text-reconciled" : "bg-attention/10 border-attention/25 text-attention"}`}>
           {xmlResult.valid ? (
             <p className="font-medium">XML valid conform ANAF CIUS-RO</p>
           ) : (
@@ -156,13 +156,13 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
       )}
 
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
+        <div className="rounded-lg bg-attention/10 border border-attention/25 p-3 text-sm text-attention">
           {error}
         </div>
       )}
 
       {showXml && xmlResult?.xml && (
-        <pre className="overflow-x-auto rounded-lg border border-slate-200 bg-slate-950 p-4 text-xs text-slate-100 max-h-96">
+        <pre className="overflow-x-auto rounded-lg border border-border bg-ink p-4 text-xs text-paper max-h-96">
           {xmlResult.xml}
         </pre>
       )}

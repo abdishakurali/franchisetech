@@ -2,18 +2,16 @@ import { redirect } from "next/navigation";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { listAccessibleSites } from "@/lib/site-context";
 import { PurchaseForm, type PurchaseDraftInitial } from "@/components/app/PurchaseForm";
-import { ensurePosDefaults } from "@/app/actions/kitchenops";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { listOperationalUnitNames } from "@/lib/units-of-measure";
 
 export default async function PurchaseEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { supabase, orgId, currency, membership, user } = await getKitchenOpsContext();
-  await ensurePosDefaults();
+  const { supabase, orgId, currency, membership, user, countryCode } = await getKitchenOpsContext();
 
   const { data: purchase } = await supabase
     .from("purchases")
-    .select("id,status,supplier_id,purchase_date,nir_date,invoice_number,supplier_invoice_date,site_id,notes,purchase_items(product_id,quantity,unit_cost,tax_rate,unit_of_measure)")
+    .select("id,status,supplier_id,purchase_date,nir_date,invoice_number,supplier_invoice_date,site_id,notes,purchase_items(product_id,quantity,received_quantity,unit_cost,tax_rate,unit_of_measure)")
     .eq("id", id)
     .eq("organisation_id", orgId)
     .single();
@@ -37,6 +35,7 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
   type ItemRow = {
     product_id: string;
     quantity: number;
+    received_quantity: number | null;
     unit_cost: number;
     tax_rate: number;
     unit_of_measure: string | null;
@@ -64,6 +63,7 @@ export default async function PurchaseEditPage({ params }: { params: Promise<{ i
       initialDraft={initialDraft}
       vatRates={vatRates}
       units={units}
+      countryCode={countryCode}
     />
   );
 }

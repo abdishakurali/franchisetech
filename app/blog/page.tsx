@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { CTASection, MarketingShell, SectionLabel } from "@/components/marketing/MarketingShell";
+import { CTASection, SectionLabel } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
+import { BlogTopicHeader } from "@/components/marketing/BlogTopicHeader";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketing/tokens";
 import { blogPosts } from "@/lib/marketing/blog";
@@ -18,7 +20,7 @@ export default function BlogPage() {
   const posts = [...blogPosts].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -27,7 +29,7 @@ export default function BlogPage() {
         }}
       />
 
-      <section className="bg-gradient-to-b from-slate-50/80 to-white px-4 py-20 sm:px-6 lg:px-8">
+      <section className="bg-gradient-to-b from-secondary/80 to-background px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <SectionLabel>Resurse</SectionLabel>
           <h1 className={`mt-4 max-w-3xl ${marketingHeading}`}>Ghiduri pentru HoReCa</h1>
@@ -41,22 +43,23 @@ export default function BlogPage() {
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post) => (
-              <Link key={post.slug} href={`/blog/${post.slug}`} className={`group flex flex-col ${marketingCard}`}>
+              <Link key={post.slug} href={`/blog/${post.slug}`} className={`group flex flex-col overflow-hidden ${marketingCard}`}>
+                <BlogTopicHeader post={post} size="card" variant="embedded" />
                 <div className="flex flex-1 flex-col gap-3 p-6">
                   <div className="flex flex-wrap gap-2">
                     {post.tags.slice(0, 2).map((tag) => (
-                      <span key={tag} className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+                      <span key={tag} className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-brass">
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <h2 className="text-base font-semibold text-slate-900 group-hover:text-blue-700">{post.title}</h2>
-                  <p className="flex-1 text-sm leading-6 text-slate-500">{post.description}</p>
+                  <h2 className="text-base font-semibold text-foreground group-hover:text-brass">{post.title}</h2>
+                  <p className="flex-1 text-sm leading-6 text-muted-foreground">{post.description}</p>
                   <div className="flex items-center justify-between pt-2">
-                    <time className="text-xs text-slate-400" dateTime={post.publishedAt}>
+                    <time className="text-xs text-muted-foreground" dateTime={post.publishedAt}>
                       {new Date(post.publishedAt).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })}
                     </time>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-brass">
                       Citește <ArrowRight className="h-3 w-3" />
                     </span>
                   </div>
@@ -68,6 +71,6 @@ export default function BlogPage() {
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

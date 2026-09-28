@@ -92,14 +92,14 @@ table{width:100%;border-collapse:collapse;margin:12px 0} td{padding:4px 0;border
         <Button
           type="button"
           variant="outline"
-          className="h-12 w-full rounded-xl border-slate-300 text-sm font-semibold gap-1.5 sm:h-14"
+          className="h-12 w-full rounded-xl border-border text-sm font-semibold gap-1.5 sm:h-14"
           disabled={disabled || pending}
           onClick={printPreBill}
         >
           <Printer className="h-4 w-4 shrink-0" />
           <span className="truncate">Notă de plată</span>
         </Button>
-        {error && <p className="text-xs text-red-600 mt-1 text-center">{error}</p>}
+        {error && <p className="text-xs text-attention mt-1 text-center">{error}</p>}
       </div>
     );
   }
@@ -115,7 +115,7 @@ table{width:100%;border-collapse:collapse;margin:12px 0} td{padding:4px 0;border
         <Printer className="h-4 w-4" />
         Tipărește notă de plată
       </Button>
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      {error && <p className="text-xs text-attention mt-1">{error}</p>}
     </div>
   );
 }

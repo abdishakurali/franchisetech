@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app/AppShell";
 import { AppI18nProvider } from "@/lib/app-i18n-context";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
@@ -21,25 +21,23 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user } } = await getAuthUser();
 
   if (!user) {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  const { data: memberships } = await supabase
-    .from("organisation_members")
-    .select("*, organisations(*)")
-    .eq("user_id", user.id)
-    .or("status.is.null,status.eq.active")
-    .order("created_at", { ascending: true })
-    .limit(1);
+  const [{ data: profile }, { data: memberships }, headersList] = await Promise.all([
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    supabase
+      .from("organisation_members")
+      .select("*, organisations(*)")
+      .eq("user_id", user.id)
+      .or("status.is.null,status.eq.active")
+      .order("created_at", { ascending: true })
+      .limit(1),
+    headers(),
+  ]);
 
   const membership = memberships?.[0] ?? null;
   const activeOrgFull = membership?.organisations ?? null;
@@ -51,12 +49,23 @@ export default async function AppLayout({
     : null;
   const userRole = membership?.role ?? null;
 
-  const headersList = await headers();
   const pathname = headersList.get("x-pathname") ?? "";
 
-  const subStatus = activeOrg?.id
-    ? await getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null)
-    : null;
+  // External accountants use a deliberately narrow, read-only product
+  // surface. Do not expose operational pages even if they know a URL.
+  if (userRole === "accountant") redirect("/accountant");
+
+  const [subStatus, completedTxCount] = activeOrg?.id
+    ? await Promise.all([
+        getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null),
+        supabase
+          .from("pos_transactions")
+          .select("*", { count: "exact", head: true })
+          .eq("organisation_id", activeOrg.id)
+          .eq("status", "completed")
+          .then(({ count }) => count ?? 0),
+      ])
+    : [null, 0];
 
   const subscriptionBlocked = isSubscriptionBlockedForApp(subStatus);
 
@@ -68,15 +77,7 @@ export default async function AppLayout({
   // Completed-sale count is needed both for the delayed verification gate
   // below and for setupComplete further down — computed once here so a new
   // signup only pays the query cost a single time per request.
-  let txCount = 0;
-  if (activeOrg?.id) {
-    const { count } = await supabase
-      .from("pos_transactions")
-      .select("*", { count: "exact", head: true })
-      .eq("organisation_id", activeOrg.id)
-      .eq("status", "completed");
-    txCount = count ?? 0;
-  }
+  const txCount = completedTxCount;
 
   // New signups get a fully unrestricted 5-day trial (see
   // lib/billing/subscription.ts's created_at-based fallback) — no forced
@@ -97,12 +98,13 @@ export default async function AppLayout({
   }
 
   const referral = activeOrg?.id && !subscriptionBlocked
-    ? await ensureReferralCode(activeOrg.id)
+    ? await ensureReferralCode(activeOrg.id, false)
     : null;
 
   let setupComplete = false;
   let moduleVisibility = {
     inventory: false,
+    purchases: false,
     recipeCosting: false,
     teamAdvanced: false,
     multiSite: false,
@@ -117,6 +119,7 @@ export default async function AppLayout({
 
     moduleVisibility = {
       inventory: isModuleNavVisible({ org: moduleFlags, module: "inventory", subscriptionPlan: subStatus?.plan, hasTrial }),
+      purchases: isModuleNavVisible({ org: moduleFlags, module: "purchases", subscriptionPlan: subStatus?.plan, hasTrial }),
       recipeCosting: isModuleNavVisible({ org: moduleFlags, module: "recipe_costing", subscriptionPlan: subStatus?.plan, hasTrial }),
       teamAdvanced: isModuleNavVisible({ org: moduleFlags, module: "team_advanced", subscriptionPlan: subStatus?.plan, hasTrial }),
       multiSite: isModuleNavVisible({ org: moduleFlags, module: "multi_site", subscriptionPlan: subStatus?.plan, hasTrial }),

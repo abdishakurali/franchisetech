@@ -12,6 +12,7 @@ const t = {
     recipes: "Recipes",
     kitchen: "Kitchen",
     customers: "Customers",
+    stock: "Stock",
     stockLevels: "Stock",
     purchases: "Purchases",
     suppliers: "Suppliers",
@@ -24,6 +25,7 @@ function hrefs(items: { href: string }[]) {
 
 function moduleVisibility(overrides: Partial<{
   inventory: boolean;
+  purchases: boolean;
   recipeCosting: boolean;
   teamAdvanced: boolean;
   multiSite: boolean;
@@ -31,6 +33,7 @@ function moduleVisibility(overrides: Partial<{
 }> = {}) {
   return {
     inventory: false,
+    purchases: false,
     recipeCosting: false,
     teamAdvanced: false,
     multiSite: false,
@@ -43,11 +46,13 @@ describe("buildMainNav", () => {
   it("returns the full, unrestricted nav regardless of role — role restriction is resolveNavItems' job", () => {
     expect(hrefs(buildMainNav(t))).toEqual([
       "/app",
-      "/app/setup-checklist",
       "/app/pos",
       "/app/products",
-      "/app/reports",
       "/app/recipes",
+      "/app/stock",
+      "/app/purchases",
+      "/app/reports",
+      "/app/settings/accountant",
     ]);
   });
 });
@@ -66,15 +71,18 @@ describe("resolveNavItems", () => {
     expect(limited).toBe(true);
   });
 
-  it("gives an accountant dashboard, reports, purchases, suppliers (and invoices when e-Factura is on)", () => {
-    const withoutEfactura = resolveNavItems("accountant", t, true, moduleVisibility(), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
-    expect(hrefs(withoutEfactura.mainNav)).toEqual(["/app", "/app/reports", "/app/purchases", "/app/suppliers"]);
+  it("keeps accountants inside the dedicated client portal", () => {
+    const withoutPurchases = resolveNavItems("accountant", t, true, moduleVisibility(), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
+    expect(hrefs(withoutPurchases.mainNav)).toEqual(["/accountant"]);
 
-    const withEfactura = resolveNavItems("accountant", t, true, moduleVisibility(), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true });
-    expect(hrefs(withEfactura.mainNav)).toEqual(["/app", "/app/reports", "/app/purchases", "/app/suppliers", "/app/invoices"]);
+    const withoutEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ purchases: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: false });
+    expect(hrefs(withoutEfactura.mainNav)).toEqual(["/accountant"]);
+
+    const withEfactura = resolveNavItems("accountant", t, true, moduleVisibility({ purchases: true }), { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true });
+    expect(hrefs(withEfactura.mainNav)).toEqual(["/accountant"]);
   });
 
-  it("hides setup-checklist once setup is complete, and gates recipes/stock on module visibility", () => {
+  it("shows only the seven design destinations while preserving recipe and stock entitlements", () => {
     const { mainNav, stockNav, showStock } = resolveNavItems(
       "owner",
       t,
@@ -82,8 +90,32 @@ describe("resolveNavItems", () => {
       moduleVisibility({ recipeCosting: false, inventory: true }),
       { id: "org1", name: "Org" },
     );
-    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/reports"]);
-    expect(showStock).toBe(true);
-    expect(hrefs(stockNav)).toEqual(["/app/stock", "/app/purchases", "/app/suppliers"]);
+    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/stock", "/app/reports", "/app/settings/accountant"]);
+    expect(showStock).toBe(false);
+    expect(hrefs(stockNav)).toEqual([]);
+  });
+
+  it("keeps all destinations for an entitled owner, with no extra module links", () => {
+    const { mainNav } = resolveNavItems(
+      "owner",
+      t,
+      false,
+      moduleVisibility({ recipeCosting: true, inventory: true, purchases: true }),
+      { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true, kitchen_display_enabled: true, loyalty_enabled: true },
+    );
+    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/recipes", "/app/stock", "/app/purchases", "/app/reports", "/app/settings/accountant"]);
+  });
+
+  it("keeps accountant acquisition outside employee-only navigation", () => {
+    expect(hrefs(resolveNavItems("staff", t, true, moduleVisibility(), { id: "org1", name: "Org" }).mainNav)).not.toContain("/app/settings/accountant");
+    expect(hrefs(resolveNavItems("manager", t, true, moduleVisibility(), { id: "org1", name: "Org" }).mainNav)).toContain("/app/settings/accountant");
+  });
+
+  it("shows purchases in the owner nav only when the purchases module is visible", () => {
+    const withoutPurchases = resolveNavItems("owner", t, true, moduleVisibility({ inventory: true }), { id: "org1", name: "Org" });
+    expect(hrefs(withoutPurchases.mainNav)).not.toContain("/app/purchases");
+
+    const withPurchases = resolveNavItems("owner", t, true, moduleVisibility({ purchases: true }), { id: "org1", name: "Org" });
+    expect(hrefs(withPurchases.mainNav)).toContain("/app/purchases");
   });
 });

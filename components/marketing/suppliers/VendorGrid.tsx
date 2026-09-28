@@ -13,7 +13,7 @@ export function VendorGrid({
 }) {
   if (!vendors.length) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50/60 p-10 text-center text-sm text-slate-500">
+      <div className="rounded-xl border border-dashed border-border bg-secondary/60 p-10 text-center text-sm text-muted-foreground">
         {emptyMessage}
       </div>
     );

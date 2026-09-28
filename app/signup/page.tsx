@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AuthPageFrame } from "@/components/auth/AuthPageFrame";
+import { AuthBrand } from "@/components/marketing/AuthBrand";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +25,7 @@ import {
 } from "@/lib/marketing/acquisition";
 import { MARKETING_LOCALE_COOKIE } from "@/lib/marketing/locale";
 import { captureClientEvent } from "@/lib/analytics/client-events";
+import { deriveAccountType } from "@/lib/analytics/account-type";
 
 const googleAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "true";
 
@@ -43,7 +44,7 @@ export default function SignupPage() {
     if (isPreferredBillingPlan(planParam)) {
       writePreferredPlanClient(planParam);
     } else {
-      writePreferredPlanClient("starter");
+      writePreferredPlanClient("free");
     }
   }, [planParam]);
 
@@ -75,7 +76,11 @@ export default function SignupPage() {
       toast.error(a.errors.passwordLength);
       return;
     }
-    captureClientEvent("signup_started", { plan: planParam ?? null });
+    // Derived once here (not just at identify() time) so PostHog can filter
+    // internal/test signups even when the visitor never completes onboarding
+    // — identify() only tags events from that point forward, not this one.
+    const accountType = deriveAccountType(form.email, null);
+    captureClientEvent("signup_started", { plan: planParam ?? null, account_type: accountType });
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -86,10 +91,10 @@ export default function SignupPage() {
         },
       });
       if (error) {
-        captureClientEvent("signup_failed", { reason: error.message?.slice(0, 120) ?? null });
+        captureClientEvent("signup_failed", { reason: error.message?.slice(0, 120) ?? null, account_type: accountType });
         toast.error(mapSupabaseAuthError(error.message, locale));
       } else if (data.session) {
-        captureClientEvent("signup_session_created", {});
+        captureClientEvent("signup_session_created", { account_type: accountType });
         toast.success(a.successSession);
         router.push("/onboarding");
         router.refresh();
@@ -101,7 +106,7 @@ export default function SignupPage() {
         // never arrive.
         toast.error(a.existingAccount);
       } else {
-        captureClientEvent("signup_email_sent", {});
+        captureClientEvent("signup_email_sent", { account_type: accountType });
         toast.success(a.successEmail);
         router.push(`/check-email?email=${encodeURIComponent(form.email)}`);
       }
@@ -116,15 +121,17 @@ export default function SignupPage() {
   };
 
   return (
-    <AuthPageFrame>
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle>{a.title}</CardTitle>
+    <main className="flex min-h-svh items-center justify-center bg-background px-4 py-10 text-foreground">
+      <div className="w-full max-w-[460px]">
+      <AuthBrand />
+      <Card className="rounded-xl border-border bg-card py-8 shadow-none">
+        <CardHeader className="space-y-2 text-left sm:px-8">
+          <CardTitle className="font-[family-name:var(--font-display)] text-[30px] font-bold leading-[1.1] tracking-[-0.03em]">{a.title}</CardTitle>
           <CardDescription>
             {selectedPlan ? a.descPlan(selectedPlan.name) : a.descDefault}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="sm:px-8 [&_input]:h-12 [&_input]:border-border [&_input]:bg-card">
           {googleAuthEnabled && (
             <>
               <Link href={planParam ? `/auth/google?plan=${planParam}` : "/auth/google"}>
@@ -134,9 +141,9 @@ export default function SignupPage() {
                 </Button>
               </Link>
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-px bg-slate-200 flex-1" />
-                <span className="text-xs text-slate-400">{a.or}</span>
-                <div className="h-px bg-slate-200 flex-1" />
+                <div className="h-px bg-border flex-1" />
+                <span className="text-xs text-muted-foreground">{a.or}</span>
+                <div className="h-px bg-border flex-1" />
               </div>
             </>
           )}
@@ -166,29 +173,29 @@ export default function SignupPage() {
                 placeholder={a.passwordPlaceholder}
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
+            <Button type="submit" className="h-12 w-full rounded-[10px] bg-primary text-base text-primary-foreground hover:bg-primary/90" disabled={loading}>
               {loading ? a.submitting : a.submit}
             </Button>
           </form>
-          <p className="text-center text-xs text-slate-400 mt-4">
+          <p className="text-center text-xs text-muted-foreground mt-4">
             {a.legal}{" "}
-            <Link href="/terms" className="underline hover:text-slate-600">{a.legalTermsLink}</Link>{" "}
+            <Link href="/terms" className="underline hover:text-foreground">{a.legalTermsLink}</Link>{" "}
             {a.legalAnd}{" "}
-            <Link href="/privacy" className="underline hover:text-slate-600">{a.legalPrivacyLink}</Link>.
+            <Link href="/privacy" className="underline hover:text-foreground">{a.legalPrivacyLink}</Link>.
           </p>
-          <p className="text-center text-sm text-slate-500 mt-3">
+          <p className="text-center text-sm text-muted-foreground mt-3">
             {a.hasAccount}{" "}
-            <Link href="/login" className="text-blue-600 hover:underline font-medium">
+            <Link href="/login" className="text-brass hover:underline font-medium">
               {a.signInLink}
             </Link>
           </p>
         </CardContent>
       </Card>
-      <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-slate-400">
-        <span>✓ Verificare card 1 €</span>
-        <span>✓ Trial 15 zile</span>
-        <span>✓ Live în sub o oră</span>
+      <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+        <span>{locale === "ro" ? "✓ Gratuit pentru totdeauna, fără card" : "✓ Free forever, no card required"}</span>
+        <span>{locale === "ro" ? "✓ Configurare ghidată" : "✓ Guided setup"}</span>
       </div>
-    </AuthPageFrame>
+      </div>
+    </main>
   );
 }

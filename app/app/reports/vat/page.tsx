@@ -42,13 +42,13 @@ export default async function VatReportPage({ searchParams }: { searchParams?: P
       <div className="flex items-center justify-between flex-wrap gap-4 print:hidden">
         <div>
           <h1 className="text-2xl font-semibold">{vp.title}</h1>
-          <p className="text-sm text-slate-500">{vp.subtitle}</p>
+          <p className="text-sm text-muted-foreground">{vp.subtitle}</p>
         </div>
         <div className="flex gap-3 items-center flex-wrap">
           <ReportDateRangeFilter basePath="/app/reports/vat" from={from} to={to} />
           <Link
             href={`/api/reports/vat/pdf?from=${from}&to=${to}`}
-            className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium hover:bg-secondary"
           >
             <FileDown className="h-4 w-4" />
             {t.common.downloadPdf}
@@ -57,19 +57,19 @@ export default async function VatReportPage({ searchParams }: { searchParams?: P
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{vp.netSales}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(totNet, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{vp.vatCollected}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-blue-600">{formatMoney(totVat, currency)}</CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">{vp.grossSales}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-green-600">{formatMoney(totGross, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{vp.netSales}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(totNet, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{vp.vatCollected}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-brass">{formatMoney(totVat, currency)}</CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{vp.grossSales}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-reconciled">{formatMoney(totGross, currency)}</CardContent></Card>
       </div>
 
       <Card>
-        <CardHeader><CardTitle>{vp.breakdownByRate}</CardTitle><p className="text-xs text-slate-500">{from} → {to}</p></CardHeader>
+        <CardHeader><CardTitle>{vp.breakdownByRate}</CardTitle><p className="text-xs text-muted-foreground">{from} → {to}</p></CardHeader>
         <CardContent>
           {byRate.size === 0 ? (
-            <p className="text-sm text-slate-400 py-8 text-center">{vp.noData}</p>
+            <p className="text-sm text-muted-foreground py-8 text-center">{vp.noData}</p>
           ) : (
             <table className="w-full text-sm">
-              <thead><tr className="border-b text-slate-500"><th className="text-left py-2">{t.reportPages.zReport.rate}</th><th className="text-right py-2">{t.tables.net}</th><th className="text-right py-2">{t.tables.vat}</th><th className="text-right py-2">{t.tables.gross}</th><th className="text-right py-2">{vp.transactions}</th></tr></thead>
+              <thead><tr className="border-b text-muted-foreground"><th className="text-left py-2">{t.reportPages.zReport.rate}</th><th className="text-right py-2">{t.tables.net}</th><th className="text-right py-2">{t.tables.vat}</th><th className="text-right py-2">{t.tables.gross}</th><th className="text-right py-2">{vp.transactions}</th></tr></thead>
               <tbody>
                 {Array.from(byRate.entries()).sort(([a],[b])=>a-b).map(([rate, v]) => (
                   <tr key={rate} className="border-b last:border-0">
@@ -77,7 +77,7 @@ export default async function VatReportPage({ searchParams }: { searchParams?: P
                     <td className="text-right py-2">{formatMoney(v.net, currency)}</td>
                     <td className="text-right py-2 font-medium">{formatMoney(v.vat, currency)}</td>
                     <td className="text-right py-2">{formatMoney(v.gross, currency)}</td>
-                    <td className="text-right py-2 text-slate-500">{v.count}</td>
+                    <td className="text-right py-2 text-muted-foreground">{v.count}</td>
                   </tr>
                 ))}
                 <tr className="font-bold border-t-2">
@@ -95,12 +95,12 @@ export default async function VatReportPage({ searchParams }: { searchParams?: P
 
       <div className="grid gap-8 sm:grid-cols-2 pt-8 print:mt-12">
         <div>
-          <p className="text-xs text-slate-500 mb-8">{vp.preparedBy}</p>
-          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{vp.nameDate}</div>
+          <p className="text-xs text-muted-foreground mb-8">{vp.preparedBy}</p>
+          <div className="border-t border-border pt-1 text-xs text-muted-foreground">{vp.nameDate}</div>
         </div>
         <div>
-          <p className="text-xs text-slate-500 mb-8">{vp.accountantSignature}</p>
-          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{vp.nameDate}</div>
+          <p className="text-xs text-muted-foreground mb-8">{vp.accountantSignature}</p>
+          <div className="border-t border-border pt-1 text-xs text-muted-foreground">{vp.nameDate}</div>
         </div>
       </div>
     </div>

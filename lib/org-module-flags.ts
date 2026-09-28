@@ -1,9 +1,10 @@
+import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { OrgModuleRow } from "@/lib/business-modules";
 import type { BusinessProfile } from "@/lib/business-profile";
 
 const MODULE_COLUMNS =
-  "business_profile,inventory_enabled,recipe_costing_enabled,team_advanced_enabled,multi_site_ops_enabled,onboarding_completed_at";
+  "business_profile,inventory_enabled,purchases_enabled,recipe_costing_enabled,team_advanced_enabled,multi_site_ops_enabled,onboarding_completed_at";
 
 const MISSING_COLUMN_HINT =
   "Module settings need a one-time database upgrade. Contact support to apply migration 039, or run 039_business_profile_modules.sql in the Supabase SQL editor.";
@@ -11,6 +12,7 @@ const MISSING_COLUMN_HINT =
 export type OrgModuleFlagUpdates = {
   business_profile?: BusinessProfile | string | null;
   inventory_enabled: boolean;
+  purchases_enabled: boolean;
   recipe_costing_enabled: boolean;
   team_advanced_enabled: boolean;
   multi_site_ops_enabled: boolean;
@@ -39,8 +41,15 @@ export async function orgModuleColumnsAvailable(supabase: SupabaseClient): Promi
   return !error;
 }
 
-/** Load module flags when migration 039 is present. */
-export async function fetchOrgModuleFlags(
+/**
+ * Load module flags when migration 039 is present. cache()-wrapped: this
+ * was being re-queried 2-3x per request (layout, module-guard, page all
+ * call it independently) — dedupe by (supabase, orgId) for one request.
+ * saveOrgModuleFlags() below writes straight to the DB and every caller
+ * re-renders via revalidatePath, so a fresh request always gets a fresh
+ * cache() instance — this never risks serving stale flags across requests.
+ */
+export const fetchOrgModuleFlags = cache(async function fetchOrgModuleFlags(
   supabase: SupabaseClient,
   orgId: string
 ): Promise<OrgModuleRow> {
@@ -55,6 +64,7 @@ export async function fetchOrgModuleFlags(
     if (isMissingColumnError(error)) {
       return {
         inventory_enabled: true,
+        purchases_enabled: true,
         recipe_costing_enabled: true,
         team_advanced_enabled: true,
         multi_site_ops_enabled: true,
@@ -62,6 +72,7 @@ export async function fetchOrgModuleFlags(
     }
     return {
       inventory_enabled: false,
+      purchases_enabled: false,
       recipe_costing_enabled: false,
       team_advanced_enabled: false,
       multi_site_ops_enabled: false,
@@ -69,7 +80,7 @@ export async function fetchOrgModuleFlags(
   }
 
   return (data ?? {}) as OrgModuleRow;
-}
+});
 
 export async function saveOrgModuleFlags(
   supabase: SupabaseClient,
@@ -83,6 +94,7 @@ export async function saveOrgModuleFlags(
 
   const payload: Record<string, unknown> = {
     inventory_enabled: updates.inventory_enabled,
+    purchases_enabled: updates.purchases_enabled,
     recipe_costing_enabled: updates.recipe_costing_enabled,
     team_advanced_enabled: updates.team_advanced_enabled,
     multi_site_ops_enabled: updates.multi_site_ops_enabled,

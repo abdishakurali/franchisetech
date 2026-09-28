@@ -70,6 +70,43 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       "Vânzările din rețete pot reduce stocul de ingrediente",
       "Vizibilitate stoc scăzut și porții posibile",
     ],
+    sections: [
+      {
+        title: "Produse și ingrediente în același sistem",
+        body: "Articolele vandabile și ingredientele pot sta în aceeași listă de produse, cu marcaje clare pentru disponibilitatea în POS și urmărirea stocului.",
+      },
+      {
+        title: "Achizițiile actualizează imaginea stocului",
+        body: "Achizițiile de la furnizori înregistrează cantități și costuri, ca valorile ingredientelor și deciziile de reaprovizionare să fie mai ușor de revizuit.",
+      },
+      {
+        title: "Știți ce puteți face",
+        body: "Cantitățile din rețete și stocul curent ajută proprietarii să înțeleagă câte porții pot fi făcute înainte de a cumpăra alte ingrediente.",
+      },
+    ],
+    faqs: [
+      {
+        question: "franchisetech poate înlocui un sistem de depozit?",
+        answer: "Nu. Este un instrument practic de stoc pentru operatori mici din alimentație, nu o platformă enterprise de gestiune depozit.",
+      },
+      {
+        question: "Achizițiile pot actualiza stocul?",
+        answer: "Da. Achizițiile pot fi înregistrate pe produse și furnizori, ca mișcarea de stoc să rămână clară.",
+      },
+      {
+        question: "Vânzările din POS pot reduce stocul de ingrediente?",
+        answer: "Da, când rețetele sunt configurate, vânzările pot reduce stocul ingredientelor din rețetă.",
+      },
+      {
+        question: "Pot transfera stoc între locații?",
+        answer: "Nu încă. Transferul de stoc între locații este pe roadmap — momentan, stocul fiecărei locații se urmărește separat.",
+      },
+    ],
+    related: [
+      { label: "Cost rețete", href: "/features/recipe-costing" },
+      { label: "Articol despre control stoc", href: "/blog/stoc-negativ-cauze-si-solutii" },
+      { label: "Restaurante", href: "/industries/restaurants" },
+    ],
   },
   "recipe-costing": {
     eyebrow: "Cost rețete",
@@ -78,6 +115,41 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     description: "Calculați costul per porție, marja brută și câte porții puteți face din stocul curent.",
     h1: "Cost rețete și marje pentru meniul dvs.",
     intro: "Legați ingredientele de prețul de vânzare ca să vedeți marja reală înainte să schimbați meniul.",
+    bullets: [
+      "Constructor de rețete la nivel de ingredient",
+      "Cost per porție",
+      "Urmărire marjă brută",
+      "Porții posibile din stocul curent",
+    ],
+    sections: [
+      {
+        title: "Construiți rețete din ingrediente",
+        body: "Adăugați ingrediente precum pui, salată, dressing, pâine sau ambalaj la un produs finit și lăsați franchisetech să calculeze costul rețetei.",
+      },
+      {
+        title: "Vedeți marja înainte să vindeți",
+        body: "Comparați costul cu prețul de vânzare, ca produsele cu marjă mică să fie vizibile înainte să reducă profitul pe tăcute.",
+      },
+      {
+        title: "Planificați din stoc",
+        body: "Numărul de porții posibile ajută echipa să înțeleagă dacă stocul acoperă meniul de azi, fără ghicit.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Pot costa un produs Chicken Caesar?",
+        answer: "Da. Adăugați pui, salată, dressing, brânză, crutoane, ambalaj și cantitățile ca să calculați cost și marjă.",
+      },
+      {
+        question: "franchisetech include consultanță fiscală?",
+        answer: "Nu. franchisetech ajută la păstrarea unor înregistrări organizate. Nu înlocuiește contabilitatea sau consultanța fiscală profesională.",
+      },
+      {
+        question: "Rețetele se pot lega de POS?",
+        answer: "Da. Produsele din rețete pot fi vândute prin POS și folosite la calculele de stoc.",
+      },
+    ],
+    related: [{ label: "Gestionare stoc", href: "/features/stock-management" }],
   },
   "z-report": {
     eyebrow: "Închidere casă",
@@ -86,6 +158,44 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     description: "Numerar deschidere, totaluri numerar/card, intrări/ieșiri și diferența la închidere.",
     h1: "Raport Z zilnic și reconciliere numerar",
     intro: "franchisetech adună cifrele de închidere zilnică ca să revizuiți vânzările fără să reconstruiți ziua din memorie.",
+    bullets: [
+      "Numerar deschidere",
+      "Totaluri numerar și card",
+      "Mișcări de numerar intrare/ieșire",
+      "Numerar așteptat, numerar numărat și diferența",
+    ],
+    sections: [
+      {
+        title: "Închideți casa fără bătăi de cap",
+        body: "Înregistrați numerarul numărat, note și diferența de numerar la sfârșitul zilei, ca registrul de casă să aibă un punct de închidere clar.",
+      },
+      {
+        title: "Revizuiți vânzările pe metodă de plată",
+        body: "Totalurile numerar și card ajută proprietarii să compare registrul casei cu numerarul din sertar și totalurile de la procesatorul de plăți.",
+      },
+      {
+        title: "Păstrați înregistrări organizate",
+        body: "franchisetech ajută la păstrarea unor înregistrări organizate. Nu înlocuiește consultanța contabilă, fiscală, juridică sau de siguranță alimentară profesională.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Ce este un raport Z?",
+        answer: "Un raport Z este un rezumat de închidere a zilei la casă, care arată vânzările și reconcilierea numerarului pentru o sesiune sau o zi.",
+      },
+      {
+        question: "Pot înregistra intrări și ieșiri de numerar?",
+        answer: "Da. Mișcările de numerar pot fi înregistrate cu motiv, ca numerarul așteptat să rămână clar.",
+      },
+      {
+        question: "Înlocuiește contabilul?",
+        answer: "Nu. franchisetech ajută la păstrarea unor înregistrări organizate de vânzări și casă. Consultanța fiscală și contabilă profesională rămâne responsabilitatea dvs.",
+      },
+    ],
+    related: [
+      { label: "Raport Z explicat", href: "/resources/z-report-explained" },
+      { label: "Funcționalitate POS", href: "/features/pos" },
+    ],
   },
   "purchases-suppliers": {
     eyebrow: "Achiziții și furnizori",
@@ -94,6 +204,40 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     description: "Înregistrați furnizori, achiziții și niveluri de stoc alături de vânzările POS.",
     h1: "Furnizori, achiziții și stoc într-un singur loc",
     intro: "Vedeți ce ați cumpărat, de la cine și cum se reflectă în stoc — lângă vânzările zilnice.",
+    bullets: [
+      "Director de furnizori cu date de contact",
+      "Înregistrări de achiziții și cheltuieli per furnizor",
+      "Stocul crește la recepția mărfii",
+      "Import achiziții din CSV",
+    ],
+    sections: [
+      {
+        title: "Cunoașteți cheltuiala per furnizor",
+        body: "Vedeți cheltuiala totală per furnizor și istoricul achizițiilor fără un fișier Excel separat.",
+      },
+      {
+        title: "Stocul urmează achizițiile",
+        body: "Achizițiile recepționate pot crește stocul de produse, ca stocul curent să rămână actualizat.",
+      },
+      {
+        title: "Funcționează cu rețetele",
+        body: "Achizițiile de ingrediente alimentează costul rețetelor și calculul porțiilor posibile.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Pot importa date vechi de achiziții?",
+        answer: "Da. Importul CSV este disponibil pentru achiziții când migrați dintr-un alt sistem.",
+      },
+      {
+        question: "Este un ERP complet?",
+        answer: "Nu. Este o urmărire practică a achizițiilor pentru operatori mici din alimentație, nu procurement enterprise.",
+      },
+    ],
+    related: [
+      { label: "Gestionare stoc", href: "/features/stock-management" },
+      { label: "Cost rețete", href: "/features/recipe-costing" },
+    ],
   },
   nir: {
     eyebrow: "NIR / Achiziții",
@@ -186,7 +330,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Bon fiscal offline?",
-        answer: "Bonul fiscal depinde de FiscalNet și dispozitivul local. Vânzarea operațională poate fi în coadă; tipărirea fiscală urmează configurarea hardware.",
+        answer: "Bonul fiscal depinde de driverul fiscal și dispozitivul local. Vânzarea operațională poate fi în coadă; tipărirea fiscală urmează configurarea hardware.",
       },
       {
         question: "Ce fac dacă sincronizarea eșuează?",
@@ -206,6 +350,39 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     description: "Configurare gratuită în aplicație: produse demo, deschidere casă și prima vânzare de test — majoritatea cafenelelor termină pașii de bază în sub o oră.",
     h1: "De la cont nou la prima vânzare în sub o oră",
     intro: "Checklist în aplicație de la înregistrare la produse demo, deschiderea casei și prima vânzare — ghidat pas cu pas, fără cost.",
+    bullets: [
+      "0–15 min: înregistrare și setări afacere",
+      "15–45 min: produse demo și metode de plată",
+      "45–60 min: deschidere casă și prima vânzare de test",
+    ],
+    sections: [
+      {
+        title: "Etape clare",
+        body: "Fiecare pas trimite direct la ecranul potrivit — setări, POS sau rapoarte — ca setup-ul să rămână concentrat.",
+      },
+      {
+        title: "Configurare ghidată, self-serve",
+        body: "Înregistrarea generează automat produse demo și metode de plată. Checklist-ul ghidat urmărește progresul de la primul produs la prima vânzare — planul gratuit e disponibil de la crearea contului, fără card, și nu expiră.",
+      },
+    ],
+    faqs: [
+      {
+        question: "Cât durează configurarea?",
+        answer: "Traseul de bază (înregistrare → produse demo → deschidere casă → prima vânzare): majoritatea cafenelelor termină în sub o oră. Migrarea unui catalog complet cu 200+ produse poate dura 1–2 zile — puteți întinde pe parcursul trialului.",
+      },
+      {
+        question: "Cum arată cronologia?",
+        answer: "0–15 min: cont și setări. 15–45 min: produse și metode de plată. 45–60 min: deschidere casă și prima vânzare de test. Stocul și rețetele pot aștepta după ce casa funcționează.",
+      },
+      {
+        question: "Pot sări peste pași?",
+        answer: "Da. Ghidul este un checklist, nu un blocaj. Vă puteți întoarce la orice pas mai târziu.",
+      },
+    ],
+    related: [
+      { label: "POS", href: "/features/pos" },
+      { label: "Prețuri", href: "/pricing" },
+    ],
   },
   "health-bars": {
     eyebrow: "Health bar",
@@ -216,16 +393,16 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     intro: "Health bar-urile depind de ingrediente proaspete, rețete consistente și marje clare pentru băuturi și gustări.",
   },
   "qr-code-receipts": {
-    eyebrow: "Bon fiscal & FiscalNet",
-    title: "Bon Fiscal în POS — FiscalNet, Raport Z și Pregătire QR",
-    metaTitle: "Bon Fiscal POS România | FiscalNet, Raport Z, QR ANAF | franchisetech",
+    eyebrow: "Bon fiscal & driver fiscal",
+    title: "Bon Fiscal în POS — Driver Fiscal, Raport Z și Pregătire QR",
+    metaTitle: "Bon Fiscal POS România | Driver Fiscal, Raport Z, QR ANAF | franchisetech",
     description:
-      "Cum gestionezi bonurile fiscale în franchisetech: POS, FiscalNet, metode de plată, TVA, raport Z și ce trebuie verificat pentru QR-ul ANAF.",
+      "Cum gestionezi bonurile fiscale în franchisetech: POS, driver fiscal, metode de plată, TVA, raport Z și ce trebuie verificat pentru QR-ul ANAF.",
     h1: "Bon fiscal din POS, fără pași manuali între vânzare și închiderea zilei",
     intro:
-      "franchisetech este pentru cafenele și restaurante mici din România care vor ca fiecare vânzare din POS să rămână legată de FiscalNet, TVA, metode de plată și raportul Z. QR-ul ANAF depinde de firmware-ul casei fiscale, dar datele operaționale trebuie să fie corecte înainte să ajungă la imprimantă.",
+      "franchisetech este pentru cafenele și restaurante mici din România care vor ca fiecare vânzare din POS să rămână legată de driverul fiscal, TVA, metode de plată și raportul Z. QR-ul ANAF depinde de firmware-ul casei fiscale, dar datele operaționale trebuie să fie corecte înainte să ajungă la imprimantă.",
     bullets: [
-      "Vânzarea se înregistrează în POS și se trimite către FiscalNet când integrarea este activă",
+      "Vânzarea se înregistrează în POS și se trimite către driverul fiscal când integrarea este activă",
       "Metodele de plată și grupele TVA sunt mapate în setările fiscale",
       "Raportul Z și diferențele de numerar rămân în același workspace",
       "QR-ul de pe bon este generat de casa fiscală certificată, nu de POS",
@@ -234,7 +411,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     sections: [
       {
         title: "Ce face franchisetech în fluxul de bon fiscal",
-        body: "Casierul finalizează vânzarea în POS, cu produse, TVA și metodă de plată. Pentru organizațiile din România cu FiscalNet configurat, franchisetech trimite datele către casa fiscală prin driverul FiscalNet și păstrează tranzacția pentru verificarea zilnică.",
+        body: "Casierul finalizează vânzarea în POS, cu produse, TVA și metodă de plată. Pentru organizațiile din România cu driverul fiscal configurat — folosim driverul FiscalNet (driverfiscal.ro) — franchisetech trimite datele către casa fiscală prin acest driver și păstrează tranzacția pentru verificarea zilnică.",
       },
       {
         title: "Unde intră QR-ul ANAF",
@@ -242,24 +419,24 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         title: "Ce verifici înainte de go-live",
-        body: "Confirmă cu furnizorul casei fiscale că firmware-ul suportă QR, actualizează FiscalNet, configurează CIF-ul, metodele de plată și grupele TVA, apoi rulează o vânzare de test și un raport Z împreună cu contabilul.",
+        body: "Confirmă cu furnizorul casei fiscale că firmware-ul suportă QR, actualizează driverul fiscal, configurează CIF-ul, metodele de plată și grupele TVA, apoi rulează o vânzare de test și un raport Z împreună cu contabilul.",
       },
     ],
     faqs: [
       {
         question: "franchisetech emite bon fiscal?",
         answer:
-          "Da, pentru organizațiile din România unde FiscalNet este activat și configurat corect. Verificarea fiscală finală rămâne la contabil și furnizorul casei fiscale.",
+          "Da, pentru organizațiile din România unde driverul fiscal este activat și configurat corect. Verificarea fiscală finală rămâne la contabil și furnizorul casei fiscale.",
       },
       {
         question: "franchisetech generează QR-ul de pe bon?",
         answer:
-          "Nu. QR-ul este generat de casa fiscală certificată. franchisetech trimite datele vânzării către FiscalNet; dispozitivul fiscal tipărește bonul conform firmware-ului instalat.",
+          "Nu. QR-ul este generat de casa fiscală certificată. franchisetech trimite datele vânzării către driverul fiscal; dispozitivul fiscal tipărește bonul conform firmware-ului instalat.",
       },
       {
         question: "Ce trebuie să verific pentru QR?",
         answer:
-          "Întreabă furnizorul autorizat dacă modelul casei tale fiscale are firmware QR disponibil, apoi testează o vânzare reală cu FiscalNet înainte de termenul ANAF.",
+          "Întreabă furnizorul autorizat dacă modelul casei tale fiscale are firmware QR disponibil, apoi testează o vânzare reală cu driverul fiscal înainte de termenul ANAF.",
       },
       {
         question: "Ce se întâmplă la finalul zilei?",
@@ -269,11 +446,11 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       {
         question: "Înlocuiește franchisetech contabilul?",
         answer:
-          "Nu. franchisetech organizează vânzări, TVA, FiscalNet și rapoarte operaționale. Contabilul verifică obligațiile fiscale și documentele oficiale.",
+          "Nu. franchisetech organizează vânzări, TVA, driver fiscal și rapoarte operaționale. Contabilul verifică obligațiile fiscale și documentele oficiale.",
       },
     ],
     related: [
-      { label: "Ghid FiscalNet România", href: "/help/romania-fiscalnet" },
+      { label: "Ghid driver fiscal România", href: "/help/romania-fiscalnet" },
       { label: "POS pentru România", href: "/industries/romania" },
       { label: "Raport Z și închidere zilnică", href: "/features/z-report" },
     ],
@@ -293,7 +470,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       "Balanță cantitativ-valorică — stoc inițial/final per produs",
       "Raport de gestiune — raport complet mișcări stoc cu defalcare TVA",
       "Export Saga XML — NIR și vânzări în format compatibil Saga",
-      "Defalcare TVA pe cote (21%, 11%, 5%, 0%)",
+      "Defalcare TVA pe cote (21%, 11%, 0%)",
     ],
     sections: [
       {
@@ -310,7 +487,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         title: "Raport de gestiune",
-        body: "Raportul complet de inventar care combină toate mișcările în ordine cronologică: stoc inițial, intrări NIR, consum, valori vânzări din Raport Z și stoc final — defalcat pe coloane TVA (21%, 11%, 5%, 0%).",
+        body: "Raportul complet de inventar care combină toate mișcările în ordine cronologică: stoc inițial, intrări NIR, consum, valori vânzări din Raport Z și stoc final — defalcat pe coloane TVA (21%, 11%, 0%).",
       },
       {
         title: "Export Saga XML",
@@ -389,17 +566,17 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     ],
   },
   romania: {
-    title: "Program de gestiune HoReCa România — FiscalNet, TVA, rapoarte contabile",
-    metaTitle: "POS România | FiscalNet, NIR, Bon consum, Balanță, Export Saga | franchisetech",
+    title: "Program de gestiune HoReCa România — Driver Fiscal, TVA, rapoarte contabile",
+    metaTitle: "POS România | Driver Fiscal, NIR, Bon consum, Balanță, Export Saga | franchisetech",
     description:
-      "franchisetech pentru cafenele și restaurante din România: POS în lei, FiscalNet, NIR, Bon de consum, Balanță cantitativ-valorică, Raport de gestiune și export Saga XML în planurile eligibile.",
+      "franchisetech pentru cafenele și restaurante din România: POS în lei, driver fiscal, NIR, Bon de consum, Balanță cantitativ-valorică, Raport de gestiune și export Saga XML în planurile eligibile.",
     h1: "POS și rapoarte contabile pentru afaceri din România",
     intro:
-      "franchisetech este configurat pentru piața românească: monedă lei (RON), cote TVA standard, integrare FiscalNet și pachetul complet de rapoarte pentru contabil — Bon de consum, Balanță, Raport de gestiune și export Saga.",
+      "franchisetech este configurat pentru piața românească: monedă lei (RON), cote TVA standard, integrare cu driverul fiscal și pachetul complet de rapoarte pentru contabil — Bon de consum, Balanță, Raport de gestiune și export Saga.",
     bullets: [
       "Afișaj în lei (RON) — POS, rapoarte, bonuri",
-      "Cote TVA românești: 21%, 11%, 5%, 0%",
-      "Integrare FiscalNet pentru bonuri fiscale",
+      "Cote TVA românești: 21%, 11%, 0%",
+      "Integrare driver fiscal pentru bonuri fiscale",
       "Registru de casă din Raport Z",
       "Bon de consum, Balanță cantitativ-valorică, Raport de gestiune",
       "Export Saga XML pentru NIR și vânzări",
@@ -408,11 +585,11 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     sections: [
       {
         title: "Monedă și TVA pentru România",
-        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 21%, TVA Redus 11%, TVA Super-redus 5% și Scutit 0%. Cotele sunt editabile oricând.",
+        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 21%, TVA Redus 11% și Scutit 0%. Cotele sunt editabile oricând.",
       },
       {
-        title: "Integrare FiscalNet completă",
-        body: "franchisetech se conectează la driver-ul FiscalNet pentru emiterea bonurilor fiscale. Suportă metodele de plată mapate (cod 1–8) și transmite reducerile per articol ca comandă DP^.",
+        title: "Integrare driver fiscal completă",
+        body: "franchisetech se conectează la driverul FiscalNet (driverfiscal.ro) pentru emiterea bonurilor fiscale. Suportă metodele de plată mapate (cod 1–8) și transmite reducerile per articol ca comandă DP^.",
       },
       {
         title: "Rapoarte pentru contabil",
@@ -430,7 +607,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
           "Registru de casă, Bon de consum, Balanță cantitativ-valorică, Raport de gestiune și export Saga XML. Disponibile în secțiunea Rapoarte după ce aveți achiziții, vânzări și rețete configurate.",
       },
       {
-        question: "Funcționează cu FiscalNet?",
+        question: "Funcționează cu driverul fiscal?",
         answer:
           "Da, când este activat pe stația de casă. franchisetech trimite comenzi S^ pentru articole, DP^ pentru reduceri și P^ pentru plăți.",
       },

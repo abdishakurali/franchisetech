@@ -2,6 +2,7 @@ import { formatMoney } from "@/lib/kitchenops/metrics";
 import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { buildConsumPdfCopy } from "@/lib/reports/consum-copy";
 import {
   fetchStockMovements,
   stockMovementQty,
@@ -29,7 +30,15 @@ export async function GET(req: Request) {
     to: dayEnd,
   });
 
-  const aggregated = new Map<string, { name: string; unit: string; quantity: number; unitCost: number; totalCost: number }>();
+  // unitCost/totalCost only ever reflect the KNOWN-cost portion of a
+  // product's movements — a missing historical cost is never filled in
+  // from today's price. hasGap marks a product with at least one
+  // contributing movement that had no recorded cost, so its totalCost is a
+  // floor, not the complete figure; see footnote below.
+  const aggregated = new Map<
+    string,
+    { name: string; unit: string; quantity: number; unitCost: number | null; totalCost: number; hasGap: boolean }
+  >();
   for (const m of movements) {
     const prod = stockMovementProduct(m);
     const productName = prod?.name ?? "—";
@@ -37,19 +46,29 @@ export async function GET(req: Request) {
     const qty = Math.abs(stockMovementQty(m));
     const unitCost = stockMovementUnitCost(m);
 
-    const existing = aggregated.get(productName);
-    if (existing) {
-      existing.quantity += qty;
+    const existing = aggregated.get(productName) ?? {
+      name: productName,
+      unit,
+      quantity: 0,
+      unitCost: null,
+      totalCost: 0,
+      hasGap: false,
+    };
+    existing.quantity += qty;
+    if (unitCost != null) {
       existing.totalCost += qty * unitCost;
-      if (unitCost > 0) existing.unitCost = unitCost;
+      existing.unitCost = unitCost;
     } else {
-      aggregated.set(productName, { name: productName, unit, quantity: qty, unitCost, totalCost: qty * unitCost });
+      existing.hasGap = true;
     }
+    aggregated.set(productName, existing);
   }
 
   const items = Array.from(aggregated.values()).sort((a, b) => a.name.localeCompare(b.name));
+  const copy = buildConsumPdfCopy();
   const money = (v: number) => formatMoney(v, currency);
   const totalValue = items.reduce((s, i) => s + i.totalCost, 0);
+  const hasAnyGap = items.some((i) => i.hasGap);
 
   const { data: bcNum } = await supabase.rpc("assign_bc_number", { p_org_id: orgId, p_from: from, p_to: to });
   const documentNumber = (bcNum as string | null) ?? `BC-${from.replace(/-/g, "")}`;
@@ -59,33 +78,44 @@ export async function GET(req: Request) {
     product: item.name,
     unit: item.unit,
     quantity: item.quantity.toFixed(2),
-    unitCost: money(item.unitCost),
-    totalCost: money(item.totalCost),
+    unitCost: item.unitCost != null ? money(item.unitCost) : "—",
+    totalCost: item.unitCost != null ? `${money(item.totalCost)}${item.hasGap ? ` (${copy.partialMarker})` : ""}` : "—",
   }));
-  pdfRows.push({ nr: "", product: "TOTAL", unit: "", quantity: "", unitCost: "", totalCost: money(totalValue), _rowStyle: "total" });
+  pdfRows.push({
+    nr: "",
+    product: copy.total,
+    unit: "",
+    quantity: "",
+    unitCost: "",
+    totalCost: `${money(totalValue)}${hasAnyGap ? ` (${copy.partialMarker})` : ""}`,
+    _rowStyle: "total",
+  });
 
   const doc = ReportPdfDocument({
     companyName: org?.name ?? "franchisetech",
     companyCui: org?.fiscalnet_cif ?? undefined,
-    title: "Bon de Consum",
+    title: copy.title,
     subtitle: `Document nr. ${documentNumber}`,
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
     generatedAt: new Date().toLocaleString("ro-RO"),
     summary: [
-      { label: "Articole", value: String(items.length) },
-      { label: "Valoare totală", value: money(totalValue) },
+      { label: copy.itemCount, value: String(items.length) },
+      { label: copy.totalValue, value: money(totalValue) },
     ],
+    footnote: hasAnyGap
+      ? copy.costGapNote
+      : undefined,
     columns: [
-      { key: "nr", label: "Nr.", align: "right", width: "6%" },
-      { key: "product", label: "Produs", width: "36%" },
-      { key: "unit", label: "UM", width: "10%" },
-      { key: "quantity", label: "Cantitate", align: "right", width: "16%" },
-      { key: "unitCost", label: "Cost unitar", align: "right", width: "16%" },
-      { key: "totalCost", label: "Cost total", align: "right", width: "16%" },
+      { key: "nr", label: copy.columns.rowNo, align: "right", width: "6%" },
+      { key: "product", label: copy.columns.product, width: "36%" },
+      { key: "unit", label: copy.columns.unit, width: "10%" },
+      { key: "quantity", label: copy.columns.quantity, align: "right", width: "16%" },
+      { key: "unitCost", label: copy.columns.unitCost, align: "right", width: "16%" },
+      { key: "totalCost", label: copy.columns.totalCost, align: "right", width: "16%" },
     ],
     rows: pdfRows,
-    signatureLabels: ["Predător (bucătărie)", "Primitor"],
+    signatureLabels: [...copy.signatureLabels],
   });
 
   return renderReportPdfResponse(doc, `bon-consum-${from}-${to}.pdf`);

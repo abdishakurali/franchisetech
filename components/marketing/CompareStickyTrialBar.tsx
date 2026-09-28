@@ -16,14 +16,14 @@ export function CompareStickyTrialBar({
   const t = useMarketingMessages();
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-4px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm print:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-4 py-3 shadow-[0_-4px_24px_rgba(15,23,42,0.08)] backdrop-blur-sm print:hidden">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 sm:flex-row">
-        <p className="text-center text-sm font-medium text-slate-800 sm:text-left">
+        <p className="text-center text-sm font-medium text-foreground sm:text-left">
           {t.cta.parallelTrial}
         </p>
         <Link
           href={compareSignupHref(competitorSlug, locale)}
-          className="inline-flex shrink-0 items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+          className="inline-flex shrink-0 items-center gap-2 rounded-full bg-brass px-5 py-2.5 text-sm font-semibold text-ink hover:bg-brass/90"
         >
           {t.cta.startTrial} <ArrowRight className="h-4 w-4" />
         </Link>

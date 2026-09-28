@@ -8,6 +8,8 @@ import {
 
 export async function middleware(request: NextRequest) {
   const lang = request.nextUrl.searchParams.get('lang')
+  // Make explicit language links visible to Server Components on this request.
+  if (isMarketingLocale(lang)) request.cookies.set(MARKETING_LOCALE_COOKIE, lang)
   const response = await updateSession(request)
   const cookieOptions = {
     path: '/',

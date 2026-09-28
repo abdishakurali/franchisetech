@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { ArrowRight, CheckCircle2, Scale, CreditCard, ListChecks, MapPin, Wifi, type LucideIcon } from "lucide-react";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 
 export const metadata: Metadata = {
   title: "Ghiduri POS și închidere zilnică | franchisetech",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Ghiduri POS și închidere zilnică | franchisetech",
     description:
-      "Practical guides and checklists for cafés, restaurants, retail, and service businesses using franchisetech.",
+      "Ghiduri practice și liste de verificare pentru cafenele, restaurante, retail și afaceri de servicii care folosesc franchisetech.",
   },
 };
 
@@ -30,113 +31,113 @@ type ResourceCard = {
 const GETTING_STARTED: ResourceCard[] = [
   {
     icon: "✅",
-    category: "Getting started",
-    title: "POS setup checklist",
-    summary: "Step-by-step checklist to get your till ready — products, staff, payments, receipts, and a test sale.",
-    readTime: "3 min read",
+    category: "Primii pași",
+    title: "Listă de verificare configurare POS",
+    summary: "Listă pas cu pas ca să pregătiți casa de marcat — produse, personal, plăți, bonuri și o vânzare de test.",
+    readTime: "3 min citire",
     href: "#pos-setup",
-    cta: "Read checklist",
+    cta: "Citește lista",
   },
   {
     icon: "🛒",
-    category: "Getting started",
-    title: "Product and menu setup guide",
-    summary: "How to add products, create categories, set prices and VAT rates, and toggle POS availability.",
-    readTime: "4 min read",
+    category: "Primii pași",
+    title: "Ghid configurare produse și meniu",
+    summary: "Cum adăugați produse, creați categorii, setați prețuri și cote TVA și activați disponibilitatea în POS.",
+    readTime: "4 min citire",
     href: "#product-setup",
-    cta: "Read guide",
+    cta: "Citește ghidul",
   },
   {
     icon: "👥",
-    category: "Getting started",
-    title: "Staff permissions checklist",
-    summary: "Set the right roles for cashiers and managers — refunds, cash movements, settings, and audit access.",
-    readTime: "2 min read",
+    category: "Primii pași",
+    title: "Listă de verificare permisiuni personal",
+    summary: "Setați rolurile potrivite pentru casieri și manageri — retururi, mișcări de numerar, setări și acces la audit.",
+    readTime: "2 min citire",
     href: "#staff-permissions",
-    cta: "Read checklist",
+    cta: "Citește lista",
   },
   {
     icon: "🗓️",
-    category: "Getting started",
-    title: "Daily close checklist",
-    summary: "What to do at end of day — count cash, review sales, check refunds, and export totals.",
-    readTime: "2 min read",
+    category: "Primii pași",
+    title: "Listă de verificare închidere zilnică",
+    summary: "Ce faceți la finalul zilei — numărați numerarul, revizuiți vânzările, verificați retururile și exportați totalurile.",
+    readTime: "2 min citire",
     href: "#daily-close",
-    cta: "Read checklist",
+    cta: "Citește lista",
   },
   {
     icon: "🔁",
-    category: "Getting started",
+    category: "Primii pași",
     title: "Cum migrezi de la Ebriza la franchisetech",
-    summary: "Exportă produsele, importă în franchisetech, rulează 15 zile în paralel și compară costul real.",
-    readTime: "6 min read",
-    href: "/resources/switch-from-ebriza",
-    cta: "Read guide",
+    summary: "Comparație de preț reală și cum rulați un test paralel gratuit înainte să mutați fluxul principal.",
+    readTime: "6 min citire",
+    href: "/compare/ebriza",
+    cta: "Citește ghidul",
   },
   {
     icon: "🧾",
-    category: "Getting started",
+    category: "Primii pași",
     title: "SmartBill + franchisetech — folosite împreună",
     summary: "SmartBill rămâne pentru facturare; franchisetech acoperă POS, stoc, NIR și închiderea de zi.",
-    readTime: "4 min read",
-    href: "/resources/smartbill-si-franchisetech",
-    cta: "Read guide",
+    readTime: "4 min citire",
+    href: "/compare/smartbill",
+    cta: "Citește ghidul",
   },
 ];
 
 const INDUSTRY_GUIDES: ResourceCard[] = [
-  { icon: "☕", category: "Industry guides", title: "POS guide for cafés",            summary: "How franchisetech fits the daily rhythm of a busy café counter — orders, cash, and close-of-day.",       readTime: "5 min read", href: "#guide-cafes",        cta: "Read guide" },
-  { icon: "🥡", category: "Industry guides", title: "POS guide for takeaways",       summary: "Fast order entry, discounts, refunds, and cash controls for high-volume quick-service businesses.",        readTime: "4 min read", href: "#guide-takeaways",    cta: "Read guide" },
-  { icon: "🥐", category: "Industry guides", title: "POS guide for bakeries",        summary: "Sell fresh items, handle morning rushes, track best sellers, and manage opening stock each day.",          readTime: "4 min read", href: "#guide-bakeries",     cta: "Read guide" },
-  { icon: "🚚", category: "Industry guides", title: "POS guide for food trucks",     summary: "Compact POS for mobile setups — works as a PWA with manual fallback and simple daily reporting.",          readTime: "4 min read", href: "#guide-foodtrucks",   cta: "Read guide" },
-  { icon: "🛍️", category: "Industry guides", title: "POS guide for retail shops",   summary: "Product catalogue, discounts, receipts, staff permissions, and daily sales dashboard for retailers.",      readTime: "4 min read", href: "#guide-retail",       cta: "Read guide" },
-  { icon: "✂️", category: "Industry guides", title: "POS guide for salons & barbers", summary: "Service and product sales, staff attribution, cash tracking, and customer-friendly checkout.",           readTime: "4 min read", href: "#guide-salons",       cta: "Read guide" },
-  { icon: "🏢", category: "Industry guides", title: "POS guide for franchises",      summary: "Standardise menus, roles, and reporting across multiple locations with franchisetech.",                    readTime: "5 min read", href: "#guide-franchises",   cta: "Read guide" },
+  { icon: "☕", category: "Ghiduri pe domenii", title: "Ghid POS pentru cafenele",            summary: "Cum se potrivește franchisetech cu ritmul zilnic al unei cafenele aglomerate — comenzi, numerar și închidere de zi.",       readTime: "5 min citire", href: "#guide-cafes",        cta: "Citește ghidul" },
+  { icon: "🥡", category: "Ghiduri pe domenii", title: "Ghid POS pentru takeaway",       summary: "Introducere rapidă a comenzilor, reduceri, retururi și control de numerar pentru afaceri cu volum mare.",        readTime: "4 min citire", href: "#guide-takeaways",    cta: "Citește ghidul" },
+  { icon: "🥐", category: "Ghiduri pe domenii", title: "Ghid POS pentru patiserii/brutării",        summary: "Vindeți produse proaspete, gestionați aglomerația de dimineață, urmăriți cele mai vândute produse și stocul de deschidere.",          readTime: "4 min citire", href: "#guide-bakeries",     cta: "Citește ghidul" },
+  { icon: "🚚", category: "Ghiduri pe domenii", title: "Ghid POS pentru food truck",     summary: "POS compact pentru configurări mobile — funcționează ca PWA, cu variantă manuală de rezervă și raportare zilnică simplă.",          readTime: "4 min citire", href: "#guide-foodtrucks",   cta: "Citește ghidul" },
+  { icon: "🛍️", category: "Ghiduri pe domenii", title: "Ghid POS pentru magazine retail",   summary: "Catalog de produse, reduceri, bonuri, permisiuni personal și tablou de bord zilnic pentru magazine.",      readTime: "4 min citire", href: "#guide-retail",       cta: "Citește ghidul" },
+  { icon: "✂️", category: "Ghiduri pe domenii", title: "Ghid POS pentru saloane și frizerii", summary: "Vânzare de servicii și produse, atribuire pe angajat, urmărire numerar și checkout prietenos pentru clienți.",           readTime: "4 min citire", href: "#guide-salons",       cta: "Citește ghidul" },
+  { icon: "🏢", category: "Ghiduri pe domenii", title: "Ghid POS pentru francize",      summary: "Standardizați meniuri, roluri și raportare pe mai multe locații cu franchisetech.",                    readTime: "5 min citire", href: "#guide-franchises",   cta: "Citește ghidul" },
 ];
 
 const OPS_CHECKLISTS: ResourceCard[] = [
-  { icon: "🌅", category: "Operations", title: "Opening checklist",                  summary: "Start the day right — open the till, enter opening cash, check products, and brief staff.",                readTime: "2 min read", href: "#opening-checklist",  cta: "View checklist" },
-  { icon: "🌙", category: "Operations", title: "Closing checklist",                  summary: "Close the till, count cash, reconcile expected vs actual, and export your daily totals.",                  readTime: "2 min read", href: "#closing-checklist",  cta: "View checklist" },
-  { icon: "💵", category: "Operations", title: "Cash in / cash out checklist",       summary: "Record all cash movements during the day — float top-ups, supplier payments, and petty cash.",            readTime: "2 min read", href: "#cash-inout",         cta: "View checklist" },
-  { icon: "↩️", category: "Operations", title: "Refunds and voids checklist",        summary: "How to handle refunds and voids correctly, with the right permissions and clear records.",                readTime: "3 min read", href: "#refunds-voids",      cta: "View checklist" },
-  { icon: "🔄", category: "Operations", title: "Staff shift handover checklist",     summary: "What to communicate between shifts — cash on hand, open orders, issues, and notes.",                      readTime: "2 min read", href: "#shift-handover",     cta: "View checklist" },
-  { icon: "📊", category: "Operations", title: "End-of-day reporting checklist",     summary: "Review daily sales, VAT totals, top products, refunds, and export your Z-report.",                        readTime: "3 min read", href: "#eod-reporting",      cta: "View checklist" },
+  { icon: "🌅", category: "Operațiuni", title: "Listă de verificare deschidere",                  summary: "Începeți ziua corect — deschideți casa, introduceți numerarul de deschidere, verificați produsele și informați echipa.",                readTime: "2 min citire", href: "#opening-checklist",  cta: "Vezi lista" },
+  { icon: "🌙", category: "Operațiuni", title: "Listă de verificare închidere",                  summary: "Închideți casa, numărați numerarul, reconciliați suma așteptată cu cea reală și exportați totalurile zilnice.",                  readTime: "2 min citire", href: "#closing-checklist",  cta: "Vezi lista" },
+  { icon: "💵", category: "Operațiuni", title: "Listă de verificare intrări/ieșiri numerar",       summary: "Înregistrați toate mișcările de numerar din timpul zilei — alimentare fond de casă, plăți furnizori și cheltuieli mărunte.",            readTime: "2 min citire", href: "#cash-inout",         cta: "Vezi lista" },
+  { icon: "↩️", category: "Operațiuni", title: "Listă de verificare retururi și anulări",        summary: "Cum gestionați corect retururile și anulările, cu permisiunile potrivite și înregistrări clare.",                readTime: "3 min citire", href: "#refunds-voids",      cta: "Vezi lista" },
+  { icon: "🔄", category: "Operațiuni", title: "Listă de verificare predare tură",     summary: "Ce trebuie comunicat între ture — numerar disponibil, comenzi deschise, probleme și observații.",                      readTime: "2 min citire", href: "#shift-handover",     cta: "Vezi lista" },
+  { icon: "📊", category: "Operațiuni", title: "Listă de verificare raportare de final de zi",     summary: "Revizuiți vânzările zilnice, totalurile TVA, produsele cele mai vândute, retururile și exportați raportul Z.",                        readTime: "3 min citire", href: "#eod-reporting",      cta: "Vezi lista" },
 ];
 
 const HARDWARE: ResourceCard[] = [
-  { icon: "🖨️",  category: "Hardware & payments", title: "Receipt printer basics",        summary: "What receipt printers work with franchisetech, and how to configure them for LAN or USB connections.",            readTime: "4 min read", href: "#receipt-printer", cta: "Read guide" },
-  { icon: "💳",  category: "Hardware & payments", title: "Payment terminal planning",     summary: "How to plan for card payment terminals alongside franchisetech — current state and what to expect.",               readTime: "3 min read", href: "#payment-terminals", cta: "Read guide" },
-  { icon: "🔍",  category: "Hardware & payments", title: "Hardware compatibility checklist", summary: "How to verify devices and fiscal hardware before going live.", readTime: "3 min read", href: "#hardware", cta: "View checklist" },
+  { icon: "🖨️",  category: "Hardware și plăți", title: "Bazele imprimantei de bonuri",        summary: "Ce imprimante de bonuri funcționează cu franchisetech și cum le configurați pe conexiune LAN sau USB.",            readTime: "4 min citire", href: "#receipt-printer", cta: "Citește ghidul" },
+  { icon: "💳",  category: "Hardware și plăți", title: "Planificare terminal de plată",     summary: "Cum planificați terminale de plată cu cardul alături de franchisetech — stadiul actual și la ce să vă așteptați.",               readTime: "3 min citire", href: "#payment-terminals", cta: "Citește ghidul" },
+  { icon: "🔍",  category: "Hardware și plăți", title: "Listă de verificare compatibilitate hardware", summary: "Cum verificați dispozitivele și hardware-ul fiscal înainte de lansare.", readTime: "3 min citire", href: "#hardware", cta: "Vezi lista" },
 ];
 
 const GROWTH: ResourceCard[] = [
-  { icon: "📈", category: "Growth & reporting", title: "Understanding your daily sales",      summary: "How to read your daily sales report, spot trends, and act on what franchisetech shows you.",               readTime: "4 min read", href: "#daily-sales",        cta: "Read guide" },
-  { icon: "🏆", category: "Growth & reporting", title: "Tracking best-selling products",      summary: "Use product performance reports to identify your top sellers and adjust your menu or stock.",              readTime: "3 min read", href: "#best-sellers",       cta: "Read guide" },
-  { icon: "🧑‍💼", category: "Growth & reporting", title: "Staff accountability with POS",    summary: "How staff roles, transaction records, and audit visibility create accountability across your team.",          readTime: "3 min read", href: "#staff-accountability", cta: "Read guide" },
-  { icon: "🏬", category: "Growth & reporting", title: "Multi-location reporting",            summary: "How franchisetech structures reporting across multiple business locations or franchise branches.",           readTime: "4 min read", href: "#multi-location",     cta: "Read guide" },
-  { icon: "🚀", category: "Growth & reporting", title: "Preparing for franchise growth",      summary: "What to standardise before expanding — menus, roles, reporting, and operational workflows.",               readTime: "5 min read", href: "#franchise-growth",   cta: "Read guide" },
+  { icon: "📈", category: "Creștere și rapoarte", title: "Înțelegerea vânzărilor zilnice",      summary: "Cum citiți raportul zilnic de vânzări, identificați tendințe și acționați pe baza datelor din franchisetech.",               readTime: "4 min citire", href: "#daily-sales",        cta: "Citește ghidul" },
+  { icon: "🏆", category: "Creștere și rapoarte", title: "Urmărirea produselor cele mai vândute",      summary: "Folosiți rapoartele de performanță ca să identificați cele mai vândute produse și să ajustați meniul sau stocul.",              readTime: "3 min citire", href: "#best-sellers",       cta: "Citește ghidul" },
+  { icon: "🧑‍💼", category: "Creștere și rapoarte", title: "Responsabilizarea personalului prin POS",    summary: "Cum rolurile personalului, înregistrările tranzacțiilor și vizibilitatea auditului creează responsabilizare în echipă.",          readTime: "3 min citire", href: "#staff-accountability", cta: "Citește ghidul" },
+  { icon: "🏬", category: "Creștere și rapoarte", title: "Raportare pentru mai multe locații",            summary: "Cum structurează franchisetech raportarea pe mai multe locații sau puncte de lucru.",           readTime: "4 min citire", href: "#multi-location",     cta: "Citește ghidul" },
+  { icon: "🚀", category: "Creștere și rapoarte", title: "Pregătirea pentru extindere",      summary: "Ce trebuie standardizat înainte de extindere — meniuri, roluri, raportare și fluxuri operaționale.",               readTime: "5 min citire", href: "#franchise-growth",   cta: "Citește ghidul" },
 ];
 
 const FAQ = [
   {
-    q: "What businesses is franchisetech built for?",
-    a: "franchisetech is built for cafés, restaurants, takeaways, bakeries, food trucks, retail shops, salons, barbers, and franchise operators. Any growing local business that needs a practical POS and clear daily records is a good fit.",
+    q: "Pentru ce afaceri este construit franchisetech?",
+    a: "franchisetech este construit pentru cafenele, restaurante, takeaway, patiserii/brutării, food truck-uri, magazine retail, saloane, frizerii și operatori de francize. Orice afacere locală în creștere care are nevoie de un POS practic și evidențe zilnice clare se potrivește.",
   },
   {
-    q: "Does franchisetech work on tablets?",
-    a: "Yes. The POS is a Progressive Web App (PWA) that works in supported modern browsers on tablet or desktop. Fiscal hardware compatibility must be verified during setup.",
+    q: "Funcționează franchisetech pe tabletă?",
+    a: "Da. POS-ul este o aplicație web progresivă (PWA) care funcționează în browsere moderne suportate, pe tabletă sau desktop. Compatibilitatea cu hardware-ul fiscal trebuie verificată la configurare.",
   },
   {
-    q: "Is franchisetech suitable for multiple locations?",
-    a: "Yes. Each location is a separate workspace with its own products, staff, till sessions, and reports. Owners can run consistent product catalogues and reporting across locations.",
+    q: "franchisetech este potrivit pentru mai multe locații?",
+    a: "Da. Fiecare locație este un workspace separat, cu produse, personal, sesiuni de casă și rapoarte proprii. Proprietarii pot păstra cataloage de produse și raportare consistente pe toate locațiile.",
   },
   {
-    q: "Can I track ingredients and calculate recipe margins?",
-    a: "Yes. Add ingredients as stock items, connect them to recipes, and franchisetech calculates cost per portion, gross margin percentage, and how many portions you can make from current stock.",
+    q: "Pot urmări ingredientele și calcula marjele pe rețete?",
+    a: "Da. Adăugați ingredientele ca articole de stoc, legați-le de rețete, iar franchisetech calculează costul per porție, procentul marjei brute și câte porții puteți face din stocul curent.",
   },
   {
-    q: "Can I import my existing products?",
-    a: "Yes. Download a CSV template, fill in your products, and import them. Imports are supported for products, ingredients, suppliers, purchases, recipes, and customers.",
+    q: "Pot importa produsele pe care le am deja?",
+    a: "Da. Descărcați un șablon CSV, completați produsele și importați-le. Importul este disponibil pentru produse, ingrediente, furnizori, achiziții, rețete și clienți.",
   },
 ];
 
@@ -146,17 +147,17 @@ function Card({ card }: { card: ResourceCard }) {
   return (
     <Link
       href={card.href}
-      className="flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-200 hover:shadow-md"
+      className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-sm transition hover:border-brass/40 hover:shadow-md"
     >
       <div className="mb-3 flex items-center justify-between">
         <span className="text-2xl" aria-hidden="true">{card.icon}</span>
-        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">{card.category}</span>
+        <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground">{card.category}</span>
       </div>
-      <h3 className="font-semibold text-slate-900">{card.title}</h3>
-      <p className="mt-1.5 flex-1 text-sm leading-6 text-slate-500">{card.summary}</p>
+      <h3 className="font-semibold text-foreground">{card.title}</h3>
+      <p className="mt-1.5 flex-1 text-sm leading-6 text-muted-foreground">{card.summary}</p>
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs text-slate-400">{card.readTime}</span>
-        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600">
+        <span className="text-xs text-muted-foreground">{card.readTime}</span>
+        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-brass">
           {card.cta} <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
         </span>
       </div>
@@ -167,16 +168,16 @@ function Card({ card }: { card: ResourceCard }) {
 function SectionHeader({ id, title, subtitle }: { id?: string; title: string; subtitle?: string }) {
   return (
     <div id={id} className="mb-8 scroll-mt-24">
-      <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
-      {subtitle && <p className="mt-2 text-slate-500">{subtitle}</p>}
+      <h2 className="text-2xl font-bold text-foreground">{title}</h2>
+      {subtitle && <p className="mt-2 text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
 
 function CheckItem({ text }: { text: string }) {
   return (
-    <li className="flex items-start gap-2 text-sm text-slate-700">
-      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" aria-hidden="true" />
+    <li className="flex items-start gap-2 text-sm text-foreground">
+      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brass" aria-hidden="true" />
       {text}
     </li>
   );
@@ -186,29 +187,29 @@ function CheckItem({ text }: { text: string }) {
 
 export default function ResourcesPage() {
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       {/* ── HERO ── */}
-      <section className="bg-white px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-card px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">Resources</p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-            Resources for running a better local business
+          <p className="text-sm font-semibold uppercase tracking-wide text-brass">Resurse</p>
+          <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            Resurse ca să conduceți mai bine afacerea
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-slate-600">
-            Guides, checklists, and practical advice for cafés, restaurants, retailers, and service teams using franchisetech.
+          <p className="mt-5 max-w-2xl text-lg text-mid">
+            Ghiduri, liste de verificare și sfaturi practice pentru cafenele, restaurante, magazine și echipe de servicii care folosesc franchisetech.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             {[
-              ["#getting-started", "Getting started"],
-              ["#industry-guides", "Industry guides"],
-              ["#operations",      "Operations"],
-              ["#hardware",        "Hardware & payments"],
-              ["#growth",          "Growth & reporting"],
+              ["#getting-started", "Primii pași"],
+              ["#industry-guides", "Ghiduri pe domenii"],
+              ["#operations",      "Operațiuni"],
+              ["#hardware",        "Hardware și plăți"],
+              ["#growth",          "Creștere și rapoarte"],
             ].map(([href, label]) => (
               <a
                 key={href}
                 href={href}
-                className="rounded-full border border-slate-200 bg-slate-50 px-4 py-1.5 text-sm font-medium text-slate-600 hover:border-blue-300 hover:text-blue-700"
+                className="rounded-full border border-border bg-secondary px-4 py-1.5 text-sm font-medium text-mid hover:border-brass/40 hover:text-brass"
               >
                 {label}
               </a>
@@ -221,30 +222,36 @@ export default function ResourcesPage() {
       <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <SectionHeader
-            title="POS & restaurant guides (Romania & international)"
-            subtitle="Searchable guides with comparisons, checklists, and honest vendor evaluations."
+            title="Ghiduri POS și restaurant (România și internațional)"
+            subtitle="Ghiduri căutabile cu comparații, liste de verificare și evaluări oneste ale furnizorilor."
           />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              { href: "/compare", title: "Compare POS software", summary: "SmartBill, Saga, RezoSoft, Square — logos and feature tables.", image: "/marketing/pos-hero.png" },
-              { href: "/resources/pos-software-romania", title: "Software POS România", summary: "FiscalNet, TVA, stoc și raport Z pentru restaurante.", image: "/marketing/pos-hero.png" },
-              { href: "/resources/choose-pos-romania", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", image: "/marketing/reports-zreport.png" },
-              { href: "/industries/romania", title: "POS pentru România", summary: "lei, TVA, FiscalNet, echipă nelimitată.", image: "/marketing/reports-zreport.png" },
-              { href: "/compare/smartbill", title: "vs SmartBill", summary: "Facturare vs operațiuni zilnice — comparație onestă.", image: "/compare/logos/smartbill.png" },
-              { href: "/help/romania-fiscalnet", title: "Ghid FiscalNet", summary: "Configurare pas cu pas pentru bonuri fiscale.", image: "/marketing/reports-zreport.png" },
-            ].map((card) => (
+            {(
+              [
+                { href: "/compare", title: "Compară software POS", summary: "SmartBill, Saga, RezoSoft, Square — logo-uri și tabele de funcționalități.", icon: Scale },
+                { href: "/resources/pos-software-romania", title: "Software POS România", summary: "FiscalNet, TVA, stoc și raport Z pentru restaurante.", icon: CreditCard },
+                { href: "/resources/choose-pos-romania", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", icon: ListChecks },
+                { href: "/industries/romania", title: "POS pentru România", summary: "lei, TVA, FiscalNet, echipă nelimitată.", icon: MapPin },
+                { href: "/compare/smartbill", title: "vs SmartBill", summary: "Facturare vs operațiuni zilnice — comparație onestă.", logo: "/compare/logos/smartbill.png" },
+                { href: "/help/romania-fiscalnet", title: "Ghid FiscalNet", summary: "Configurare pas cu pas pentru bonuri fiscale.", icon: Wifi },
+              ] as Array<{ href: string; title: string; summary: string; icon?: LucideIcon; logo?: string }>
+            ).map((card) => (
               <Link
                 key={card.href}
                 href={card.href}
-                className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-blue-300 hover:shadow-md"
+                className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:border-brass/40 hover:shadow-md"
               >
-                <div className="relative aspect-[16/9] bg-slate-100">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={card.image} alt="" className="h-full w-full object-cover object-top opacity-90 transition group-hover:opacity-100" />
+                <div className="relative flex aspect-[16/9] items-center justify-center bg-secondary">
+                  {card.logo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={card.logo} alt="" className="h-10 w-auto opacity-90 transition group-hover:opacity-100" />
+                  ) : (
+                    card.icon && <card.icon className="h-9 w-9 text-brass" strokeWidth={1.5} aria-hidden />
+                  )}
                 </div>
                 <div className="p-5">
-                  <h3 className="font-semibold text-slate-900 group-hover:text-blue-700">{card.title}</h3>
-                  <p className="mt-1.5 text-sm text-slate-500">{card.summary}</p>
+                  <h3 className="font-semibold text-foreground group-hover:text-brass">{card.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{card.summary}</p>
                 </div>
               </Link>
             ))}
@@ -253,12 +260,12 @@ export default function ResourcesPage() {
       </section>
 
       {/* ── GETTING STARTED ── */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-secondary px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <SectionHeader
             id="getting-started"
-            title="Getting started"
-            subtitle="Everything you need to get franchisetech running for your business."
+            title="Primii pași"
+            subtitle="Tot ce aveți nevoie ca să porniți franchisetech pentru afacerea dvs."
           />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {GETTING_STARTED.map((card) => <Card key={card.title} card={card} />)}
@@ -271,8 +278,8 @@ export default function ResourcesPage() {
         <div className="mx-auto max-w-6xl">
           <SectionHeader
             id="industry-guides"
-            title="Industry guides"
-            subtitle="How franchisetech fits the daily operations of specific types of businesses."
+            title="Ghiduri pe domenii"
+            subtitle="Cum se potrivește franchisetech cu operațiunile zilnice ale unor tipuri specifice de afaceri."
           />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {INDUSTRY_GUIDES.map((card) => <Card key={card.title} card={card} />)}
@@ -281,12 +288,12 @@ export default function ResourcesPage() {
       </section>
 
       {/* ── OPERATIONS ── */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-secondary px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <SectionHeader
             id="operations"
-            title="Operations checklists"
-            subtitle="Day-to-day checklists to keep your team and till running consistently."
+            title="Liste de verificare — operațiuni"
+            subtitle="Liste zilnice ca echipa și casa de marcat să funcționeze constant."
           />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {OPS_CHECKLISTS.map((card) => <Card key={card.title} card={card} />)}
@@ -299,8 +306,8 @@ export default function ResourcesPage() {
         <div className="mx-auto max-w-6xl">
           <SectionHeader
             id="hardware"
-            title="Hardware & payments"
-            subtitle="Understand your hardware options, what works, and what to expect."
+            title="Hardware și plăți"
+            subtitle="Înțelegeți opțiunile de hardware, ce funcționează și la ce să vă așteptați."
           />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {HARDWARE.map((card) => <Card key={card.title} card={card} />)}
@@ -309,12 +316,12 @@ export default function ResourcesPage() {
       </section>
 
       {/* ── GROWTH ── */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-secondary px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <SectionHeader
             id="growth"
-            title="Growth & reporting"
-            subtitle="Use franchisetech data to understand performance and plan for growth."
+            title="Creștere și rapoarte"
+            subtitle="Folosiți datele din franchisetech ca să înțelegeți performanța și să planificați creșterea."
           />
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {GROWTH.map((card) => <Card key={card.title} card={card} />)}
@@ -331,241 +338,241 @@ export default function ResourcesPage() {
 
           {/* ── POS SETUP CHECKLIST ── */}
           <article id="pos-setup" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Getting started</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">POS setup checklist</h2>
-            <p className="mt-3 text-slate-600">
-              Follow this checklist when you first set up franchisetech to make sure your till is ready for real use.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Primii pași</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Listă de verificare configurare POS</h2>
+            <p className="mt-3 text-mid">
+              Urmați această listă când configurați franchisetech prima dată, ca să vă asigurați că este pregătit pentru folosirea reală.
             </p>
             <ul className="mt-5 space-y-2">
               {[
-                "Add your business name and details in Settings",
-                "Add your product categories (e.g. Coffee, Food, Drinks)",
-                "Add at least a few products with prices and VAT rates",
-                "Set each product as available in POS if you want it to appear on the till",
-                "Add staff users and assign roles (cashier or manager)",
-                "Set up payment methods (Cash, Card, and any custom types you use)",
-                "Configure VAT rates if you sell items at different rates",
-                "Set up receipt preferences if you use a receipt printer",
-                "Run a test sale and process a test refund to confirm everything works",
-                "Check reports after the test sale to confirm data appears correctly",
+                "Adăugați numele și datele afacerii în Setări",
+                "Adăugați categoriile de produse (ex. Cafea, Mâncare, Băuturi)",
+                "Adăugați cel puțin câteva produse cu prețuri și cote TVA",
+                "Marcați fiecare produs ca disponibil în POS dacă vreți să apară la casă",
+                "Adăugați utilizatori din personal și atribuiți roluri (casier sau manager)",
+                "Configurați metodele de plată (numerar, card și orice tip personalizat folosiți)",
+                "Configurați cotele TVA dacă vindeți articole la cote diferite",
+                "Configurați preferințele de bon dacă folosiți o imprimantă de bonuri",
+                "Rulați o vânzare de test și procesați un retur de test ca să confirmați că totul funcționează",
+                "Verificați rapoartele după vânzarea de test ca să confirmați că datele apar corect",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
 
           {/* ── DAILY CLOSE CHECKLIST ── */}
           <article id="daily-close" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Getting started</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Daily close checklist</h2>
-            <p className="mt-3 text-slate-600">
-              Run through this at the end of each trading day to close correctly and keep your records clean.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Primii pași</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Listă de verificare închidere zilnică</h2>
+            <p className="mt-3 text-mid">
+              Parcurgeți această listă la finalul fiecărei zile de lucru ca să închideți corect și să păstrați evidențe clare.
             </p>
             <ul className="mt-5 space-y-2">
               {[
-                "Review today's sales report — total sales, transaction count, and payment method breakdown",
-                "Count the physical cash in the drawer",
-                "Compare counted cash to the expected cash figure in franchisetech",
-                "Record any cash movements you did not log during the day (cash out, float adjustments)",
-                "Check for any refunds or voids — confirm they were authorised and recorded correctly",
-                "Review staff activity if relevant — who processed transactions, refunds, or cash movements",
-                "Close the till session to lock in the day's records",
-                "Export or screenshot the Z-report / till closing summary for your records",
-                "Note any stock issues or product changes needed for tomorrow",
+                "Revizuiți raportul de vânzări de azi — vânzări totale, număr tranzacții și defalcare pe metodă de plată",
+                "Numărați numerarul fizic din sertar",
+                "Comparați numerarul numărat cu suma așteptată din franchisetech",
+                "Înregistrați orice mișcare de numerar neînregistrată în timpul zilei (ieșiri numerar, ajustări fond de casă)",
+                "Verificați retururile sau anulările — confirmați că au fost autorizate și înregistrate corect",
+                "Revizuiți activitatea personalului dacă e relevant — cine a procesat tranzacții, retururi sau mișcări de numerar",
+                "Închideți sesiunea de casă ca să blocați evidențele zilei",
+                "Exportați sau salvați o captură a raportului Z / rezumatului de închidere pentru evidențele dvs.",
+                "Notați problemele de stoc sau modificările de produse necesare pentru mâine",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
 
           {/* ── STAFF PERMISSIONS ── */}
           <article id="staff-permissions" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Getting started</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Staff permissions checklist</h2>
-            <p className="mt-3 text-slate-600">
-              Set the right access levels for each team member before they start using franchisetech.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Primii pași</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Listă de verificare permisiuni personal</h2>
+            <p className="mt-3 text-mid">
+              Setați nivelurile corecte de acces pentru fiecare membru al echipei înainte să înceapă să folosească franchisetech.
             </p>
             <div className="mt-5 grid gap-6 sm:grid-cols-2">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-                <h3 className="font-semibold text-slate-900">Cashier role</h3>
+              <div className="rounded-xl border border-border bg-secondary p-5">
+                <h3 className="font-semibold text-foreground">Rol casier</h3>
                 <ul className="mt-3 space-y-1.5">
                   {[
-                    "Access to POS register",
-                    "Can process sales and receipts",
-                    "Can apply pre-configured discounts",
-                    "Can record customer details",
-                    "Cannot access settings or financial configuration",
+                    "Acces la casa de marcat",
+                    "Poate procesa vânzări și bonuri",
+                    "Poate aplica reduceri preconfigurate",
+                    "Poate înregistra datele clientului",
+                    "Nu are acces la setări sau configurări financiare",
                   ].map((item) => <CheckItem key={item} text={item} />)}
                 </ul>
               </div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-5">
-                <h3 className="font-semibold text-slate-900">Manager role</h3>
+              <div className="rounded-xl border border-border bg-secondary p-5">
+                <h3 className="font-semibold text-foreground">Rol manager</h3>
                 <ul className="mt-3 space-y-1.5">
                   {[
-                    "All cashier access",
-                    "Can process refunds and voids",
-                    "Can record cash in / cash out movements",
-                    "Access to reports and transaction history",
-                    "Can access settings if permitted by owner",
-                    "Audit log visibility",
+                    "Tot accesul de casier",
+                    "Poate procesa retururi și anulări",
+                    "Poate înregistra intrări/ieșiri de numerar",
+                    "Acces la rapoarte și istoricul tranzacțiilor",
+                    "Poate accesa setările dacă proprietarul permite",
+                    "Vizibilitate jurnal de audit",
                   ].map((item) => <CheckItem key={item} text={item} />)}
                 </ul>
               </div>
             </div>
-            <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
-              <strong>Good practice:</strong> Assign the minimum permissions needed for each role. Review permissions periodically as your team changes.
+            <div className="mt-6 rounded-xl border border-brass/25 bg-accent p-4 text-sm text-foreground">
+              <strong>Bună practică:</strong> Atribuiți minimul de permisiuni necesar pentru fiecare rol. Revizuiți periodic permisiunile pe măsură ce echipa se schimbă.
             </div>
           </article>
 
           {/* ── HARDWARE CHECKLIST ── */}
           <article id="hardware" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Hardware & payments</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">Hardware compatibility checklist</h2>
-            <p className="mt-3 text-slate-600">
-              Confirm supported devices and fiscal hardware during setup before using franchisetech with customers.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Hardware și plăți</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Listă de verificare compatibilitate hardware</h2>
+            <p className="mt-3 text-mid">
+              Confirmați dispozitivele suportate și hardware-ul fiscal la configurare, înainte de a folosi franchisetech cu clienți reali.
             </p>
-            <h3 className="mt-6 font-semibold text-slate-900">Verify before going live</h3>
+            <h3 className="mt-6 font-semibold text-foreground">Verificați înainte de lansare</h3>
             <ul className="mt-3 space-y-2">
               {[
-                "A supported modern browser on the till device",
-                "Stable local network access where fiscal hardware requires it",
-                "A compatible Romanian fiscal cash register or printer",
-                "FiscalNet installed and tested locally for fiscal receipts",
-                "Correct VAT groups and payment mappings",
+                "Un browser modern suportat pe dispozitivul de casă",
+                "Acces stabil la rețeaua locală acolo unde hardware-ul fiscal îl cere",
+                "O casă de marcat sau imprimantă fiscală compatibilă, certificată în România",
+                "FiscalNet instalat și testat local pentru bonuri fiscale",
+                "Grupe TVA și mapări de plată corecte",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
             <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-800">
-              <strong>Note:</strong> franchisetech does not claim compatibility with every device or fiscal register. Confirm your exact setup with support.
+              <strong>Notă:</strong> franchisetech nu pretinde compatibilitate cu orice dispozitiv sau casă de marcat fiscală. Confirmați configurația exactă cu echipa de suport.
             </div>
           </article>
 
           {/* ── INDUSTRY: CAFÉS ── */}
           <article id="guide-cafes" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Industry guide</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">POS guide for cafés</h2>
-            <p className="mt-3 text-slate-600">
-              franchisetech fits naturally into the rhythm of a café counter — fast order entry, cash and card tracking, and a clear end-of-day close.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru cafenele</h2>
+            <p className="mt-3 text-mid">
+              franchisetech se potrivește natural cu ritmul unei tejghele de cafenea — introducere rapidă a comenzilor, urmărire numerar și card, și o închidere de zi clară.
             </p>
             <ul className="mt-5 space-y-2">
               {[
-                "Set up product categories: Hot Drinks, Cold Drinks, Food, Pastries",
-                "Add modifiers (e.g. milk type, size) as separate products or variants",
-                "Use the fast product grid to keep popular items in easy reach",
-                "Run cash and card split payments or separate them as different payment methods",
-                "Record the opening float and cash movements during the day",
-                "Check daily sales at close to see total revenue, best sellers, and cash balance",
-                "Track ingredients (milk, coffee beans, syrups) for stock visibility and recipe costing",
+                "Configurați categorii de produse: Băuturi calde, Băuturi reci, Mâncare, Patiserie",
+                "Adăugați opțiuni (ex. tip de lapte, mărime) ca produse separate sau variante",
+                "Folosiți grila rapidă de produse ca să aveți articolele populare la îndemână",
+                "Rulați plăți combinate numerar/card sau separați-le ca metode de plată diferite",
+                "Înregistrați fondul de casă de deschidere și mișcările de numerar din timpul zilei",
+                "Verificați vânzările zilnice la închidere ca să vedeți venitul total, cele mai vândute produse și soldul de numerar",
+                "Urmăriți ingredientele (lapte, cafea boabe, siropuri) pentru vizibilitate stoc și cost rețete",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
 
           {/* ── INDUSTRY: TAKEAWAYS ── */}
           <article id="guide-takeaways" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Industry guide</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">POS guide for takeaways</h2>
-            <p className="mt-3 text-slate-600">
-              Speed is everything in quick service. franchisetech keeps the checkout fast and gives you the cash controls you need.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru takeaway</h2>
+            <p className="mt-3 text-mid">
+              Viteza contează cel mai mult la fast-food. franchisetech păstrează checkout-ul rapid și vă dă controlul de numerar necesar.
             </p>
             <ul className="mt-5 space-y-2">
               {[
-                "Keep the product grid simple — group by meal type or by popular order combos",
-                "Add order notes to capture kitchen instructions per transaction",
-                "Use discounts for meal deals, loyalty offers, or end-of-day markdowns",
-                "Record cash in/out regularly during busy periods to keep your float accurate",
-                "Run refunds quickly without leaving the POS view",
-                "Use the close-of-day report to review takings across cash and card",
+                "Păstrați grila de produse simplă — grupați pe tip de meniu sau combinații populare",
+                "Adăugați note la comandă pentru instrucțiuni de bucătărie per tranzacție",
+                "Folosiți reduceri pentru meniuri, oferte de fidelitate sau reduceri de final de zi",
+                "Înregistrați regulat intrările/ieșirile de numerar în perioadele aglomerate ca fondul de casă să rămână corect",
+                "Procesați retururi rapid, fără să părăsiți ecranul POS",
+                "Folosiți raportul de închidere ca să revizuiți încasările pe numerar și card",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
 
           {/* ── INDUSTRY: BAKERIES ── */}
           <article id="guide-bakeries" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Industry guide</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">POS guide for bakeries</h2>
-            <p className="mt-3 text-slate-600">
-              Bakeries need speed at the counter, clear best-seller data, and good stock visibility for opening each day.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru patiserii/brutării</h2>
+            <p className="mt-3 text-mid">
+              Patiseriile au nevoie de viteză la tejghea, date clare despre cele mai vândute produse și vizibilitate bună a stocului la deschiderea fiecărei zile.
             </p>
             <ul className="mt-5 space-y-2">
               {[
-                "Organise products by bake: Bread, Pastries, Cakes, Drinks",
-                "Mark products as sold out quickly during the day when stock runs low",
-                "Use product performance reports to see which items sell fastest each morning",
-                "Track raw materials (flour, butter, eggs) to understand ingredient costs",
-                "Build recipes for your key products to see cost per unit and gross margin",
-                "Review opening stock each morning to plan production for the day",
+                "Organizați produsele pe categorii: Pâine, Patiserie, Prăjituri, Băuturi",
+                "Marcați rapid produsele ca epuizate în timpul zilei când stocul scade",
+                "Folosiți rapoartele de performanță ca să vedeți ce produse se vând cel mai rapid dimineața",
+                "Urmăriți materiile prime (făină, unt, ouă) ca să înțelegeți costurile ingredientelor",
+                "Construiți rețete pentru produsele cheie ca să vedeți costul pe unitate și marja brută",
+                "Revizuiți stocul de deschidere în fiecare dimineață ca să planificați producția zilei",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
 
           {/* ── INDUSTRY: FOOD TRUCKS ── */}
           <article id="guide-foodtrucks" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Industry guide</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">POS guide for food trucks</h2>
-            <p className="mt-3 text-slate-600">
-              franchisetech runs as a PWA on any device, making it ideal for mobile setups with limited hardware.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru food truck</h2>
+            <p className="mt-3 text-mid">
+              franchisetech rulează ca PWA pe orice dispozitiv, ideal pentru configurări mobile cu hardware limitat.
             </p>
             <ul className="mt-5 space-y-2">
               {[
-                "Install franchisetech as a PWA on your phone or tablet for portable till access",
-                "Run browser POS on a phone or tablet without extra installation",
-                "Keep the product list short and focused on your menu for the day",
-                "Use cash in/out to record your opening float and any change movements",
-                "Review your daily total at the end of each event",
-                "Export transaction records for accurate accounting after each event day",
+                "Instalați franchisetech ca PWA pe telefon sau tabletă pentru acces portabil la casă",
+                "Rulați POS-ul din browser pe telefon sau tabletă, fără instalare suplimentară",
+                "Păstrați lista de produse scurtă și concentrată pe meniul zilei",
+                "Folosiți intrări/ieșiri de numerar ca să înregistrați fondul de deschidere și orice mișcare de rest",
+                "Revizuiți totalul zilnic la finalul fiecărui eveniment",
+                "Exportați înregistrările tranzacțiilor pentru contabilitate corectă după fiecare zi de eveniment",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
 
           {/* ── INDUSTRY: RETAIL ── */}
           <article id="guide-retail" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Industry guide</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">POS guide for retail shops</h2>
-            <p className="mt-3 text-slate-600">
-              franchisetech handles the product catalogue, discounts, receipts, and daily reporting that retail shops need.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru magazine retail</h2>
+            <p className="mt-3 text-mid">
+              franchisetech gestionează catalogul de produse, reducerile, bonurile și raportarea zilnică de care au nevoie magazinele retail.
             </p>
             <ul className="mt-5 space-y-2">
               {[
-                "Add your full product range with categories (e.g. Clothing, Accessories, Gifts)",
-                "Set sale prices, standard prices, and apply discounts at the point of sale",
-                "Issue receipts for all transactions — important for refund and warranty management",
-                "Use staff permissions to control who can process refunds or access reports",
-                "Check the sales dashboard daily to see which product lines are performing",
-                "Use the import feature to upload large product catalogues from a spreadsheet",
+                "Adăugați întreaga gamă de produse pe categorii (ex. Îmbrăcăminte, Accesorii, Cadouri)",
+                "Setați prețuri de vânzare, prețuri standard și aplicați reduceri la punctul de vânzare",
+                "Emiteți bonuri pentru toate tranzacțiile — important pentru gestionarea retururilor și garanțiilor",
+                "Folosiți permisiunile de personal ca să controlați cine poate procesa retururi sau accesa rapoarte",
+                "Verificați zilnic tabloul de bord al vânzărilor ca să vedeți ce linii de produse performează",
+                "Folosiți funcția de import ca să încărcați cataloage mari de produse dintr-un fișier",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
 
           {/* ── INDUSTRY: SALONS ── */}
           <article id="guide-salons" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Industry guide</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">POS guide for salons & barbers</h2>
-            <p className="mt-3 text-slate-600">
-              Salons and barbers sell a mix of services and retail products. franchisetech handles both in one simple checkout.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru saloane și frizerii</h2>
+            <p className="mt-3 text-mid">
+              Saloanele și frizeriile vând o combinație de servicii și produse. franchisetech gestionează ambele într-un checkout simplu.
             </p>
             <ul className="mt-5 space-y-2">
               {[
-                "Add services as products (e.g. Haircut, Colour, Blowdry) with fixed prices",
-                "Add retail products (shampoo, styling products) in a separate category",
-                "Attach customer names to transactions for basic appointment tracking",
-                "Record which staff member completed each service for attribution",
-                "Use cash and card as separate payment methods for accurate daily reconciliation",
-                "Check end-of-day totals per staff member to understand individual performance",
+                "Adăugați serviciile ca produse (ex. Tuns, Vopsit, Coafat) cu prețuri fixe",
+                "Adăugați produsele de vânzare (șampon, produse de styling) într-o categorie separată",
+                "Atașați numele clienților la tranzacții pentru urmărirea de bază a programărilor",
+                "Înregistrați ce membru al echipei a efectuat fiecare serviciu, pentru atribuire",
+                "Folosiți numerar și card ca metode de plată separate pentru o reconciliere zilnică precisă",
+                "Verificați totalurile de final de zi per angajat ca să înțelegeți performanța individuală",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
 
           {/* ── INDUSTRY: FRANCHISES ── */}
           <article id="guide-franchises" className="scroll-mt-24">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Industry guide</p>
-            <h2 className="mt-2 text-2xl font-bold text-slate-900">POS guide for franchises & multi-location operators</h2>
-            <p className="mt-3 text-slate-600">
-              franchisetech supports multi-location businesses with consistent product setups, role-based staff access, and location-level reporting.
+            <p className="text-xs font-semibold uppercase tracking-wide text-brass">Ghid pe domeniu</p>
+            <h2 className="mt-2 text-2xl font-bold text-foreground">Ghid POS pentru francize și operatori cu mai multe locații</h2>
+            <p className="mt-3 text-mid">
+              franchisetech susține afacerile cu mai multe locații prin configurări consistente de produse, acces pe roluri pentru personal și raportare la nivel de locație.
             </p>
             <ul className="mt-5 space-y-2">
               {[
-                "Create a separate workspace for each location with its own products and staff",
-                "Use a consistent product naming and category structure across all locations",
-                "Assign manager roles at each location to local team leads",
-                "Review each location's daily reports separately for performance comparison",
-                "Use the same payment method setup across all locations for consistent reporting",
-                "Export transaction data per location for consolidated accounting",
-                "Plan product updates centrally before pushing changes to individual locations",
+                "Creați un workspace separat pentru fiecare locație, cu produse și personal propriu",
+                "Folosiți o denumire și o structură de categorii consistentă la toate locațiile",
+                "Atribuiți roluri de manager la fiecare locație responsabililor locali",
+                "Revizuiți separat rapoartele zilnice ale fiecărei locații pentru comparație de performanță",
+                "Folosiți aceeași configurare a metodelor de plată la toate locațiile pentru raportare consistentă",
+                "Exportați datele tranzacțiilor per locație pentru contabilitate consolidată",
+                "Planificați actualizările de produse central, înainte de a le trimite către locațiile individuale",
               ].map((item) => <CheckItem key={item} text={item} />)}
             </ul>
           </article>
@@ -574,15 +581,15 @@ export default function ResourcesPage() {
       </div>
 
       {/* ── FAQ ── */}
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="bg-secondary px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-2xl font-bold text-slate-900">Frequently asked questions</h2>
-          <p className="mt-2 text-slate-500">Honest answers about how franchisetech works and what it requires.</p>
+          <h2 className="text-2xl font-bold text-foreground">Întrebări frecvente</h2>
+          <p className="mt-2 text-muted-foreground">Răspunsuri oneste despre cum funcționează franchisetech și ce presupune.</p>
           <div className="mt-8 grid gap-4 md:grid-cols-2">
             {FAQ.map(({ q, a }) => (
-              <div key={q} className="rounded-xl border border-slate-200 bg-white p-5">
-                <h3 className="font-semibold text-slate-900">{q}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-500">{a}</p>
+              <div key={q} className="rounded-xl border border-border bg-card p-5">
+                <h3 className="font-semibold text-foreground">{q}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{a}</p>
               </div>
             ))}
           </div>
@@ -593,16 +600,16 @@ export default function ResourcesPage() {
       <section className="px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm font-medium text-slate-500">Related pages:</span>
+            <span className="text-sm font-medium text-muted-foreground">Pagini asociate:</span>
             {[
-              ["/compare",                   "Compare POS"],
-              ["/resources/pos-software-romania", "POS România guide"],
-              ["/",                          "← Home"],
-              ["/features/pos",              "POS register"],
-              ["/features/z-report",         "Z-report"],
-              ["/pricing",                   "Pricing"],
+              ["/compare",                   "Compară POS"],
+              ["/resources/pos-software-romania", "Ghid POS România"],
+              ["/",                          "← Acasă"],
+              ["/features/pos",              "Casă de marcat"],
+              ["/features/z-report",         "Raport Z"],
+              ["/pricing",                   "Prețuri"],
             ].map(([href, label]) => (
-              <Link key={href} href={href} className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-blue-600 hover:border-blue-300 hover:underline">
+              <Link key={href} href={href} className="rounded-lg border border-border px-3 py-1.5 text-sm text-brass hover:border-brass/40 hover:underline">
                 {label}
               </Link>
             ))}
@@ -610,7 +617,7 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      <CTASection title="Ready to simplify your daily operations?" />
-    </MarketingShell>
+      <CTASection title="Gata să vă simplificați operațiunile zilnice?" />
+    </ClaudeMarketingShellAuth>
   );
 }

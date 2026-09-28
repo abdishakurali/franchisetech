@@ -30,17 +30,19 @@ import {
   type PurchaseLineInput,
 } from "@/lib/nir/purchase";
 import { createServiceClient } from "@/lib/supabase/server";
-import { listActiveVatRates, seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
+import { listActiveVatRates, listAllVatRates } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
 import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEventAsync } from "@/lib/posthog-server";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
-import { nearestVatRate, ratesMatch, validateVatRate, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
-import { listOperationalUnitNames, validateOperationalUnit } from "@/lib/units-of-measure";
+import { resolveCsvVatRate, validatePurchaseVatRate, validateVatRateForOrg, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
+import { listOperationalUnitNames, validateOperationalUnit, isReservedUnitName } from "@/lib/units-of-measure";
 import {
   assertEntitlement,
+  assertUsageBelowLimit,
   hasEntitlement,
+  resolveEntitlements,
   EntitlementDeniedError,
 } from "@/lib/billing/entitlement-resolver";
 
@@ -60,8 +62,15 @@ async function resolveSubmittedVatRate(
   key: string
 ): Promise<{ ok: true; rate: number } | { ok: false; error: string }> {
   const rate = numberValue(formData, key);
-  const vatRates = await listActiveVatRates(supabase, orgId);
-  const validation = validateVatRate(vatRates, rate);
+  const [vatRates, orgRow] = await Promise.all([
+    listActiveVatRates(supabase, orgId),
+    supabase.from("organisations").select("country_code, anaf_vat_registered").eq("id", orgId).maybeSingle()
+      .then(({ data }: { data: { country_code: string | null; anaf_vat_registered: boolean | null } | null }) => data),
+  ]);
+  const validation = validateVatRateForOrg(vatRates, rate, {
+    countryCode: orgRow?.country_code ?? null,
+    vatRegistered: Boolean(orgRow?.anaf_vat_registered),
+  });
   if (!validation.ok) return { ok: false, error: validation.message };
   return { ok: true, rate };
 }
@@ -72,11 +81,17 @@ async function validateSubmittedVatRates(
   orgId: string,
   rates: number[]
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const activeRates = await listActiveVatRates(supabase, orgId);
-  if (activeRates.length === 0) return { ok: true };
-  const invalid = rates.find((rate) => !activeRates.some((r) => ratesMatch(r.rate, rate)));
-  if (invalid == null) return { ok: true };
-  return { ok: false, error: `VAT rate ${invalid}% is not active in Settings.` };
+  // Purchases record supplier VAT and are independent of the organisation's
+  // selling-rate restriction for an unregistered Romanian business.
+  const [catalogRates, orgResult] = await Promise.all([
+    listAllVatRates(supabase, orgId),
+    supabase.from("organisations").select("country_code").eq("id", orgId).maybeSingle(),
+  ]);
+  const countryCode = orgResult.data?.country_code ?? null;
+  const invalid = rates
+    .map((rate) => validatePurchaseVatRate(catalogRates, rate, countryCode))
+    .find((validation) => !validation.ok);
+  return invalid && !invalid.ok ? { ok: false, error: invalid.message } : { ok: true };
 }
 
 // Checkout-time guard against garbage vat_rate values (e.g. a stale/tampered cart
@@ -258,32 +273,6 @@ async function createKitchenOrderIfEnabled({
   }
 }
 
-export async function ensurePosDefaults() {
-  const { supabase, orgId } = await getActiveOrg();
-  const { data: orgRow } = await supabase.from("organisations").select("country_code").eq("id", orgId).single();
-  const countryCode = orgRow?.country_code ?? null;
-
-  const { data: cats } = await supabase.from("product_categories").select("id").eq("organisation_id", orgId).limit(1);
-  if (!cats?.length) {
-    await supabase.from("product_categories").insert([
-      { organisation_id: orgId, name: "Drinks", color: "#2563eb", sort_order: 1, category_type: "pos" },
-      { organisation_id: orgId, name: "Food", color: "#16a34a", sort_order: 2, category_type: "pos" },
-      { organisation_id: orgId, name: "Snacks", color: "#f59e0b", sort_order: 3, category_type: "pos" },
-      { organisation_id: orgId, name: "Ingredients", color: "#64748b", sort_order: 1, category_type: "inventory" },
-    ]);
-  }
-  const { data: methods } = await supabase.from("payment_methods").select("id").eq("organisation_id", orgId).limit(1);
-  if (!methods?.length) {
-    await supabase.from("payment_methods").insert([
-      { organisation_id: orgId, name: "Cash", type: "cash" },
-      { organisation_id: orgId, name: "Card", type: "card" },
-      { organisation_id: orgId, name: "Online", type: "online" },
-      { organisation_id: orgId, name: "Other", type: "other" },
-    ]);
-  }
-  await seedOrgVatRatesIfEmpty(supabase, orgId, countryCode);
-}
-
 export async function addCategory(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
@@ -294,10 +283,54 @@ export async function addCategory(formData: FormData) {
     organisation_id: orgId, name,
     color: stringValue(formData, "color") || null,
     sort_order: numberValue(formData, "sort_order"),
-    category_type: stringValue(formData, "category_type") || "inventory",
+    // Defaults to "both", not "inventory" — a category created without an
+    // explicit type must stay sellable in POS. Prior default silently made
+    // every category created from this action POS-invisible (products in it
+    // couldn't be assigned a pos_category_id and got no POS tab), which is
+    // exactly the "category exists in admin, not in POS" bug a customer hit.
+    // Matches addCategoryInline's already-established default below.
+    category_type: stringValue(formData, "category_type") || "both",
   });
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
+  revalidatePath("/app/pos");
+}
+
+// Inline category creation — used by the onboarding menu builder and any
+// other quick-add flow that needs a new category without leaving the
+// product form. Returns the created row (no redirect) and defaults to
+// category_type "both" so the single customer-facing "Categorie" field
+// works for both till layout and reporting — see addProductFromPos above
+// and docs/onboarding-redesign-audit-2026-09-19.md Section P/H.
+export async function addCategoryInline(
+  formData: FormData
+): Promise<{ ok: boolean; category?: { id: string; name: string }; error?: string }> {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "products.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
+  const name = stringValue(formData, "name");
+  if (!name) return { ok: false, error: "Numele categoriei este obligatoriu." };
+
+  const { data, error } = await supabase
+    .from("product_categories")
+    .insert({
+      organisation_id: orgId,
+      name,
+      category_type: "both",
+      sort_order: numberValue(formData, "sort_order", 999),
+    })
+    .select("id, name")
+    .single();
+
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/app/products", "page");
+  revalidatePath("/app/pos", "page");
+  return { ok: true, category: { id: data.id as string, name: data.name as string } };
 }
 
 export async function updateCategory(formData: FormData) {
@@ -387,7 +420,7 @@ export async function approveProductVat(formData: FormData) {
     completed_at: new Date().toISOString(),
   }).eq("id", batch.id);
 
-  revalidatePath("/app/settings/data-repair");
+  revalidatePath("/app/settings");
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
 }
@@ -402,15 +435,17 @@ export async function updateSgrPolicy(formData: FormData) {
     sgr_deposit_amount: numberValue(formData, "sgr_deposit_amount", 0.5),
     sgr_vat_rate: numberValue(formData, "sgr_vat_rate", 0),
   }).eq("id", orgId);
-  revalidatePath("/app/settings/data-repair");
+  revalidatePath("/app/settings");
 }
 
 export async function addUnit(formData: FormData) {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
   await assertEntitlement(orgId, "products.enabled");
-  const name = stringValue(formData, "name");
-  if (!name) return;
+  const name = stringValue(formData, "name").trim();
+  if (!name || isReservedUnitName(name)) return;
+  const existing = await listOperationalUnitNames(supabase, orgId);
+  if (existing.some((u) => u.toLowerCase() === name.toLowerCase())) return;
   await supabase.from("units_of_measure").insert({
     organisation_id: orgId, name,
     abbreviation: stringValue(formData, "abbreviation") || null,
@@ -424,8 +459,10 @@ export async function updateUnit(formData: FormData) {
   if (!canManage(membership.role)) return;
   await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
-  const name = stringValue(formData, "name");
-  if (!id || !name) return;
+  const name = stringValue(formData, "name").trim();
+  if (!id || !name || isReservedUnitName(name)) return;
+  const existing = await listOperationalUnitNames(supabase, orgId);
+  if (existing.some((u) => u.toLowerCase() === name.toLowerCase())) return;
   await supabase.from("units_of_measure").update({
     name,
     abbreviation: stringValue(formData, "abbreviation") || null,
@@ -445,12 +482,25 @@ export async function deleteUnit(formData: FormData) {
   revalidatePath("/app/settings");
 }
 
-export async function addProduct(formData: FormData) {
+export async function addProduct(
+  formData: FormData,
+): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const { supabase, membership, user, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
-  await assertEntitlement(orgId, "products.enabled");
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  try {
+    await assertEntitlement(orgId, "products.enabled");
+    const { count: activeProductCount } = await supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("active", true);
+    await assertUsageBelowLimit(orgId, "products.limit", activeProductCount ?? 0);
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
   const name = stringValue(formData, "name");
-  if (!name) return;
+  if (!name) return { ok: false, error: "Product name is required." };
   const availableInPos = formData.get("available_in_pos") === "on";
   const moduleFlags = await fetchOrgModuleFlags(supabase, orgId);
   const visibility = productModuleVisibility(moduleFlags);
@@ -458,11 +508,11 @@ export async function addProduct(formData: FormData) {
   const isSellable = availableInPos || formData.get("is_sellable") === "on";
   const openingStock = visibility.inventory ? nullableNum(formData, "opening_stock") : null;
   const vat = await resolveSubmittedVatRate(supabase, orgId, formData, "vat_rate");
-  if (!vat.ok) throw new Error(vat.error);
+  if (!vat.ok) return vat;
   const unit = await resolveSubmittedUnitOfMeasure(supabase, orgId, stringValue(formData, "unit_of_measure") || "each");
-  if (!unit.ok) throw new Error(unit.error);
+  if (!unit.ok) return unit;
 
-  const { data: inserted } = await supabase.from("products").insert({
+  const { data: inserted, error: insertError } = await supabase.from("products").insert({
     organisation_id: orgId,
     name,
     category_id: stringValue(formData, "category_id") || null,
@@ -488,6 +538,8 @@ export async function addProduct(formData: FormData) {
     current_stock_qty: openingStock ?? 0,
     active: true,
   }).select("id").single();
+
+  if (insertError || !inserted) return { ok: false, error: insertError?.message ?? "Could not save product." };
 
   // Handle image upload after insert so we can use the product ID in the path
   const imageFile = formData.get("image_file") as File | null;
@@ -526,7 +578,7 @@ export async function addProduct(formData: FormData) {
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
   revalidatePath("/app/stock");
-  redirect("/app/products");
+  return { ok: true, id: inserted.id };
 }
 
 /** Minimal POS quick-add — no redirect; returns result for in-till dialog. */
@@ -535,6 +587,12 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
   try {
     await assertEntitlement(orgId, "products.enabled");
+    const { count: activeProductCount } = await supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("active", true);
+    await assertUsageBelowLimit(orgId, "products.limit", activeProductCount ?? 0);
   } catch (error) {
     if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
     throw error;
@@ -548,11 +606,18 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
   const unit = await resolveSubmittedUnitOfMeasure(supabase, orgId, stringValue(formData, "unit_of_measure") || "each");
   if (!unit.ok) return unit;
 
+  // A quick-added product gets one category, mirrored onto both FK columns.
+  // The two-category split (category_id for reporting, pos_category_id for
+  // till layout) is real and stays available in the full product edit form,
+  // but a product created from a quick-add has no reason to leave one of
+  // them silently null — see docs/onboarding-redesign-audit-2026-09-19.md
+  // Section P/H.
+  const quickAddCategoryId = stringValue(formData, "pos_category_id") || null;
   const { error } = await supabase.from("products").insert({
     organisation_id: orgId,
     name,
-    pos_category_id: stringValue(formData, "pos_category_id") || null,
-    category_id: null,
+    pos_category_id: quickAddCategoryId,
+    category_id: quickAddCategoryId,
     unit_of_measure: unit.unit,
     sale_price: salePrice,
     vat_rate: vat.rate,
@@ -571,8 +636,10 @@ export async function addProductFromPos(formData: FormData): Promise<{ ok: boole
   });
 
   if (error) return { ok: false, error: error.message };
-  revalidatePath("/app/products");
-  revalidatePath("/app/pos");
+  // Keep POS quick-add scoped to the two pages whose server data changed.
+  // Explicit `page` avoids invalidating the entire /app layout tree.
+  revalidatePath("/app/products", "page");
+  revalidatePath("/app/pos", "page");
   return { ok: true };
 }
 
@@ -1047,6 +1114,7 @@ async function replacePurchaseItems(
       product_name: productLookup.get(item.product_id) || "Item",
       item_name: productLookup.get(item.product_id) || "Item",
       quantity: item.quantity,
+      received_quantity: item.received_quantity,
       unit_cost: item.unit_cost,
       total_cost: item.total_cost,
       tax_rate: item.tax_rate,
@@ -1181,7 +1249,7 @@ async function loadDraftPurchaseItems(
 ): Promise<PurchaseLineInput[]> {
   const { data } = await supabase
     .from("purchase_items")
-    .select("product_id,quantity,unit_cost,total_cost,tax_rate,tax_amount,unit_of_measure")
+    .select("product_id,quantity,received_quantity,unit_cost,total_cost,tax_rate,tax_amount,unit_of_measure")
     .eq("purchase_id", purchaseId)
     .eq("organisation_id", orgId);
   return (data ?? [])
@@ -1189,6 +1257,7 @@ async function loadDraftPurchaseItems(
     .map((row: {
       product_id: string;
       quantity: number;
+      received_quantity: number | null;
       unit_cost: number;
       total_cost: number;
       tax_rate: number;
@@ -1197,6 +1266,7 @@ async function loadDraftPurchaseItems(
     }) => ({
       product_id: row.product_id,
       quantity: Number(row.quantity),
+      received_quantity: row.received_quantity != null ? Number(row.received_quantity) : null,
       unit_cost: Number(row.unit_cost),
       total_cost: Number(row.total_cost),
       tax_rate: Number(row.tax_rate ?? 0),
@@ -1350,7 +1420,7 @@ export async function updateRecipeFromProducts(formData: FormData) {
 
   await supabase
     .from("recipes")
-    .update({ product_id: productId, name: recipeName, yield_qty: yieldQty })
+    .update({ product_id: productId, name: recipeName, yield_qty: yieldQty, cost_computed_at: new Date().toISOString() })
     .eq("id", recipeId)
     .eq("organisation_id", orgId);
 
@@ -1400,6 +1470,7 @@ export async function addRecipeFromProducts(formData: FormData) {
 
   const { data: recipe } = await supabase.from("recipes").insert({
     organisation_id: orgId, product_id: productId, name: recipeName, yield_qty: yieldQty,
+    cost_computed_at: new Date().toISOString(),
   }).select("id").single();
   if (!recipe) return;
 
@@ -1502,6 +1573,14 @@ export async function importProductsCsv(formData: FormData) {
   await assertEntitlement(orgId, "products.enabled");
   const rows = parseCsv(await csvText(formData));
   let imported = 0, skipped = 0;
+  // Plan product cap: count rows against remaining headroom rather than
+  // hard-failing the whole import — rows past the limit are skipped, same as
+  // any other invalid row, and the redirect below already reports skipped.
+  const { limits: productLimits } = await resolveEntitlements(orgId);
+  const productsLimit = productLimits["products.limit"];
+  let activeProductCount = productsLimit === "unlimited" ? 0 : (
+    (await supabase.from("products").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("active", true)).count ?? 0
+  );
   const { data: existingCats } = await supabase.from("product_categories").select("id,name,category_type").eq("organisation_id", orgId);
   const categories = new Map((existingCats ?? []).map((c) => [String(c.name).toLowerCase(), c.id]));
   const posCategories = new Map((existingCats ?? []).filter((c) => c.category_type === "pos").map((c) => [String(c.name).toLowerCase(), c.id]));
@@ -1522,6 +1601,16 @@ export async function importProductsCsv(formData: FormData) {
     }
     return categoryId;
   }
+  // Same registration gate as resolveSubmittedVatRate (manual entry), via
+  // resolveCsvVatRate below — this path used to have its own separate logic
+  // that never consulted anaf_vat_registered at all, which is how a
+  // blank-VAT CSV row could land on this org's active-default rate (21%)
+  // even while unregistered.
+  const { data: orgRowForVat } = await supabase
+    .from("organisations")
+    .select("country_code, anaf_vat_registered")
+    .eq("id", orgId)
+    .maybeSingle();
   const { data: vatRateRows } = await supabase
     .from("vat_rates")
     .select("id,name,rate,is_default,active,fiscalnet_vat_group,sort_order")
@@ -1540,6 +1629,7 @@ export async function importProductsCsv(formData: FormData) {
   for (const row of rows) {
     const name = row.name?.trim();
     if (!name) { skipped++; continue; }
+    if (productsLimit !== "unlimited" && activeProductCount >= productsLimit) { skipped++; continue; }
     let categoryId = null;
     let posCategoryId = null;
     const categoryName = row.category?.trim();
@@ -1557,14 +1647,10 @@ export async function importProductsCsv(formData: FormData) {
     // explicit numeric value in the file goes through nearest-rate snapping;
     // a missing one falls back to the org's own default rate instead.
     const rawVat = row.vat_rate !== "" && row.vat_rate != null ? Number(row.vat_rate) : null;
-    const orgDefaultRate = catalogRates.find((r) => r.is_default)?.rate ?? 0;
-    let vatRate = orgDefaultRate;
-    if (rawVat != null && catalogRates.length > 0) {
-      const nearest = nearestVatRate(catalogRates, rawVat);
-      vatRate = nearest?.rate ?? rawVat;
-    } else if (rawVat != null) {
-      vatRate = rawVat;
-    }
+    const vatRate = resolveCsvVatRate(rawVat, catalogRates, {
+      countryCode: orgRowForVat?.country_code ?? null,
+      vatRegistered: Boolean(orgRowForVat?.anaf_vat_registered),
+    });
     const { error } = await supabase.from("products").insert({
       organisation_id: orgId, name, category_id: categoryId, pos_category_id: posCategoryId,
       sku: row.sku || row.barcode || null,
@@ -1584,7 +1670,7 @@ export async function importProductsCsv(formData: FormData) {
       reorder_level: row.reorder_level ? Number(row.reorder_level) : 0,
       image_url: row.image_url || null, active: true,
     });
-    if (error) skipped++; else imported++;
+    if (error) skipped++; else { imported++; activeProductCount++; }
   }
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
@@ -1899,6 +1985,109 @@ export async function bulkUpdateProductStock(formData: FormData): Promise<{ ok: 
   return { ok: true, updated };
 }
 
+// ── Inventory counts (Step 5: Inventar) ─────────────────────────
+// A session-grouped physical stock count, distinct from the ad-hoc
+// updateProductStock/bulkUpdateProductStock above: those apply immediately
+// on submit, one product (or one low-stock batch) at a time. This lets
+// staff walk the whole catalog over however long it takes, record counts
+// as they go without committing each one, then review every variance
+// before a single finalize applies them together as one auditable batch.
+
+export async function startInventoryCount(): Promise<void> {
+  const { supabase, membership, orgId, user } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "inventory.enabled");
+
+  const { data: count } = await supabase
+    .from("inventory_counts")
+    .insert({ organisation_id: orgId, started_by: user.id })
+    .select("id")
+    .single();
+  if (!count) return;
+
+  revalidatePath("/app/inventory");
+  redirect(`/app/inventory/${count.id}`);
+}
+
+/** Records (or updates) one product's counted quantity for an in-progress
+ * count. expected_qty is read fresh right now, not carried over from when
+ * the count session started or from any earlier count of this same item —
+ * see the migration comment on inventory_count_items for why. */
+export async function recordInventoryCountItem(
+  formData: FormData
+): Promise<{ ok: boolean; error?: string }> {
+  const { supabase, membership, orgId, user } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied" };
+  await assertEntitlement(orgId, "inventory.enabled");
+
+  const countId = stringValue(formData, "inventory_count_id");
+  const productId = stringValue(formData, "product_id");
+  const countedQty = numberValue(formData, "counted_qty", NaN);
+  if (!countId || !productId || !Number.isFinite(countedQty) || countedQty < 0) {
+    return { ok: false, error: "Invalid count" };
+  }
+
+  const { data: count } = await supabase
+    .from("inventory_counts")
+    .select("id,status")
+    .eq("id", countId)
+    .eq("organisation_id", orgId)
+    .maybeSingle();
+  if (!count) return { ok: false, error: "Count not found" };
+  if (count.status !== "draft") return { ok: false, error: "Count already finalized" };
+
+  const { data: product } = await supabase
+    .from("products")
+    .select("current_stock_qty, unit_of_measure")
+    .eq("id", productId)
+    .eq("organisation_id", orgId)
+    .single();
+  if (!product) return { ok: false, error: "Product not found" };
+
+  const { error } = await supabase.from("inventory_count_items").upsert(
+    {
+      organisation_id: orgId,
+      inventory_count_id: countId,
+      product_id: productId,
+      expected_qty: Number(product.current_stock_qty ?? 0),
+      counted_qty: countedQty,
+      unit_of_measure: product.unit_of_measure ?? "each",
+      counted_at: new Date().toISOString(),
+      counted_by: user.id,
+    },
+    { onConflict: "inventory_count_id,product_id" }
+  );
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/app/inventory/${countId}`);
+  return { ok: true };
+}
+
+export async function finalizeInventoryCount(formData: FormData): Promise<void> {
+  const { membership, orgId, user } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+  await assertEntitlement(orgId, "inventory.enabled");
+
+  const countId = stringValue(formData, "inventory_count_id");
+  if (!countId) return;
+
+  const serviceSupabase = await createServiceClient();
+  const { error } = await serviceSupabase.rpc("finalize_inventory_count", {
+    p_count_id: countId,
+    p_org_id: orgId,
+    p_actor_id: user.id,
+  });
+  if (error) redirect(`/app/inventory/${countId}?error=finalize_failed`);
+
+  revalidatePath("/app/inventory");
+  revalidatePath(`/app/inventory/${countId}`);
+  revalidatePath("/app/products");
+  revalidatePath("/app/stock");
+  revalidatePath("/app/reports/balanta");
+  revalidatePath("/app/reports/gestiune");
+  redirect(`/app/inventory/${countId}?finalized=1`);
+}
+
 // ── Business country ────────────────────────────────────────────
 const ALLOWED_COUNTRY_CODES = ["IE", "RO", "UK", "OTHER"] as const;
 type CountryCode = (typeof ALLOWED_COUNTRY_CODES)[number];
@@ -1912,6 +2101,71 @@ export async function updateOrgCountry(formData: FormData): Promise<void> {
     : "IE";
   await supabase.from("organisations").update({ country_code: code }).eq("id", orgId);
   revalidatePath("/app/settings");
+}
+
+// ── updateSite (Step 8: Location section) ───────────────────────
+// Single-site orgs edit their one location here. Orgs with the multi_site
+// entitlement (legacy scale/multi_location, or the new "team" plan) add
+// further locations through addSite below, gated on the plan's
+// locations.limit — everyone else never reaches that surface at all, since
+// /app/sites itself requires the multi_site module (see lib/module-guard.ts).
+export async function updateSite(formData: FormData): Promise<void> {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return;
+  const id = stringValue(formData, "id");
+  const name = stringValue(formData, "name");
+  if (!id || !name) return;
+  await supabase
+    .from("sites")
+    .update({
+      name,
+      address: stringValue(formData, "address") || null,
+      city: stringValue(formData, "city") || null,
+    })
+    .eq("id", id)
+    .eq("organisation_id", orgId);
+  revalidatePath("/app/settings");
+}
+
+export type AddSiteResult =
+  | { ok: true; site: { id: string; organisation_id: string; name: string; address: string | null; city: string | null; eircode: string | null; created_at: string } }
+  | { ok: false; error: string };
+
+// Belt-and-suspenders alongside the page-level requireBusinessModule("multi_site")
+// guard on /app/sites: that guard already keeps Free/Growth orgs off this
+// surface entirely, but the limit is enforced here too so a second location
+// can never be created for an org above its plan's locations.limit, from any
+// call path.
+export async function addSite(formData: FormData): Promise<AddSiteResult> {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+  const name = stringValue(formData, "name");
+  if (!name) return { ok: false, error: "Site name is required." };
+  try {
+    await assertEntitlement(orgId, "multi_site.enabled");
+    const { count: siteCount } = await supabase
+      .from("sites")
+      .select("id", { count: "exact", head: true })
+      .eq("organisation_id", orgId);
+    await assertUsageBelowLimit(orgId, "locations.limit", siteCount ?? 0);
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
+  const { data, error } = await supabase
+    .from("sites")
+    .insert({
+      organisation_id: orgId,
+      name,
+      address: stringValue(formData, "address") || null,
+      city: stringValue(formData, "city") || null,
+      eircode: stringValue(formData, "eircode") || null,
+    })
+    .select()
+    .single();
+  if (error || !data) return { ok: false, error: error?.message ?? "Could not add site." };
+  revalidatePath("/app/sites");
+  return { ok: true, site: data };
 }
 
 // ── updateOrgCurrency ────────────────────────────────────────────────────────
@@ -2281,10 +2535,12 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     { organisation: orgId },
   );
 
-  revalidatePath("/app/pos");
-  revalidatePath("/app/transactions");
-  revalidatePath("/app/reports/sales");
-  revalidatePath("/app");
+  // A sale changes only these page-level read models. Do not invalidate the
+  // authenticated layout: that remounts navigation and unrelated modules.
+  revalidatePath("/app/pos", "page");
+  revalidatePath("/app/transactions", "page");
+  revalidatePath("/app/reports/sales", "page");
+  revalidatePath("/app", "page");
 
   return {
     ok: true,
@@ -2470,6 +2726,7 @@ export async function updateBusinessCapabilities(formData: FormData): Promise<{ 
   const moduleResult = await saveOrgModuleFlags(supabase, orgId, {
     business_profile: profile,
     inventory_enabled: formCheckboxEnabled(formData, "inventory_enabled"),
+    purchases_enabled: formCheckboxEnabled(formData, "purchases_enabled"),
     recipe_costing_enabled: formCheckboxEnabled(formData, "recipe_costing_enabled"),
     team_advanced_enabled: formCheckboxEnabled(formData, "team_advanced_enabled"),
     multi_site_ops_enabled: formCheckboxEnabled(formData, "multi_site_ops_enabled"),
@@ -2534,6 +2791,7 @@ export async function updateBusinessProfileAndModules(formData: FormData): Promi
 
   const profile = String(formData.get("business_profile") ?? "").trim();
   const inventory = formCheckboxEnabled(formData, "inventory_enabled");
+  const purchases = formCheckboxEnabled(formData, "purchases_enabled");
   const recipeCosting = formCheckboxEnabled(formData, "recipe_costing_enabled");
   const teamAdvanced = formCheckboxEnabled(formData, "team_advanced_enabled");
   const multiSite = formCheckboxEnabled(formData, "multi_site_ops_enabled");
@@ -2543,6 +2801,7 @@ export async function updateBusinessProfileAndModules(formData: FormData): Promi
     updates.business_profile = profile;
   }
   updates.inventory_enabled = inventory;
+  updates.purchases_enabled = purchases;
   updates.recipe_costing_enabled = recipeCosting;
   updates.team_advanced_enabled = teamAdvanced;
   updates.multi_site_ops_enabled = multiSite;

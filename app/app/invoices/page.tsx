@@ -24,18 +24,18 @@ type EfacturaRow = {
 
 function StatusBadge({ uploadStatus, processingStatus }: { uploadStatus: string; processingStatus: string | null }) {
   if (uploadStatus === "accepted") {
-    return <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">Acceptată</span>;
+    return <span className="inline-flex items-center rounded-full bg-reconciled/10 px-2.5 py-0.5 text-xs font-medium text-reconciled">Acceptată</span>;
   }
   if (uploadStatus === "rejected") {
-    return <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700">Respinsă</span>;
+    return <span className="inline-flex items-center rounded-full bg-attention/10 px-2.5 py-0.5 text-xs font-medium text-attention">Respinsă</span>;
   }
   if (uploadStatus === "uploaded" || processingStatus === "in prelucrare") {
-    return <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">Trimisă</span>;
+    return <span className="inline-flex items-center rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-brass">Trimisă</span>;
   }
   if (uploadStatus === "failed") {
     return <span className="inline-flex items-center rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-700">Eroare</span>;
   }
-  return <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">Draft</span>;
+  return <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-mid">Draft</span>;
 }
 
 export default async function InvoicesPage() {
@@ -44,7 +44,7 @@ export default async function InvoicesPage() {
   if (countryCode !== "RO") {
     return (
       <div className="p-6">
-        <p className="text-slate-500 text-sm">e-Factura este disponibilă doar pentru organizațiile din România.</p>
+        <p className="text-muted-foreground text-sm">e-Factura este disponibilă doar pentru organizațiile din România.</p>
       </div>
     );
   }
@@ -58,10 +58,10 @@ export default async function InvoicesPage() {
   if (!org?.efactura_enabled) {
     return (
       <div className="p-6">
-        <div className="mx-auto max-w-xl rounded-xl border border-slate-200 bg-white p-6">
-          <FileText className="h-9 w-9 text-slate-300" />
-          <h1 className="mt-4 text-xl font-semibold text-slate-950">e-Factura nu este instalată</h1>
-          <p className="mt-2 text-sm text-slate-500">
+        <div className="mx-auto max-w-xl rounded-xl border border-border bg-card p-6">
+          <FileText className="h-9 w-9 text-muted-foreground" />
+          <h1 className="mt-4 text-xl font-semibold text-foreground">e-Factura nu este instalată</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Instalează integrarea ANAF e-Factura din Marketplace doar dacă emiți facturi B2B prin SPV.
           </p>
           <Link href="/app/settings?tab=integrations" className="mt-5 inline-flex">
@@ -92,8 +92,8 @@ export default async function InvoicesPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">e-Factura</h1>
-          <p className="text-sm text-slate-500">Facturi electronice transmise la ANAF / SPV</p>
+          <h1 className="text-2xl font-semibold text-foreground">e-Factura</h1>
+          <p className="text-sm text-muted-foreground">Facturi electronice transmise la ANAF / SPV</p>
         </div>
         <Link href="/app/invoices/new">
           <Button>
@@ -105,54 +105,54 @@ export default async function InvoicesPage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">Total acceptate</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total acceptate</CardTitle></CardHeader>
           <CardContent><p className="text-2xl font-bold">{totalValue.toLocaleString("ro-RO", { minimumFractionDigits: 2 })} RON</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">Facturi trimise</CardTitle></CardHeader>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Facturi trimise</CardTitle></CardHeader>
           <CardContent><p className="text-2xl font-bold">{sentCount}</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-slate-500">Respinse ANAF</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold text-red-600">{rejectedCount}</p></CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Respinse ANAF</CardTitle></CardHeader>
+          <CardContent><p className="text-2xl font-bold text-attention">{rejectedCount}</p></CardContent>
         </Card>
       </div>
 
       {rows.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-slate-200 py-20 text-center">
-          <FileText className="h-10 w-10 text-slate-300" />
+        <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-border py-20 text-center">
+          <FileText className="h-10 w-10 text-muted-foreground" />
           <div>
-            <p className="font-medium text-slate-700">Nicio factură emisă încă</p>
-            <p className="mt-1 text-sm text-slate-500">Emite prima ta e-Factură și trimite-o automat la ANAF/SPV.</p>
+            <p className="font-medium text-foreground">Nicio factură emisă încă</p>
+            <p className="mt-1 text-sm text-muted-foreground">Emite prima ta e-Factură și trimite-o automat la ANAF/SPV.</p>
           </div>
           <Link href="/app/invoices/new">
             <Button>Factură nouă</Button>
           </Link>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
+        <div className="overflow-x-auto rounded-xl border border-border">
           <table className="min-w-full divide-y divide-slate-100 text-sm">
-            <thead className="bg-slate-50">
+            <thead className="bg-secondary">
               <tr>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Nr. factură</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Client</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">CIF client</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Dată</th>
-                <th className="px-4 py-3 text-right font-medium text-slate-500">Total incl. TVA</th>
-                <th className="px-4 py-3 text-left font-medium text-slate-500">Status SPV</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Nr. factură</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Client</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">CIF client</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Dată</th>
+                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Total incl. TVA</th>
+                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Status SPV</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody className="divide-y divide-slate-100 bg-card">
               {rows.map((inv) => (
-                <tr key={inv.id} className="hover:bg-slate-50">
+                <tr key={inv.id} className="hover:bg-secondary">
                   <td className="px-4 py-3 font-medium">
-                    <Link href={`/app/invoices/${inv.id}`} className="text-blue-600 hover:underline">
+                    <Link href={`/app/invoices/${inv.id}`} className="text-brass hover:underline">
                       {inv.invoice_number}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-slate-700">{inv.buyer_name}</td>
-                  <td className="px-4 py-3 text-slate-500">{inv.buyer_cif}</td>
-                  <td className="px-4 py-3 text-slate-500">
+                  <td className="px-4 py-3 text-foreground">{inv.buyer_name}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{inv.buyer_cif}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
                     {new Date(inv.issue_date).toLocaleDateString("ro-RO")}
                   </td>
                   <td className="px-4 py-3 text-right font-medium">

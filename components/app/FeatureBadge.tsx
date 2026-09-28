@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 type Variant = "working" | "coming-soon";
 
 const STYLES: Record<Variant, string> = {
-  "working":     "bg-green-50 text-green-700 border border-green-200",
-  "coming-soon": "bg-slate-100 text-slate-500 border border-slate-200",
+  "working":     "bg-reconciled/10 text-reconciled border border-reconciled/25",
+  "coming-soon": "bg-secondary text-muted-foreground border border-border",
 };
 
 const LABELS: Record<Variant, string> = {

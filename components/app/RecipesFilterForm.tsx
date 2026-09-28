@@ -21,13 +21,13 @@ export function RecipesFilterForm({ defaultQuery = "", defaultStatus = "all" }: 
   ];
 
   return (
-    <form className="flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-3">
+    <form className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-3">
       <div className="min-w-[220px] flex-1">
-        <label className="mb-1 block text-xs font-medium text-slate-500">{r.searchLabel}</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">{r.searchLabel}</label>
         <Input name="q" defaultValue={defaultQuery} placeholder={r.searchPlaceholder} />
       </div>
       <div className="min-w-[180px]">
-        <label className="mb-1 block text-xs font-medium text-slate-500">{r.filterLabel}</label>
+        <label className="mb-1 block text-xs font-medium text-muted-foreground">{r.filterLabel}</label>
         <FormSelect name="status" options={statusOptions} defaultValue={defaultStatus} />
       </div>
       <Button type="submit" variant="outline">

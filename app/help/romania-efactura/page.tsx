@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, AlertCircle } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 
 export const metadata: Metadata = {
   title: "Romania e-Factura Setup Guide — franchisetech",
@@ -50,7 +51,7 @@ const checklist = [
 
 export default function RomaniaEfacturaPage() {
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       {/* Breadcrumb */}
       <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
         <div className="mx-auto max-w-4xl text-sm text-slate-500">
@@ -83,9 +84,9 @@ export default function RomaniaEfacturaPage() {
           <div className="mt-4 flex gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
             <p className="text-sm text-blue-800">
-              <strong>e-Factura and FiscalNet are different, unrelated systems.</strong> e-Factura (this guide) is ANAF&apos;s national electronic invoicing system for B2B/B2G invoices. FiscalNet is the driver that talks to your physical fiscal cash register for POS receipts and X/Z reports — see the{" "}
+              <strong>e-Factura and your fiscal driver are different, unrelated systems.</strong> e-Factura (this guide) is ANAF&apos;s national electronic invoicing system for B2B/B2G invoices. Your fiscal driver (we use FiscalNet, driverfiscal.ro) is what talks to your physical fiscal cash register for POS receipts and X/Z reports — see the{" "}
               <Link href="/help/romania-fiscalnet" className="underline hover:text-blue-900">
-                FiscalNet setup guide
+                fiscal driver setup guide
               </Link>{" "}
               for that. Connecting one does not connect the other.
             </p>
@@ -151,7 +152,7 @@ export default function RomaniaEfacturaPage() {
           <h2 className="text-lg font-semibold text-slate-950">Related guides</h2>
           <div className="mt-4 flex flex-wrap gap-3">
             <Link href="/help/romania-fiscalnet" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700">
-              Romania FiscalNet setup →
+              Romania fiscal driver setup →
             </Link>
             <Link href="/app/settings?tab=fiscal" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700">
               Fiscal settings →
@@ -161,6 +162,6 @@ export default function RomaniaEfacturaPage() {
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

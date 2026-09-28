@@ -12,9 +12,12 @@
 
 # testing
 /coverage
+/test-results
+/playwright-report
 
 # next.js
 /.next/
+/.next-e2e/
 /out/
 
 # production
@@ -43,3 +46,6 @@ next-env.d.ts
 
 # Cursor IDE
 .cursor/
+
+# Local agent worktrees
+.worktrees/

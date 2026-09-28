@@ -28,6 +28,12 @@ export type GestiuneReportData = {
   };
   openingStock: VatBucket;
   closingStock: VatBucket;
+  /** True if any opening-stock or consumption movement in this report had
+   * no recorded cost. Those movements contribute 0 to their VAT bucket
+   * rather than today's price standing in for an unknown historical one --
+   * so every total below is a known floor whenever this is true, not
+   * necessarily the complete figure. */
+  hasUnknownCost: boolean;
 };
 
 /**
@@ -53,6 +59,7 @@ export async function computeGestiuneReport(
     .single();
 
   const movements: GestiuneMovement[] = [];
+  let hasUnknownCost = false;
 
   const movementsBeforePeriod = await fetchStockMovements(supabase, orgId, { before: periodStart });
 
@@ -63,7 +70,12 @@ export async function computeGestiuneReport(
   const openingStock: VatBucket = { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0 };
   for (const m of movementsBeforePeriod) {
     const qty = stockMovementQty(m);
-    const value = qty * stockMovementUnitCost(m);
+    const cost = stockMovementUnitCost(m);
+    if (cost == null) {
+      hasUnknownCost = true;
+      continue;
+    }
+    const value = qty * cost;
     const prod = stockMovementProduct(m);
     const vatRate = Number(prod?.vat_rate ?? 21);
 
@@ -130,7 +142,12 @@ export async function computeGestiuneReport(
     const existing = consumByDate.get(dateKey) ?? { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0 };
 
     const qty = Math.abs(stockMovementQty(m));
-    const value = qty * stockMovementUnitCost(m);
+    const cost = stockMovementUnitCost(m);
+    if (cost == null) {
+      hasUnknownCost = true;
+      continue;
+    }
+    const value = qty * cost;
     const prodConsum = stockMovementProduct(m);
     const vatRate = Number(prodConsum?.vat_rate ?? 21);
 
@@ -207,5 +224,5 @@ export async function computeGestiuneReport(
     return a.date.localeCompare(b.date);
   });
 
-  return { org, movements, totals, openingStock, closingStock };
+  return { org, movements, totals, openingStock, closingStock, hasUnknownCost };
 }

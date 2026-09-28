@@ -36,7 +36,7 @@ export function SiteSwitcher({ sites, activeSiteId, collapsed = false }: SiteSwi
         <DropdownMenuTrigger
           title={activeSite?.name ?? "Switch location"}
           disabled={isPending}
-          className="flex items-center justify-center rounded-lg h-9 w-9 mx-auto text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+          className="flex items-center justify-center rounded-lg h-9 w-9 mx-auto text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
         >
           <MapPin className="h-[18px] w-[18px]" />
         </DropdownMenuTrigger>
@@ -45,7 +45,7 @@ export function SiteSwitcher({ sites, activeSiteId, collapsed = false }: SiteSwi
             <DropdownMenuItem
               key={site.id}
               onClick={() => handleSelect(site.id)}
-              className={site.id === activeSiteId ? "font-semibold text-blue-700" : ""}
+              className={site.id === activeSiteId ? "font-semibold text-brass" : ""}
             >
               {site.name}
             </DropdownMenuItem>
@@ -59,18 +59,18 @@ export function SiteSwitcher({ sites, activeSiteId, collapsed = false }: SiteSwi
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={isPending}
-        className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors w-full text-left"
+        className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium text-mid hover:bg-secondary hover:text-foreground transition-colors w-full text-left"
       >
-        <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-slate-400" />
+        <MapPin className="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground" />
         <span className="truncate flex-1">{activeSite?.name ?? "Select location"}</span>
-        <ChevronDown className="h-3 w-3 flex-shrink-0 text-slate-400" />
+        <ChevronDown className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent side="right" align="end" className="min-w-[180px]">
         {sites.map((site) => (
           <DropdownMenuItem
             key={site.id}
             onClick={() => handleSelect(site.id)}
-            className={site.id === activeSiteId ? "font-semibold text-blue-700" : ""}
+            className={site.id === activeSiteId ? "font-semibold text-brass" : ""}
           >
             {site.name}
           </DropdownMenuItem>

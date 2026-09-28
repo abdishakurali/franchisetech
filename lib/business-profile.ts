@@ -30,6 +30,7 @@ export function deriveBusinessProfile(input: {
 
 export function defaultModulesForProfile(profile: BusinessProfile): {
   inventory_enabled: boolean;
+  purchases_enabled: boolean;
   recipe_costing_enabled: boolean;
   team_advanced_enabled: boolean;
   multi_site_ops_enabled: boolean;
@@ -38,6 +39,7 @@ export function defaultModulesForProfile(profile: BusinessProfile): {
     case "multi_site":
       return {
         inventory_enabled: true,
+        purchases_enabled: true,
         recipe_costing_enabled: true,
         team_advanced_enabled: true,
         multi_site_ops_enabled: true,
@@ -45,6 +47,7 @@ export function defaultModulesForProfile(profile: BusinessProfile): {
     case "standard":
       return {
         inventory_enabled: true,
+        purchases_enabled: true,
         recipe_costing_enabled: true,
         team_advanced_enabled: true,
         multi_site_ops_enabled: false,
@@ -53,6 +56,7 @@ export function defaultModulesForProfile(profile: BusinessProfile): {
     default:
       return {
         inventory_enabled: false,
+        purchases_enabled: false,
         recipe_costing_enabled: false,
         team_advanced_enabled: false,
         multi_site_ops_enabled: false,

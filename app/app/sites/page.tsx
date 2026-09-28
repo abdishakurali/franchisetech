@@ -45,7 +45,6 @@ export default async function SitesPage() {
       <SitesManager
         sites={sites ?? []}
         assetCounts={countBySite}
-        orgId={membership.organisation_id}
         canManage={["owner", "manager"].includes(membership.role)}
       />
     </div>

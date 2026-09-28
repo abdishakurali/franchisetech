@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { CompareBrandLogosLabeled } from "@/components/marketing/CompareBrandLogos";
 import { competitorLogoForOg } from "@/lib/marketing/competitor-brands";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import {
   breadcrumbSchema,
@@ -45,7 +46,7 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
   const page = localizeComparisonPage(raw, locale);
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd data={faqJsonLd(page.faqs)} />
       <JsonLd
         data={breadcrumbSchema([
@@ -70,34 +71,35 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
         }}
       />
 
-      <section className="px-4 py-16 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <Link href="/compare" className="text-sm font-medium text-blue-600 hover:underline">
+      <section className="relative overflow-hidden bg-[#0D0F0E] px-4 py-16 sm:px-6 lg:px-8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_70%_at_78%_0%,rgba(22,93,252,0.35),transparent_60%)]" />
+        <div className="relative mx-auto max-w-6xl">
+          <Link href="/compare" className="text-sm font-medium text-[#5B9CFF] hover:underline">
             ← {ui.allComparisons}
           </Link>
           <div className="mt-6">
             <CompareBrandLogosLabeled competitorSlug={page.slug} />
           </div>
-          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-blue-600">
+          <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-[#5B9CFF]">
             {page.market === "ro" ? ui.comparisonRo : ui.comparison}
           </p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+          <h1 className="mt-3 max-w-3xl font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-[#FAF8F4] sm:text-5xl">
             {page.h1}
           </h1>
-          <p className="mt-5 max-w-3xl text-lg text-slate-600">{page.intro}</p>
-          <p className="mt-4 max-w-3xl rounded-lg border border-amber-100 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-950">
+          <p className="mt-5 max-w-3xl text-lg text-[#FAF8F4]/72">{page.intro}</p>
+          <p className="mt-4 max-w-3xl rounded-[10px] border border-[#5B9CFF]/25 bg-white/5 px-4 py-3 text-sm leading-6 text-[#FAF8F4]/90">
             {page.betterFor}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={compareSignupHref(page.slug, locale)}
-              className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+              className="rounded-[10px] bg-[#165DFC] px-5 py-3 text-sm font-semibold text-white hover:bg-[#3E7BFF]"
             >
               {t.cta.startTrial}
             </Link>
             <Link
               href="/pricing"
-              className="rounded-lg border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="rounded-[10px] border border-white/24 px-5 py-3 text-sm font-semibold text-[#FAF8F4] hover:border-white"
             >
               {t.cta.seePricing}
             </Link>
@@ -105,25 +107,25 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
-      <section className="px-4 pb-8 sm:px-6 lg:px-8">
+      <section className="px-4 pb-8 pt-16 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <h2 className="text-lg font-bold text-slate-950">franchisetech</h2>
+          <div className="rounded-2xl border border-[#DFDCD2] bg-white p-6">
+            <h2 className="text-lg font-semibold text-[#0D0F0E]">franchisetech</h2>
             <ul className="mt-4 space-y-2">
               {page.franchisetechStrengths.map((item) => (
-                <li key={item} className="flex gap-2 text-sm text-slate-600">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+                <li key={item} className="flex gap-2 text-sm text-[#5B5D57]">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#00A63D]" />
                   {item}
                 </li>
               ))}
             </ul>
           </div>
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-            <h2 className="text-lg font-bold text-slate-950">{page.competitor}</h2>
+          <div className="rounded-2xl border border-[#DFDCD2] bg-[#F3F0E8] p-6">
+            <h2 className="text-lg font-semibold text-[#0D0F0E]">{page.competitor}</h2>
             <ul className="mt-4 space-y-2">
               {page.competitorStrengths.map((item) => (
-                <li key={item} className="flex gap-2 text-sm text-slate-600">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                <li key={item} className="flex gap-2 text-sm text-[#5B5D57]">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#8F8F86]" />
                   {item}
                 </li>
               ))}
@@ -132,10 +134,10 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
-      <section className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl overflow-x-auto">
-          <div className="min-w-[32rem] overflow-hidden rounded-xl border border-slate-200 bg-white">
-            <div className="grid grid-cols-3 bg-slate-100 px-4 py-3 text-sm font-bold text-slate-950">
+          <div className="min-w-[32rem] overflow-hidden rounded-2xl border border-[#DFDCD2] bg-white">
+            <div className="grid grid-cols-3 bg-[#F3F0E8] px-4 py-3 text-sm font-semibold text-[#0D0F0E]">
               <span>{ui.tableArea}</span>
               <span>{ui.tableFranchisetech}</span>
               <span>{page.competitor}</span>
@@ -143,39 +145,39 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
             {page.rows.map((row) => (
               <div
                 key={row[0]}
-                className="grid grid-cols-3 gap-3 border-t border-slate-100 px-4 py-4 text-sm"
+                className="grid grid-cols-3 gap-3 border-t border-[#DFDCD2] px-4 py-4 text-sm"
               >
-                <strong className="pr-2">{row[0]}</strong>
-                <span className="text-slate-600">{row[1]}</span>
-                <span className="text-slate-600">{row[2]}</span>
+                <strong className="pr-2 text-[#0D0F0E]">{row[0]}</strong>
+                <span className="text-[#5B5D57]">{row[1]}</span>
+                <span className="text-[#5B5D57]">{row[2]}</span>
               </div>
             ))}
           </div>
         </div>
-        <p className="mx-auto mt-5 max-w-6xl text-xs text-slate-500">{ui.disclaimer}</p>
+        <p className="mx-auto mt-5 max-w-6xl text-xs text-[#8F8F86]">{ui.disclaimer}</p>
       </section>
 
       {page.sections.length > 0 ? (
-        <section className="px-4 py-14 sm:px-6 lg:px-8">
+        <section className="bg-[#F3F0E8] px-4 py-14 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl space-y-10">
             {page.sections.map((section) => (
               <article key={section.title}>
-                <h2 className="text-xl font-bold text-slate-950">{section.title}</h2>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{section.body}</p>
+                <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold text-[#0D0F0E]">{section.title}</h2>
+                <p className="mt-3 text-sm leading-7 text-[#5B5D57]">{section.body}</p>
               </article>
             ))}
           </div>
         </section>
       ) : null}
 
-      <section className="border-t border-slate-100 bg-white px-4 py-14 sm:px-6 lg:px-8">
+      <section className="border-t border-[#DFDCD2] bg-white px-4 py-14 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-3xl">
-          <h2 className="text-xl font-bold text-slate-950">{ui.faq}</h2>
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold text-[#0D0F0E]">{ui.faq}</h2>
           <dl className="mt-6 space-y-6">
             {page.faqs.map((faq) => (
               <div key={faq.question}>
-                <dt className="font-semibold text-slate-900">{faq.question}</dt>
-                <dd className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</dd>
+                <dt className="font-semibold text-[#0D0F0E]">{faq.question}</dt>
+                <dd className="mt-2 text-sm leading-6 text-[#5B5D57]">{faq.answer}</dd>
               </div>
             ))}
           </dl>
@@ -185,7 +187,7 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
       <section className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-6xl flex-wrap gap-4 text-sm font-medium">
           {page.related.map((link) => (
-            <Link key={link.href} href={link.href} className="text-blue-600 hover:underline">
+            <Link key={link.href} href={link.href} className="text-[#165DFC] hover:underline">
               {link.label} <ArrowRight className="inline h-4 w-4" />
             </Link>
           ))}
@@ -195,6 +197,6 @@ export default async function ComparePage({ params }: { params: Promise<{ slug: 
       <CTASection />
       <CompareStickyTrialBar competitorSlug={page.slug} locale={locale} />
       <div className="h-20 print:hidden" aria-hidden />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

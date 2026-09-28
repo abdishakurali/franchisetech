@@ -1,6 +1,14 @@
-// POST /api/cron/owner-digest
+// GET/POST /api/cron/owner-digest
 // Requires: Authorization: Bearer <CRON_SECRET>
-// Schedule via n8n or server crontab every 5 minutes (sends within a tight window after configured time).
+// Scheduled via Vercel Cron every 5 minutes (see vercel.json) — Vercel invokes
+// crons with GET; POST is kept for manual/authenticated retries, same
+// convention as the other routes in this directory. Previously triggered by
+// an external n8n workflow (outreach/n8n-owner-digest-cron.workflow.ts) on
+// the same 5-minute cadence; n8n was disabled, and nothing else was calling
+// this route, so digests silently stopped sending. The 5-minute cadence
+// itself isn't cosmetic: the route only sends within a 15-minute window after
+// each org's own configured local time (OWNER_DIGEST_SEND_WINDOW_MINUTES in
+// lib/owner-digest/schedule.ts), so a coarser schedule would miss most orgs.
 // Uses SUPABASE_SERVICE_ROLE_KEY + SECURITY DEFINER RPCs.
 
 import { NextRequest, NextResponse } from "next/server";
@@ -47,14 +55,22 @@ async function ensureDigestReferralLink(
   return code ? buildReferralLink(code) : null;
 }
 
-export async function POST(req: NextRequest) {
+async function runOwnerDigest(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
+  // PG_CRON_SECRET is a second, separate secret used only by the Supabase
+  // pg_cron job (see supabase/migrations for the schedule) — Vercel Hobby
+  // blocks any cron more frequent than daily, and this route needs a 5-minute
+  // cadence, so pg_cron calls it directly over HTTP from the database.
+  // Deliberately not reusing CRON_SECRET here so rotating either one never
+  // risks breaking the other trigger path.
+  const pgCronSecret = process.env.PG_CRON_SECRET;
+  if (!cronSecret && !pgCronSecret) {
     return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 500 });
   }
 
   const auth = req.headers.get("authorization") ?? "";
-  if (auth !== `Bearer ${cronSecret}`) {
+  const authorized = (cronSecret && auth === `Bearer ${cronSecret}`) || (pgCronSecret && auth === `Bearer ${pgCronSecret}`);
+  if (!authorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -202,4 +218,12 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ checked, due, sent, failed, skipped, locked, recipientsSent, recipientsFailed });
+}
+
+export async function GET(req: NextRequest) {
+  return runOwnerDigest(req);
+}
+
+export async function POST(req: NextRequest) {
+  return runOwnerDigest(req);
 }

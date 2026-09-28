@@ -51,9 +51,9 @@ function ProductsImportContent() {
     <div className="mx-auto max-w-3xl space-y-6 p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <Link href="/app/products" className="text-sm text-slate-500 hover:text-slate-700">← Back to products</Link>
-          <h1 className="text-2xl font-semibold text-slate-950 mt-1">Import products</h1>
-          <p className="mt-1 text-sm text-slate-500">Use this to add many products at once.</p>
+          <Link href="/app/products" className="text-sm text-muted-foreground hover:text-foreground">← Back to products</Link>
+          <h1 className="text-2xl font-semibold text-foreground mt-1">Import products</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Use this to add many products at once.</p>
         </div>
         <Button
           variant="outline"
@@ -65,7 +65,7 @@ function ProductsImportContent() {
       </div>
 
       {summary && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">{summary}</div>
+        <div className="rounded-lg border border-reconciled/25 bg-reconciled/10 p-3 text-sm text-reconciled">{summary}</div>
       )}
 
       <Card>
@@ -73,15 +73,15 @@ function ProductsImportContent() {
         <CardContent>
           <form action={importProductsCsv as unknown as (fd: FormData) => Promise<void>} className="space-y-4">
             <Input name="csv_file" type="file" accept=".csv,text/csv" />
-            <p className="text-xs text-slate-400">Or paste CSV below:</p>
+            <p className="text-xs text-muted-foreground">Or paste CSV below:</p>
             <textarea
               name="csv_text"
               value={csv}
               onChange={(e) => setCsv(e.target.value)}
-              className="min-h-44 w-full rounded-md border border-slate-200 p-3 font-mono text-xs"
+              className="min-h-44 w-full rounded-md border border-border p-3 font-mono text-xs"
             />
             {errors.length > 0 && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              <div className="rounded-lg border border-attention/25 bg-attention/10 p-3 text-sm text-attention">
                 {errors.slice(0, 5).join(" · ")}
               </div>
             )}
@@ -99,7 +99,7 @@ function ProductsImportContent() {
             <div className="overflow-x-auto text-sm">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b text-left text-xs text-slate-400">
+                  <tr className="border-b text-left text-xs text-muted-foreground">
                     <th className="py-2 pr-3">Name</th>
                     <th className="py-2 pr-3">Category</th>
                     <th className="py-2 pr-3">Price (€)</th>
@@ -110,7 +110,7 @@ function ProductsImportContent() {
                   {rows.slice(0, 10).map((r, i) => (
                     <tr key={i} className="border-b last:border-0">
                       <td className="py-2 pr-3 font-medium">{r.name}</td>
-                      <td className="py-2 pr-3 text-slate-500">{r.category}</td>
+                      <td className="py-2 pr-3 text-muted-foreground">{r.category}</td>
                       <td className="py-2 pr-3">{r.sale_price_gross}</td>
                       <td className="py-2">{r.available_in_pos}</td>
                     </tr>
@@ -127,7 +127,7 @@ function ProductsImportContent() {
 
 export default function ProductsImportPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-slate-400">Loading…</div>}>
+    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
       <ProductsImportContent />
     </Suspense>
   );

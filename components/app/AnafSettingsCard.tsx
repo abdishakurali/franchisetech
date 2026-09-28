@@ -35,7 +35,7 @@ export function AnafSettingsCard({
               <div className="space-y-1.5">
                 <Label htmlFor="anaf_cif">CIF / CUI organizație</Label>
                 <Input id="anaf_cif" name="anaf_cif" defaultValue={anafCif} placeholder="ex: 12345678" />
-                <p className="text-xs text-slate-500">Fără prefixul RO — îl adăugăm automat în XML.</p>
+                <p className="text-xs text-muted-foreground">Fără prefixul RO — îl adăugăm automat în XML.</p>
               </div>
               <div className="flex items-end gap-2 pb-1">
                 <input
@@ -43,7 +43,7 @@ export function AnafSettingsCard({
                   id="anaf_vat_registered"
                   name="anaf_vat_registered"
                   defaultChecked={anafVatRegistered}
-                  className="h-4 w-4 rounded border-slate-300"
+                  className="h-4 w-4 rounded border-border"
                 />
                 <Label htmlFor="anaf_vat_registered">Plătitor de TVA (prefix RO în CUI)</Label>
               </div>
@@ -52,14 +52,14 @@ export function AnafSettingsCard({
           </form>
         )}
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="rounded-xl border border-border bg-secondary p-4">
           <div className="flex items-center gap-3">
-            <div className={`h-2.5 w-2.5 rounded-full ${anafConnected ? "bg-green-500" : "bg-slate-300"}`} />
+            <div className={`h-2.5 w-2.5 rounded-full ${anafConnected ? "bg-reconciled" : "bg-secondary"}`} />
             <div>
               <p className="font-medium text-sm">
                 {anafConnected ? "Conectat la ANAF/SPV ✓" : "Neconectat"}
               </p>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {anafConnected
                   ? "Facturi electronice pot fi trimise automat la ANAF."
                   : "Necesită certificat digital pe token USB și PIN-ul asociat."}
@@ -84,7 +84,7 @@ export function AnafSettingsCard({
           </div>
 
           {!anafConnected && (
-            <div className="mt-4 rounded-lg bg-blue-50 p-3 text-xs text-blue-700 space-y-1">
+            <div className="mt-4 rounded-lg bg-accent p-3 text-xs text-brass space-y-1">
               <p className="font-medium">Pași pentru conectare:</p>
               <ol className="list-decimal pl-4 space-y-0.5">
                 <li>Introdu tokenul USB (SafeNet / Gemalto / Oberthur) în calculator</li>
@@ -97,7 +97,7 @@ export function AnafSettingsCard({
 
           <Link
             href="/help/romania-efactura"
-            className="mt-4 inline-block text-xs font-medium text-blue-700 hover:underline"
+            className="mt-4 inline-block text-xs font-medium text-brass hover:underline"
           >
             Vezi ghid pas cu pas pentru e-Factura →
           </Link>

@@ -79,8 +79,8 @@ export default async function RefundsPage() {
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-950">{t.refunds.titleFull}</h1>
-        <p className="text-sm text-slate-500">{t.refunds.subtitle}</p>
+        <h1 className="text-2xl font-semibold text-foreground">{t.refunds.titleFull}</h1>
+        <p className="text-sm text-muted-foreground">{t.refunds.subtitle}</p>
       </div>
 
       <Card>
@@ -90,8 +90,8 @@ export default async function RefundsPage() {
         <CardContent>
           {safeTx.length === 0 ? (
             <div className="text-center py-12 space-y-2">
-              <p className="text-slate-400 text-sm">{t.refunds.empty}</p>
-              <p className="text-slate-300 text-xs">{t.refunds.emptyDetail}</p>
+              <p className="text-muted-foreground text-sm">{t.refunds.empty}</p>
+              <p className="text-muted-foreground text-xs">{t.refunds.emptyDetail}</p>
             </div>
           ) : (
             <Table>
@@ -114,22 +114,22 @@ export default async function RefundsPage() {
                       <TableCell className="font-mono text-sm">
                         {tx.transaction_number ?? "—"}
                       </TableCell>
-                      <TableCell className="text-sm text-slate-500">
+                      <TableCell className="text-sm text-muted-foreground">
                         {safeDate(tx.sold_at)}
                       </TableCell>
                       <TableCell className="text-sm">
                         {method?.name ?? "—"}
                       </TableCell>
-                      <TableCell className="text-sm text-slate-600">
+                      <TableCell className="text-sm text-mid">
                         {audit?.reason ?? "—"}
                       </TableCell>
-                      <TableCell className="text-right font-medium text-red-600">
+                      <TableCell className="text-right font-medium text-attention">
                         &minus;{formatMoney(tx.total, currency)}
                       </TableCell>
                       <TableCell>
                         <Link
                           href={`/app/transactions/${tx.id}`}
-                          className="text-sm text-blue-600 hover:underline"
+                          className="text-sm text-brass hover:underline"
                         >
                           {t.refunds.view}
                         </Link>
@@ -143,7 +143,7 @@ export default async function RefundsPage() {
         </CardContent>
       </Card>
 
-      <p className="text-xs text-slate-400">{t.refunds.footerHint}</p>
+      <p className="text-xs text-muted-foreground">{t.refunds.footerHint}</p>
     </div>
   );
 }

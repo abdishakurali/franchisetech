@@ -27,19 +27,19 @@ export default async function ModifiersPage() {
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex items-center gap-3">
-        <Link href="/app/products" className="text-slate-400 hover:text-slate-600">
+        <Link href="/app/products" className="text-muted-foreground hover:text-mid">
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold text-slate-950">
+          <h1 className="text-2xl font-semibold text-foreground">
             {t.products?.modifiers?.title ?? "Product modifiers"}
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             {t.products?.modifiers?.desc ?? "Add-ons, variants, and options that customers choose at the time of sale."}
           </p>
         </div>
         <Link href="/app/products/modifiers/new">
-          <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+          <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground">
             <Plus className="h-4 w-4" />
             {t.products?.modifiers?.addGroup ?? "New modifier group"}
           </Button>
@@ -49,7 +49,7 @@ export default async function ModifiersPage() {
       {allGroups.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <p className="text-slate-500 text-sm">
+            <p className="text-muted-foreground text-sm">
               {t.products?.modifiers?.emptyState ?? "No modifier groups yet. Create your first to add options like \"Extra shot\" or \"Milk type\" to products."}
             </p>
             <Link href="/app/products/modifiers/new">
@@ -79,7 +79,7 @@ export default async function ModifiersPage() {
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       {group.active === false && (
-                        <Badge variant="outline" className="text-slate-400">Inactive</Badge>
+                        <Badge variant="outline" className="text-muted-foreground">Inactive</Badge>
                       )}
                       <Link href={`/app/products/modifiers/${group.id}/edit`}>
                         <Button variant="outline" size="sm">{t.common.edit}</Button>
@@ -89,14 +89,14 @@ export default async function ModifiersPage() {
                 </CardHeader>
                 <CardContent>
                   {activeOptions.length === 0 ? (
-                    <p className="text-xs text-slate-400">{t.products?.modifiers?.noOptions ?? "No options yet."}</p>
+                    <p className="text-xs text-muted-foreground">{t.products?.modifiers?.noOptions ?? "No options yet."}</p>
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       {activeOptions.map((opt) => (
-                        <span key={opt.id} className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-700">
+                        <span key={opt.id} className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-3 py-1 text-xs text-foreground">
                           {opt.name}
                           {Number(opt.price_delta) !== 0 && (
-                            <span className="text-blue-600 font-medium">
+                            <span className="text-brass font-medium">
                               {Number(opt.price_delta) > 0 ? `+${Number(opt.price_delta).toFixed(2)}` : Number(opt.price_delta).toFixed(2)}
                             </span>
                           )}
@@ -111,10 +111,10 @@ export default async function ModifiersPage() {
         </div>
       )}
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-muted-foreground">
         {activeGroups.length} {t.products?.modifiers?.activeGroups ?? "active group(s)"}
         {" · "}
-        <Link href="/app/products" className="text-blue-600 hover:underline">
+        <Link href="/app/products" className="text-brass hover:underline">
           {t.products?.modifiers?.assignToProducts ?? "Assign to products from the product edit page"}
         </Link>
       </p>

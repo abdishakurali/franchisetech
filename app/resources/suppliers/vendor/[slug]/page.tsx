@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { MarketingShell, CTASection } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { findVendorCategory } from "@/lib/marketing/vendor-categories";
 import { getAllPublicVendorSlugs, getCounties, getVendorBySlug } from "@/lib/vendors/queries";
@@ -70,7 +71,7 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ s
   const reportMailto = `mailto:${REPORT_EMAIL}?subject=${encodeURIComponent(reportSubject)}&body=${encodeURIComponent(reportBody)}`;
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd
         data={breadcrumbSchema([
           { name: isRo ? "Acasă" : "Home", path: "/" },
@@ -250,6 +251,6 @@ export default async function VendorDetailPage({ params }: { params: Promise<{ s
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

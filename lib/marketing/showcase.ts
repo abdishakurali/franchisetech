@@ -5,57 +5,57 @@
 export const showcaseAssets = {
   /** POS with products in cart and Charge button */
   posCart: {
-    src: "/showcase/pos-grid.png",
+    src: "/marketing/live/pos.png",
     path: "/app/pos",
   },
   /** Owner dashboard — Today at a glance */
   ownerDashboard: {
-    src: "/showcase/reports-dashboard.png",
+    src: "/marketing/live/dashboard.png",
     path: "/app",
   },
   /** Kitchen display — New / Preparing / Ready / Done */
   kitchenDisplay: {
-    src: "/showcase/kitchen-display.png",
+    src: "/marketing/live/pos.png",
     path: "/app/kitchen",
   },
   /** Stock levels table with low-stock alerts */
   stockLevels: {
-    src: "/showcase/stock-levels.png",
+    src: "/marketing/live/stock.png",
     path: "/app/stock",
   },
   /** Supplier list and spend */
   suppliers: {
-    src: "/showcase/suppliers.png",
+    src: "/marketing/live/stock.png",
     path: "/app/suppliers",
   },
   /** Products & ingredients with unit costs (margin building block) */
   recipeCosting: {
-    src: "/showcase/recipe-costing.png",
+    src: "/marketing/live/recipes.png",
     path: "/app/products",
   },
   /** Daily Z-report / till close */
   zReport: {
-    src: "/showcase/z-report.png",
+    src: "/marketing/live/reports.png",
     path: "/app/reports/z-report",
   },
   /** In-app setup checklist */
   setupGuide: {
-    src: "/showcase/setup-guide.png",
+    src: "/marketing/live/dashboard.png",
     path: "/app/setup-checklist",
   },
   /** POS product grid before items are added */
   posGrid: {
-    src: "/showcase/pos-grid.png",
+    src: "/marketing/live/pos.png",
     path: "/app/pos",
   },
   /** Table floor picker — Sală / Terasă / Bar */
   tableFloor: {
-    src: "/showcase/table-floor.png",
+    src: "/marketing/live/pos.png",
     path: "/app/pos",
   },
   /** Table tab checkout — Trimite comanda rounds, Încasează total */
   posTableOrder: {
-    src: "/showcase/pos-table-order.png",
+    src: "/marketing/live/pos.png",
     path: "/app/pos",
   },
 } as const;

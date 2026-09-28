@@ -31,8 +31,8 @@ export function PricingEmailSignup({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center">
-      <h2 className="text-2xl font-semibold text-slate-900">{title}</h2>
+    <div className="rounded-2xl border border-border bg-secondary p-8 text-center">
+      <h2 className="text-2xl font-semibold text-foreground">{title}</h2>
       <form onSubmit={handleSubmit} className="mx-auto mt-6 flex max-w-md flex-col gap-3 sm:flex-row">
         <Input
           type="email"
@@ -40,10 +40,10 @@ export function PricingEmailSignup({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 bg-white"
+          className="flex-1 bg-card"
           autoComplete="email"
         />
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 shrink-0">
+        <Button type="submit" className="bg-brass hover:bg-brass/90 shrink-0">
           {getStarted} <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </form>

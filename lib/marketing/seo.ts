@@ -93,7 +93,7 @@ export const featurePages: SeoPage[] = [
       { question: "How many staff can use the register?", answer: "Unlimited. Add cashiers, managers, and kitchen roles at no extra per-user cost." },
     ],
     related: [{ label: "Z-report", href: "/features/z-report" }, { label: "Cafes", href: "/industries/cafes" }],
-    image: "/showcase/pos-grid.png",
+    image: "/marketing/live/pos.png",
     heroComponent: OwnerPosProof,
   },
   {
@@ -118,7 +118,7 @@ export const featurePages: SeoPage[] = [
       { question: "Can I transfer stock between locations?", answer: "Not yet. Stock transfer between locations is on the roadmap — today, each location's stock is tracked separately." },
     ],
     related: [{ label: "Recipe costing", href: "/features/recipe-costing" }, { label: "Stock control article", href: "/blog/stoc-negativ-cauze-si-solutii" }, { label: "Restaurants", href: "/industries/restaurants" }],
-    image: "/showcase/stock-levels.png",
+    image: "/marketing/live/stock.png",
     heroComponent: OwnerStockProof,
   },
   {
@@ -142,7 +142,7 @@ export const featurePages: SeoPage[] = [
       { question: "Can recipes connect to POS?", answer: "Yes. Recipe products can be sold through POS and used for stock calculations." },
     ],
     related: [{ label: "Stock management", href: "/features/stock-management" }],
-    image: "/showcase/recipe-costing.png",
+    image: "/marketing/live/recipes.png",
     heroComponent: OwnerRecipeProof,
   },
   {
@@ -166,7 +166,7 @@ export const featurePages: SeoPage[] = [
       { question: "Does this replace my accountant?", answer: "No. franchisetech helps keep organised sales and till records. Professional tax and accounting advice remains your responsibility." },
     ],
     related: [{ label: "Z-report explained", href: "/resources/z-report-explained" }, { label: "POS feature", href: "/features/pos" }],
-    image: "/showcase/reports-dashboard.png",
+    image: "/marketing/live/dashboard.png",
     heroComponent: OwnerZReportProof,
   },
   {
@@ -189,7 +189,7 @@ export const featurePages: SeoPage[] = [
       { question: "Is this a full ERP?", answer: "No. It is practical purchase tracking for small food operators, not enterprise procurement." },
     ],
     related: [{ label: "Stock management", href: "/features/stock-management" }, { label: "Recipe costing", href: "/features/recipe-costing" }],
-    image: "/showcase/suppliers.png",
+    image: "/marketing/live/stock.png",
     heroComponent: OwnerSuppliersProof,
   },
   {
@@ -226,7 +226,7 @@ export const featurePages: SeoPage[] = [
       { label: "Purchases & suppliers", href: "/features/purchases-suppliers" },
       { label: "Romania", href: "/industries/romania" },
     ],
-    image: "/showcase/suppliers.png",
+    image: "/marketing/live/stock.png",
     heroComponent: OwnerSuppliersProof,
   },
   {
@@ -254,7 +254,7 @@ export const featurePages: SeoPage[] = [
     ],
     faqs: [
       { question: "Does offline mode work without installing software?", answer: "Yes. franchisetech runs in the browser. Offline queuing is built into the POS — no separate APK required for basic offline sales." },
-      { question: "Will FiscalNet print offline?", answer: "Fiscal receipts depend on your local FiscalNet setup and fiscal device. Operational sale recording can queue offline; fiscal printing follows your configured hardware path." },
+      { question: "Will my fiscal driver print offline?", answer: "Fiscal receipts depend on your local fiscal driver (FiscalNet, driverfiscal.ro) setup and fiscal device. Operational sale recording can queue offline; fiscal printing follows your configured hardware path." },
       { question: "What happens if sync fails?", answer: "Queued sales stay in the browser until sync succeeds. Staff should avoid clearing browser data during an outage. Contact support if sync does not complete after reconnecting." },
     ],
     related: [
@@ -262,7 +262,7 @@ export const featurePages: SeoPage[] = [
       { label: "Z-report", href: "/features/z-report" },
       { label: "Romania", href: "/industries/romania" },
     ],
-    image: "/showcase/pos-grid.png",
+    image: "/marketing/live/pos.png",
     heroComponent: OwnerPosProof,
   },
   {
@@ -277,7 +277,7 @@ export const featurePages: SeoPage[] = [
     bullets: ["0–15 min: signup and business settings", "15–45 min: demo products and payment methods", "45–60 min: open till and first test sale"],
     sections: [
       { title: "Clear milestones", body: "Each step links to the right screen — settings, POS, or reports — so setup stays focused." },
-      { title: "Guided self-serve setup", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — the 15-day trial starts after a one-time €1 card verification." },
+      { title: "Guided self-serve setup", body: "Signup seeds demo products and payment methods. The guided checklist tracks progress from first product to first sale — the Free plan is available when the account is created, with no card required, and never expires." },
     ],
     faqs: [
       { question: "How long does setup take?", answer: "Core path (signup → demo products → open till → first sale): most cafes finish in under an hour. A full catalog migration with 200+ products may take 1–2 days — spread it over your trial." },
@@ -285,20 +285,20 @@ export const featurePages: SeoPage[] = [
       { question: "Can I skip steps?", answer: "Yes. The guide is a checklist, not a blocker. You can return to any step later." },
     ],
     related: [{ label: "POS", href: "/features/pos" }, { label: "Pricing", href: "/pricing" }],
-    image: "/showcase/setup-guide.png",
+    image: "/marketing/live/dashboard.png",
     heroComponent: OwnerSetupGuideProof,
   },
   {
     slug: "qr-code-receipts",
     path: "/features/qr-code-receipts",
-    eyebrow: "Bon fiscal & FiscalNet",
-    title: "Bon Fiscal în POS — FiscalNet, Raport Z și Pregătire QR",
-    metaTitle: "Bon Fiscal POS România | FiscalNet, Raport Z, QR ANAF | franchisetech",
-    description: "Cum gestionezi bonurile fiscale în franchisetech: POS, FiscalNet, metode de plată, TVA, raport Z și ce trebuie verificat pentru QR-ul ANAF.",
+    eyebrow: "Bon fiscal & driver fiscal",
+    title: "Bon Fiscal în POS — Driver Fiscal, Raport Z și Pregătire QR",
+    metaTitle: "Bon Fiscal POS România | Driver Fiscal, Raport Z, QR ANAF | franchisetech",
+    description: "Cum gestionezi bonurile fiscale în franchisetech: POS, driver fiscal, metode de plată, TVA, raport Z și ce trebuie verificat pentru QR-ul ANAF.",
     h1: "Bon fiscal din POS, fără pași manuali între vânzare și închiderea zilei",
-    intro: "franchisetech este pentru cafenele și restaurante mici din România care vor ca fiecare vânzare din POS să rămână legată de FiscalNet, TVA, metode de plată și raportul Z. QR-ul ANAF depinde de firmware-ul casei fiscale, dar datele operaționale trebuie să fie corecte înainte să ajungă la imprimantă.",
+    intro: "franchisetech este pentru cafenele și restaurante mici din România care vor ca fiecare vânzare din POS să rămână legată de driverul fiscal, TVA, metode de plată și raportul Z. QR-ul ANAF depinde de firmware-ul casei fiscale, dar datele operaționale trebuie să fie corecte înainte să ajungă la imprimantă.",
     bullets: [
-      "Vânzarea se înregistrează în POS și se trimite către FiscalNet când integrarea este activă",
+      "Vânzarea se înregistrează în POS și se trimite către driverul fiscal când integrarea este activă",
       "Metodele de plată și grupele TVA sunt mapate în setările fiscale",
       "Raportul Z și diferențele de numerar rămân în același workspace",
       "QR-ul de pe bon este generat de casa fiscală certificată, nu de POS",
@@ -307,7 +307,7 @@ export const featurePages: SeoPage[] = [
     sections: [
       {
         title: "Ce face franchisetech în fluxul de bon fiscal",
-        body: "Casierul finalizează vânzarea în POS, cu produse, TVA și metodă de plată. Pentru organizațiile din România cu FiscalNet configurat, franchisetech trimite datele către casa fiscală prin driverul FiscalNet și păstrează tranzacția pentru verificarea zilnică.",
+        body: "Casierul finalizează vânzarea în POS, cu produse, TVA și metodă de plată. Pentru organizațiile din România cu driverul fiscal configurat — folosim driverul FiscalNet (driverfiscal.ro) — franchisetech trimite datele către casa fiscală prin acest driver și păstrează tranzacția pentru verificarea zilnică.",
       },
       {
         title: "Unde intră QR-ul ANAF",
@@ -315,21 +315,21 @@ export const featurePages: SeoPage[] = [
       },
       {
         title: "Ce verifici înainte de go-live",
-        body: "Confirmă cu furnizorul casei fiscale că firmware-ul suportă QR, actualizează FiscalNet, configurează CIF-ul, metodele de plată și grupele TVA, apoi rulează o vânzare de test și un raport Z împreună cu contabilul.",
+        body: "Confirmă cu furnizorul casei fiscale că firmware-ul suportă QR, actualizează driverul fiscal, configurează CIF-ul, metodele de plată și grupele TVA, apoi rulează o vânzare de test și un raport Z împreună cu contabilul.",
       },
     ],
     faqs: [
       {
         question: "franchisetech emite bon fiscal?",
-        answer: "Da, pentru organizațiile din România unde FiscalNet este activat și configurat corect. Verificarea fiscală finală rămâne la contabil și furnizorul casei fiscale.",
+        answer: "Da, pentru organizațiile din România unde driverul fiscal este activat și configurat corect. Verificarea fiscală finală rămâne la contabil și furnizorul casei fiscale.",
       },
       {
         question: "franchisetech generează QR-ul de pe bon?",
-        answer: "Nu. QR-ul este generat de casa fiscală certificată. franchisetech trimite datele vânzării către FiscalNet; dispozitivul fiscal tipărește bonul conform firmware-ului instalat.",
+        answer: "Nu. QR-ul este generat de casa fiscală certificată. franchisetech trimite datele vânzării către driverul fiscal; dispozitivul fiscal tipărește bonul conform firmware-ului instalat.",
       },
       {
         question: "Ce trebuie să verific pentru QR?",
-        answer: "Întreabă furnizorul autorizat dacă modelul casei tale fiscale are firmware QR disponibil, apoi testează o vânzare reală cu FiscalNet înainte de termenul ANAF.",
+        answer: "Întreabă furnizorul autorizat dacă modelul casei tale fiscale are firmware QR disponibil, apoi testează o vânzare reală cu driverul fiscal înainte de termenul ANAF.",
       },
       {
         question: "Ce se întâmplă la finalul zilei?",
@@ -337,15 +337,15 @@ export const featurePages: SeoPage[] = [
       },
       {
         question: "Înlocuiește franchisetech contabilul?",
-        answer: "Nu. franchisetech organizează vânzări, TVA, FiscalNet și rapoarte operaționale. Contabilul verifică obligațiile fiscale și documentele oficiale.",
+        answer: "Nu. franchisetech organizează vânzări, TVA, driverul fiscal și rapoarte operaționale. Contabilul verifică obligațiile fiscale și documentele oficiale.",
       },
     ],
     related: [
-      { label: "Romania FiscalNet guide", href: "/help/romania-fiscalnet" },
+      { label: "Romania fiscal driver guide", href: "/help/romania-fiscalnet" },
       { label: "POS for Romania", href: "/industries/romania" },
       { label: "Z-report and daily closing", href: "/features/z-report" },
     ],
-    image: "/showcase/pos-grid.png",
+    image: "/marketing/live/pos.png",
     heroComponent: OwnerPosProof,
   },
   {
@@ -363,7 +363,7 @@ export const featurePages: SeoPage[] = [
       "Balanță cantitativ-valorică — opening/closing stock by product",
       "Raport de gestiune — complete inventory movement report with TVA breakdown",
       "Saga XML export — NIR and sales in Saga-compatible format",
-      "TVA breakdown by rate (21%, 11%, 5%, 0%)",
+      "TVA breakdown by rate (21%, 11%, 0%)",
     ],
     sections: [
       {
@@ -380,7 +380,7 @@ export const featurePages: SeoPage[] = [
       },
       {
         title: "Raport de gestiune (Stock Management Report)",
-        body: "The complete inventory report combining all movements in chronological order: opening stock, NIR entries, consumption, Z-report sales values, and closing stock — split by TVA rate columns (21%, 11%, 5%, 0%).",
+        body: "The complete inventory report combining all movements in chronological order: opening stock, NIR entries, consumption, Z-report sales values, and closing stock — split by TVA rate columns (21%, 11%, 0%).",
       },
       {
         title: "Saga XML Export",
@@ -414,7 +414,7 @@ export const featurePages: SeoPage[] = [
       { label: "Stock management", href: "/features/stock-management" },
       { label: "QR code on receipts", href: "/features/qr-code-receipts" },
     ],
-    image: "/showcase/reports-dashboard.png",
+    image: "/marketing/live/dashboard.png",
     heroComponent: OwnerDashboardProof,
   },
   {
@@ -465,28 +465,28 @@ export const industryPages: SeoPage[] = [
     slug: "romania",
     path: "/industries/romania",
     eyebrow: "🇷🇴 România",
-    title: "Soft de Casa de Marcat Romania — FiscalNet, TVA, lei",
-    metaTitle: "POS Romania cu FiscalNet | TVA 21%/11%/5% | lei (RON) | franchisetech",
-    description: "franchisetech este un sistem POS pentru restaurante, cafenele și magazine din România. Integrare FiscalNet, afișaj în lei (RON), cote TVA românești (21%/11%/5%), membri de echipă nelimitați.",
-    h1: "POS pentru afaceri din România — FiscalNet, TVA, lei",
-    intro: "franchisetech este configurat pentru piața românească: monedă lei (RON), cote TVA standard, integrare FiscalNet pentru bonuri fiscale, și echipă nelimitată fără costuri suplimentare.",
+    title: "Soft de Casa de Marcat Romania — Driver Fiscal, TVA, lei",
+    metaTitle: "POS Romania cu driver fiscal | TVA 21%/11%/0% | lei (RON) | franchisetech",
+    description: "franchisetech este un sistem POS pentru restaurante, cafenele și magazine din România. Integrare cu driverul fiscal, afișaj în lei (RON), cote TVA românești (21%/11%/0%), membri de echipă nelimitați.",
+    h1: "POS pentru afaceri din România — Driver fiscal, TVA, lei",
+    intro: "franchisetech este configurat pentru piața românească: monedă lei (RON), cote TVA standard, integrare cu driverul fiscal pentru bonuri fiscale, și echipă nelimitată fără costuri suplimentare.",
     bullets: [
       "Afișaj în lei (RON) în tot sistemul — POS, rapoarte, bonuri",
-      "Cote TVA românești pre-încărcate: 21%, 11%, 5%, 0%",
-      "Integrare FiscalNet pentru bonuri fiscale",
-      "Tipuri de plată mapate pentru FiscalNet (coduri 1–8): numerar, card, tichete masă etc.",
-      "Grupe TVA FiscalNet (1–5) configurabile per cotă",
+      "Cote TVA românești pre-încărcate: 21%, 11%, 0%",
+      "Integrare cu driverul fiscal pentru bonuri fiscale",
+      "Tipuri de plată mapate pentru driverul fiscal (coduri 1–8): numerar, card, tichete masă etc.",
+      "Grupe TVA ale driverului fiscal (1–5) configurabile per cotă",
       "Membri de echipă nelimitați fără cost suplimentar",
       "Rapoarte zilnice: vânzări, numerar, marjă, stoc",
     ],
     sections: [
       {
         title: "Monedă și TVA pentru România",
-        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 21% (grupa FiscalNet 1), TVA Redus 11% (grupa 2), TVA Super-redus 5% (grupa 3), Scutit 0% (grupa 4). Cotele sunt editabile oricând.",
+        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 21% (grupa 1 a driverului fiscal), TVA Redus 11% (grupa 2), Scutit 0% (grupa 4). Cotele sunt editabile oricând.",
       },
       {
-        title: "Integrare FiscalNet completă",
-        body: "franchisetech se conectează la driver-ul FiscalNet pentru emiterea bonurilor fiscale. Suportă toate metodele de plată (cod 1–8): numerar, card, credit, tichete masă, tichete valorice, voucher, plată modernă. Reducerile per articol se transmit automat ca comandă DP^.",
+        title: "Integrare completă cu driverul fiscal",
+        body: "franchisetech se conectează la driverul FiscalNet (driverfiscal.ro) pentru emiterea bonurilor fiscale. Suportă toate metodele de plată (cod 1–8): numerar, card, credit, tichete masă, tichete valorice, voucher, plată modernă. Reducerile per articol se transmit automat ca comandă DP^.",
       },
       {
         title: "Echipă nelimitată, roluri clare",
@@ -495,8 +495,8 @@ export const industryPages: SeoPage[] = [
     ],
     faqs: [
       { question: "franchisetech afișează prețurile în lei?", answer: "Da. Toate prețurile, rapoartele, bonurile și POS-ul afișează în lei (RON) pentru organizațiile din România." },
-      { question: "Sunt pre-încărcate cotele TVA românești?", answer: "Da. TVA Standard 21%, TVA Redus 11%, TVA Super-redus 5% și Scutit 0% sunt disponibile de la început. Pot fi editate sau completate oricând." },
-      { question: "Cum funcționează integrarea FiscalNet?", answer: "franchisetech trimite comenzi către driver-ul FiscalNet: S^ pentru articole, DP^ pentru reduceri, P^ pentru plăți. Codul de plată și grupa TVA se configurează per metodă de plată și cotă TVA în setări." },
+      { question: "Sunt pre-încărcate cotele TVA românești?", answer: "Da. TVA Standard 21%, TVA Redus 11% și Scutit 0% sunt disponibile de la început. Pot fi editate sau completate oricând." },
+      { question: "Cum funcționează integrarea cu driverul fiscal?", answer: "franchisetech trimite comenzi către driverul fiscal: S^ pentru articole, DP^ pentru reduceri, P^ pentru plăți. Codul de plată și grupa TVA se configurează per metodă de plată și cotă TVA în setări." },
       { question: "Există limită de utilizatori?", answer: "Nu. Poți adăuga membri de echipă nelimitați cu acces bazat pe rol, fără cost suplimentar." },
       { question: "Funcționează pe tabletă sau telefon?", answer: "Da. franchisetech rulează ca PWA în orice browser modern, inclusiv pe tablete Android — fără instalare de aplicație." },
     ],
@@ -505,54 +505,8 @@ export const industryPages: SeoPage[] = [
       { label: "Z-report", href: "/features/z-report" },
       { label: "Cafenele & cofetării", href: "/industries/cafes" },
     ],
-    image: "/showcase/reports-dashboard.png",
+    image: "/marketing/live/dashboard.png",
     heroComponent: OwnerDashboardProof,
-  },
-  {
-    slug: "salons",
-    path: "/industries/salons",
-    eyebrow: "Salons & Barbers",
-    title: "POS System for Salons, Barbers & Beauty Businesses",
-    metaTitle: "Salon POS System | Barber POS | Staff Sales & Cash Tracking | franchisetech",
-    description: "franchisetech helps salons, barbers, and beauty businesses handle walk-ins, service sales, retail products, staff attribution, cash tracking, and daily reports.",
-    h1: "POS and daily operations for salons and barbers",
-    intro: "Salons and barbers need a fast till, clear staff accountability, combined service and retail sales, and simple end-of-day cash totals — without expensive appointment software or complex setup.",
-    bullets: [
-      "Service and retail product sales from one POS",
-      "Staff attribution — know who sold what",
-      "Cash, card, and other payment tracking",
-      "Discounts and refunds with reason",
-      "Daily sales totals and Z-report",
-      "Unlimited staff — no per-seat fees",
-      "Works in EUR (Ireland) and lei / RON (Romania)",
-    ],
-    sections: [
-      {
-        title: "Services and retail in one till",
-        body: "Create service items (haircuts, colours, treatments) and retail products (shampoos, styling products) in the same catalogue. The POS checkout handles both in a single transaction.",
-      },
-      {
-        title: "Staff attribution and accountability",
-        body: "Every sale can be linked to a customer and is always linked to the staff member who processed it. Owners and managers can review individual performance in transaction reports.",
-      },
-      {
-        title: "Simple cash-up at end of day",
-        body: "Open with a float, record cash in and out, close with a Z-report showing expected cash versus what was counted. Clear daily records without a complicated back office.",
-      },
-    ],
-    faqs: [
-      { question: "Does franchisetech support appointment booking?", answer: "Not currently. franchisetech focuses on POS, cash control, stock, and operations records. Appointment features are planned but not yet available." },
-      { question: "Can I sell retail products alongside services?", answer: "Yes. Products and services live in the same catalogue and can be mixed in one checkout transaction." },
-      { question: "Can I track which staff member made each sale?", answer: "Yes. Every transaction is linked to the logged-in user, and managers can filter reports by staff." },
-      { question: "Does it work for Irish and Romanian salons?", answer: "Yes. EUR currency and Irish VAT for Ireland; lei/RON and Romanian TVA for Romania, with FiscalNet fiscal receipts available when configured." },
-    ],
-    related: [
-      { label: "POS register", href: "/features/pos" },
-      { label: "Z-report and till closing", href: "/features/z-report" },
-      { label: "Romania", href: "/industries/romania" },
-    ],
-    image: "/showcase/pos-grid.png",
-    heroComponent: OwnerPosProof,
   },
 ];
 
@@ -607,6 +561,8 @@ export const publicPaths = [
   ...resourcePages.map((p) => p.path),
   "/help",
   "/help/romania-fiscalnet",
+  "/pentru-contabili",
+  "/accountant-partners",
   "/privacy",
   "/terms",
   "/legal-disclaimer",
@@ -621,7 +577,10 @@ export function pageMetadata(
   },
   locale: MarketingLocale = "en",
 ): Metadata {
-  const image = page.image ?? "/showcase/pos-grid.png";
+  // Not sourcing page.image (or the old /marketing/live/pos.png fallback) for
+  // OG/Twitter cards — every current value in the seo.ts data is one of the
+  // stale pre-pivot screenshots (EUR pricing, Irish VAT bands). Falls back
+  // to the site-wide default OG image in app/layout.tsx.
   return {
     title: page.metaTitle,
     description: page.description,
@@ -632,13 +591,11 @@ export function pageMetadata(
       description: page.description,
       url: page.path,
       locale: marketingOpenGraphLocale(locale),
-      images: [{ url: image, width: 1200, height: 750, alt: page.metaTitle }],
     },
     twitter: {
       card: "summary_large_image",
       title: page.metaTitle,
       description: page.description,
-      images: [image],
     },
   };
 }
@@ -674,7 +631,7 @@ export function seoMeta({
   title,
   description,
   path,
-  image = "/showcase/pos-grid.png",
+  image = "/marketing/live/pos.png",
   locale = "en" as MarketingLocale,
 }: {
   title: string;

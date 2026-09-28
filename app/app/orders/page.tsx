@@ -23,10 +23,10 @@ export default async function OrdersPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Orders</h1>
-          <p className="text-sm text-slate-500">Recent completed sales from the register.</p>
+          <h1 className="text-2xl font-semibold text-foreground">Orders</h1>
+          <p className="text-sm text-muted-foreground">Recent completed sales from the register.</p>
         </div>
-        <Link href="/app/pos" className="rounded-lg bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700">
+        <Link href="/app/pos" className="rounded-lg bg-reconciled text-white px-4 py-2 text-sm font-medium hover:bg-reconciled/90">
           + New sale
         </Link>
       </div>
@@ -36,8 +36,8 @@ export default async function OrdersPage() {
         <CardContent>
           {!transactions?.length ? (
             <div className="text-center py-12">
-              <p className="text-slate-400 mb-3">No orders yet today.</p>
-              <Link href="/app/pos" className="text-blue-600 hover:underline text-sm">Go to register →</Link>
+              <p className="text-muted-foreground mb-3">No orders yet today.</p>
+              <Link href="/app/pos" className="text-brass hover:underline text-sm">Go to register →</Link>
             </div>
           ) : (
             <Table>
@@ -62,10 +62,10 @@ export default async function OrdersPage() {
                   return (
                     <TableRow key={tx.id}>
                       <TableCell className="font-mono text-sm">{tx.transaction_number}</TableCell>
-                      <TableCell className="text-sm text-slate-500">{time}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{time}</TableCell>
                       <TableCell>{tx.customer_name ?? "—"}</TableCell>
                       <TableCell>
-                        <span className="text-sm text-slate-600">
+                        <span className="text-sm text-mid">
                           {items.slice(0, 2).map((i: {product_name:string;quantity:number;discount_pct?:number|null}) => `${i.product_name}${Number(i.discount_pct ?? 0) > 0 ? ` (−${i.discount_pct}%)` : ""} ×${i.quantity}`).join(", ")}
                           {items.length > 2 && ` +${items.length - 2} more`}
                         </span>
@@ -74,11 +74,11 @@ export default async function OrdersPage() {
                       <TableCell className="text-right">
                         <div className="font-semibold">{formatMoney(tx.total, currency)}</div>
                         {(discountTotal > 0 || hasLineDiscount) && (
-                          <div className="text-xs text-blue-600">−{formatMoney(discountTotal, currency)} disc.</div>
+                          <div className="text-xs text-brass">−{formatMoney(discountTotal, currency)} disc.</div>
                         )}
                       </TableCell>
                       <TableCell>
-                        <Link href={`/app/transactions/${tx.id}`} className="text-sm text-blue-600 hover:underline">Receipt</Link>
+                        <Link href={`/app/transactions/${tx.id}`} className="text-sm text-brass hover:underline">Receipt</Link>
                       </TableCell>
                     </TableRow>
                   );

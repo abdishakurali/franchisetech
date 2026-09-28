@@ -60,20 +60,20 @@ export function ContactForm({ source = "contact_page" }: { source?: string }) {
 
   if (status === "success") {
     return (
-      <div className="border border-emerald-200 bg-emerald-50 p-6" role="status">
+      <div className="border border-reconciled/25 bg-reconciled/10 p-6" role="status">
         <h3 className="font-semibold text-emerald-950">{isRo ? "Cererea a fost trimisă." : "Request sent."}</h3>
-        <p className="mt-2 text-sm text-emerald-800">{isRo ? "Revenim în maximum o zi lucrătoare." : "We will reply within one business day."}</p>
+        <p className="mt-2 text-sm text-reconciled">{isRo ? "Revenim în maximum o zi lucrătoare." : "We will reply within one business day."}</p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={submit} onFocus={markStarted} className="space-y-4 rounded-lg border border-[#DFDCD2] bg-white p-5 sm:p-6">
+    <form onSubmit={submit} onFocus={markStarted} className="space-y-4 rounded-lg border border-border bg-card p-5 sm:p-6">
       {/* Phone number is the ONE required field. Everything else is optional:
           an owner at the counter should be able to leave a number in seconds
           and get a call back, not fill in a five-field qualification form. */}
       <div>
-        <Label htmlFor={`${source}-contact`} className="text-base font-semibold text-[#0D0F0E]">
+        <Label htmlFor={`${source}-contact`} className="text-base font-semibold text-foreground">
           {isRo ? "Numărul dumneavoastră de telefon" : "Your phone number"}
         </Label>
         <Input
@@ -87,7 +87,7 @@ export function ContactForm({ source = "contact_page" }: { source?: string }) {
           maxLength={160}
           className="mt-1.5 h-12 font-mono text-base"
         />
-        <p className="mt-1.5 text-xs text-[#78786F]">
+        <p className="mt-1.5 text-xs text-muted-foreground">
           {isRo
             ? "Vă sunăm în următoarea zi lucrătoare. Puteți lăsa și un email, dacă preferați."
             : "We call you back the next working day. You can leave an email instead if you prefer."}
@@ -95,7 +95,7 @@ export function ContactForm({ source = "contact_page" }: { source?: string }) {
       </div>
 
       <details className="group">
-        <summary className="cursor-pointer list-none text-sm font-medium text-[#165DFC] hover:text-[#165DFC]">
+        <summary className="cursor-pointer list-none text-sm font-medium text-brass hover:text-brass">
           {isRo ? "Adaugă detalii (opțional)" : "Add details (optional)"}
         </summary>
         <div className="mt-4 space-y-4">
@@ -105,7 +105,7 @@ export function ContactForm({ source = "contact_page" }: { source?: string }) {
           </div>
           <div>
             <Label htmlFor={`${source}-business-type`}>{isRo ? "Tipul afacerii" : "Business type"}</Label>
-            <select id={`${source}-business-type`} name="businessType" defaultValue="" className="mt-1.5 h-10 w-full rounded-md border border-[#C7C2B4] bg-white px-3 text-sm">
+            <select id={`${source}-business-type`} name="businessType" defaultValue="" className="mt-1.5 h-10 w-full rounded-md border border-border bg-card px-3 text-sm">
               <option value="">{isRo ? "Alegeți" : "Select"}</option>
               {BUSINESS_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
             </select>
@@ -124,13 +124,13 @@ export function ContactForm({ source = "contact_page" }: { source?: string }) {
         </div>
       </details>
 
-      <label className="flex items-start gap-2 text-xs leading-5 text-[#78786F]">
+      <label className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
         <input type="checkbox" name="consent" required className="mt-1" />
         <span>{isRo ? "Sunt de acord ca franchisetech să folosească aceste date pentru a răspunde cererii mele, conform" : "I agree that franchisetech may use these details to answer my request under the"} <Link href="/privacy" className="underline">{isRo ? "politicii de confidențialitate" : "privacy policy"}</Link>.</span>
       </label>
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" />
-      {error ? <p className="text-sm text-red-600" role="alert">{error}</p> : null}
-      <Button type="submit" disabled={status === "loading"} className="min-h-12 w-full rounded-md bg-[#165DFC] text-base hover:bg-[#165DFC]">
+      {error ? <p className="text-sm text-attention" role="alert">{error}</p> : null}
+      <Button type="submit" disabled={status === "loading"} className="min-h-12 w-full rounded-md bg-brass text-base hover:bg-brass">
         {status === "loading" ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{isRo ? "Se trimite" : "Sending"}</> : isRo ? "Sunați-mă" : "Call me back"}
       </Button>
     </form>

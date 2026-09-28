@@ -8,6 +8,7 @@ import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleEnabled } from "@/lib/business-modules";
 import { PRODUCT_DETAIL_SELECT } from "@/lib/supabase/product-selects";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { formatCostAsOf } from "@/lib/recipe-costing";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -61,7 +62,7 @@ export default async function ProductDetailPage({
     .eq("id", id)
     .single();
 
-  if (!product) return <div className="p-6 text-slate-500">Product not found.</div>;
+  if (!product) return <div className="p-6 text-muted-foreground">Product not found.</div>;
 
   // Fetch supplier separately (safe even without FK)
   const supplierName: string | null = product.supplier_id
@@ -72,7 +73,7 @@ export default async function ProductDetailPage({
   const { data: recipes } = recipeVisible
     ? await supabase
         .from("recipes")
-        .select("id,name,yield_qty,recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)")
+        .select("id,name,yield_qty,cost_computed_at,recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)")
         .eq("product_id", id)
         .eq("organisation_id", orgId)
         .limit(1)
@@ -185,12 +186,12 @@ export default async function ProductDetailPage({
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href={returnTo} className="text-sm text-slate-500 hover:text-slate-700">← Products</Link>
+            <Link href={returnTo} className="text-sm text-muted-foreground hover:text-foreground">← Products</Link>
           </div>
-          <h1 className="text-2xl font-semibold text-slate-950">{product.name}</h1>
+          <h1 className="text-2xl font-semibold text-foreground">{product.name}</h1>
           <div className="flex flex-wrap gap-2 mt-2">
             {cat && <Badge variant="secondary" style={{ backgroundColor: (cat.color ?? "#94a3b8") + "20", color: cat.color ?? undefined }}>{cat.name}</Badge>}
-            {product.available_in_pos !== false && <Badge className="bg-blue-100 text-blue-700 border-0">POS</Badge>}
+            {product.available_in_pos !== false && <Badge className="bg-accent text-brass border-0">POS</Badge>}
             {recipeVisible && product.is_ingredient && <Badge variant="outline">Ingredient</Badge>}
             {inventoryVisible && product.is_stock_tracked && <Badge variant="outline">Stock tracked</Badge>}
             {!product.active && <Badge variant="destructive">Inactive</Badge>}
@@ -198,15 +199,15 @@ export default async function ProductDetailPage({
         </div>
         <div className="flex items-center gap-3">
           {product.image_url ? (
-            <img src={product.image_url} alt={product.name} className="h-20 w-20 rounded-xl object-cover border border-slate-200 shrink-0" />
+            <img src={product.image_url} alt={product.name} className="h-20 w-20 rounded-xl object-cover border border-border shrink-0" />
           ) : (
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-2xl">
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl border border-border bg-secondary text-2xl">
               {isIngredient ? "Stock" : "POS"}
             </div>
           )}
           <div className="flex flex-col gap-2">
             <Link href={`/app/products/${product.id}/edit?returnTo=${encodeURIComponent(returnTo)}`}><Button size="sm">Edit product</Button></Link>
-            <Link href="/app/products/new" className="text-sm text-blue-600 hover:underline">+ Add product</Link>
+            <Link href="/app/products/new" className="text-sm text-brass hover:underline">+ Add product</Link>
           </div>
         </div>
       </div>
@@ -215,14 +216,14 @@ export default async function ProductDetailPage({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {isSellable && (
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Sale price</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Sale price</CardTitle></CardHeader>
             <CardContent className="text-2xl font-bold">{money(salePrice, currency)}</CardContent>
           </Card>
         )}
         {inventoryVisible && isIngredient && (
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">On hand</CardTitle></CardHeader>
-            <CardContent className={`text-2xl font-bold ${Number(product.current_stock_qty ?? 0) <= Number(product.reorder_level ?? 0) && Number(product.reorder_level ?? 0) > 0 ? "text-red-600" : "text-green-700"}`}>
+            <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">On hand</CardTitle></CardHeader>
+            <CardContent className={`text-2xl font-bold ${Number(product.current_stock_qty ?? 0) <= Number(product.reorder_level ?? 0) && Number(product.reorder_level ?? 0) > 0 ? "text-attention" : "text-reconciled"}`}>
               {Number(product.current_stock_qty ?? 0)} {product.unit_of_measure ?? "units"}
             </CardContent>
           </Card>
@@ -230,21 +231,30 @@ export default async function ProductDetailPage({
         {recipeVisible && recipe && (
           <>
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Recipe cost</CardTitle></CardHeader>
-              <CardContent className="text-2xl font-bold text-slate-700">{money(recipeCostPerUnit, currency)}</CardContent>
+              <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Recipe cost</CardTitle></CardHeader>
+              <CardContent className="text-2xl font-bold text-foreground">
+                {money(recipeCostPerUnit, currency)}
+                <p className="text-xs font-normal text-muted-foreground mt-1">
+                  {formatCostAsOf(recipe.cost_computed_at, {
+                    basis: t.common.costBasisCmp,
+                    asOf: t.common.costAsOf,
+                    unknown: t.common.costBasisUnknown,
+                  })}
+                </p>
+              </CardContent>
             </Card>
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Gross margin</CardTitle></CardHeader>
-              <CardContent className={`text-2xl font-bold ${marginPct >= 60 ? "text-green-700" : marginPct >= 30 ? "text-amber-600" : "text-red-600"}`}>
+              <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Gross margin</CardTitle></CardHeader>
+              <CardContent className={`text-2xl font-bold ${marginPct >= 60 ? "text-reconciled" : marginPct >= 30 ? "text-amber-600" : "text-attention"}`}>
                 {money(grossMargin, currency)} ({marginPct.toFixed(1)}%)
               </CardContent>
             </Card>
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm text-slate-500">Can make</CardTitle></CardHeader>
-              <CardContent className={`text-2xl font-bold ${canMake !== null && canMake < 5 ? "text-red-600" : "text-slate-950"}`}>
+              <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Can make</CardTitle></CardHeader>
+              <CardContent className={`text-2xl font-bold ${canMake !== null && canMake < 5 ? "text-attention" : "text-foreground"}`}>
                 {canMake !== null ? canMake : "—"}
                 {limitingIngredient && canMake !== null && canMake < 20 && (
-                  <p className="text-xs text-slate-400 font-normal mt-1">Limited by {limitingIngredient}</p>
+                  <p className="text-xs text-muted-foreground font-normal mt-1">Limited by {limitingIngredient}</p>
                 )}
               </CardContent>
             </Card>
@@ -252,9 +262,9 @@ export default async function ProductDetailPage({
         )}
         {recipeVisible && !recipe && isSellable && (
           <Card className="border-dashed">
-            <CardContent className="pt-4 text-sm text-slate-400">
+            <CardContent className="pt-4 text-sm text-muted-foreground">
               No recipe linked.{" "}
-              <Link href="/app/recipes/new" className="text-blue-600 hover:underline">Create recipe →</Link>
+              <Link href="/app/recipes/new" className="text-brass hover:underline">Create recipe →</Link>
             </CardContent>
           </Card>
         )}
@@ -266,7 +276,7 @@ export default async function ProductDetailPage({
           <Card>
             <CardHeader>
               <CardTitle>Recipe: {recipe.name}</CardTitle>
-              <p className="text-sm text-slate-500">Yield: {recipe.yield_qty} portion{Number(recipe.yield_qty) !== 1 ? "s" : ""}</p>
+              <p className="text-sm text-muted-foreground">Yield: {recipe.yield_qty} portion{Number(recipe.yield_qty) !== 1 ? "s" : ""}</p>
             </CardHeader>
             <CardContent>
               <Table>
@@ -292,9 +302,9 @@ export default async function ProductDetailPage({
                         </TableCell>
                         <TableCell className="text-right">{needed}</TableCell>
                         <TableCell>{ri.unit_of_measure ?? "each"}</TableCell>
-                        <TableCell className="text-right text-slate-500">{money(Number(ri.unit_cost ?? 0), currency)}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{money(Number(ri.unit_cost ?? 0), currency)}</TableCell>
                         <TableCell className="text-right font-medium">{money(Number(ri.total_cost ?? 0), currency)}</TableCell>
-                        <TableCell className={`text-right text-xs ${portions !== null && portions < 5 ? "text-red-600 font-medium" : "text-slate-500"}`}>
+                        <TableCell className={`text-right text-xs ${portions !== null && portions < 5 ? "text-attention font-medium" : "text-muted-foreground"}`}>
                           {ri.product ? `${onHand} ${ri.product.unit_of_measure ?? ""}` : "—"}
                         </TableCell>
                       </TableRow>
@@ -303,12 +313,19 @@ export default async function ProductDetailPage({
                 </TableBody>
               </Table>
               <div className="mt-3 border-t pt-3 space-y-1 text-sm">
-                <div className="flex justify-between text-slate-600"><span>Recipe cost ({recipe.yield_qty} portion{Number(recipe.yield_qty) !== 1 ? "s" : ""})</span><strong>{money(recipeCost, currency)}</strong></div>
-                <div className="flex justify-between text-slate-600"><span>Cost per portion</span><strong>{money(recipeCostPerUnit, currency)}</strong></div>
-                <div className="flex justify-between text-slate-600"><span>Sale price</span><strong>{money(salePrice, currency)}</strong></div>
-                <div className={`flex justify-between font-bold text-base pt-1 ${marginPct >= 60 ? "text-green-700" : "text-amber-600"}`}>
+                <div className="flex justify-between text-mid"><span>Recipe cost ({recipe.yield_qty} portion{Number(recipe.yield_qty) !== 1 ? "s" : ""})</span><strong>{money(recipeCost, currency)}</strong></div>
+                <div className="flex justify-between text-mid"><span>Cost per portion</span><strong>{money(recipeCostPerUnit, currency)}</strong></div>
+                <div className="flex justify-between text-mid"><span>Sale price</span><strong>{money(salePrice, currency)}</strong></div>
+                <div className={`flex justify-between font-bold text-base pt-1 ${marginPct >= 60 ? "text-reconciled" : "text-amber-600"}`}>
                   <span>Margin</span><span>{money(grossMargin, currency)} ({marginPct.toFixed(1)}%)</span>
                 </div>
+                <p className="text-xs text-muted-foreground pt-1">
+                  {formatCostAsOf(recipe.cost_computed_at, {
+                    basis: t.common.costBasisCmp,
+                    asOf: t.common.costAsOf,
+                    unknown: t.common.costBasisUnknown,
+                  })}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -328,8 +345,8 @@ export default async function ProductDetailPage({
               { label: "Reorder level", value: product.reorder_level ? `${product.reorder_level} ${product.unit_of_measure ?? "units"}` : "—" },
             ].map(({ label, value }) => (
               <div key={label} className="flex justify-between gap-4">
-                <span className="text-slate-500">{label}</span>
-                <span className="text-slate-900 text-right">{value}</span>
+                <span className="text-muted-foreground">{label}</span>
+                <span className="text-foreground text-right">{value}</span>
               </div>
             ))}
           </CardContent>
@@ -341,7 +358,7 @@ export default async function ProductDetailPage({
             <CardHeader><CardTitle>Stock movements</CardTitle></CardHeader>
             <CardContent>
               {!stockMovements.length ? (
-                <p className="text-sm text-slate-400">No stock movements yet. Record a purchase to start.</p>
+                <p className="text-sm text-muted-foreground">No stock movements yet. Record a purchase to start.</p>
               ) : (
                 <div className="space-y-2">
                   {stockMovements.map((m) => {
@@ -355,13 +372,13 @@ export default async function ProductDetailPage({
                     return (
                       <div key={m.id} className="flex items-center justify-between text-sm py-1.5 border-b last:border-0">
                         <div>
-                          <span className={`font-medium ${isIn ? "text-green-700" : "text-red-600"}`}>
+                          <span className={`font-medium ${isIn ? "text-reconciled" : "text-attention"}`}>
                             {isIn ? "+" : ""}{Number(m.quantity_change)} {m.unit_of_measure ?? ""}
                           </span>
-                          <span className="ml-2 text-slate-500">{typeLabel[m.movement_type] ?? m.movement_type}</span>
-                          {m.reason && <span className="ml-1 text-slate-400">— {m.reason}</span>}
+                          <span className="ml-2 text-muted-foreground">{typeLabel[m.movement_type] ?? m.movement_type}</span>
+                          {m.reason && <span className="ml-1 text-muted-foreground">— {m.reason}</span>}
                         </div>
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-muted-foreground">
                           {new Date(m.performed_at).toLocaleDateString("en-IE", { day: "2-digit", month: "short" })}
                         </span>
                       </div>
@@ -369,6 +386,11 @@ export default async function ProductDetailPage({
                   })}
                 </div>
               )}
+              <div className="pt-3 mt-1 border-t border-border">
+                <Link href={`/app/products/${id}/fisa-magazie`} className="text-sm text-brass hover:underline">
+                  View full stock card (Fișă de magazie) &rarr;
+                </Link>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -382,7 +404,7 @@ export default async function ProductDetailPage({
                 {usedInRecipes.map((r) => (
                   <div key={r.id} className="flex items-center justify-between text-sm py-1.5 border-b last:border-0">
                     <span className="font-medium">{r.name}</span>
-                    <span className="text-slate-500">{r.products?.name ?? "—"}</span>
+                    <span className="text-muted-foreground">{r.products?.name ?? "—"}</span>
                   </div>
                 ))}
               </div>
@@ -406,7 +428,7 @@ export default async function ProductDetailPage({
                 <TableBody>
                   {salesHistory.map((s, i) => (
                     <TableRow key={i}>
-                      <TableCell className="text-sm text-slate-500">
+                      <TableCell className="text-sm text-muted-foreground">
                         {new Date(s.sold_at).toLocaleDateString("en-IE", { day: "2-digit", month: "short" })}
                       </TableCell>
                       <TableCell className="text-right">{s.quantity}</TableCell>

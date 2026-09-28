@@ -75,7 +75,7 @@ export default async function TransactionDetailPage({
     .eq("id", id)
     .single();
 
-  if (!tx) return <div className="p-6 text-slate-500">{t.transactions.notFound}</div>;
+  if (!tx) return <div className="p-6 text-muted-foreground">{t.transactions.notFound}</div>;
 
   const { data: returnedRows } = await supabase
     .from("pos_return_items")
@@ -128,6 +128,10 @@ export default async function TransactionDetailPage({
       : t.common.walkInCustomer;
   const paymentName = method?.name || r.payment;
   const statusVoided = tx.status === "voided";
+  const fiscalNotConfirmed =
+    Boolean(tx.fiscal_receipt_required) &&
+    tx.fiscal_receipt_status !== "success" &&
+    tx.fiscal_receipt_status !== "not_required";
 
   const canVoid = membership.role === "owner" || membership.role === "manager";
 
@@ -152,18 +156,18 @@ export default async function TransactionDetailPage({
     <div className="space-y-6 p-6">
       <div className="flex items-start justify-between gap-4 flex-wrap print:hidden">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">
+          <h1 className="text-2xl font-semibold text-foreground">
             {r.title(tx.transaction_number)}
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             {safeDate(tx.sold_at, locale)} · {paymentName} · {customerName}
             {statusVoided && (
-              <span className="ml-2 text-red-600 font-medium">[{t.transactions.statusVoided.toUpperCase()}]</span>
+              <span className="ml-2 text-attention font-medium">[{t.transactions.statusVoided.toUpperCase()}]</span>
             )}
           </p>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
-          <Link href="/app/pos" className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-slate-50">
+          <Link href="/app/pos" className="rounded-lg border px-3 py-2 text-sm font-medium hover:bg-secondary">
             {r.newSale}
           </Link>
           <PrintButton />
@@ -175,16 +179,21 @@ export default async function TransactionDetailPage({
       <Card className="mx-auto max-w-xl print:border-0 print:shadow-none">
         <CardHeader>
           <CardTitle>{((org as { name?: string | null } | null)?.name) ?? "franchisetech"}</CardTitle>
-          <p className="text-sm text-slate-500">{safeDate(tx.sold_at, locale)} · {paymentName}</p>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-muted-foreground">{safeDate(tx.sold_at, locale)} · {paymentName}</p>
+          <p className="text-sm text-mid">
             {r.customer}: {customerName}
           </p>
           {tableName && (
-            <p className="text-sm font-medium text-slate-700">Masa: {tableName}</p>
+            <p className="text-sm font-medium text-foreground">Masa: {tableName}</p>
           )}
           {statusVoided && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700 font-medium">
+            <div className="rounded-lg bg-attention/10 border border-attention/25 px-3 py-2 text-sm text-attention font-medium">
               {t.transactions.statusVoided.toUpperCase()}
+            </div>
+          )}
+          {!statusVoided && fiscalNotConfirmed && (
+            <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-800 font-medium">
+              {r.fiscalNotConfirmed}
             </div>
           )}
         </CardHeader>
@@ -208,12 +217,12 @@ export default async function TransactionDetailPage({
                   <TableCell>
                     <div>{item.product_name || r.item}</div>
                     {lineHasDiscount(item) && (
-                      <Badge variant="secondary" className="mt-1 text-[10px] font-semibold text-blue-700">
+                      <Badge variant="secondary" className="mt-1 text-[10px] font-semibold text-brass">
                         −{linePct}%
                       </Badge>
                     )}
                     {Number(item.vat_rate ?? 0) > 0 && (
-                      <div className="text-xs text-slate-400">{r.vatShort(Number(item.vat_rate))}</div>
+                      <div className="text-xs text-muted-foreground">{r.vatShort(Number(item.vat_rate))}</div>
                     )}
                   </TableCell>
                   <TableCell className="text-right">{Number(item.quantity ?? 0)}</TableCell>
@@ -221,7 +230,7 @@ export default async function TransactionDetailPage({
                   <TableCell className="text-right">
                     <div className="font-medium">{money(lineAfter, currency)}</div>
                     {lineHasDiscount(item) && lineBefore > lineAfter + 0.001 && (
-                      <div className="text-xs text-slate-400">
+                      <div className="text-xs text-muted-foreground">
                         {money(lineBefore, currency)} {r.beforeDiscount}
                       </div>
                     )}
@@ -229,7 +238,7 @@ export default async function TransactionDetailPage({
                 </TableRow>
               );}) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="py-6 text-center text-sm text-slate-500">
+                  <TableCell colSpan={4} className="py-6 text-center text-sm text-muted-foreground">
                     {r.noItems}
                   </TableCell>
                 </TableRow>
@@ -239,15 +248,15 @@ export default async function TransactionDetailPage({
 
           {discountSummary.hasDiscount && (
             <div className="space-y-1 border-t pt-3 text-sm">
-              <div className="flex justify-between text-slate-500">
+              <div className="flex justify-between text-muted-foreground">
                 <span>{r.subtotalBeforeDiscount}</span>
                 <span>{money(discountSummary.subtotalBefore, currency)}</span>
               </div>
-              <div className="flex justify-between text-blue-700 font-medium">
+              <div className="flex justify-between text-brass font-medium">
                 <span>{r.discountTotal}</span>
                 <span>−{money(discountSummary.discountTotal, currency)}</span>
               </div>
-              <div className="flex justify-between font-semibold text-slate-900">
+              <div className="flex justify-between font-semibold text-foreground">
                 <span>{r.totalAfterDiscount}</span>
                 <span>{money(discountSummary.totalAfter, currency)}</span>
               </div>
@@ -257,24 +266,24 @@ export default async function TransactionDetailPage({
           {/* VAT summary */}
           <div className="space-y-1 border-t pt-3 text-sm">
             {Array.from(vatByRate.entries()).map(([rate, v]) => (
-              <div key={rate} className="flex justify-between text-slate-500">
+              <div key={rate} className="flex justify-between text-muted-foreground">
                 <span>{r.vatLine(rate, money(v.net, currency))}</span>
                 <span>{money(v.vat, currency)}</span>
               </div>
             ))}
           </div>
           <div className="space-y-1 border-t pt-3 text-sm">
-            <div className="flex justify-between text-slate-500"><span>{r.netExclVat}</span><span>{money(totalNet || (totalGross - totalVat), currency)}</span></div>
-            <div className="flex justify-between text-slate-500"><span>{r.vatTotal}</span><span>{money(totalVat, currency)}</span></div>
+            <div className="flex justify-between text-muted-foreground"><span>{r.netExclVat}</span><span>{money(totalNet || (totalGross - totalVat), currency)}</span></div>
+            <div className="flex justify-between text-muted-foreground"><span>{r.vatTotal}</span><span>{money(totalVat, currency)}</span></div>
             <div className="flex justify-between text-lg font-bold"><span>{r.totalInclVat}</span><span>{money(totalGross, currency)}</span></div>
             {cashPaymentMeta?.cash_received && (
               <>
-                <div className="flex justify-between text-slate-500 border-t pt-2">
+                <div className="flex justify-between text-muted-foreground border-t pt-2">
                   <span>{r.cashReceived}</span>
                   <span>{money(cashPaymentMeta.cash_received, currency)}</span>
                 </div>
                 {(cashPaymentMeta.change_due ?? 0) > 0.005 && (
-                  <div className="flex justify-between font-semibold text-green-700">
+                  <div className="flex justify-between font-semibold text-reconciled">
                     <span>{r.changeDue}</span>
                     <span>{money(cashPaymentMeta.change_due ?? 0, currency)}</span>
                   </div>
@@ -289,7 +298,7 @@ export default async function TransactionDetailPage({
         <Card className="mx-auto max-w-xl print:hidden">
           <CardHeader>
             <CardTitle className="text-base">Retur pe produs</CardTitle>
-            <p className="text-sm text-slate-500">Cantitatea, TVA-ul, plata, stocul și garanția SGR se inversează împreună.</p>
+            <p className="text-sm text-muted-foreground">Cantitatea, TVA-ul, plata, stocul și garanția SGR se inversează împreună.</p>
           </CardHeader>
           <CardContent className="space-y-3">
             {items.map((item) => {
@@ -300,18 +309,18 @@ export default async function TransactionDetailPage({
                   <input type="hidden" name="transaction_id" value={tx.id} />
                   <input type="hidden" name="transaction_item_id" value={item.id} />
                   <div>
-                    <p className="text-sm font-medium text-slate-900">{item.product_name}</p>
-                    <p className="text-xs text-slate-500">Disponibil pentru retur: {remaining}</p>
+                    <p className="text-sm font-medium text-foreground">{item.product_name}</p>
+                    <p className="text-xs text-muted-foreground">Disponibil pentru retur: {remaining}</p>
                   </div>
-                  <label className="text-xs text-slate-600">
+                  <label className="text-xs text-mid">
                     Cantitate
                     <input name="quantity" type="number" min="0.001" max={remaining} step="0.001" defaultValue={remaining} required className="mt-1 h-9 w-full rounded-md border px-2 text-sm" />
                   </label>
-                  <label className="text-xs text-slate-600">
+                  <label className="text-xs text-mid">
                     Motiv
                     <input name="reason" required placeholder="Motivul returului" className="mt-1 h-9 w-full rounded-md border px-2 text-sm" />
                   </label>
-                  <button type="submit" className="h-9 rounded-md bg-slate-950 px-3 text-sm font-medium text-white hover:bg-slate-800">Retur</button>
+                  <button type="submit" className="h-9 rounded-md bg-ink px-3 text-sm font-medium text-white hover:bg-ink/90">Retur</button>
                 </form>
               );
             })}
@@ -333,8 +342,8 @@ export default async function TransactionDetailPage({
                     {r.auditEvent(event.event_type)}
                   </Badge>
                   <div>
-                    <p className="text-slate-700">{who} · {safeDate(event.performed_at, locale)}</p>
-                    {event.reason && <p className="text-slate-500 mt-0.5">{r.reason(event.reason)}</p>}
+                    <p className="text-foreground">{who} · {safeDate(event.performed_at, locale)}</p>
+                    {event.reason && <p className="text-muted-foreground mt-0.5">{r.reason(event.reason)}</p>}
                   </div>
                 </div>
               );

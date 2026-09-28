@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
+    },
+    {
+      "name": "franchisetech-e2e",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["scripts/dev-e2e.sh"],
+      "port": 3200
     }
   ]
 }

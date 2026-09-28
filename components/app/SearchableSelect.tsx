@@ -107,12 +107,12 @@ export function SearchableSelect({
         }}
         placeholder={resolvedSearchPlaceholder}
         autoComplete="off"
-        className="h-10 w-full min-w-0 truncate rounded-lg border border-slate-200 bg-white px-3 text-sm shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+        className="h-10 w-full min-w-0 truncate rounded-lg border border-border bg-card px-3 text-sm shadow-sm focus:border-brass focus:outline-none focus:ring-2 focus:ring-brass/20"
       />
       {open && portalTarget && createPortal(
         <div
           style={menuStyle}
-          className="z-[9999] overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg"
+          className="z-[9999] overflow-y-auto rounded-lg border border-border bg-card shadow-lg"
         >
           {!required && (
             <button
@@ -121,7 +121,7 @@ export function SearchableSelect({
                 e.preventDefault();
                 choose({ value: "", label: placeholder });
               }}
-              className="w-full px-3 py-2 text-left text-sm text-slate-500 hover:bg-blue-50"
+              className="w-full px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent"
             >
               {placeholder}
             </button>
@@ -134,15 +134,15 @@ export function SearchableSelect({
                 e.preventDefault();
                 choose(option);
               }}
-              className={`w-full min-w-0 truncate px-3 py-2 text-left text-sm hover:bg-blue-50 ${
-                option.value === value ? "bg-blue-50 font-medium text-blue-700" : "text-slate-700"
+              className={`w-full min-w-0 truncate px-3 py-2 text-left text-sm hover:bg-accent ${
+                option.value === value ? "bg-accent font-medium text-brass" : "text-foreground"
               }`}
             >
               {option.label}
             </button>
           ))}
           {filtered.length === 0 && (
-            <div className="px-3 py-2 text-xs text-slate-400">{t.common.noMatchingOption}</div>
+            <div className="px-3 py-2 text-xs text-muted-foreground">{t.common.noMatchingOption}</div>
           )}
         </div>,
         portalTarget,

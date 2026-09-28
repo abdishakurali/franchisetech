@@ -63,8 +63,8 @@ export default async function OperationsPage({ searchParams }: { searchParams?: 
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">Operations</h1>
-          <p className="text-sm text-slate-500">Stock · Suppliers · Purchases · Recipes</p>
+          <h1 className="text-2xl font-semibold text-foreground">Operations</h1>
+          <p className="text-sm text-muted-foreground">Stock · Suppliers · Purchases · Recipes</p>
         </div>
         <div className="flex gap-2">
           {tab === "suppliers" && <Link href="/app/suppliers/new"><Button size="sm">Add supplier</Button></Link>}
@@ -74,12 +74,12 @@ export default async function OperationsPage({ searchParams }: { searchParams?: 
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 border-b border-slate-200">
+      <div className="flex gap-1 border-b border-border">
         {tabs.map((t) => (
           <Link key={t.key} href={`?tab=${t.key}`}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === t.key ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}>
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === t.key ? "border-brass text-brass" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
             {t.label}
-            {t.count > 0 && <span className="ml-1.5 text-xs text-slate-400">({t.count})</span>}
+            {t.count > 0 && <span className="ml-1.5 text-xs text-muted-foreground">({t.count})</span>}
           </Link>
         ))}
       </div>
@@ -90,7 +90,7 @@ export default async function OperationsPage({ searchParams }: { searchParams?: 
           <CardContent className="pt-4">
             {!stockProducts?.length ? (
               <div className="text-center py-10">
-                <p className="text-slate-400 mb-2">No stock-tracked products yet.</p>
+                <p className="text-muted-foreground mb-2">No stock-tracked products yet.</p>
                 <Link href="/app/recipes/new"><Button variant="outline" size="sm">Create recipe</Button></Link>
               </div>
             ) : (
@@ -113,14 +113,14 @@ export default async function OperationsPage({ searchParams }: { searchParams?: 
                     return (
                       <TableRow key={p.id}>
                         <TableCell>
-                          <Link href={`/app/products/${p.id}`} className="font-medium hover:text-blue-600 hover:underline">{p.name}</Link>
+                          <Link href={`/app/products/${p.id}`} className="font-medium hover:text-brass hover:underline">{p.name}</Link>
                         </TableCell>
-                        <TableCell className={`text-right font-semibold ${isLow ? "text-red-600" : "text-green-700"}`}>{qty}</TableCell>
+                        <TableCell className={`text-right font-semibold ${isLow ? "text-attention" : "text-reconciled"}`}>{qty}</TableCell>
                         <TableCell>{p.unit_of_measure ?? "each"}</TableCell>
-                        <TableCell className="text-right text-slate-400">{reorder || "—"}</TableCell>
+                        <TableCell className="text-right text-muted-foreground">{reorder || "—"}</TableCell>
                         <TableCell className="text-right">{p.cost_price ? money(Number(p.cost_price), currency) : "—"}</TableCell>
                         <TableCell>
-                          {isLow ? <Badge variant="outline" className="text-red-600 border-red-200 bg-red-50">Low</Badge>
+                          {isLow ? <Badge variant="outline" className="text-attention border-attention/25 bg-attention/10">Low</Badge>
                                  : <Badge variant="secondary">OK</Badge>}
                         </TableCell>
                       </TableRow>
@@ -139,7 +139,7 @@ export default async function OperationsPage({ searchParams }: { searchParams?: 
           <CardContent className="pt-4">
             {!suppliers?.length ? (
               <div className="text-center py-10">
-                <p className="text-slate-400 mb-2">No suppliers yet.</p>
+                <p className="text-muted-foreground mb-2">No suppliers yet.</p>
                 <Link href="/app/suppliers/new"><Button variant="outline" size="sm">Add first supplier</Button></Link>
               </div>
             ) : (
@@ -180,7 +180,7 @@ export default async function OperationsPage({ searchParams }: { searchParams?: 
           <CardContent className="pt-4">
             {!purchases?.length ? (
               <div className="text-center py-10">
-                <p className="text-slate-400 mb-2">No purchases recorded yet.</p>
+                <p className="text-muted-foreground mb-2">No purchases recorded yet.</p>
                 <Link href="/app/purchases/new"><Button variant="outline" size="sm">Record first purchase</Button></Link>
               </div>
             ) : (
@@ -221,7 +221,7 @@ export default async function OperationsPage({ searchParams }: { searchParams?: 
           {!recipes?.length ? (
             <Card>
               <CardContent className="pt-10 pb-10 text-center">
-                <p className="text-slate-400 mb-4">No recipes yet.</p>
+                <p className="text-muted-foreground mb-4">No recipes yet.</p>
                 <Link href="/app/recipes/new"><Button variant="outline">Create first recipe</Button></Link>
               </CardContent>
             </Card>
@@ -240,16 +240,16 @@ export default async function OperationsPage({ searchParams }: { searchParams?: 
                     <div className="flex items-center justify-between flex-wrap gap-3">
                       <div>
                         <CardTitle className="text-base">{recipe.name}</CardTitle>
-                        <p className="text-sm text-slate-500">{product?.name ?? "—"} · yield {yieldQty}</p>
+                        <p className="text-sm text-muted-foreground">{product?.name ?? "—"} · yield {yieldQty}</p>
                       </div>
                       <div className="flex flex-wrap gap-4 text-center">
-                        <div><p className="text-lg font-bold">{money(salePrice, currency)}</p><p className="text-xs text-slate-400">sale</p></div>
-                        <div><p className="text-lg font-bold text-slate-600">{money(costPerUnit, currency)}</p><p className="text-xs text-slate-400">cost</p></div>
+                        <div><p className="text-lg font-bold">{money(salePrice, currency)}</p><p className="text-xs text-muted-foreground">sale</p></div>
+                        <div><p className="text-lg font-bold text-mid">{money(costPerUnit, currency)}</p><p className="text-xs text-muted-foreground">cost</p></div>
                         <div>
-                          <p className={`text-lg font-bold ${marginPct >= 60 ? "text-green-700" : marginPct >= 30 ? "text-amber-600" : "text-red-600"}`}>
+                          <p className={`text-lg font-bold ${marginPct >= 60 ? "text-reconciled" : marginPct >= 30 ? "text-amber-600" : "text-attention"}`}>
                             {marginPct.toFixed(1)}%
                           </p>
-                          <p className="text-xs text-slate-400">margin</p>
+                          <p className="text-xs text-muted-foreground">margin</p>
                         </div>
                       </div>
                     </div>

@@ -63,6 +63,20 @@ export async function GET(req: Request) {
     .lte("performed_at", periodEnd)
     .order("performed_at");
 
+  // See app/app/reports/registru-de-casa/page.tsx for why this is needed:
+  // a till close's recorded cash_difference (counted vs expected) is real
+  // and must not be left out, or every later balance in this ledger
+  // silently diverges from what was actually in the drawer.
+  const { data: closedSessions } = await supabase
+    .from("pos_sessions")
+    .select("closed_at,cash_difference")
+    .eq("organisation_id", orgId)
+    .gte("closed_at", periodStart)
+    .lte("closed_at", periodEnd)
+    .not("cash_difference", "is", null)
+    .neq("cash_difference", 0)
+    .order("closed_at");
+
   const { data: transactions } = await supabase
     .from("pos_transactions")
     .select("sold_at,status,total,payment_methods(type)")
@@ -118,6 +132,21 @@ export async function GET(req: Request) {
       description: "Vânzări POS (numerar)",
       cashIn: total,
       cashOut: 0,
+    });
+  }
+
+  let difCount = 0;
+  for (const s of (closedSessions ?? [])) {
+    const diff = Number(s.cash_difference ?? 0);
+    if (diff === 0 || !s.closed_at) continue;
+    difCount++;
+    entries.push({
+      sortKey: s.closed_at,
+      date: new Date(s.closed_at).toLocaleDateString("ro-RO"),
+      docNo: `DIF${String(difCount).padStart(4, "0")}`,
+      description: diff < 0 ? "Diferență casă la închidere (lipsă)" : "Diferență casă la închidere (plus)",
+      cashIn: diff > 0 ? diff : 0,
+      cashOut: diff < 0 ? Math.abs(diff) : 0,
     });
   }
 

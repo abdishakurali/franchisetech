@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 
 const updated = "3 June 2026";
 
 export default function PrivacyPage() {
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-slate-900">Privacy Policy</h1>
         <p className="mt-2 text-sm text-slate-500">Last updated: {updated}</p>
@@ -31,6 +31,6 @@ export default function PrivacyPage() {
           <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>
         </p>
       </main>
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

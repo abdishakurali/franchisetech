@@ -87,22 +87,22 @@ function IngredientPicker({
       <button
         type="button"
         onClick={() => { setOpen((o) => !o); setTimeout(() => inputRef.current?.focus(), 50); }}
-        className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-left flex items-center justify-between gap-2 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+        className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm text-left flex items-center justify-between gap-2 hover:border-border focus:outline-none focus:ring-2 focus:ring-brass/30"
       >
-        <span className={selected ? "text-slate-900" : "text-slate-400"}>
+        <span className={selected ? "text-foreground" : "text-muted-foreground"}>
           {selected ? `${selected.name} (${selected.unit_of_measure ?? "buc"})` : "— alege articol din stoc —"}
         </span>
         {selected && (
-          <span className="text-slate-400 text-xs shrink-0">
+          <span className="text-muted-foreground text-xs shrink-0">
             €{Number(selected.cost_price ?? 0).toFixed(4)}/unit
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute z-50 top-11 left-0 right-0 rounded-md border border-slate-200 bg-white shadow-lg">
-          <div className="p-2 border-b border-slate-100 flex items-center gap-2">
-            <Search className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+        <div className="absolute z-50 top-11 left-0 right-0 rounded-md border border-border bg-card shadow-lg">
+          <div className="p-2 border-b border-border flex items-center gap-2">
+            <Search className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <input
               ref={inputRef}
               value={query}
@@ -111,7 +111,7 @@ function IngredientPicker({
               className="flex-1 text-sm outline-none bg-transparent"
             />
             {query && (
-              <button type="button" onClick={() => setQuery("")} className="text-slate-400 hover:text-slate-600">
+              <button type="button" onClick={() => setQuery("")} className="text-muted-foreground hover:text-mid">
                 <X className="h-3.5 w-3.5" />
               </button>
             )}
@@ -123,7 +123,7 @@ function IngredientPicker({
                 <button
                   type="button"
                   onClick={() => selectProduct("")}
-                  className="w-full px-3 py-2 text-sm text-left text-slate-400 hover:bg-slate-50"
+                  className="w-full px-3 py-2 text-sm text-left text-muted-foreground hover:bg-secondary"
                 >
                   — niciunul —
                 </button>
@@ -134,19 +134,19 @@ function IngredientPicker({
                 <button
                   type="button"
                   onClick={() => selectProduct(p.id)}
-                  className={`w-full px-3 py-2 text-sm text-left hover:bg-blue-50 flex justify-between gap-2 ${p.id === value ? "bg-blue-50 font-medium text-blue-700" : "text-slate-700"}`}
+                  className={`w-full px-3 py-2 text-sm text-left hover:bg-accent flex justify-between gap-2 ${p.id === value ? "bg-accent font-medium text-brass" : "text-foreground"}`}
                 >
-                  <span>{p.name} <span className="text-slate-400 font-normal">({p.unit_of_measure ?? "buc"})</span></span>
-                  <span className="text-slate-400 shrink-0">€{Number(p.cost_price ?? 0).toFixed(4)}/unitate</span>
+                  <span>{p.name} <span className="text-muted-foreground font-normal">({p.unit_of_measure ?? "buc"})</span></span>
+                  <span className="text-muted-foreground shrink-0">€{Number(p.cost_price ?? 0).toFixed(4)}/unitate</span>
                 </button>
               </li>
             ))}
             {!filtered.length && !query.trim() && (
-              <li className="px-3 py-3 text-sm text-slate-400 text-center">Niciun articol de stoc încă.</li>
+              <li className="px-3 py-3 text-sm text-muted-foreground text-center">Niciun articol de stoc încă.</li>
             )}
             {/* Inline create option */}
             {query.trim() && !hasExactMatch && (
-              <li className="border-t border-slate-100">
+              <li className="border-t border-border">
                 <button
                   type="button"
                   onClick={() => {
@@ -154,7 +154,7 @@ function IngredientPicker({
                     setQuery("");
                     onInlineCreate(rowId, query.trim());
                   }}
-                  className="w-full px-3 py-2.5 text-sm text-left text-blue-600 hover:bg-blue-50 font-medium"
+                  className="w-full px-3 py-2.5 text-sm text-left text-brass hover:bg-accent font-medium"
                 >
                   + Creează &ldquo;{query.trim()}&rdquo; ca articol nou de stoc
                 </button>
@@ -195,10 +195,10 @@ function InlineCreateModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">Creează articol de stoc</h3>
-          <p className="text-sm text-slate-500 mt-0.5">Acest articol va fi disponibil ca ingredient în toate produsele.</p>
+          <h3 className="text-lg font-semibold text-foreground">Creează articol de stoc</h3>
+          <p className="text-sm text-muted-foreground mt-0.5">Acest articol va fi disponibil ca ingredient în toate produsele.</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
@@ -211,7 +211,7 @@ function InlineCreateModal({
               <select
                 name="unit_of_measure"
                 defaultValue="each"
-                className="mt-1 h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+                className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 text-sm"
               >
                 <option value="each">bucată</option>
                 <option value="g">grame (g)</option>
@@ -227,13 +227,13 @@ function InlineCreateModal({
             </div>
           </div>
           <div>
-            <Label>Stoc inițial <span className="text-slate-400 font-normal">(opțional)</span></Label>
+            <Label>Stoc inițial <span className="text-muted-foreground font-normal">(opțional)</span></Label>
             <Input name="opening_stock" type="number" step="0.01" min="0" defaultValue="0" className="mt-1" />
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-attention">{error}</p>}
           <div className="flex gap-3 pt-1">
             <Button type="button" variant="outline" onClick={onCancel} className="flex-1">Anulează</Button>
-            <Button type="submit" disabled={isPending} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+            <Button type="submit" disabled={isPending} className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground">
               {isPending ? "Se creează…" : "Creează și selectează"}
             </Button>
           </div>
@@ -363,13 +363,13 @@ export function RecipeCostCalculator({
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <Label>Produs *</Label>
-            <p className="text-xs text-slate-500 mb-1 mt-0.5">Alege produsul pe care îl vinzi.</p>
+            <p className="text-xs text-muted-foreground mb-1 mt-0.5">Alege produsul pe care îl vinzi.</p>
             <select
               name="product_id"
               required
               value={selectedProductId}
               onChange={(e) => setSelectedProductId(e.target.value)}
-              className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+              className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm"
             >
               <option value="">— alege produsul —</option>
               {sellableProducts.map((p) => (
@@ -390,7 +390,7 @@ export function RecipeCostCalculator({
               onChange={(e) => setYieldQty(e.target.value)}
               className="mt-1"
             />
-            <p className="text-xs text-slate-500 mt-0.5">Câte porții rezultă din această rețetă.</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Câte porții rezultă din această rețetă.</p>
           </div>
         </div>
 
@@ -399,14 +399,14 @@ export function RecipeCostCalculator({
           <div className="flex items-center justify-between">
             <div>
               <Label>Articole de stoc folosite</Label>
-              <p className="text-xs text-slate-500 mt-0.5">Câtă cantitate din fiecare ingredient intră într-o rețetă.</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Câtă cantitate din fiecare ingredient intră într-o rețetă.</p>
             </div>
           </div>
 
           {allIngredients.length === 0 ? (
             <div className="rounded-xl border border-dashed p-8 text-center">
-              <p className="text-sm text-slate-500 mb-3">Niciun articol de stoc încă.</p>
-              <p className="text-xs text-slate-400 mb-4">
+              <p className="text-sm text-muted-foreground mb-3">Niciun articol de stoc încă.</p>
+              <p className="text-xs text-muted-foreground mb-4">
                 Adaugă articole de stoc cu unitate și preț de cost pentru a urmări costul ingredientelor.
               </p>
               <Link href="/app/recipes/new">
@@ -415,7 +415,7 @@ export function RecipeCostCalculator({
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-[1fr_100px_80px_32px] gap-2 px-1 text-xs text-slate-400 font-medium">
+              <div className="grid grid-cols-[1fr_100px_80px_32px] gap-2 px-1 text-xs text-muted-foreground font-medium">
                 <span>Articol de stoc</span>
                 <span className="text-right">Cantitate per rețetă</span>
                 <span className="text-right">Cost linie</span>
@@ -439,7 +439,7 @@ export function RecipeCostCalculator({
                         onInlineCreate={(rowId, name) => setInlineCreate({ rowId, initialName: name })}
                       />
                       {p && (
-                        <p className="text-[10px] text-slate-400 mt-0.5 pl-1">
+                        <p className="text-[10px] text-muted-foreground mt-0.5 pl-1">
                           Stoc disponibil: <span className={stock < qty * 5 ? "text-amber-600 font-medium" : ""}>{formatQty(stock)} {p.unit_of_measure ?? "buc"}</span>
                         </p>
                       )}
@@ -455,7 +455,7 @@ export function RecipeCostCalculator({
                       className="text-right"
                     />
                     <div className="h-10 flex items-center justify-end">
-                      <span className="text-sm font-medium text-slate-700">
+                      <span className="text-sm font-medium text-foreground">
                         {rowCost > 0 ? money(rowCost) : "—"}
                       </span>
                     </div>
@@ -463,7 +463,7 @@ export function RecipeCostCalculator({
                       type="button"
                       onClick={() => removeRow(row.id)}
                       disabled={rows.length === 1}
-                      className="h-10 w-8 flex items-center justify-center rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 disabled:opacity-20 transition-colors"
+                      className="h-10 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-attention hover:bg-attention/10 disabled:opacity-20 transition-colors"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -474,7 +474,7 @@ export function RecipeCostCalculator({
               <button
                 type="button"
                 onClick={addRow}
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-slate-300 py-2 text-sm text-slate-500 hover:border-blue-300 hover:text-blue-600 transition-colors"
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-2 text-sm text-muted-foreground hover:border-brass/40 hover:text-brass transition-colors"
               >
                 <Plus className="h-4 w-4" />Adaugă articol de stoc
               </button>
@@ -484,8 +484,8 @@ export function RecipeCostCalculator({
 
         {/* Live cost + can-make summary */}
         {filledRows.length > 0 && (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-            <p className="text-sm font-semibold text-slate-700">Cost și marjă</p>
+          <div className="rounded-xl border border-border bg-secondary p-4 space-y-3">
+            <p className="text-sm font-semibold text-foreground">Cost și marjă</p>
 
             <div className="space-y-1">
               {filledRows.map((row, i) => {
@@ -494,7 +494,7 @@ export function RecipeCostCalculator({
                 const qty = Number(row.quantity);
                 const cost = qty * Number(p.cost_price ?? 0);
                 return (
-                  <div key={i} className="flex justify-between text-sm text-slate-600">
+                  <div key={i} className="flex justify-between text-sm text-mid">
                     <span>{p.name} × {qty} {p.unit_of_measure ?? "buc"}</span>
                     <span className="tabular-nums">{money(cost)}</span>
                   </div>
@@ -502,25 +502,25 @@ export function RecipeCostCalculator({
               })}
             </div>
 
-            <div className="border-t border-slate-200 pt-3 space-y-2">
+            <div className="border-t border-border pt-3 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-slate-600">Cost total ingrediente ({yieldQty} porții)</span>
+                <span className="text-mid">Cost total ingrediente ({yieldQty} porții)</span>
                 <strong className="tabular-nums">{money(totalCost)}</strong>
               </div>
               {Number(yieldQty) > 1 && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Cost per porție</span>
+                  <span className="text-mid">Cost per porție</span>
                   <strong className="tabular-nums">{money(costPerUnit)}</strong>
                 </div>
               )}
               {salePrice > 0 && (
                 <>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-600">Preț vânzare</span>
+                    <span className="text-mid">Preț vânzare</span>
                     <strong className="tabular-nums">{money(salePrice)}</strong>
                   </div>
-                  <div className={`flex justify-between text-base font-bold pt-1 border-t border-slate-200 ${
-                    marginPct >= 60 ? "text-green-700" : marginPct >= 30 ? "text-amber-600" : "text-red-600"
+                  <div className={`flex justify-between text-base font-bold pt-1 border-t border-border ${
+                    marginPct >= 60 ? "text-reconciled" : marginPct >= 30 ? "text-amber-600" : "text-attention"
                   }`}>
                     <span>Marjă brută</span>
                     <span className="tabular-nums">{money(margin)} ({marginPct.toFixed(1)}%)</span>
@@ -529,19 +529,19 @@ export function RecipeCostCalculator({
               )}
 
               {canMakeData !== null && (
-                <div className="mt-3 pt-3 border-t border-slate-200 rounded-lg bg-white border p-3">
+                <div className="mt-3 pt-3 border-t border-border rounded-lg bg-card border p-3">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-700">Poți prepara acum</p>
-                      <p className="text-xs text-slate-400">Pe baza stocului curent</p>
+                      <p className="text-sm font-semibold text-foreground">Poți prepara acum</p>
+                      <p className="text-xs text-muted-foreground">Pe baza stocului curent</p>
                     </div>
                     <div className="text-right">
                       <p className={`text-3xl font-bold leading-none ${
-                        canMakeData.canMake === 0 ? "text-red-600" : canMakeData.canMake < 5 ? "text-amber-600" : "text-green-700"
+                        canMakeData.canMake === 0 ? "text-attention" : canMakeData.canMake < 5 ? "text-amber-600" : "text-reconciled"
                       }`}>
                         {canMakeData.canMake}
                       </p>
-                      <p className="text-xs text-slate-400 mt-0.5">porții</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">porții</p>
                     </div>
                   </div>
                   {canMakeData.limitingProduct && canMakeData.canMake < 20 && (
@@ -550,7 +550,7 @@ export function RecipeCostCalculator({
                     </p>
                   )}
                   {canMakeData.canMake === 0 && (
-                    <p className="text-xs text-red-600 mt-1">
+                    <p className="text-xs text-attention mt-1">
                       Stoc insuficient. Achiziționează mai mult sau redu dimensiunea rețetei.
                     </p>
                   )}
@@ -560,14 +560,14 @@ export function RecipeCostCalculator({
           </div>
         )}
 
-        <div className="flex gap-3 pt-2 border-t border-slate-100">
+        <div className="flex gap-3 pt-2 border-t border-border">
           <Link href={recipeId ? `/app/recipes/${recipeId}` : "/app/recipes"}>
             <Button variant="outline" type="button">Anulează</Button>
           </Link>
           <Button
             type="submit"
             disabled={allIngredients.length === 0 || !selectedProductId || filledRows.length === 0}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {submitLabel ?? "Salvează ingredientele"}
           </Button>

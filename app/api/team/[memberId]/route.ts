@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { canManageTeam, isDbRole } from "@/lib/access-control";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
+import { normalizeAccountantPermissions } from "@/lib/accountant/permissions";
 
 const ADVANCED_ROLES = new Set(["manager", "auditor", "kitchen"]);
 
@@ -22,8 +23,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ me
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const body = await req.json() as { role?: string; fullName?: string; phone?: string; roleTitle?: string; email?: string; password?: string };
-    const { role, fullName, phone, roleTitle, email, password } = body;
+    const body = await req.json() as { role?: string; fullName?: string; phone?: string; roleTitle?: string; email?: string; password?: string; accountantPermissions?: unknown };
+    const { role, fullName, phone, roleTitle, email, password, accountantPermissions } = body;
     if (role && !isDbRole(role)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
@@ -43,7 +44,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ me
     const admin = makeAdminClient();
     const { data: member } = await admin
       .from("organisation_members")
-      .select("id,role,user_id")
+      .select("id,role,user_id,accountant_permissions")
       .eq("id", memberId)
       .eq("organisation_id", orgId)
       .maybeSingle();
@@ -112,6 +113,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ me
         target_user_id: member.user_id,
         action: "profile_updated",
       });
+    }
+
+    if (accountantPermissions !== undefined) {
+      if ((role ?? member.role) !== "accountant") return NextResponse.json({ error: "Permissions apply only to accountants" }, { status: 400 });
+      const permissions = normalizeAccountantPermissions(accountantPermissions);
+      if (!permissions.length) return NextResponse.json({ error: "Selectează cel puțin o categorie de acces." }, { status: 400 });
+      const { error: permissionsError } = await admin.from("organisation_members").update({ accountant_permissions: permissions }).eq("id", memberId).eq("organisation_id", orgId);
+      if (permissionsError) return NextResponse.json({ error: permissionsError.message }, { status: 500 });
+      await admin.from("team_audit_events").insert({ organisation_id: orgId, actor_user_id: user.id, target_user_id: member.user_id, action: "accountant_permissions_changed", metadata: { old: member.accountant_permissions, new: permissions } });
     }
 
     return NextResponse.json({ success: true });

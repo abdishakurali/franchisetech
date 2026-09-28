@@ -1,0 +1,18 @@
+# Copy this file to .env.production on the server. Do not commit the real file.
+# New, isolated deployment. Do not point these at franchisetech.ro or Dolcenera.
+APP_DOMAIN=new.franchisetech.ro
+NEXT_PUBLIC_APP_URL=https://new.franchisetech.ro
+NEXT_PUBLIC_SITE_URL=https://new.franchisetech.ro
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY
+
+# Required server secrets and integrations. Leave integrations disabled until configured.
+CRON_SECRET=REPLACE_WITH_A_LONG_RANDOM_VALUE
+DIRECT_DB_URL=postgresql://USER:PASSWORD@HOST:5432/postgres
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+RESEND_API_KEY=
+LOOPS_API_KEY=
+NEXT_PUBLIC_ENABLE_GOOGLE_AUTH=false
+NEXT_PUBLIC_LEAN_PRODUCT_SCOPE=true

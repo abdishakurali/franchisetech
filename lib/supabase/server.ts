@@ -1,8 +1,15 @@
+import { cache } from 'react'
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createSupabaseJsClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
-export async function createClient() {
+// cache() memoizes this for the lifetime of one request only (React's
+// per-render dedup, not a cross-request cache) — every caller within the
+// same request gets the same client instance instead of re-reading cookies
+// and re-constructing a client each time. This is what lets getActiveOrg(),
+// fetchOrgModuleFlags(), etc. below dedupe correctly by argument identity,
+// since they all end up sharing this one client reference per request.
+export const createClient = cache(async function createClient() {
   const cookieStore = await cookies()
 
   return createServerClient(
@@ -25,7 +32,17 @@ export async function createClient() {
       },
     }
   )
-}
+})
+
+// cache()-wraps the auth round-trip itself (a call to the Supabase auth
+// server, not just a local Postgres query) so every call site within one
+// request shares a single result — app/app/layout.tsx and getActiveOrg()
+// (lib/kitchenops/data.ts) used to each call supabase.auth.getUser()
+// independently, doubling that round-trip on nearly every /app/* navigation.
+export const getAuthUser = cache(async function getAuthUser() {
+  const supabase = await createClient()
+  return supabase.auth.getUser()
+})
 
 /**
  * Anon-key client with no cookie/session plumbing at all — safe to call

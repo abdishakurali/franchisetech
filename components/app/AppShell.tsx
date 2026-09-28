@@ -8,8 +8,9 @@ import { User } from "@supabase/supabase-js";
 import {
   LayoutDashboard, Package, BarChart3,
   LogOut, Menu, X, ChevronDown, Archive,
-  CreditCard, ListChecks, Truck, ShoppingBag,
-  Gift, BookOpen, FileText, Star, ChefHat,
+  CreditCard, ShoppingBag,
+  Gift, BookOpen,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -27,10 +28,10 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { SubscriptionStatus } from "@/lib/billing/subscription";
 import { HeaderBillingNotice } from "@/components/billing/HeaderBillingNotice";
+import { AccountantAccessCard } from "@/components/app/AccountantAccessCard";
 import { resetPosTillOpen, subscribePosTillOpen } from "@/lib/pos-till-state";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import type { AppT } from "@/lib/app-i18n";
-import { LEAN_PRODUCT_SCOPE_ENABLED } from "@/lib/product-scope";
 
 interface AppShellProps {
   user: User;
@@ -40,6 +41,7 @@ interface AppShellProps {
   setupComplete?: boolean;
   moduleVisibility?: {
     inventory: boolean;
+    purchases: boolean;
     recipeCosting: boolean;
     teamAdvanced: boolean;
     multiSite: boolean;
@@ -93,26 +95,23 @@ function isSubscriptionBlockedForClient(subStatus?: SubscriptionStatus): boolean
 export function buildMainNav(t: AppT): NavItem[] {
   const nav: NavItem[] = [
     { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
-    { href: "/app/setup-checklist", label: t.nav.setupGuide, icon: ListChecks, exact: false },
     { href: "/app/pos", label: t.nav.pos, icon: CreditCard, exact: false },
     { href: "/app/products", label: t.nav.products, icon: Package, exact: false },
-    { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
     // Recipes is a paid Operations module: gate it ONLY on the org's own
     // recipeCosting visibility (applied in resolveNavItems below), never on the
     // marketing-scope flag. LEAN_PRODUCT_SCOPE_ENABLED trims what the public
     // site advertises — it must not decide what a paying customer can reach.
     { href: "/app/recipes", label: t.nav.recipes, icon: BookOpen, exact: false },
+    { href: "/app/stock", label: t.nav.stock, icon: Archive, exact: false },
+    // Purchases (NIR/suppliers) is its own paid module since purchases_enabled
+    // became independent of inventory_enabled — gated ONLY on moduleVisibility.
+    // purchases below, never folded back under inventory.
+    { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
+    { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
+    { href: "/app/settings/accountant", label: "Contabil", icon: BriefcaseBusiness, exact: false },
   ];
 
   return nav;
-}
-
-function buildStockNav(t: AppT) {
-  return [
-    { href: "/app/stock", label: t.nav.stockLevels, icon: Archive },
-    { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag },
-    { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck },
-  ];
 }
 
 export function resolveNavItems(
@@ -120,46 +119,34 @@ export function resolveNavItems(
   t: AppT,
   setupComplete: boolean,
   moduleVisibility: AppShellProps["moduleVisibility"],
-  activeOrg: AppShellProps["activeOrg"],
+  _activeOrg: AppShellProps["activeOrg"],
 ) {
+  void _activeOrg;
   const limited = userRole === "cashier" || userRole === "kitchen";
   const accountant = userRole === "accountant";
 
-  const showEfactura = activeOrg?.country_code === "RO" && activeOrg?.efactura_enabled === true;
-
   if (accountant) {
     const accountantNav: NavItem[] = [
-      { href: "/app", label: t.nav.dashboard, icon: LayoutDashboard, exact: true },
-      { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
-      { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
-      { href: "/app/suppliers", label: t.nav.suppliers, icon: Truck, exact: false },
-      ...(showEfactura ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }] : []),
+      { href: "/accountant", label: "Clienții mei", icon: LayoutDashboard, exact: true },
     ];
     return { mainNav: accountantNav, stockNav: [], showStock: false, limited: false };
   }
 
-  const mainNav = [
-    ...buildMainNav(t).filter((item) => item.href !== "/app/setup-checklist" || !setupComplete),
-    ...(!LEAN_PRODUCT_SCOPE_ENABLED && activeOrg?.kitchen_display_enabled === true && !limited
-      ? [{ href: "/app/kitchen", label: t.nav.kitchen, icon: ChefHat, exact: false }]
-      : []),
-    ...(!LEAN_PRODUCT_SCOPE_ENABLED && activeOrg?.loyalty_enabled === true && !limited
-      ? [{ href: "/app/customers", label: t.nav.customers ?? "Customers", icon: Star, exact: false }]
-      : []),
-    ...(showEfactura && !limited
-      ? [{ href: "/app/invoices", label: "Facturi", icon: FileText, exact: false }]
-      : []),
-  ]
+  const mainNav = buildMainNav(t)
     .filter((item) => item.href !== "/app/recipes" || moduleVisibility?.recipeCosting === true)
+    .filter((item) => item.href !== "/app/stock" || moduleVisibility?.inventory === true)
+    .filter((item) => item.href !== "/app/purchases" || moduleVisibility?.purchases === true)
+    .filter((item) => item.href !== "/app/settings/accountant" || userRole === "owner" || userRole === "manager")
     .filter((item) => {
       if (!limited) return true;
       return item.href === "/app" || item.href === "/app/pos";
     });
 
-  // Stock / purchases / suppliers are paid Operations modules — gated on the
-  // org's own inventory visibility only, not on the marketing-scope flag.
-  const showStock = moduleVisibility?.inventory === true && !limited;
-  const stockNav = showStock ? buildStockNav(t) : [];
+  // Stock, recipes, and purchases are each independent paid Operations
+  // modules — every one gated on its own moduleVisibility flag above, never
+  // folded under another module's flag.
+  const showStock = false;
+  const stockNav: NavItem[] = [];
 
   return { mainNav, stockNav, showStock, limited };
 }
@@ -195,10 +182,10 @@ function HeaderNavLink({
       onClick={onNavigate}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap",
+        "rounded-md px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap",
         isActive
-          ? "bg-blue-50 text-blue-700"
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+          ? "bg-accent text-foreground"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground",
         className,
       )}
     >
@@ -207,69 +194,8 @@ function HeaderNavLink({
   );
 }
 
-function StockHeaderMenu({
-  pathname,
-  stockNav,
-  t,
-  onNavigate,
-  variant = "desktop",
-}: {
-  pathname: string;
-  stockNav: ReturnType<typeof buildStockNav>;
-  t: AppT;
-  onNavigate?: () => void;
-  variant?: "desktop" | "mobile";
-}) {
-  const router = useRouter();
-  const isStockActive = stockNav.some((item) => pathname.startsWith(item.href));
-
-  if (variant === "mobile") {
-    return (
-      <div className="space-y-0.5">
-        <p className="px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          {t.nav.stock}
-        </p>
-        {stockNav.map((item) => (
-          <HeaderNavLink
-            key={item.href}
-            href={item.href}
-            label={item.label}
-            pathname={pathname}
-            onNavigate={onNavigate}
-            className="block w-full"
-          />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn(
-          "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors outline-none",
-          isStockActive
-            ? "bg-blue-50 text-blue-700"
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
-        )}
-        aria-label={t.nav.stock}
-      >
-        {t.nav.stock}
-        <ChevronDown className="h-3.5 w-3.5 opacity-60" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-48">
-        {stockNav.map((item) => (
-          <DropdownMenuItem
-            key={item.href}
-            onClick={() => router.push(item.href)}
-            className={cn(pathname.startsWith(item.href) && "font-semibold text-blue-700")}
-          >
-            {item.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
+function HeaderNavAction({ label, onClick, className }: { label: string; onClick: () => void; className?: string }) {
+  return <button type="button" onClick={onClick} className={cn("rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground whitespace-nowrap", className)}>{label}</button>;
 }
 
 function AppHeader({
@@ -288,6 +214,7 @@ function AppHeader({
   onMobileToggle,
   onLogout,
   onReferralOpen,
+  onAccountantOpen,
   accessibleSites = [],
   activeSiteId = null,
   userRole,
@@ -307,11 +234,12 @@ function AppHeader({
   onMobileToggle: () => void;
   onLogout: () => void;
   onReferralOpen: () => void;
+  onAccountantOpen: () => void;
   accessibleSites?: { id: string; name: string }[];
   activeSiteId?: string | null;
   userRole: string | null;
 }) {
-  const { mainNav, stockNav, showStock, limited } = useMemo(
+  const { mainNav, limited } = useMemo(
     () => resolveNavItems(userRole, t, setupComplete ?? false, moduleVisibility, activeOrg),
     [userRole, t, setupComplete, moduleVisibility, activeOrg],
   );
@@ -321,17 +249,19 @@ function AppHeader({
   };
 
   return (
-    <div className="print:hidden shrink-0 bg-white border-b border-slate-100">
+    <div className="print:hidden shrink-0 bg-card border-b border-border">
       <div className="flex h-12 items-center gap-2 sm:gap-3 px-3 sm:px-4">
         <Link href="/app" className="shrink-0" aria-label={t.nav.dashboard}>
-          <FranchiseTechLogo className="h-6 w-auto max-w-[120px] sm:h-7 sm:max-w-[140px]" />
+          <FranchiseTechLogo className="h-8 w-auto max-w-[150px] sm:h-9 sm:max-w-[170px]" />
         </Link>
 
         <nav
           className="hidden lg:flex flex-1 items-center gap-0.5 min-w-0 overflow-x-auto"
           aria-label={t.shell.mainNav}
         >
-          {mainNav.map((item) => (
+          {mainNav.map((item) => item.href === "/app/settings/accountant" ? (
+            <HeaderNavAction key={item.href} label={item.label} onClick={onAccountantOpen} />
+          ) : (
             <HeaderNavLink
               key={item.href}
               href={item.href}
@@ -340,9 +270,6 @@ function AppHeader({
               exact={item.exact}
             />
           ))}
-          {showStock && (
-            <StockHeaderMenu pathname={pathname} stockNav={stockNav} t={t} />
-          )}
           {!limited && (
             <HeaderNavLink
               href="/app/settings"
@@ -363,25 +290,25 @@ function AppHeader({
 
           <DropdownMenu>
             <DropdownMenuTrigger
-              className="flex items-center gap-2 rounded-lg px-1.5 py-1 hover:bg-slate-50 transition-colors outline-none"
+              className="flex items-center gap-2 rounded-md px-1.5 py-1 hover:bg-accent transition-colors outline-none"
               aria-label={profile?.full_name ?? t.shell.user}
             >
               <Avatar className="h-8 w-8 shrink-0">
-                <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
+                <AvatarFallback className="bg-accent text-foreground text-xs font-semibold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <span className="hidden md:block max-w-[8rem] truncate text-sm font-medium text-slate-800">
+              <span className="hidden md:block max-w-[8rem] truncate text-sm font-medium text-foreground">
                 {profile?.full_name ?? t.shell.user}
               </span>
-              <ChevronDown className="hidden md:block h-3.5 w-3.5 text-slate-400" />
+              <ChevronDown className="hidden md:block h-3.5 w-3.5 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
               <div className="px-2 py-1.5 md:hidden">
-                <p className="text-sm font-medium text-slate-900 truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {profile?.full_name ?? t.shell.user}
                 </p>
-                <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
               </div>
               <DropdownMenuSeparator className="md:hidden" />
               {referral?.link && (
@@ -391,7 +318,7 @@ function AppHeader({
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onLogout} className="text-red-600">
+              <DropdownMenuItem onClick={onLogout} className="text-attention">
                 <LogOut className="h-4 w-4 mr-2" />
                 {t.nav.logout}
               </DropdownMenuItem>
@@ -415,7 +342,7 @@ function AppHeader({
       {mobileOpen && (
         <nav
           id="app-mobile-nav"
-          className="lg:hidden border-t border-slate-100 bg-white px-3 py-3 space-y-1 max-h-[min(70vh,28rem)] overflow-y-auto"
+          className="lg:hidden border-t border-border bg-card px-3 py-3 space-y-1 max-h-[min(70vh,28rem)] overflow-y-auto"
           aria-label={t.shell.mainNav}
         >
           {moduleVisibility?.multiSite === true && accessibleSites.length >= 2 && activeSiteId && (
@@ -424,7 +351,9 @@ function AppHeader({
             </div>
           )}
 
-          {mainNav.map((item) => (
+          {mainNav.map((item) => item.href === "/app/settings/accountant" ? (
+            <HeaderNavAction key={item.href} label={item.label} onClick={() => { closeMobile(); onAccountantOpen(); }} className="block w-full text-left" />
+          ) : (
             <HeaderNavLink
               key={item.href}
               href={item.href}
@@ -435,16 +364,6 @@ function AppHeader({
               className="block w-full"
             />
           ))}
-
-          {showStock && (
-            <StockHeaderMenu
-              pathname={pathname}
-              stockNav={stockNav}
-              t={t}
-              onNavigate={closeMobile}
-              variant="mobile"
-            />
-          )}
 
           {!limited && (
             <HeaderNavLink
@@ -469,6 +388,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   const { t, locale } = useAppI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
+  const [accountantOpen, setAccountantOpen] = useState(false);
   const [posTillOpen, setPosTillOpenState] = useState(false);
 
   const isPosRoute = pathname.startsWith("/app/pos");
@@ -514,7 +434,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
       };
 
   return (
-    <div className={cn("app-shell-h relative flex flex-col overflow-hidden", isPosRoute ? "bg-white" : "bg-slate-50")}>
+    <div className={cn("app-shell app-shell-h relative flex flex-col overflow-hidden", isPosRoute ? "bg-card" : "bg-background")}>
       <div
         className={cn(
           "contents",
@@ -540,6 +460,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
           onMobileToggle={() => setMobileOpen((v) => !v)}
           onLogout={handleLogout}
           onReferralOpen={() => setReferralOpen(true)}
+          onAccountantOpen={() => setAccountantOpen(true)}
           accessibleSites={accessibleSites}
           activeSiteId={activeSiteId}
         />
@@ -553,7 +474,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
               <DialogDescription>{t.shell.inviteDesc}</DialogDescription>
             </DialogHeader>
             <div className="space-y-3">
-              <p className="break-all rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">{referral.link}</p>
+              <p className="break-all rounded-md bg-secondary px-3 py-2 text-sm text-foreground">{referral.link}</p>
               <div className="flex flex-wrap items-center gap-2">
                 <CopyReferralButton link={referral.link} />
                 {referral.code && <Badge variant="outline">{t.shell.referralCode} {referral.code}</Badge>}
@@ -563,9 +484,19 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
         </Dialog>
       )}
 
+      <Dialog open={accountantOpen} onOpenChange={setAccountantOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Conectează contabilul</DialogTitle>
+            <DialogDescription>Introdu emailul și alege datele disponibile. Contabilul primește un link securizat de activare, cu codul inclus automat, apoi firma apare în portalul său.</DialogDescription>
+          </DialogHeader>
+          <AccountantAccessCard showHeader={false} />
+        </DialogContent>
+      </Dialog>
+
       <main
         className={cn(
-          "flex-1 min-h-0 bg-white",
+          "flex-1 min-h-0 bg-card",
           posTillSelling ? "flex flex-col overflow-hidden" : "overflow-y-auto",
           isPosRoute && !posTillOpen && "lg:max-w-5xl lg:mx-auto lg:w-full",
         )}
@@ -575,20 +506,20 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
       </div>
 
       {subscriptionOverlayActive && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 px-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 text-center shadow-xl">
-            <p className="text-xs font-semibold uppercase tracking-wide text-red-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 px-4 backdrop-blur-[2px]">
+          <div className="w-full max-w-sm rounded-md border border-border bg-card p-6 text-center shadow-xl">
+            <p className="text-xs font-semibold uppercase tracking-wide text-attention">
               {overlayCopy.eyebrow}
             </p>
-            <h2 className="mt-2 text-xl font-semibold text-slate-950">
+            <h2 className="mt-2 text-xl font-semibold text-foreground">
               {overlayCopy.title}
             </h2>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 text-sm text-mid">
               {overlayCopy.body}
             </p>
             <Link
               href={`/app/billing?reason=${billingReason}`}
-              className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+              className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-paper transition-colors hover:bg-ink/90"
             >
               {overlayCopy.pay}
             </Link>

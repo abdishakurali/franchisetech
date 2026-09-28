@@ -18,6 +18,7 @@ type Props = {
   id?: string;
   className?: string;
   settingsHint?: boolean;
+  includeInactive?: boolean;
 };
 
 export function VatRateSelect({
@@ -31,11 +32,12 @@ export function VatRateSelect({
   id,
   className = "",
   settingsHint = true,
+  includeInactive = false,
 }: Props) {
   const { t } = useAppI18n();
   const activeRates = useMemo(
-    () => rates.filter((r) => r.active !== false).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.rate - b.rate),
-    [rates]
+    () => rates.filter((r) => includeInactive || r.active !== false).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.rate - b.rate),
+    [includeInactive, rates]
   );
   const numericValue = value === "" ? NaN : Number(value);
   const matched = activeRates.find((r) => ratesMatch(r.rate, numericValue));
@@ -132,14 +134,14 @@ export function VatRateSelect({
         autoComplete="off"
         className={
           compact
-            ? "h-10 w-full min-w-0 truncate rounded-md border border-slate-200 bg-white px-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-            : "h-10 w-full min-w-0 truncate rounded-md border border-slate-200 bg-white px-3 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+            ? "h-10 w-full min-w-0 truncate rounded-md border border-border bg-card px-2 text-sm focus:border-brass focus:outline-none focus:ring-2 focus:ring-brass/20"
+            : "h-10 w-full min-w-0 truncate rounded-md border border-border bg-card px-3 text-sm focus:border-brass focus:outline-none focus:ring-2 focus:ring-brass/20"
         }
       />
       {open && portalTarget && createPortal(
         <div
           style={menuStyle}
-          className="z-[9999] overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg"
+          className="z-[9999] overflow-y-auto rounded-lg border border-border bg-card shadow-lg"
         >
           {filtered.length > 0 ? (
             filtered.map((rate) => (
@@ -150,8 +152,8 @@ export function VatRateSelect({
                   e.preventDefault();
                   selectRate(rate);
                 }}
-                className={`flex w-full min-w-0 items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-blue-50 ${
-                  matched && ratesMatch(matched.rate, rate.rate) ? "bg-blue-50 font-medium text-blue-700" : "text-slate-700"
+                className={`flex w-full min-w-0 items-center justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-accent ${
+                  matched && ratesMatch(matched.rate, rate.rate) ? "bg-accent font-medium text-brass" : "text-foreground"
                 }`}
               >
                 <span className="min-w-0 truncate">{rate.name}</span>
@@ -159,7 +161,7 @@ export function VatRateSelect({
               </button>
             ))
           ) : (
-            <div className="px-3 py-2 text-xs text-slate-400">{t.common.noMatchingOption}</div>
+            <div className="px-3 py-2 text-xs text-muted-foreground">{t.common.noMatchingOption}</div>
           )}
         </div>,
         portalTarget,

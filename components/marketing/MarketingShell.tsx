@@ -33,12 +33,12 @@ export async function MarketingNav() {
 
 export function Hero({ eyebrow, title, description, image = true }: { eyebrow?: string; title: string; description: string; image?: boolean }) {
   return (
-    <section className={`overflow-hidden bg-gradient-to-b from-[#F3F0E8]/80 to-[#FAF8F4] px-4 pb-16 pt-20 sm:px-6 lg:px-8 ${marketingSectionY}`}>
+    <section className={`overflow-hidden bg-gradient-to-b from-background/80 to-card px-4 pb-16 pt-20 sm:px-6 lg:px-8 ${marketingSectionY}`}>
       <div className={`mx-auto grid max-w-6xl items-center gap-12 ${image ? "lg:grid-cols-2" : ""}`}>
         <div>
-          {eyebrow && <p className="mb-4 font-mono text-xs font-medium uppercase tracking-[0.14em] text-[#165DFC]">{eyebrow}</p>}
-          <h1 className="text-4xl font-semibold tracking-tight text-[#0D0F0E] sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">{title}</h1>
-          <p className="mt-5 text-lg leading-relaxed text-[#78786F]">{description}</p>
+          {eyebrow && <p className="mb-4 font-mono text-xs font-medium uppercase tracking-[0.14em] text-brass">{eyebrow}</p>}
+          <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">{title}</h1>
+          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">{description}</p>
         </div>
         {image && <HeroScreenshots />}
       </div>
@@ -54,7 +54,7 @@ export async function PageShell({ children, schema }: { children: ReactNode; sch
   const locale = await getMarketingLocale();
   return (
     <MarketingLocaleProvider key={locale} initialLocale={locale}>
-      <div className="min-h-screen bg-[#FAF8F4]">
+      <div className="min-h-screen bg-card">
         {schema?.map((item, index) => <div key={index}>{jsonLd(item)}</div>)}
         <MarketingNav />
         <MarketingBodyClasses />
@@ -86,7 +86,7 @@ export const featureLinks = [
   ["/features/pos", "POS register"],
   ["/features/z-report", "Z-report"],
   ["/features/setup-onboarding", "Guided setup"],
-  ["/help/romania-fiscalnet", "FiscalNet"],
+  ["/help/romania-fiscalnet", "Fiscal driver"],
 ] as const;
 
 export const industryLinks = [

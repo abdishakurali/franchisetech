@@ -53,7 +53,7 @@ export async function GET(req: Request) {
   const { data: profile } = await supabase.from("profiles").select("full_name,email").eq("id", user.id).single();
   const generatedBy = profile?.full_name || profile?.email || user.email || "—";
 
-  const { org, movements, totals, openingStock, closingStock } = await computeGestiuneReport(
+  const { org, movements, totals, openingStock, closingStock, hasUnknownCost } = await computeGestiuneReport(
     supabase,
     orgId,
     from,
@@ -127,6 +127,9 @@ export async function GET(req: Request) {
     ],
     rows: pdfRows,
     signatureLabels: ["Întocmit de", "Semnătură contabil"],
+    footnote: hasUnknownCost
+      ? "Unele mișcări de stoc inițial sau consum nu au cost înregistrat și au fost excluse din aceste totaluri, nu evaluate la prețul curent — stocul inițial și totalul ieșirilor de mai sus sunt un minim cunoscut, nu neapărat cifra completă. Intrările NIR nu sunt afectate."
+      : undefined,
   });
 
   return renderReportPdfResponse(doc, `gestiune-${from}-${to}.pdf`);

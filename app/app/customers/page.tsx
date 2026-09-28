@@ -39,8 +39,8 @@ export default async function CustomersPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{t.customers.title}</h1>
-          <p className="text-sm text-slate-500">{t.customers.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{t.customers.title}</h1>
+          <p className="text-sm text-muted-foreground">{t.customers.subtitle}</p>
         </div>
         <div className="flex gap-2">
           <a href="/api/customers/export"><Button variant="outline">{t.common.export}</Button></a>
@@ -51,11 +51,11 @@ export default async function CustomersPage() {
         <Card>
           <CardHeader>
             <CardTitle>{t.customers.loyaltyRegularsAtRisk}</CardTitle>
-            <p className="text-sm text-slate-500">{t.customers.loyaltyRegularsAtRiskSubtitle}</p>
+            <p className="text-sm text-muted-foreground">{t.customers.loyaltyRegularsAtRiskSubtitle}</p>
           </CardHeader>
           <CardContent>
             {!regularsAtRisk.length ? (
-              <p className="py-6 text-center text-sm text-slate-400">{t.customers.loyaltyRegularsAtRiskEmpty}</p>
+              <p className="py-6 text-center text-sm text-muted-foreground">{t.customers.loyaltyRegularsAtRiskEmpty}</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -69,11 +69,11 @@ export default async function CustomersPage() {
                 </TableHeader>
                 <TableBody>
                   {regularsAtRisk.map((r) => (
-                    <TableRow key={r.customer_id} className="hover:bg-slate-50">
+                    <TableRow key={r.customer_id} className="hover:bg-secondary">
                       <TableCell className="font-medium">
-                        <Link className="hover:text-blue-600" href={`/app/customers?selected=${r.customer_id}`}>{r.name}</Link>
+                        <Link className="hover:text-brass" href={`/app/customers?selected=${r.customer_id}`}>{r.name}</Link>
                       </TableCell>
-                      <TableCell className="text-slate-500">{r.phone ?? "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{r.phone ?? "—"}</TableCell>
                       <TableCell className="text-right">{r.visit_count}</TableCell>
                       <TableCell className="text-right">{Number(r.lifetime_spend).toFixed(2)}</TableCell>
                       <TableCell className="text-right">
@@ -87,20 +87,20 @@ export default async function CustomersPage() {
           </CardContent>
         </Card>
       ) : (
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-muted-foreground">
           {t.customers.loyaltyUpsell}{" "}
-          <Link href="/app/settings?tab=integrations" className="text-blue-600 hover:underline">
+          <Link href="/app/settings?tab=integrations" className="text-brass hover:underline">
             {t.customers.loyaltyUpsellLink}
           </Link>
         </p>
       )}
 
-      <details className="rounded-xl border border-slate-200 bg-white">
-        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-slate-700">{t.customers.importCustomers}</summary>
+      <details className="rounded-xl border border-border bg-card">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-foreground">{t.customers.importCustomers}</summary>
         <form action={importCustomersCsv as unknown as (fd: FormData) => Promise<void>} className="space-y-3 border-t p-4">
-          <a className="text-sm text-blue-600 hover:underline" href={`data:text/csv;charset=utf-8,${encodeURIComponent("name,phone,email,notes\nJane Murphy,+353 87 000 0000,jane@example.ie,Regular customer")}`} download="franchisetech-customers-template.csv">{t.customers.downloadCsvTemplate}</a>
+          <a className="text-sm text-brass hover:underline" href={`data:text/csv;charset=utf-8,${encodeURIComponent("name,phone,email,notes\nJane Murphy,+353 87 000 0000,jane@example.ie,Regular customer")}`} download="franchisetech-customers-template.csv">{t.customers.downloadCsvTemplate}</a>
           <input name="csv_file" type="file" accept=".csv,text/csv" className="block text-sm" />
-          <textarea name="csv_text" className="min-h-24 w-full rounded-md border border-slate-200 p-3 font-mono text-xs" placeholder="name,phone,email,notes" />
+          <textarea name="csv_text" className="min-h-24 w-full rounded-md border border-border p-3 font-mono text-xs" placeholder="name,phone,email,notes" />
           <Button type="submit" size="sm">{t.customers.importCustomers}</Button>
         </form>
       </details>
@@ -136,8 +136,8 @@ export default async function CustomersPage() {
           <CardContent>
             {!customers?.length ? (
               <div className="text-center py-12">
-                <p className="text-slate-400">{t.customers.empty}</p>
-                <p className="text-sm text-slate-400 mt-1">{t.customers.emptyDetail}</p>
+                <p className="text-muted-foreground">{t.customers.empty}</p>
+                <p className="text-sm text-muted-foreground mt-1">{t.customers.emptyDetail}</p>
               </div>
             ) : (
               <Table>
@@ -151,10 +151,10 @@ export default async function CustomersPage() {
                 </TableHeader>
                 <TableBody>
                   {(customers ?? []).map((c) => (
-                    <TableRow key={c.id} className="hover:bg-slate-50">
-                      <TableCell className="font-medium"><Link className="block hover:text-blue-600" href={`/app/customers?selected=${c.id}`}>{c.name}</Link></TableCell>
-                      <TableCell className="text-slate-500"><Link className="block" href={`/app/customers?selected=${c.id}`}>{c.email ?? "—"}</Link></TableCell>
-                      <TableCell className="text-slate-500"><Link className="block" href={`/app/customers?selected=${c.id}`}>{c.phone ?? "—"}</Link></TableCell>
+                    <TableRow key={c.id} className="hover:bg-secondary">
+                      <TableCell className="font-medium"><Link className="block hover:text-brass" href={`/app/customers?selected=${c.id}`}>{c.name}</Link></TableCell>
+                      <TableCell className="text-muted-foreground"><Link className="block" href={`/app/customers?selected=${c.id}`}>{c.email ?? "—"}</Link></TableCell>
+                      <TableCell className="text-muted-foreground"><Link className="block" href={`/app/customers?selected=${c.id}`}>{c.phone ?? "—"}</Link></TableCell>
                       <TableCell className="text-right">
                         {txByCustomer.get(c.id) ? (
                           <Badge variant="secondary">{txByCustomer.get(c.id)}</Badge>

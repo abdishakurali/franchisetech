@@ -7,8 +7,8 @@ import { useAppI18n } from "@/lib/app-i18n-context";
 const EXPORT_KEYS = ["transactions", "items", "vat_summary", "void_log", "food_safety", "actions"] as const;
 
 const EXPORT_COLORS: Record<(typeof EXPORT_KEYS)[number], string> = {
-  transactions: "bg-blue-600 hover:bg-blue-700",
-  items: "bg-blue-600 hover:bg-blue-700",
+  transactions: "bg-brass hover:bg-brass/90",
+  items: "bg-brass hover:bg-brass/90",
   vat_summary: "bg-green-600 hover:bg-green-700",
   void_log: "bg-red-600 hover:bg-red-700",
   food_safety: "bg-amber-600 hover:bg-amber-700",
@@ -61,7 +61,7 @@ export function AuditExportButtons({ orgId, fromDate, toDate }: { orgId: string;
             );
           })}
         </div>
-        <p className="mt-4 text-xs text-slate-400">{ae.exportsFooter(fromDate, toDate)}</p>
+        <p className="mt-4 text-xs text-muted-foreground">{ae.exportsFooter(fromDate, toDate)}</p>
       </CardContent>
     </Card>
   );

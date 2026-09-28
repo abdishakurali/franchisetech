@@ -5,9 +5,9 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
   cafes: {
     eyebrow: "Cafenele",
     title: "POS pentru cafenele",
-    metaTitle: "POS cafenea România — FiscalNet, cost rețete, raport Z | franchisetech",
+    metaTitle: "POS cafenea România — Driver Fiscal, cost rețete, raport Z | franchisetech",
     description:
-      "Casă de marcat pentru cafenele: vânzare rapidă la tejghea, marje pe rețete, bon fiscal FiscalNet, personal nelimitat și raport Z în câteva minute.",
+      "Casă de marcat pentru cafenele: vânzare rapidă la tejghea, marje pe rețete, bon fiscal prin driver fiscal, personal nelimitat și raport Z în câteva minute.",
     h1: "Cafeneaua dumneavoastră vinde rapid. Știți cifrele la închidere.",
     heroBefore: "Cafeneaua dumneavoastră vinde rapid. ",
     heroHighlight: "știți cifrele la închidere",
@@ -33,14 +33,14 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       ["Viteză POS la tejghea", "Grilă în browser — laptop sau tabletă", "Variază — adesea desktop"],
       ["Marje pe rețete", "Cost rețete inclus", "Adesea limitat în POS simplu"],
       ["Preț personal", "Nelimitat pe plan plătit", "Verificați taxă per terminal"],
-      ["FiscalNet (RO)", "Când e activat în Setări", "Variază la furnizor"],
+      ["Driver fiscal (RO)", "Când e activat în Setări", "Variază la furnizor"],
       ["Preț lunar listat", "De la 49€/lună pe site", "Adesea doar la ofertă"],
     ],
     faqs: [
       {
         question: "Funcționează cu imprimanta de bon pe care o am deja?",
         answer:
-          "franchisetech se conectează prin FiscalNet pe PC-ul de casă când e activat. Casa de marcat tipărește bonul; noi trimitem datele vânzării. Verificați firmware QR pentru noiembrie 2026.",
+          "franchisetech se conectează prin driverul fiscal pe PC-ul de casă când e activat. Casa de marcat tipărește bonul; noi trimitem datele vânzării. Verificați firmware QR pentru noiembrie 2026.",
       },
       {
         question: "Baristele noi pot vinde din prima zi?",
@@ -52,22 +52,22 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Numerar, card și tichete Sodexo/Benefit?",
-        answer: "Metodele de plată se mapează la codurile FiscalNet unde e configurat — numerar, card, tichete masă și altele.",
+        answer: "Metodele de plată se mapează la codurile driverului fiscal unde e configurat — numerar, card, tichete masă și altele.",
       },
       {
         question: "Cât durează închiderea zilnică?",
         answer: "Majoritatea cafenelelor înregistrează numerarul numărat și revizuiesc raportul Z în câteva minute după deschiderea sesiunii.",
       },
     ],
-    ctaTitle: "Deschide casa gratuit — 15 zile",
+    ctaTitle: "Deschide casa gratuit — pentru totdeauna",
     ctaSubtitle: "Setup ghidat pentru cafenele: produse demo, prima vânzare și raport Z.",
   },
   restaurants: {
     eyebrow: "Restaurante",
     title: "POS restaurant — vânzări, stoc, raport Z",
-    metaTitle: "POS restaurant România — vânzări, rețete, FiscalNet | franchisetech",
+    metaTitle: "POS restaurant România — vânzări, rețete, driver fiscal | franchisetech",
     description:
-      "POS restaurant în browser: vânzări rapide, marje pe rețete, FiscalNet și raport Z — fără hardware POS dedicat.",
+      "POS restaurant în browser: vânzări rapide, marje pe rețete, driver fiscal și raport Z — fără hardware POS dedicat.",
     h1: "De la comanda la masă până la raportul Z — tot într-un singur loc.",
     heroBefore: "De la comanda la masă până la ",
     heroHighlight: "raportul Z",
@@ -97,7 +97,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     faqs: [
       {
         question: "Am nevoie de casă de marcat specială?",
-        answer: "Nu. franchisetech rulează în browser pe tablete. FiscalNet rulează pe PC-ul de casă pentru bonuri fiscale.",
+        answer: "Nu. franchisetech rulează în browser pe tablete. Driverul fiscal rulează pe PC-ul de casă pentru bonuri fiscale.",
       },
       {
         question: "Pot începe doar cu POS la tejghea?",
@@ -112,15 +112,15 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Rapoartele de vânzări și exporturile includ TVA pe cote pentru organizațiile din România.",
       },
     ],
-    ctaTitle: "Încearcă POS restaurant — 15 zile gratuit",
+    ctaTitle: "Încearcă POS restaurant — gratuit pentru totdeauna",
     ctaSubtitle: "Vânzări, stoc, rețete și închidere casă — pentru control zilnic.",
   },
   takeaways: {
     eyebrow: "Takeaway & fast food",
-    title: "POS takeaway — casă rapidă, FiscalNet",
+    title: "POS takeaway — casă rapidă, driver fiscal",
     metaTitle: "POS takeaway România — casă rapidă, închidere zi | franchisetech",
     description:
-      "POS takeaway și fast food: grilă rapidă la tejghea, numerar și card, bon fiscal prin FiscalNet și raport Z zilnic.",
+      "POS takeaway și fast food: grilă rapidă la tejghea, numerar și card, bon fiscal prin driver fiscal și raport Z zilnic.",
     h1: "Comanda pleacă în trei atingeri, nu în trei ecrane.",
     heroBefore: "Comanda pleacă în ",
     heroHighlight: "trei atingeri, nu în trei ecrane",
@@ -148,8 +148,8 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     ],
     faqs: [
       {
-        question: "Funcționează cu FiscalNet?",
-        answer: "Da, când FiscalNet e activ pe PC-ul de casă. Bonurile fiscale urmează hardware-ul configurat.",
+        question: "Funcționează cu driverul fiscal?",
+        answer: "Da, când driverul fiscal e activ pe PC-ul de casă. Bonurile fiscale urmează hardware-ul configurat.",
       },
       {
         question: "Pot rula de pe tabletă la tejghea?",
@@ -164,8 +164,8 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Da. Rapoartele de vânzări arată top produse pe orice interval; Operations adaugă cost pe porție și marjă.",
       },
     ],
-    ctaTitle: "Pornește POS takeaway — 15 zile gratuit",
-    ctaSubtitle: "Casă rapidă, bon fiscal prin FiscalNet și raport Z într-un singur setup.",
+    ctaTitle: "Pornește POS takeaway — gratuit pentru totdeauna",
+    ctaSubtitle: "Casă rapidă, bon fiscal prin driver fiscal și raport Z într-un singur setup.",
   },
   "bar-pub": {
     eyebrow: "Baruri & puburi",
@@ -202,11 +202,11 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     faqs: [
       {
         question: "Pot vinde rapid direct la tejghea?",
-        answer: "Da. Grila POS este construită pentru selectarea rapidă a produselor, plată numerar sau card și bon fiscal prin FiscalNet când este configurat.",
+        answer: "Da. Grila POS este construită pentru selectarea rapidă a produselor, plată numerar sau card și bon fiscal prin driverul fiscal când este configurat.",
       },
       {
         question: "TVA diferit pe soft drinks vs alcool?",
-        answer: "Da. Produsele folosesc grupele TVA configurate; grupele FiscalNet se mapează în Setări pentru România.",
+        answer: "Da. Produsele folosesc grupele TVA configurate; grupele driverului fiscal se mapează în Setări pentru România.",
       },
       {
         question: "Mai mulți barmani pe aceeași casă?",
@@ -214,18 +214,18 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Am nevoie de terminal POS fix?",
-        answer: "Nu. Browser pe tabletă la bar e suficient; FiscalNet rulează pe PC-ul fiscal conectat.",
+        answer: "Nu. Browser pe tabletă la bar e suficient; driverul fiscal rulează pe PC-ul fiscal conectat.",
       },
     ],
-    ctaTitle: "Deschide POS bar — 15 zile gratuit",
+    ctaTitle: "Deschide POS bar — gratuit pentru totdeauna",
     ctaSubtitle: "Mese pe plan, stoc și închidere casă — fără taxă per loc.",
   },
   "patisserie-bakery": {
     eyebrow: "Patiserii & brutării",
     title: "POS patiserie și brutărie",
-    metaTitle: "POS patiserie România — cost rețetă, bon consum, FiscalNet",
+    metaTitle: "POS patiserie România — cost rețetă, bon consum, driver fiscal",
     description:
-      "POS patiserie și brutărie: cost per croissant, bon de consum pentru contabil, vânzare la bucată sau kg, stoc și FiscalNet.",
+      "POS patiserie și brutărie: cost per croissant, bon de consum pentru contabil, vânzare la bucată sau kg, stoc și driver fiscal.",
     h1: "Știți costul fiecărui croissant înainte să îl puneți la vitrină.",
     heroBefore: "Știți costul fiecărui ",
     heroHighlight: "croissant înainte să îl puneți la vitrină",
@@ -249,7 +249,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       ["Cost rețete", "Inclus per porție", "SmartBill: focus facturare"],
       ["Bon de consum", "Din consum rețete", "Nu e focus POS"],
       ["POS + stoc împreună", "Un singur workspace", "Adesea unelte separate"],
-      ["FiscalNet POS", "Când e configurat", "SmartBill: e-Factura"],
+      ["Driver fiscal POS", "Când e configurat", "SmartBill: e-Factura"],
       ["Preț listat", "De la 79€/lună Operations", "Altă categorie produs"],
     ],
     faqs: [
@@ -266,11 +266,11 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Produsele suportă unitatea de măsură în catalog; configurați articole pentru retail la bucată sau la greutate după nevoie.",
       },
       {
-        question: "Funcționează cu FiscalNet?",
+        question: "Funcționează cu un driver fiscal?",
         answer: "Da, când e activ pe PC-ul de casă — același flux ca la alte afaceri alimentare.",
       },
     ],
-    ctaTitle: "Începe POS patiserie — 15 zile gratuit",
+    ctaTitle: "Începe POS patiserie — gratuit pentru totdeauna",
     ctaSubtitle: "Rețete, bon de consum și vânzare la tejghea într-un singur loc.",
   },
   "food-trucks": {
@@ -278,7 +278,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     title: "POS food truck — mobil, offline, raport Z",
     metaTitle: "POS food truck România — tabletă, mod offline | franchisetech",
     description:
-      "POS food truck pe tabletă: vindeți când semnalul pică cu coadă offline, sincronizare la reconectare, FiscalNet când e conectat, raport Z seara.",
+      "POS food truck pe tabletă: vindeți când semnalul pică cu coadă offline, sincronizare la reconectare, driver fiscal când e conectat, raport Z seara.",
     h1: "Vindeți de oriunde. Raportul Z vă așteaptă la seară.",
     heroBefore: "Vindeți de oriunde. ",
     heroHighlight: "Raportul Z vă așteaptă la seară",
@@ -302,13 +302,13 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       ["Tabletă / browser", "Da — principal", "Square: focus hardware"],
       ["Coadă offline", "În POS", "Variază"],
       ["Stoc alimentar", "Plan Operations", "Square: retail-first"],
-      ["FiscalNet România", "Când e configurat", "Square: fără fiscal RO"],
+      ["Driver fiscal România", "Când e configurat", "Square: fără fiscal RO"],
       ["Preț lunar listat", "De la 49€/lună", "Focus terminale plată"],
     ],
     faqs: [
       {
         question: "franchisetech funcționează offline?",
-        answer: "Da. POS-ul pune vânzările în coadă locală în pene scurte și sincronizează când browserul se reconectează. Tipărirea fiscală depinde de FiscalNet când sunteți online.",
+        answer: "Da. POS-ul pune vânzările în coadă locală în pene scurte și sincronizează când browserul se reconectează. Tipărirea fiscală depinde de driverul fiscal când sunteți online.",
       },
       {
         question: "Am nevoie de laptop și tabletă?",
@@ -316,14 +316,14 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Imprimantă fiscală portabilă?",
-        answer: "Bonurile fiscale trec prin FiscalNet și dispozitivul certificat — de obicei o imprimantă fiscală compactă legată de un PC pe truck.",
+        answer: "Bonurile fiscale trec prin driverul fiscal și dispozitivul certificat — de obicei o imprimantă fiscală compactă legată de un PC pe truck.",
       },
       {
         question: "Locații diferite în aceeași săptămână?",
         answer: "O organizație; aceeași listă de produse. Add-on multi-locație când aveți site-uri juridice separate.",
       },
     ],
-    ctaTitle: "Încearcă POS food truck — 15 zile gratuit",
+    ctaTitle: "Încearcă POS food truck — gratuit pentru totdeauna",
     ctaSubtitle: "Casă pe tabletă, coadă offline și raport Z.",
   },
   "multi-site": {
@@ -368,8 +368,8 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         answer: "Proprietarii comută între site-uri și revizuiesc rapoarte per locație din același cont.",
       },
       {
-        question: "Fiecare locație are nevoie de FiscalNet?",
-        answer: "Fiecare locație din România rulează FiscalNet pe PC-ul de casă. Ajutăm per site la onboarding asistat.",
+        question: "Fiecare locație are nevoie de un driver fiscal?",
+        answer: "Fiecare locație din România rulează driverul fiscal pe PC-ul de casă. Ajutăm per site la onboarding asistat.",
       },
       {
         question: "Contabilul primește toate exporturile?",

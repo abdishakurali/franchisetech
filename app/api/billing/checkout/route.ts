@@ -5,7 +5,9 @@ import { type BillingPlan, getPlan, getPriceId, isBillingConfigured } from "@/li
 
 export const dynamic = "force-dynamic";
 
-const VALID_PLANS: BillingPlan[] = ["starter", "core", "pro", "operations", "multi_location", "scale"];
+// "free" is deliberately excluded — it never has a Stripe subscription, so it
+// never goes through checkout.
+const VALID_PLANS: BillingPlan[] = ["starter", "core", "pro", "operations", "multi_location", "scale", "growth", "team"];
 
 export async function POST(request: Request) {
   if (!isBillingConfigured()) {

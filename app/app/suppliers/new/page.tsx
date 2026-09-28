@@ -7,13 +7,13 @@ import { requireBusinessModule } from "@/lib/module-guard";
 import { SupplierFormFields } from "@/components/app/SupplierForm";
 
 export default async function SuppliersNewPage() {
-  await requireBusinessModule("inventory");
+  await requireBusinessModule("purchases");
   await getKitchenOpsContext();
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-6">
       <div className="flex items-center gap-3">
-        <Link href="/app/suppliers" className="text-sm text-slate-500 hover:text-slate-700">← Suppliers</Link>
-        <h1 className="text-2xl font-semibold text-slate-950">Add supplier</h1>
+        <Link href="/app/suppliers" className="text-sm text-muted-foreground hover:text-foreground">← Suppliers</Link>
+        <h1 className="text-2xl font-semibold text-foreground">Add supplier</h1>
       </div>
       <Card>
         <CardHeader><CardTitle>Supplier details</CardTitle></CardHeader>
@@ -22,7 +22,7 @@ export default async function SuppliersNewPage() {
             <SupplierFormFields />
             <div className="flex gap-3 pt-2">
               <Link href="/app/suppliers"><Button variant="outline" type="button">Cancel</Button></Link>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">Add supplier</Button>
+              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">Add supplier</Button>
             </div>
           </form>
         </CardContent>

@@ -28,8 +28,8 @@ export default async function AuditExportPage({ searchParams }: { searchParams?:
   return (
     <div className="space-y-6 p-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-950">{ae.title}</h1>
-        <p className="text-sm text-slate-500">{ae.subtitle}</p>
+        <h1 className="text-2xl font-semibold text-foreground">{ae.title}</h1>
+        <p className="text-sm text-muted-foreground">{ae.subtitle}</p>
       </div>
 
       <Card>
@@ -37,18 +37,18 @@ export default async function AuditExportPage({ searchParams }: { searchParams?:
         <CardContent>
           <form className="flex flex-wrap gap-3 items-end">
             <div>
-              <label className="text-sm font-medium text-slate-700 block mb-1">{ae.from}</label>
-              <input type="date" name="from" defaultValue={fromDate} className="h-10 rounded-md border border-slate-200 px-3 text-sm" />
+              <label className="text-sm font-medium text-foreground block mb-1">{ae.from}</label>
+              <input type="date" name="from" defaultValue={fromDate} className="h-10 rounded-md border border-border px-3 text-sm" />
             </div>
             <div>
-              <label className="text-sm font-medium text-slate-700 block mb-1">{ae.to}</label>
-              <input type="date" name="to" defaultValue={toDate} max={today} className="h-10 rounded-md border border-slate-200 px-3 text-sm" />
+              <label className="text-sm font-medium text-foreground block mb-1">{ae.to}</label>
+              <input type="date" name="to" defaultValue={toDate} max={today} className="h-10 rounded-md border border-border px-3 text-sm" />
             </div>
-            <button type="submit" className="h-10 rounded-md border border-slate-200 bg-white px-4 text-sm font-medium hover:bg-slate-50">
+            <button type="submit" className="h-10 rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-secondary">
               {ae.applyRange}
             </button>
           </form>
-          <p className="mt-2 text-xs text-slate-400">{ae.showing(fromDate, toDate)}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{ae.showing(fromDate, toDate)}</p>
         </CardContent>
       </Card>
 
@@ -58,17 +58,17 @@ export default async function AuditExportPage({ searchParams }: { searchParams?:
 
       <Card>
         <CardHeader><CardTitle>{ae.exportsIncluded}</CardTitle></CardHeader>
-        <CardContent className="space-y-3 text-sm text-slate-600">
+        <CardContent className="space-y-3 text-sm text-mid">
           {(["transactions", "items", "vat_summary", "void_log", "food_safety", "actions"] as const).map((key) => {
             const exp = ae.exports[key];
             const color =
               key === "vat_summary"
-                ? "bg-green-100 text-green-700"
+                ? "bg-reconciled/15 text-reconciled"
                 : key === "void_log"
-                  ? "bg-red-100 text-red-700"
+                  ? "bg-red-100 text-attention"
                   : key === "food_safety" || key === "actions"
                     ? "bg-amber-100 text-amber-700"
-                    : "bg-blue-100 text-blue-700";
+                    : "bg-accent text-brass";
             return (
               <div key={key} className="flex gap-3 items-start">
                 <span className={`rounded px-2 py-0.5 text-xs font-medium mt-0.5 ${color}`}>{key}.csv</span>

@@ -69,11 +69,11 @@ const faqs = [
   ],
   [
     "Trebuie să schimb casa de marcat?",
-    "Nu promitem asta fără verificare. În proba asistată verificăm împreună fluxul FiscalNet, casa fiscală și ce se poate configura pentru localul dumneavoastră.",
+    "Nu promitem asta fără verificare. În proba asistată verificăm împreună fluxul driverului fiscal, casa fiscală și ce se poate configura pentru localul dumneavoastră.",
   ],
   [
     "Am nevoie de card la înscriere?",
-    "Trialul de 15 zile începe după o verificare unică de 1 € a cardului. Nu este un abonament — plata lunară începe numai dacă alegeți un plan după perioada de probă.",
+    "Planul Free e disponibil de la crearea contului, fără card, și nu expiră. Plata lunară începe numai dacă alegeți un plan plătit.",
   ],
   [
     "Merge pe telefon?",
@@ -92,7 +92,7 @@ function PrimaryCta({ signupHref, centered = false }: { signupHref: string; cent
         href={signupHref}
         className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#1747c9] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#0f2f8f] sm:w-auto sm:py-3"
       >
-        Începeți proba de 15 zile <ArrowRight className="h-4 w-4" aria-hidden />
+        Creați cont gratuit <ArrowRight className="h-4 w-4" aria-hidden />
       </Link>
       <Link
         href="/blog/raport-x-vs-raport-z-diferenta"
@@ -107,8 +107,7 @@ function PrimaryCta({ signupHref, centered = false }: { signupHref: string; cent
 function TrialMicrocopy({ dark = false }: { dark?: boolean }) {
   return (
     <p className={`mt-3 text-xs leading-6 ${dark ? "text-white/60" : "text-slate-500"}`}>
-      15 zile cu configurare asistată · verificare card 1 € · fără plată lunară în perioada de
-      probă · anulare oricând
+      fără card necesar · gratuit pentru totdeauna · upgrade oricând · anulare oricând
     </p>
   );
 }
@@ -158,7 +157,7 @@ function XReportCard() {
 /**
  * Shift handover panel, drawn rather than screenshotted.
  *
- * The existing /showcase/z-report.png capture is English, in EUR, and shows a 9%
+ * The existing /marketing/live/reports.png capture is English, in EUR, and shows a 9%
  * VAT line — a rate Romania no longer uses — so it is deliberately not reused here.
  * Romanian test data with the current 21% / 11% rates is the honest stand-in until
  * a clean Romanian screenshot exists.
@@ -216,7 +215,9 @@ function DisclaimerNote() {
     <div className="rounded-md border border-[#1747c9]/15 bg-[#eaf0ff] p-4 text-sm leading-6 text-slate-700">
       <p>
         Raportul X fiscal este emis de casa de marcat certificată. franchisetech trimite comanda
-        prin FiscalNet, atunci când integrarea este configurată, și ține în paralel totalurile turei
+        prin driverul fiscal local — folosim driverul FiscalNet
+        (<a href="https://driverfiscal.ro/" target="_blank" rel="noopener noreferrer" className="underline">driverfiscal.ro</a>),
+        atunci când integrarea este configurată — și ține în paralel totalurile turei
         deschise.
       </p>
       <p className="mt-2 text-xs text-slate-500">

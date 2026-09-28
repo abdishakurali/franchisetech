@@ -12,7 +12,7 @@ export function RequestAccessButton({
 }) {
   if (className) {
     return (
-      <Link href="/signup?plan=starter" className={className}>
+      <Link href="/signup?plan=free" className={className}>
         {label ?? "Începe trialul"}
       </Link>
     );
@@ -21,8 +21,8 @@ export function RequestAccessButton({
   if (size === "sm") {
     return (
       <Link
-        href="/signup?plan=starter"
-        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+        href="/signup?plan=free"
+        className="rounded-lg bg-brass px-4 py-2 text-sm font-semibold text-ink hover:bg-brass/90 transition-colors"
       >
         {label ?? "Începe trialul"}
       </Link>
@@ -31,8 +31,8 @@ export function RequestAccessButton({
 
   return (
     <Link
-      href="/signup?plan=starter"
-      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-base font-semibold text-white hover:bg-blue-700 transition-colors"
+      href="/signup?plan=free"
+      className="inline-flex items-center gap-2 rounded-lg bg-brass px-6 py-3 text-base font-semibold text-ink hover:bg-brass/90 transition-colors"
     >
       {label ?? "Începe trialul"} <ArrowRight className="h-4 w-4" />
     </Link>

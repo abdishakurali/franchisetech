@@ -18,7 +18,7 @@ export const en = {
     language: "Language",
   },
   announcement: {
-    text: "15 days to see whether every evening closes cleanly — free in-app setup included.",
+    text: "Free forever, so you can see whether every evening closes cleanly — free in-app setup included.",
     cta: "Start now",
   },
   footer: {
@@ -26,7 +26,7 @@ export const en = {
     subtagline: "Sell, track stock, close the till, and see real numbers — without POS lock-in or per-seat fees.",
     getStartedTitle: "Ready to get started?",
     getStartedText: "Tell us about your business and we will help configure your first location.",
-    getStartedCta: "Start your 15-day trial",
+    getStartedCta: "Create a free account",
     features: "Features",
     industries: "Industries",
     company: "Company",
@@ -61,10 +61,10 @@ export const en = {
     },
   },
   cta: {
-    getStarted: "Open till free — 15 days",
+    getStarted: "Open till free — forever",
     talkToSales: "Talk to sales",
-    startTrial: "Start 15-day trial",
-    parallelTrial: "15-day parallel trial — same team, same end-of-day close",
+    startTrial: "Create free account",
+    parallelTrial: "Free parallel test — same team, same end-of-day close",
     seePricing: "See pricing",
     seeFeatures: "See features",
     learnMore: "Learn more",
@@ -75,12 +75,12 @@ export const en = {
   },
   seoPage: {
     getStarted: "Get started",
-    startTrial: "Start 15-day trial",
+    startTrial: "Create free account",
     allFeatures: "All features",
     faq: "FAQ",
     related: "Related",
     readyTitle: "Ready to try it?",
-    readyText: "Start a 15-day assisted trial with setup help for products, till, and first sale.",
+    readyText: "Free forever, with setup help for products, till, and first sale.",
     startTrialLink: "Get started",
     viewFeature: "View feature",
     viewIndustry: "View industry",
@@ -104,7 +104,7 @@ export const en = {
       },
       {
         title: "Romanian fiscal compliance built in",
-        text: "FiscalNet, Z-Report, ANAF e-Factura and VAT support are native — not add-ons bolted on later.",
+        text: "Fiscal driver, Z-Report, ANAF e-Factura and VAT support are native — not add-ons bolted on later.",
       },
       {
         title: "Works on existing hardware",
@@ -134,7 +134,7 @@ export const en = {
       titleAfter: " where the money went.",
       subtitle: "franchisetech shows sales, cash, card, margin, and stock gaps before you go home.",
       socialProof: "For owners who want daily control, not complicated reports at month end.",
-      trialNote: "€1 card verification · Guided in-app setup · Cancel anytime",
+      trialNote: "No card required · Guided in-app setup · Cancel anytime",
       trustSignals: [
         { title: "No surprises at close", text: "Cash, card, and differences visible before the site closes." },
         { title: "Fast first sale", text: "Demo products, open till, and guided checkout in one session." },
@@ -162,8 +162,8 @@ export const en = {
         },
         {
           label: "You issue the receipt",
-          title: "FiscalNet stays on the till PC",
-          body: "The fiscal receipt uses the local FiscalNet setup with correctly mapped payment methods and VAT groups.",
+          title: "The fiscal driver stays on the till PC",
+          body: "The fiscal receipt uses the local fiscal driver setup with correctly mapped payment methods and VAT groups.",
         },
         {
           label: "You close clean",
@@ -177,7 +177,7 @@ export const en = {
       title: "When you know the truth every day, you run the business differently.",
       items: [
         { title: "Till doesn't match the drawer", text: "See expected cash, card totals, and difference at close — not a guess after service." },
-        { title: "Fiscal receipt is a separate step", text: "FiscalNet connects the sale to the local register flow without server-side fiscal calls." },
+        { title: "Fiscal receipt is a separate step", text: "The fiscal driver connects the sale to the local register flow without server-side fiscal calls." },
         { title: "Daily numbers arrive too late", text: "Sales, cash, card, and VAT are visible immediately after service." },
         { title: "Locked-in POS contracts", text: "Browser-based POS with unlimited staff. Start on devices you already own." },
       ],
@@ -187,21 +187,21 @@ export const en = {
         headline: "Till matches the drawer",
         body: "Expected cash, card totals and the difference — visible before you lock the door.",
         href: "/features/z-report",
-        img: "/showcase/reports-dashboard.png",
+        img: "/marketing/live/dashboard.png",
         imgAlt: "franchisetech dashboard — expected cash and till status",
       },
       {
         headline: "Sell fast at the till",
         body: "Product grid, cash or card checkout, fiscal receipt — new staff can sell on day one.",
         href: "/features/pos",
-        img: "/showcase/pos-grid.png",
+        img: "/marketing/live/pos.png",
         imgAlt: "franchisetech POS — product grid, cart, and charge",
       },
       {
-        headline: "Fiscal receipt through FiscalNet",
+        headline: "Fiscal receipt through the fiscal driver",
         body: "Configure the local register, payment methods, and VAT groups before the first real sale.",
         href: "/help/romania-fiscalnet",
-        img: "/showcase/recipe-costing.png",
+        img: "/marketing/live/recipes.png",
         imgAlt: "franchisetech recipe costing — ingredient cost and margin",
       },
     ],
@@ -245,14 +245,14 @@ export const en = {
       },
       items: [
         { title: "Cafes", text: "Counter service and recipe margins.", bestFor: "Counter service, 1–2 tills, recipe-led menus", href: "/industries/cafes", image: "/marketing/industry-cafe.png" },
-        { title: "Takeaways", text: "Speed at the till, clear end-of-day.", bestFor: "High-volume till, fast checkout, daily Z-report", href: "/industries/takeaways", image: "/showcase/pos-grid.png", imageType: "screenshot" as const },
+        { title: "Takeaways", text: "Speed at the till, clear end-of-day.", bestFor: "High-volume till, fast checkout, daily Z-report", href: "/industries/takeaways", image: "/marketing/live/pos.png", imageType: "screenshot" as const },
       ],
     },
     steps: {
       label: "How it works",
       title: "Live in three steps.",
       items: [
-        { title: "Free setup", text: "Sign up and demo products — under 60 minutes to your first sale." },
+        { title: "Guided setup", text: "Demo products, till opening, and your first sale, with in-app guidance." },
         { title: "Open till", text: "Start a session and sell from any device." },
         { title: "Sell & report", text: "Close the day with clear cash, card, and VAT totals." },
       ],
@@ -321,8 +321,8 @@ export const en = {
     faq: {
       title: "Questions from owners",
       items: [
-        { question: "How does the 15-day trial work?", answer: "The trial starts after a one-time €1 card verification via Stripe. It's not a subscription — monthly billing begins only if you choose a plan at the end." },
-        { question: "Do I need special POS hardware?", answer: "The app runs in a browser on supported devices. Fiscal hardware and FiscalNet compatibility are checked separately." },
+        { question: "How does the free plan work?", answer: "The Free plan is available when the account is created, with no card required, and never expires. Monthly billing begins only if you choose a paid plan." },
+        { question: "Do I need special POS hardware?", answer: "The app runs in a browser on supported devices. Fiscal hardware and fiscal driver compatibility are checked separately." },
         { question: "Can I see margins on menu items?", answer: "Yes. Recipe costing links ingredients to sale price so you see cost per portion and gross margin before you change the menu." },
         { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
         { question: "Can I manage stock from the same system as POS?", answer: "Yes. Purchases, suppliers, and stock levels sit beside sales so owners see what is low before the next service." },
@@ -337,10 +337,10 @@ export const en = {
     description: "POS, products, fiscal receipts, VAT, and Z-report for cafes and takeaways in Romania.",
     heroLabel: "Features",
     heroTitle: "Everything needed for the first sale and daily close",
-    heroText: "Products, POS, FiscalNet, VAT, and Z-report in one simple flow. No per-seat pricing.",
+    heroText: "Products, POS, fiscal driver, VAT, and Z-report in one simple flow. No per-seat pricing.",
     compareCallout: {
       title: "Evaluating other tools?",
-      text: "Honest comparisons vs Ebriza, SmartBill, Oblio, Bit-Soft, and more — including when rivals charge extra for reporting.",
+      text: "Honest comparisons vs Ebriza, SmartBill, Expressoft, and more — including when rivals charge extra for reporting.",
       cta: "Compare POS software",
       href: "/compare",
     },
@@ -364,7 +364,7 @@ export const en = {
     heroTitle: "Built for food businesses that serve customers every day.",
     heroText:
       "POS, fiscal receipts, and daily reports for small businesses that need to start quickly.",
-    cardIncludes: ["POS register", "FiscalNet", "Daily Z-style till close"],
+    cardIncludes: ["POS register", "Fiscal driver", "Daily Z-style till close"],
   },
   partners: {
     title: "franchisetech Partner Program — Recurring revenue for HORECA accountants",
@@ -384,7 +384,7 @@ export const en = {
     howItWorks: [
       { step: "1", title: "You introduce the client", text: "A restaurant or café in your portfolio — we never ask you to run the install." },
       { step: "2", title: "We onboard the client", text: "Products, till, first sale, Z-report — franchisetech leads the setup." },
-      { step: "3", title: "Client pays subscription", text: "15-day trial, then Core or Operations — clear pricing, no per-seat fees." },
+      { step: "3", title: "Client pays subscription", text: "Free plan forever, then upgrade to Pro or Multi when needed — clear pricing, no per-seat fees." },
       { step: "4", title: "You earn recurring commission", text: "A share of the subscription while the client stays active. Exact terms confirmed when the program opens." },
     ],
     accountantsLabel: "For accountants",
@@ -402,7 +402,7 @@ export const en = {
     otherArchetypesLabel: "Other profiles",
     otherArchetypesTitle: "Integrators, consultants, POS resellers",
     otherArchetypes: [
-      { title: "FiscalNet integrator", text: "Recommend an operations workspace beside the fiscal printer — we install." },
+      { title: "Fiscal driver integrator", text: "Recommend an operations workspace beside the fiscal printer — we install." },
       { title: "Opening consultant", text: "New sites: POS + setup checklist for first service." },
       { title: "Local POS reseller", text: "Cloud add-on with recurring commission — no technical support on your shoulders." },
     ],
@@ -443,15 +443,15 @@ export const en = {
   },
   pricing: {
     title: "franchisetech Pricing",
-    description: "Core is €49/location/month and Operations is €79/location/month. The 15-day trial starts after a one-time €1 card verification.",
+    description: "Free is free forever, Pro is €49/location/month, and Multi is €79/location/month + €29/extra location. No card required at signup.",
     badge: "Simple pricing",
     heroTitle: "Two plans with clear per-location pricing.",
-    heroText: "Core covers sales and daily close. Operations adds stock, purchasing, and recipes.",
-    heroStatFrom: "€1 card verification",
-    heroStatTrial: "15-day trial",
+    heroText: "Free covers sales and daily close, forever. Pro adds stock, purchasing, and recipes.",
+    heroStatFrom: "No card required",
+    heroStatTrial: "Free forever",
     heroStatTill: "No long-term contract",
     seeFeatures: "See all features",
-    freeSetupStrip: "Start free. In-app setup included — under an hour to your first sale.",
+    freeSetupStrip: "Free forever, without a card. Guided in-app setup included.",
     setupFreeTitle: "Free in-app setup",
     setupFreeText: "New account → demo products → open till → first sale. Step-by-step guide, no cost.",
     embeddedSignupTitle: "Get started today",
@@ -472,7 +472,7 @@ export const en = {
     fairnessItems: [
       "Unlimited staff — no per-user fees",
       "No hardware lock-in or terminal contracts",
-      "15-day trial after a €1 card verification",
+      "Free forever, without a card",
       "Cancel anytime — no long-term lock-in",
       "Existing subscribers keep their rate when prices change",
     ],
@@ -492,7 +492,7 @@ export const en = {
     },
     notIncludedTitle: "What is not included yet",
     notIncludedText:
-      "You are responsible for purchasing and registering a compatible fiscal printer. franchisetech connects to it via FiscalNet and handles fiscal receipts and Z-reports automatically; ANAF e-Factura invoices are generated and submitted from the app, per invoice. Online ordering and loyalty are not included yet.",
+      "You are responsible for purchasing and registering a compatible fiscal printer. Fiscal driver connectivity and any ANAF e-Factura flow depend on verified local integration setup. Online ordering and loyalty are not included yet.",
     faqTitle: "Pricing FAQ",
     compareCompetitors: {
       title: "Total cost vs competitors (Romania)",
@@ -504,19 +504,19 @@ export const en = {
           href: "/compare/ebriza",
         },
         {
-          name: "Oblio vs daily POS",
-          summary: "Oblio is ~€2.49/month for unlimited invoicing — excellent for e-Factura. franchisetech Core (€49) is for till sessions, stock, recipes, and Z-style close — different job.",
-          href: "/compare/oblio",
-        },
-        {
           name: "SmartBill vs operations",
           summary: "SmartBill Silver from ~€5.84/month covers invoicing; Gestiune adds stock from ~€16/month. Strong for documents — franchisetech targets HORECA till + margins in one browser workspace.",
           href: "/compare/smartbill",
         },
         {
-          name: "Bit-Soft enterprise",
-          summary: "Bit-Soft Breeze serves chains and hotels with quote-based pricing. franchisetech publishes €49–€109/month for independent 1–3 location venues.",
-          href: "/compare/bit-soft",
+          name: "Expressoft enterprise",
+          summary: "Expressoft serves large HoReCa/retail chains with dedicated, weeks-long rollouts. franchisetech lists €49–€109/month with a self-serve trial for independent 1–3 location venues.",
+          href: "/compare/expressoft",
+        },
+        {
+          name: "Boogit (delivery vs POS)",
+          summary: "Boogit's own POS pricing isn't published — its FAQ mentions a setup fee plus a quote-based subscription. franchisetech lists €49–€109/month on the site, no setup fee.",
+          href: "/compare/boogit",
         },
       ],
     },
@@ -550,9 +550,9 @@ export const en = {
       },
     },
     faqs: [
-      ["Do I need special hardware?", "The web app runs on supported devices. Fiscal receipts require compatible fiscal hardware and FiscalNet configured locally."],
+      ["Do I need special hardware?", "The web app runs on supported devices. Fiscal receipts require compatible fiscal hardware and a fiscal driver configured locally."],
       ["Can you set up my products?", "Guided in-app setup is included. Large migrations, team training, and on-site fiscal setup are separate services."],
-      ["Can I cancel after the trial?", "Yes. The trial is 15 days. Payment starts only if you continue."],
+      ["Do I have to pay to start?", "No. The Free plan is free forever. Payment starts only if you choose a paid plan."],
       ["Is pricing per company or location?", "The displayed prices are per location, per month. Request a quote for a multi-location configuration."],
       ["Will my price go up later?", "If we change list prices, existing paying customers keep their current rate unless they change plans."],
     ] as const,
@@ -581,14 +581,14 @@ export const en = {
     homeTeaser: {
       label: "Pricing",
       title: "One workspace. One price per shop.",
-      text: "From {starter}/location/month. The 15-day trial starts after a €1 card verification. No long-term contract.",
+      text: "Free forever, then from {starter}/location/month. No card at signup. No long-term contract.",
       cta: "See all plans",
     },
   },
   auth: {
     loginTitle: "Sign in to franchisetech",
     signupTitle: "Start your free account",
-    signupDescription: "Guided setup. The 15-day trial starts after a €1 card verification.",
+    signupDescription: "Guided setup. The Free plan is available when the account is created, with no card required, and never expires.",
     signupLegal: "By signing up you agree that franchisetech supports your records — it does not replace your legal obligations as a food business operator.",
     email: "Email",
     password: "Password",
@@ -629,7 +629,7 @@ export const en = {
     backToBlog: "Back to blog",
     published: "Published",
     ctaTitle: "Try franchisetech on your till",
-    ctaText: "15-day assisted trial. Setup help for products, payment methods, and your first sale.",
+    ctaText: "Free forever. Setup help for products, payment methods, and your first sale.",
   },
 } as const;
 

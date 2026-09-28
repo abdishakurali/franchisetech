@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { IndustryLandingPage } from "@/components/marketing/IndustryLandingPage";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { faqJsonLd, findPage, industryPages, pageMetadata, SITE_URL } from "@/lib/marketing/seo";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
@@ -37,7 +37,7 @@ export default async function IndustrySlugPage({ params }: { params: Promise<{ s
   };
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd data={faqJsonLd(page.faqs)} />
       <JsonLd
         data={{
@@ -50,6 +50,6 @@ export default async function IndustrySlugPage({ params }: { params: Promise<{ s
         }}
       />
       <IndustryLandingPage page={page} ui={ui} />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

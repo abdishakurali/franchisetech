@@ -24,7 +24,7 @@ export function CtaRow({
 }) {
   const t = useMarketingMessages();
   const secondary = secondaryLabel ?? t.cta.seePricing;
-  const signupHref = plan ? `/signup?plan=${plan}` : "/signup?plan=starter";
+  const signupHref = plan ? `/signup?plan=${plan}` : "/signup?plan=free";
   const ctaLocation = className.includes("justify-center") ? "final_cta" : "cta_row";
 
   return (
@@ -88,8 +88,8 @@ export function FinalCta({ title }: { title?: string }) {
   return (
     <Section tone="slate">
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-3xl font-semibold tracking-tight text-[#0D0F0E]">{title ?? t.cta.finalTitle}</h2>
-        <p className="mt-3 text-[#78786F]">{t.cta.setupHelp}</p>
+        <h2 className="text-3xl font-semibold tracking-tight text-foreground">{title ?? t.cta.finalTitle}</h2>
+        <p className="mt-3 text-muted-foreground">{t.cta.setupHelp}</p>
         <div className="mt-8">
           <CtaRow showDemo className="justify-center" />
         </div>

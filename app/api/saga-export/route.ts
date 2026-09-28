@@ -15,6 +15,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
+import { hasAccountantPartnerAccess } from "@/lib/accountant/permissions";
 import {
   generateFacturiXml,
   formatSagaDate,
@@ -62,6 +63,7 @@ type TransactionItemRow = {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const type = searchParams.get("type") ?? "nir";
+  const requestedOrgId = searchParams.get("org");
   const from = searchParams.get("from") ?? new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
   const to = searchParams.get("to") ?? new Date().toISOString().slice(0, 10);
   const fromTs = `${from}T00:00:00.000Z`;
@@ -77,12 +79,19 @@ export async function GET(req: Request) {
 
   const { data: membership } = await supabase
     .from("organisation_members")
-    .select("organisation_id,role")
+    .select("organisation_id,role,accountant_permissions")
     .eq("user_id", user.id)
+    .in("role", ["owner", "manager", "accountant"])
+    .or("status.is.null,status.eq.active")
+    .eq(requestedOrgId ? "organisation_id" : "user_id", requestedOrgId ?? user.id)
     .limit(1)
     .single();
   if (!membership) return new NextResponse("No org", { status: 403 });
   const orgId = membership.organisation_id;
+  const accountantPermissions = Array.isArray(membership.accountant_permissions) ? membership.accountant_permissions : [];
+  if (membership.role === "accountant" && !accountantPermissions.includes(type === "nir" ? "purchases" : "sales")) {
+    return new NextResponse("Acces interzis pentru acest export.", { status: 403 });
+  }
 
   const { data: org } = await supabase
     .from("organisations")
@@ -94,7 +103,7 @@ export async function GET(req: Request) {
     return new NextResponse("Saga module is not installed", { status: 403 });
   }
   const entitled = await hasEntitlement(orgId, "reports.accountant_pack");
-  if (!entitled) {
+  if (!entitled && !(await hasAccountantPartnerAccess(supabase, orgId))) {
     return new NextResponse("Plan upgrade required for Saga export", { status: 403 });
   }
 

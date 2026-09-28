@@ -30,7 +30,7 @@ function multiLocationCountryCategory(market: BillingMarket): PlanFeatureCategor
     if (market === "RO") {
     return {
       title: "Romania",
-      items: ["FiscalNet receipt integration (when enabled in Settings)"],
+      items: ["Fiscal driver receipt integration (when enabled in Settings)"],
     };
   }
   return null;
@@ -81,7 +81,7 @@ export function getPlanFeatureCategories(
             {
               title: "Romanian compliance",
               items: [
-                "FiscalNet fiscal receipts",
+                "Fiscal driver fiscal receipts",
                 "Fiscal Z-report (daily close)",
                 "Fiscal X-report (interim)",
                 "TVA groups",
@@ -97,14 +97,74 @@ export function getPlanFeatureCategories(
     ];
   }
 
-  if (plan === "pro" || plan === "operations") {
+  // New pricing generation (2026-09) — Free mirrors Core's feature set exactly,
+  // with different framing ("no card, no expiry" instead of a trial) and an
+  // explicit callout of its product/location caps, since those caps (not
+  // missing features) are what distinguishes it.
+  if (plan === "free") {
+    const tillItems =
+      market === "RO"
+        ? [
+            "POS checkout",
+            "Cash & card payments",
+            "Transaction history & receipts",
+            "Open/close till",
+            "% or fixed lei discounts at checkout",
+          ]
+        : [
+            "POS checkout",
+            "Cash & card payments",
+            "Transaction history & receipts",
+            "Open/close till",
+          ];
+    return [
+      { title: "Till & sales", items: tillItems },
+      {
+        title: "Products",
+        items: [
+          "Products & categories (up to 50)",
+          market === "RO" ? "Cote TVA" : `${tax} rates`,
+          "CSV import & export",
+        ],
+      },
+      {
+        title: "Reports",
+        items: ["Sales report", tillClose, market === "RO" ? "Raport TVA" : `${tax} report`],
+      },
+      ...(market === "RO"
+        ? [
+            {
+              title: "Romanian compliance",
+              items: [
+                "Fiscal driver fiscal receipts",
+                "Fiscal Z-report (daily close)",
+                "Fiscal X-report (interim)",
+                "TVA groups",
+                "ANAF e-Factura support",
+              ],
+            },
+          ]
+        : []),
+      {
+        title: "Included",
+        items: ["Owner and staff roles", "Unlimited staff", "1 location", "No card required, free forever"],
+      },
+    ];
+  }
+
+  if (plan === "pro" || plan === "operations" || plan === "growth") {
     const accountingItems =
       market === "RO"
         ? [
             "Bon de consum (materii prime consumate din rețete)",
             "Export audit CSV pentru contabil",
+            ...(plan === "growth" ? ["Pachet export contabil (CSV + XML)"] : []),
           ]
-        : ["Ingredient consumption record", "Audit CSV export"];
+        : [
+            "Ingredient consumption record",
+            "Audit CSV export",
+            ...(plan === "growth" ? ["Accountant export pack (CSV + XML)"] : []),
+          ];
     return [
       {
         title: "Till & sales",
@@ -134,7 +194,7 @@ export function getPlanFeatureCategories(
         ? [
             {
               title: "Fiscal",
-              items: ["FiscalNet este inclus în franchisetech; abonamentul la furnizor se plătește separat"],
+              items: ["Driverul fiscal este inclus în franchisetech; abonamentul la furnizor se plătește separat"],
             },
           ]
         : []),
@@ -172,6 +232,27 @@ export function getPlanFeatureCategories(
     ];
   }
 
+  if (plan === "team") {
+    const teamCountryCategory = multiLocationCountryCategory(market);
+    return [
+      {
+        title: "Operations",
+        items: ["Everything in Pro", "Multiple sites", "Site switching", "€29/extra location/month"],
+      },
+      ...(teamCountryCategory ? [teamCountryCategory] : []),
+      {
+        title: "Reporting",
+        items: ["Per-site sales & reports", tillClose],
+      },
+      {
+        title: "Support",
+        items: ["Priority support (same-day response)"],
+      },
+    ];
+  }
+
+  // multi_location — legacy per-location add-on to a Scale base plan, unrelated
+  // to the new "team" plan above (which bundles its own per-location price).
   const countryCategory = multiLocationCountryCategory(market);
   return [
     {

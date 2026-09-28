@@ -14,12 +14,26 @@ import { cn } from "@/lib/utils";
 
 type BillingSearchParams = { reason?: string; checkout?: string };
 
+// Every feature-gate redirect (accountant workspace, gestiune reports, the
+// legacy SAGA export, loyalty, business-module installs) lands here with a
+// `reason` naming the entitlement it was missing — all of these currently
+// require at least the Growth plan under the self-serve pricing model, since
+// Growth's entitlement set is a superset of the legacy Operations tier these
+// reasons were originally written against.
+const ENTITLEMENT_UPGRADE_REASONS = new Set([
+  "accountant_pack_requires_growth",
+  "gestiune_requires_pro",
+  "saga_requires_scale",
+  "loyalty_requires_operations",
+  "module_required",
+]);
+
 function statusColor(state: string) {
   if (state === "active") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (state === "trialing" || state === "soft_trial") return "bg-blue-50 text-blue-700 border-blue-200";
+  if (state === "trialing" || state === "soft_trial") return "bg-accent text-foreground border-border";
   if (state === "past_due" || state === "past_due_expired" || state === "canceled") return "bg-red-50 text-red-700 border-red-200";
   if (state === "incomplete") return "bg-amber-50 text-amber-700 border-amber-200";
-  return "bg-slate-50 text-slate-600 border-slate-200";
+  return "bg-secondary text-muted-foreground border-border";
 }
 
 function formatDate(locale: AppLocale, iso: string) {
@@ -47,6 +61,7 @@ function statusLabel(locale: AppLocale, state: string) {
     canceled: "Anulat",
     incomplete: "Checkout nefinalizat",
     none: "Fără plan activ",
+    free: "Plan Free",
   };
   const en: Record<string, string> = {
     active: "Active",
@@ -57,6 +72,7 @@ function statusLabel(locale: AppLocale, state: string) {
     canceled: "Canceled",
     incomplete: "Checkout incomplete",
     none: "No active plan",
+    free: "Free plan",
   };
   return (locale === "ro" ? ro : en)[state] ?? state;
 }
@@ -69,6 +85,8 @@ const copy = {
     trialExpiredDesc: "Choose a plan to continue using FranchiseTech. Your data stays saved.",
     pastDueTitle: "Payment required.",
     pastDueDesc: "Update your payment method. POS sales remain available while you fix billing.",
+    upgradeFeatureTitle: "That feature needs the Pro plan.",
+    upgradeFeatureDesc: "Self-serve plan switching isn't available yet — contact us to upgrade, or use “Manage billing” below to see your current subscription.",
     successTitle: "Subscription activated.",
     successDesc: "Your plan is active. Thank you.",
     checkoutErrorTitle: "Checkout did not start.",
@@ -104,6 +122,8 @@ const copy = {
     trialExpiredDesc: "Alegeți un plan ca să continuați să folosiți FranchiseTech. Datele dumneavoastră rămân salvate.",
     pastDueTitle: "Este necesară plata.",
     pastDueDesc: "Actualizați metoda de plată. Vânzările POS rămân disponibile cât timp rezolvați facturarea.",
+    upgradeFeatureTitle: "Acea funcționalitate necesită planul Pro.",
+    upgradeFeatureDesc: "Schimbarea planului nu este încă disponibilă direct — contactați-ne pentru upgrade, sau folosiți „Gestionare facturare” mai jos pentru abonamentul actual.",
     successTitle: "Abonamentul a fost activat.",
     successDesc: "Planul dumneavoastră este activ. Mulțumim.",
     checkoutErrorTitle: "Checkout-ul nu a pornit.",
@@ -171,7 +191,7 @@ function StatusIcon({ state }: { state: string }) {
   if (state === "active") return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
   if (state === "past_due" || state === "past_due_expired" || state === "canceled") return <AlertCircle className="h-5 w-5 text-red-600" />;
   if (state === "incomplete") return <AlertTriangle className="h-5 w-5 text-amber-600" />;
-  return <Clock className="h-5 w-5 text-blue-600" />;
+  return <Clock className="h-5 w-5 text-brass" />;
 }
 
 export async function BillingPanel({
@@ -217,16 +237,28 @@ export async function BillingPanel({
   const c = copy[locale];
   const sub = resolvedOrganisationId ? await getSubscriptionStatus(resolvedOrganisationId) : null;
   const configured = isBillingConfigured();
-  const needsPlan = !sub || ["none", "incomplete", "canceled"].includes(sub.state);
+  // "free" belongs here too: getSubscriptionStatus() always returns a real
+  // object (never null) for a Free-plan org — state: "free", showUpgradeCTA:
+  // true — so `!sub` never catches it. Without "free" in this list, a
+  // Free-plan owner opening /app/billing saw the plan cards disappear
+  // entirely: canChoosePlan below fell through to false, and there was no
+  // other checkout entry point in the app.
+  const needsPlan = !sub || ["none", "free", "incomplete", "canceled"].includes(sub.state);
   const canChoosePlan = needsPlan || sub?.state === "soft_trial" || sub?.state === "trialing";
+  // Existing subscribers can't self-serve switch plans yet — /api/billing/checkout
+  // rejects a new checkout while a subscription is active (avoids a duplicate),
+  // and the Stripe portal's subscription_update feature isn't enabled — so for
+  // this group the banner points at "Manage billing" (Stripe portal) instead of
+  // rendering pricing cards that would just fail on click.
+  const wantsUpgrade = ENTITLEMENT_UPGRADE_REASONS.has(searchParams.reason ?? "") && !canChoosePlan;
   const paidInvoices = await listPaidInvoices(sub?.stripeCustomerId ?? null, locale);
   const canOpenBillingPortal = canManageBilling(membership?.role);
 
   return (
     <div className={cn("space-y-6", className)}>
       <div>
-        <h2 className="text-xl font-semibold text-slate-950">{c.title}</h2>
-        <p className="mt-1 text-sm text-slate-500">{c.subtitle}</p>
+        <h2 className="text-xl font-semibold text-foreground">{c.title}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{c.subtitle}</p>
       </div>
 
       {searchParams.reason === "trial_expired" && needsPlan && (
@@ -240,6 +272,13 @@ export async function BillingPanel({
         <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800">
           <p className="font-semibold">{c.pastDueTitle}</p>
           <p className="mt-0.5 opacity-80">{c.pastDueDesc}</p>
+        </div>
+      )}
+
+      {wantsUpgrade && (
+        <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm text-blue-800">
+          <p className="font-semibold">{c.upgradeFeatureTitle}</p>
+          <p className="mt-0.5 opacity-80">{c.upgradeFeatureDesc}</p>
         </div>
       )}
 
@@ -303,39 +342,39 @@ export async function BillingPanel({
 
       {sub && !needsPlan && (
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
-            <h2 className="mb-4 text-sm font-semibold text-slate-700">{c.details}</h2>
+          <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+            <h2 className="mb-4 text-sm font-semibold text-foreground">{c.details}</h2>
             <dl className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm sm:grid-cols-4">
               <div>
-                <dt className="text-xs font-semibold uppercase text-slate-400">Plan</dt>
+                <dt className="text-xs font-semibold uppercase text-muted-foreground">Plan</dt>
                 <dd className="mt-0.5 font-medium">{sub.plan ? effectivePlanLabel(sub.plan as Parameters<typeof effectivePlanLabel>[0]) : "-"}</dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase text-slate-400">Status</dt>
+                <dt className="text-xs font-semibold uppercase text-muted-foreground">Status</dt>
                 <dd className="mt-0.5 font-medium">{statusLabel(locale, sub.state)}</dd>
               </div>
               <div>
-                <dt className="text-xs font-semibold uppercase text-slate-400">{sub.cancelAtPeriodEnd ? c.cancels : c.renews}</dt>
+                <dt className="text-xs font-semibold uppercase text-muted-foreground">{sub.cancelAtPeriodEnd ? c.cancels : c.renews}</dt>
                 <dd className="mt-0.5 font-medium">{sub.periodEnd ? formatDate(locale, sub.periodEnd) : "-"}</dd>
               </div>
               {sub.creditMonths > 0 && (
                 <div>
-                  <dt className="text-xs font-semibold uppercase text-slate-400">{c.referralCredit}</dt>
-                  <dd className="mt-0.5 font-medium text-blue-700">{c.creditMonths(sub.creditMonths)}</dd>
+                  <dt className="text-xs font-semibold uppercase text-muted-foreground">{c.referralCredit}</dt>
+                  <dd className="mt-0.5 font-medium text-reconciled">{c.creditMonths(sub.creditMonths)}</dd>
                 </div>
               )}
             </dl>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+          <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
             <div className="mb-4">
-              <h2 className="text-sm font-semibold text-slate-700">{c.billingHistory}</h2>
-              <p className="mt-1 text-xs text-slate-500">{c.billingHistoryDesc}</p>
+              <h2 className="text-sm font-semibold text-foreground">{c.billingHistory}</h2>
+              <p className="mt-1 text-xs text-muted-foreground">{c.billingHistoryDesc}</p>
             </div>
             {paidInvoices.length ? (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="border-b border-slate-100 text-left text-xs font-semibold uppercase text-slate-400">
+                  <thead className="border-b border-border text-left text-xs font-semibold uppercase text-muted-foreground">
                     <tr>
                       <th className="py-2 pr-4">{c.invoiceDate}</th>
                       <th className="py-2 pr-4">{c.invoiceAmount}</th>
@@ -343,21 +382,21 @@ export async function BillingPanel({
                       <th className="py-2 text-right">PDF</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border">
                     {paidInvoices.map((invoice) => (
                       <tr key={invoice.id}>
-                        <td className="py-3 pr-4 text-slate-700">{formatDate(locale, invoice.created)}</td>
-                        <td className="py-3 pr-4 font-medium text-slate-900">{invoice.amount}</td>
+                        <td className="py-3 pr-4 text-foreground">{formatDate(locale, invoice.created)}</td>
+                        <td className="py-3 pr-4 font-medium text-foreground">{invoice.amount}</td>
                         <td className="py-3 pr-4 text-emerald-700">{c.invoicePaid}</td>
                         <td className="py-3">
                           <div className="flex justify-end gap-3">
                             {invoice.hostedUrl && (
-                              <a href={invoice.hostedUrl} target="_blank" rel="noreferrer" className="font-medium text-blue-600 hover:underline">
+                              <a href={invoice.hostedUrl} target="_blank" rel="noreferrer" className="font-medium text-brass hover:underline">
                                 {c.viewInvoice}
                               </a>
                             )}
                             {invoice.pdfUrl && (
-                              <a href={invoice.pdfUrl} target="_blank" rel="noreferrer" className="font-medium text-blue-600 hover:underline">
+                              <a href={invoice.pdfUrl} target="_blank" rel="noreferrer" className="font-medium text-brass hover:underline">
                                 {c.downloadPdf}
                               </a>
                             )}
@@ -369,7 +408,7 @@ export async function BillingPanel({
                 </table>
               </div>
             ) : (
-              <p className="rounded-lg bg-slate-50 px-4 py-3 text-sm text-slate-500">{c.noInvoices}</p>
+              <p className="rounded-lg bg-secondary px-4 py-3 text-sm text-muted-foreground">{c.noInvoices}</p>
             )}
           </div>
         </div>

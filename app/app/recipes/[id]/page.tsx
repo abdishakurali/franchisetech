@@ -8,6 +8,7 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import {
   firstJoined,
+  formatCostAsOf,
   formatQty,
   formatRecipeMoney,
   recipeCanMake,
@@ -31,7 +32,7 @@ export default async function RecipeDetailPage({
   const { data: rawRecipe } = await supabase
     .from("recipes")
     .select(
-      "id,name,yield_qty,product_id,products(name,sale_price),recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)"
+      "id,name,yield_qty,product_id,cost_computed_at,products(name,sale_price),recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_of_measure,unit_cost,total_cost)"
     )
     .eq("organisation_id", orgId)
     .eq("id", id)
@@ -67,23 +68,23 @@ export default async function RecipeDetailPage({
   return (
     <div className="space-y-6 p-6">
       {justSaved && (
-        <div className="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+        <div className="rounded-xl border border-reconciled/25 bg-reconciled/10 px-4 py-3 text-sm font-medium text-reconciled">
           ✓ Modificările au fost salvate.
         </div>
       )}
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link href="/app/recipes" className="text-sm text-slate-500 hover:text-slate-700">
+          <Link href="/app/recipes" className="text-sm text-muted-foreground hover:text-foreground">
             ← Toate rețetele
           </Link>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-950">{recipe.name}</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="mt-2 text-2xl font-semibold text-foreground">{recipe.name}</h1>
+          <p className="text-sm text-muted-foreground">
             {product?.name ?? "—"} · {metrics.yieldQty} {metrics.yieldQty === 1 ? "porție" : "porții"} per rețetă
           </p>
         </div>
         <Link href={`/app/recipes/${recipe.id}/edit`}>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">Editează rețeta</Button>
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">Editează rețeta</Button>
         </Link>
       </div>
 
@@ -96,49 +97,56 @@ export default async function RecipeDetailPage({
                 <div className="min-w-[56px] text-center">
                   <p
                     className={`text-2xl font-bold leading-none ${
-                      canMake === 0 ? "text-red-600" : canMake < 5 ? "text-amber-600" : "text-green-700"
+                      canMake === 0 ? "text-attention" : canMake < 5 ? "text-amber-600" : "text-reconciled"
                     }`}
                   >
                     {canMake}
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-400">poți prepara</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">poți prepara</p>
                   {limitingIngName && canMake < 20 ? (
-                    <p className="mt-0.5 text-[10px] leading-tight text-red-500">⚠ {limitingIngName}</p>
+                    <p className="mt-0.5 text-[10px] leading-tight text-attention">⚠ {limitingIngName}</p>
                   ) : null}
                 </div>
               ) : null}
               <div className="text-center">
                 <p className="text-xl font-bold leading-none">{formatRecipeMoney(salePrice, currency)}</p>
-                <p className="mt-0.5 text-xs text-slate-400">preț vânzare</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">preț vânzare</p>
               </div>
               <div className="text-center">
-                <p className="text-xl font-bold leading-none text-slate-600">
+                <p className="text-xl font-bold leading-none text-mid">
                   {formatRecipeMoney(metrics.costPerUnit, currency)}
                 </p>
-                <p className="mt-0.5 text-xs text-slate-400">cost ingrediente</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">cost ingrediente</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">
+                  {formatCostAsOf(recipe.cost_computed_at, {
+                    basis: "CMP",
+                    asOf: (date) => `CMP la ${date}`,
+                    unknown: "bază cost necunoscută",
+                  })}
+                </p>
               </div>
               <div className="text-center">
                 <p
                   className={`text-xl font-bold leading-none ${
                     metrics.marginPct >= 60
-                      ? "text-green-700"
+                      ? "text-reconciled"
                       : metrics.marginPct >= 30
                         ? "text-amber-600"
-                        : "text-red-600"
+                        : "text-attention"
                   }`}
                 >
                   {metrics.marginPct.toFixed(1)}%
                 </p>
-                <p className="mt-0.5 text-xs text-slate-400">marjă</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">marjă</p>
               </div>
               <Badge
                 variant="secondary"
                 className={
                   metrics.marginPct >= 60
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-reconciled/10 text-reconciled"
                     : metrics.marginPct >= 30
                       ? "bg-amber-100 text-amber-700"
-                      : "bg-red-100 text-red-700"
+                      : "bg-attention/10 text-attention"
                 }
               >
                 marjă {formatRecipeMoney(metrics.margin, currency)}
@@ -189,8 +197,8 @@ export default async function RecipeDetailPage({
                         ) : null}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{Number(item.quantity)}</TableCell>
-                      <TableCell className="text-slate-500">{item.unit_of_measure ?? "buc"}</TableCell>
-                      <TableCell className="text-right tabular-nums text-slate-500">
+                      <TableCell className="text-muted-foreground">{item.unit_of_measure ?? "buc"}</TableCell>
+                      <TableCell className="text-right tabular-nums text-muted-foreground">
                         {formatRecipeMoney(Number(item.unit_cost ?? 0), currency)}
                       </TableCell>
                       <TableCell className="text-right font-medium tabular-nums">
@@ -199,15 +207,15 @@ export default async function RecipeDetailPage({
                       <TableCell
                         className={`text-right text-sm tabular-nums ${
                           onHand !== null && onHand < Number(item.quantity) * 5
-                            ? "text-red-600 font-medium"
-                            : "text-slate-500"
+                            ? "text-attention font-medium"
+                            : "text-muted-foreground"
                         }`}
                       >
                         {onHand !== null ? formatQty(onHand) : "—"}
                       </TableCell>
                       <TableCell
                         className={`text-right font-medium tabular-nums ${
-                          portionsFromThis !== null && portionsFromThis < 5 ? "text-red-600" : "text-slate-700"
+                          portionsFromThis !== null && portionsFromThis < 5 ? "text-attention" : "text-foreground"
                         }`}
                       >
                         {portionsFromThis !== null ? portionsFromThis : "—"}
@@ -215,8 +223,8 @@ export default async function RecipeDetailPage({
                     </TableRow>
                   );
                 })}
-                <TableRow className="bg-slate-50 font-semibold">
-                  <TableCell colSpan={4} className="text-right text-slate-600">
+                <TableRow className="bg-secondary font-semibold">
+                  <TableCell colSpan={4} className="text-right text-mid">
                     Cost total ({metrics.yieldQty} {metrics.yieldQty === 1 ? "porție" : "porții"})
                   </TableCell>
                   <TableCell className="text-right">{formatRecipeMoney(metrics.totalCost, currency)}</TableCell>
@@ -227,7 +235,7 @@ export default async function RecipeDetailPage({
             </Table>
           </CardContent>
         ) : (
-          <CardContent className="text-sm text-slate-500">Niciun ingredient asociat acestei rețete încă.</CardContent>
+          <CardContent className="text-sm text-muted-foreground">Niciun ingredient asociat acestei rețete încă.</CardContent>
         )}
       </Card>
     </div>

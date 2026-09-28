@@ -116,7 +116,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
       <CardContent>
         {rates.length > 3 && (
           <div className="mb-4">
-            <Label className="text-xs text-slate-500">Filter by name or rate</Label>
+            <Label className="text-xs text-muted-foreground">Filter by name or rate</Label>
             <Input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
@@ -125,13 +125,13 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
             />
           </div>
         )}
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-border">
           {displayRates.map((v) =>
             editingId === v.id ? (
               /* ── EDIT ROW ── */
               <div key={v.id} className="py-3 flex flex-wrap items-end gap-2">
                 <div>
-                  <Label className="text-xs text-slate-500">Name</Label>
+                  <Label className="text-xs text-muted-foreground">Name</Label>
                   <Input
                     value={editState.name ?? ""}
                     onChange={(e) => setEditState((s) => ({ ...s, name: e.target.value }))}
@@ -139,7 +139,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-slate-500">Rate %</Label>
+                  <Label className="text-xs text-muted-foreground">Rate %</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -152,11 +152,11 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                 </div>
                 {fiscalnetEnabled && (
                   <div>
-                    <Label className="text-xs text-slate-500">FiscalNet group</Label>
+                    <Label className="text-xs text-muted-foreground">FiscalNet group</Label>
                     <select
                       value={editState.fiscalnet_vat_group != null ? String(editState.fiscalnet_vat_group) : ""}
                       onChange={(e) => setEditState((s) => ({ ...s, fiscalnet_vat_group: e.target.value ? Number(e.target.value) : undefined }))}
-                      className="h-8 rounded border border-slate-200 px-2 text-sm"
+                      className="h-8 rounded border border-border px-2 text-sm"
                     >
                       <option value="">— none —</option>
                       {FISCALNET_GROUPS.map((g) => (
@@ -171,8 +171,8 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                     onClick={() => setEditState((s) => ({ ...s, is_default: !s.is_default }))}
                     className={`h-8 px-3 rounded border text-xs font-medium transition-colors ${
                       editState.is_default
-                        ? "bg-blue-50 border-blue-300 text-blue-700"
-                        : "bg-slate-50 border-slate-200 text-slate-400"
+                        ? "bg-accent border-brass/40 text-brass"
+                        : "bg-secondary border-border text-muted-foreground"
                     }`}
                   >
                     {editState.is_default ? "★ Default" : "Set default"}
@@ -193,10 +193,10 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm">
                     {v.name}
-                    <span className="ml-2 text-slate-400 font-normal">{v.rate}%</span>
+                    <span className="ml-2 text-muted-foreground font-normal">{v.rate}%</span>
                   </p>
                   {fiscalnetEnabled && (
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-muted-foreground">
                       FiscalNet group: {v.fiscalnet_vat_group != null ? v.fiscalnet_vat_group : "not set"}
                     </p>
                   )}
@@ -204,7 +204,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                 {!!v.is_default && <Badge variant="secondary" className="shrink-0">Default</Badge>}
                 {canEdit && deleteConfirm === v.id ? (
                   <div className="flex items-center gap-1 shrink-0">
-                    <span className="text-xs text-red-600">Delete?</span>
+                    <span className="text-xs text-attention">Delete?</span>
                     <Button size="sm" variant="destructive" className="h-7 px-2 text-xs" onClick={() => handleDelete(v.id)} disabled={isPending}>Yes</Button>
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setDeleteConfirm(null)}>No</Button>
                   </div>
@@ -213,7 +213,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => startEdit(v)}>
                       Edit
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-red-500 hover:text-red-600" onClick={() => setDeleteConfirm(v.id)}>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-red-500 hover:text-attention" onClick={() => setDeleteConfirm(v.id)}>
                       ✕
                     </Button>
                   </div>
@@ -224,9 +224,9 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
 
           {/* ── ADD NEW ROW ── */}
           {canEdit && addingNew && (
-            <div className="py-3 flex flex-wrap items-end gap-2 bg-slate-50 -mx-6 px-6 rounded-b">
+            <div className="py-3 flex flex-wrap items-end gap-2 bg-secondary -mx-6 px-6 rounded-b">
               <div>
-                <Label className="text-xs text-slate-500">Name</Label>
+                <Label className="text-xs text-muted-foreground">Name</Label>
                 <Input
                   placeholder="e.g. TVA 21%"
                   value={newState.name}
@@ -236,7 +236,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                 />
               </div>
               <div>
-                <Label className="text-xs text-slate-500">Rate %</Label>
+                <Label className="text-xs text-muted-foreground">Rate %</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -250,11 +250,11 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
               </div>
               {fiscalnetEnabled && (
                 <div>
-                  <Label className="text-xs text-slate-500">FiscalNet group</Label>
+                  <Label className="text-xs text-muted-foreground">FiscalNet group</Label>
                   <select
                     value={newState.fiscalnet_vat_group}
                     onChange={(e) => setNewState((s) => ({ ...s, fiscalnet_vat_group: e.target.value }))}
-                    className="h-8 rounded border border-slate-200 px-2 text-sm"
+                    className="h-8 rounded border border-border px-2 text-sm"
                   >
                     <option value="">— none —</option>
                     {FISCALNET_GROUPS.map((g) => (
@@ -269,8 +269,8 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                   onClick={() => setNewState((s) => ({ ...s, is_default: !s.is_default }))}
                   className={`h-8 px-3 rounded border text-xs font-medium transition-colors ${
                     newState.is_default
-                      ? "bg-blue-50 border-blue-300 text-blue-700"
-                      : "bg-slate-50 border-slate-200 text-slate-400"
+                      ? "bg-accent border-brass/40 text-brass"
+                      : "bg-secondary border-border text-muted-foreground"
                   }`}
                 >
                   {newState.is_default ? "★ Default" : "Set default"}

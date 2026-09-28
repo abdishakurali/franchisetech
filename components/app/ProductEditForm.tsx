@@ -18,6 +18,7 @@ import type { ProductModuleVisibility } from "@/lib/product-module-fields";
 import { cn } from "@/lib/utils";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import { KITCHEN_STATIONS } from "@/lib/kitchen-stations";
+import { unitLabel } from "@/lib/units-of-measure";
 
 type ProductRecord = {
   id: string;
@@ -69,14 +70,14 @@ function OptionToggle({
   onChange?: (on: boolean) => void;
 }) {
   const [on, setOn] = useState(defaultChecked);
-  const activeRing = accent === "green" ? "border-green-300 bg-green-50/60" : "border-blue-300 bg-blue-50/60";
-  const activeDot = accent === "green" ? "bg-green-600" : "bg-blue-600";
+  const activeRing = accent === "green" ? "border-reconciled/30 bg-reconciled/15" : "border-brass/40 bg-accent/60";
+  const activeDot = accent === "green" ? "bg-green-600" : "bg-brass";
 
   return (
     <label
       className={cn(
         "flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors",
-        on ? activeRing : "border-slate-200 bg-white hover:border-slate-300",
+        on ? activeRing : "border-border bg-card hover:border-border",
       )}
     >
       <input
@@ -90,20 +91,20 @@ function OptionToggle({
       <span
         className={cn(
           "mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors",
-          on ? activeDot : "bg-slate-200",
+          on ? activeDot : "bg-secondary",
         )}
         aria-hidden
       >
         <span
           className={cn(
-            "h-4 w-4 rounded-full bg-white shadow transition-transform",
+            "h-4 w-4 rounded-full bg-card shadow transition-transform",
             on ? "translate-x-4" : "translate-x-0",
           )}
         />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-sm font-medium text-slate-900">{title}</span>
-        <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">{description}</span>
+        <span className="block text-sm font-medium text-foreground">{title}</span>
+        <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{description}</span>
       </span>
     </label>
   );
@@ -122,7 +123,7 @@ export function ProductEditForm({
   returnTo,
 }: Props) {
   const router = useRouter();
-  const { t: i18n } = useAppI18n();
+  const { t: i18n, locale } = useAppI18n();
   const pf = i18n.productsForm;
   const formRef = useRef<HTMLFormElement>(null);
   const [saving, setSaving] = useState(false);
@@ -131,7 +132,7 @@ export function ProductEditForm({
   const [availableInPos, setAvailableInPos] = useState(product.available_in_pos !== false);
   const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }));
   const posCategoryOptions = posCategories.map((c) => ({ value: c.id, label: c.name }));
-  const unitOptions = units.map((u) => ({ value: u, label: u }));
+  const unitOptions = units.map((u) => ({ value: u, label: unitLabel(u, locale) }));
   const supplierOptions = suppliers.map((s) => ({ value: s.id, label: s.name }));
   const stationOptions = KITCHEN_STATIONS.map((s) => ({ value: s.value, label: s.label }));
 
@@ -171,7 +172,16 @@ export function ProductEditForm({
       const fd = new FormData(e.currentTarget);
       const result = await updateProduct(fd);
       if (!result.ok) {
-        toast.error(result.error);
+        // updateProduct forwards the bare EntitlementDeniedError code, not a
+        // message — showing it verbatim left the owner staring at
+        // "entitlement_denied" with no idea their plan was the cause.
+        toast.error(
+          result.error === "entitlement_denied"
+            ? locale === "ro"
+              ? "Acțiune indisponibilă pentru planul curent. Faceți upgrade pentru a continua."
+              : "This action isn't available on your current plan. Upgrade to continue."
+            : result.error,
+        );
         return;
       }
       toast.success(t.saved);
@@ -191,7 +201,13 @@ export function ProductEditForm({
       fd.set("id", product.id);
       const result = await deleteProduct(fd);
       if (!result.ok) {
-        toast.error(result.error);
+        toast.error(
+          result.error === "entitlement_denied"
+            ? locale === "ro"
+              ? "Acțiune indisponibilă pentru planul curent. Faceți upgrade pentru a continua."
+              : "This action isn't available on your current plan. Upgrade to continue."
+            : result.error,
+        );
         return;
       }
       toast.success(t.deleted);
@@ -207,7 +223,7 @@ export function ProductEditForm({
       <form ref={formRef} onSubmit={handleSave} className="space-y-5" encType="multipart/form-data">
         <input type="hidden" name="id" value={product.id} />
 
-        <Card className="overflow-hidden border-slate-200/80 shadow-sm">
+        <Card className="overflow-hidden border-border/80 shadow-sm">
           <CardContent className="p-4 sm:p-6">
             <div className="grid gap-6 lg:grid-cols-[200px_1fr] lg:items-start">
               <ImageUploadField
@@ -216,10 +232,10 @@ export function ProductEditForm({
                 productName={product.name}
               />
               <div className="space-y-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.basics}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.basics}</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <Label htmlFor="product-name">Product name *</Label>
+                    <Label htmlFor="product-name">{pf.productName} *</Label>
                     <Input
                       id="product-name"
                       name="name"
@@ -232,17 +248,17 @@ export function ProductEditForm({
                   <div className="sm:col-span-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="product-category">{pf.category}</Label>
-                      <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{t.manageCategories}</Link>
+                      <Link href="/app/settings?tab=products" className="text-xs text-brass hover:underline">{t.manageCategories}</Link>
                     </div>
-                    <SearchableSelect name="category_id" options={categoryOptions} defaultValue={product.category_id} placeholder="— none —" searchPlaceholder={pf.category} className="mt-1.5" />
+                    <SearchableSelect name="category_id" options={categoryOptions} defaultValue={product.category_id} placeholder={pf.none} searchPlaceholder={pf.category} className="mt-1.5" />
                   </div>
                   {availableInPos && (
                     <div className="sm:col-span-2">
                       <div className="flex items-center justify-between">
                         <Label>{t.posCategory}</Label>
-                        <Link href="/app/settings?tab=products" className="text-xs text-blue-600 hover:underline">{t.manageCategories}</Link>
+                        <Link href="/app/settings?tab=products" className="text-xs text-brass hover:underline">{t.manageCategories}</Link>
                       </div>
-                      <SearchableSelect name="pos_category_id" options={posCategoryOptions} defaultValue={product.pos_category_id ?? null} placeholder="— none —" searchPlaceholder={t.posCategory} className="mt-1.5" />
+                      <SearchableSelect name="pos_category_id" options={posCategoryOptions} defaultValue={product.pos_category_id ?? null} placeholder={pf.none} searchPlaceholder={t.posCategory} className="mt-1.5" />
                     </div>
                   )}
                 </div>
@@ -251,9 +267,9 @@ export function ProductEditForm({
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200/80 shadow-sm">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="space-y-4 p-4 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.pricing}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.pricing}</p>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <Label htmlFor="sale-price">{t.salePrice}</Label>
@@ -287,16 +303,16 @@ export function ProductEditForm({
                 </div>
               </div>
               <div>
-                <Label htmlFor="unit">Unit</Label>
-                <SearchableSelect name="unit_of_measure" options={unitOptions} defaultValue={product.unit_of_measure ?? "each"} required searchPlaceholder="Unit" className="mt-1.5" />
+                <Label htmlFor="unit">{pf.unit}</Label>
+                <SearchableSelect name="unit_of_measure" options={unitOptions} defaultValue={product.unit_of_measure ?? "each"} required searchPlaceholder={pf.unit} className="mt-1.5" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-slate-200/80 shadow-sm">
+        <Card className="border-border/80 shadow-sm">
           <CardContent className="space-y-4 p-4 sm:p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{t.options}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t.options}</p>
             <div className="grid gap-3 sm:grid-cols-2">
               <OptionToggle
                 name="available_in_pos"
@@ -335,33 +351,33 @@ export function ProductEditForm({
             {visibility.inventory && suppliers.length > 0 && (
               <div>
                 <Label htmlFor="supplier">{t.supplier}</Label>
-                <SearchableSelect name="supplier_id" options={supplierOptions} defaultValue={product.supplier_id} placeholder="— none —" searchPlaceholder={t.supplier} className="mt-1.5" />
+                <SearchableSelect name="supplier_id" options={supplierOptions} defaultValue={product.supplier_id} placeholder={pf.none} searchPlaceholder={t.supplier} className="mt-1.5" />
               </div>
             )}
           </CardContent>
         </Card>
 
-        <details className="group rounded-xl border border-slate-200 bg-white shadow-sm">
-          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 rounded-xl [&::-webkit-details-marker]:hidden">
+        <details className="group rounded-xl border border-border bg-card shadow-sm">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary rounded-xl [&::-webkit-details-marker]:hidden">
             <span>{t.advanced}</span>
-            <ChevronDown className="h-4 w-4 text-slate-400 transition-transform group-open:rotate-180" />
+            <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-open:rotate-180" />
           </summary>
-          <div className="space-y-4 border-t border-slate-100 px-4 py-4">
+          <div className="space-y-4 border-t border-border px-4 py-4">
             <div>
-              <Label htmlFor="sku">SKU</Label>
-              <Input id="sku" name="sku" defaultValue={product.sku ?? ""} placeholder="optional" className="mt-1.5 max-w-md" />
+              <Label htmlFor="sku">{pf.skuOptional}</Label>
+              <Input id="sku" name="sku" defaultValue={product.sku ?? ""} className="mt-1.5 max-w-md" />
             </div>
             {kitchenStationsEnabled && (
               <div>
-                <Label htmlFor="kitchen-station">Kitchen station</Label>
-                <SearchableSelect name="kitchen_station" options={stationOptions} defaultValue={product.kitchen_station} placeholder="— all stations —" searchPlaceholder="Kitchen station" className="mt-1.5 max-w-md" />
+                <Label htmlFor="kitchen-station">{pf.kitchenStation}</Label>
+                <SearchableSelect name="kitchen_station" options={stationOptions} defaultValue={product.kitchen_station} placeholder={pf.allStations} searchPlaceholder={pf.kitchenStation} className="mt-1.5 max-w-md" />
               </div>
             )}
           </div>
         </details>
       </form>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-card/95 px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex max-w-[720px] items-center justify-between gap-3">
           <Link href={returnTo || `/app/products/${product.id}`}>
             <Button variant="outline" type="button" disabled={saving}>
@@ -371,7 +387,7 @@ export function ProductEditForm({
           <Button
             type="button"
             disabled={saving}
-            className="min-w-[8.5rem] bg-blue-600 hover:bg-blue-700 text-white"
+            className="min-w-[8.5rem] bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={() => formRef.current?.requestSubmit()}
           >
             {saving ? (
@@ -393,21 +409,21 @@ export function ProductEditForm({
         <button
           type="button"
           onClick={() => setShowDanger((v) => !v)}
-          className="text-xs font-medium text-slate-400 hover:text-red-600 transition-colors"
+          className="text-xs font-medium text-muted-foreground hover:text-attention transition-colors"
         >
           {showDanger ? pf.hideDelete : pf.showDelete}
         </button>
         {showDanger && (
-          <Card className="mt-3 border-red-200">
+          <Card className="mt-3 border-attention/25">
             <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-mid">
                 {pf.hideProductHint}
               </p>
               <Button
                 type="button"
                 variant="outline"
                 disabled={deleting}
-                className="border-red-300 text-red-700 hover:bg-red-50"
+                className="border-attention/40 text-attention hover:bg-attention/10"
                 onClick={handleDelete}
               >
                 {deleting ? (

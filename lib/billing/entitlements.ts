@@ -1,33 +1,56 @@
 import type { BillingPlan } from "@/lib/billing/plans";
 import { normalizePlan, type PlanCode } from "@/lib/billing/plan-codes";
+import { planEntitlements, type EntitlementKey } from "@/lib/billing/entitlement-catalog";
 
 export type BusinessModuleKey =
   | "pos_core"
   | "inventory"
+  | "purchases"
   | "recipe_costing"
   | "team_advanced"
   | "multi_site"
   | "kitchen_ops";
 
-const PLAN_MODULES: Record<PlanCode | "multi_location", readonly BusinessModuleKey[]> = {
-  core: ["pos_core"],
-  operations: ["pos_core", "inventory", "recipe_costing", "team_advanced", "kitchen_ops"],
-  scale: ["pos_core", "inventory", "recipe_costing", "team_advanced", "kitchen_ops"],
-  multi_location: [
-    "pos_core",
-    "inventory",
-    "recipe_costing",
-    "team_advanced",
-    "kitchen_ops",
-    "multi_site",
-  ],
+// Plan-tier membership for the four modules with an honest 1:1 entitlement
+// key, derived from planEntitlements (the static per-plan array — never
+// resolveEntitlements(orgId), which layers subscription status and
+// per-org overrides on top; see the comment there for why that distinction
+// is load-bearing).
+//
+// pos_core and multi_site are deliberately absent from this map, not
+// omitted by oversight:
+//   - pos_core is unconditionally true regardless of plan (see below).
+//     "Always on" and "has pos.enabled" happen to coincide today, but they
+//     don't mean the same thing, and deriving from the latter would make
+//     pos_core's availability an accident of how pos.enabled is defined
+//     rather than an explicit guarantee.
+//   - multi_site's real gate has never gone through this map at all —
+//     lib/business-modules.ts's canUseModule special-cases it with its own
+//     inline check (the org's multi_site_ops_enabled column AND plan code),
+//     returning before it would ever consult modulesForPlan/planAllowsModule.
+//     Collapsing this map doesn't change that; it's untouched.
+const MODULE_ENTITLEMENT: Record<
+  Exclude<BusinessModuleKey, "pos_core" | "multi_site">,
+  EntitlementKey
+> = {
+  inventory: "inventory.enabled",
+  purchases: "purchases.nir",
+  recipe_costing: "recipes.costing",
+  team_advanced: "team.advanced_roles",
+  kitchen_ops: "kitchen.enabled",
 };
 
 export function modulesForPlan(plan: BillingPlan | string | null | undefined): readonly BusinessModuleKey[] {
-  if (plan === "multi_location") return PLAN_MODULES.multi_location;
+  // normalizePlan already collapses "multi_location" to "scale" — multi_location's
+  // non-multi_site module set was always identical to scale's, so no special case
+  // is needed here (unlike the old PLAN_MODULES.multi_location array).
   const normalized = normalizePlan(plan);
-  if (!normalized) return PLAN_MODULES.core;
-  return PLAN_MODULES[normalized] ?? PLAN_MODULES.core;
+  const tierKeys = new Set(planEntitlements(normalized));
+  const modules: BusinessModuleKey[] = ["pos_core"];
+  for (const moduleKey of Object.keys(MODULE_ENTITLEMENT) as (keyof typeof MODULE_ENTITLEMENT)[]) {
+    if (tierKeys.has(MODULE_ENTITLEMENT[moduleKey])) modules.push(moduleKey);
+  }
+  return modules;
 }
 
 export function planAllowsModule(

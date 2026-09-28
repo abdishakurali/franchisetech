@@ -37,10 +37,51 @@ const PROFILE_OPTIONS: { value: BusinessProfile; label: string }[] = [
 
 const TOGGLE_MODULES: BusinessModuleKey[] = [
   "inventory",
+  "purchases",
   "recipe_costing",
   "team_advanced",
   "multi_site",
 ];
+
+// BUSINESS_MODULE_DEFINITIONS (lib/business-modules.ts) is shared with
+// non-UI code (module-guard, entitlements) and stays English-only — this is
+// a local RO overlay, same pattern PricingPlansSection.tsx uses for its
+// English-first shared data. All user-facing text must be Romanian per
+// project convention; code/shared definitions stay in English.
+const MODULE_LABELS_RO: Partial<Record<BusinessModuleKey, { label: string; description: string }>> = {
+  inventory: { label: "Stoc", description: "Niveluri de stoc și numărători de inventar." },
+  purchases: { label: "Achiziții", description: "Furnizori și recepție marfă (NIR)." },
+  recipe_costing: { label: "Cost rețete", description: "Rețete, cost ingrediente și rapoarte de marjă." },
+  team_advanced: { label: "Echipă & audit", description: "Roluri și permisiuni pentru echipă." },
+  multi_site: { label: "Operațiuni multi-locație", description: "Mai multe locații și raportare centralizată." },
+};
+
+const UI_STRINGS = {
+  en: {
+    title: "Business level & modules",
+    description: "Choose how complex your setup is. Modules you turn off stay hidden in the menu — your data is kept.",
+    moduleLocked: "Module locked",
+    viewBilling: "View billing plans",
+    businessLevel: "Business level",
+    businessLevelHint: "Changing level does not delete stock or recipe data. Turn modules off to simplify the menu.",
+    productModules: "Product modules",
+    save: "Save modules",
+    on: "On",
+    pro: "Pro",
+  },
+  ro: {
+    title: "Nivel business & module",
+    description: "Alege cât de complexă e configurația ta. Modulele dezactivate rămân ascunse din meniu — datele tale sunt păstrate.",
+    moduleLocked: "Modul blocat",
+    viewBilling: "Vezi planurile de facturare",
+    businessLevel: "Nivel business",
+    businessLevelHint: "Schimbarea nivelului nu șterge datele de stoc sau rețete. Dezactivează module pentru a simplifica meniul.",
+    productModules: "Module produs",
+    save: "Salvează modulele",
+    on: "Activ",
+    pro: "Pro",
+  },
+} as const;
 
 export function BusinessModulesCard({
   org,
@@ -53,23 +94,22 @@ export function BusinessModulesCard({
   updateAction,
 }: Props) {
   const uiLocale: AppLocale = locale === "ro" ? "ro" : "en";
+  const s = UI_STRINGS[uiLocale];
   const profile = normaliseBusinessProfile(org.business_profile);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Business level &amp; modules</CardTitle>
-        <CardDescription>
-          Choose how complex your setup is. Modules you turn off stay hidden in the menu — your data is kept.
-        </CardDescription>
+        <CardTitle>{s.title}</CardTitle>
+        <CardDescription>{s.description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {lockedModule && lockedMessage ? (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-            <p className="font-medium">Module locked</p>
+            <p className="font-medium">{s.moduleLocked}</p>
             <p className="mt-1">{lockedMessage}</p>
-            <Link href="/app/billing" className="mt-2 inline-block text-blue-700 hover:underline">
-              View billing plans
+            <Link href="/app/billing" className="mt-2 inline-block text-brass hover:underline">
+              {s.viewBilling}
             </Link>
           </div>
         ) : null}
@@ -77,14 +117,14 @@ export function BusinessModulesCard({
         {canEdit ? (
           <form action={updateAction} className="space-y-6">
             <div>
-              <label htmlFor="business_profile" className="text-sm font-medium text-slate-700">
-                Business level
+              <label htmlFor="business_profile" className="text-sm font-medium text-foreground">
+                {s.businessLevel}
               </label>
               <select
                 id="business_profile"
                 name="business_profile"
                 defaultValue={profile}
-                className="mt-1 h-10 w-full max-w-md rounded-md border border-slate-200 bg-white px-3 text-sm"
+                className="mt-1 h-10 w-full max-w-md rounded-md border border-border bg-card px-3 text-sm"
               >
                 {PROFILE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -92,15 +132,14 @@ export function BusinessModulesCard({
                   </option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-slate-500">
-                Changing level does not delete stock or recipe data. Turn modules off to simplify the menu.
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">{s.businessLevelHint}</p>
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-700">Product modules</p>
+              <p className="text-sm font-medium text-foreground">{s.productModules}</p>
               {TOGGLE_MODULES.map((moduleKey) => {
                 const def = BUSINESS_MODULE_DEFINITIONS.find((d) => d.key === moduleKey);
+                const localised = uiLocale === "ro" ? MODULE_LABELS_RO[moduleKey] : null;
                 const fieldName = def?.settingsKey ?? "inventory_enabled";
                 const enabled = isModuleEnabled(org, moduleKey);
                 const allowed = canUseModule({
@@ -120,7 +159,7 @@ export function BusinessModulesCard({
                   <div
                     key={moduleKey}
                     className={`flex items-start gap-3 rounded-lg border p-3 ${
-                      allowed ? "border-slate-200" : "border-slate-100 bg-slate-50 opacity-90"
+                      allowed ? "border-border" : "border-border bg-secondary opacity-90"
                     }`}
                   >
                     <input type="hidden" name={fieldName} value="false" />
@@ -134,18 +173,18 @@ export function BusinessModulesCard({
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-medium">{def?.label}</span>
+                        <span className="text-sm font-medium">{localised?.label ?? def?.label}</span>
                         {!allowed ? (
                           <Badge variant="outline" className="text-[10px] gap-1">
-                            <Lock className="h-3 w-3" /> Pro
+                            <Lock className="h-3 w-3" /> {s.pro}
                           </Badge>
                         ) : enabled ? (
                           <Badge variant="secondary" className="text-[10px] gap-1">
-                            <Unlock className="h-3 w-3" /> On
+                            <Unlock className="h-3 w-3" /> {s.on}
                           </Badge>
                         ) : null}
                       </div>
-                      <p className="text-xs text-slate-500">{def?.description}</p>
+                      <p className="text-xs text-muted-foreground">{localised?.description ?? def?.description}</p>
                       {!allowed && blockReason ? (
                         <p className="mt-1 text-xs text-amber-700">{blockReason}</p>
                       ) : null}
@@ -155,20 +194,21 @@ export function BusinessModulesCard({
               })}
             </div>
 
-            <Button type="submit" variant="outline">Save modules</Button>
+            <Button type="submit" variant="outline">{s.save}</Button>
           </form>
         ) : (
           <div className="space-y-2 text-sm">
             <p>
-              <span className="text-slate-500">Business level:</span>{" "}
+              <span className="text-muted-foreground">{s.businessLevel}:</span>{" "}
               <span className="font-medium">{profileLabel(profile, locale)}</span>
             </p>
             {TOGGLE_MODULES.map((moduleKey) => {
               const def = BUSINESS_MODULE_DEFINITIONS.find((d) => d.key === moduleKey);
+              const localised = uiLocale === "ro" ? MODULE_LABELS_RO[moduleKey] : null;
               return (
                 <p key={moduleKey}>
-                  <span className="text-slate-500">{def?.label}:</span>{" "}
-                  <span className="font-medium">{isModuleEnabled(org, moduleKey) ? "On" : "Off"}</span>
+                  <span className="text-muted-foreground">{localised?.label ?? def?.label}:</span>{" "}
+                  <span className="font-medium">{isModuleEnabled(org, moduleKey) ? s.on : (uiLocale === "ro" ? "Inactiv" : "Off")}</span>
                 </p>
               );
             })}

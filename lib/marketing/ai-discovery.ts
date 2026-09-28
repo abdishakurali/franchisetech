@@ -12,7 +12,7 @@ export const AI_ENTITY = {
     "Browser-based POS, product and stock management, fiscal receipt workflows, till close, and owner reports for cafés, takeaway, bakeries, shops, and service businesses in Romania.",
   markets: ["Romania"],
   languages: ["English", "Romanian"],
-  pricingModel: "Monthly SaaS subscription with unlimited staff on paid plans; 15-day assisted trial",
+  pricingModel: "Monthly SaaS subscription with unlimited staff on paid plans; permanent free plan, no card required",
   pricingUrl: `${SITE_URL}/pricing`,
   signupUrl: `${SITE_URL}/signup`,
   compareHubUrl: `${SITE_URL}/compare`,
@@ -21,8 +21,8 @@ export const AI_ENTITY = {
   sitemapUrl: `${SITE_URL}/sitemap.xml`,
   romanianCapabilities: [
     "Display in lei (RON)",
-    "Romanian TVA rates 21%, 11%, 5%, 0%",
-    "FiscalNet fiscal receipt integration when enabled and configured",
+    "Romanian TVA rates 21%, 11%, 0%",
+    "Fiscal driver (FiscalNet, driverfiscal.ro) receipt integration when enabled and configured",
     "Unlimited team members on paid plans",
   ],
   notClaims: [
@@ -37,9 +37,9 @@ export const AI_ENTITY = {
   })),
   topRomanianQueries: [
     { query: "alternativă SmartBill restaurant POS", url: `${SITE_URL}/compare/smartbill` },
-    { query: "software POS restaurant România FiscalNet", url: `${SITE_URL}/industries/romania` },
-    { query: "gestiune stoc restaurant NIR", url: `${SITE_URL}/resources/stock-management-romania` },
-    { query: "franchisetech vs RezoSoft", url: `${SITE_URL}/compare/rezosoft` },
+    { query: "software POS restaurant România driver fiscal", url: `${SITE_URL}/industries/romania` },
+    { query: "gestiune stoc restaurant NIR", url: `${SITE_URL}/features/stock-management` },
+    { query: "franchisetech vs Expressoft", url: `${SITE_URL}/compare/expressoft` },
     { query: "casă de marcat cloud browser", url: `${SITE_URL}/features/pos` },
   ],
 } as const;
@@ -54,7 +54,7 @@ export function aiEntityJsonLd() {
     operatingSystem: "Web browser",
     description: AI_ENTITY.description,
     inLanguage: AI_ENTITY.languages,
-    offers: pricingPlans.filter((plan) => ["starter", "pro"].includes(plan.id)).map((plan) => ({
+    offers: pricingPlans.filter((plan) => ["free", "growth", "team"].includes(plan.id)).map((plan) => ({
       "@type": "Offer",
       name: plan.name,
       price: String(plan.amountCents / 100),
@@ -74,7 +74,7 @@ export function aiEntityJsonLd() {
       "Stock and purchase tracking",
       "Recipe costing and margins",
       "Till close and Z-report",
-      "FiscalNet integration for Romania when configured",
+      "Fiscal driver integration for Romania when configured",
     ],
   };
 }

@@ -78,7 +78,7 @@ export function StockLowStockPanel({ items }: { items: LowStockRow[] }) {
           <p className="mt-1 text-sm text-amber-900/80">{t.stock.bulkReplenishHint}</p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
-          <Button type="button" variant="outline" size="sm" className="bg-white" onClick={() => setOpen((v) => !v)}>
+          <Button type="button" variant="outline" size="sm" className="bg-card" onClick={() => setOpen((v) => !v)}>
             {open ? t.stock.collapseLowStock : t.stock.expandLowStock}
           </Button>
           <Link
@@ -94,14 +94,14 @@ export function StockLowStockPanel({ items }: { items: LowStockRow[] }) {
         <div className="mt-4 space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-medium text-amber-950">{t.stock.bulkReplenishTitle}</p>
-            <Button type="button" variant="outline" size="sm" className="bg-white" onClick={fillAllToReorder}>
+            <Button type="button" variant="outline" size="sm" className="bg-card" onClick={fillAllToReorder}>
               {t.stock.setAllToReorder}
             </Button>
           </div>
 
-          <div className="max-h-72 overflow-auto rounded-lg border border-amber-200 bg-white">
+          <div className="max-h-72 overflow-auto rounded-lg border border-amber-200 bg-card">
             <table className="w-full min-w-[520px] text-sm">
-              <thead className="sticky top-0 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+              <thead className="sticky top-0 bg-secondary text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-3 py-2 font-medium">{t.tables.product}</th>
                   <th className="px-3 py-2 font-medium text-right">{t.stock.onHand}</th>
@@ -112,12 +112,12 @@ export function StockLowStockPanel({ items }: { items: LowStockRow[] }) {
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item.id} className="border-t border-slate-100">
-                    <td className="px-3 py-2 font-medium text-slate-900">{item.name}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-red-600">
+                  <tr key={item.id} className="border-t border-border">
+                    <td className="px-3 py-2 font-medium text-foreground">{item.name}</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-attention">
                       {item.current_stock_qty} {item.unit_of_measure ?? ""}
                     </td>
-                    <td className="px-3 py-2 text-right tabular-nums text-slate-500">{item.reorder_level}</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-muted-foreground">{item.reorder_level}</td>
                     <td className="px-3 py-2 text-right">
                       <Input
                         type="number"

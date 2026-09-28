@@ -1,15 +1,13 @@
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { listAccessibleSites } from "@/lib/site-context";
 import { PurchaseForm } from "@/components/app/PurchaseForm";
-import { ensurePosDefaults } from "@/app/actions/kitchenops";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { listOperationalUnitNames } from "@/lib/units-of-measure";
 
 export default async function PurchasesNewPage() {
-  await requireBusinessModule("inventory");
-  const { supabase, orgId, currency, membership, user } = await getKitchenOpsContext();
-  await ensurePosDefaults();
+  await requireBusinessModule("purchases");
+  const { supabase, orgId, currency, membership, user, countryCode } = await getKitchenOpsContext();
   const [suppRes, prodRes, sites, vatRates, units] = await Promise.all([
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     supabase
@@ -32,6 +30,7 @@ export default async function PurchasesNewPage() {
       currentUserId={user?.id}
       vatRates={vatRates}
       units={units}
+      countryCode={countryCode}
     />
   );
 }

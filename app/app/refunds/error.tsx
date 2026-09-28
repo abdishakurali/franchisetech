@@ -20,14 +20,14 @@ export default function RefundsError({
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 space-y-4">
       <div className="text-center space-y-2 max-w-md">
-        <h2 className="text-lg font-semibold text-slate-800">
+        <h2 className="text-lg font-semibold text-foreground">
           {t.errors.refundsLoadFailed}
         </h2>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-muted-foreground">
           {t.errors.refundsSafeData}
         </p>
         {error?.digest && (
-          <p className="text-xs text-slate-400 font-mono">
+          <p className="text-xs text-muted-foreground font-mono">
             {t.errors.errorId}: {error.digest}
           </p>
         )}
@@ -35,13 +35,13 @@ export default function RefundsError({
       <div className="flex gap-3">
         <button
           onClick={reset}
-          className="text-sm px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+          className="text-sm px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
         >
           {t.errors.tryAgain}
         </button>
         <Link
           href="/app"
-          className="text-sm px-4 py-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50"
+          className="text-sm px-4 py-2 rounded-lg border border-border text-mid hover:bg-secondary"
         >
           {t.errors.backToDashboard}
         </Link>

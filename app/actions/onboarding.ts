@@ -13,14 +13,13 @@ import {
   type LocationBand,
 } from "@/lib/business-profile";
 import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
-import { getDefaultThresholds, type AssetType } from "@/lib/temperature";
-import { demoProductsForCountry } from "@/lib/onboarding/demo-products";
 import { saveOrgModuleFlags } from "@/lib/org-module-flags";
+import { onboardingStepRoute, type OnboardingStep } from "@/lib/onboarding/steps";
 import type { BillingPlan } from "@/lib/billing/plans";
 import { upsertLoopsContact } from "@/lib/loops";
-import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEvent, flushPostHog } from "@/lib/posthog-server";
+import { deriveAccountType } from "@/lib/analytics/account-type";
 
 const COUNTRY_LABELS: Record<string, string> = {
   RO: "Romania",
@@ -42,6 +41,7 @@ export async function completePosOnboarding(input: {
   countryCode: string;
   anafCif?: string;
   anafVatRegistered?: boolean;
+  anafAddress?: string;
   locationBand: LocationBand;
   ingredientTracking: IngredientTrackingIntent;
   preferredPlan?: BillingPlan;
@@ -85,30 +85,58 @@ export async function completePosOnboarding(input: {
     .limit(1)
     .maybeSingle();
 
+  let orgId: string | undefined;
+  let siteId: string | undefined;
+
   if (existingMembership?.organisation_id) {
-    revalidatePath("/app");
-    redirect("/app");
-  }
-
-  const { data, error } = await supabase.rpc("create_organisation_with_owner", {
-    p_org_name: input.orgName.trim(),
-    p_business_type: input.businessType || null,
-    p_asset_name: null,
-    p_asset_type: "fridge",
-  });
-
-  if (error) {
-    console.error("onboarding_rpc_failed", {
-      code: error.code,
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
+    // A prior attempt already created the org/membership for this user (the
+    // RPC below is not re-run — it would create a second organisation).
+    // If that attempt also finished this step, send them to wherever they
+    // actually are instead of back through account creation. If it's still
+    // unset, a prior attempt got the org created but failed before finishing
+    // the critical setup below (payment methods / till session) — resume on
+    // the SAME org rather than dead-ending them in a redirect loop back to
+    // this form, which always hit this branch and bounced to /app.
+    orgId = existingMembership.organisation_id;
+    const { data: orgRow } = await supabase
+      .from("organisations")
+      .select("onboarding_step")
+      .eq("id", orgId)
+      .maybeSingle();
+    const step = (orgRow?.onboarding_step ?? null) as OnboardingStep | null;
+    if (step && step !== "location_type" && step !== "business_cui") {
+      redirect(onboardingStepRoute(step, input.countryCode === "RO"));
+    }
+    const { data: existingSite } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("organisation_id", orgId)
+      .limit(1)
+      .maybeSingle();
+    siteId = existingSite?.id;
+  } else {
+    const { data, error } = await supabase.rpc("create_organisation_with_owner", {
+      p_org_name: input.orgName.trim(),
+      p_business_type: input.businessType || null,
+      p_asset_name: null,
+      p_asset_type: "fridge",
     });
-    return { error: "Could not create your workspace. Please try again." };
+
+    if (error) {
+      console.error("onboarding_rpc_failed", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+      });
+      return { error: "Could not create your workspace. Please try again." };
+    }
+
+    const created = Array.isArray(data) ? data[0] : data;
+    orgId = created?.organisation_id as string | undefined;
+    siteId = created?.site_id as string | undefined;
   }
 
-  const created = Array.isArray(data) ? data[0] : data;
-  const orgId = created?.organisation_id as string | undefined;
   if (!orgId) {
     return { error: "Workspace was created but could not be loaded. Please refresh and try again." };
   }
@@ -121,8 +149,36 @@ export async function completePosOnboarding(input: {
   const countryLabel = COUNTRY_LABELS[input.countryCode] ?? COUNTRY_LABELS.OTHER;
   const { code: currencyCode, symbol: currencySymbol } = currencyForCountry(input.countryCode);
 
-  // trial_started_at / trial_ends_at are intentionally NOT set here — the trial
-  // starts only after the €1 card verification payment (see lib/billing/verification.ts).
+  // Trial retired 2026-09: no trial timestamps are set here or anywhere else
+  // in onboarding. Every new org is permanently on the Free plan (see
+  // lib/billing/entitlement-resolver.ts / lib/billing/subscription.ts) until
+  // it subscribes.
+
+  // ── Accountant-partner referral capture ─────────────────────────────────
+  // Resolved BEFORE the consumer referral fallback below, and written to its
+  // own accountant_partner_code column — never referred_by_code, so the two
+  // referral systems can never collide on the same org. accountant_partners
+  // has RLS restricting SELECT to auth.uid() = user_id, so this lookup (by
+  // referral_code, on behalf of an org that isn't the partner's own) needs
+  // the service role, same as ensureReferralCode's cross-org RPC calls.
+  const rawReferralCode = input.referralCode?.trim() || null;
+  let accountantPartnerCode: string | null = null;
+  let consumerReferralCode: string | null = rawReferralCode;
+  if (rawReferralCode?.startsWith("AP-")) {
+    const { createServiceClient } = await import("@/lib/supabase/server");
+    const service = await createServiceClient();
+    const { data: partner } = await service
+      .from("accountant_partners")
+      .select("referral_code")
+      .eq("referral_code", rawReferralCode)
+      .eq("status", "active")
+      .maybeSingle();
+    if (partner) {
+      accountantPartnerCode = partner.referral_code;
+      consumerReferralCode = null;
+    }
+  }
+
   const { error: orgUpdateError } = await supabase.from("organisations").update({
     business_type: input.businessType || null,
     country: countryLabel,
@@ -131,9 +187,11 @@ export async function completePosOnboarding(input: {
     ingredient_tracking_intent: input.ingredientTracking,
     anaf_cif: input.countryCode === "RO" ? input.anafCif?.trim() || null : null,
     anaf_vat_registered: input.countryCode === "RO" ? Boolean(input.anafVatRegistered) : false,
+    company_address: input.countryCode === "RO" ? input.anafAddress?.trim() || null : null,
     currency_code: currencyCode,
     currency_symbol: currencySymbol,
-    referred_by_code: input.referralCode?.trim() || null,
+    referred_by_code: consumerReferralCode,
+    accountant_partner_code: accountantPartnerCode,
     acquisition_source: input.acquisition?.utm_source || null,
     acquisition_campaign: input.acquisition?.utm_campaign || null,
     acquisition_content: input.acquisition?.utm_content || null,
@@ -153,6 +211,7 @@ export async function completePosOnboarding(input: {
   await saveOrgModuleFlags(supabase, orgId, {
     business_profile: profile,
     inventory_enabled: modules.inventory_enabled,
+    purchases_enabled: modules.purchases_enabled,
     recipe_costing_enabled: modules.recipe_costing_enabled,
     team_advanced_enabled: modules.team_advanced_enabled,
     multi_site_ops_enabled: modules.multi_site_ops_enabled,
@@ -160,35 +219,61 @@ export async function completePosOnboarding(input: {
 
   await ensureReferralCode(orgId);
 
-  // ── CRITICAL: payment methods ──────────────────────────────────────────
-  const { error: pmError } = await supabase.from("payment_methods").insert([
-    { organisation_id: orgId, name: "Cash", type: "cash" },
-    { organisation_id: orgId, name: "Card", type: "card" },
-  ]);
-  if (pmError) {
-    console.error("onboarding_payment_methods_seed_failed", pmError.message);
-    return { error: "Could not create payment methods. Please try again." };
+  // ── CRITICAL: payment methods (idempotent — resuming a prior attempt
+  // must not duplicate these, and must not fail if they already exist) ────
+  const { data: existingPaymentMethods } = await supabase
+    .from("payment_methods")
+    .select("id")
+    .eq("organisation_id", orgId)
+    .limit(1);
+  if (!existingPaymentMethods?.length) {
+    // RO gets its FiscalNet payment codes (1=cash, 2=card, 4=tichete masă)
+    // pre-assigned and meal vouchers added outright — otherwise every RO
+    // owner has to look up and type in the same three codes by hand before
+    // FiscalNet can map a single sale correctly. Non-RO orgs are unaffected
+    // (FiscalNet codes are meaningless outside Romania).
+    const isRO = input.countryCode === "RO";
+    const { error: pmError } = await supabase.from("payment_methods").insert([
+      { organisation_id: orgId, name: "Cash", type: "cash", fiscalnet_code: isRO ? 1 : null },
+      { organisation_id: orgId, name: "Card", type: "card", fiscalnet_code: isRO ? 2 : null },
+      ...(isRO ? [{ organisation_id: orgId, name: "Tichete masă", type: "other", fiscalnet_code: 4 }] : []),
+    ]);
+    if (pmError) {
+      console.error("onboarding_payment_methods_seed_failed", pmError.message);
+      return { error: "Could not create payment methods. Please try again." };
+    }
   }
 
-  // ── WARN-ONLY: product category ──────────────────────────────────────
-  const { data: category, error: categoryError } = await supabase
+  // ── WARN-ONLY: product category (idempotent, same reason) ─────────────
+  const { data: existingCategory } = await supabase
     .from("product_categories")
-    .insert({
+    .select("id")
+    .eq("organisation_id", orgId)
+    .eq("category_type", "pos")
+    .limit(1)
+    .maybeSingle();
+  if (!existingCategory) {
+    const { error: categoryError } = await supabase.from("product_categories").insert({
       organisation_id: orgId,
       name: "Menu",
-      color: "#2563eb",
+      color: "#b4903f",
       sort_order: 1,
       category_type: "pos",
-    })
-    .select("id")
-    .single();
-
-  if (categoryError) {
-    console.warn("onboarding_category_seed_failed", categoryError.message);
+    });
+    if (categoryError) {
+      console.warn("onboarding_category_seed_failed", categoryError.message);
+    }
   }
 
   // ── WARN-ONLY: VAT rates ───────────────────────────────────────────────
-  const vatSeedError = await seedOrgVatRatesIfEmpty(supabase, orgId, input.countryCode).then(
+  // The organisation's ANAF VAT status is the source of truth for the
+  // initial selling default. Purchase VAT remains independently selectable.
+  const vatSeedError = await seedOrgVatRatesIfEmpty(
+    supabase,
+    orgId,
+    input.countryCode,
+    Boolean(input.anafVatRegistered),
+  ).then(
     () => null,
     (e: unknown) => e,
   );
@@ -196,83 +281,44 @@ export async function completePosOnboarding(input: {
     console.warn("onboarding_vat_seed_failed", vatSeedError);
   }
 
-  const { data: defaultVat } = await supabase
-    .from("vat_rates")
-    .select("rate")
-    .eq("organisation_id", orgId)
-    .eq("is_default", true)
-    .limit(1)
-    .maybeSingle();
-  const vatRate = defaultVat?.rate != null ? Number(defaultVat.rate) : input.countryCode === "RO" ? 21 : 23;
-
-  if (category?.id) {
-    const demos = demoProductsForCountry(input.countryCode, input.businessType);
-    const { error: productsError } = await supabase.from("products").insert(
-      demos.map((item) => ({
-        organisation_id: orgId,
-        category_id: category.id,
-        name: item.name,
-        sale_price: item.sale_price,
-        vat_rate: vatRate,
-        available_in_pos: true,
-        active: true,
-        pos_sort_order: item.sort_order,
-      })),
-    );
-    if (productsError) {
-      console.warn("onboarding_products_seed_failed", productsError.message);
-    }
-  }
-
-  // ── CRITICAL: guarantee at least one sellable product ─────────────────
-  const { count: productCount } = await supabase
-    .from("products")
-    .select("id", { count: "exact", head: true })
-    .eq("organisation_id", orgId)
-    .eq("active", true);
-
-  if (!productCount || productCount === 0) {
-    const fallbackPrice = input.countryCode === "RO" ? 12 : 2.5;
-    const { error: fallbackError } = await supabase.from("products").insert({
-      organisation_id: orgId,
-      name: "Espresso",
-      sale_price: fallbackPrice,
-      vat_rate: vatRate,
-      available_in_pos: true,
-      active: true,
-      pos_sort_order: 1,
-    });
-    if (fallbackError) {
-      console.error("onboarding_product_fallback_failed", fallbackError.message);
-      return { error: "Could not create your product list. Please try again." };
-    }
-  }
-
-  // ── CRITICAL: POS session ─────────────────────────────────────────────
-  const siteId = created?.site_id as string | undefined;
+  // ── CRITICAL: POS session (idempotent — never open a second one for the
+  // same org; also the project rule "Do not create duplicate POS sessions") ─
   if (!siteId) {
     console.error("onboarding_no_site_id", { orgId });
     return { error: "Workspace created but no till location was found. Please contact support." };
   }
 
-  const { error: sessionError } = await supabase.from("pos_sessions").insert({
-    organisation_id: orgId,
-    site_id: siteId,
-    opened_by: user.id,
-    opening_cash: 0,
-    expected_cash: 0,
-    status: "open",
-  });
-  if (sessionError) {
-    console.error("onboarding_pos_session_failed", sessionError.message);
-    return { error: "Could not open your till. Please try again." };
+  const { data: existingSession } = await supabase
+    .from("pos_sessions")
+    .select("id")
+    .eq("organisation_id", orgId)
+    .eq("status", "open")
+    .limit(1)
+    .maybeSingle();
+  if (!existingSession) {
+    const { error: sessionError } = await supabase.from("pos_sessions").insert({
+      organisation_id: orgId,
+      site_id: siteId,
+      opened_by: user.id,
+      opening_cash: 0,
+      expected_cash: 0,
+      status: "open",
+    });
+    if (sessionError) {
+      console.error("onboarding_pos_session_failed", sessionError.message);
+      return { error: "Could not open your till. Please try again." };
+    }
   }
 
   // ── Growth milestone: till opened ──────────────────────────────────────
   await recordGrowthMilestone(supabase, orgId, "till_opened", user.id);
-  await supabase.from("organisations").update({ onboarding_completed: true }).eq("id", orgId).then(
+  // Onboarding is NOT complete yet — account creation is step 1 of the
+  // guided journey (modules → menu → fiscal → first sale → result), not
+  // the whole thing. onboarding_completed only flips true at the end, in
+  // completeOnboardingJourney (app/actions/onboarding-steps.ts).
+  await supabase.from("organisations").update({ onboarding_step: "modules" }).eq("id", orgId).then(
     () => null,
-    (e: unknown) => console.error("onboarding_completed_update_failed", e),
+    (e: unknown) => console.error("onboarding_step_update_failed", e),
   );
 
   // ── Preferred plan cookie ──────────────────────────────────────────────
@@ -287,24 +333,29 @@ export async function completePosOnboarding(input: {
   }
 
   // ── Loops: non-blocking ────────────────────────────────────────────────
-  // trial_started (Loops + PostHog) now fires when the trial actually starts —
-  // after the €1 card verification — in lib/billing/verification.ts.
+  // Trial retired 2026-09 — every new org lands permanently on Free until it
+  // subscribes; no card verification step exists anymore.
   if (user.email) {
     void upsertLoopsContact(user.email, {
       firstName: input.userName?.trim(),
-      plan: input.preferredPlan ?? "starter",
+      plan: input.preferredPlan ?? "free",
     }).catch((e: unknown) => console.error("onboarding_loops_contact_failed", e));
   }
   // Fire-and-forget capture; flush before the action's request scope ends.
   after(flushPostHog);
+  // Set explicitly on these events (not just relying on PostHogIdentify's
+  // later group() call) since these fire server-side, right at org creation
+  // — before the client has necessarily mounted and identified this session.
+  const accountType = deriveAccountType(user.email, input.orgName);
   captureServerEvent(
     user.id,
     "onboarding_completed",
     {
       organisation_id: orgId,
       country_code: input.countryCode,
-      plan: input.preferredPlan ?? "starter",
+      plan: input.preferredPlan ?? "free",
       business_type: input.businessType ?? null,
+      account_type: accountType,
     },
     { organisation: orgId },
   );
@@ -316,6 +367,7 @@ export async function completePosOnboarding(input: {
       country_code: input.countryCode,
       business_type: input.businessType ?? null,
       location_band: input.locationBand,
+      account_type: accountType,
     },
     { organisation: orgId },
   );
@@ -334,6 +386,7 @@ export async function completePosOnboarding(input: {
         country_code: input.countryCode,
         business_type: input.businessType ?? null,
         location_band: input.locationBand,
+        account_type: accountType,
       },
       { organisation: orgId },
     );
@@ -356,212 +409,5 @@ export async function completePosOnboarding(input: {
   // can open the till and ring up sales first; app/app/layout.tsx only
   // redirects to /onboarding/verify-card once they've had a real preview
   // (Z-report view or a few sales).
-  redirect("/app/setup-checklist?welcome=1");
-}
-
-
-type OnboardingAsset = {
-  name: string;
-  assetType: AssetType;
-};
-
-export async function createOrganisationWithOwner(params: {
-  orgName: string;
-  businessType?: string;
-  userName?: string;
-  assetName?: string;
-  assetType?: AssetType;
-  assets?: OnboardingAsset[];
-  referralCode?: string | null;
-}) {
-  const supabase = await createClient();
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  if (userError || !user) {
-    console.error("onboarding_rpc_failed", { code: userError?.code, message: userError?.message });
-    return { error: "You must be signed in. Please sign in and try again." };
-  }
-
-  if (params.userName?.trim()) {
-    const { error: profileError } = await supabase
-      .from("profiles")
-      .update({ full_name: params.userName.trim() })
-      .eq("id", user.id);
-    if (profileError) {
-      console.error("onboarding_profile_update_failed", {
-        code: profileError.code,
-        message: profileError.message,
-        details: profileError.details,
-        hint: profileError.hint,
-      });
-    }
-  }
-
-  const assets = (params.assets?.length ? params.assets : [{
-    name: params.assetName?.trim() || "Walk-in Cold Room",
-    assetType: params.assetType || "fridge",
-  }]).filter((asset) => asset.name.trim());
-  const firstAsset = assets[0] ?? { name: "Walk-in Cold Room", assetType: "fridge" };
-
-  const { data, error } = await supabase.rpc("create_organisation_with_owner", {
-    p_org_name: params.orgName.trim(),
-    p_business_type: params.businessType || null,
-    p_asset_name: firstAsset.name.trim(),
-    p_asset_type: firstAsset.assetType || "fridge",
-  });
-
-  if (error) {
-    console.error("onboarding_rpc_failed", {
-      code: error.code,
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      params: {
-        hasOrgName: Boolean(params.orgName),
-        businessType: params.businessType,
-        hasAssetName: Boolean(params.assetName),
-        assetType: params.assetType,
-      },
-    });
-    return { error: "Could not create your workspace. Please try again." };
-  }
-
-  const created = Array.isArray(data) ? data[0] : data;
-  if (created?.organisation_id) {
-    const trialEndsAt = new Date(Date.now() + 15 * 86400000).toISOString();
-    await supabase.from("organisations").update({
-      trial_started_at: new Date().toISOString(),
-      trial_ends_at: trialEndsAt,
-      referred_by_code: params.referralCode?.trim() || null,
-    }).eq("id", created.organisation_id).then(() => null, () => null);
-    await ensureReferralCode(created.organisation_id);
-  }
-  const extraAssets = assets.slice(1);
-  if (created?.organisation_id && created?.site_id && extraAssets.length) {
-    const rows = extraAssets.map((asset) => {
-      const defaults = getDefaultThresholds(asset.assetType);
-      return {
-        organisation_id: created.organisation_id,
-        site_id: created.site_id,
-        name: asset.name.trim(),
-        asset_type: asset.assetType,
-        qr_code: `FP-ASSET-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
-        min_temp: defaults.minTemp,
-        max_temp: defaults.maxTemp,
-        active: true,
-      };
-    });
-    const { error: extraAssetsError } = await supabase.from("assets").insert(rows);
-    if (extraAssetsError) {
-      console.error("onboarding_extra_assets_failed", {
-        code: extraAssetsError.code,
-        message: extraAssetsError.message,
-        details: extraAssetsError.details,
-        hint: extraAssetsError.hint,
-        count: rows.length,
-      });
-      return { error: "Workspace was created, but extra units could not be added. Add them from Equipment." };
-    }
-  }
-  revalidatePath("/app");
-  revalidatePath("/onboarding");
-  return {
-    organisationId: created?.organisation_id ?? null,
-    siteId: created?.site_id ?? null,
-    assetId: created?.asset_id ?? null,
-  };
-}
-
-export async function createOnboardingSetup(input: {
-  orgName: string;
-  businessType: string;
-  siteName?: string;
-  siteCity?: string;
-  siteEircode?: string;
-  assetName: string;
-  assetType: AssetType;
-  assetLocation?: string;
-}) {
-  return createOrganisationWithOwner({
-    orgName: input.orgName,
-    businessType: input.businessType,
-    assetName: input.assetName,
-    assetType: input.assetType,
-  });
-}
-
-export async function createSite(
-  orgId: string,
-  name: string,
-  city: string,
-  eircode: string
-) {
-  const client = await createClient();
-  const { data: { user } } = await client.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
-
-  const { data: membership } = await client
-    .from("organisation_members")
-    .select("role")
-    .eq("organisation_id", orgId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (!membership || !["owner", "manager"].includes(membership.role ?? "")) {
-    return { error: "Forbidden" };
-  }
-
-  const { count } = await client
-    .from("sites")
-    .select("*", { count: "exact", head: true })
-    .eq("organisation_id", orgId);
-  if ((count ?? 0) >= 1) {
-    await assertEntitlement(orgId, "multi_site.enabled");
-  }
-
-  const { data: site, error } = await client
-    .from("sites")
-    .insert({
-      organisation_id: orgId,
-      name,
-      city: city || null,
-      eircode: eircode || null,
-    })
-    .select()
-    .single();
-
-  if (error) return { error: error.message };
-  return { site };
-}
-
-export async function createAsset(
-  orgId: string,
-  siteId: string,
-  name: string,
-  assetType: string,
-  location: string,
-  qrCode: string,
-  minTemp: string,
-  maxTemp: string
-) {
-  const client = await createClient();
-  const { data: { user } } = await client.auth.getUser();
-  if (!user) return { error: "Not authenticated" };
-
-  const { data: asset, error } = await client
-    .from("assets")
-    .insert({
-      organisation_id: orgId,
-      site_id: siteId,
-      name,
-      asset_type: assetType,
-      location: location || null,
-      qr_code: qrCode,
-      min_temp: minTemp ? parseFloat(minTemp) : null,
-      max_temp: maxTemp ? parseFloat(maxTemp) : null,
-      active: true,
-    })
-    .select()
-    .single();
-
-  if (error) return { error: error.message };
-  return { asset };
+  redirect("/onboarding/modules");
 }

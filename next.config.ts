@@ -8,8 +8,26 @@ const industryVanityRedirects = Object.entries(INDUSTRY_VANITY_REDIRECTS).map(([
 }));
 
 const nextConfig: NextConfig = {
+  output: "standalone",
+  // Lets scripts/dev-e2e.sh run on its own build output — sharing the
+  // default .next with a concurrently running `npm run dev` corrupts both
+  // servers' build manifests (concurrent writers, same cache directory).
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   turbopack: {
     root: __dirname,
+  },
+  experimental: {
+    // Client Router Cache: lets a repeat navigation to a page visited in the
+    // last 30s reuse the already-fetched RSC payload instead of a full
+    // server round-trip (e.g. tab-switching in the app nav, back/forward).
+    // Any server action that mutates data still calls revalidatePath/
+    // router.refresh() as it already does throughout this app, which busts
+    // this cache immediately — this never risks showing stale sales/stock/
+    // till data after a write, only skips a redundant re-fetch when nothing
+    // changed.
+    staleTimes: {
+      dynamic: 30,
+    },
   },
   async redirects() {
     return [
@@ -30,6 +48,14 @@ const nextConfig: NextConfig = {
       { source: "/faq", destination: "/help", permanent: true },
       { source: "/support", destination: "/help", permanent: true },
       { source: "/docs", destination: "/help", permanent: true },
+      // Lean café product: retain old bookmarks while retired modules leave the UI.
+      { source: "/app/deliveries", destination: "/app/purchases", permanent: false },
+      { source: "/app/kitchen", destination: "/app/pos", permanent: false },
+      { source: "/app/tables/:path*", destination: "/app/pos", permanent: false },
+      { source: "/app/settings/loyalty", destination: "/app/settings", permanent: false },
+      { source: "/app/reports/loyalty-roi", destination: "/app/reports", permanent: false },
+      { source: "/app/reports/audit-export", destination: "/app/reports", permanent: false },
+      { source: "/app/setup-checklist", destination: "/app", permanent: false },
     ];
   },
   async rewrites() {

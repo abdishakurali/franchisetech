@@ -95,25 +95,25 @@ function IngredientsImportContent() {
     <div className="mx-auto max-w-3xl space-y-6 p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <Link href="/app/products" className="text-sm text-slate-500 hover:text-slate-700">← Înapoi la produse</Link>
-          <h1 className="text-2xl font-semibold text-slate-950 mt-1">Importă ingrediente</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Folosește asta pentru a adăuga articole de stoc pe care le cumperi și le folosești în rețete.</p>
+          <Link href="/app/products" className="text-sm text-muted-foreground hover:text-foreground">← Înapoi la produse</Link>
+          <h1 className="text-2xl font-semibold text-foreground mt-1">Importă ingrediente</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Folosește asta pentru a adăuga articole de stoc pe care le cumperi și le folosești în rețete.</p>
         </div>
         <Button variant="outline" type="button" onClick={() => downloadCsv(TEMPLATE, "franchisetech-ingredients-template.csv")}>
           <Download className="h-4 w-4 mr-2" />Descarcă șablon
         </Button>
       </div>
 
-      <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800">
+      <div className="rounded-xl border border-brass/25 bg-accent p-4 text-sm text-foreground">
         <p className="font-semibold mb-1">Sfat cost ingrediente</p>
         <p>Setează cost_price la costul <strong>per unitate</strong>. Exemple:</p>
-        <p className="mt-1 font-mono text-xs bg-blue-100 rounded p-2">
+        <p className="mt-1 font-mono text-xs bg-accent rounded p-2">
           Pui, g, 0,012, 2400, 500 → 0,012€ per gram, 2400g în stoc, reaprovizionare la 500g<br/>
           Salată, cap, 1,20, 10, 2 → 1,20€ per cap, 10 capete în stoc
         </p>
       </div>
 
-      {summary && <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">{summary}</div>}
+      {summary && <div className="rounded-lg border border-reconciled/25 bg-reconciled/10 p-3 text-sm text-reconciled">{summary}</div>}
 
       <Card>
         <CardHeader><CardTitle>Încarcă CSV</CardTitle></CardHeader>
@@ -125,7 +125,7 @@ function IngredientsImportContent() {
             className="space-y-4"
           >
             <Input name="csv_file" type="file" accept=".csv,text/csv" className="hidden" />
-            <p className="text-xs text-slate-400 font-medium">Lipește lista de ingrediente mai jos (name, unit, cost_price, stock_qty, reorder_level):</p>
+            <p className="text-xs text-muted-foreground font-medium">Lipește lista de ingrediente mai jos (name, unit, cost_price, stock_qty, reorder_level):</p>
             <textarea
               name="csv_text"
               value={mapToProductCsv(rows)}
@@ -135,11 +135,11 @@ function IngredientsImportContent() {
             <textarea
               value={csv}
               onChange={(e) => setCsv(e.target.value)}
-              className="min-h-44 w-full rounded-md border border-slate-200 p-3 font-mono text-xs"
+              className="min-h-44 w-full rounded-md border border-border p-3 font-mono text-xs"
               placeholder={TEMPLATE}
             />
             {errors.length > 0 && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              <div className="rounded-lg border border-attention/25 bg-attention/10 p-3 text-sm text-attention">
                 {errors.slice(0, 5).join(" · ")}
               </div>
             )}
@@ -167,7 +167,7 @@ function IngredientsImportContent() {
             <div className="overflow-x-auto text-sm">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b text-left text-xs text-slate-400">
+                  <tr className="border-b text-left text-xs text-muted-foreground">
                     <th className="py-2 pr-4">Nume</th>
                     <th className="py-2 pr-4">Unitate</th>
                     <th className="py-2 pr-4">Cost/unitate</th>
@@ -179,10 +179,10 @@ function IngredientsImportContent() {
                   {rows.slice(0, 12).map((r, i) => (
                     <tr key={i} className="border-b last:border-0">
                       <td className="py-2 pr-4 font-medium">{r.name}</td>
-                      <td className="py-2 pr-4 text-slate-500">{r.unit}</td>
+                      <td className="py-2 pr-4 text-muted-foreground">{r.unit}</td>
                       <td className="py-2 pr-4">€{r.cost_price}</td>
                       <td className="py-2 pr-4">{r.current_stock_qty || "0"}</td>
-                      <td className="py-2 text-slate-500">{r.reorder_level || "—"}</td>
+                      <td className="py-2 text-muted-foreground">{r.reorder_level || "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -197,7 +197,7 @@ function IngredientsImportContent() {
 
 export default function IngredientsImportPage() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm text-slate-400">Se încarcă…</div>}>
+    <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Se încarcă…</div>}>
       <IngredientsImportContent />
     </Suspense>
   );

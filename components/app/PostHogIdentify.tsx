@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import posthog from "posthog-js";
+import { deriveAccountType } from "@/lib/analytics/account-type";
 
 type Props = {
   userId: string;
@@ -14,15 +15,7 @@ type Props = {
 export function PostHogIdentify({ userId, email, orgId, orgName }: Props) {
   useEffect(() => {
     if (!userId || typeof window === "undefined") return;
-    const normalizedEmail = email?.toLowerCase() ?? "";
-    const normalizedOrg = orgName?.toLowerCase() ?? "";
-    const accountType = normalizedEmail.endsWith("@franchisetech.ro")
-      ? "internal"
-      : normalizedOrg.includes("test")
-        ? "test"
-        : normalizedOrg.includes("demo")
-          ? "demo"
-          : "real_customer";
+    const accountType = deriveAccountType(email, orgName);
     posthog.identify(userId, {
       email: email ?? undefined,
       org_id: orgId ?? undefined,

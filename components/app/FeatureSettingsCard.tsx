@@ -51,7 +51,7 @@ export function FeatureSettingsCard({
         </CardHeader>
         <CardContent>
           {suggestions.length > 0 && (
-            <div className="mb-4 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">
+            <div className="mb-4 rounded-lg bg-accent p-3 text-sm text-foreground">
               Useful for this business type: {suggestions.map((key) => RESTAURANT_FEATURES[key].label).join(", ")}.
             </div>
           )}
@@ -61,21 +61,21 @@ export function FeatureSettingsCard({
               const disabled = !canEdit || !feature.ready;
               const isSuggested = suggestions.includes(key);
               return (
-                <label key={key} className="flex items-start justify-between gap-4 rounded-lg border border-slate-200 p-4">
+                <label key={key} className="flex items-start justify-between gap-4 rounded-lg border border-border p-4">
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium text-slate-900">{feature.label}</span>
+                      <span className="font-medium text-foreground">{feature.label}</span>
                       {isSuggested && <Badge variant="secondary">Suggested</Badge>}
                       {!feature.ready && <Badge variant="outline">Coming later</Badge>}
                     </div>
-                    <p className="text-sm text-slate-500">{feature.description}</p>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </div>
                   <input
                     type="checkbox"
                     name={key}
                     defaultChecked={Boolean(values[key])}
                     disabled={disabled}
-                    className="mt-1 h-5 w-5 rounded border-slate-300"
+                    className="mt-1 h-5 w-5 rounded border-border"
                   />
                 </label>
               );

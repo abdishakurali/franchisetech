@@ -1,0 +1,42 @@
+-- Current app read/write contracts for the isolated core E2E project only.
+alter table public.organisations
+  add column if not exists kitchen_display_enabled boolean default false,
+  add column if not exists restaurant_order_flow_enabled boolean default false,
+  add column if not exists table_service_enabled boolean default false,
+  add column if not exists order_types_enabled boolean default false,
+  add column if not exists kitchen_stations_enabled boolean default false,
+  add column if not exists product_modifiers_enabled boolean default false,
+  add column if not exists courses_enabled boolean default false,
+  add column if not exists kitchen_printing_enabled boolean default false,
+  add column if not exists payment_split_enabled boolean default false,
+  add column if not exists tips_enabled boolean default false,
+  add column if not exists compact_workstation_nav_enabled boolean default false,
+  add column if not exists fiscalnet_enabled boolean default false,
+  add column if not exists fiscalnet_mock_mode boolean default false,
+  add column if not exists fiscalnet_connection_mode text,
+  add column if not exists fiscalnet_api_host text,
+  add column if not exists fiscalnet_bonuri_path text,
+  add column if not exists fiscalnet_raspuns_path text,
+  add column if not exists fiscalnet_auto_print boolean default false,
+  add column if not exists fiscalnet_ask_before_print boolean default false,
+  add column if not exists fiscalnet_manual_only boolean default true,
+  add column if not exists fiscalnet_timeout_ms integer,
+  add column if not exists fiscalnet_retry_count integer,
+  add column if not exists fiscalnet_cif text,
+  add column if not exists fiscalnet_operator_code text,
+  add column if not exists fiscalnet_vat_groups jsonb,
+  add column if not exists fiscalnet_payment_type_map jsonb,
+  add column if not exists tax_id_verified boolean default false,
+  add column if not exists company_legal_name text,
+  add column if not exists saga_gestiune_code text,
+  add column if not exists notification_preferences jsonb,
+  add column if not exists owner_digest_enabled boolean default false,
+  add column if not exists owner_digest_frequency text,
+  add column if not exists owner_digest_day_of_week integer,
+  add column if not exists owner_digest_time_of_day text,
+  add column if not exists owner_digest_timezone text,
+  add column if not exists owner_digest_recipients jsonb;
+
+create table public.suppliers (id uuid primary key default gen_random_uuid(), organisation_id uuid not null references public.organisations(id) on delete cascade, name text not null, active boolean default true);
+alter table public.suppliers enable row level security;
+create policy supplier_member_access on public.suppliers for all to authenticated using (public.is_org_member(organisation_id)) with check (public.is_org_member(organisation_id));

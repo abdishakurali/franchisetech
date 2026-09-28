@@ -39,9 +39,9 @@ export function StockAdjustCell({
         type="button"
         onClick={() => setEditing(true)}
         title={t.stock.clickToEditQty}
-        className="tabular-nums font-semibold hover:bg-blue-50 hover:text-blue-700 rounded px-1.5 py-0.5 transition-colors"
+        className="tabular-nums font-semibold hover:bg-accent hover:text-brass rounded px-1.5 py-0.5 transition-colors"
       >
-        {currentQty}
+        {currentQty.toLocaleString("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </button>
     );
   }
@@ -50,27 +50,29 @@ export function StockAdjustCell({
     <span className="inline-flex items-center gap-1">
       <input
         type="number"
+        step="any"
+        aria-label="Cantitate stoc nouă"
         value={val}
         onChange={(e) => setVal(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter") save();
           if (e.key === "Escape") { setVal(String(currentQty)); setEditing(false); }
         }}
-        className="w-16 h-7 text-sm border border-blue-300 rounded px-1.5 tabular-nums focus:outline-none focus:ring-2 focus:ring-blue-200"
+        className="w-16 h-7 text-sm border border-brass/40 rounded px-1.5 tabular-nums focus:outline-none focus:ring-2 focus:ring-brass/30"
         autoFocus
       />
       <button
         type="button"
         onClick={save}
         disabled={saving}
-        className="text-xs font-bold text-green-600 hover:text-green-800 px-1"
+        className="text-xs font-bold text-reconciled hover:text-reconciled px-1"
       >
         {saving ? "…" : "✓"}
       </button>
       <button
         type="button"
         onClick={() => { setVal(String(currentQty)); setEditing(false); }}
-        className="text-xs text-slate-400 hover:text-slate-600 px-1"
+        className="text-xs text-muted-foreground hover:text-mid px-1"
       >
         ✕
       </button>

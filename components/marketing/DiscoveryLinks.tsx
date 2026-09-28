@@ -26,15 +26,15 @@ export function DiscoveryLinks() {
   if (!comparisons.length && !guides.length) return null;
 
   return (
-    <section className="border-t border-[#DFDCD2] bg-[#F3F0E8] px-4 py-12 sm:px-6 lg:px-8">
+    <section className="border-t border-border bg-background px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto grid max-w-6xl gap-10 sm:grid-cols-2">
         {comparisons.length > 0 && (
           <div>
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-[#8F8F86]">Comparații</p>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Comparații</p>
             <ul className="mt-4 space-y-2.5">
               {comparisons.map((c) => (
                 <li key={c.slug}>
-                  <Link href={c.path} className="text-sm font-medium text-[#5B5D57] hover:text-[#165DFC]">
+                  <Link href={c.path} className="text-sm font-medium text-mid hover:text-brass">
                     franchisetech vs {c.competitor} →
                   </Link>
                 </li>
@@ -44,11 +44,11 @@ export function DiscoveryLinks() {
         )}
         {guides.length > 0 && (
           <div>
-            <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-[#8F8F86]">Ghiduri</p>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Ghiduri</p>
             <ul className="mt-4 space-y-2.5">
               {guides.map((g) => (
                 <li key={g.slug}>
-                  <Link href={`/blog/${g.slug}`} className="text-sm font-medium text-[#5B5D57] hover:text-[#165DFC]">
+                  <Link href={`/blog/${g.slug}`} className="text-sm font-medium text-mid hover:text-brass">
                     {g.title} →
                   </Link>
                 </li>

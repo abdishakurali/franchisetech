@@ -68,7 +68,7 @@ export default async function SkagLandingPage({
   if (!forwarded.has("utm_source")) forwarded.set("utm_source", "google");
   if (!forwarded.has("utm_medium")) forwarded.set("utm_medium", "cpc");
   if (!forwarded.has("utm_campaign")) forwarded.set("utm_campaign", page.slug);
-  const signupHref = `/signup?plan=starter&${forwarded.toString()}`;
+  const signupHref = `/signup?plan=free&${forwarded.toString()}`;
 
   // Slugs with a purpose-built page. Everything else falls through to the generic
   // SKAG template below.
@@ -125,7 +125,7 @@ export default async function SkagLandingPage({
               href={signupHref}
               className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white transition sm:w-auto sm:py-3 ${marketingCtaPrimary}`}
             >
-              Începe proba de 15 zile <ArrowRight className="h-4 w-4" />
+              Creează cont gratuit <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/pricing"
@@ -135,7 +135,7 @@ export default async function SkagLandingPage({
             </Link>
           </div>
           <p className="mt-4 text-xs text-slate-500">
-            Verificare card 1 € · anulezi oricând · suport în limba română
+            Fără card necesar · anulezi oricând · suport în limba română
           </p>
           <p className="mt-3 text-sm font-medium text-slate-600">{ro.home.hero.socialProof}</p>
         </div>
@@ -170,14 +170,14 @@ export default async function SkagLandingPage({
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-slate-600">
             Configurați produsele, deschideți tura și faceți prima vânzare test — fără instalare,
-            merge pe orice tabletă sau calculator. Suport în limba română pe tot parcursul probei.
+            merge pe orice tabletă sau calculator. Suport în limba română, gratuit pentru totdeauna.
           </p>
           <div className="mt-8">
             <Link
               href={signupHref}
               className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white transition ${marketingCtaPrimary}`}
             >
-              Începe proba de 15 zile <ArrowRight className="h-4 w-4" />
+              Creează cont gratuit <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>

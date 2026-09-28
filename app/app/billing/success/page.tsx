@@ -113,8 +113,8 @@ export default async function BillingSuccessPage({
   }
 
   const Icon = state === "synced" ? CheckCircle2 : state === "error" ? AlertTriangle : Clock;
-  const iconClass = state === "synced" ? "bg-emerald-100 text-emerald-600" : state === "error" ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600";
-  const noticeClass = state === "synced" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : state === "error" ? "border-red-200 bg-red-50 text-red-800" : "border-amber-200 bg-amber-50 text-amber-800";
+  const iconClass = state === "synced" ? "bg-emerald-100 text-emerald-600" : state === "error" ? "bg-attention/10 text-attention" : "bg-amber-100 text-amber-600";
+  const noticeClass = state === "synced" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : state === "error" ? "border-attention/25 bg-attention/10 text-attention" : "border-amber-200 bg-amber-50 text-amber-800";
   const c = copy[locale];
   const title = titleForState(locale, state);
   const body = bodyForState(locale, state);
@@ -130,8 +130,8 @@ export default async function BillingSuccessPage({
         </div>
 
         <div className="space-y-2">
-          <h1 id="billing-success-title" className="text-2xl font-bold text-slate-900">{title}</h1>
-          <p className="text-slate-500 text-base">
+          <h1 id="billing-success-title" className="text-2xl font-bold text-foreground">{title}</h1>
+          <p className="text-muted-foreground text-base">
             {body}
           </p>
         </div>
@@ -140,13 +140,13 @@ export default async function BillingSuccessPage({
           <p className="font-semibold">{c.receiptTitle}</p>
           <p className="mt-1">{c.receiptBody}</p>
           {state === "synced" && (invoiceUrl || invoicePdfUrl) && (
-            <div className="mt-4 rounded-lg border border-emerald-200 bg-white/70 p-4">
+            <div className="mt-4 rounded-lg border border-emerald-200 bg-card/70 p-4">
               <p className="font-semibold text-emerald-950">{c.accountingTitle}</p>
               <p className="mt-1 text-emerald-900">{c.accountingBody}</p>
               <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               {invoiceUrl && (
                 <a
-                  className={cn(buttonVariants({ variant: "outline", size: "sm" }), "bg-white focus-visible:ring-2 focus-visible:ring-emerald-600")}
+                  className={cn(buttonVariants({ variant: "outline", size: "sm" }), "bg-card focus-visible:ring-2 focus-visible:ring-emerald-600")}
                   href={invoiceUrl}
                   target="_blank"
                   rel="noreferrer"
@@ -157,7 +157,7 @@ export default async function BillingSuccessPage({
               )}
               {invoicePdfUrl && (
                 <a
-                  className={cn(buttonVariants({ variant: "outline", size: "sm" }), "bg-white focus-visible:ring-2 focus-visible:ring-emerald-600")}
+                  className={cn(buttonVariants({ variant: "outline", size: "sm" }), "bg-card focus-visible:ring-2 focus-visible:ring-emerald-600")}
                   href={invoicePdfUrl}
                   target="_blank"
                   rel="noreferrer"
@@ -174,7 +174,7 @@ export default async function BillingSuccessPage({
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Link
             href="/app"
-            className={cn(buttonVariants({ variant: "default", size: "lg" }), "bg-blue-600 hover:bg-blue-500 text-white")}
+            className={cn(buttonVariants({ variant: "default", size: "lg" }), "bg-primary hover:bg-primary text-primary-foreground")}
           >
             {c.backToApp}
           </Link>

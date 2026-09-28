@@ -68,9 +68,9 @@ function LoginForm() {
                 </Button>
               </Link>
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-px bg-slate-200 flex-1" />
-                <span className="text-xs text-slate-400">{a.or}</span>
-                <div className="h-px bg-slate-200 flex-1" />
+                <div className="h-px bg-border flex-1" />
+                <span className="text-xs text-muted-foreground">{a.or}</span>
+                <div className="h-px bg-border flex-1" />
               </div>
             </>
           )}
@@ -90,7 +90,7 @@ function LoginForm() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">{a.password}</Label>
-                <Link href="/forgot-password" className="text-xs font-medium text-blue-600 hover:underline">
+                <Link href="/forgot-password" className="text-xs font-medium text-brass hover:underline">
                   {a.forgotPassword}
                 </Link>
               </div>
@@ -104,21 +104,21 @@ function LoginForm() {
                 placeholder="••••••••"
               />
             </div>
-            <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
+            <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" disabled={loading}>
               {loading ? a.submitting : a.submit}
             </Button>
           </form>
-          <p className="text-center text-sm text-slate-500 mt-4">
+          <p className="text-center text-sm text-muted-foreground mt-4">
             {a.noAccount}{" "}
-            <Link href="/signup" className="text-blue-600 hover:underline font-medium">
+            <Link href="/signup" className="text-brass hover:underline font-medium">
               {a.signUpLink}
             </Link>
           </p>
         </CardContent>
       </Card>
-      <p className="text-center text-sm text-slate-400 mt-6">
+      <p className="text-center text-sm text-muted-foreground mt-6">
         {a.needHelp}{" "}
-        <Link href="/help" className="text-slate-500 hover:text-slate-700 hover:underline font-medium">
+        <Link href="/help" className="text-muted-foreground hover:text-foreground hover:underline font-medium">
           {a.helpLink}
         </Link>
       </p>

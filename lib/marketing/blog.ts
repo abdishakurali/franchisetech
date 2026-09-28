@@ -15,6 +15,65 @@ export type BlogPost = {
  * prior 90 days (PostHog, filterTestAccounts=true). Do not add new posts
  * without a distribution plan (who finds it, how) — volume without
  * distribution is how this list grew to 115 with ~90 at zero visitors.
+ *
+ * 2026-09-19: added 8 posts, deliberately adjacent to the two highest-traffic
+ * posts (bon-fiscal-obligatoriu-cand-si-cum, cum-anulezi-un-bon-fiscal-emis-gresit —
+ * both fiscal-receipt procedural-panic queries), not generic topics. Every legal
+ * claim was checked against primary sources (OUG 28/1999, Legea 296/2023 via an
+ * official ANAF comparison PDF) before publishing.
+ *
+ * 2026-09-21: added 5 more posts, same bar (every legal claim verified against a
+ * primary source — OUG 28/1999, Legea 296/2023, Legea 241/2005, Legea 317/2024,
+ * Legea 141/2025 for the current 21%/11%/0% VAT rates). Also fixed the distribution
+ * gap flagged above: both proven high-traffic posts, plus three of the 2026-09-19
+ * posts, now carry a genuine contextual internal link (via the renderer's new
+ * [text](url) markdown-link support in app/blog/[slug]/page.tsx) into this batch and
+ * back — not just the generic "Mai multe articole" footer. Also fixed a stale 5%
+ * VAT-rate line in cote-tva-diferite-acelasi-bon-cum-se-calculeaza's worked example
+ * (5% hasn't been a valid standalone rate since the Aug 2025 change; replaced with
+ * the real 0% case). Before adding further posts, actually check PostHog traffic on
+ * this batch first — don't repeat the volume-without-verification pattern.
+ *
+ * 2026-09-26: added 5 more posts, adjacent to two posts that PostHog traffic (checked
+ * before writing) showed were real anchors beyond the original two: inventar-fizic-vs-
+ * scriptic-diferente and program-legal-de-lucru-horeca-romania. Extends into labor-law
+ * fear queries (overtime, meal breaks, ITM inspections, undeclared-work fines) and the
+ * legally-mandated annual inventory — same primary-source-verification bar as before,
+ * this time against Codul Muncii (Legea 53/2003), Legea 108/1999, Legea 239/2025,
+ * Legea 82/1991 and OMFP 2861/2009. The verification pass itself caught two real errors
+ * before publishing: there is no 15-minute statutory minimum meal break for adult
+ * employees (only a 30-minute minimum for minors, art. 134) — a widely repeated myth —
+ * and the old "5+ undeclared workers = criminal offense" rule was abrogated in 2017
+ * (OUG 53/2017); it's been purely a contravention since, now 40.000 lei/person capped
+ * at 1.000.000 lei/employer as of 1 Jan 2026 (Legea 239/2025, doubled from 20.000/
+ * 200.000). Also: Revisal was fully replaced by REGES-Online on 1 Oct 2025 — don't
+ * reference the old name in new content. Added genuine reciprocal links both ways
+ * (edited program-legal-de-lucru-horeca-romania and inventar-fizic-vs-scriptic-diferente
+ * to link forward into this batch, not just the generic footer).
+ *
+ * 2026-09-28: added 10 more posts — 4 general business-finance education (net margin,
+ * cash flow, delivery-platform margin math, cost-of-opening categories; no legal
+ * citations, so no primary-source pass needed) plus 6 compliance/regulatory posts that
+ * did go through primary-source verification first: e-Factura B2C (OUG 69/2024), SAF-T
+ * D406 (OPANAF 1783/2021), the 2026-07-01 minimum wage increase (HG 146/2026), HACCP
+ * (Reg. CE 852/2004 + Legea 150/2004), GDPR for a loyalty program (Reg. UE 2016/679 +
+ * Legea 190/2018 + Legea 506/2004 for SMS marketing), and CAEN codes. The CAEN post
+ * exists because of a genuinely time-sensitive find: Romania's CAEN Rev.2→Rev.3
+ * transition deadline was 2026-09-25, three days before this batch was written — a
+ * dedicated food-truck code (5612) didn't exist under Rev.2. The verification pass
+ * explicitly flagged claims NOT to publish: exact e-Factura B2C penalty amounts and a
+ * "legitimate interest requires a DPO" claim were both only weakly sourced, so both are
+ * hedged/omitted rather than stated as fact. The SAF-T post is deliberately honest about
+ * scope — franchisetech's export covers only stock movements (NIR/sales/adjustments),
+ * not a full certified D406 filing; see lib/ro-accounting/saf-t-xml.ts's own header
+ * comment, which says the same thing about the export itself. Skipped a 7th planned
+ * topic (mandatory HoReCa authorizations/DSP/ISU) as redundant — already covered at
+ * list level in documente-obligatorii-horeca-lista-completa and
+ * checklist-deschidere-cafenea-de-la-zero. Also skipped stating specific delivery-
+ * platform (Glovo/Bolt Food/Tazz) commission percentages — no reliable public source
+ * for current rates, which vary by contract; the delivery-margin post states the
+ * mechanism and hedges the number, following the same pattern already used for card-
+ * processor fees in costuri-fixe-vs-variabile-horeca.
  */
 export const blogPosts: BlogPost[] = [
   {
@@ -25,7 +84,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["raport-z", "pos", "inchidere-zi"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -34,7 +93,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce trebuie să conțină un Raport Z corect?",
-        body: "Un raport Z complet include:\n\n- **Total tranzacții** — numărul de vânzări din ziua respectivă\n- **Vânzări nete** — valoarea totală fără reduceri sau anulări\n- **Defalcare pe metode de plată** — numerar, card, online separat\n- **TVA colectat** — defalcat pe cote (21%, 11%, 5%, 0%)\n- **Vânzări brute** — totalul inclusiv TVA\n- **Numerar așteptat vs. numărat** — diferența față de fondul de deschidere plus încasări cash\n\nÎn franchisetech, aceste câmpuri sunt calculate automat din sesiunea POS. Nu introduceți nimic manual — sistemul agregă fiecare tranzacție înregistrată în ziua respectivă.",
+        body: "Un raport Z complet include:\n\n- **Total tranzacții** — numărul de vânzări din ziua respectivă\n- **Vânzări nete** — valoarea totală fără reduceri sau anulări\n- **Defalcare pe metode de plată** — numerar, card, online separat\n- **TVA colectat** — defalcat pe cote (21%, 11%, 0%)\n- **Vânzări brute** — totalul inclusiv TVA\n- **Numerar așteptat vs. numărat** — diferența față de fondul de deschidere plus încasări cash\n\nÎn franchisetech, aceste câmpuri sunt calculate automat din sesiunea POS. Nu introduceți nimic manual — sistemul agregă fiecare tranzacție înregistrată în ziua respectivă.",
       },
       {
         heading: "Cum îl faceți în franchisetech",
@@ -58,7 +117,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["nir", "achizitii", "furnizori", "contabilitate"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     sections: [
       {
         heading: "Ce este NIR-ul?",
@@ -90,7 +149,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["retete", "cost-reteta", "marja", "menu-engineering"],
-    image: "/marketing/recipe-costing-hero.png",
+    image: "/marketing/live/recipes.png",
     sections: [
       {
         heading: "De ce contează costul rețetei?",
@@ -122,7 +181,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["bon-de-consum", "contabilitate", "stoc", "retete"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce este bonul de consum?",
@@ -154,7 +213,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["saga", "export-contabil", "contabilitate", "nir"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce este exportul Saga?",
@@ -206,7 +265,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum testați înainte să decideți",
-        body: "Ambele platforme oferă perioadă de testare gratuită. La Franchisetech: 15 zile trial după o verificare de 1 € a cardului, configurare gratuită în aplicație.\n\nTestul corect pe orice platformă POS:\n\n1. Configurați produsele reale (nu demo) cu prețurile dumneavoastră\n2. Faceți câteva vânzări numerar + card\n3. Închideți ziua (raport Z) și comparați numerarul din sertar cu ce arată sistemul\n4. Înregistrați o recepție de marfă (NIR) de la un furnizor real\n5. Exportați datele pentru contabil și trimiteți-i fișierul\n\nDacă fluxul dumneavoastră zilnic funcționează fără probleme în trial — sistemul e potrivit. Dacă dați de blocaje sau aveți nevoie de suport pentru pași de bază, ia asta ca semnal.",
+        body: "Verificați condițiile de testare ale fiecărei platforme. La franchisetech, planul gratuit e disponibil pentru totdeauna de la crearea contului, fără card; configurarea ghidată în aplicație este inclusă.\n\nTestul corect pe orice platformă POS:\n\n1. Configurați produsele reale (nu demo) cu prețurile dumneavoastră\n2. Faceți câteva vânzări numerar + card\n3. Închideți ziua (raport Z) și comparați numerarul din sertar cu ce arată sistemul\n4. Înregistrați o recepție de marfă (NIR) de la un furnizor real\n5. Exportați datele pentru contabil și trimiteți-i fișierul\n\nDacă fluxul dumneavoastră zilnic funcționează fără probleme pe planul gratuit — sistemul e potrivit. Dacă dați de blocaje sau aveți nevoie de suport pentru pași de bază, ia asta ca semnal.",
       },
     ],
   },
@@ -238,7 +297,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum testați corect în trial",
-        body: "Orice sistem POS vă va părea bun dacă îl testați cu produse demo și scenarii simple. Testul real:\n\n1. Adăugați produsele dumneavoastră reale cu prețurile și cotele TVA corecte\n2. Faceți 10 vânzări — mix numerar și card\n3. Înregistrați o recepție de marfă (NIR) de la furnizorul dumneavoastră de cafea\n4. Închideți ziua și numărați sertarul — comparați cu ce arată raportul Z\n5. Exportați datele și trimiteți-le contabilului dumneavoastră să confirme că poate importa în Saga\n\nDacă toți cei 5 pași funcționează fără să sunați la suport — ați găsit sistemul potrivit.\n\nFranchisetech oferă 15 zile trial (după o verificare de 1 € a cardului) și configurare ghidată în aplicație.",
+        body: "Orice sistem POS vă va părea bun dacă îl testați cu produse demo și scenarii simple. Testul real:\n\n1. Adăugați produsele dumneavoastră reale cu prețurile și cotele TVA corecte\n2. Faceți 10 vânzări — mix numerar și card\n3. Înregistrați o recepție de marfă (NIR) de la furnizorul dumneavoastră de cafea\n4. Închideți ziua și numărați sertarul — comparați cu ce arată raportul Z\n5. Exportați datele și trimiteți-le contabilului dumneavoastră să confirme că poate importa în Saga\n\nDacă toți cei 5 pași funcționează fără să sunați la suport — ați găsit sistemul potrivit.\n\nfranchisetech oferă un plan gratuit permanent de la crearea contului, fără card și configurare ghidată în aplicație.",
       },
     ],
   },
@@ -297,7 +356,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "De ce marja brută 85% pe cafea nu înseamnă că sunteți profitabil",
-        body: "Asta e greșeala clasică: proprietarul vede 85% marjă pe cafea și crede că afacerea merge bine. Dar marja brută acoperă doar ingredientele.\n\nCe mai trebuie acoperit din acei 12.76 RON per flat white:\n\n- **Chirie**: dacă plătiți 3.000 EUR/lună și vindeți 1.500 cafele pe lună → 2 EUR (≈10 RON) per cafea\n- **Salarii**: dacă aveți 2 baristi cu salariu net 3.500 RON fiecare și vindeți 1.500 cafele → ≈4.67 RON per cafea\n- **Utilități, consumabile, echipamente**: 1–2 RON per cafea\n\nTotal costuri fixe per cafea: ≈15–17 RON. Marja brută per cafea: 12.76 RON.\n\n**La acest volum și la aceste costuri fixe, fiecare flat white vândut la 15 RON generează pierdere.**\n\nSoluții: creșteți prețul, creșteți volumul, reduceți costurile fixe — sau combinați toate trei. Dar fără marja brută calculată corect, nu știți nici de unde să începeți.",
+        body: "Asta e greșeala clasică: proprietarul vede 85% marjă pe cafea și crede că afacerea merge bine. Dar marja brută acoperă doar ingredientele.\n\nCe mai trebuie acoperit din acei 12.76 RON per flat white:\n\n- **Chirie**: dacă plătiți 3.000 EUR/lună și vindeți 1.500 cafele pe lună → 2 EUR (≈10 RON) per cafea\n- **Salarii**: dacă aveți 2 baristi cu salariu net 3.500 RON fiecare și vindeți 1.500 cafele → ≈4.67 RON per cafea\n- **Utilități, consumabile, echipamente**: 1–2 RON per cafea\n\nTotal costuri fixe per cafea: ≈15–17 RON. Marja brută per cafea: 12.76 RON.\n\n**La acest volum și la aceste costuri fixe, fiecare flat white vândut la 15 RON generează pierdere.**\n\nSoluții: creșteți prețul, creșteți volumul, reduceți costurile fixe — sau combinați toate trei. Dar fără marja brută calculată corect, nu știți nici de unde să începeți.\n\nAcest calcul per produs e util, dar rămâne parțial — imaginea completă vine din [marja netă a întregii afaceri, calculată lunar](/blog/marja-neta-vs-marja-bruta-de-ce-conteaza-prima), nu doar din marja brută a unui singur produs.",
       },
       {
         heading: "Cum calculați automat pentru toate produsele din meniu",
@@ -345,7 +404,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-05",
     locale: "ro",
     tags: ["fiscal","bon-fiscal","conformitate"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/qr-code-receipts",
     sections: [
       {
@@ -366,7 +425,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce riscați dacă nu emiteți bonul fiscal",
-        body: "Neemiterea bonului fiscal este o abatere contravențională, sancționată cu amendă — cuantumul depinde de încadrarea faptei și de eventuala recidivă, așa că verificați valoarea actualizată cu contabilul dumneavoastră sau pe portalul ANAF.\n\nLa recidivă sau la constatarea unui tipar (mai multe vânzări fără bon, nu un incident izolat), riscul crește dincolo de amendă — poate ajunge la suspendarea temporară a activității punctului de lucru.",
+        body: "Neemiterea bonului fiscal este o abatere contravențională, sancționată cu amendă — cuantumul depinde de încadrarea faptei și de eventuala recidivă, așa că verificați valoarea actualizată cu contabilul dumneavoastră sau pe portalul ANAF.\n\nLa recidivă sau la constatarea unui tipar (mai multe vânzări fără bon, nu un incident izolat), riscul crește dincolo de amendă — poate ajunge la suspendarea temporară a activității punctului de lucru. Dacă tocmai ați descoperit că o vânzare a scăpat neînregistrată, [aflați exact ce faceți în continuare](/blog/ati-uitat-sa-emiteti-bonul-fiscal-ce-faceti-acum) — diferența dintre un incident izolat corectat cinstit și un tipar contează enorm pentru cât de gravă rămâne situația.",
       },
       {
         heading: "Cum vă asigurați că nu ratați niciun bon",
@@ -382,7 +441,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-06",
     locale: "ro",
     tags: ["fiscal","factura","bon-fiscal"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     relatedFeature: "/features/qr-code-receipts",
     sections: [
       {
@@ -447,7 +506,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-07",
     locale: "ro",
     tags: ["tva","fiscal","delivery"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -480,7 +539,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-07",
     locale: "ro",
     tags: ["tva","fiscal","pos"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -489,11 +548,11 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum se calculează practic, linie cu linie",
-        body: "Dacă prețul afișat pentru un produs include deja TVA (cum e normal la vânzarea către consumatori finali), TVA-ul aferent acelei linii se extrage din preț cu formula:\n\nTVA = Preț cu TVA × Cotă / (100 + Cotă)\n\nBaza impozabilă a liniei este diferența: Preț cu TVA − TVA.\n\nBonul fiscal totalizează separat baza și TVA-ul pentru fiecare cotă întâlnită pe bon (21%, 11%, 5%, 0%), apoi le adună pentru totalul general de plată. Casa de marcat face acest calcul automat pe fiecare linie, în funcție de cota configurată pentru produsul respectiv.",
+        body: "Dacă prețul afișat pentru un produs include deja TVA (cum e normal la vânzarea către consumatori finali), TVA-ul aferent acelei linii se extrage din preț cu formula:\n\nTVA = Preț cu TVA × Cotă / (100 + Cotă)\n\nBaza impozabilă a liniei este diferența: Preț cu TVA − TVA.\n\nBonul fiscal totalizează separat baza și TVA-ul pentru fiecare cotă întâlnită pe bon (21%, 11%, 0%), apoi le adună pentru totalul general de plată. Casa de marcat face acest calcul automat pe fiecare linie, în funcție de cota configurată pentru produsul respectiv.",
       },
       {
         heading: "Exemplu concret cu trei cote diferite",
-        body: "Un bon cu trei produse, fiecare la o cotă diferită de TVA:\n\n- Produs A, cotă standard 21%: preț 20,00 lei → bază 16,53 lei, TVA 3,47 lei\n- Produs B, cotă redusă 11%: preț 15,00 lei → bază 13,51 lei, TVA 1,49 lei\n- Produs C, cotă redusă 5%: preț 10,00 lei → bază 9,52 lei, TVA 0,48 lei\n\n**Total bon: 45,00 lei** — din care bază impozabilă totală 39,56 lei și TVA total colectat 5,44 lei.\n\nFiecare cotă rămâne vizibilă separat pe bon, nu doar suma finală.",
+        body: "Un bon cu trei produse, fiecare la o cotă diferită de TVA:\n\n- Produs A, cotă standard 21%: preț 20,00 lei → bază 16,53 lei, TVA 3,47 lei\n- Produs B, cotă redusă 11%: preț 15,00 lei → bază 13,51 lei, TVA 1,49 lei\n- Produs C, cotă 0% (scutit): preț 10,00 lei → bază 10,00 lei, TVA 0,00 lei\n\n**Total bon: 45,00 lei** — din care bază impozabilă totală 40,04 lei și TVA total colectat 4,96 lei.\n\nFiecare cotă rămâne vizibilă separat pe bon, nu doar suma finală.",
       },
       {
         heading: "Ce trebuie să apară pe bonul fiscal tipărit",
@@ -534,7 +593,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce nu trebuie să faceți niciodată",
-        body: "- Nu opriți sau nu deconecta manual aparatul fiscal sperând să \"resetați\" problema, fără indicație de la distribuitorul autorizat\n- Nu ștergeți sau nu încercați să resetați jurnalul electronic pe cont propriu — este un document cu regim special\n- Nu ignora eroarea zile la rând sperând că \"se rezolvă singură\" — un aparat care nu a mai transmis date de câteva zile e un semnal de verificat imediat, nu de amânat\n- Nu schimba SIM-ul sau routerul fără să notați ce ați schimbat — dacă distribuitorul trebuie să intervină, are nevoie de acest istoric",
+        body: "- Nu opriți sau nu deconecta manual aparatul fiscal sperând să \"resetați\" problema, fără indicație de la distribuitorul autorizat\n- Nu ștergeți sau nu încercați să resetați jurnalul electronic pe cont propriu — este un document cu regim special\n- Nu ignora eroarea zile la rând sperând că \"se rezolvă singură\" — un aparat care nu a mai transmis date de câteva zile e un semnal de verificat imediat, nu de amânat. Neconectarea la sistemul ANAF are [o amendă separată de cea pentru lipsa bonului fiscal](/blog/amenda-neconectare-casa-marcat-anaf), aplicabilă chiar dacă aparatul emite bonuri corect\n- Nu schimba SIM-ul sau routerul fără să notați ce ați schimbat — dacă distribuitorul trebuie să intervină, are nevoie de acest istoric",
       },
       {
         heading: "Bonul cu cod QR și rolul lui",
@@ -550,12 +609,12 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-09",
     locale: "ro",
     tags: ["pos","storno","fiscal"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
         heading: "Ce este stornarea unui bon fiscal",
-        body: "Odată emis, un bon fiscal nu poate fi șters sau editat — casele de marcat fiscale nu permit asta prin design, tocmai pentru a preveni manipularea vânzărilor. Singura cale legală de a corecta o greșeală este **stornarea**: emiterea unui bon de stornare care anulează valoarea bonului greșit, urmat, dacă e cazul, de emiterea bonului corect. Cadrul legal pentru procedură este dat de normele metodologice de aplicare a OUG 28/1999 (aprobate prin HG 479/2003).\n\nStornarea funcționează cât timp bonul greșit face parte din ziua fiscală curentă, adică înainte de generarea raportului Z de închidere a zilei respective. Pe lângă bonul de stornare emis de aparat, procedura corectă cere și un document scris — un proces-verbal de stornare, cu numărul și ora bonului greșit, motivul anulării și semnătura casierului plus a persoanei responsabile (manager/administrator) — păstrat alături de bonul stornat pentru justificare la un eventual control.",
+        body: "Odată emis, un bon fiscal nu poate fi șters sau editat — casele de marcat fiscale nu permit asta prin design, tocmai pentru a preveni manipularea vânzărilor. Singura cale legală de a corecta o greșeală este **stornarea**: emiterea unui bon de stornare care anulează valoarea bonului greșit, urmat, dacă e cazul, de emiterea bonului corect. Cadrul legal pentru procedură este dat de normele metodologice de aplicare a OUG 28/1999 (aprobate prin HG 479/2003).\n\nStornarea funcționează cât timp bonul greșit face parte din ziua fiscală curentă, adică înainte de generarea raportului Z de închidere a zilei respective. Pe lângă bonul de stornare emis de aparat, procedura corectă cere și un document scris — un proces-verbal de stornare, cu numărul și ora bonului greșit, motivul anulării și semnătura casierului plus a persoanei responsabile (manager/administrator) — păstrat alături de bonul stornat pentru justificare la un eventual control.\n\nProcedura de mai jos e generală, valabilă pentru orice tip de greșeală — produs, cantitate, sumă. Dacă greșeala e specific o cotă de TVA greșită, mai ales dacă a fost deja încasată de la un client care a plecat, situația are o nuanță suplimentară: [cum corectați un bon cu cotă de TVA greșită după emitere](/blog/bon-fiscal-cota-tva-gresita-cum-corectati-dupa-emitere).",
       },
       {
         heading: "Pașii pentru anularea unui bon fiscal emis greșit",
@@ -583,7 +642,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-10",
     locale: "ro",
     tags: ["pos","storno"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -649,7 +708,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-12",
     locale: "ro",
     tags: ["pos","reconciliere","raport-z"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -682,7 +741,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-14",
     locale: "ro",
     tags: ["stoc","inventar"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Ce înseamnă stoc scriptic și stoc fizic",
@@ -702,7 +761,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cât de des faceți inventar",
-        body: "Pentru produsele perisabile cu valoare mare (cafea, carne, lactate), o verificare săptămânală ține diferențele mici și ușor de urmărit la sursă. Pentru un inventar complet, pe toate produsele din gestiune, o dată pe lună este ritmul obișnuit în HoReCa.\n\nUn inventar complet făcut o dată pe an, ca formalitate contabilă, nu ajută operațional — diferențele acumulate timp de 12 luni devin imposibil de atribuit unei cauze precise.",
+        body: "Pentru produsele perisabile cu valoare mare (cafea, carne, lactate), o verificare săptămânală ține diferențele mici și ușor de urmărit la sursă. Pentru un inventar complet, pe toate produsele din gestiune, o dată pe lună este ritmul obișnuit în HoReCa.\n\nUn inventar complet făcut o dată pe an, doar ca formalitate contabilă, nu ajută operațional — diferențele acumulate timp de 12 luni devin imposibil de atribuit unei cauze precise. Dar inventarul anual rămâne, separat de verificările operative de mai sus, o obligație legală distinctă, cu propriile cerințe de document și termene — [vedeți exact ce trebuie să conțină procesul-verbal și cum tratați o diferență constatată](/blog/diferenta-stoc-inventar-anual-cum-o-documentati).",
       },
       {
         heading: "Cum ajută franchisetech",
@@ -718,7 +777,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-17",
     locale: "ro",
     tags: ["stoc","materii-prime"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Ce înseamnă, în practică, fiecare tip de stoc",
@@ -782,7 +841,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-17",
     locale: "ro",
     tags: ["stoc","stoc-negativ"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Ce înseamnă stoc negativ și de ce e un semnal de alarmă",
@@ -814,7 +873,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-19",
     locale: "ro",
     tags: ["stoc","nir","furnizori"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Situația: marfa a ajuns, factura nu",
@@ -846,7 +905,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-19",
     locale: "ro",
     tags: ["retete","pret","marja"],
-    image: "/marketing/recipe-costing-hero.png",
+    image: "/marketing/live/recipes.png",
     sections: [
       {
         heading: "Greșeala de a copia prețul de la vecini",
@@ -882,7 +941,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-24",
     locale: "ro",
     tags: ["registru-de-casa","raport-z"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -895,7 +954,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Exemplu complet, o zi de cafenea",
-        body: "Iată cum arată o zi normală într-o cafenea mică:\n\n- **Sold reportat**: 300 lei (fondul de casă de la închiderea zilei anterioare)\n- **Încasări vânzări numerar** (agregat din raportul Z): 842 lei → sold 1.142 lei\n- **Plată furnizor lapte** (numerar, din sertar): −180 lei → sold 962 lei\n- **Depunere la bancă**: −682 lei → sold 280 lei\n- **Sold final**: 280 lei\n\nObservă că soldul final (280 lei) nu este identic cu fondul de casă inițial (300 lei) — diferența de 20 de lei ar trebui să apară undeva explicată (rest dat în plus, o eroare de numărare) sau, dacă fondul dumneavoastră standard e 300 lei, completați din nou până la 300 pentru ziua următoare și notați mișcarea.",
+        body: "Iată cum arată o zi normală într-o cafenea mică:\n\n- **Sold reportat**: 300 lei (fondul de casă de la închiderea zilei anterioare)\n- **Încasări vânzări numerar** (agregat din raportul Z): 842 lei → sold 1.142 lei\n- **Plată furnizor lapte** (numerar, din sertar): −180 lei → sold 962 lei\n- **Depunere la bancă**: −682 lei → sold 280 lei\n- **Sold final**: 280 lei\n\nObservă că soldul final (280 lei) nu este identic cu fondul de casă inițial (300 lei) — diferența de 20 de lei ar trebui să apară undeva explicată (rest dat în plus, o eroare de numărare) sau, dacă fondul dumneavoastră standard e 300 lei, completați din nou până la 300 pentru ziua următoare și notați mișcarea. Pentru pașii exacți de documentat o astfel de diferență, cu surplus sau lipsă, vedeți [diferența de casă la final de zi](/blog/diferenta-de-casa-la-final-de-zi-surplus-sau-lipsa).",
       },
       {
         heading: "Corecțiile se fac prin stornare, nu prin ștersătură",
@@ -919,7 +978,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-25",
     locale: "ro",
     tags: ["raport-z","raport-x"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -952,7 +1011,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-25",
     locale: "ro",
     tags: ["raport-z","multi-casierie"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -985,7 +1044,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-26",
     locale: "ro",
     tags: ["numerar","banca"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -1018,7 +1077,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-27",
     locale: "ro",
     tags: ["personal","pontaj"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "De ce pontajul clasic nu ține pasul cu HoReCa",
@@ -1091,7 +1150,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-29",
     locale: "ro",
     tags: ["personal","vanzari"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "De ce targetul «un număr pentru toată lumea» nu funcționează",
@@ -1123,7 +1182,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-29",
     locale: "ro",
     tags: ["personal","legal"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "Durata normală a timpului de lucru",
@@ -1135,11 +1194,11 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Munca de noapte și pauza de masă",
-        body: "Munca desfășurată în intervalul orar considerat de noapte (de regulă 22:00–06:00) trebuie compensată conform legii — fie prin reducerea programului, fie printr-un spor salarial stabilit prin contractul colectiv aplicabil sau prin contractul individual de muncă. Procentul exact de spor variază în funcție de sectorul de activitate și de ce prevede contractul aplicabil — verificați-l cu un specialist în legislația muncii sau cu contabilul care vă administrează salarizarea, nu presupuneți un procent standard.\n\nPentru orice zi de lucru mai lungă de 6 ore, angajatul are dreptul la o pauză de masă, a cărei durată minimă este stabilită prin contractul colectiv de muncă sau prin regulamentul intern. În HoReCa, pauza trebuie programată real — nu doar trecută pe hârtie — ceea ce înseamnă acoperire suplimentară de personal în orele de vârf, altfel angajatul rămâne fără pauză efectivă.",
+        body: "Munca desfășurată în intervalul orar considerat de noapte (de regulă 22:00–06:00) trebuie compensată conform legii — fie prin reducerea programului, fie printr-un spor salarial stabilit prin contractul colectiv aplicabil sau prin contractul individual de muncă. Procentul exact de spor variază în funcție de sectorul de activitate și de ce prevede contractul aplicabil — verificați-l cu un specialist în legislația muncii sau cu contabilul care vă administrează salarizarea, nu presupuneți un procent standard.\n\nPentru orice zi de lucru mai lungă de 6 ore, angajatul are dreptul la o pauză de masă, a cărei durată minimă este stabilită prin contractul colectiv de muncă sau prin regulamentul intern — legea nu impune un număr fix de minute pentru un angajat adult, orice ar circula pe internet. [Vedeți exact ce spune articolul 134 din Codul Muncii](/blog/pauza-de-masa-cate-minute-prevede-legea) și de unde vine confuzia cu cele «15 minute obligatorii». În HoReCa, pauza trebuie programată real — nu doar trecută pe hârtie — ceea ce înseamnă acoperire suplimentară de personal în orele de vârf, altfel angajatul rămâne fără pauză efectivă.\n\nPentru orele suplimentare, ordinea de compensare e stabilită de lege, nu la alegere — [vedeți cum se calculează și se plătesc corect](/blog/ore-suplimentare-horeca-cum-se-calculeaza-si-platesc).",
       },
       {
         heading: "Evidența orelor de lucru — de ce contează",
-        body: "Angajatorul are obligația de a ține evidența orelor lucrate de fiecare angajat, indiferent de tipul de contract (normă întreagă, timp parțial). La un control de muncă, lipsa evidenței sau evidența care nu corespunde cu programul real afișat este una dintre cele mai frecvente cauze de sancțiune în HoReCa.\n\nProbleme tipice descoperite la control:\n\n- Program afișat diferit de orele efectiv lucrate (angajatul vine mai devreme pentru pregătire, dar ora nu e înregistrată)\n- Ture suplimentare acoperite informal, fără actualizarea evidenței\n- Personal care lucrează fără contract sau cu contract de timp parțial, dar cu program de normă întreagă în realitate\n\nEvidența trebuie să reflecte exact orele lucrate, inclusiv timpul de pregătire înainte de deschidere și de închidere efectivă a casei după ultimul client.",
+        body: "Angajatorul are obligația de a ține evidența orelor lucrate de fiecare angajat, indiferent de tipul de contract (normă întreagă, timp parțial). La un control de muncă, lipsa evidenței sau evidența care nu corespunde cu programul real afișat este una dintre cele mai frecvente cauze de sancțiune în HoReCa.\n\nProbleme tipice descoperite la control:\n\n- Program afișat diferit de orele efectiv lucrate (angajatul vine mai devreme pentru pregătire, dar ora nu e înregistrată)\n- Ture suplimentare acoperite informal, fără actualizarea evidenței\n- Personal care lucrează fără contract sau cu contract de timp parțial, dar cu program de normă întreagă în realitate\n\nEvidența trebuie să reflecte exact orele lucrate, inclusiv timpul de pregătire înainte de deschidere și de închidere efectivă a casei după ultimul client. Iar controlul de muncă poate veni oricând, fără preaviz — [vedeți exact ce verifică ITM la o afacere HoReCa și ce riscați](/blog/control-itm-neanuntat-horeca-ce-verifica-si-ce-riscati).",
       },
       {
         heading: "Checklist practic de conformitate",
@@ -1187,7 +1246,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-02",
     locale: "ro",
     tags: ["contabilitate","export"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "Diferența simplă dintre CSV și XML",
@@ -1219,7 +1278,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-03",
     locale: "ro",
     tags: ["contabilitate","conformitate"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "De ce nu puteți improviza lista asta",
@@ -1255,7 +1314,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-03",
     locale: "ro",
     tags: ["contabilitate","cheltuieli"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "De ce contează distincția, nu doar la control",
@@ -1291,7 +1350,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-04",
     locale: "ro",
     tags: ["contabilitate","rapoarte"],
-    image: "/marketing/dashboard-hero.png",
+    image: "/marketing/live/dashboard.png",
     sections: [
       {
         heading: "De ce contabilul cere aceleași documente în fiecare lună",
@@ -1348,7 +1407,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ziua de deschidere și primele două săptămâni",
-        body: "Multe cafenele fac o deschidere «soft» — câteva zile de funcționare fără promovare, pentru ca personalul și sistemul să se roteze fără presiunea unui val mare de clienți din prima zi.\n\nÎn primele două săptămâni:\n\n- Generați raportul Z în fiecare zi, fără excepție — obișnuiți-vă cu procesul cât timp volumul e încă gestionabil\n- Verificați zilnic dacă stocul scade conform așteptărilor sau apar diferențe neexplicate\n- Ajustați meniul pe baza vânzărilor reale — produsele care nu se vând deloc în primele două săptămâni rareori decolează mai târziu fără o schimbare\n\nFranchisetech oferă configurare ghidată în aplicație pentru produse, rețete și prima sesiune de casă, plus 15 zile de trial — util exact pentru etapa asta, când doriți sistemul funcțional înainte de ziua de deschidere, nu în timpul ei.",
+        body: "Multe cafenele fac o deschidere «soft» — câteva zile de funcționare fără promovare, pentru ca personalul și sistemul să se roteze fără presiunea unui val mare de clienți din prima zi.\n\nÎn primele două săptămâni:\n\n- Generați raportul Z în fiecare zi, fără excepție — obișnuiți-vă cu procesul cât timp volumul e încă gestionabil\n- Verificați zilnic dacă stocul scade conform așteptărilor sau apar diferențe neexplicate\n- Ajustați meniul pe baza vânzărilor reale — produsele care nu se vând deloc în primele două săptămâni rareori decolează mai târziu fără o schimbare\n\nFranchisetech oferă configurare ghidată în aplicație pentru produse, rețete și prima sesiune de casă, plus un plan gratuit permanent — util exact pentru etapa asta, când doriți sistemul funcțional înainte de ziua de deschidere, nu în timpul ei.",
       },
     ],
   },
@@ -1397,7 +1456,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-05",
     locale: "ro",
     tags: ["patiserie","stoc","risipa"],
-    image: "/marketing/stock-report.png",
+    image: "/marketing/live/stock.png",
     sections: [
       {
         heading: "Risipa la patiserie e diferită de risipa la restaurant",
@@ -1470,7 +1529,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-07",
     locale: "ro",
     tags: ["dark-kitchen","delivery"],
-    image: "/marketing/pos-hero.png",
+    image: "/marketing/live/pos.png",
     relatedFeature: "/features/pos",
     sections: [
       {
@@ -1503,7 +1562,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-07",
     locale: "ro",
     tags: ["catering","facturare"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce e diferit la catering față de o vânzare normală la casă",
@@ -1535,7 +1594,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-08",
     locale: "ro",
     tags: ["breakeven","marja","financiar"],
-    image: "/marketing/margins-report.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce este pragul de rentabilitate și de ce trebuie să-l știți",
@@ -1567,7 +1626,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-09",
     locale: "ro",
     tags: ["costuri","financiar"],
-    image: "/marketing/margins-report.png",
+    image: "/marketing/live/reports.png",
     sections: [
       {
         heading: "Ce sunt costurile fixe și ce sunt costurile variabile",
@@ -1587,7 +1646,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum vedeți această separare în franchisetech",
-        body: "Costul variabil per produs (materii prime, calculat din prețurile reale de la ultima aprovizionare) vine automat din calculatorul de rețete, actualizat de fiecare dată când introduceți un NIR cu preț nou. Costurile fixe (chirie, salarii, abonamente) rămân în afara sistemului, pentru că nu trec prin vânzări sau stoc — dar cu jumătate din calcul deja făcut corect și automat, separarea fixe/variabile devine un exercițiu de câteva minute, nu o reconstituire manuală de la zero în fiecare lună.",
+        body: "Costul variabil per produs (materii prime, calculat din prețurile reale de la ultima aprovizionare) vine automat din calculatorul de rețete, actualizat de fiecare dată când introduceți un NIR cu preț nou. Costurile fixe (chirie, salarii, abonamente) rămân în afara sistemului, pentru că nu trec prin vânzări sau stoc — dar cu jumătate din calcul deja făcut corect și automat, separarea fixe/variabile devine un exercițiu de câteva minute, nu o reconstituire manuală de la zero în fiecare lună.\n\nSepararea corectă contează și pentru altceva: costurile fixe care ies din cont la date fixe, indiferent de cât ați vândut luna respectivă, sunt exact ce poate crea un decalaj între [profitul de pe hârtie și banii reali din cont](/blog/cash-flow-cafenea-profitabil-pe-hartie-fara-bani-in-cont).",
       },
     ],
   },
@@ -1599,7 +1658,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-10",
     locale: "ro",
     tags: ["kpi","rapoarte"],
-    image: "/marketing/reports-sales.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -1632,7 +1691,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-07-12",
     locale: "ro",
     tags: ["raport-z","greseli"],
-    image: "/marketing/reports-zreport.png",
+    image: "/marketing/live/reports.png",
     relatedFeature: "/features/z-report",
     sections: [
       {
@@ -1694,6 +1753,945 @@ export const blogPosts: BlogPost[] = [
       {
         heading: "Cum ajută franchisetech să aveți totul la zi",
         body: "franchisetech arhivează automat fiecare raport Z, fiecare NIR emis și registrul de casă aferent, căutabile instant pe dată din aplicație — nu trebuie să căutați printre dosare fizice sau fișiere Excel când un inspector cere documentele. Cotele de TVA se configurează o singură dată per produs și rămân consistente în toate rapoartele generate ulterior, reducând riscul de eroare la aplicarea cotei greșite.",
+      },
+    ],
+  },
+  {
+    slug: "amenda-neeliberare-bon-fiscal-cat-este-si-cum-o-eviti",
+    title: "Amenda pentru neeliberarea bonului fiscal — cât este și cum o evitați",
+    description:
+      "Neemiterea bonului fiscal este contravenția cel mai des constatată la control în HoReCa. Iată exact ce spune legea, cum se calculează amenda pe tranșe și ce se întâmplă la o abatere repetată.",
+    publishedAt: "2026-09-19",
+    locale: "ro",
+    tags: ["fiscal", "amenzi", "bon-fiscal"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/qr-code-receipts",
+    sections: [
+      {
+        heading: "Ce înseamnă, legal, «neemiterea bonului fiscal»",
+        body: "Fapta este definită explicit în OUG nr. 28/1999 (republicată), art. 10 pct. 3 lit. c): constituie contravenție \"neemiterea bonului fiscal pentru toate bunurile livrate sau serviciile prestate, emiterea de bonuri cu o valoare inferioară preţului de vânzare a bunului sau tarifului de prestare a serviciului ori nerespectarea prevederilor art. 1 alin. (8)\" — ultima parte se referă la nerespectarea regulilor de înregistrare în registrul special atunci când aparatul fiscal e defect.\n\nLegea numește suma implicată \"sumă nejustificată\": contravaloarea bunurilor sau serviciilor pentru care nu s-a emis bon, diferența până la prețul real dacă bonul a fost emis cu o valoare mai mică, sau contravaloarea operațiunilor înregistrate greșit în perioada de defectare a aparatului. Practic, orice vânzare care nu ajunge corect în evidența fiscală a zilei intră sub această definiție — indiferent dacă a fost uitare, grabă la oră de vârf sau o înțelegere \"pe repede\" cu un client.",
+      },
+      {
+        heading: "Cât este amenda, concret — pe tranșe, nu o sumă fixă",
+        body: "De la 1 ianuarie 2024 (modificare adusă de Legea nr. 296/2023), amenda pentru această contravenție (art. 11 alin. (1) lit. e) din OUG 28/1999) nu mai e o sumă unică — depinde de mărimea sumei nejustificate și de ponderea ei în vânzările totale ale zilei, înregistrate de aparat și/sau în registrul special:\n\n- Sumă nejustificată **până la 300 lei** și **sub 3%** din vânzările zilei — amendă **2.000 lei**\n- Sumă până la 300 lei, dar **peste 3%** din vânzările zilei — amendă **5.000 lei**\n- Sumă între **300 și 1.000 lei**, sub 3% din vânzări — amendă **6.000 lei**\n- Sumă între 300 și 1.000 lei, peste 3% din vânzări — amendă **12.000 lei**\n- Sumă **peste 1.000 lei**, sub 3% din vânzări — amendă **15.000 lei**\n- Sumă peste 1.000 lei și peste 3% din vânzări — amendă **30.000 lei**\n\nÎn toate cazurile, pe lângă amendă se aplică și **confiscarea sumei nejustificate**. Important: până la 31 decembrie 2023, prima treaptă (suma cea mai mică) putea fi sancționată doar cu avertisment. De la 1 ianuarie 2024, avertismentul a fost eliminat — chiar și cea mai mică abatere constatată pornește de la 2.000 lei amendă fermă.",
+      },
+      {
+        heading: "Recidiva costă mult mai mult",
+        body: "Dacă în 12 luni de la ultima sancționare operatorul economic mai comite cel puțin două abateri din aceeași categorie (una dintre tranșele de mai sus), amenda aplicată devine **triplul** amenzii care s-ar fi aplicat normal, iar pe lângă confiscarea sumei nejustificate se dispune și **suspendarea activității la punctul de lucru respectiv, pentru 15 zile**. Dacă e o singură recidivă în 12 luni (nu două), amenda se **dublează**, fără suspendare.\n\nSuspendarea poate înceta mai devreme: dacă operatorul economic achită amenda plus o sumă egală cu de cinci ori amenda aplicată și de cinci ori suma nejustificată confiscată, suspendarea încetează de drept în 24 de ore de la prezentarea dovezii de plată către organul constatator. Pe durata suspendării, unitatea este sigilată de echipa de control, iar la loc vizibil se afișează un anunț despre această situație.",
+      },
+      {
+        heading: "Fapte conexe care se pedepsesc separat",
+        body: "Legea sancționează distinct și alte situații legate de bon, ca să nu le confundați cu cea de mai sus:\n\n- **Neînmânarea bonului deja emis** către client, sau nefacturarea la cerere (art. 10 lit. g) — amendă **1.000–2.000 lei**, aplicată direct persoanei fizice care operează aparatul (casierul), nu firmei. Este exact situația în care bonul a fost emis corect, dar nu a fost pus fizic la dispoziția clientului.\n- **Documente justificative lipsă** pentru sume introduse sau scoase din casă în afara vânzărilor obișnuite (art. 10 lit. d) — intră sub aceeași grilă de tranșe de mai sus, dacă generează o sumă nejustificată.\n\nDiferența contează la un control: prima e o problemă de proces intern (casierul nu a înmânat bonul), a doua ține de fondul vânzării (bonul nici nu a fost emis).",
+      },
+      {
+        heading: "Cum evitați această amendă, în practică",
+        body: "Rădăcina majorității abaterilor de acest tip nu e frauda intenționată, ci un pas manual sărit la oră de vârf. Câteva măsuri simple reduc semnificativ riscul:\n\n- Fiecare încasare trece prin aparatul fiscal, fără excepții \"doar de data asta\" pentru un produs mic sau un client cunoscut\n- Personalul nou este instruit explicit că bonul se emite **la momentul plății**, nu \"quando am timp\"\n- Există o procedură clară pentru momentele în care aparatul are o problemă (verificați articolul dedicat defecțiunilor aparatului fiscal), ca personalul să nu improvizeze\n\nÎn franchisetech, fiecare vânzare finalizată în POS trimite automat comanda de emitere către aparatul fiscal, în același pas cu confirmarea plății — nu există un buton separat \"emite bonul\" pe care casierul să îl poată uita. Dacă transmiterea către aparat eșuează, starea apare clar în aplicație, nu e ascunsă.",
+      },
+    ],
+  },
+  {
+    slug: "fiscalnet-offline-ce-faceti-cand-vreti-sa-emiteti-bonul",
+    title: "Ce faceți dacă driverul fiscal e offline când vreți să emiteți bonul",
+    description:
+      "Driverul fiscal este integrarea care trimite comanda de emitere către casa de marcat sau imprimanta fiscală — nu aparatul fiscal în sine. Iată ce înseamnă, practic și legal, când pare «offline» chiar în mijlocul unei vânzări.",
+    publishedAt: "2026-09-20",
+    locale: "ro",
+    tags: ["fiscal", "fiscalnet", "pos"],
+    image: "/marketing/live/dashboard.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "Ce este, de fapt, un driver fiscal",
+        body: "Driverul fiscal (noi folosim FiscalNet, driverfiscal.ro) este stratul de comunicare care leagă aplicația de vânzare de pe calculator sau tabletă de casa de marcat sau imprimanta fiscală certificată conectată fizic la stația de lucru — prin USB, rețea locală sau Bluetooth, în funcție de model. Rolul lui este să traducă o vânzare finalizată în POS într-o comandă pe care aparatul fiscal o poate executa și să transmită înapoi rezultatul (bon emis, eroare, în așteptare).\n\nAsta e diferit de conexiunea aparatului fiscal la serverele ANAF (SIM de date sau rețea, cu retransmitere automată când revine semnalul) — aceea e tratată separat, într-un alt articol. Aici vorbim despre legătura dintre calculatorul de la casă și aparatul din fața casierului, care e o problemă locală, de cablu sau rețea, nu de conexiune la internet a aparatului însuși.",
+      },
+      {
+        heading: "De ce contează tipul aparatului dumneavoastră",
+        body: "O **casă de marcat** clasică are propriă tastatură și ecran și poate, în multe cazuri, funcționa și bate manual o vânzare direct de la aparat, chiar dacă legătura cu POS-ul e picată. O **imprimantă fiscală** (fără tastatură proprie) nu poate — depinde integral de comenzi primite de la un calculator conectat, prin exact acest tip de integrare. Dacă driverul fiscal e offline și aveți o imprimantă fiscală, aparatul pur și simplu nu are cum să primească vreo comandă de emitere, indiferent cât timp așteptați.\n\nMerită să știți, dinainte, care tip de aparat aveți instalat în local — informația e utilă în secunda în care apare o eroare, nu e ceva de căutat atunci, cu un client la casă.",
+      },
+      {
+        heading: "Primii pași când vedeți eroarea de conexiune",
+        body: "1. Verificați dacă e o problemă generală de rețea — internetul, POS-ul, alte aparate din local funcționează?\n2. Verificați fizic cablul de conectare (USB sau rețea) dintre calculator și aparatul fiscal — un cablu slăbit e cea mai frecventă cauză\n3. Dacă aveți mai multe case, verificați dacă problema e doar la stația respectivă sau la toate\n4. Reporniți aplicația de vânzare — nu aparatul fiscal însuși, decât dacă distribuitorul autorizat vă indică asta\n\nDacă după acești pași aparatul tot nu răspunde, tratați situația ca pe o defecțiune a aparatului fiscal, nu doar ca pe o eroare software trecătoare.",
+      },
+      {
+        heading: "Dacă aparatul chiar nu răspunde — regimul de defectare",
+        body: "Din punct de vedere legal, dacă aparatul fiscal nu poate emite bonuri — indiferent dacă motivul e o defecțiune internă sau imposibilitatea de a primi comenzi — se aplică art. 1 alin. (8) din OUG 28/1999: până la repunerea în funcțiune, înregistrați toate operațiunile într-un **registru special** și emiteți **chitanțe**, nu bonuri fiscale improvizate. Trebuie să anunțați imediat distribuitorul autorizat sau unitatea de service, în modul stabilit la achiziția aparatului, ca să puteți dovedi notificarea la un eventual control.\n\nProcedura completă — ce trebuie să conțină registrul special, cât timp se păstrează și ce se întâmplă când aparatul repornește — este detaliată în articolul dedicat defecțiunilor aparatului fiscal.",
+      },
+      {
+        heading: "Ce nu faceți",
+        body: "- Nu refuzați clienți sau nu opriți vânzarea doar pentru că vedeți un mesaj de eroare — verificați întâi dacă e o problemă reală de emitere, nu doar o întârziere de câteva secunde\n- Nu improvizați un \"bon\" scris de mână care să semene cu unul fiscal — folosiți chitanță, conform procedurii legale\n- Nu lăsați vânzările neconsemnate sperând să \"recuperați\" din memorie mai târziu — notați-le pe loc, în ordine\n- Nu încercați reparații pe cont propriu la aparatul fiscal — doar tehnicieni autorizați au voie să intervină",
+      },
+      {
+        heading: "Cum gestionează franchisetech acest moment",
+        body: "În franchisetech, starea transmiterii către aparatul fiscal este afișată clar la fiecare vânzare — trimis, în așteptare sau eșuat — nu e ascunsă sub un mesaj generic. Vânzarea în sine se salvează local imediat ce plata este confirmată, independent de rezultatul transmiterii către driverul fiscal, ca să nu pierdeți evidența comenzii doar pentru că integrarea are o problemă temporară.\n\nCe aplicația nu face: nu marchează o vânzare drept \"finalizată fiscal\" până nu primește o confirmare reală de la aparat. Dacă transmiterea eșuează, vedeți asta imediat, nu abia la sfârșitul zilei când încercați să închideți casa.",
+      },
+    ],
+  },
+  {
+    slug: "imprimanta-fiscala-nu-tipareste-bonul-ce-faceti",
+    title: "Ce faceți dacă imprimanta fiscală nu tipărește bonul, în mijlocul vânzării",
+    description:
+      "Aparatul fiscal s-a blocat exact când aveați un client la casă? Legea are o procedură exactă pentru această situație — registrul special și chitanțele — nu improvizație.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["fiscal", "casa-de-marcat", "defectiune"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "Ce spune legea despre defectarea aparatului fiscal",
+        body: "Situația e prevăzută explicit în OUG nr. 28/1999 (republicată), art. 1 alin. (8): \"În cazul defectării aparatelor de marcat electronice fiscale, până la repunerea în funcţiune a acestora, operatorii economici utilizatori sunt obligaţi să înregistreze într-un registru special, întocmit în acest sens, toate operaţiunile efectuate şi să emită chitanţe, în condiţiile legii, pentru respectivele operaţiuni şi facturi, la cererea clientului.\"\n\nAsta include orice situație în care aparatul nu tipărește — hârtie terminată, cap de imprimare blocat, eroare mecanică sau electronică. Excepția de la obligația registrului special se aplică doar taxiurilor și aparatelor integrate în echipamente nesupravegheate (automate) — nicio excepție relevantă pentru o cafenea sau un restaurant.",
+      },
+      {
+        heading: "Primul pas: anunțați imediat distribuitorul autorizat sau unitatea de service",
+        body: "Art. 1 alin. (8¹) din OUG 28/1999 vă obligă să notificați **imediat** distribuitorul autorizat sau unitatea de service acreditată, în modul stabilit prin contract la momentul achiziționării aparatului — de exemplu telefon urmat de email, sau un formular online, în funcție de furnizor. Legea e explicită: \"Notificarea efectuată în alt mod decât cel stabilit de părţile contractante nu este valabilă\" — deci verificați dinainte, nu în momentul crizei, care e metoda agreată cu furnizorul dumneavoastră.\n\nPăstrați dovada notificării (email trimis, confirmare telefonică notată cu oră și persoană) — la un control, dumneavoastră trebuie să demonstrați că ați anunțat, nu distribuitorul.",
+      },
+      {
+        heading: "Cât timp durează reparația: registrul special",
+        body: "Până la repunerea în funcțiune, toate operațiunile se înregistrează într-un registru special, ținut fizic la punctul de lucru:\n\n- Fiecare vânzare se notează **cronologic**, fără ștersături și fără spații libere lăsate necompletate\n- Pentru fiecare operațiune se emite o **chitanță** (nu bon fiscal) către client\n- Dacă clientul cere factură, i-o eliberați conform legii\n\nRegistrul special și raportul fiscal de închidere zilnică sunt documentele pe care organele fiscale le au în vedere la verificarea veniturilor care stau la baza impozitelor datorate — nu sunt o formalitate secundară. Registrul special se arhivează și se păstrează **10 ani**, aceeași perioadă ca memoria fiscală a aparatului.",
+      },
+      {
+        heading: "Ce nu înlocuiește chitanța — și de ce nu vă opriți din vânzare",
+        body: "Chitanța emisă manual în această perioadă nu este un document fiscal echivalent bonului — este documentul-punte prevăzut de lege exact pentru acest interval. Nu o confundați cu o factură și nu încercați să \"recreați\" ulterior bonuri fiscale retroactiv pentru vânzările din perioada de defectare — asta nu este posibil și nici legal.\n\nDefecțiunea aparatului nu este un motiv să opriți vânzarea sau să refuzați clienți \"până se repară aparatul\". Vânzarea tot trebuie să aibă loc și să fie înregistrată — doar că prin registrul special și chitanță, nu prin bon fiscal, cât timp aparatul e indisponibil.",
+      },
+      {
+        heading: "Când aparatul revine în funcțiune",
+        body: "La repunerea în funcțiune, tehnicianul de service care intervine trebuie să noteze în registrul special sau în cartea de intervenții data și ora la care aparatul și-a reluat funcționarea, sub semnătură și cu numele în clar. Acest pas nu este opțional — face parte din documentația care demonstrează, la un eventual control, perioada exactă de indisponibilitate și că ați respectat procedura pe toată durata ei.\n\nPăstrați cartea de intervenții și registrul special împreună, accesibile rapid — sunt exact documentele cerute primele la un control, alături de rapoartele Z.",
+      },
+      {
+        heading: "Cum reduceți riscul unei defecțiuni la oră de vârf",
+        body: "Câteva măsuri simple reduc frecvența și impactul defecțiunilor:\n\n- Păstrați întotdeauna o rolă de hârtie de rezervă lângă aparat, de tipul recomandat în manualul de utilizare\n- Nu permiteți intervenții tehnice decât persoanelor autorizate — legea interzice explicit accesul altor persoane la componentele aparatului\n- Păstrați la îndemână cartea de intervenții și datele de contact ale distribuitorului autorizat, nu doar \"undeva în birou\"\n\nfranchisetech trimite comanda de emitere către aparatul fiscal conectat, dar nu înlocuiește procedura legală de mai sus — dacă aparatul fizic e defect, registrul special și chitanțele rămân responsabilitatea dumneavoastră la punctul de lucru, indiferent de software-ul folosit pentru vânzare.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-suma-gresita-clientul-a-plecat-ce-faceti",
+    title: "Bon fiscal emis cu suma greșită, dar clientul a plecat — ce faceți",
+    description:
+      "Ați observat abia după ce a plecat clientul că bonul avea suma greșită. Stornoul rămâne procedura corectă, dar fără clientul de față, grija reală este alta: cum documentați diferența de bani.",
+    publishedAt: "2026-09-22",
+    locale: "ro",
+    tags: ["pos", "storno", "fiscal"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "De ce situația asta e diferită de o corecție obișnuită",
+        body: "Dacă observați o greșeală de sumă pe bon **cât clientul e încă la casă**, corectarea e directă: stornați, discutați cu clientul, îi dați rest sau îi cereți diferența, emiteți bonul corect. Situația de aici e alta — clientul a plecat deja, iar dumneavoastră (sau un coleg) observați abia acum că suma de pe bon nu corespunde cu ce ar fi trebuit facturat.\n\nProcedura fiscală de bază rămâne aceeași — stornarea bonului greșit, în cadrul aceleiași zile fiscale — dar fără clientul de față, nu mai puteți rezolva pe loc diferența de bani. Aici e de fapt miezul problemei: nu documentul, ci banii.",
+      },
+      {
+        heading: "Stornoul nu cere prezența fizică a clientului",
+        body: "Procedura de stornare a unui bon fiscal este reglementată prin normele metodologice de aplicare a OUG 28/1999 (aprobate prin HG 479/2003), art. 36. Documentele necesare pentru dosarul de anulare sunt, în esență, interne:\n\n- O **notă explicativă** (proces-verbal) din partea persoanei care a emis bonul greșit, cu motivul, numărul și ora bonului\n- **Aprobarea scrisă** a directorului financiar-contabil, contabilului-șef sau a persoanei responsabile cu gestiunea\n- Dacă eroarea a fost de preț, o notă cu diferența corectă\n- Înregistrarea contabilă a operațiunii de anulare\n\nNiciunul dintre aceste documente nu presupune, prin natura lui, semnătura sau prezența clientului — stornarea este, procedural, o operațiune internă. Pentru situații neobișnuite sau cu sume mari, confirmați totuși abordarea cu contabilul dumneavoastră înainte să închideți cazul.",
+      },
+      {
+        heading: "Dacă suma încasată a fost mai mare",
+        body: "Dacă bonul greșit a fost la o sumă mai mare decât cea corectă, aveți în sertar bani în plus față de vânzarea reală a zilei — nu îi tratați ca pe un \"surplus\" convenabil. Stornați bonul greșit, emiteți bonul corect cu suma reală și documentați clar, în procesul-verbal, ce s-a întâmplat cu diferența: dacă rămâne disponibilă pentru returnare în cazul în care clientul revine sau vă contactează, notați asta explicit.\n\nDacă aveți datele de contact ale clientului (de exemplu de la o comandă telefonică sau o rezervare), cea mai simplă abordare este să îl informați direct. Pentru sume mari sau situații care se repetă, cereți contabilului dumneavoastră tratamentul corect al banilor nerevendicați — nu este un aspect pe care să îl decideți singur, din instinct.",
+      },
+      {
+        heading: "Dacă suma încasată a fost mai mică",
+        body: "Dacă bonul greșit a fost la o sumă mai mică decât cea corectă, aveți o lipsă reală în încasările zilei față de ce s-ar fi cuvenit — și clientul a plecat fără să știe că mai datorează ceva. În practică, recuperarea diferenței de la client este rareori realistă sau merită efortul.\n\nCeea ce contează este să nu ascundeți diferența ca pe o \"neconcordanță de sertar\" nejustificată la închiderea zilei. Stornați bonul, emiteți intern bonul corect (chiar dacă suma suplimentară nu mai poate fi încasată efectiv) și notați explicit motivul în registrul de casă. O lipsă documentată și explicată e o problemă operațională minoră; o lipsă nedocumentată, recurentă, e exact tiparul pe care un control fiscal îl caută.",
+      },
+      {
+        heading: "Termenul care contează: înainte de raportul Z",
+        body: "Stornarea prin sistemul POS/aparatul fiscal este posibilă cât timp bonul greșit face parte din **ziua fiscală curentă** — adică înainte de generarea raportului Z de închidere a acelei zile. Nu contează dacă au trecut deja câteva ore de când clientul a plecat; atât timp cât raportul Z al zilei respective nu a fost generat, stornarea rămâne posibilă prin procedura obișnuită.\n\nDacă raportul Z a fost deja generat când observați greșeala, jurnalul electronic al zilei respective este definitiv — stornarea prin aparat nu mai este posibilă. Corecția se face atunci doar prin proceduri contabile separate, discutate direct cu contabilul dumneavoastră, nu prin POS.",
+      },
+      {
+        heading: "Cum preveniți să ajungeți în situația asta",
+        body: "Cea mai eficientă prevenție este confirmarea sumei cu clientul **înainte** de finalizarea plății, nu după — mai ales la plata cash, unde nu mai există un extras de cont care să arate automat suma reală. Un obicei simplu de instruit la personal: spuneți suma cu voce tare înainte de a încasa, nu doar de a o afișa pe ecran.\n\nÎn franchisetech, totalul comenzii rămâne vizibil pe ecranul de vânzare pe tot parcursul construirii comenzii, înainte de apăsarea butonului de finalizare — nu apare abia după ce plata a fost deja procesată. Asta nu elimină complet riscul de eroare umană, dar reduce fereastra în care o greșeală de sumă ajunge pe bon nesesizată.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-pierdut-sau-deteriorat-ce-faci",
+    title: "Bon fiscal pierdut sau deteriorat — ce dovadă mai aveți",
+    description:
+      "Un client vine fără bon și cere retur, sau dumneavoastră ați pierdut bonul unui echipament cumpărat pentru local. Ce spune legea despre dovada achiziției și ce puteți accepta sau folosi în loc.",
+    publishedAt: "2026-09-09",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "garantie"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "La ce servește bonul fiscal după ce s-a plătit",
+        body: "Bonul fiscal nu e important doar în momentul plății — rolul lui real începe după aceea, ca dovadă a **datei achiziției**. Conform Legii nr. 449/2003 privind vânzarea produselor și garanțiile asociate acestora (republicată), răspunderea vânzătorului pentru un produs neconform este angajată dacă defectul apare într-un termen de 2 ani de la livrare (art. 16) — iar acest termen curge de la data de pe bon sau factură, nu de la o dată estimată ulterior.\n\nPentru produsele de folosință îndelungată (echipamente de bucătărie, electronice, mobilier), comerciantul are și obligația să le însoțească de un certificat de garanție, conform art. 20 alin. (3) din OG nr. 21/1992 privind protecția consumatorilor. Certificatul arată ce acoperă garanția; bonul sau factura arată de când curge termenul. Fără niciunul dintre cele două, discuția despre garanție pornește mult mai greu.",
+      },
+      {
+        heading: "Un client vine fără bon — sunteți obligați să-l refuzați?",
+        body: "Nu automat. Legea nu condiționează dreptul la retur sau reclamație de prezentarea exclusivă a bonului fiscal — cere doar dovada că tranzacția a avut loc la dumneavoastră. Practica ANPC recunoaște ca dovezi alternative: extrasul de cont bancar (dacă plata a fost cu cardul), factura (dacă a fost cerută la momentul plății), o confirmare de plată prin SMS sau email, sau chiar eticheta produsului dacă indică vânzătorul.\n\nRefuzul automat al unei reclamații doar pe motiv că lipsește bonul fizic poate fi tratat ca o încălcare a drepturilor consumatorului. Asta nu înseamnă că trebuie să acceptați orice afirmație necontrolată — puteți și ar trebui să verificați intern dacă vânzarea a avut loc, cum arătăm în secțiunea următoare — dar «nu am bonul» nu e, singur, un motiv legal suficient pentru refuz.",
+      },
+      {
+        heading: "Cum verificați o vânzare fără bonul fizic",
+        body: "Bonul fizic e doar hârtia — vânzarea în sine rămâne înregistrată în jurnalul electronic al casei de marcat și, dacă folosiți un POS conectat, în istoricul digital al aplicației. Dacă un client vine fără bon dar știe aproximativ data, ora și ce a cumpărat, puteți căuta tranzacția în sistem înainte să decideți cum procedați.\n\nAsta contează mai ales la sume mai mari sau la produse cu garanție extinsă, unde confirmarea reală a tranzacției contează mai mult decât un bon fizic care oricum nu poate fi «reemis» de o casă de marcat fiscală — odată emis, un bon nu se poate genera a doua oară identic, doar stornat dacă e nevoie de corecție. Pentru verificare, jurnalul digital e mai de încredere decât memoria oricui. Situația e și mai strictă dacă [Raportul Z al zilei respective e deja închis](/blog/bon-fiscal-cerut-dupa-raportul-z-inchis-ce-faceti) — acolo nici stornarea nu mai e o opțiune tehnică.",
+      },
+      {
+        heading: "Când dumneavoastră ați pierdut bonul unui echipament cumpărat",
+        body: "Situația se întoarce și către dumneavoastră, ca afacere — de exemplu, ați cumpărat o mașină de cafea sau un echipament de bucătărie și, câteva luni mai târziu, aveți nevoie de garanție, dar bonul s-a decolorat sau s-a rătăcit. Dacă ați plătit cu cardul, extrasul de cont bancar arată data și furnizorul și poate susține solicitarea de garanție — de altfel, pentru plățile cu cardul, extrasul de cont ține deja, prin lege, locul bonului fiscal ca mijloc de probă a achiziției (Legea nr. 317/2024, care a modificat OUG nr. 28/1999).\n\nDacă furnizorul v-a emis și factură (frecvent la echipamente, pentru că firma cumpărătoare are nevoie de ea pentru contabilitate), aceea rămâne cea mai solidă dovadă — păstrați facturile de echipamente separat de bonurile de consumabile zilnice, tocmai pentru cazurile de garanție.",
+      },
+      {
+        heading: "Ce nu e clar reglementat — verificați cazurile punctuale",
+        body: "Nici Legea nr. 449/2003, nici OG nr. 21/1992 nu descriu explicit procedura exactă pentru un bon fiscal plătit cash și pierdut complet, fără nicio altă urmă (fără extras de card, fără factură, fără martori). Practic, în lipsa unei dovezi de orice fel, comerciantul are libertatea să decidă dacă acceptă reclamația — legea protejează consumatorul de refuzul arbitrar bazat *doar* pe lipsa bonului, nu garantează rezolvarea favorabilă indiferent de circumstanțe.\n\nPentru situații ambigue sau sume mari, cel mai sigur e să verificați direct cu ANPC (pentru dumneavoastră ca și comerciant) sau cu un consultant fiscal, în loc să vă bazați pe o interpretare generală — inclusiv a acestui articol.",
+      },
+      {
+        heading: "Cum reduceți dependența de hârtie",
+        body: "În franchisetech, fiecare vânzare finalizată în POS rămâne în istoricul digital al aplicației, căutabil după dată, oră și produs — nu doar pe bonul de hârtie pe care clientul îl poate pierde sau pe care termalul îl poate decolora în câteva luni. Dacă un client revine fără bon, puteți verifica rapid dacă și când a avut loc tranzacția, în loc să vă bazați doar pe memoria personalului sau pe cuvântul clientului.\n\nAsta nu înlocuiește bonul fiscal ca document legal — bonul rămas emis de casa de marcat fiscală certificată — dar vă dă un instrument intern rapid de verificare atunci când hârtia lipsește.",
+      },
+    ],
+  },
+  {
+    slug: "ce-risti-daca-nu-ai-bon-fiscal-la-un-control-anaf",
+    title: "Ce riscați dacă lipsește bonul fiscal la un control ANAF",
+    description:
+      "Nu «amenda generică» — mecanismul exact prin care un inspector transformă un bon lipsă într-o sancțiune, pragurile de amendă în vigoare din 2024 și ce se întâmplă dacă situația se repetă.",
+    publishedAt: "2026-09-11",
+    locale: "ro",
+    tags: ["fiscal", "control-anaf", "amenzi"],
+    image: "/marketing/live/reports.png",
+    sections: [
+      {
+        heading: "Cum descoperă efectiv inspectorul un bon lipsă",
+        body: "Un inspector nu «știe» din start că un bon lipsește — îl constată printr-o comparație. La momentul controlului sau la sfârșitul zilei, se compară valoarea bunurilor livrate sau a serviciilor prestate cu ce arată aparatul de marcat electronic fiscal (AMEF) și/sau registrul special. Diferența dintre ce s-a vândut efectiv și ce a fost înregistrat fiscal se numește, în text legal, **sumă nejustificată** — și e exact mecanismul prin care o vânzare fără bon devine o contravenție cu amendă atașată.\n\nAsta înseamnă că riscul nu vine doar din «a uitat casierul să bată un bon» — vine din orice neconcordanță pe care inspectorul o poate demonstra la momentul verificării, indiferent de motivul din spate.",
+      },
+      {
+        heading: "Amenzile pe praguri, în vigoare din 1 ianuarie 2024",
+        body: "Legea nr. 296/2023 (publicată în Monitorul Oficial nr. 977/27.10.2023) a modificat art. 11 din OUG nr. 28/1999 și a înlocuit vechiul sistem (care includea și un avertisment pentru sume mici) cu amenzi fixe pe praguri, calculate după mărimea sumei nejustificate:\n\n- **2.000 lei** — sumă nejustificată de până la 300 lei inclusiv, sub 3% din valoarea totală a bunurilor/serviciilor înregistrate\n- **5.000 lei** — până la 300 lei, dar peste 3% din total\n- **6.000 lei** — între 300 și 1.000 lei, sub 3% din total\n- **12.000 lei** — între 300 și 1.000 lei, peste 3% din total\n- **15.000 lei** — peste 1.000 lei, sub 3% din total\n- **30.000 lei** — peste 1.000 lei și peste 3% din total\n\nÎn toate cazurile, suma nejustificată se confiscă suplimentar față de amendă. Aceste cifre sunt cele confirmate în materialul explicativ oficial al ANAF (DGRFP Brașov) la modificarea din 2023 — verificați totuși cu contabilul dumneavoastră dacă nu a mai apărut o actualizare între timp, fiindcă amenzile fiscale se revizuiesc periodic.",
+      },
+      {
+        heading: "Ce se întâmplă dacă situația se repetă",
+        body: "Legea tratează diferit un incident izolat față de un tipar repetat. Dacă în 12 luni de la o sancționare pentru sumă nejustificată apare o nouă abatere din aceeași categorie, amenda se dublează față de suma inițial aplicabilă pentru acel prag. Dacă în 12 luni se constată **cel puțin două** astfel de abateri noi, amenda se triplează, iar pe lângă confiscarea sumei nejustificate se dispune și **suspendarea activității punctului de lucru pentru 15 zile**.\n\nSuspendarea poate înceta mai devreme decât cele 15 zile doar dacă operatorul economic achită amenda plus o sumă egală cu de cinci ori amenda aplicată și de cinci ori suma confiscată — caz în care sancțiunea complementară încetează la 24 de ore de la prezentarea dovezii de plată. În practică, costul real al recidivei nu e amenda de bază, ci multiplicatorul plus riscul de a sta închis fizic 15 zile la vârf de sezon.",
+      },
+      {
+        heading: "De ce «a fost o singură dată» nu vă protejează la control",
+        body: "Din perspectiva inspectorului, un bon lipsă constatat în ziua controlului nu vine cu context — nu poate distinge «a fost o excepție azi» de «se întâmplă des, dar azi ați fost prinși». Suma nejustificată se calculează din ce lipsește la momentul verificării, nu din istoricul intențiilor dumneavoastră. Un incident real izolat tot generează amendă conform pragurilor de mai sus — legea nu prevede o toleranță pentru prima abatere, cu excepția cazului deja acoperit de prag (sub 300 lei și sub 3%, care rămâne totuși sancționat, doar la nivelul minim de 2.000 lei, nu cu avertisment cum era înainte de 2024).\n\nSingurul lucru care contează practic e să nu se repete — pentru că acolo intervine multiplicarea amenzii și suspendarea.",
+      },
+      {
+        heading: "Cum reduceți riscul ca un bon să lipsească fără să observați",
+        body: "Cea mai frecventă cauză a unui bon lipsă nu e frauda, ci un pas manual sărit la oră de vârf — o vânzare cash încasată «repede», fără să treacă prin POS. Riscul scade dacă fiscalizarea nu mai depinde de un pas separat: în franchisetech, fiecare vânzare finalizată în POS trimite automat comanda către driverul fiscal, care declanșează emiterea bonului la casa fiscală, **când integrarea e configurată** — nu există un moment în care casierul trebuie «să nu uite» să bată vânzarea separat.\n\nAsta nu elimină nevoia de verificare zilnică a sertarului și a rapoartelor — dar reduce exact tipul de discrepanță pe care se bazează mecanismul sumei nejustificate descris mai sus.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-vs-bon-nefiscal-diferenta-si-cand-gresiti",
+    title: "Bon fiscal vs. bon nefiscal — diferența și când greșiți",
+    description:
+      "Nota de plată, comanda tipărită din softul de gestiune sau bonul de test al casei de marcat nu sunt bon fiscal. Iată diferența reală și cele trei greșeli frecvente prin care cafenelele și restaurantele le confundă.",
+    publishedAt: "2026-09-14",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "pos"],
+    image: "/marketing/live/dashboard.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "Ce este, de fapt, un bon nefiscal",
+        body: "Un bon nefiscal este orice document tipărit care arată ca o listă de produse și un total, dar care **nu a trecut prin jurnalul electronic fiscal** al AMEF — nu are valoare fiscală, nu e transmis către sistemul ANAF și nu poate sta la baza obligației de a fiscaliza vânzarea. În HoReCa, cele mai frecvente exemple legitime sunt: **nota de plată** (pre-bilul pe care ospătarul îl aduce la masă pentru confirmare, înainte de plata efectivă), un bon de test generat la pornirea casei de marcat, sau o comandă internă tipărită pentru bucătărie.\n\nUtilizarea unui bon nefiscal nu e, în sine, o problemă — devine una doar când e tratat sau prezentat ca și cum ar fi bonul fiscal final al unei vânzări încheiate.",
+      },
+      {
+        heading: "Ce este bonul fiscal și de ce diferă legal",
+        body: "Bonul fiscal este documentul emis de aparatul de marcat electronic fiscal (AMEF) la momentul încasării, conform OUG nr. 28/1999 privind obligația operatorilor economici de a utiliza aparate de marcat electronice fiscale. Spre deosebire de bonul nefiscal, el ajunge în jurnalul electronic al casei, colectează și raportează TVA-ul, și este documentul pe care legea îl cere la orice încasare de la o persoană fizică, indiferent de sumă.\n\nDin perspectiva unui control, diferența nu e stilistică — un bon nefiscal dat clientului în locul celui fiscal echivalează, practic, cu o vânzare nefiscalizată, chiar dacă pe hârtie arată aproape identic cu bonul real.",
+      },
+      {
+        heading: "Greșeala #1: vă opriți la nota de plată",
+        body: "Tiparul clasic în restaurante: ospătarul aduce nota de plată, clientul confirmă și plătește cash direct la masă sau la ieșire, iar la aglomerație pasul final — baterea efectivă a bonului fiscal la casă — se amână «pentru mai târziu» sau se omite complet, pentru că din perspectiva echipei «clientul deja a plătit, deci e rezolvat».\n\nDin perspectivă fiscală, nu e rezolvat — nota de plată nu are nicio valoare fiscală. Dacă acea vânzare nu ajunge separat, în aceeași zi, în jurnalul AMEF, ea devine exact tipul de neconcordanță descrisă în mecanismul sumei nejustificate la un eventual control.",
+      },
+      {
+        heading: "Greșeala #2: bonul din softul de gestiune, dat ca fiscal",
+        body: "Multe softuri de gestiune sau POS-uri mai vechi pot genera un bon printat local, cu logo și listă de produse, fără să fie conectate efectiv la AMEF. Dacă acel bon ajunge la client fără ca vânzarea să fi trecut și prin casa fiscală, clientul crede că are dovada fiscală a achiziției — dar documentul nu există în jurnalul ANAF.\n\nAsta creează un risc dublu: pentru afacere, la control, ca vânzare nefiscalizată; pentru client, dacă cere ulterior factură sau garanție pe baza acelui bon, care nu poate fi legat de o tranzacție fiscală reală.",
+      },
+      {
+        heading: "Greșeala #3: folosirea bonului nefiscal în contabilitate",
+        body: "Un bon nefiscal nu poate sta la baza înregistrărilor contabile ale afacerii care l-a emis și nu e recunoscut ca document justificativ pentru deducerea TVA de către cel care îl primește la o achiziție. Regulile exacte despre ce praguri și condiții se aplică bonurilor fiscale simple (fără CUI) în contabilitate diferă și se schimbă — verificați cu contabilul dumneavoastră ce documente acceptă exact pentru pontarea unei cheltuieli, în loc să presupuneți că orice bon tipărit e suficient.\n\nCa regulă generală simplă: dacă un document nu a trecut prin AMEF, tratați-l ca informativ, nu ca document fiscal — indiferent cât de oficial arată.",
+      },
+      {
+        heading: "Cum evitați confuzia în flux",
+        body: "Cel mai sigur proces are o singură regulă: nota de plată e mereu urmată, în aceeași interacțiune, de apăsarea finalizării plății în POS — pasul care declanșează efectiv emiterea bonului fiscal prin AMEF. Niciun document tipărit înainte de acel moment nu înlocuiește bonul fiscal, oricât de complet ar arăta.\n\nÎn franchisetech, fiecare vânzare finalizată în POS trimite automat comanda spre fiscalizare — nu există un pas manual separat de «acum bat bonul real», ceea ce reduce riscul ca personalul să confunde nota de plată cu finalizarea efectivă a vânzării.",
+      },
+    ],
+  },
+  {
+    slug: "e-obligatoriu-qr-code-pe-bonul-fiscal",
+    title: "E obligatoriu cod QR pe bonul fiscal? Ce se schimbă în 2026",
+    description:
+      "Bonul fiscal digital cu cod QR nu mai e doar o discuție teoretică — Ministerul Finanțelor a pus în dezbatere publică un proiect de HG cu termen 1 noiembrie 2026. Iată ce e deja lege, ce e încă proiect și ce nu se schimbă.",
+    publishedAt: "2026-09-17",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "casa-de-marcat"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/qr-code-receipts",
+    sections: [
+      {
+        heading: "Da, premisa e reală — dar verificați stadiul exact",
+        body: "Spre deosebire de multe subiecte fiscale «se zvonește că», codul QR pe bonul fiscal chiar este pe agenda oficială a Ministerului Finanțelor. La 1 aprilie 2026, MF a lansat în dezbatere publică un proiect de Hotărâre de Guvern care introduce bonul fiscal digital, cu cod QR, identificator unic și transmitere a datelor către ANAF într-un format standardizat.\n\nImportant: la momentul redactării acestui articol, e vorba despre un **proiect** aflat în dezbatere publică, nu despre o lege deja publicată în Monitorul Oficial. Verificați stadiul curent înainte să luați decizii de buget sau de implementare bazate pe acest termen — proiectele fiscale românești se modifică frecvent între dezbatere și forma finală.",
+      },
+      {
+        heading: "Termenul: 1 noiembrie 2026",
+        body: "Conform proiectului, operatorii economici au la dispoziție termenul de 1 noiembrie 2026 pentru a-și adapta sistemele și pentru a transmite noile date către ANAF. Nu e prima dată când apare acest gen de termen — obligația de a avea cod QR pe bon există în principiu din 2024, sancțiunile pentru lipsa lui au fost programate inițial pentru septembrie 2025, apoi suspendate printr-o ordonanță din decembrie 2025 chiar până la 1 noiembrie 2026, motivat oficial de faptul că aproximativ 900.000 de case de marcat din România aveau nevoie de actualizare software și certificare tehnică la ICI București.\n\nCu alte cuvinte, termenul a tot fost amânat — ceea ce e un motiv în plus să nu tratați 1 noiembrie 2026 ca fiind sigur imuabil, ci ca cea mai recentă variantă cunoscută.",
+      },
+      {
+        heading: "Ce conține, concret, bonul digital cu QR",
+        body: "Conform proiectului aflat în dezbatere, codul QR de pe bon ar urma să fie însoțit de data și ora exactă a emiterii, un identificator unic al bonului și, la cererea clientului, codul de identificare fiscală al comerciantului. Scopul declarat e ca un client sau un inspector să poată verifica instant validitatea bonului, iar ANAF să primească automat confirmarea tranzacției.\n\nProiectul discută și reducerea perioadei de arhivare a jurnalelor electronice de la 10 la 5 ani, dar acesta e un detaliu tehnic care poate suferi modificări până la forma finală — nu vă bazați operațional pe el încă.",
+      },
+      {
+        heading: "Ce e deja lege, nu doar proiect: bonul la plata cu cardul",
+        body: "Spre deosebire de codul QR, o schimbare conexă e deja în vigoare: Legea nr. 317/2024, care a modificat OUG nr. 28/1999, prevede că la plata cu cardul de debit sau credit, comerciantul **nu mai are obligația să tipărească și să înmâneze** bonul fiscal — doar la cererea explicită a clientului. Lipsa bonului tipărit nu afectează drepturile consumatorului: extrasul de cont bancar ține locul bonului ca mijloc de probă a achiziției.\n\nAtenție la ce nu s-a schimbat: tranzacția tot trebuie fiscalizată prin AMEF în momentul plății — legea a scutit doar pasul de tipărire pe hârtie, nu obligația de a trece vânzarea prin casa de marcat.",
+      },
+      {
+        heading: "Ce înseamnă pentru dumneavoastră ca afacere",
+        body: "Codul QR, când va deveni obligatoriu, va fi generat de **casa de marcat fiscală certificată**, nu de un soft de gestiune sau de un POS extern — exact cum se întâmplă și acum cu bonul fiscal standard. franchisetech nu generează codul QR de pe bon și nu promite asta: trimite datele vânzării către casa fiscală prin driverul fiscal, **când integrarea este configurată**, iar emiterea efectivă a bonului — cu sau fără QR — rămâne responsabilitatea aparatului certificat.\n\nCe puteți face util acum, fără să reacționați exagerat la un proiect încă în dezbatere: întrebați furnizorul casei de marcat dacă are deja un plan de actualizare pentru termenul din proiect, ca să nu vă prindă pe ultima sută de metri dacă termenul rămâne 1 noiembrie 2026.",
+      },
+    ],
+  },
+  {
+    slug: "diferenta-de-casa-la-final-de-zi-surplus-sau-lipsa",
+    title: "Diferență de casă la final de zi — surplus sau lipsă, ce faceți și cum o documentați",
+    description:
+      "Sertarul nu se potrivește exact cu raportul Z? O diferență de casă nu e automat o problemă cu ANAF — dar modul în care o documentați poate deveni una. Ce spune legea, ce e doar practică internă și cum notați corect surplusul sau lipsa.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["numerar", "registru-de-casa", "raport-z", "operatiuni"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/z-report",
+    sections: [
+      {
+        heading: "O diferență de casă nu este, prin ea însăși, o contravenție",
+        body: "OUG nr. 28/1999, legea de bază a caselor de marcat, nu sancționează faptul în sine că numerarul numărat în sertar nu coincide exact cu totalul de numerar așteptat din raportul Z. Nu există un articol care să spună „diferența de casă e contravenție\" — și n-ar trebui să inventați unul din frică, pentru că nu ajută la nimic dacă la control explicați ceva ce legea nu cere.\n\nCe sancționează efectiv OUG 28/1999, la art. 10, sunt alte fapte: neemiterea bonului fiscal pentru o vânzare (art. 10 pct. 3 lit. c), neînmânarea bonului deja emis către client (art. 10 lit. g) și, cel mai apropiat de subiectul de aici, lipsa documentelor justificative pentru sume introduse sau scoase din casă în afara vânzărilor obișnuite (art. 10 lit. d). Ultima cade sub aceeași grilă de amenzi pe tranșe ca neemiterea bonului — între 2.000 și 30.000 lei, în funcție de sumă și de cât reprezintă din vânzările zilei, plus confiscarea sumei nejustificate. Diferența practică: nu vă amendează nimeni pentru că sertarul are 30 de lei în minus. V-ar putea amenda dacă acei 30 de lei (sau orice sumă introdusă ori scoasă din casă) nu au niciun document care să explice de unde vin sau unde s-au dus.",
+      },
+      {
+        heading: "Ce e cu adevărat obligatoriu: registrul de casă",
+        body: "Ce este obligatoriu, conform Legii contabilității nr. 82/1991 și normelor date prin Ordinul MFP nr. 2634/2015, este completarea registrului de casă — documentul care înregistrează cronologic, zilnic, fiecare încasare și plată în numerar. Normele generale din anexa 1 a ordinului sunt explicite: documentele financiar-contabile nu admit ștersături, modificări sau spații libere între operațiuni; erorile se corectează prin tăierea cu o linie a cifrei greșite și înscrierea alături a cifrei corecte, cu semnătură și dată. Pentru documentele pe baza cărora se justifică numerarul — exact categoria din care face parte registrul de casă — regula e și mai strictă: documentul completat greșit se anulează integral și rămâne în carnet, nu se corectează prin suprascriere.\n\nAsta înseamnă, concret, că o diferență de casă găsită la închiderea zilei nu \"dispare\" dacă nu o notați nicăieri — ea trebuie să apară undeva, cu explicație, în evidența pe care o păstrați. Am detaliat structura exactă pe coloane și un exemplu complet, zi de zi, în [Cum completați corect Registrul de casă, pas cu pas](/blog/cum-completezi-registrul-de-casa-corect) — dacă nu sunteți sigur cum arată un rând corect completat, plecați de acolo.",
+      },
+      {
+        heading: "Cum documentați corect o diferență, pas cu pas",
+        body: "1. Numărați fizic tot numerarul din sertar, bănuț cu bănuț, nu \"cam atât\"\n2. Scădeți fondul de deschidere al zilei (suma cu care ați pornit tura)\n3. Comparați rezultatul cu numerarul așteptat conform raportului Z\n4. Dacă cele două cifre coincid — nu aveți nimic de documentat suplimentar\n5. Dacă nu coincid, identificați, dacă puteți, cauza probabilă (rest greșit, o anulare nedocumentată, o vânzare neîncasată)\n6. Notați suma exactă a diferenței, semnul ei (plus sau minus) și explicația găsită — sau \"cauză neidentificată\" dacă nu găsiți una — direct în registrul de casă sau într-o notă atașată lui, cu data și semnătura persoanei care a numărat\n\nUn pas des sărit: diferențele mici, sub 10-20 de lei, sunt tratate ca \"nu merită notate\". Practic nu contează mărimea — contează faptul că, peste trei luni, nimeni nu-și mai amintește dacă acea diferență repetată de 15 lei e o eroare de rest normală sau un tipar care merită investigat mai serios.",
+      },
+      {
+        heading: "Surplus vs. lipsă — și ce nu aveți voie să faceți cu o lipsă",
+        body: "Un surplus (mai mulți bani în sertar decât arată raportul Z) și o lipsă nu se tratează la fel. Un surplus e, cel mai adesea, o eroare de rest dat în minus către un client — deci prima reacție corectă e să verificați dacă nu cumva ați \"câștigat\" acei bani dintr-o greșeală, nu să-i tratați automat ca venit. Dacă, după verificare, cauza chiar nu poate fi identificată, contabilul dumneavoastră va ști cum să înregistreze surplusul; nu e o decizie pe care ar trebui s-o luați singur, la fața locului, fără să consultați pe cineva care vede toată luna, nu doar o zi.\n\nO lipsă repetată sau mare ridică o întrebare diferită: cine răspunde pentru ea? Aici atenție la o greșeală frecventă — angajatorul nu poate scădea pur și simplu suma din salariul casierului. Codul muncii, art. 254, permite recuperarea unui prejudiciu cauzat din vina salariatului doar prin acordul scris al acestuia (sumă care, prin acord, nu poate depăși echivalentul a 5 salarii minime brute pe economie) sau, dacă nu există acord, printr-o hotărâre judecătorească definitivă. O reținere unilaterală din statul de plată, fără niciuna dintre cele două, nu e o soluție legală, oricât de clar ar părea cazul.",
+      },
+      {
+        heading: "Cele mai frecvente cauze ale diferenței de casă",
+        body: "- **Rest calculat sau dat greșit** — cea mai frecventă cauză de departe; câțiva lei pe tranzacție, care se adună pe parcursul unei zile aglomerate\n- **Anulări (storno) sau reduceri aplicate după încasare, nedocumentate** — casierul anulează o linie din bon după ce clientul a plătit deja cash, dar nu notează de ce\n- **Vânzare neînregistrată în sistem** — plata s-a încasat, dar produsul nu a fost trecut prin POS, deci nu apare în totalul așteptat de raportul Z\n- **Scoateri de numerar din sertar nedocumentate** — o plată rapidă către un furnizor \"din cash-ul zilei\", fără chitanță sau dispoziție de plată notată pe loc\n- **Furt** — cea mai rară cauză statistic, dar singura pentru care lipsa se repetă constant la aceeași persoană sau tură, fără nicio altă explicație plauzibilă\n\nDacă o diferență similară apare la aceeași oră sau la aceeași persoană, în mod repetat, nu mai e \"o zi proastă\" — e un tipar care merită investigat specific, nu doar notat și trecut mai departe.",
+      },
+      {
+        heading: "Cum funcționează în franchisetech",
+        body: "Raportul Z din franchisetech calculează automat numerarul așteptat — vânzări în numerar plus fondul de deschidere — deci comparația cu ce numărați fizic în sertar pornește de la o cifră corectă, nu de la o estimare. Dacă apare o diferență, o puteți nota direct ca mișcare în registrul de casă generat automat din sesiunea POS, cu oră și utilizator, fără să completați manual un formular separat.\n\nfranchisetech nu decide pentru dumneavoastră dacă o diferență e o eroare de rest sau ceva mai serios — asta rămâne o evaluare pe care o faceți dumneavoastră sau contabilul, cu contextul zilei respective. Ce oferă sistemul e o cifră de plecare exactă și un istoric complet, căutabil pe dată, ca să nu reconstituiți o diferență din memorie peste trei luni.",
+      },
+    ],
+  },
+  {
+    slug: "ati-uitat-sa-emiteti-bonul-fiscal-ce-faceti-acum",
+    title: "Ați uitat să emiteți bonul fiscal pentru o vânzare — ce faceți acum",
+    description:
+      "Descoperiți abia la închiderea zilei, sau a doua zi, că o vânzare n-a trecut deloc prin bon fiscal? Fapta e deja comisă legal — dar diferența dintre un incident izolat corectat cinstit și un tipar de venituri needeclarate contează enorm pentru cât de gravă rămâne situația.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "amenzi", "control-anaf"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/z-report",
+    sections: [
+      {
+        heading: "Ce înseamnă, legal, o vânzare descoperită fără bon, după fapt",
+        body: "Fapta e definită în OUG nr. 28/1999 (republicată), art. 10 pct. 3 lit. c): neemiterea bonului fiscal pentru bunurile livrate sau serviciile prestate este contravenție, indiferent de motivul din spate — grabă la oră de vârf, o eroare de operare sau, exact situația de aici, o vânzare care pur și simplu nu a mai ajuns prin aparatul fiscal. Legea nu face, la nivelul acestei fapte, nicio distincție între «am uitat» și «am ales să nu bat bonul»: contravenția se consumă juridic în momentul vânzării, nu în momentul în care o descoperiți dumneavoastră, la închiderea zilei sau abia a doua zi, la reconciliere.\n\nAsta e important de acceptat de la început, ca să nu vă bazați pe o presupunere greșită: descoperirea ulterioară, din proprie inițiativă, nu vă mută într-o categorie juridică separată sau mai blândă doar pentru că nu a fost un inspector cel care a găsit diferența. Ce diferă cu adevărat, în funcție de ce faceți din acel moment încolo, e cât de gravă rămâne situația — nu dacă fapta a existat. Pentru mecanismul exact al amenzii, pe tranșe, aveți deja un articol dedicat: [Amenda pentru neeliberarea bonului fiscal — cât este și cum o evitați](/blog/amenda-neeliberare-bon-fiscal-cat-este-si-cum-o-eviti). Articolul de față pornește de unde se oprește acela — nu cum preveniți fapta, ci ce faceți după ce ați constatat-o deja, pe cont propriu.",
+      },
+      {
+        heading: "Nu există o cale de a «emite» retroactiv bonul — dar tot aveți ce face",
+        body: "Prima reacție firească e să vă întrebați dacă puteți, pur și simplu, «bate acum bonul, cu data de azi», pentru vânzarea uitată. Nu puteți, iar dacă ați putea din punct de vedere tehnic, nu ar corecta nimic legal — ar crea doar o discrepanță nouă, o încasare care apare fiscal într-o zi în care nu a avut loc, fără să rezolve nimic în ziua în care vânzarea chiar s-a produs. Aparatele de marcat electronice fiscale înregistrează operațiunile cu data și ora reală a tranzacției; nu există un mecanism legal de emitere retroactivă a unui bon fiscal pentru o vânzare deja încheiată altfel.\n\nNu confundați situația cu procedura de la art. 1 alin. (8) din OUG 28/1999 — registrul special și chitanțele emise cât timp aparatul e efectiv defect. Acea procedură se aplică doar cât timp aparatul chiar nu funcționează, în timp real; nu se poate invoca retroactiv, pentru o zi în care aparatul a funcționat normal, dar operațiunea a fost pur și simplu omisă. La un control, jurnalul intern al aparatului și istoricul de service arată clar dacă a existat sau nu o defecțiune reală — nu încercați să «acoperiți» o vânzare uitată cu o defecțiune care nu s-a întâmplat.\n\nCe puteți controla, în schimb, e partea contabilă: venitul din vânzarea respectivă tot trebuie să ajungă în evidența contabilă și în declarația de TVA sau de impozit pe profit aferentă perioadei corecte, chiar dacă bonul fiscal, ca document, nu mai poate fi emis pentru acea tranzacție.",
+      },
+      {
+        heading: "Diferența care contează cu adevărat: incident izolat vs. tipar de venituri needeclarate",
+        body: "Aici e diferența care contează cu adevărat pentru cât de gravă rămâne situația dumneavoastră — și de multe ori nu e explicată clar. Neemiterea bonului, ca faptă izolată, e o contravenție conform OUG 28/1999: amendă pe tranșe (de la 2.000 lei până la 30.000 lei, în funcție de sumă și de ponderea ei din vânzările zilei — detaliile complete sunt în articolul despre amenda pentru neeliberarea bonului fiscal, linkuit mai sus), plus confiscarea sumei nejustificate. Se aplică per faptă constatată, indiferent de intenție.\n\nCu totul altceva e situația în care venitul nedeclarat nu rămâne un incident izolat, corectat intern, ci devine un tipar — vânzări care nu ajung nici prin bon, nici în contabilitate, nici în declarațiile fiscale, în mod repetat. Legea nr. 241/2005 pentru prevenirea și combaterea evaziunii fiscale sancționează, la art. 9 alin. (1) lit. b), ca infracțiune — nu ca simplă contravenție — «omisiunea, în tot sau în parte, a evidenţierii, în actele contabile ori în alte documente legale, a operaţiunilor comerciale efectuate sau a veniturilor realizate», atunci când fapta e comisă «în scopul sustragerii de la îndeplinirea obligaţiilor fiscale». Pedeapsa e închisoarea — conform ultimelor modificări legislative, între 3 și 10 ani, cu majorări dacă prejudiciul e mare — nu o amendă pe care o plătiți și treceți mai departe. Legea prevede și o cale de reducere sau înlăturare a pedepsei dacă prejudiciul e acoperit integral înainte de primul termen de judecată, dar acel mecanism e gândit pentru fapte deja calificate drept infracțiune, nu e un motiv să tratați ușor o vânzare uitată.\n\nDiferența practică, pentru dumneavoastră: o vânzare uitată, descoperită și corectată cinstit în contabilitate rămâne, dacă e găsită la un control, un risc de amendă contravențională. Venituri needeclarate constant, pe mai multe zile sau săptămâni, riscă să treacă granița spre evaziune fiscală — unde vorbim de altă lege, alt tip de răspundere și alte mize. Cifrele exacte ale pedepsei se modifică periodic; pentru o evaluare corectă a riscului într-un caz concret, aveți nevoie de un avocat sau de un consultant fiscal, nu de un articol de blog.",
+      },
+      {
+        heading: "Ce NU faceți când descoperiți gaura asta",
+        body: "- Nu emiteți un bon «de completare», cu data curentă, pentru o vânzare din trecut — nu corectează nimic legal, doar creează o neconcordanță nouă\n- Nu modificați sau ștergeți diferența din Registrul de casă ca să «iasă» cifrele — e document legal; orice corecție se face vizibil, cu explicație atașată, nu prin rescriere\n- Nu așteptați până la finalul lunii sau al anului, sperând că «se pierde în cifre» — cu cât trece mai mult timp între vânzare și descoperire, cu atât e mai greu de explicat, cu bună-credință, de ce ați aflat abia atunci\n- Nu ascundeți situația de contabilul dumneavoastră — el sau ea are nevoie de detaliile reale ca să reflecte corect venitul în declarații, nu doar diferența de casă\n- Nu tratați asta ca pe un incident «rezolvat» doar pentru că ați acoperit lipsa din sertar din bani proprii — lipsa fizică din casă și obligația fiscală pentru venitul nedeclarat sunt două lucruri separate",
+      },
+      {
+        heading: "Ce faceți, concret, chiar acum",
+        body: "1. Notați ce știți cât mai repede — data, ora aproximativă, suma, ce s-a vândut, cine a operat casa — cât timp încă vă amintiți detaliile, nu peste o săptămână\n2. Discutați cu contabilul dumneavoastră în aceeași săptămână, nu la următorul raport lunar — el sau ea decide cum se reflectă corect venitul în contabilitate și în declarația de TVA sau de impozit pe profit aferentă\n3. Verificați dacă e un caz izolat sau dacă găsiți diferențe similare în zilele anterioare — dacă da, tratați-l ca pe un semnal de proces, nu ca pe o excepție\n4. Dacă situația se repetă sau implică sume mari, cereți explicit contabilului sau unui consultant fiscal o evaluare de risc — nu e o discuție de amânat, oricât de neplăcută pare\n\nCu cât descoperiți mai devreme o astfel de diferență, cu atât rămâne mai ușor de explicat și de corectat — și cu atât scade riscul să devină un tipar, care e exact linia dintre o contravenție și o problemă mult mai serioasă. În franchisetech, diferența dintre numerarul așteptat și cel numărat apare direct în Raportul Z, în aceeași zi, nu abia la o reconciliere lunară — motivul pentru care majoritatea unor astfel de goluri ajung să fie descoperite la câteva ore de la vânzare, nu la câteva săptămâni.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-cota-tva-gresita-cum-corectati-dupa-emitere",
+    title: "Bon fiscal emis cu cotă de TVA greșită — cum corectați după emitere",
+    description:
+      "Ați bătut 21% în loc de 11% (sau invers) și bonul s-a tipărit deja — poate clientul a și plecat. Iată ce puteți corecta prin stornare și ce rămâne, real, doar în mâna contabilului.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["tva", "storno", "fiscal"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "Prin ce diferă o cotă de TVA greșită de o sumă sau un produs greșit",
+        body: "Mecanismul legal de corectare a unui bon fiscal emis greșit este același indiferent ce anume ați greșit — produsul, cantitatea, suma sau cota de TVA: stornarea, cu bază în normele de aplicare a OUG 28/1999 (aprobate prin HG 479/2003). [Pașii concreți, documentele necesare și ce faceți dacă observați greșeala abia după închiderea zilei sunt explicate pe larg aici](/blog/cum-anulezi-un-bon-fiscal-emis-gresit) — nu le repetăm în articolul de față.\n\nCe e diferit la o cotă de TVA greșită — de exemplu un produs bătut la 21% când trebuia 11%, sau invers — e ce se întâmplă cu banii deja încasați. La o eroare de sumă, diferența e, practic, banii afacerii: fie ați luat în plus de la client, fie în minus. La o eroare de cotă TVA, o parte din suma încasată e declarată explicit pe bon drept TVA — bani colectați, formal, în numele statului, nu venit propriu. Asta schimbă exact ce puteți repara doar printr-o notă contabilă internă și ce nu, mai ales dacă între timp clientul a plecat.",
+      },
+      {
+        heading: "Cotele curente de TVA — ca să știți precis ce ați greșit",
+        body: "Cotele de TVA din România s-au schimbat prin Legea nr. 141/2025, cu normele de aplicare date prin HG 602/2025, ambele cu efect din 1 august 2025: cota standard a urcat de la 19% la **21%**, iar fostele cote reduse de 9% și 5% au fost unificate într-o singură cotă redusă de **11%**. Pentru un local HoReCa, cota de 11% acoperă serviciile de restaurant și catering, precum și alimentele în general — cu excepția băuturilor alcoolice, a băuturilor nealcoolice îndulcite încadrate la codul NC 2202 și a alimentelor cu conținut mare de zahăr adăugat, care rămân la cota standard de 21%. Cota 0% rămâne rezervată operațiunilor scutite prin lege — nu e o cotă pe care o alegeți pentru un client obișnuit la masă.\n\nÎn practică, o sursă frecventă chiar a erorii de cotă e obișnuința cu cifrele vechi: cineva care a lucrat cu sistemul dinainte de august 2025 poate încă \"gândi\" în 19% sau 9%, sau confundă cota redusă actuală cu fosta cotă suplimentară de 5%, care nu mai funcționează ca atare pentru alimentație. Dacă un produs din sistem are o cotă care nu e nici 21%, nici 11%, nici 0%, verificați configurarea înainte de orice altceva — poate să nu fie o greșeală de moment, ci o setare veche, nemodificată de la schimbarea legii.",
+      },
+      {
+        heading: "Ați prins greșeala în aceeași zi, cu clientul încă la casă",
+        body: "Dacă observați eroarea de cotă chiar în timpul vânzării, înainte ca bonul să fie tipărit, corectarea e directă. Conform art. 33 lit. B.c din normele de aplicare a OUG 28/1999 (HG 479/2003), o eroare poate fi corectată la momentul respectiv, fără dosar separat, cât timp bonul nu a fost încă emis și corecția nu duce valoarea totală în negativ.\n\nDacă bonul greșit a apucat deja să fie tipărit, dar clientul e tot la casă, se aplică aceeași procedură de stornare: stornați bonul, restituiți efectiv banii încasați de la client, apoi emiteți bonul corect cu cota de TVA corectă setată pe produs. Pentru că banii se întorc fizic la client, iar tranzacția corectă e una nouă și completă, nu rămâne nimic de reglat ulterior pe cota greșită — ea pur și simplu nu mai există în vânzările zilei.",
+      },
+      {
+        heading: "Clientul a plecat deja, dar ziua fiscală nu s-a închis",
+        body: "Aici lucrurile se complică față de o simplă eroare de sumă. Tehnic, stornarea prin aparatul fiscal rămâne posibilă cât timp raportul Z al zilei nu a fost generat — ziua fiscală e încă deschisă. Dar o stornare pentru eroare de cotă TVA presupune, în esență, să declarați că suma încasată de la un client pe care nu îl mai aveți în față conținea, de fapt, un alt TVA decât cel scris pe bon — și asta ridică o problemă pe care o eroare de sumă nu o are.\n\nPotrivit unui răspuns de specialitate din consultanța fiscal-contabilă, pe exact acest tip de speță, odată ce TVA-ul a fost efectiv încasat pe bon de la o persoană fizică, o simplă \"reglare contabilă\" care ar muta diferența de TVA la veniturile firmei ar însemna, practic, o îmbogățire fără justă cauză în detrimentul statului — pentru că acel TVA a fost colectat în numele statului, nu ca venit al afacerii (raționament bazat pe art. 330 din Codul Fiscal și art. 33 și 36 din normele de aplicare a OUG 28/1999). Cu alte cuvinte: stornarea bonului și reemiterea unuia cu cota corectă nu înseamnă automat că diferența de TVA poate trece, pur și simplu, la profitul firmei. Pentru un caz ca acesta, discutați explicit cu contabilul dumneavoastră înainte să considerați situația rezolvată — nu e o decizie de luat singur, doar din ecranul POS-ului.",
+      },
+      {
+        heading: "Dacă observați abia după închiderea zilei",
+        body: "Dacă raportul Z al zilei a fost deja generat, jurnalul electronic al acelei zile e definitiv — stornarea prin aparatul fiscal nu mai e o opțiune, la fel ca la orice altă corectare de bon după închidere. Pentru o eroare de cotă TVA, asta separă problema în două:\n\n1. **Pentru viitor** — corectați imediat cota de TVA configurată pe produsul respectiv, ca eroarea să nu se repete pe fiecare bon următor. Cu cât durează mai mult până corectați setarea, cu atât se adună mai multe bonuri greșite de tratat retroactiv.\n2. **Pentru trecut** — TVA-ul deja colectat la cota greșită, pe bonurile deja emise, nu se repară printr-o simplă notă în POS. Devine subiect de discuție directă cu contabilul dumneavoastră, care stabilește tratamentul corect — inclusiv dacă e nevoie de regularizare cu ANAF pentru perioada afectată.\n\nCu cât greșeala de cotă e descoperită mai târziu — după mai multe zile sau săptămâni, nu doar după o singură închidere — cu atât perioada de regularizat pentru contabil e mai mare. E un motiv concret să verificați periodic, nu doar la control, dacă produsele din meniu au cotele de TVA setate corect.",
+      },
+      {
+        heading: "Cum reduceți riscul în franchisetech",
+        body: "Cota de TVA se configurează o singură dată, la nivel de produs, în franchisetech — nu se alege manual de casier la fiecare vânzare și nu depinde de canalul prin care se vinde produsul (masă, livrare, take-away). Asta elimină cea mai frecventă sursă de eroare umană: alegerea greșită a cotei în mijlocul unei vânzări aglomerate.\n\nRaportul Z arată TVA-ul colectat defalcat pe fiecare cotă prezentă în vânzările zilei. Dacă un produs are cota setată greșit, discrepanța devine vizibilă rapid — de multe ori chiar în aceeași zi, ceea ce vă lasă varianta mai simplă de stornare prin aparat, descrisă mai sus, în loc de o corecție contabilă ulterioară. Dacă totuși o greșeală de cotă ajunge să fie descoperită după închiderea zilei, franchisetech păstrează istoricul complet al vânzărilor și al modificărilor de produs, ca să aveți exact datele de care contabilul are nevoie pentru regularizare.",
+      },
+    ],
+  },
+  {
+    slug: "amenda-neconectare-casa-marcat-anaf",
+    title: "Amenda pentru neconectarea casei de marcat la sistemul ANAF — cât este și cum o evitați",
+    description:
+      "Legea obligă orice casă de marcat fiscală să transmită date către ANAF în timp real — nu doar să existe. Amenda pentru neconectare e diferită de cea pentru lipsa bonului fiscal. Iată exact cât este, cu ce articol se aplică și ce înseamnă „conectat” din punct de vedere tehnic.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["fiscal", "casa-de-marcat", "amenzi", "control-anaf"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/qr-code-receipts",
+    sections: [
+      {
+        heading: "Obligația de conectare — și de ce e diferită de „aveți casă de marcat certificată”",
+        body: "OUG 28/1999 (republicată) tratează, de fapt, două obligații diferite, cu sancțiuni diferite. Prima este simpla deținere a unei case de marcat electronice fiscale (AMEF) certificate — obligația generală de la art. 1 alin. (1). Nerespectarea acesteia se sancționează separat, prin art. 10 lit. cc), cu amenda de la art. 11 alin. (1) lit. f), plus confiscarea sumelor nejustificate și suspendarea activității punctului de lucru.\n\nA doua obligație, distinctă, e cea de care se ocupă acest articol: chiar dacă aveți un aparat certificat și funcțional, legea vă cere separat, prin art. 3¹ alin. (4) din OUG 28/1999, ca operatorii economici să \"asigure conectarea la distanță a aparatelor de marcat electronice fiscale, în vederea transmiterii de date fiscale către Agenția Națională de Administrare Fiscală\". Un aparat fiscal care emite bonuri corect, dar nu transmite datele către serverele ANAF, încalcă tot legea — doar un articol diferit, cu o amendă diferită de cea pentru lipsa aparatului sau pentru lipsa bonului.",
+      },
+      {
+        heading: "Amenda pentru neconectare: cât este, exact, și cu ce articol",
+        body: "Nerespectarea obligației de conectare este calificată drept contravenție separat, la art. 10 lit. ff) din OUG 28/1999: \"nerespectarea de către utilizatorii aparatelor de marcat electronice fiscale a dispozițiilor prevăzute la art. 3¹ alin. (4)\".\n\nAmenda corespunzătoare e stabilită la art. 11 alin. (1) — care, până la 31 decembrie 2023, o încadra la litera j), iar de la 1 ianuarie 2024, odată cu restructurarea grilei de amenzi prin Legea nr. 296/2023 (publicată în Monitorul Oficial nr. 977/27.10.2023), a mutat-o la litera l), fără să-i schimbe valoarea: **amendă de la 8.000 lei la 10.000 lei**. Suma nu s-a schimbat prin reforma fiscală din 2024 — doar litera de la care se citează articolul, pentru cine caută textul exact în lege sau găsește materiale mai vechi care încă citează litera j).",
+      },
+      {
+        heading: "E o amendă per aparat, recurentă, sau per control? Ce spune legea, ce nu spune",
+        body: "Textul legii nu prevede, pentru această faptă, o amendă zilnică sau cumulativă — este o sumă fixă în intervalul de mai sus, aplicată de agentul constatator pentru fapta constatată la momentul controlului. Spre deosebire de alte litere din același articol (de exemplu cele pentru sume nejustificate în casă, la art. 11 alin. (1) lit. e), care au reguli explicite de recidivă — amendă dublată sau triplată dacă fapta se repetă în 12 luni), legea nu prevede, pentru litera care acoperă neconectarea, o clauză separată de recidivă.\n\nCât despre distincția „niciodată conectat” vs. „offline temporar dintr-o pană de internet” — legea nu publică un număr exact de ore de toleranță. Ce rezultă clar din text: obligația de la art. 3¹ alin. (4) este să **asigurați** conectarea, nu ca aceasta să fie neîntreruptă în orice secundă. Ghidul oficial ANAF de conectare a AMEF cere operatorilor „asigurarea, cu caracter permanent, a condițiilor pentru menținerea conexiunii (de exemplu, neîntreruperea serviciilor de internet)” — un standard de diligență rezonabilă, nu de conexiune perfectă. Un aparat care a parcurs deja procedura de conectare și are o pană scurtă de semnal e într-o situație diferită, tehnic și juridic, de unul care nu a fost conectat niciodată. Pentru pașii practici când apare o eroare de conectare la casă — și ce faceți concret în fața unui client — vedeți [erorile frecvente de conectare la ANAF și cum le rezolvați](/blog/conectare-casa-marcat-anaf-erori-frecvente).",
+      },
+      {
+        heading: "Ce înseamnă, tehnic, „conectat” — nu e doar despre SIM",
+        body: "„Conectat” nu înseamnă doar că aparatul are un SIM cu date sau e băgat într-o rețea cu internet — deși ambele sunt condiții necesare. Conform procedurii oficiale ANAF, conectarea propriu-zisă se face de distribuitorul autorizat sau unitatea de service acreditată, în patru pași: instalarea certificatului digital ANAF în aparat, instalarea fișierului de profil care trece aparatul „online”, generarea unui raport Z de închidere zilnică prin care se verifică transmiterea reușită la sistemul informatic MF-ANAF, și atașarea acelui raport Z la cartea tehnică de intervenții a aparatului.\n\nÎn practică, un raport Z transmis cu succes este dovada tehnică a conexiunii — nu declarația dumneavoastră de intenție. Odată conectat, aparatul transmite automat datele către ANAF după fiecare raport Z de închidere zilnică, fără să mai fie nevoie de declarația lunară A4200 (care rămâne obligatorie doar pentru perioada dinaintea conectării sau pentru fișierele semnalate ca netransmise). Puteți verifica oricând, prin Spațiul Privat Virtual, dacă sistemul ANAF a semnalat fișiere netransmise de la aparatul dumneavoastră — cel mai simplu mod de a confirma că nu aveți o problemă de conectare fără să așteptați un control.",
+      },
+      {
+        heading: "Când neconectarea devine mai mult decât o amendă administrativă",
+        body: "Amenda de 8.000–10.000 lei de mai sus este sancțiunea contravențională — cea aplicată pentru simpla constatare a neconectării. Din 16 mai 2024, odată cu intrarea în vigoare a Legii nr. 126/2024, care a modificat Legea nr. 241/2005 pentru prevenirea și combaterea evaziunii fiscale, a apărut și o variantă penală a unei fapte înrudite.\n\nArt. 9 alin. (1) lit. i) din Legea 241/2005 (introdusă prin Legea 126/2024) califică drept infracțiune de evaziune fiscală \"utilizarea de aparate de marcat electronice fiscale care nu sunt conectate la sistemul informatic național de supraveghere și monitorizare a datelor fiscale, potrivit legii, sau alterarea aparatelor de marcat electronice fiscale pentru netransmiterea unor date fiscale sau transmiterea unor date fiscale nereale” — pedepsită cu închisoare de la 3 la 10 ani și interzicerea unor drepturi, sau cu amendă.\n\nCondiția care contează practic: art. 9 alin. (1) se aplică doar faptelor \"săvârșite în scopul sustragerii de la îndeplinirea obligațiilor fiscale\" — adică unde există intenția de a evita taxe, nu o simplă neglijență administrativă sau o problemă tehnică nerezolvată la timp. O casă de marcat neconectată din cauza unui SIM expirat sau a unui certificat neactualizat rămâne, în mod normal, în zona amenzii contravenționale de mai sus; varianta penală vizează aparatele alterate deliberat sau ținute offline cu bună știință pentru a ascunde vânzări.",
+      },
+      {
+        heading: "Cum reduceți riscul, practic — și cum ajută franchisetech",
+        body: "Câteva verificări simple reduc riscul unei amenzi pentru neconectare:\n\n- **Verificați statusul în SPV** — Spațiul Privat Virtual arată dacă ANAF a semnalat fișiere netransmise de la aparatul dumneavoastră\n- **Nu lăsați abonamentul de date al SIM-ului fiscal să expire** — e cea mai frecventă cauză practică de neconectare prelungită, nu o defecțiune a aparatului\n- **Păstrați raportul Z generat la conectare**, atașat la cartea tehnică — e dovada că procedura a fost dusă la capăt corect\n- **Aflați dinainte de la distribuitorul autorizat** care e canalul agreat de notificare în caz de problemă, ca să nu-l căutați în mijlocul unui control\n\nfranchisetech nu gestionează certificatul digital sau SIM-ul aparatului fiscal — acestea rămân, prin lege, în responsabilitatea distribuitorului autorizat și a operatorului economic. Ce arată aplicația, la fiecare vânzare, este starea reală a transmiterii către aparatul fiscal conectat — trimis, în așteptare sau eșuat — vizibil direct din POS, nu descoperit abia la o reconciliere de sfârșit de lună sau, mai rău, la un control.",
+      },
+    ],
+  },
+  {
+    slug: "bon-fiscal-cerut-dupa-raportul-z-inchis-ce-faceti",
+    title: "Un client cere bon fiscal după ce ați închis Raportul Z — ce faceți",
+    description:
+      "Raportul Z de ieri (sau de acum trei săptămâni) e deja generat, iar clientul vrea o dovadă a cumpărăturii. Ce poate și ce nu poate face, tehnic și legal, casa de marcat pentru o zi deja închisă — și ce alternative reale aveți.",
+    publishedAt: "2026-09-21",
+    locale: "ro",
+    tags: ["fiscal", "bon-fiscal", "raport-z"],
+    image: "/marketing/live/pos.png",
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "De ce Raportul Z schimbă complet răspunsul",
+        body: "Raportul Z nu e doar un rezumat al zilei — este momentul în care ziua fiscală respectivă devine definitivă. Așa cum arătăm și în ghidul de stornare corectă, odată generat raportul Z, ziua fiscală se închide și jurnalul electronic al acelei zile rămâne definitiv — nu mai există, prin procedura obișnuită de casă, nicio operațiune care să modifice, să anuleze sau să regenereze o vânzare din acea zi. Cadrul legal pentru ce se poate face cu un bon deja emis, cât timp ziua e încă deschisă, e dat de normele metodologice de aplicare a OUG nr. 28/1999 (aprobate prin HG nr. 479/2003, art. 36) — iar condiția de bază pentru orice corecție e ca operațiunea să aibă loc **înainte** de raportul Z.\n\nSituația dumneavoastră e mai strictă decât un bon pur și simplu pierdut de client. Acolo, bonul a existat și e doar hârtia care lipsește. Aici, dacă ziua e deja închisă, nici casa de marcat fizică nu mai poate „scoate” ceva nou pentru acea zi — indiferent cât de sinceră e cererea clientului.",
+      },
+      {
+        heading: "Duplicat sau retipărire — ce spune practica, nu doar bunul-simț",
+        body: "Legea nu obligă un comerciant să elibereze un „duplicat” de bon fiscal — nu există în OUG nr. 28/1999 sau în normele sale de aplicare o prevedere care să reglementeze explicit un duplicat identic al unui bon deja emis. Motivul e și tehnic, nu doar administrativ: fiecare bon se înregistrează o singură dată, progresiv, în memoria fiscală a aparatului, iar echipamentele actuale nici nu mai păstrează fizic o a doua copie pe hârtie, cum se întâmpla cu vechile role-indigo — tipăresc un singur exemplar.\n\nCe există, la unele case de marcat, e o funcție de **retipărire** — retrimiterea comenzii de printare către imprimantă. Dar ea are sens doar în condiții stricte:\n\n- Incidentul are loc **în aceeași sesiune**, de obicei chiar în timpul sau imediat după tranzacția blocată\n- Bonul **nu a apărut încă** în raportul Z al zilei respective — altfel, retipărirea îl înregistrează a doua oară, o eroare reală de raportare, nu o soluție\n- Ziua fiscală curentă **nu s-a închis încă** prin Raportul Z\n\nPentru o zi cu Raportul Z deja generat, posibil cu zile sau săptămâni în urmă, niciuna dintre aceste condiții nu mai e valabilă — ziua respectivă nu mai este „sesiunea curentă” a niciunei case, iar mecanismul de retipărire nu se aplică.",
+      },
+      {
+        heading: "Ce puteți face concret: verificați tranzacția, chiar dacă nu o puteți retipări",
+        body: "Bonul fizic nu poate fi recreat, dar vânzarea în sine a rămas înregistrată — în jurnalul electronic al casei de marcat și, dacă folosiți un POS conectat, în istoricul digital al aplicației. E același principiu descris în ghidul pentru [un bon fiscal pierdut sau deteriorat](/blog/bon-fiscal-pierdut-sau-deteriorat-ce-faci): jurnalul digital nu înlocuiește un document fiscal nou, dar vă spune rapid dacă, când și pentru cât s-a făcut vânzarea, înainte să decideți cum ajutați clientul.\n\nÎn franchisetech, fiecare vânzare finalizată rămâne căutabilă în istoricul POS după dată, oră și produs, indiferent cât de veche e — nu depinde de memoria personalului sau de hârtia pe care a pierdut-o clientul. Confirmarea internă contează mai ales când cererea vine cu detalii vagi („cred că am fost acum vreo două săptămâni”) — verificați înainte de a promite ceva ce, oricum, casa de marcat fizic nu mai poate emite pentru ziua respectivă.",
+      },
+      {
+        heading: "Dacă a plătit cu cardul, extrasul de cont e deja o dovadă legală",
+        body: "Pentru plățile cu cardul, aveți un răspuns concret care nu depinde deloc de starea Raportului Z. Legea nr. 317/2024, care a modificat OUG nr. 28/1999, prevede că extrasul de cont bancar funcționează ca dovadă a plății, alături de sau în locul bonului fiscal — indiferent dacă bonul a fost tipărit, pierdut sau nu mai poate fi reemis pentru că ziua e deja închisă fiscal. Clientul își poate verifica singur extrasul de cont pentru data și suma respectivă; dumneavoastră puteți confirma, din istoricul intern, că suma corespunde unei vânzări reale din local.\n\nPentru numerar, situația e mai grea, pentru că nu există un al treilea martor electronic independent de casa dumneavoastră. Acolo, verificarea internă din secțiunea anterioară rămâne singurul instrument practic — și, la fel ca la un bon pierdut fără nicio altă urmă, decizia de a accepta cererea clientului rămâne, în lipsa unei dovezi, la latitudinea dumneavoastră.",
+      },
+      {
+        heading: "Dacă ce vrea de fapt e o factură, nu un bon fiscal",
+        body: "Multe cereri de genul „îmi mai dați un bon” ascund, de fapt, o nevoie diferită: clientul are nevoie de un document pe care să-l deconteze la propria firmă sau la contabilul lui, nu literalmente de o hârtie identică cu cea pierdută. Dacă e cazul, răspunsul corect nu e să încercați o retipărire care oricum nu funcționează pentru o zi închisă, ci să discutați despre o factură — [factura și bonul fiscal](/blog/factura-vs-bon-fiscal-diferenta) sunt documente diferite, iar o factură se poate emite ulterior, separat, dacă clientul furnizează CUI-ul firmei.\n\nAtenție: procedura de a emite o factură pe baza unui bon fiscal simplu, fără CUI comunicat la momentul plății, este mai greoaie și depinde de termenele aplicabile — verificați cu contabilul dumneavoastră care e fereastra reală în cazul dumneavoastră, mai ales dacă ziua vânzării e deja la câteva săptămâni distanță.",
+      },
+      {
+        heading: "Cum funcționează în franchisetech",
+        body: "franchisetech nu poate — și nu are cum, tehnic — să recreeze un bon fiscal pentru o zi cu Raportul Z deja generat; niciun POS conectat la o casă de marcat certificată nu poate face asta, indiferent de furnizor. Ce oferă e istoricul complet al vânzărilor, căutabil instant pe dată, oră sau produs, ca să aveți răspunsul corect în câteva secunde, nu să promiteți ceva ce nu se poate livra.\n\nÎn plus, generarea Raportului Z necesită drepturi de administrator sau manager, nu e la îndemâna oricărui casier — exact pentru a reduce riscul unei închideri premature care ar transforma o cerere obișnuită de bon într-o discuție despre o zi deja închisă fiscal, cu ore bune înainte ca locația să se închidă efectiv.",
+      },
+    ],
+  },
+  {
+    slug: "ore-suplimentare-horeca-cum-se-calculeaza-si-platesc",
+    title: "Ore suplimentare în HoReCa: cum se calculează și cum se plătesc corect",
+    description:
+      "Codul Muncii limitează timpul de lucru la 48 de ore pe săptămână, inclusiv orele suplimentare, și stabilește cum se compensează — întâi timp liber, apoi un spor de minimum 75%. Ce înseamnă concret pentru o cafenea sau un restaurant cu ture variabile.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["personal", "pontaj"],
+    sections: [
+      {
+        heading: "Plafonul de 48 de ore pe săptămână — ce include și ce nu",
+        body: "Durata normală a timpului de lucru rămâne 8 ore pe zi și 40 de ore pe săptămână (art. 112 din Codul Muncii). Peste acest prag, legea permite muncă suplimentară, dar cu o limită fermă: **timpul total de lucru, inclusiv orele suplimentare, nu poate depăși 48 de ore pe săptămână** (art. 114 alin. 1).\n\nExcepție: se poate depăși 48 de ore într-o săptămână anume, dacă media pe o perioadă de referință de 4 luni calendaristice nu trece de 48 de ore pe săptămână. Contractul colectiv de muncă aplicabil poate extinde această perioadă de referință la maximum 6 luni și, în cazuri speciale, justificate tehnic sau organizatoric, la maximum 12 luni (art. 114 alin. 2-4). Pentru o cafenea cu weekenduri aglomerate și zile de mijloc de săptămână mai libere, exact acest mecanism de mediere pe perioadă de referință e cel care contează, nu o limită rigidă identică în fiecare săptămână.",
+      },
+      {
+        heading: "Ce înseamnă, legal, muncă suplimentară",
+        body: "Munca suplimentară este, conform art. 120 din Codul Muncii, munca prestată peste durata normală a timpului de lucru săptămânal prevăzută la art. 112. Regula de bază: se prestează doar cu acordul salariatului, cu excepția cazurilor de forță majoră sau a lucrărilor urgente pentru prevenirea accidentelor ori înlăturarea consecințelor unui accident.\n\nÎn practică, în HoReCa apare frecvent o zonă gri: un angajat rămâne «să ajute» la o comandă mare sau la un eveniment neplanificat, fără o discuție explicită despre ore suplimentare. Legal, dacă a lucrat peste programul normal, ora contează ca suplimentară, indiferent cât de informal a fost solicitată.",
+      },
+      {
+        heading: "Cum se compensează: întâi timp liber, bani doar dacă nu se poate altfel",
+        body: "Ordinea stabilită de lege nu e la alegere:\n\n- **Regula de bază (art. 122):** munca suplimentară se compensează prin ore libere plătite, acordate în următoarele **90 de zile calendaristice** după ce a fost prestată.\n- **Dacă timpul liber nu e posibil în acest interval (art. 123):** munca suplimentară se plătește prin adăugarea unui spor la salariu, negociat prin contractul colectiv de muncă aplicabil sau prin contractul individual, care **nu poate fi mai mic de 75% din salariul de bază**.\n\nGreșeala frecventă: un proprietar promite verbal «îți dau liber altă dată» și cele 90 de zile trec fără ca timpul liber să fie acordat efectiv — nici înregistrat, nici recuperat. La acel moment, legal, ora suplimentară ar fi trebuit deja plătită cu sporul minim de 75%, nu lăsată «pe listă» la nesfârșit.",
+      },
+      {
+        heading: "Greșelile care apar cel mai des",
+        body: "**Ore suplimentare nescrise nicăieri.** Dacă evidența orelor lucrate nu separă clar orele normale de cele suplimentare, nu aveți de fapt cum să dovediți, la un control sau la un calcul de salarii, câte ore suplimentare a prestat fiecare angajat și dacă au fost compensate corect. Vedeți [metodele reale de pontaj în HoReCa](/blog/pontaj-personal-horeca-metode) dacă evidența actuală se bazează pe memorie sau pe un caiet completat retroactiv.\n\n**Compensarea promisă, dar netrasă în timp.** Fără o dată clară la care s-au acumulat orele suplimentare, fereastra de 90 de zile pentru compensare prin timp liber devine imposibil de urmărit — și, implicit, imposibil de dovedit că a fost respectată.\n\n**Confuzia cu tura de weekend sau de noapte.** O tură de weekend nu e automat «suplimentară» dacă se încadrează în programul normal planificat al angajatului — suplimentară înseamnă strict ce depășește durata normală săptămânală, nu orice tură considerată incomodă.",
+      },
+      {
+        heading: "Checklist practic",
+        body: "- [ ] Evidența orelor separă clar orele normale de cele suplimentare, pentru fiecare angajat\n- [ ] Orele suplimentare sunt acceptate cu acordul angajatului, nu impuse tacit\n- [ ] Totalul săptămânal, inclusiv suplimentar, respectă plafonul de 48 de ore (sau media pe perioada de referință aplicabilă)\n- [ ] Compensarea prin timp liber are o dată de acordare urmărită, în intervalul de 90 de zile\n- [ ] Dacă timpul liber nu a fost acordat în interval, sporul de minimum 75% e calculat și plătit\n- [ ] Regulile de mai sus sunt verificate periodic cu contabilul sau consultantul care administrează salarizarea, nu presupuse din auzite\n\nAceastă listă nu înlocuiește sfatul unui specialist în legislația muncii pentru situații specifice — contracte cu timp parțial, muncă sezonieră sau perioade de referință extinse prin contract colectiv necesită verificare punctuală.",
+      },
+    ],
+  },
+  {
+    slug: "pauza-de-masa-cate-minute-prevede-legea",
+    title: "Pauza de masă la angajați: câte minute prevede, de fapt, legea",
+    description:
+      "Circulă ideea unei pauze obligatorii de 15 minute. Codul Muncii nu prevede așa ceva pentru un angajat adult — iată ce spune exact articolul 134, de unde vine confuzia și ce trebuie scris în regulamentul intern ca să fiți acoperiți la un control.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["personal", "legal"],
+    sections: [
+      {
+        heading: "Mitul celor 15 minute",
+        body: "Căutați «pauza de masă legea muncii minute» și veți găsi, aproape peste tot, aceeași cifră repetată: 15 minute, obligatoriu prin lege. Cifra circulă atât de des în conținut de business românesc încât a devenit, practic, «cunoștință comună» — problema e că nu există în Codul Muncii, la niciun articol, pentru un angajat adult.\n\nNu e o interpretare discutabilă a legii — e o cifră care pur și simplu nu apare în text. Dacă ați scris-o în regulamentul intern crezând că respectați un minim legal, nu greșiți practic (o pauză de 15 minute e perfect validă), dar greșiți pe motivarea din spate.",
+      },
+      {
+        heading: "Ce spune de fapt articolul 134",
+        body: "Codul Muncii, art. 134 alin. (1), prevede că salariații au dreptul la pauză de masă atunci când durata zilnică a timpului de lucru este mai mare de 6 ore, în condițiile stabilite prin **contractul colectiv de muncă aplicabil sau prin regulamentul intern**. Legea nu fixează un număr minim de minute pentru un angajat adult — decizia rămâne la nivelul contractului colectiv sau al regulamentului intern al fiecărui angajator.\n\nSingura cifră fixă din articolul 134 privește minorii: salariații sub 18 ani au dreptul la o pauză de masă de **minimum 30 de minute**, dacă durata zilnică a timpului de lucru depășește 4 ore și jumătate (art. 134 alin. 2). Dacă în local aveți angajați minori (frecvent în HoReCa, pe posturi de vacanță sau part-time), acesta e singurul prag pe care legea chiar îl impune direct.",
+      },
+      {
+        heading: "De ce contează să fie scris, nu doar practicat informal",
+        body: "Pentru că legea lasă durata exactă la latitudinea contractului colectiv sau a regulamentului intern, absența unei cifre scrise nu înseamnă «nu există obligație» — înseamnă că, la un control, nu aveți un standard documentat cu care să demonstrați ce pauză practicați efectiv și de ce.\n\nO pauză «de obicei prin rotație, cam 20-30 de minute, cum prinde fiecare un moment liber» nu e o politică — e o intenție bună fără dovadă scrisă. Fixați o durată clară în regulamentul intern (10, 15, 20, 30 de minute — alegerea e a dumneavoastră, atât timp cât e reală și aplicată), ca să aveți un reper verificabil, nu o practică descrisă diferit de fiecare angajat întrebat separat.",
+      },
+      {
+        heading: "Cum arată o pauză reală într-o tură aglomerată",
+        body: "Scrisă corect în regulament nu ajută dacă, în practică, pauza nu se întâmplă niciodată la orele de vârf. Așa cum discutăm și în [ghidul programului legal de lucru în HoReCa](/blog/program-legal-de-lucru-horeca-romania), pauza trebuie programată real, cu acoperire suplimentară de personal în orele aglomerate — altfel angajatul rămâne, de fapt, fără pauză efectivă, indiferent ce scrie pe hârtie.\n\nO metodă simplă: programați pauzele prin rotație, în funcție de fluxul real de clienți din tura respectivă, nu la o oră fixă identică în fiecare zi — o cafenea are un vârf de dimineață complet diferit de un restaurant cu vârf de prânz sau de seară.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Regulamentul intern specifică o durată clară a pauzei de masă pentru angajați cu program peste 6 ore/zi\n- [ ] Dacă aveți angajați minori, pauza acestora respectă minimum 30 de minute pentru program peste 4,5 ore/zi\n- [ ] Pauza e programată real, cu acoperire de personal în orele de vârf, nu doar «pe hârtie»\n- [ ] Angajații știu exact când și cât durează pauza lor, nu depinde de improvizație zilnică\n- [ ] Nu ați presupus o cifră legală («15 minute») care nu există — verificați ce ați scris efectiv în regulamentul intern\n\nCa la orice detaliu de legislația muncii, pentru situații specifice (program inegal, muncă de noapte, contracte de timp parțial) verificați cu un consultant HR sau cu contabilul care administrează salarizarea afacerii dumneavoastră.",
+      },
+    ],
+  },
+  {
+    slug: "control-itm-neanuntat-horeca-ce-verifica-si-ce-riscati",
+    title: "Control ITM neanunțat la cafenea sau restaurant: ce verifică și ce riscați",
+    description:
+      "Inspecția Muncii poate intra fără preaviz, oricând în programul de funcționare. Ce documente cere efectiv la o verificare HoReCa, ce înseamnă «muncă nedeclarată» și ce riscați, concret, dacă găsește o problemă.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["personal", "control-itm"],
+    sections: [
+      {
+        heading: "Da, ITM poate veni fără să anunțe",
+        body: "Legea nr. 108/1999, republicată, privind înființarea și organizarea Inspecției Muncii, dă inspectorilor de muncă **acces liber, permanent și fără înștiințare prealabilă** la orice loc de muncă aflat sub incidența legii (art. 19 lit. a). Nu există, deci, o obligație de a vă anunța în avans — controlul poate avea loc oricând în programul de funcționare al locației.\n\nO modificare recentă, prin Legea nr. 239/2025, a adăugat un nou articol (19¹) care permite inspectorilor să folosească **camere video portabile** în timpul controalelor, fără a avea nevoie de consimțământul celor verificați — înregistrările se păstrează maximum 6 luni, apoi se distrug.",
+      },
+      {
+        heading: "Ce verifică efectiv la o afacere HoReCa",
+        body: "Un control ITM la o cafenea sau un restaurant se concentrează, de regulă, pe:\n\n- **Contractele individuale de muncă**, înregistrate și transmise prin **REGES-Online** — sistemul care, din 1 octombrie 2025, a înlocuit complet vechiul Revisal (Hotărârea de Guvern nr. 295/2025). Dacă procedurile interne sau contabilul încă vorbesc despre «Revisal», actualizați terminologia — sistemul vechi nu mai există.\n- **Evidența orelor lucrate** — pontajul trebuie să reflecte real programul fiecărui angajat, nu doar orele «oficiale» dintr-un tabel completat retroactiv.\n- **Statul de plată și fluturașii de salariu** — corespondența dintre orele înregistrate și sumele plătite efectiv.\n- **Dosarele de instruire SSM** (securitate și sănătate în muncă) — fișele de instruire semnate, actualizate la angajare și periodic.\n\nAceastă listă nu e un articol unic de lege, ci practica obișnuită a controalelor — combină cerințe din Codul Muncii, din Legea nr. 319/2006 (securitate și sănătate în muncă) și din reglementarea REGES-Online.",
+      },
+      {
+        heading: "Ce înseamnă «muncă nedeclarată» și cât costă",
+        body: "Muncă nedeclarată înseamnă, în esență, un angajat care lucrează efectiv fără contract individual de muncă înregistrat. De la 1 ianuarie 2026, amenda pentru fiecare persoană găsită astfel este de **40.000 de lei**, cu un plafon cumulat de **1.000.000 de lei per angajator** (art. 260 alin. 1 lit. e din Codul Muncii, modificat prin Legea nr. 239/2025) — sumă dublă față de vechiul cuantum de 20.000 lei/200.000 lei.\n\nUn mit persistent, dar depășit: că angajarea a peste 5 persoane nedeclarate atrage automat răspundere penală. Prevederea care spunea asta (art. 264 alin. 4 din Codul Muncii) a fost **abrogată din 2017**, prin OUG nr. 53/2017 — motivul invocat a fost că instanțele respingeau sau achitau constant astfel de dosare, considerând că fapta nu prezintă gradul de pericol social al unei infracțiuni. Din 2017, indiferent de câte persoane sunt găsite nedeclarate, fapta rămâne strict contravențională, sancționată doar cu amendă — [vedeți sumele exacte și ce contează ca muncă nedeclarată](/blog/amenda-munca-nedeclarata-horeca-sumele-reale-2026).",
+      },
+      {
+        heading: "Documente de avut pregătite mereu",
+        body: "- Copiile contractelor individuale de muncă, cu dovada transmiterii în REGES-Online, pentru fiecare angajat activ\n- Evidența actualizată a orelor lucrate, inclusiv orele suplimentare separate distinct\n- Ultimele state de plată și fluturașii de salariu corespunzători\n- Fișele de instruire SSM, semnate și la zi\n- Regulamentul intern, cu politica de pauze și program clar documentată\n\nA avea aceste documente centralizate, nu împrăștiate între contabil, un dosar fizic și memoria managerului de tură, scurtează dramatic un control care oricum vine fără preaviz.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Toți angajații activi au contract individual de muncă transmis în REGES-Online, nu în vechiul Revisal\n- [ ] Evidența orelor lucrate e actualizată zilnic, nu completată retroactiv\n- [ ] Dosarele SSM sunt la zi pentru fiecare angajat\n- [ ] Regulamentul intern documentează clar programul, pauzele și politica de ore suplimentare\n- [ ] Managerii de tură știu ce documente să prezinte unui inspector, fără să aștepte instrucțiuni de la proprietar\n\nCa la orice control, pregătirea din timp contează mai mult decât reacția din momentul respectiv — un dosar incomplet descoperit în fața unui inspector e mult mai greu de rezolvat decât unul verificat din vreme.",
+      },
+    ],
+  },
+  {
+    slug: "amenda-munca-nedeclarata-horeca-sumele-reale-2026",
+    title: "Amenda pentru muncă nedeclarată în HoReCa: sumele reale în 2026",
+    description:
+      "De la 1 ianuarie 2026, amenda pentru muncă nedeclarată s-a dublat. Iată suma exactă per persoană, plafonul per angajator și de ce «5 angajați nedeclarați înseamnă închisoare» nu mai este adevărat din 2017.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["personal", "control-itm"],
+    sections: [
+      {
+        heading: "Ce înseamnă, exact, «muncă nedeclarată»",
+        body: "În sensul strict al controalelor ITM, muncă nedeclarată înseamnă o persoană care prestează activitate pentru un angajator fără să aibă un contract individual de muncă înregistrat și transmis conform legii — practic, un angajat «la negru», complet în afara evidențelor oficiale.\n\nNu se referă la greșeli minore de completare a unui contract existent sau la o întârziere administrativă izolată — vizează situația în care, la momentul controlului, nu există deloc un contract înregistrat pentru persoana găsită la muncă.",
+      },
+      {
+        heading: "Suma amenzii în 2026",
+        body: "Codul Muncii, art. 260 alin. (1) lit. e), modificat prin **Legea nr. 239/2025** (publicată în Monitorul Oficial nr. 1160 din 15 decembrie 2025, în vigoare de la **1 ianuarie 2026**), stabilește amenda pentru muncă nedeclarată la **40.000 de lei pentru fiecare persoană** identificată astfel, cu un plafon cumulat de **1.000.000 de lei per angajator**.\n\nSuma reprezintă o dublare față de reglementarea anterioară, care prevedea 20.000 de lei per persoană și un plafon de 200.000 de lei. Dacă ați reținut cifrele vechi dintr-un articol sau o discuție mai veche, actualizați-le — legea nouă e deja în vigoare la data acestui articol.",
+      },
+      {
+        heading: "Mitul răspunderii penale — de ce nu mai e adevărat din 2017",
+        body: "Până în 2017, Codul Muncii prevedea, la art. 264 alin. (4), că angajarea a mai mult de 5 persoane fără contract înregistrat constituia infracțiune, cu pedeapsă de la 3 luni la 2 ani de închisoare. Această prevedere a fost **abrogată prin OUG nr. 53/2017**, în vigoare din 7 august 2017.\n\nMotivul invocat oficial la momentul abrogării a fost practica judiciară: procurorii și instanțele resping sau achitau constant astfel de dosare, considerând că fapta nu întrunește gradul de pericol social specific unei infracțiuni. De atunci, indiferent de câte persoane sunt găsite nedeclarate la un control — una sau cincizeci —, fapta rămâne **strict contravențională**, sancționată exclusiv cu amenda descrisă mai sus, nu cu răspundere penală.\n\nDacă ați auzit varianta «la 5 angajați nedeclarați rișți dosar penal», e o informație depășită de aproape un deceniu — corectă cândva, dar nu și astăzi.",
+      },
+      {
+        heading: "Cum vă asigurați că sunteți acoperit",
+        body: "Regula practică simplă: niciun angajat nu începe efectiv activitatea înainte ca contractul individual de muncă să fie înregistrat și transmis prin **REGES-Online** — sistemul care a înlocuit complet Revisal din 1 octombrie 2025. Un angajat care «începe mâine, hârtiile le facem săptămâna asta» este exact profilul de risc pe care îl vizează amenda de mai sus.\n\nPentru personal sezonier sau part-time, frecvent în HoReCa, tentația de a amâna documentația «pentru câteva zile de probă» e mare — dar din perspectiva legii, ziua în care persoana lucrează efectiv fără contract înregistrat e suficientă pentru încadrarea ca muncă nedeclarată, indiferent cât de scurtă a fost perioada.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Niciun angajat nu lucrează efectiv înainte ca contractul să fie transmis în REGES-Online\n- [ ] Personalul sezonier sau part-time are aceleași verificări ca personalul permanent, fără excepții informale\n- [ ] Evidența contractelor active e centralizată și ușor de arătat la un control\n- [ ] Ați actualizat terminologia internă de la «Revisal» la «REGES-Online»\n- [ ] Nu vă bazați pe informația veche despre pragul de 5 persoane și răspunderea penală — nu mai e valabilă din 2017\n\nPentru situații specifice de angajare (colaboratori, PFA, muncă sezonieră), verificarea cu un consultant HR sau cu contabilul care administrează salarizarea rămâne cea mai sigură cale — regulile de încadrare corectă a unui raport de muncă au nuanțe pe care un ghid general nu le poate acoperi complet.",
+      },
+    ],
+  },
+  {
+    slug: "diferenta-stoc-inventar-anual-cum-o-documentati",
+    title: "Diferența de stoc la inventarul anual: cum o documentați ca să nu pară nejustificată",
+    description:
+      "Inventarul general anual e obligatoriu prin lege, nu doar o practică bună. Ce trebuie să conțină procesul-verbal, ce termene de 7 zile aveți și cum tratați legal o lipsă sau un plus descoperit la numărătoare.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["stoc", "contabilitate"],
+    relatedFeature: "/features/stock-management",
+    sections: [
+      {
+        heading: "De ce inventarul anual e o obligație legală, nu doar o practică bună",
+        body: "Legea contabilității nr. 82/1991, republicată, art. 7 alin. (1), obligă orice entitate să efectueze inventarierea generală a elementelor de natura activelor, datoriilor și capitalurilor proprii **cel puțin o dată pe an**. Normele de aplicare (Ordinul Ministerului Finanțelor Publice nr. 2861/2009) adaugă și alte situații care declanșează obligația: începutul activității, fuziune sau divizare, încetarea activității, la cererea organelor de control, la apariția unor indicii de plusuri sau lipsuri în gestiune, la predarea-primirea unei gestiuni, sau în caz de calamități ori alte cazuri prevăzute de lege.\n\nAșa cum discutăm și în [ghidul despre stoc fizic vs. scriptic](/blog/inventar-fizic-vs-scriptic-diferente), verificările frecvente (săptămânale sau lunare) sunt esențiale operațional, dar nu înlocuiesc inventarul general anual — sunt două obligații diferite, cu scopuri diferite.",
+      },
+      {
+        heading: "Ce trebuie să conțină procesul-verbal de inventariere",
+        body: "Potrivit normelor OMFP nr. 2861/2009 (pct. 42), procesul-verbal de inventariere trebuie să conțină, în principal:\n\n- Data întocmirii\n- Numele membrilor comisiei de inventariere\n- Numărul și data deciziei de numire a comisiei\n- Gestiunea (sau gestiunile) inventariată\n- Datele de început și de sfârșit ale operațiunii de inventariere\n- Rezultatele inventarierii\n- Concluziile și propunerile comisiei privind cauzele plusurilor și lipsurilor constatate și persoanele responsabile, cu propuneri de măsuri\n- Volumul stocurilor depreciate, fără mișcare sau greu vandabile, cu propuneri de valorificare\n- Propuneri de scoatere din funcțiune a mijloacelor fixe, respectiv de casare a obiectelor de inventar\n- Constatări privind modul de păstrare, depozitare, conservare și asigurare a integrității bunurilor din gestiune\n\nUn proces-verbal care omite oricare din aceste puncte e incomplet față de cerința legală, chiar dacă numărătoarea fizică a fost făcută corect.",
+      },
+      {
+        heading: "Termenele de 7 zile pe care le uită multă lume",
+        body: "Normele stabilesc două termene distincte de câte 7 zile lucrătoare, ușor de confundat:\n\n- Comisia trebuie să predea propunerile sale administratorului **în cel mult 7 zile lucrătoare** de la terminarea efectivă a operațiunilor de inventariere (pct. 43)\n- După ce administratorul aprobă procesul-verbal, rezultatele trebuie înregistrate în evidența tehnico-operativă **în cel mult 7 zile lucrătoare** de la data aprobării (pct. 45 alin. 1)\n\nÎn practică, multe afaceri mici tratează inventarul ca un eveniment punctual — se numără marfa, se notează o cifră totală, și subiectul se închide. Cele două termene de mai sus există tocmai pentru că legea privește inventarul ca pe un proces cu etape documentate, nu ca pe o singură zi de numărătoare.",
+      },
+      {
+        heading: "Lipsuri și plusuri — ce puteți și ce nu puteți face",
+        body: "Lipsurile imputabile se evaluează la **valoarea de înlocuire** — costul de achiziție la prețul pieței, la data constatării pagubei, la care se adaugă taxele nerecuperabile (inclusiv TVA) și cheltuielile de transport-aprovizionare (pct. 39 din normele OMFP 2861/2009). Comisia are obligația să obțină explicații scrise de la persoanele responsabile pentru fiecare plus, lipsă sau depreciere constatată, înainte de a propune modul de regularizare.\n\nCompensarea lipsurilor cu plusurile este permisă **doar** dacă există risc de confuzie între sortimentele aceluiași produs (diferă doar culoarea, modelul, mărimea sau ambalajul) **și** diferențele privesc aceeași perioadă de gestiune și aceeași gestiune (pct. 40 alin. 3-5). Compensarea **nu este permisă** dacă se dovedește că lipsa provine din furt sau din degradare din vina unei persoane responsabile (pct. 41) — în acel caz, lipsa rămâne imputabilă integral, fără a fi acoperită de un plus constatat în paralel.\n\nDacă la inventarul dumneavoastră apar frecvent lipsuri la un singur produs, fără o cauză evidentă de confuzie între sortimente, merită investigat punctual — vedeți și [cauzele frecvente ale stocului negativ](/blog/stoc-negativ-cauze-si-solutii) pentru un punct de plecare în diagnosticare.",
+      },
+      {
+        heading: "Cum ajută franchisetech",
+        body: "franchisetech nu înlocuiește procesul-verbal legal, comisia numită prin decizie sau obligația de a documenta cauzele plusurilor și lipsurilor — acestea rămân, prin lege, un proces administrativ separat de orice software de gestiune. Ce oferă concret: balanța de stoc calculează automat, din NIR, rețete și vânzările înregistrate prin POS, care ar trebui să fie stocul scriptic la momentul inventarului, produs cu produs.\n\nAsta înseamnă că, atunci când comisia de inventariere numără fizic marfa și compară cu sistemul, pornește de la o cifră scriptică deja corectă — nu de la un fișier Excel actualizat manual, cu propriile erori acumulate în timp. Investigarea unei diferențe mari, cerută de altfel de proces-verbal, are un punct de plecare direct din datele deja existente în sistem.",
+      },
+    ],
+  },
+  {
+    slug: "marja-neta-vs-marja-bruta-de-ce-conteaza-prima",
+    title: "Marja netă vs. marja brută — de ce prima e cea care contează cu adevărat",
+    description:
+      "Marja brută vă arată cât rămâne după ingrediente. Marja netă vă arată cât rămâne, de fapt, în buzunar după toate costurile. Formula completă, cu un exemplu lunar complet pentru o cafenea mică.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["marja", "financiar"],
+    sections: [
+      {
+        heading: "Ce este marja netă și în ce diferă de marja brută",
+        body: "Așa cum arătăm și în [ghidul de calcul al marjei brute](/blog/cum-calculezi-marja-bruta-produs-restaurant), marja brută scade doar costul ingredientelor din prețul de vânzare — nimic altceva. Marja netă merge mai departe: scade absolut toate costurile afacerii dintr-o perioadă (o lună, de regulă) din veniturile totale ale acelei perioade.\n\n**Formula:**\n- Profit net = Venituri totale − Cost materii prime − Costuri fixe − Costuri variabile (altele decât materii prime) − Impozite\n- Marjă netă = (Profit net / Venituri totale) × 100\n\nMarja brută e un indicator per produs, util pentru decizii de meniu și de preț. Marja netă e un indicator per afacere, pe o perioadă întreagă — răspunde la întrebarea reală: la finalul lunii, ați câștigat bani sau nu?",
+      },
+      {
+        heading: "De ce marja brută mare poate ascunde o afacere care nu e profitabilă",
+        body: "O cafenea poate avea marjă brută de 85% pe cafea și, în același timp, să încheie luna pe pierdere — exact scenariul detaliat în [exemplul flat white din ghidul de marjă brută](/blog/cum-calculezi-marja-bruta-produs-restaurant): odată ce scădeți chiria, salariile și utilitățile alocate fiecărei cafele vândute, marja brută de 85% se poate transforma rapid într-o marjă netă negativă, dacă volumul de vânzări nu acoperă costurile fixe.\n\nMarja brută per produs și marja netă a afacerii răspund la întrebări diferite. Un proprietar care urmărește doar marja brută pe produsele din meniu, fără să calculeze niciodată marja netă lunară, poate crede că afacerea merge bine luni de zile înainte să observe că, de fapt, pierde bani constant.",
+      },
+      {
+        heading: "Cum calculați marja netă, pas cu pas, pentru o lună",
+        body: "1. **Adunați toate veniturile lunii** — tot ce ați încasat prin vânzări, indiferent de metoda de plată\n2. **Scădeți costul materiilor prime consumate** în luna respectivă (nu ce ați cumpărat, ci ce ați consumat efectiv — diferența contează dacă ați și stocat marfă pentru luna următoare)\n3. **Scădeți costurile fixe** — chirie, salarii cu normă întreagă, abonamente, asigurări (vedeți [separarea costurilor fixe de cele variabile](/blog/costuri-fixe-vs-variabile-horeca) dacă nu aveți încă această clasificare făcută)\n4. **Scădeți celelalte costuri variabile** — ambalaje, comisioane de card, comisioane de livrare, ore suplimentare\n5. **Scădeți impozitele aferente** (impozit pe profit sau pe venitul microîntreprinderii, după caz — verificați regimul fiscal aplicabil cu contabilul dumneavoastră)\n\nCe rămâne este profitul net al lunii. Împărțit la veniturile totale și înmulțit cu 100, obțineți procentul de marjă netă.",
+      },
+      {
+        heading: "Un exemplu complet, cu cifre ilustrative",
+        body: "Pentru o cafenea mică, cu o lună de vânzări obișnuită (cifrele de mai jos sunt un exemplu ilustrativ, nu un etalon al industriei — fiecare afacere are structura ei de costuri):\n\n- Venituri totale din vânzări: **60.000 RON**\n- Cost materii prime consumate: **13.000 RON**\n- Costuri fixe (chirie, salarii, abonamente, utilități): **32.000 RON**\n- Costuri variabile suplimentare (ambalaje, comisioane card): **3.000 RON**\n- Impozit estimat: **2.400 RON**\n\nProfit net: 60.000 − 13.000 − 32.000 − 3.000 − 2.400 = **9.600 RON**\n\nMarjă netă: 9.600 / 60.000 × 100 = **16%**\n\nObservați diferența față de marja brută: dacă marja brută medie pe produsele din meniu era, să zicem, 75%, marja netă reală a afacerii e de peste patru ori mai mică — pentru că include tot ce marja brută ignoră.",
+      },
+      {
+        heading: "De ce marja netă ar trebui urmărită lunar, nu doar calculată o dată",
+        body: "Marja brută pe un produs nu se schimbă des — variază doar când crește prețul unui ingredient sau modificați rețeta. Marja netă a afacerii se schimbă lunar, pentru că depinde de volumul de vânzări, de sezon, de costurile ocazionale (o reparație, un angajat nou, o lună cu ore suplimentare peste normal).\n\nUrmărirea lunară a marjei nete vă arată tendința reală a afacerii — dacă marja netă scade constant de la o lună la alta, chiar dacă veniturile brute cresc, e un semnal timpuriu care merită investigat, nu ignorat pentru că «vânzările merg bine». Vedeți și [KPI-urile de urmărit săptămânal în HoReCa](/blog/kpi-uri-de-urmarit-saptamanal-horeca) pentru indicatorii care, urmăriți constant, arată devreme unde apare o problemă.",
+      },
+    ],
+  },
+  {
+    slug: "cash-flow-cafenea-profitabil-pe-hartie-fara-bani-in-cont",
+    title: "Cash flow într-o cafenea — de ce poți fi «profitabil pe hârtie» și fără bani în cont",
+    description:
+      "Profitul e un calcul contabil pe o perioadă. Cash flow-ul e mișcarea reală de bani, cu alt timing. De ce cele două pot spune povești complet diferite și cum construiți un tampon financiar simplu.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["financiar", "cash-flow"],
+    sections: [
+      {
+        heading: "Profit și cash flow nu sunt același lucru",
+        body: "Profitul este un calcul contabil: venituri minus cheltuieli, pentru o perioadă definită — o lună, de regulă. Cash flow-ul (fluxul de numerar) este mișcarea reală de bani, intrări și ieșiri, la momentul în care se întâmplă efectiv, nu la momentul în care sunt înregistrate contabil.\n\nO afacere poate fi profitabilă pe hârtie și, în același timp, să aibă dificultăți reale de numerar — dacă banii intră mai târziu decât ies, sau dacă o cheltuială mare cade exact atunci când contul e la un nivel scăzut. Vedeți [diferența dintre marja brută și marja netă](/blog/marja-neta-vs-marja-bruta-de-ce-conteaza-prima) pentru profitabilitate — cash flow-ul e o problemă diferită, de timing, nu de marjă.",
+      },
+      {
+        heading: "De ce apare decalajul, specific în HoReCa",
+        body: "O cafenea sau un restaurant are, de fapt, un avantaj structural de cash flow față de multe alte afaceri: încasați aproape întotdeauna imediat, cash sau card, în timp ce plătiți furnizorii adesea cu termen (14, 30 de zile). Asta înseamnă, în teorie, bani în cont înainte să plătiți marfa care i-a generat.\n\nProblema apare la cheltuielile mari, punctuale, care nu urmează ritmul zilnic al vânzărilor:\n\n- **TVA-ul de plată**, depus trimestrial sau lunar — o sumă acumulată din luni de vânzări, plătită dintr-o dată\n- **Un utilaj esențial stricat** (espressorul, frigiderul de vitrină) — cost mare, neprevăzut, care nu poate fi amânat\n- **Un sezon slab urmat de unul bun** — stocați mai multă marfă înainte ca vânzările sezonului bun să genereze efectiv veniturile\n- **Salarii și contribuții**, care ies din cont la date fixe indiferent dacă luna a fost bună sau slabă\n\nNiciunul din aceste cazuri nu înseamnă că afacerea e neprofitabilă — înseamnă doar că banii nu sunt disponibili exact când sunt necesari.",
+      },
+      {
+        heading: "Semnele că aveți o problemă de cash flow, nu de profitabilitate",
+        body: "- Raportul lunar arată profit, dar soldul din cont scade constant de la o lună la alta\n- Amânați plata furnizorilor sistematic, nu ocazional, chiar și atunci când vânzările sunt bune\n- Folosiți overdraft-ul sau o linie de credit ca practică obișnuită, nu ca soluție de urgență rară\n- Sunteți surprins de suma de TVA de plătit, deși veniturile lunii au fost cunoscute din timp\n\nDacă recunoașteți mai multe din aceste semne, problema nu e câți bani câștigați — e când îi aveți disponibili față de când trebuie să-i plătiți.",
+      },
+      {
+        heading: "Cum construiți un tampon de cash flow simplu",
+        body: "Nu aveți nevoie de un sistem complex de prognoză financiară pentru a reduce riscul — câteva reguli practice ajută semnificativ:\n\n- **Păstrați un fond de rezervă** echivalent cu una-două luni de costuri fixe (chirie, salarii, abonamente), separat de contul operațional curent, pentru cheltuieli neprevăzute\n- **Puneți deoparte TVA-ul colectat pe măsură ce se acumulează**, într-un cont separat, în loc să-l lăsați amestecat cu restul încasărilor — la termenul de plată, suma e deja pusă deoparte, nu trebuie găsită\n- **Estimați cheltuielile mari dinainte** (echipament care se apropie de sfârșitul duratei de viață, contracte care se reînnoiesc) — o cheltuială anticipată afectează mult mai puțin cash flow-ul decât una complet neașteptată\n- **Urmăriți încasările zilnice, nu doar totalul lunar** — un declin de o săptămână-două se observă din timp în datele zilnice, mult înainte să devină vizibil în totalul lunar",
+      },
+      {
+        heading: "Cum ajută datele zilnice din franchisetech",
+        body: "[Raportul Z zilnic](/blog/ce-este-raportul-z-si-cum-il-faci) și registrul de casă arată încasările reale, zi de zi, nu doar un total aproximat la finalul lunii. Asta înseamnă că un declin de încasări — sezonier, cauzat de o problemă operațională sau de concurență nouă în zonă — devine vizibil din primele zile, nu abia când verificați soldul contului și vă întrebați ce s-a întâmplat în ultimele două luni.\n\nCash flow-ul rămâne, în esență, o decizie de disciplină financiară — dar disciplina e mult mai ușor de aplicat când aveți cifrele zilnice la îndemână, nu doar un total lunar reconstituit după fapt.",
+      },
+    ],
+  },
+  {
+    slug: "marja-reala-comenzi-platforme-livrare-glovo-bolt-tazz",
+    title: "Marja reală a unei comenzi prin Glovo, Bolt Food sau Tazz — ce mănâncă din preț înainte să ajungă la dvs.",
+    description:
+      "Prețul afișat în aplicația de delivery nu e ce încasați efectiv. Comisionul platformei, ambalajul suplimentar și TVA-ul neschimbat reduc marja reală — iată cum o calculați corect, per comandă.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["delivery", "marja"],
+    sections: [
+      {
+        heading: "De ce prețul din aplicație nu e ce încasați efectiv",
+        body: "O comandă de 50 de lei prin Glovo, Bolt Food sau Tazz nu vă aduce 50 de lei în cont. Din acea sumă se scad, înainte să ajungă la dumneavoastră: comisionul platformei, eventual costul suplimentar al ambalajului de transport, și, dacă ați activat vreo promoție sau reducere prin platformă, valoarea acesteia. Marja reală per comandă delivery e aproape întotdeauna mai mică decât marja aceluiași produs vândut la masă — problema e că mulți proprietari nu calculează diferența, ci presupun că marja e identică.",
+      },
+      {
+        heading: "Comisionul platformei — variază, dar e semnificativ",
+        body: "Fiecare platformă de livrare percepe un comision din valoarea comenzii, negociat prin contractul de parteneriat — procentul variază semnificativ între platforme și între tipuri de contract (cu sau fără livrare proprie a platformei, cu sau fără promovare inclusă), așa că verificați cifra exactă din contractul dumneavoastră, nu presupuneți un procent standard.\n\nCe rămâne relevant de reținut: acest comision este, de regulă, mult mai mare decât [comisionul unui procesator de plăți cu cardul](/blog/costuri-fixe-vs-variabile-horeca) (de obicei 1-2,5% din valoarea tranzacției) — comisionul de livrare poate ajunge la o parte semnificativă din valoarea comenzii. Diferența asta, pe volum mare de comenzi delivery, schimbă complet calculul de profitabilitate al unui produs care pare identic de rentabil la vânzare directă.",
+      },
+      {
+        heading: "Ambalajul de unică folosință — costul ușor de ignorat",
+        body: "O comandă consumată la masă nu are cost de ambalare. O comandă delivery are aproape întotdeauna: cutie sau pahar cu capac securizat pentru transport, pungă, eventual tacâmuri de unică folosință și șervețele. Dacă [rețeta configurată în sistem](/blog/cum-calculezi-marja-bruta-produs-restaurant) nu include separat acest cost pentru varianta delivery, marja calculată pentru acel produs e supraestimată de fiecare dată când e vândut prin platformă.\n\nSoluția simplă: configurați o variantă separată de rețetă pentru delivery, cu costul de ambalare inclus, în loc să folosiți aceeași rețetă (și, implicit, aceeași marjă calculată) pentru ambele canale de vânzare.",
+      },
+      {
+        heading: "TVA-ul rămâne neschimbat indiferent de canal",
+        body: "Cota de TVA aplicabilă unui produs nu se schimbă în funcție de canalul prin care se vinde — un produs cu o anumită cotă la vânzare directă păstrează aceeași cotă și la vânzare prin platformă de livrare. Ce diferă e baza de calcul a marjei, nu regimul de TVA. Dacă aveți neclarități despre cotele aplicabile la livrare vs. consum local, vedeți [ghidul TVA la livrare vs. consum local](/blog/tva-livrare-delivery-vs-consum-local).",
+      },
+      {
+        heading: "Cum calculați marja reală, per comandă de livrare",
+        body: "**Marjă reală delivery = Preț afișat în aplicație − Comisionul platformei − Costul ambalajului − Costul ingredientelor**\n\nComparați rezultatul cu marja brută a aceluiași produs vândut la masă. Diferența vă arată exact cât «pierdeți» structural pe canalul delivery — informație utilă nu ca să renunțați la delivery, ci ca să luați decizii informate: prețuri diferite pentru delivery dacă platforma permite, sau un meniu delivery mai restrâns, axat pe produsele cu marjă suficient de mare încât să absoarbă comisionul fără să devină nerentabile.",
+      },
+      {
+        heading: "Ce puteți face practic",
+        body: "- Calculați marja reală separat pentru fiecare produs vândut prin delivery, nu presupuneți că e identică cu vânzarea la masă\n- Dacă platforma permite prețuri diferite pentru delivery, ajustați-le să reflecte comisionul, nu doar costul ingredientelor\n- Restrângeți meniul delivery la produsele care rămân rentabile după comision și ambalaj — nu orice produs din meniul fizic merită expus pe platformă\n- Recalculați periodic — comisioanele și condițiile de contract cu platformele se renegociază și se schimbă, uneori fără să observați imediat impactul pe marjă",
+      },
+    ],
+  },
+  {
+    slug: "cat-costa-sa-deschizi-o-cafenea-mica-categoriile-reale-de-cost",
+    title: "Cât costă, de fapt, să deschideți o cafenea mică — categoriile reale de cost",
+    description:
+      "Bugetul de deschidere al unei cafenele e mai mult decât chiria și echipamentul. Categoriile de cost pe care mulți antreprenori le subestimează — și de ce costul cel mai des uitat e capitalul de lucru.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["cafenea", "financiar"],
+    relatedFeature: "/features/setup-onboarding",
+    sections: [
+      {
+        heading: "De ce «bugetul de deschidere» e mai mult decât pare",
+        body: "Mulți antreprenori la prima deschidere bugetează pentru ce văd cel mai ușor — chiria și echipamentul principal — și subestimează sau uită complet alte categorii de cost care apar oricum, indiferent dacă au fost planificate sau nu. Rezultatul obișnuit: bugetul inițial se epuizează înainte de ziua de deschidere, sau afacerea deschide fără rezervă pentru primele luni, exact perioada în care veniturile sunt cele mai imprevizibile.\n\nAcest ghid nu dă o cifră totală unică — variază enorm în funcție de oraș, de starea spațiului și de câte echipamente sunt noi vs. second-hand — ci categoriile pe care orice buget de deschidere trebuie să le acopere, ca să nu fie descoperite pe parcurs.",
+      },
+      {
+        heading: "Categoriile de cost pe care trebuie să le bugetați",
+        body: "- **Amenajarea și renovarea spațiului** — de la zugrăveală și instalații până la adaptarea spațiului la cerințele de alimentație publică (ventilație, grup sanitar, zonă de preparare separată)\n- **Echipamentele esențiale** — espressor, râșniță, vitrină frigorifică, mobilier, casă de marcat fiscală (vedeți [echipamentele esențiale la deschidere](/blog/checklist-deschidere-cafenea-de-la-zero) pentru lista completă)\n- **Stocul inițial** — materii prime, ambalaje, consumabile pentru primele săptămâni de funcționare\n- **Avize, autorizații și taxele aferente** — înființarea firmei, avizul sanitar, autorizația de funcționare, contractul DDD\n- **Software de gestiune și abonamente** — soft de gestiune, contabilitate, internet\n- **Marketing de lansare** — semnalizare, prezență online, eventual o campanie locală pentru primele săptămâni\n- **Capital de lucru** — rezerva de bani pentru perioada în care cheltuielile curg, dar veniturile încă nu s-au stabilizat",
+      },
+      {
+        heading: "Costul cel mai des subestimat: capitalul de lucru",
+        body: "Aproape orice cafenea nouă are o perioadă — de obicei câteva luni — în care veniturile sunt sub costurile fixe curente: clienții încă nu cunosc locul, echipa e nouă și mai lentă, meniul se ajustează pe baza vânzărilor reale. Dacă tot bugetul de deschidere s-a dus în amenajare și echipament, fără rezervă pentru această perioadă, afacerea intră în funcțiune deja sub presiune financiară din prima lună.\n\nCapitalul de lucru necesar nu e un cost punctual, ca un espressor — e o rezervă care acoperă exact decalajul descris în [ghidul de cash flow pentru cafenele](/blog/cash-flow-cafenea-profitabil-pe-hartie-fara-bani-in-cont): cheltuieli certe, venituri încă neconsolidate.",
+      },
+      {
+        heading: "De ce o cifră totală unică ar fi înșelătoare",
+        body: "Costul real de deschidere variază enorm între o cafenea într-un spațiu care necesită renovare completă și una într-un spațiu deja amenajat pentru alimentație publică; între echipament nou și echipament second-hand funcțional; între un oraș mare, cu chirii ridicate, și un oraș mic. Orice cifră unică publicată online ca «buget standard» riscă să fie fie prea optimistă pentru situația dumneavoastră, fie complet nerelevantă.\n\nCe funcționează mai bine: construiți-vă propriul buget pe categoriile de mai sus, cu oferte reale de la furnizori și contractori din zona dumneavoastră, nu pe o cifră generică găsită într-un articol.",
+      },
+      {
+        heading: "Cum reduceți riscul financiar la deschidere",
+        body: "- Nu subestimați capitalul de lucru — e mai valoros să aveți o rezervă mai mare și un echipament mai modest decât invers\n- Luați în calcul echipament second-hand funcțional pentru pozițiile mai puțin critice, păstrând bugetul nou pentru echipamentul care determină direct calitatea (espressorul, în special)\n- Configurați sistemul de gestiune și POS înainte de deschidere, nu în prima săptămână — franchisetech oferă configurare ghidată și un plan gratuit permanent, exact pentru etapa în care fiecare leu din buget contează\n- Calculați marja brută a fiecărui produs din meniul de lansare înainte de deschidere, nu după o lună de vânzări — vedeți [cum calculați marja brută cu exemple reale](/blog/cum-calculezi-marja-bruta-produs-restaurant)",
+      },
+    ],
+  },
+  {
+    slug: "coduri-caen-restaurant-cafenea-2026-rev3",
+    title: "Codurile CAEN pentru restaurant, cafenea sau catering în 2026 — ce s-a schimbat",
+    description:
+      "Termenul de trecere la nomenclatorul CAEN Rev. 3 a expirat pe 25 septembrie 2026. Codurile corecte acum pentru restaurant, bar, catering și food truck — și ce se întâmplă dacă firma dumneavoastră are încă un cod vechi.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["caen", "infiintare"],
+    sections: [
+      {
+        heading: "Termenul de tranziție la CAEN Rev. 3 a expirat deja",
+        body: "România a trecut, în 2026, de la nomenclatorul CAEN Rev. 2 la CAEN Rev. 3, aliniat la clasificarea europeană NACE Rev. 2.1. Termenul stabilit prin Hotărârea Guvernului nr. 284/2025 pentru actualizarea codurilor firmelor deja înregistrate la Registrul Comerțului a fost **25 septembrie 2026** — dacă citiți acest articol la scurt timp după publicare, termenul a trecut deja de câteva zile.\n\nVestea bună: nu există o penalizare sau o dizolvare a firmei pentru actualizarea întârziată a codului CAEN existent — dar orice firmă nou înființată de acum înainte trebuie să folosească direct codurile Rev. 3, iar firmele existente ar trebui să își actualizeze codul la prima ocazie (o modificare oricum necesară, o cerere la ONRC), nu să rămână la infinit cu un cod Rev. 2 care nu mai e nomenclatorul curent.",
+      },
+      {
+        heading: "Codurile corecte acum, pentru fiecare tip de activitate HoReCa",
+        body: "Sub Rev. 3, diviziunea 56 (Restaurante și alte activități de servicii de alimentație) arată astfel:\n\n- **5611 — Restaurante** (codul general pentru restaurant, cafenea cu servire la masă)\n- **5612 — Activități ale unităților mobile de alimentație** — cod nou, dedicat, pentru food truck-uri și vânzare ambulantă de mâncare; sub Rev. 2, aceste activități intrau tot sub codul general de restaurant, fără un cod separat\n- **5621 — Activități de alimentație (catering) pentru evenimente**\n- **5622 — Alte servicii de alimentație n.c.a.** (renumerotat față de vechiul 5629)\n- **5630 — Baruri și alte activități de servire a băuturilor** (cod neschimbat față de Rev. 2)\n- **5640 — Intermediere în alimentație și servire băuturi** — grupă complet nouă în Rev. 3, fără echivalent direct în Rev. 2\n\nDacă operați un food truck, codul 5612 e acum cea mai precisă alegere — anterior, sub Rev. 2, toate food truck-urile foloseau practic același cod ca un restaurant cu locație fixă, ceea ce nu reflecta corect specificul activității.",
+      },
+      {
+        heading: "Ce se întâmplă dacă firma dumneavoastră are încă un cod Rev. 2",
+        body: "Firmele deja înregistrate, cu certificatul constatator emis pe un cod Rev. 2 (de exemplu 5610 pentru restaurant sau 5629 pentru vechiul \"alte activități de alimentație\"), rămân funcționale — nu sunteți obligat să opriți activitatea sau să refaceți actele de urgență. Actualizarea codului la Rev. 3 se face printr-o cerere depusă la Registrul Comerțului, fără costuri suplimentare asociate exclusiv tranziției.\n\nCe merită totuși verificat: dacă urmează să faceți oricum o modificare la firmă (schimbare sediu, adăugare de activitate, modificare asociați), profitați de acel moment pentru a actualiza și codul CAEN la Rev. 3, în loc să tratați cele două ca proceduri separate.",
+      },
+      {
+        heading: "Cum alegeți codul corect pentru activitatea dumneavoastră",
+        body: "- **Cafenea sau restaurant cu servire la masă, locație fixă** → 5611\n- **Food truck sau vânzare ambulantă de mâncare** → 5612\n- **Catering pentru evenimente** (nunți, conferințe, petreceri) → 5621\n- **Alte servicii de alimentație** care nu se încadrează clar în restaurant sau catering → 5622\n- **Bar, cafenea axată pe băuturi**, fără meniu de restaurant complet → 5630\n\nMulte afaceri HoReCa au, de fapt, activitate mixtă (un restaurant care face și catering ocazional, de exemplu) — în acest caz, înregistrați activitatea principală pe codul CAEN principal și adăugați codurile secundare relevante, nu forțați totul sub un singur cod.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Verificați ce cod CAEN are firma dumneavoastră înregistrat acum — Rev. 2 sau Rev. 3\n- [ ] Dacă e Rev. 2, planificați actualizarea la ONRC, ideal odată cu orice altă modificare pe care oricum trebuie să o faceți\n- [ ] Pentru o firmă nouă, folosiți direct codurile Rev. 3 de mai sus\n- [ ] Dacă operați un food truck, folosiți codul dedicat 5612, nu codul general de restaurant\n- [ ] Dacă aveți activitate mixtă (restaurant plus catering, de exemplu), înregistrați și codurile secundare relevante\n\nAceastă listă nu înlocuiește verificarea directă cu contabilul sau cu Registrul Comerțului pentru situația specifică a firmei dumneavoastră, mai ales dacă activitatea nu se încadrează clar într-o singură categorie.",
+      },
+    ],
+  },
+  {
+    slug: "haccp-horeca-mitul-certificatului",
+    title: "HACCP în HoReCa — mitul certificatului vs. obligația reală",
+    description:
+      "Mulți proprietari cred că «rezolvă» HACCP cumpărând un certificat de la o firmă de consultanță. Legea nu cere un certificat — cere proceduri de autocontrol implementate și documentate efectiv, în fiecare zi.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["haccp", "conformitate"],
+    sections: [
+      {
+        heading: "Mitul: «am nevoie de un certificat HACCP»",
+        body: "O confuzie frecventă în HoReCa: proprietarul plătește o firmă de consultanță pentru un «certificat HACCP», îl pune într-un dosar sau pe perete, și consideră subiectul rezolvat. Problema: legea nu cere, de fapt, un certificat — cere ceva diferit, care nu se cumpără o singură dată, ci se aplică zilnic.",
+      },
+      {
+        heading: "Ce spune de fapt legea",
+        body: "Regulamentul (CE) nr. 852/2004 al Parlamentului European și al Consiliului privind igiena produselor alimentare, aplicabil direct în România ca stat membru UE, impune operatorilor din sectorul alimentar obligația de a dezvolta, implementa și menține permanent una sau mai multe proceduri bazate pe principiile HACCP (Hazard Analysis and Critical Control Points) — analiza riscurilor și controlul punctelor critice. Cadrul general este completat, la nivel național, de Legea nr. 150/2004 privind siguranța alimentelor și a hranei pentru animale, republicată.\n\nNicăieri în acest cadru legal nu apare o obligație de a deține un «certificat HACCP» emis de un terț. Ce apare este obligația de a avea un sistem de autocontrol documentat, aplicat efectiv — indiferent de mărimea afacerii. O cafenea cu doi angajați are aceeași obligație legală ca un restaurant mare, chiar dacă amploarea documentației diferă proporțional.",
+      },
+      {
+        heading: "Ce înseamnă, practic, «proceduri HACCP» pentru o cafenea mică",
+        body: "Nu înseamnă un document teoretic de 40 de pagini scris o dată și uitat într-un sertar. Înseamnă proceduri reale, documentate constant:\n\n- **Monitorizarea temperaturilor** la frigidere și vitrine frigorifice, înregistrată periodic (nu doar «pare rece»)\n- **Trasabilitatea materiilor prime** — de unde vine fiecare lot de marfă, cu documentele de recepție păstrate\n- **Proceduri de curățenie și igienizare**, cu un program clar, nu «facem curat când apucăm»\n- **Instruirea personalului** pe igienă alimentară, la angajare și periodic\n- **Gestionarea produselor cu risc** — separarea materiilor prime crude de cele gata de consum, respectarea termenelor de valabilitate\n\nAceste proceduri, documentate constant (chiar și simplu, pe un formular tipărit completat zilnic), reprezintă exact ce cere legea — nu o hârtie cumpărată o singură dată.",
+      },
+      {
+        heading: "De ce un certificat cumpărat nu vă scutește de aplicare efectivă",
+        body: "Un certificat emis de o firmă de consultanță poate fi util ca punct de plecare — mulți consultanți ajută la scrierea procedurilor inițiale, ceea ce are valoare reală. Dar certificatul în sine nu e ce verifică un control DSP sau ANSVSA. Ce se verifică este dacă procedurile chiar se aplică: temperaturile sunt notate real, curățenia se face conform programului, personalul știe și respectă regulile.\n\nUn dosar impecabil cu proceduri scrise, dar fără aplicare zilnică vizibilă, nu rezistă la un control — inspectorul verifică dovezi curente (jurnale de temperatură completate, etichete de trasabilitate), nu doar existența unui document semnat cu luni în urmă.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Aveți proceduri HACCP scrise, adaptate activității reale a locației, nu un șablon generic nefolosit\n- [ ] Temperaturile echipamentelor de refrigerare se înregistrează periodic, nu doar la deschidere\n- [ ] Personalul nou primește instruire pe igienă alimentară înainte de prima tură, nu «din mers»\n- [ ] Documentele de trasabilitate (NIR, facturi) se păstrează sistematic, corelate cu materiile prime din gestiune\n- [ ] Procedurile de curățenie au un program clar, verificabil, nu doar o intenție bună\n\nDacă tocmai deschideți o locație și nu aveți încă un sistem HACCP scris, un consultant specializat în siguranță alimentară vă poate ajuta să-l construiți corect de la început — dar rețineți că valoarea reală stă în aplicare, nu în documentul inițial.",
+      },
+    ],
+  },
+  {
+    slug: "salariul-minim-2026-costuri-personal-horeca",
+    title: "Salariul minim 2026 — ce înseamnă pentru costurile cu personalul într-o cafenea sau restaurant",
+    description:
+      "De la 1 iulie 2026, salariul minim brut pe economie a crescut la 4.325 lei. Ce înseamnă asta pentru costurile cu personalul în HoReCa și de ce vechea excepție pentru industria alimentară nu mai există.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["personal", "salarii"],
+    sections: [
+      {
+        heading: "Noul salariu minim brut — 4.325 lei, de la 1 iulie 2026",
+        body: "Prin Hotărârea de Guvern nr. 146/2026, salariul minim brut pe economie a crescut la **4.325 lei/lună**, de la 1 iulie 2026, pentru un program normal de lucru de 166,667 ore/lună (echivalent 25,949 lei/oră) — o creștere față de nivelul anterior de 4.050 lei. Tot de la aceeași dată, plafonul neimpozabil aplicat salariului minim a scăzut de la 300 la 200 lei.\n\nPentru orice angajat cu normă întreagă plătit la nivelul minim — frecvent cazul personalului la început de carieră în HoReCa — acest nivel reprezintă pragul legal minim, nu o recomandare orientativă.",
+      },
+      {
+        heading: "Nu confundați cu salariul minim din construcții",
+        body: "Există un salariu minim separat, mai mare, pentru sectorul construcțiilor (4.582 lei, stabilit prin OUG nr. 156/2024) — dar acesta **nu se aplică HoReCa**. Dacă ați văzut cifre diferite în articole despre salariul minim, verificați întotdeauna la ce sector se referă înainte de a le aplica propriei afaceri.",
+      },
+      {
+        heading: "Vechea excepție pentru industria alimentară a fost eliminată",
+        body: "Până de curând, exista un salariu minim separat, mai mic, pentru sectoarele agricultură și industrie alimentară. Această excepție a fost **eliminată începând cu 1 iulie 2026**, prin OUG nr. 29/2026, care a abrogat prevederea anterioară — motivul invocat oficial a fost prevenirea disparităților salariale între sectoare. De la această dată, toate sectoarele, inclusiv cele care anterior aveau un prag mai mic, respectă același salariu minim general de 4.325 lei.\n\nDacă ați reținut ideea unui «salariu minim mai mic pentru industria alimentară», actualizați informația — nu mai există, indiferent cum a fost aplicată sau interpretată anterior în legătură cu HoReCa.",
+      },
+      {
+        heading: "Ce înseamnă practic pentru costul total cu un angajat",
+        body: "Salariul brut nu este singurul cost real cu un angajat — la el se adaugă contribuțiile aferente suportate de angajator, care variază în funcție de tipul de contract și condițiile specifice. Nu presupuneți un procent standard fără să verificați — cereți contabilului care vă administrează salarizarea o simulare exactă a costului total per angajat la noul nivel de salariu minim, mai ales dacă aveți mai mulți angajați plătiți la acest nivel și impactul se multiplică direct în costurile fixe lunare.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Verificați dacă vreun angajat este plătit la nivelul vechiului salariu minim (4.050 lei) și necesită ajustare la 4.325 lei\n- [ ] Actualizați bugetul lunar de personal cu noul nivel, de la 1 iulie 2026\n- [ ] Nu aplicați din greșeală un prag mai mic pentru personalul din bucătărie sau producție — excepția pentru industria alimentară nu mai există\n- [ ] Cereți contabilului o simulare a costului total (brut + contribuții angajator) la noul nivel, nu doar cifra brută\n- [ ] Recalculați marja produselor dacă personalul plătit la salariul minim reprezintă o parte semnificativă din costurile fixe — vedeți [cum calculați marja netă a afacerii](/blog/marja-neta-vs-marja-bruta-de-ce-conteaza-prima)",
+      },
+    ],
+  },
+  {
+    slug: "e-factura-b2c-2026-ce-inseamna-pentru-horeca",
+    title: "E-Factura pentru vânzări către persoane fizice — ce înseamnă, de fapt, pentru un local HoReCa",
+    description:
+      "De la 1 ianuarie 2025, e-Factura e obligatorie și pentru vânzările către persoane fizice — dar bonul fiscal obișnuit nu intră sub această obligație. Iată exact când se aplică regula și când nu.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["fiscal", "e-factura"],
+    sections: [
+      {
+        heading: "De la 1 ianuarie 2025, e-Factura e obligatorie și pentru B2C",
+        body: "OUG nr. 69/2024 a extins sistemul RO e-Factura și la tranzacțiile dintre firme și persoane fizice (B2C) — opțional în a doua jumătate a lui 2024, **obligatoriu de la 1 ianuarie 2025**. Multe articole și discuții de proprietari HoReCa din 2025 au tratat asta ca pe o schimbare majoră a modului în care se vinde zilnic la casă — dar, pentru majoritatea vânzărilor dintr-o cafenea sau restaurant, nu e cazul. Vedeți secțiunea următoare pentru motiv.",
+      },
+      {
+        heading: "Bonul fiscal obișnuit NU trece prin e-Factura",
+        body: "Codul Fiscal, la art. 319 alin. (12) și (21), califică un bon fiscal (sau alt document similar emis de o casă de marcat) drept **factură simplificată** atunci când valoarea nu depășește 100 EUR — iar facturile simplificate sunt **exceptate de la obligația de transmitere prin RO e-Factura**. Asta înseamnă că vânzarea obișnuită dintr-o cafenea sau restaurant — un cappuccino, o masă de familie, orice [bon fiscal emis normal prin POS](/blog/bon-fiscal-obligatoriu-cand-si-cum) — **nu trebuie încărcată separat în sistemul e-Factura**. Bonul rămâne exact ce a fost mereu: documentul fiscal al vânzării, emis prin casa de marcat conectată la ANAF.\n\nAceasta e distincția pe care mulți proprietari o ratează: e-Factura B2C nu înseamnă «orice vânzare către un client obișnuit trebuie transmisă prin platforma ANAF» — înseamnă altceva, explicat mai jos.",
+      },
+      {
+        heading: "Când se aplică totuși obligația",
+        body: "Obligația de transmitere prin RO e-Factura se activează atunci când emiteți efectiv o **factură** (nu un bon fiscal) către o persoană fizică — de exemplu, un client care cere o factură cu numele lui, pentru a o deconta la propria firmă sau pentru alte scopuri. În acest caz, factura trebuie transmisă prin sistemul RO e-Factura, în termen de 5 zile lucrătoare de la emitere.\n\nDacă activitatea dumneavoastră constă aproape exclusiv în vânzări prin bon fiscal, iar facturile către persoane fizice sunt rare (cazuri punctuale, la cerere), impactul practic al e-Factura B2C asupra fluxului zilnic de la casă e minim — dar e important să știți exact în ce moment obligația se activează, ca să nu rateze termenul de 5 zile atunci când apare o cerere de factură.",
+      },
+      {
+        heading: "Ce riscați dacă nu respectați termenul",
+        body: "Legea prevede sancțiuni pentru netransmiterea la timp a unei facturi B2C prin RO e-Factura, diferențiate în funcție de categoria de contribuabil — verificați cuantumul actualizat cu contabilul dumneavoastră sau pe portalul ANAF, pentru că aceste amenzi se pot ajusta, și nu vă bazați pe o cifră reținută dintr-un articol mai vechi.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Vânzările obișnuite prin bon fiscal, sub 100 EUR, nu necesită nicio acțiune suplimentară legată de e-Factura\n- [ ] Dacă un client cere o factură (nu doar bon), aveți un proces clar pentru a o emite și transmite prin RO e-Factura în 5 zile lucrătoare\n- [ ] Personalul de la casă știe diferența dintre «dați-mi bonul» și «am nevoie de factură pe firmă», ca să direcționeze corect cererea\n- [ ] Verificați periodic cu contabilul dacă procedura internă reflectă corect regulile curente — zona asta a legislației s-a schimbat de mai multe ori din 2024",
+      },
+    ],
+  },
+  {
+    slug: "raportarea-saf-t-d406-pentru-horeca",
+    title: "Raportarea SAF-T (D406) pentru HoReCa — cine trebuie să o depună și din când",
+    description:
+      "Perioadele de grație pentru contribuabilii mici s-au încheiat — dacă aveți un SRL mic în HoReCa, obligația de raportare SAF-T (D406) se aplică deja. Ce înseamnă concret și ce acoperă exportul din programul de gestiune.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["contabilitate", "saf-t"],
+    sections: [
+      {
+        heading: "Ce este SAF-T și de ce a devenit relevant pentru afaceri mici",
+        body: "SAF-T (Standard Audit File for Tax) este declarația informativă D406, un raport standardizat pe care ANAF îl cere periodic pentru a verifica, electronic, corespondența dintre datele contabile ale unei firme și declarațiile fiscale depuse. Obligația a fost introdusă prin OPANAF nr. 1783/2021 și aplicată gradual, pe categorii de contribuabili:\n\n- **Contribuabili mari**: obligație din 1 ianuarie 2022\n- **Contribuabili mijlocii**: obligație din 1 ianuarie 2023\n- **Contribuabili mici** (categoria în care se încadrează majoritatea afacerilor HoReCa independente): obligație din **1 ianuarie 2025**\n\nPerioadele de grație acordate inițial fiecărei categorii s-au încheiat între timp — dacă operați un SRL mic în HoReCa, obligația se aplică deja efectiv, fără o perioadă de toleranță rămasă.",
+      },
+      {
+        heading: "Ce riscați dacă nu depuneți la timp sau depuneți incorect",
+        body: "Potrivit Codului de procedură fiscală, nedepunerea la termen a declarației D406 se sancționează cu amendă între **1.000 și 5.000 lei**, iar depunerea unei declarații incorecte sau incomplete, cu amendă între **500 și 1.500 lei**. Nu se aplică sancțiune dacă eroarea este corectată înainte de următorul termen de depunere, sau dacă întârzierea s-a datorat unor cauze care nu au ținut de contribuabil.\n\nAceste cuantumuri se pot actualiza — verificați cu contabilul dumneavoastră valoarea curentă la momentul unui eventual control sau al depunerii declarației.",
+      },
+      {
+        heading: "Ce acoperă exportul disponibil în franchisetech — și ce nu",
+        body: "franchisetech oferă un export SAF-T pentru partea de **mișcări de stoc** (recepții prin NIR, ieșiri prin vânzare, scăzăminte, ajustări, retururi) — secțiunea din declarația D406 care se bazează pe date de gestiune, nu pe contabilitatea completă a firmei. Acest export **nu este o depunere certificată de sine stătătoare** — este un draft structurat corect după schema oficială ANAF, care trebuie verificat și integrat de contabilul dumneavoastră în declarația D406 completă a firmei, alături de partea de registru general contabil (jurnal, balanțe, solduri) pe care programul de gestiune nu o gestionează.\n\nUn program de gestiune ca franchisetech nu ține o contabilitate în partidă dublă — nu are conturi contabile, solduri de furnizori sau clienți, sau coduri vamale per produs, elemente pe care schema SAF-T le cere pentru anumite secțiuni. Exportul acoperă exact ce sistemul chiar știe cu certitudine — mișcările de stoc reale, din NIR și vânzări — nu inventează date pentru secțiunile pe care nu le gestionează.",
+      },
+      {
+        heading: "Cum funcționează practic acest flux",
+        body: "1. **Exportați din franchisetech** secțiunea de mișcări de stoc pentru perioada raportată, în formatul XML compatibil cu schema SAF-T\n2. **Trimiteți exportul contabilului dumneavoastră**, care îl validează și îl integrează în declarația D406 completă a firmei\n3. **Contabilul depune declarația finală** către ANAF, cu responsabilitatea de a confirma corectitudinea întregului conținut, nu doar a secțiunii de stoc\n\nAcest flux nu elimină nevoia unui contabil pentru raportarea SAF-T — o reduce la partea pe care contabilul altfel ar trebui să o reconstituie manual din facturi și NIR-uri împrăștiate.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Confirmați cu contabilul dumneavoastră dacă firma se încadrează deja la categoria «contribuabil mic» obligată să depună SAF-T\n- [ ] Verificați termenul de depunere aplicabil situației dumneavoastră (lunar, trimestrial, în funcție de perioada fiscală)\n- [ ] Exportați secțiunea de mișcări de stoc din franchisetech și trimiteți-o contabilului cu suficient timp înainte de termen\n- [ ] Nu presupuneți că exportul de stoc, singur, reprezintă o depunere completă — contabilul trebuie să îl integreze în declarația D406 a firmei",
+      },
+    ],
+  },
+  {
+    slug: "gdpr-program-loializare-date-clienti",
+    title: "GDPR și programul de loializare — ce trebuie să știți înainte să colectați date despre clienți",
+    description:
+      "Un program de fidelizare cu nume și telefon înseamnă că prelucrați date cu caracter personal. Ce bază legală aveți nevoie, dacă vă trebuie un DPO și ce regulă separată se aplică dacă trimiteți SMS-uri promoționale.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["gdpr", "loializare"],
+    sections: [
+      {
+        heading: "Ce date colectați, de fapt, printr-un program de loializare",
+        body: "Un program de fidelizare simplu — cartelă digitală de vizite, puncte de loialitate, reduceri pentru clienți recurenți — înseamnă, aproape întotdeauna, colectarea a cel puțin numelui și numărului de telefon al clientului. Din momentul în care stocați aceste date, indiferent cât de simplu pare sistemul, intrați sub incidența Regulamentului UE 2016/679 (GDPR) și a legii române de aplicare, Legea nr. 190/2018.",
+      },
+      {
+        heading: "Aveți nevoie de consimțământ — baza legală cea mai sigură",
+        body: "Pentru a colecta legal numele și telefonul unui client în scopul unui program de loializare, cea mai clară și mai sigură bază legală este **consimțământul explicit al clientului**, obținut la momentul înscrierii în program — de exemplu, printr-o bifă clară la înscriere, nu presupus din simplul fapt că a lăsat numărul de telefon la casă.\n\nConsimțământul trebuie să fie specific (pentru programul de loializare, nu generic «pentru marketing în general»), ușor de retras, și documentat — păstrați o evidență a momentului și modului în care fiecare client și-a dat acordul.",
+      },
+      {
+        heading: "Nu aveți nevoie de un DPO doar pentru asta",
+        body: "O confuzie frecventă: proprietarii cred că orice colectare de date personale impune desemnarea unui responsabil cu protecția datelor (DPO). Potrivit precizărilor oficiale ale Autorității Naționale de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP), DPO este obligatoriu doar pentru autorități publice, sau pentru prelucrări de date **la scară largă** ori care implică monitorizare sistematică sau categorii speciale de date.\n\nUn program de loializare pentru clienții unei cafenele sau ale unui restaurant cu 1-3 locații, care colectează doar nume și telefon, nu atinge pragul de «scară largă» definit de autoritate — nu aveți nevoie de un DPO desemnat pentru acest scop, deși documentarea corectă a modului în care gestionați datele rămâne obligatorie indiferent de asta.",
+      },
+      {
+        heading: "Dacă trimiteți SMS-uri promoționale, se aplică o regulă separată",
+        body: "Colectarea numărului de telefon pentru programul de loializare este un lucru; trimiterea de SMS-uri sau mesaje promoționale pe acel număr este altceva, guvernat separat de Legea nr. 506/2004 (transpunerea românească a directivei privind protecția vieții private în comunicațiile electronice). Această lege cere **consimțământ prealabil explicit** pentru trimiterea de comunicări de marketing (SMS, email), cu o excepție limitată («soft opt-in») atunci când datele de contact au fost colectate în contextul unei vânzări similare, iar clientul a avut posibilitatea clară de a refuza la momentul colectării și la fiecare comunicare ulterioară.\n\nPractic: consimțământul pentru cartela de loialitate nu acoperă automat și consimțământul pentru SMS-uri promoționale — dacă intenționați să trimiteți oferte, cereți acest acord separat, explicit, la înscriere.",
+      },
+      {
+        heading: "Ce drepturi au clienții asupra datelor lor",
+        body: "Indiferent de baza legală folosită, clienții își păstrează drepturile garantate de GDPR: dreptul de acces la datele deținute despre ei, dreptul de rectificare dacă sunt greșite, și dreptul la ștergere («dreptul de a fi uitat»), atunci când nu mai există un motiv legal de a le păstra. Aveți nevoie de un proces clar — chiar și simplu, un email sau un formular de contact — prin care un client poate cere ștergerea datelor sale din programul de loializare, și trebuie să răspundeți efectiv, nu doar formal.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Clienții își dau consimțământul explicit la înscrierea în programul de loializare, nu presupus\n- [ ] Păstrați o evidență a momentului și modului în care fiecare client a consimțit\n- [ ] Nu trimiteți SMS-uri sau email-uri promoționale fără un consimțământ separat, specific pentru asta\n- [ ] Aveți un proces clar prin care un client poate cere ștergerea datelor sale\n- [ ] Nu ați desemnat inutil un DPO doar pentru programul de loializare — nu e obligatoriu la această scară\n\nPentru situații mai complexe (colectarea altor tipuri de date, integrare cu platforme externe de marketing), verificarea cu un specialist în protecția datelor rămâne cea mai sigură cale.",
       },
     ],
   },

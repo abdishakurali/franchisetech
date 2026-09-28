@@ -11,6 +11,7 @@ type Props = {
   browserOffline: boolean;
   pendingSync: QueuedSale[];
   pendingFiscal: QueuedSale[];
+  needsAttention?: QueuedSale[];
   syncing?: boolean;
   onQueueChange: () => void;
   onSyncAll?: () => void;
@@ -23,20 +24,21 @@ export function PosOfflineBar({
   browserOffline,
   pendingSync,
   pendingFiscal,
+  needsAttention = [],
   syncing = false,
   onQueueChange,
   onSyncAll,
   onResend,
   onDismiss,
 }: Props) {
-  const hasQueue = pendingSync.length > 0 || pendingFiscal.length > 0;
+  const hasQueue = pendingSync.length > 0 || pendingFiscal.length > 0 || needsAttention.length > 0;
   if (!browserOffline && !hasQueue) return null;
 
   return (
-    <div className="shrink-0 space-y-1.5 border-b border-slate-100 bg-white px-3 py-2 sm:px-4">
+    <div className="shrink-0 space-y-1.5 border-b border-border bg-white px-3 py-2 sm:px-4">
       {browserOffline && (
-        <div className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-100 px-3 py-2 text-xs font-medium text-slate-800 sm:text-sm">
-          <WifiOff className="h-4 w-4 shrink-0 text-slate-600" aria-hidden />
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary px-3 py-2 text-xs font-medium text-foreground sm:text-sm">
+          <WifiOff className="h-4 w-4 shrink-0 text-mid" aria-hidden />
           {t.offlineModeBanner}
         </div>
       )}
@@ -64,7 +66,7 @@ export function PosOfflineBar({
             <span className="font-semibold">{t.offlinePendingSyncRow}</span>
             <span className="text-amber-800"> — {entry.label}</span>
             {entry.lastError && (
-              <p className="mt-0.5 text-[11px] text-amber-700">{t.offlineSyncFailed}</p>
+              <p className="mt-0.5 text-[11px] text-amber-700">{entry.lastError}</p>
             )}
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -83,7 +85,44 @@ export function PosOfflineBar({
                 type="button"
                 disabled={syncing}
                 onClick={() => { onDismiss(entry.id); onQueueChange(); }}
-                className="shrink-0 rounded-md border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                className="shrink-0 rounded-md border border-border bg-white px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-secondary disabled:opacity-50"
+                title="Elimină din coadă"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+      {needsAttention.map((entry) => (
+        <div
+          key={entry.id}
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-900 sm:text-sm"
+        >
+          <div className="min-w-0">
+            <span className="font-semibold">{t.offlinePendingAttentionRow}</span>
+            <span className="text-rose-800"> — {entry.label}</span>
+            {entry.lastError && (
+              <p className="mt-0.5 text-[11px] text-rose-700">{entry.lastError}</p>
+            )}
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            {onResend && (
+              <button
+                type="button"
+                disabled={syncing}
+                onClick={() => onResend(entry.id)}
+                className="shrink-0 rounded-md border border-rose-400 bg-white px-2.5 py-1 font-semibold text-rose-900 hover:bg-rose-100 disabled:opacity-50"
+              >
+                {t.offlineResend}
+              </button>
+            )}
+            {onDismiss && (
+              <button
+                type="button"
+                disabled={syncing}
+                onClick={() => { onDismiss(entry.id); onQueueChange(); }}
+                className="shrink-0 rounded-md border border-border bg-white px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-secondary disabled:opacity-50"
                 title="Elimină din coadă"
               >
                 ×

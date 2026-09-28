@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MarketingShell } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { HELP_ARTICLES, HELP_CATEGORIES, getArticle, getArticlesByCategory } from "@/lib/help/articles";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { ChevronRight, ArrowLeft, CheckCircle2 } from "lucide-react";
@@ -49,12 +49,12 @@ function renderBody(text: string) {
     .map((part, i) => {
       if (part === "\n\n") return <br key={i} />;
       if (part.startsWith("**") && part.endsWith("**")) {
-        return <strong key={i} className="font-semibold text-slate-900">{part.slice(2, -2)}</strong>;
+        return <strong key={i} className="font-semibold text-foreground">{part.slice(2, -2)}</strong>;
       }
       const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
       if (link) {
         return (
-          <Link key={i} href={link[2]} className="font-semibold text-blue-600 hover:underline">
+          <Link key={i} href={link[2]} className="font-semibold text-brass hover:underline">
             {link[1]}
           </Link>
         );
@@ -82,26 +82,26 @@ export default async function HelpArticlePage({ params }: Props) {
   const morInCat = getArticlesByCategory(article.category).filter((a) => a.slug !== article.slug).slice(0, 3);
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <div className="max-w-3xl mx-auto px-4 py-12">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-1.5 text-xs text-slate-400 mb-8">
-          <Link href="/help" className="hover:text-blue-600 transition-colors">{t.breadcrumbHome}</Link>
+        <nav className="flex items-center gap-1.5 text-xs text-muted-foreground mb-8">
+          <Link href="/help" className="hover:text-brass transition-colors">{t.breadcrumbHome}</Link>
           <ChevronRight className="h-3 w-3" />
-          <Link href={`/help#${article.category}`} className="hover:text-blue-600 transition-colors">
+          <Link href={`/help#${article.category}`} className="hover:text-brass transition-colors">
             {categoryLabel}
           </Link>
           <ChevronRight className="h-3 w-3" />
-          <span className="text-slate-600">{title}</span>
+          <span className="text-mid">{title}</span>
         </nav>
 
         {/* Header */}
         <header className="mb-10">
           <p className="text-3xl mb-3">{article.icon}</p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-3">{title}</h1>
-          <p className="text-lg text-slate-500">{description}</p>
-          <div className="mt-4 flex items-center gap-3 text-sm text-slate-400">
-            <span className="bg-blue-50 text-blue-700 rounded-full px-3 py-1 text-xs font-medium">{categoryLabel}</span>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">{title}</h1>
+          <p className="text-lg text-muted-foreground">{description}</p>
+          <div className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
+            <span className="bg-accent text-brass rounded-full px-3 py-1 text-xs font-medium">{categoryLabel}</span>
             <span>{t.steps(article.steps.length)}</span>
           </div>
         </header>
@@ -115,23 +115,23 @@ export default async function HelpArticlePage({ params }: Props) {
               <li key={idx} className="relative">
                 {/* Step number connector line */}
                 {idx < article.steps.length - 1 && (
-                  <div className="absolute left-5 top-10 bottom-0 w-px bg-slate-100" />
+                  <div className="absolute left-5 top-10 bottom-0 w-px bg-secondary" />
                 )}
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 flex items-start justify-center">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-bold text-sm z-10">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brass text-white font-bold text-sm z-10">
                       {idx + 1}
                     </div>
                   </div>
                   <div className="flex-1 pb-2">
-                    <h2 className="text-lg font-semibold text-slate-900 mb-2 mt-1.5">{stepTitle}</h2>
-                    <p className="text-slate-600 text-sm leading-relaxed mb-4">{renderBody(stepBody)}</p>
+                    <h2 className="text-lg font-semibold text-foreground mb-2 mt-1.5">{stepTitle}</h2>
+                    <p className="text-mid text-sm leading-relaxed mb-4">{renderBody(stepBody)}</p>
                     {step.screenshot && (
                       // eslint-disable-next-line @next/next/no-img-element -- varying aspect ratios, plain img keeps natural sizing
                       <img
                         src={`/help/${step.screenshot}`}
                         alt={stepTitle}
-                        className="w-full max-w-xl rounded-lg border border-slate-200 shadow-sm"
+                        className="w-full max-w-xl rounded-lg border border-border shadow-sm"
                       />
                     )}
                   </div>
@@ -152,19 +152,19 @@ export default async function HelpArticlePage({ params }: Props) {
 
         {/* Related articles */}
         {(related.length > 0 || morInCat.length > 0) && (
-          <section className="mt-14 border-t border-slate-100 pt-10">
-            <h2 className="text-lg font-bold text-slate-800 mb-5">{t.related}</h2>
+          <section className="mt-14 border-t border-border pt-10">
+            <h2 className="text-lg font-bold text-foreground mb-5">{t.related}</h2>
             <div className="grid sm:grid-cols-2 gap-3">
               {[...related, ...morInCat].slice(0, 4).map((a) => (
                 <Link
                   key={a!.slug}
                   href={`/help/${a!.slug}`}
-                  className="group flex items-start gap-3 rounded-lg border border-slate-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all"
+                  className="group flex items-start gap-3 rounded-lg border border-border p-4 hover:border-brass/40 hover:shadow-sm transition-all"
                 >
                   <span className="text-xl">{a!.icon}</span>
                   <div>
-                    <p className="text-sm font-semibold text-slate-800 group-hover:text-blue-700">{isRo ? a!.titleRo ?? a!.title : a!.title}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{t.steps(a!.steps.length)}</p>
+                    <p className="text-sm font-semibold text-foreground group-hover:text-brass">{isRo ? a!.titleRo ?? a!.title : a!.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t.steps(a!.steps.length)}</p>
                   </div>
                 </Link>
               ))}
@@ -173,11 +173,11 @@ export default async function HelpArticlePage({ params }: Props) {
         )}
 
         <div className="mt-10">
-          <Link href="/help" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors">
+          <Link href="/help" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-brass transition-colors">
             <ArrowLeft className="h-4 w-4" /> {t.back}
           </Link>
         </div>
       </div>
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

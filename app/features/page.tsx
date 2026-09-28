@@ -1,9 +1,12 @@
+import { DesignFeatures } from "@/components/marketing/ClaudeMarketing";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CheckCircle, PackagePlus, ReceiptText, ScanLine, ShoppingCart, WifiOff } from "lucide-react";
-import { CTASection, MarketingShell, SectionLabel } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { JsonLd } from "@/components/marketing/JsonLd";
-import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketing/tokens";
+import { PersuasionHero } from "@/components/marketing/PersuasionHero";
+import { marketingCard } from "@/lib/marketing/tokens";
 import { featurePages, SITE_URL } from "@/lib/marketing/seo";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages, localizeSeoPage } from "@/lib/marketing/i18n";
@@ -25,10 +28,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FeaturesPage() {
   const locale = await getMarketingLocale();
+  if (locale === "ro") return <ClaudeMarketingShellAuth><DesignFeatures /></ClaudeMarketingShellAuth>;
   const t = getMarketingMessages(locale);
 
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -37,15 +41,9 @@ export default async function FeaturesPage() {
         }}
       />
 
-      <section className="bg-gradient-to-b from-slate-50/80 to-white px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <div className="mx-auto max-w-6xl text-center lg:text-left">
-          <SectionLabel>{t.featuresIndex.heroLabel}</SectionLabel>
-          <h1 className={`mx-auto mt-4 max-w-3xl lg:mx-0 ${marketingHeading}`}>{t.featuresIndex.heroTitle}</h1>
-          <p className={`mx-auto mt-4 max-w-2xl lg:mx-0 ${marketingSubtext}`}>{t.featuresIndex.heroText}</p>
-        </div>
-      </section>
+      <PersuasionHero eyebrow={t.featuresIndex.heroLabel} title={t.featuresIndex.heroTitle} subtitle={t.featuresIndex.heroText} />
 
-      <section className="px-4 pb-24 sm:px-6 lg:px-8">
+      <section className="px-4 py-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-6 md:grid-cols-2">
             {featurePages.filter((page) => isLeanPublicFeature(page.slug)).map((raw) => {
@@ -54,21 +52,21 @@ export default async function FeaturesPage() {
                 <Link key={page.path} href={page.path} className={`group p-6 ${marketingCard}`}>
                   {(() => {
                     const Icon = FEATURE_ICONS[page.slug as keyof typeof FEATURE_ICONS] ?? CheckCircle;
-                    return <Icon className="h-6 w-6 text-[#1a3ab8]" aria-hidden />;
+                    return <Icon className="h-6 w-6 text-[#165DFC]" aria-hidden />;
                   })()}
                   <div>
-                    <p className="text-xs font-medium uppercase tracking-[0.15em] text-[#1a3ab8]">{page.eyebrow}</p>
-                    <h2 className="mt-2 text-lg font-medium text-slate-900">{page.title}</h2>
-                    <p className="mt-2 text-sm text-slate-500">{page.description}</p>
+                    <p className="text-xs font-medium uppercase tracking-[0.15em] text-[#165DFC]">{page.eyebrow}</p>
+                    <h2 className="mt-2 text-lg font-medium text-[#0D0F0E]">{page.title}</h2>
+                    <p className="mt-2 text-sm text-[#8F8F86]">{page.description}</p>
                     <ul className="mt-4 space-y-2">
                       {page.bullets.slice(0, 3).map((bullet) => (
-                        <li key={bullet} className="flex gap-2 text-sm text-slate-700">
-                          <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#1a3ab8]" />
+                        <li key={bullet} className="flex gap-2 text-sm text-[#5B5D57]">
+                          <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#165DFC]" />
                           {bullet}
                         </li>
                       ))}
                     </ul>
-                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#1a3ab8]">
+                    <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#165DFC]">
                       {t.seoPage.viewFeature} <ArrowRight className="h-4 w-4" />
                     </span>
                   </div>
@@ -79,22 +77,22 @@ export default async function FeaturesPage() {
         </div>
       </section>
 
-      <section className="border-t border-slate-100 bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
+      <section className="border-t border-[#DFDCD2] bg-[#F3F0E8] px-4 py-16 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-[#1a3ab8]">{t.featuresIndex.countryLabel}</p>
-          <h2 className="mt-2 text-2xl font-bold text-slate-900">{t.featuresIndex.countryTitle}</h2>
-          <p className="mt-3 max-w-2xl text-slate-600">{t.featuresIndex.countryText}</p>
+          <p className="text-sm font-semibold uppercase tracking-wide text-[#165DFC]">{t.featuresIndex.countryLabel}</p>
+          <h2 className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold text-[#0D0F0E]">{t.featuresIndex.countryTitle}</h2>
+          <p className="mt-3 max-w-2xl text-[#5B5D57]">{t.featuresIndex.countryText}</p>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {t.featuresIndex.countryCards.map((card) => (
-              <div key={card.title} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <h3 className="font-semibold text-slate-950">{card.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{card.body}</p>
+              <div key={card.title} className="rounded-2xl border border-[#DFDCD2] bg-white p-5">
+                <h3 className="font-semibold text-[#0D0F0E]">{card.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-[#5B5D57]">{card.body}</p>
               </div>
             ))}
           </div>
-          <p className="mt-6 text-xs italic text-slate-500">
+          <p className="mt-6 text-xs italic text-[#8F8F86]">
             {t.featuresIndex.countryDisclaimer}{" "}
-            <Link href="/help" className="underline hover:text-slate-700">
+            <Link href="/help" className="underline hover:text-[#5B5D57]">
               {t.featuresIndex.helpCentre}
             </Link>
           </p>
@@ -102,6 +100,6 @@ export default async function FeaturesPage() {
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }

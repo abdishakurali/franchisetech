@@ -17,9 +17,9 @@ import { fetchStockMovements } from "@/lib/ro-accounting/stock-movements";
 function integrityBadgeClass(status: BalantaIntegrityStatus): string {
   switch (status) {
     case "archived":
-      return "bg-slate-100 text-slate-600";
+      return "bg-secondary text-mid";
     case "missing":
-      return "bg-red-50 text-red-700";
+      return "bg-attention/10 text-attention";
     case "not_tracked":
       return "bg-amber-50 text-amber-800";
     case "qty_mismatch":
@@ -65,7 +65,7 @@ export default async function BalantaReportPage({
     .eq("id", orgId)
     .single();
 
-  const { items, totals } = await computeBalantaReport(supabase, orgId, fromDate, toDate, t.common.unknown);
+  const { items, totals, hasUnknownCost } = await computeBalantaReport(supabase, orgId, fromDate, toDate, t.common.unknown);
   const integrityIssues = items.filter((i) => i.integrityStatus && i.integrityStatus !== "ok");
   const hasArchived = integrityIssues.some((i) => i.integrityStatus === "archived");
 
@@ -99,14 +99,14 @@ export default async function BalantaReportPage({
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between gap-4 flex-wrap print:hidden">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-950">{labels.title}</h1>
-          <p className="text-sm text-slate-500">{labels.subtitle}</p>
+          <h1 className="text-2xl font-semibold text-foreground">{labels.title}</h1>
+          <p className="text-sm text-muted-foreground">{labels.subtitle}</p>
         </div>
         <div className="flex gap-3 items-center flex-wrap">
           <ReportDateRangeFilter basePath="/app/reports/balanta" from={fromDate} to={toDate} />
           <Link
             href={`/api/reports/balanta/pdf?from=${fromDate}&to=${toDate}`}
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium hover:bg-slate-50"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-border bg-card px-3 text-sm font-medium hover:bg-secondary"
           >
             <FileDown className="h-4 w-4" />
             {t.common.downloadPdf}
@@ -129,15 +129,21 @@ export default async function BalantaReportPage({
         </div>
       ) : null}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 print:border-0">
+      {hasUnknownCost ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 print:hidden">
+          <p className="font-medium">{labels.costGapBanner}</p>
+        </div>
+      ) : null}
+
+      <div className="rounded-xl border border-border bg-card p-6 print:border-0">
         <div className="flex flex-wrap gap-8 text-sm">
           <div>
-            <p className="text-slate-500">{labels.unitLabel}</p>
-            <p className="font-semibold text-slate-900">{org?.name ?? "franchisetech"}</p>
+            <p className="text-muted-foreground">{labels.unitLabel}</p>
+            <p className="font-semibold text-foreground">{org?.name ?? "franchisetech"}</p>
           </div>
           <div>
-            <p className="text-slate-500">{labels.period}</p>
-            <p className="font-semibold text-slate-900">
+            <p className="text-muted-foreground">{labels.period}</p>
+            <p className="font-semibold text-foreground">
               {fromDate} — {toDate}
             </p>
           </div>
@@ -161,17 +167,17 @@ export default async function BalantaReportPage({
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm text-green-700">{labels.entries}</CardTitle>
+            <CardTitle className="text-sm text-reconciled">{labels.entries}</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-semibold text-green-700">
+          <CardContent className="text-2xl font-semibold text-reconciled">
             {formatMoney(totals.entryValue, currency)}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm text-blue-700">{labels.closingStock}</CardTitle>
+            <CardTitle className="text-sm text-brass">{labels.closingStock}</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-semibold text-blue-700">
+          <CardContent className="text-2xl font-semibold text-brass">
             {formatMoney(totals.closingValue, currency)}
           </CardContent>
         </Card>
@@ -184,8 +190,8 @@ export default async function BalantaReportPage({
         <CardContent className="overflow-x-auto">
           {items.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-sm text-slate-400">{labels.noData}</p>
-              <p className="text-xs text-slate-300 mt-2">{labels.noDataHint}</p>
+              <p className="text-sm text-muted-foreground">{labels.noData}</p>
+              <p className="text-xs text-muted-foreground mt-2">{labels.noDataHint}</p>
             </div>
           ) : (
             <Table>
@@ -221,7 +227,7 @@ export default async function BalantaReportPage({
               <TableBody>
                 {items.map((item, idx) => (
                   <TableRow key={item.productId ?? item.productName}>
-                    <TableCell className="text-right tabular-nums text-slate-500">{idx + 1}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">{idx + 1}</TableCell>
                     <TableCell className="font-medium">
                       <div className="flex flex-wrap items-center gap-2">
                         <span>{item.productName}</span>
@@ -233,6 +239,11 @@ export default async function BalantaReportPage({
                             {integrityLabels[item.integrityStatus]}
                           </Badge>
                         ) : null}
+                        {item.hasUnknownCost ? (
+                          <Badge variant="secondary" className="text-xs bg-amber-50 text-amber-800">
+                            {labels.costPartialBadge}
+                          </Badge>
+                        ) : null}
                       </div>
                     </TableCell>
                     <TableCell>{item.unit}</TableCell>
@@ -242,16 +253,16 @@ export default async function BalantaReportPage({
                     <TableCell className="text-right tabular-nums">
                       {formatMoney(item.openingValue, currency)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums border-l text-green-700">
+                    <TableCell className="text-right tabular-nums border-l text-reconciled">
                       {item.entryQty.toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums text-green-700">
+                    <TableCell className="text-right tabular-nums text-reconciled">
                       {formatMoney(item.entryValue, currency)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums border-l text-red-600">
+                    <TableCell className="text-right tabular-nums border-l text-attention">
                       {item.exitQty.toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-right tabular-nums text-red-600">
+                    <TableCell className="text-right tabular-nums text-attention">
                       {formatMoney(item.exitValue, currency)}
                     </TableCell>
                     <TableCell className="text-right tabular-nums border-l font-medium">
@@ -262,7 +273,7 @@ export default async function BalantaReportPage({
                     </TableCell>
                   </TableRow>
                 ))}
-                <TableRow className="bg-slate-50 font-bold">
+                <TableRow className="bg-secondary font-bold">
                   <TableCell colSpan={3} className="text-right">
                     {labels.total}:
                   </TableCell>
@@ -271,11 +282,11 @@ export default async function BalantaReportPage({
                     {formatMoney(totals.openingValue, currency)}
                   </TableCell>
                   <TableCell className="text-right border-l">—</TableCell>
-                  <TableCell className="text-right tabular-nums text-green-700">
+                  <TableCell className="text-right tabular-nums text-reconciled">
                     {formatMoney(totals.entryValue, currency)}
                   </TableCell>
                   <TableCell className="text-right border-l">—</TableCell>
-                  <TableCell className="text-right tabular-nums text-red-600">
+                  <TableCell className="text-right tabular-nums text-attention">
                     {formatMoney(totals.exitValue, currency)}
                   </TableCell>
                   <TableCell className="text-right border-l">—</TableCell>
@@ -293,11 +304,11 @@ export default async function BalantaReportPage({
         <Card className="print:hidden">
           <CardHeader>
             <CardTitle className="text-base">{labels.reconcileTitle}</CardTitle>
-            <p className="text-sm text-slate-500 font-normal">{labels.reconcileSubtitle}</p>
+            <p className="text-sm text-muted-foreground font-normal">{labels.reconcileSubtitle}</p>
           </CardHeader>
           <CardContent>
             {reconcileRows.length === 0 ? (
-              <p className="text-sm text-slate-500">{labels.reconcileNoIssues}</p>
+              <p className="text-sm text-muted-foreground">{labels.reconcileNoIssues}</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -313,7 +324,7 @@ export default async function BalantaReportPage({
                   {reconcileRows.map((row) => (
                     <TableRow key={row.id}>
                       <TableCell className="font-medium">
-                        <Link href={`/app/products/${row.id}`} className="hover:text-blue-600 hover:underline">
+                        <Link href={`/app/products/${row.id}`} className="hover:text-brass hover:underline">
                           {row.name}
                         </Link>
                       </TableCell>
@@ -333,20 +344,20 @@ export default async function BalantaReportPage({
         </Card>
       ) : null}
 
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 print:hidden">
-        <p className="text-xs text-slate-500">
+      <div className="rounded-lg border border-border bg-secondary p-4 print:hidden">
+        <p className="text-xs text-muted-foreground">
           <strong>{labels.dataSourceLabel}</strong> {labels.dataSource}
         </p>
       </div>
 
       <div className="grid gap-8 sm:grid-cols-2 pt-8 print:mt-12">
         <div>
-          <p className="text-xs text-slate-500 mb-8">{labels.preparedBy}</p>
-          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+          <p className="text-xs text-muted-foreground mb-8">{labels.preparedBy}</p>
+          <div className="border-t border-border pt-1 text-xs text-muted-foreground">{labels.nameDate}</div>
         </div>
         <div>
-          <p className="text-xs text-slate-500 mb-8">{labels.accountantSignature}</p>
-          <div className="border-t border-slate-300 pt-1 text-xs text-slate-400">{labels.nameDate}</div>
+          <p className="text-xs text-muted-foreground mb-8">{labels.accountantSignature}</p>
+          <div className="border-t border-border pt-1 text-xs text-muted-foreground">{labels.nameDate}</div>
         </div>
       </div>
     </div>

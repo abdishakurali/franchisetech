@@ -13,6 +13,13 @@ describe("demoProductsForCountry", () => {
     expect(items.map((i) => i.name)).toEqual(["Shaorma", "Cartofi prăjiți", "Burger", "Suc"]);
   });
 
+  it("gives a distinct restaurant catalog, not the café default", () => {
+    const ro = demoProductsForCountry("RO", "Restaurant");
+    const en = demoProductsForCountry("IE", "Restaurant");
+    expect(ro.map((i) => i.name)).toEqual(["Ciorbă de legume", "Piept de pui la grătar", "Salată Caesar", "Limonadă"]);
+    expect(en.map((i) => i.name)).toEqual(["Vegetable soup", "Grilled chicken breast", "Caesar salad", "Lemonade"]);
+  });
+
   it("recognizes the bakery/patisserie label regardless of language", () => {
     const ro = demoProductsForCountry("RO", "Patiserie / brutărie");
     const en = demoProductsForCountry("US", "Bakery / patisserie");

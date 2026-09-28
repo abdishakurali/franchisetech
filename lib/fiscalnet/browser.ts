@@ -284,3 +284,13 @@ export async function fiscalBrowserXReport(
   if (config.mockMode) return { ok: true, message: "Mock — raport X simulat." };
   return callApi(config.apiHost, lines);
 }
+
+export async function fiscalBrowserVoidLast(
+  config: BrowserFiscalConfig
+): Promise<BrowserFiscalResult> {
+  if (!config.enabled) return { ok: true, message: "FiscalNet dezactivat." };
+  const lines = ["VB^"];
+  if (config.connectionMode === "file") return downloadLines(lines, "VOID");
+  if (config.mockMode) return { ok: true, message: "Mock — anulare bon simulată." };
+  return callApi(config.apiHost, lines);
+}

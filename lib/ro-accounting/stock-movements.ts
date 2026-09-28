@@ -7,6 +7,7 @@ export type StockMovementProductRef = {
   vat_rate?: number | null;
   name?: string;
   unit_of_measure?: string | null;
+  sku?: string | null;
 };
 
 export type StockMovementQueryRow = {
@@ -29,12 +30,22 @@ export function stockMovementProduct(row: StockMovementQueryRow): StockMovementP
   return Array.isArray(row.products) ? row.products[0] ?? null : row.products;
 }
 
-export function stockMovementUnitCost(row: StockMovementQueryRow): number {
-  // Prefer the cost snapshotted on the movement itself (CMP at time of consumption).
-  // Falls back to the product's current cost_price for legacy rows without unit_cost.
-  if (row.unit_cost != null) return Number(row.unit_cost);
-  const prod = stockMovementProduct(row);
-  return Number(prod?.cost_price ?? 0);
+/**
+ * The cost snapshotted on the movement itself (CMP at time of consumption
+ * for sale_used/return; the price paid for purchase_received). Returns null
+ * when the row has no unit_cost recorded — this is not rare (org-wide,
+ * roughly 14.7% of sale_used rows and 8.75% of purchase_received rows have
+ * no unit_cost, mostly rows predating the column or a product whose
+ * cost_price was still unset at the time).
+ *
+ * This used to fall back to the product's CURRENT cost_price when the row's
+ * own value was missing — silently substituting today's price for a
+ * historical row's unknown one, in every report built on this helper. Null
+ * means unknown; callers must render that as unknown, not fill it in.
+ */
+export function stockMovementUnitCost(row: StockMovementQueryRow): number | null {
+  if (row.unit_cost == null) return null;
+  return Number(row.unit_cost);
 }
 
 export function stockMovementUnit(row: StockMovementQueryRow): string {
@@ -102,7 +113,7 @@ export async function fetchStockMovements(
   if (productIds.length > 0) {
     const { data: products } = await supabase
       .from("products")
-      .select("id,name,unit_of_measure,cost_price,vat_rate")
+      .select("id,name,unit_of_measure,cost_price,vat_rate,sku")
       .eq("organisation_id", orgId)
       .in("id", productIds);
 

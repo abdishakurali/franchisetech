@@ -1,38 +1,40 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, AlertCircle } from "lucide-react";
-import { CTASection, MarketingShell } from "@/components/marketing/MarketingShell";
+import { CTASection } from "@/components/marketing/MarketingShell";
+import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
+import { FISCALNET_SUPPORTED_DEVICES } from "@/lib/fiscalnet/supported-devices";
 
 export const metadata: Metadata = {
-  title: "Romania FiscalNet Setup Guide",
-  description: "How to configure franchisetech for Romanian organisations: FiscalNet fiscal receipts, TVA rates, payment code mapping, and owner go-live checklist.",
+  title: "Romania Fiscal Driver Setup Guide",
+  description: "How to configure franchisetech for Romanian organisations: fiscal driver receipts, TVA rates, payment code mapping, and owner go-live checklist.",
   alternates: { canonical: "/help/romania-fiscalnet" },
 };
 
 const steps = [
   {
     title: "Who this guide is for",
-    body: "This guide is for business owners operating in Romania who want to issue fiscal receipts through FiscalNet via franchisetech. You will need a FiscalNet provider (fiscal printer or cloud fiscal service) and your accountant's sign-off before going live.",
+    body: "This guide is for business owners operating in Romania who want to issue fiscal receipts through a fiscal driver via franchisetech. You will need a fiscal driver provider (fiscal printer or cloud fiscal service) and your accountant's sign-off before going live.",
   },
   {
     title: "Enable Romania settings",
-    body: "Go to Settings → Business. Set your Currency to RON (lei) and your Country to Romania. This unlocks Romanian TVA rates and the FiscalNet configuration section.",
+    body: "Go to Settings → Business. Set your Currency to RON (lei) and your Country to Romania. This unlocks Romanian TVA rates and the Fiscal configuration section.",
   },
   {
     title: "Assign TVA rates to products",
-    body: "Romanian TVA rates — 21% (standard), 11% (food/hospitality), 5% (reduced), and 0% (exempt) — are pre-loaded. Go to Products, edit each product, and assign the correct TVA rate. Your accountant can confirm which rate applies to each product type.",
+    body: "Romanian TVA rates — 21% (standard), 11% (food/hospitality), and 0% (exempt) — are pre-loaded. Go to Products, edit each product, and assign the correct TVA rate. Your accountant can confirm which rate applies to each product type.",
   },
   {
-    title: "Configure FiscalNet credentials",
-    body: "Go to Settings → FiscalNet. Enter your FiscalNet provider credentials (CIF, serial number, and API token) supplied by your fiscal printer or cloud fiscal service provider. Do not use live credentials for test transactions.",
+    title: "Configure your fiscal driver credentials",
+    body: "Go to Settings → Fiscal. Enter your fiscal driver provider credentials (CIF, serial number, and API token) supplied by your fiscal printer or cloud fiscal service provider. Do not use live credentials for test transactions.",
   },
   {
     title: "Review payment type mapping",
-    body: "FiscalNet requires a payment type code for every transaction. Payment types mapped for FiscalNet (codes 1–8): 1 = cash, 2 = card, 3 = credit, 4 = tichete masă, 5 = tichete valorice, 6 = voucher, 7 = plată modernă. Review the mapping in Settings → FiscalNet → Payment mapping and adjust if your provider requires a different mapping.",
+    body: "Your fiscal driver requires a payment type code for every transaction. Payment types mapped (codes 1–8): 1 = cash, 2 = card, 3 = credit, 4 = tichete masă, 5 = tichete valorice, 6 = voucher, 7 = plată modernă. Review the mapping in Settings → Fiscal → Payment mapping and adjust if your provider requires a different mapping.",
   },
   {
     title: "Test with your fiscal provider",
-    body: "Use the Test fiscal receipt button in Settings → FiscalNet to send a test transaction to your fiscal provider. Confirm the test receipt prints or is logged correctly. Do not go live until your provider and accountant have verified the setup.",
+    body: "Use the Test fiscal receipt button in Settings → Fiscal to send a test transaction to your fiscal provider. Confirm the test receipt prints or is logged correctly. Do not go live until your provider and accountant have verified the setup.",
   },
   {
     title: "Daily reconciliation with the Z-report",
@@ -40,24 +42,26 @@ const steps = [
   },
 ];
 
+const supportedDevices = FISCALNET_SUPPORTED_DEVICES;
+
 const checklist = [
-  "FiscalNet credentials entered and verified",
+  "Fiscal driver credentials entered and verified",
   "All products assigned the correct TVA rate",
   "Payment type mapping reviewed",
   "Test receipt confirmed with your fiscal provider",
   "Accountant has reviewed the configuration",
-  "Backup cash/card process agreed in case of FiscalNet downtime",
+  "Backup cash/card process agreed in case your fiscal driver is down",
 ];
 
 export default function RomaniaFiscalNetPage() {
   return (
-    <MarketingShell>
+    <ClaudeMarketingShellAuth>
       {/* Breadcrumb */}
       <div className="border-b border-slate-100 px-4 py-3 sm:px-6">
         <div className="mx-auto max-w-4xl text-sm text-slate-500">
           <Link href="/help" className="hover:text-slate-700">Help &amp; Resources</Link>
           <span className="mx-2">›</span>
-          <span className="text-slate-900">Romania &amp; FiscalNet</span>
+          <span className="text-slate-900">Romania &amp; fiscal driver</span>
         </div>
       </div>
 
@@ -66,17 +70,17 @@ export default function RomaniaFiscalNetPage() {
         <div className="mx-auto max-w-4xl">
           <p className="text-sm font-semibold uppercase tracking-wide text-blue-600">🇷🇴 Romania setup guide</p>
           <h1 className="mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">
-            FiscalNet, TVA rates, and fiscal receipts
+            Fiscal driver, TVA rates, and fiscal receipts
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-slate-600">
-            Configure franchisetech for your Romanian organisation — from TVA product assignment to FiscalNet go-live.
+            Configure franchisetech for your Romanian organisation — from TVA product assignment to fiscal driver go-live.
           </p>
 
           {/* Disclaimer banner */}
           <div className="mt-6 flex gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
             <p className="text-sm text-amber-800">
-              franchisetech supports Romanian fiscal receipt workflows through FiscalNet. Businesses remain responsible for their own legal, fiscal, and accountant review. Confirm your setup with a qualified Romanian accountant or fiscal provider before go-live.
+              franchisetech supports Romanian fiscal receipt workflows through a fiscal driver — we use FiscalNet (driverfiscal.ro). Businesses remain responsible for their own legal, fiscal, and accountant review. Confirm your setup with a qualified Romanian accountant or fiscal provider before go-live.
             </p>
           </div>
         </div>
@@ -96,6 +100,50 @@ export default function RomaniaFiscalNetPage() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Supported fiscal driver devices */}
+      <section className="border-t border-slate-100 px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-xl font-bold text-slate-950">Supported fiscal driver devices</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            Your fiscal driver is a driver, not a piece of hardware — it runs on a Windows PC and connects to whichever
+            fiscal register or fiscal printer your business already has. It also has an Android companion app.
+            Confirm your exact model against{" "}
+            <a
+              href="https://driverfiscal.ro/echipamente-implementate/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-blue-700 hover:underline"
+            >
+              its published device list
+            </a>{" "}
+            before buying hardware.
+          </p>
+          <div className="mt-6 overflow-hidden rounded-xl border border-slate-200">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-4 py-3">Brand</th>
+                  <th className="px-4 py-3">Models</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {supportedDevices.map((device) => (
+                  <tr key={device.brand}>
+                    <td className="px-4 py-3 font-medium text-slate-900">{device.brand}</td>
+                    <td className="px-4 py-3 text-slate-600">{device.models}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-sm leading-6 text-slate-600">
+            Your fiscal driver is sold separately by its provider or your hardware distributor, licensed per cash register
+            (lifetime or annual). franchisetech connects to it once it&apos;s installed and licensed — it
+            does not sell, install, or license the driver itself.
+          </p>
         </div>
       </section>
 
@@ -120,12 +168,12 @@ export default function RomaniaFiscalNetPage() {
         <div className="mx-auto max-w-4xl">
           <h2 className="text-xl font-bold text-slate-950">What franchisetech does not do</h2>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            franchisetech supports the fiscal receipt workflow through FiscalNet. It does not:
+            franchisetech supports the fiscal receipt workflow through your fiscal driver. It does not:
           </p>
           <ul className="mt-3 list-inside list-disc space-y-1 text-sm text-slate-600">
             <li>Replace advice from a Romanian accountant, tax advisor, or fiscal printer provider</li>
             <li>Guarantee compliance with specific ANAF or Romanian tax authority requirements</li>
-            <li>Manage or configure your fiscal printer hardware or FiscalNet provider account</li>
+            <li>Manage or configure your fiscal printer hardware or fiscal driver provider account</li>
             <li>File VAT returns or other tax declarations on your behalf</li>
           </ul>
           <p className="mt-4 text-sm text-slate-600">
@@ -153,6 +201,6 @@ export default function RomaniaFiscalNetPage() {
       </section>
 
       <CTASection />
-    </MarketingShell>
+    </ClaudeMarketingShellAuth>
   );
 }
