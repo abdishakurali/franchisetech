@@ -19,6 +19,7 @@ import type { BillingPlan } from "@/lib/billing/plans";
 import { upsertLoopsContact } from "@/lib/loops";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEvent, flushPostHog } from "@/lib/posthog-server";
+import { deriveAccountType } from "@/lib/analytics/account-type";
 
 const COUNTRY_LABELS: Record<string, string> = {
   RO: "Romania",
@@ -342,6 +343,10 @@ export async function completePosOnboarding(input: {
   }
   // Fire-and-forget capture; flush before the action's request scope ends.
   after(flushPostHog);
+  // Set explicitly on these events (not just relying on PostHogIdentify's
+  // later group() call) since these fire server-side, right at org creation
+  // — before the client has necessarily mounted and identified this session.
+  const accountType = deriveAccountType(user.email, input.orgName);
   captureServerEvent(
     user.id,
     "onboarding_completed",
@@ -350,6 +355,7 @@ export async function completePosOnboarding(input: {
       country_code: input.countryCode,
       plan: input.preferredPlan ?? "free",
       business_type: input.businessType ?? null,
+      account_type: accountType,
     },
     { organisation: orgId },
   );
@@ -361,6 +367,7 @@ export async function completePosOnboarding(input: {
       country_code: input.countryCode,
       business_type: input.businessType ?? null,
       location_band: input.locationBand,
+      account_type: accountType,
     },
     { organisation: orgId },
   );
@@ -379,6 +386,7 @@ export async function completePosOnboarding(input: {
         country_code: input.countryCode,
         business_type: input.businessType ?? null,
         location_band: input.locationBand,
+        account_type: accountType,
       },
       { organisation: orgId },
     );

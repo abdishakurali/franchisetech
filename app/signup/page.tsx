@@ -25,6 +25,7 @@ import {
 } from "@/lib/marketing/acquisition";
 import { MARKETING_LOCALE_COOKIE } from "@/lib/marketing/locale";
 import { captureClientEvent } from "@/lib/analytics/client-events";
+import { deriveAccountType } from "@/lib/analytics/account-type";
 
 const googleAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "true";
 
@@ -75,7 +76,11 @@ export default function SignupPage() {
       toast.error(a.errors.passwordLength);
       return;
     }
-    captureClientEvent("signup_started", { plan: planParam ?? null });
+    // Derived once here (not just at identify() time) so PostHog can filter
+    // internal/test signups even when the visitor never completes onboarding
+    // — identify() only tags events from that point forward, not this one.
+    const accountType = deriveAccountType(form.email, null);
+    captureClientEvent("signup_started", { plan: planParam ?? null, account_type: accountType });
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -86,10 +91,10 @@ export default function SignupPage() {
         },
       });
       if (error) {
-        captureClientEvent("signup_failed", { reason: error.message?.slice(0, 120) ?? null });
+        captureClientEvent("signup_failed", { reason: error.message?.slice(0, 120) ?? null, account_type: accountType });
         toast.error(mapSupabaseAuthError(error.message, locale));
       } else if (data.session) {
-        captureClientEvent("signup_session_created", {});
+        captureClientEvent("signup_session_created", { account_type: accountType });
         toast.success(a.successSession);
         router.push("/onboarding");
         router.refresh();
@@ -101,7 +106,7 @@ export default function SignupPage() {
         // never arrive.
         toast.error(a.existingAccount);
       } else {
-        captureClientEvent("signup_email_sent", {});
+        captureClientEvent("signup_email_sent", { account_type: accountType });
         toast.success(a.successEmail);
         router.push(`/check-email?email=${encodeURIComponent(form.email)}`);
       }
