@@ -2101,16 +2101,19 @@ function PosRegisterInner({
                 )}
               </button>
               <div className="flex items-center gap-2">
-              <div className="flex shrink-0 items-center gap-0.5 rounded-lg border border-border bg-secondary/80 p-0.5">
-                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity - 1); }} aria-label={t.decreaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-mid hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40 sm:h-10 sm:w-10">−</button>
-                <span className="w-6 text-center text-sm font-bold tabular-nums sm:w-7">{item.quantity}</span>
-                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity + 1); }} aria-label={t.increaseQty} className="flex h-9 w-9 items-center justify-center rounded-md text-sm font-bold text-mid hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40 sm:h-10 sm:w-10">+</button>
+              {/* 44px is the minimum comfortable touch target (Apple HIG / Material) —
+                  these were 36-40px, undersized for a tablet mounted at the counter and
+                  tapped under time pressure; PostHog measured 162 rage-clicks here. */}
+              <div className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-secondary/80 p-0.5">
+                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity - 1); }} aria-label={t.decreaseQty} className="flex h-11 w-11 items-center justify-center rounded-md text-base font-bold text-mid hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40">−</button>
+                <span className="w-7 text-center text-sm font-bold tabular-nums">{item.quantity}</span>
+                <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, item.quantity + 1); }} aria-label={t.increaseQty} className="flex h-11 w-11 items-center justify-center rounded-md text-base font-bold text-mid hover:bg-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40">+</button>
               </div>
               <div className="ml-auto shrink-0 text-right">
                 {linePct > 0 && <p className="text-[10px] text-muted-foreground line-through tabular-nums">{money(lineList)}</p>}
                 <p className="text-sm font-bold tabular-nums text-foreground sm:text-base">{money(lineTotal)}</p>
               </div>
-              <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, 0); }} aria-label={t.removeItem} className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-attention/10 hover:text-attention focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-attention/30 sm:h-9 sm:w-9">×</button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); setQty(item.product_id, 0); }} aria-label={t.removeItem} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:bg-attention/10 hover:text-attention focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-attention/30">×</button>
               </div>
             </div>
           );})}
