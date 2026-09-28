@@ -72,7 +72,7 @@ const FEATURE_TRANSLATIONS: Record<string, string> = {
   "Products & categories": "Produse & categorii",
   "CSV import & export": "Import & export CSV",
   "Sales report": "Raport vânzări",
-  "FiscalNet fiscal receipts": "Bonuri fiscale prin FiscalNet",
+  "Fiscal driver fiscal receipts": "Bonuri fiscale prin driverul fiscal",
   "Fiscal Z-report (daily close)": "Raport Z fiscal (închidere zilnică)",
   "Fiscal X-report (interim)": "Raport X fiscal (interimar)",
   "TVA groups": "Grupe TVA",
@@ -91,7 +91,6 @@ const FEATURE_TRANSLATIONS: Record<string, string> = {
   "Margins report": "Raport marje",
   "Ingredient consumption record": "Înregistrare consum ingrediente",
   "Audit CSV export": "Export CSV audit",
-  "FiscalNet included in FranchiseTech; provider subscription paid separately": "FiscalNet este inclus în FranchiseTech; abonamentul furnizorului se plătește separat",
   "Staff roles & permissions": "Roluri & permisiuni personal",
   "Owner digest email: sales, cash status, voids, refunds, VAT and stock": "Email rezumat manager: vânzări, status casă, anulări, retururi, TVA și stoc",
   "Everything in Operations": "Tot ce include Operations",
@@ -103,7 +102,7 @@ const FEATURE_TRANSLATIONS: Record<string, string> = {
   "Multiple sites": "Locații multiple",
   "Site switching": "Comutare între locații",
   "Per-site sales & reports": "Vânzări & rapoarte per locație",
-  "FiscalNet receipt integration (when enabled in Settings)": "Integrare bonuri FiscalNet (când este activată în Setări)",
+  "Fiscal driver receipt integration (when enabled in Settings)": "Integrare bonuri fiscale prin driverul fiscal (când este activată în Setări)",
   "Products & categories (up to 50)": "Produse & categorii (până la 50)",
   "1 location": "1 locație",
   "No card required, free forever": "Fără card necesar, gratuit pentru totdeauna",
@@ -112,6 +111,7 @@ const FEATURE_TRANSLATIONS: Record<string, string> = {
 };
 
 const FEATURE_EN_TRANSLATIONS: Record<string, string> = {
+  "Driverul fiscal este inclus în franchisetech; abonamentul la furnizor se plătește separat": "Fiscal driver included in franchisetech; provider subscription paid separately",
   "Bon de consum (materii prime consumate din rețete)": "Consumption note (raw materials consumed from recipes)",
   "Export audit CSV pentru contabil": "Audit CSV export for accountant",
   "Export XML Saga pentru contabil": "Saga XML export for accountant",
@@ -121,13 +121,13 @@ const FEATURE_EN_TRANSLATIONS: Record<string, string> = {
 };
 
 const PLAN_DESCRIPTIONS_RO: Record<BillingPlan, string> = {
-  starter: "Pentru o locație care are nevoie de POS conform, FiscalNet, bonuri fiscale și rapoarte zilnice.",
-  core: "Pentru o locație care are nevoie de POS conform, FiscalNet, bonuri fiscale și rapoarte zilnice.",
+  starter: "Pentru o locație care are nevoie de POS conform, driver fiscal, bonuri fiscale și rapoarte zilnice.",
+  core: "Pentru o locație care are nevoie de POS conform, driver fiscal, bonuri fiscale și rapoarte zilnice.",
   pro: "Pentru manageri care vor stoc, cost rețete, flux bucătărie și controale mai bune pentru personal.",
   operations: "Pentru manageri care vor stoc, cost rețete, flux bucătărie și controale mai bune pentru personal.",
   scale: "Pentru afaceri mature operațional care vor toate modulele, suport prioritar și spațiu de creștere.",
   multi_location: "Pentru afaceri cu două sau mai multe locații. Necesită planul de bază Scale.",
-  free: "Pentru o locație la început de drum — POS, FiscalNet, bonuri fiscale, până la 50 de produse, 1 locație. Fără card, fără expirare.",
+  free: "Pentru o locație la început de drum — POS, driver fiscal, bonuri fiscale, până la 50 de produse, 1 locație. Fără card, fără expirare.",
   growth: "Pentru o locație care vrea stoc, cost rețete, flux bucătărie și pachetul de export pentru contabil — produse nelimitate.",
   team: "Pentru afaceri cu două sau mai multe locații — tot din Pro, plus multi-locație și suport prioritar.",
 };
@@ -184,6 +184,7 @@ type Props = {
   configured?: boolean;
   labels?: PricingLabels;
   locale?: PricingLocale;
+  featuredPlan?: string;
 };
 
 function PlanFeaturesAccordion({
@@ -224,6 +225,7 @@ export function PricingPlansSection({
   configured = false,
   labels,
   locale = "en",
+  featuredPlan,
 }: Props) {
   // Annual billing is hidden, not just defaulted away from: the live annual
   // Stripe prices are misconfigured (return the monthly-equivalent amount
@@ -236,6 +238,7 @@ export function PricingPlansSection({
   const l = labels ?? DEFAULT_LABELS[locale];
 
   const mainPlans = pricingPlans.filter((plan) => plan.id === "free" || plan.id === "growth");
+  const highlightPlan = mainPlans.some((plan) => plan.id === featuredPlan) ? featuredPlan : "growth";
 
   return (
     <div className="space-y-10">
@@ -251,20 +254,21 @@ export function PricingPlansSection({
           const displayPrice = plan.price;
           const displayCadence = plan.cadence;
           const shortName = PLAN_SHORT_NAMES[plan.id];
+          const isHighlighted = plan.id === highlightPlan;
 
           return (
             <div
               key={plan.id}
               className={`relative rounded-2xl border-2 p-6 text-left sm:p-8 ${
-                plan.highlighted ? "border-primary bg-accent/50" : "border-border bg-card"
+                isHighlighted ? "border-primary bg-accent/50" : "border-border bg-card"
               }`}
             >
-              {plan.highlighted && (
+              {isHighlighted && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-semibold text-primary-foreground">
                   {l.mainPlan}
                 </span>
               )}
-              <p className={`text-sm font-semibold uppercase tracking-wide ${plan.highlighted ? "text-primary" : "text-muted-foreground"}`}>
+              <p className={`text-sm font-semibold uppercase tracking-wide ${isHighlighted ? "text-primary" : "text-muted-foreground"}`}>
                 {shortName}
               </p>
               <p className="mt-2 text-4xl font-bold text-foreground">{displayPrice}</p>

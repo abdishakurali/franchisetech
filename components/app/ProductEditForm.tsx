@@ -172,7 +172,16 @@ export function ProductEditForm({
       const fd = new FormData(e.currentTarget);
       const result = await updateProduct(fd);
       if (!result.ok) {
-        toast.error(result.error);
+        // updateProduct forwards the bare EntitlementDeniedError code, not a
+        // message — showing it verbatim left the owner staring at
+        // "entitlement_denied" with no idea their plan was the cause.
+        toast.error(
+          result.error === "entitlement_denied"
+            ? locale === "ro"
+              ? "Acțiune indisponibilă pentru planul curent. Faceți upgrade pentru a continua."
+              : "This action isn't available on your current plan. Upgrade to continue."
+            : result.error,
+        );
         return;
       }
       toast.success(t.saved);
@@ -192,7 +201,13 @@ export function ProductEditForm({
       fd.set("id", product.id);
       const result = await deleteProduct(fd);
       if (!result.ok) {
-        toast.error(result.error);
+        toast.error(
+          result.error === "entitlement_denied"
+            ? locale === "ro"
+              ? "Acțiune indisponibilă pentru planul curent. Faceți upgrade pentru a continua."
+              : "This action isn't available on your current plan. Upgrade to continue."
+            : result.error,
+        );
         return;
       }
       toast.success(t.deleted);

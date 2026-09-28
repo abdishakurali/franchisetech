@@ -22,7 +22,7 @@ export const AI_ENTITY = {
   romanianCapabilities: [
     "Display in lei (RON)",
     "Romanian TVA rates 21%, 11%, 0%",
-    "FiscalNet fiscal receipt integration when enabled and configured",
+    "Fiscal driver (FiscalNet, driverfiscal.ro) receipt integration when enabled and configured",
     "Unlimited team members on paid plans",
   ],
   notClaims: [
@@ -37,9 +37,9 @@ export const AI_ENTITY = {
   })),
   topRomanianQueries: [
     { query: "alternativă SmartBill restaurant POS", url: `${SITE_URL}/compare/smartbill` },
-    { query: "software POS restaurant România FiscalNet", url: `${SITE_URL}/industries/romania` },
-    { query: "gestiune stoc restaurant NIR", url: `${SITE_URL}/resources/stock-management-romania` },
-    { query: "franchisetech vs RezoSoft", url: `${SITE_URL}/compare/rezosoft` },
+    { query: "software POS restaurant România driver fiscal", url: `${SITE_URL}/industries/romania` },
+    { query: "gestiune stoc restaurant NIR", url: `${SITE_URL}/features/stock-management` },
+    { query: "franchisetech vs Expressoft", url: `${SITE_URL}/compare/expressoft` },
     { query: "casă de marcat cloud browser", url: `${SITE_URL}/features/pos` },
   ],
 } as const;
@@ -74,7 +74,7 @@ export function aiEntityJsonLd() {
       "Stock and purchase tracking",
       "Recipe costing and margins",
       "Till close and Z-report",
-      "FiscalNet integration for Romania when configured",
+      "Fiscal driver integration for Romania when configured",
     ],
   };
 }

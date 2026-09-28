@@ -46,7 +46,9 @@ export function FiscalOnboardingCard({
       fd.set("fiscalnet_operator_code", operatorCode);
       const saveResult = await saveFiscalNetSettings(fd);
       if (saveResult?.error) {
-        toast.error(saveResult.error);
+        // saveFiscalNetSettings forwards the bare EntitlementDeniedError
+        // code, not a message, if this ever fires mid-onboarding.
+        toast.error(saveResult.error === "entitlement_denied" ? "Acțiune indisponibilă pentru planul curent." : saveResult.error);
         return;
       }
       const result = await advanceFromFiscal();

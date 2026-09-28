@@ -94,7 +94,11 @@ export async function GET(req: Request) {
   const movements: SaftStockMovementInput[] = [];
   for (const row of movementRows) {
     const product = stockMovementProduct(row);
-    const productCode = row.product_id ?? "UNKNOWN";
+    // Prefer the merchant's own product code (SKU) — an accountant reading
+    // this file needs something they can cross-reference against NIRs and
+    // invoices, not the product's internal database id. Only falls back to
+    // the row id when the product was never given a SKU.
+    const productCode = product?.sku || row.product_id || "UNKNOWN";
     if (!productMap.has(productCode)) {
       productMap.set(productCode, {
         productCode,

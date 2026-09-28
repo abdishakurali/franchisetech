@@ -86,7 +86,7 @@ export const featureLinks = [
   ["/features/pos", "POS register"],
   ["/features/z-report", "Z-report"],
   ["/features/setup-onboarding", "Guided setup"],
-  ["/help/romania-fiscalnet", "FiscalNet"],
+  ["/help/romania-fiscalnet", "Fiscal driver"],
 ] as const;
 
 export const industryLinks = [

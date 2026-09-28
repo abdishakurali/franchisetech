@@ -254,7 +254,7 @@ export const featurePages: SeoPage[] = [
     ],
     faqs: [
       { question: "Does offline mode work without installing software?", answer: "Yes. franchisetech runs in the browser. Offline queuing is built into the POS — no separate APK required for basic offline sales." },
-      { question: "Will FiscalNet print offline?", answer: "Fiscal receipts depend on your local FiscalNet setup and fiscal device. Operational sale recording can queue offline; fiscal printing follows your configured hardware path." },
+      { question: "Will my fiscal driver print offline?", answer: "Fiscal receipts depend on your local fiscal driver (FiscalNet, driverfiscal.ro) setup and fiscal device. Operational sale recording can queue offline; fiscal printing follows your configured hardware path." },
       { question: "What happens if sync fails?", answer: "Queued sales stay in the browser until sync succeeds. Staff should avoid clearing browser data during an outage. Contact support if sync does not complete after reconnecting." },
     ],
     related: [
@@ -291,14 +291,14 @@ export const featurePages: SeoPage[] = [
   {
     slug: "qr-code-receipts",
     path: "/features/qr-code-receipts",
-    eyebrow: "Bon fiscal & FiscalNet",
-    title: "Bon Fiscal în POS — FiscalNet, Raport Z și Pregătire QR",
-    metaTitle: "Bon Fiscal POS România | FiscalNet, Raport Z, QR ANAF | franchisetech",
-    description: "Cum gestionezi bonurile fiscale în franchisetech: POS, FiscalNet, metode de plată, TVA, raport Z și ce trebuie verificat pentru QR-ul ANAF.",
+    eyebrow: "Bon fiscal & driver fiscal",
+    title: "Bon Fiscal în POS — Driver Fiscal, Raport Z și Pregătire QR",
+    metaTitle: "Bon Fiscal POS România | Driver Fiscal, Raport Z, QR ANAF | franchisetech",
+    description: "Cum gestionezi bonurile fiscale în franchisetech: POS, driver fiscal, metode de plată, TVA, raport Z și ce trebuie verificat pentru QR-ul ANAF.",
     h1: "Bon fiscal din POS, fără pași manuali între vânzare și închiderea zilei",
-    intro: "franchisetech este pentru cafenele și restaurante mici din România care vor ca fiecare vânzare din POS să rămână legată de FiscalNet, TVA, metode de plată și raportul Z. QR-ul ANAF depinde de firmware-ul casei fiscale, dar datele operaționale trebuie să fie corecte înainte să ajungă la imprimantă.",
+    intro: "franchisetech este pentru cafenele și restaurante mici din România care vor ca fiecare vânzare din POS să rămână legată de driverul fiscal, TVA, metode de plată și raportul Z. QR-ul ANAF depinde de firmware-ul casei fiscale, dar datele operaționale trebuie să fie corecte înainte să ajungă la imprimantă.",
     bullets: [
-      "Vânzarea se înregistrează în POS și se trimite către FiscalNet când integrarea este activă",
+      "Vânzarea se înregistrează în POS și se trimite către driverul fiscal când integrarea este activă",
       "Metodele de plată și grupele TVA sunt mapate în setările fiscale",
       "Raportul Z și diferențele de numerar rămân în același workspace",
       "QR-ul de pe bon este generat de casa fiscală certificată, nu de POS",
@@ -307,7 +307,7 @@ export const featurePages: SeoPage[] = [
     sections: [
       {
         title: "Ce face franchisetech în fluxul de bon fiscal",
-        body: "Casierul finalizează vânzarea în POS, cu produse, TVA și metodă de plată. Pentru organizațiile din România cu FiscalNet configurat, franchisetech trimite datele către casa fiscală prin driverul FiscalNet și păstrează tranzacția pentru verificarea zilnică.",
+        body: "Casierul finalizează vânzarea în POS, cu produse, TVA și metodă de plată. Pentru organizațiile din România cu driverul fiscal configurat — folosim driverul FiscalNet (driverfiscal.ro) — franchisetech trimite datele către casa fiscală prin acest driver și păstrează tranzacția pentru verificarea zilnică.",
       },
       {
         title: "Unde intră QR-ul ANAF",
@@ -315,21 +315,21 @@ export const featurePages: SeoPage[] = [
       },
       {
         title: "Ce verifici înainte de go-live",
-        body: "Confirmă cu furnizorul casei fiscale că firmware-ul suportă QR, actualizează FiscalNet, configurează CIF-ul, metodele de plată și grupele TVA, apoi rulează o vânzare de test și un raport Z împreună cu contabilul.",
+        body: "Confirmă cu furnizorul casei fiscale că firmware-ul suportă QR, actualizează driverul fiscal, configurează CIF-ul, metodele de plată și grupele TVA, apoi rulează o vânzare de test și un raport Z împreună cu contabilul.",
       },
     ],
     faqs: [
       {
         question: "franchisetech emite bon fiscal?",
-        answer: "Da, pentru organizațiile din România unde FiscalNet este activat și configurat corect. Verificarea fiscală finală rămâne la contabil și furnizorul casei fiscale.",
+        answer: "Da, pentru organizațiile din România unde driverul fiscal este activat și configurat corect. Verificarea fiscală finală rămâne la contabil și furnizorul casei fiscale.",
       },
       {
         question: "franchisetech generează QR-ul de pe bon?",
-        answer: "Nu. QR-ul este generat de casa fiscală certificată. franchisetech trimite datele vânzării către FiscalNet; dispozitivul fiscal tipărește bonul conform firmware-ului instalat.",
+        answer: "Nu. QR-ul este generat de casa fiscală certificată. franchisetech trimite datele vânzării către driverul fiscal; dispozitivul fiscal tipărește bonul conform firmware-ului instalat.",
       },
       {
         question: "Ce trebuie să verific pentru QR?",
-        answer: "Întreabă furnizorul autorizat dacă modelul casei tale fiscale are firmware QR disponibil, apoi testează o vânzare reală cu FiscalNet înainte de termenul ANAF.",
+        answer: "Întreabă furnizorul autorizat dacă modelul casei tale fiscale are firmware QR disponibil, apoi testează o vânzare reală cu driverul fiscal înainte de termenul ANAF.",
       },
       {
         question: "Ce se întâmplă la finalul zilei?",
@@ -337,11 +337,11 @@ export const featurePages: SeoPage[] = [
       },
       {
         question: "Înlocuiește franchisetech contabilul?",
-        answer: "Nu. franchisetech organizează vânzări, TVA, FiscalNet și rapoarte operaționale. Contabilul verifică obligațiile fiscale și documentele oficiale.",
+        answer: "Nu. franchisetech organizează vânzări, TVA, driverul fiscal și rapoarte operaționale. Contabilul verifică obligațiile fiscale și documentele oficiale.",
       },
     ],
     related: [
-      { label: "Romania FiscalNet guide", href: "/help/romania-fiscalnet" },
+      { label: "Romania fiscal driver guide", href: "/help/romania-fiscalnet" },
       { label: "POS for Romania", href: "/industries/romania" },
       { label: "Z-report and daily closing", href: "/features/z-report" },
     ],
@@ -465,28 +465,28 @@ export const industryPages: SeoPage[] = [
     slug: "romania",
     path: "/industries/romania",
     eyebrow: "🇷🇴 România",
-    title: "Soft de Casa de Marcat Romania — FiscalNet, TVA, lei",
-    metaTitle: "POS Romania cu FiscalNet | TVA 21%/11%/0% | lei (RON) | franchisetech",
-    description: "franchisetech este un sistem POS pentru restaurante, cafenele și magazine din România. Integrare FiscalNet, afișaj în lei (RON), cote TVA românești (21%/11%/0%), membri de echipă nelimitați.",
-    h1: "POS pentru afaceri din România — FiscalNet, TVA, lei",
-    intro: "franchisetech este configurat pentru piața românească: monedă lei (RON), cote TVA standard, integrare FiscalNet pentru bonuri fiscale, și echipă nelimitată fără costuri suplimentare.",
+    title: "Soft de Casa de Marcat Romania — Driver Fiscal, TVA, lei",
+    metaTitle: "POS Romania cu driver fiscal | TVA 21%/11%/0% | lei (RON) | franchisetech",
+    description: "franchisetech este un sistem POS pentru restaurante, cafenele și magazine din România. Integrare cu driverul fiscal, afișaj în lei (RON), cote TVA românești (21%/11%/0%), membri de echipă nelimitați.",
+    h1: "POS pentru afaceri din România — Driver fiscal, TVA, lei",
+    intro: "franchisetech este configurat pentru piața românească: monedă lei (RON), cote TVA standard, integrare cu driverul fiscal pentru bonuri fiscale, și echipă nelimitată fără costuri suplimentare.",
     bullets: [
       "Afișaj în lei (RON) în tot sistemul — POS, rapoarte, bonuri",
       "Cote TVA românești pre-încărcate: 21%, 11%, 0%",
-      "Integrare FiscalNet pentru bonuri fiscale",
-      "Tipuri de plată mapate pentru FiscalNet (coduri 1–8): numerar, card, tichete masă etc.",
-      "Grupe TVA FiscalNet (1–5) configurabile per cotă",
+      "Integrare cu driverul fiscal pentru bonuri fiscale",
+      "Tipuri de plată mapate pentru driverul fiscal (coduri 1–8): numerar, card, tichete masă etc.",
+      "Grupe TVA ale driverului fiscal (1–5) configurabile per cotă",
       "Membri de echipă nelimitați fără cost suplimentar",
       "Rapoarte zilnice: vânzări, numerar, marjă, stoc",
     ],
     sections: [
       {
         title: "Monedă și TVA pentru România",
-        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 21% (grupa FiscalNet 1), TVA Redus 11% (grupa 2), Scutit 0% (grupa 4). Cotele sunt editabile oricând.",
+        body: "Toate sumele se afișează în lei (RON). Cotele TVA sunt pre-încărcate: TVA Standard 21% (grupa 1 a driverului fiscal), TVA Redus 11% (grupa 2), Scutit 0% (grupa 4). Cotele sunt editabile oricând.",
       },
       {
-        title: "Integrare FiscalNet completă",
-        body: "franchisetech se conectează la driver-ul FiscalNet pentru emiterea bonurilor fiscale. Suportă toate metodele de plată (cod 1–8): numerar, card, credit, tichete masă, tichete valorice, voucher, plată modernă. Reducerile per articol se transmit automat ca comandă DP^.",
+        title: "Integrare completă cu driverul fiscal",
+        body: "franchisetech se conectează la driverul FiscalNet (driverfiscal.ro) pentru emiterea bonurilor fiscale. Suportă toate metodele de plată (cod 1–8): numerar, card, credit, tichete masă, tichete valorice, voucher, plată modernă. Reducerile per articol se transmit automat ca comandă DP^.",
       },
       {
         title: "Echipă nelimitată, roluri clare",
@@ -496,7 +496,7 @@ export const industryPages: SeoPage[] = [
     faqs: [
       { question: "franchisetech afișează prețurile în lei?", answer: "Da. Toate prețurile, rapoartele, bonurile și POS-ul afișează în lei (RON) pentru organizațiile din România." },
       { question: "Sunt pre-încărcate cotele TVA românești?", answer: "Da. TVA Standard 21%, TVA Redus 11% și Scutit 0% sunt disponibile de la început. Pot fi editate sau completate oricând." },
-      { question: "Cum funcționează integrarea FiscalNet?", answer: "franchisetech trimite comenzi către driver-ul FiscalNet: S^ pentru articole, DP^ pentru reduceri, P^ pentru plăți. Codul de plată și grupa TVA se configurează per metodă de plată și cotă TVA în setări." },
+      { question: "Cum funcționează integrarea cu driverul fiscal?", answer: "franchisetech trimite comenzi către driverul fiscal: S^ pentru articole, DP^ pentru reduceri, P^ pentru plăți. Codul de plată și grupa TVA se configurează per metodă de plată și cotă TVA în setări." },
       { question: "Există limită de utilizatori?", answer: "Nu. Poți adăuga membri de echipă nelimitați cu acces bazat pe rol, fără cost suplimentar." },
       { question: "Funcționează pe tabletă sau telefon?", answer: "Da. franchisetech rulează ca PWA în orice browser modern, inclusiv pe tablete Android — fără instalare de aplicație." },
     ],
@@ -561,6 +561,8 @@ export const publicPaths = [
   ...resourcePages.map((p) => p.path),
   "/help",
   "/help/romania-fiscalnet",
+  "/pentru-contabili",
+  "/accountant-partners",
   "/privacy",
   "/terms",
   "/legal-disclaimer",

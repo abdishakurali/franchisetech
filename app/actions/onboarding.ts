@@ -226,9 +226,16 @@ export async function completePosOnboarding(input: {
     .eq("organisation_id", orgId)
     .limit(1);
   if (!existingPaymentMethods?.length) {
+    // RO gets its FiscalNet payment codes (1=cash, 2=card, 4=tichete masă)
+    // pre-assigned and meal vouchers added outright — otherwise every RO
+    // owner has to look up and type in the same three codes by hand before
+    // FiscalNet can map a single sale correctly. Non-RO orgs are unaffected
+    // (FiscalNet codes are meaningless outside Romania).
+    const isRO = input.countryCode === "RO";
     const { error: pmError } = await supabase.from("payment_methods").insert([
-      { organisation_id: orgId, name: "Cash", type: "cash" },
-      { organisation_id: orgId, name: "Card", type: "card" },
+      { organisation_id: orgId, name: "Cash", type: "cash", fiscalnet_code: isRO ? 1 : null },
+      { organisation_id: orgId, name: "Card", type: "card", fiscalnet_code: isRO ? 2 : null },
+      ...(isRO ? [{ organisation_id: orgId, name: "Tichete masă", type: "other", fiscalnet_code: 4 }] : []),
     ]);
     if (pmError) {
       console.error("onboarding_payment_methods_seed_failed", pmError.message);

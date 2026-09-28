@@ -124,23 +124,23 @@ const ro = {
     },
   ],
   offlineNote:
-    "Pentru întreruperi scurte: maximum 20 de intrări în coada locală. Păstrează browserul și datele sale. Stocul celorlalte case și plățile bancare nu se actualizează offline; emiterea fiscală depinde de conexiunea locală FiscalNet.",
+    "Pentru întreruperi scurte: maximum 20 de intrări în coada locală. Păstrează browserul și datele sale. Stocul celorlalte case și plățile bancare nu se actualizează offline; emiterea fiscală depinde de conexiunea locală cu driverul fiscal.",
   offlineLink: "Detalii despre modul offline",
   languagesLabel: "Română și English",
   languagesTitle: "Aceeași platformă. Limba echipei tale.",
   languagesText:
     "Schimbă limba pentru site, aplicație și POS. Preferința se păstrează în acest browser când treci de la prezentare la lucru.",
-  hardwareLabel: "Echipamente prin FiscalNet",
+  hardwareLabel: "Echipamente prin driverul fiscal",
   hardwareTitle: "Software-ul nostru. Echipamentul potrivit pentru tine.",
   hardwareIntro:
-    "Conectează POS-ul la casa de marcat sau imprimanta fiscală prin FiscalNet configurat local. Mai jos sunt exemple de modele listate de Datecs ca fiind compatibile cu driverul.",
+    "Conectează POS-ul la casa de marcat sau imprimanta fiscală prin driverul fiscal configurat local — folosim driverul FiscalNet (driverfiscal.ro). Mai jos sunt exemple de modele listate de Datecs ca fiind compatibile cu driverul.",
   register: "Casă de marcat",
   printer: "Imprimantă fiscală",
   model: "Vezi modelul",
   hardwareNote:
-    "Compatibilitatea se confirmă pentru model, firmware și configurația locală. Hardware-ul și licența FiscalNet se achiziționează separat de la furnizorul tău.",
-  hardwareGuide: "Ghid de conectare FiscalNet",
-  hardwareSource: "Lista oficială Datecs / FiscalNet",
+    "Compatibilitatea se confirmă pentru model, firmware și configurația locală. Hardware-ul și licența driverului fiscal se achiziționează separat de la furnizorul tău.",
+  hardwareGuide: "Ghid de conectare driver fiscal",
+  hardwareSource: "Lista oficială Datecs / driver fiscal",
   deviceTitle: "Pe ecranul care ți se potrivește",
   deviceText:
     "POS în browser pe calculator sau tabletă; rapoarte pe telefon. Tipărirea fiscală are nevoie de driverul și dispozitivul local configurate.",
@@ -155,7 +155,7 @@ const ro = {
   month: "lună",
   pricingLink: "Compară toate planurile",
   pricingNote:
-    "Prețuri fără TVA. FiscalNet, echipamentele și serviciile terțe se plătesc separat.",
+    "Prețuri fără TVA. Driverul fiscal, echipamentele și serviciile terțe se plătesc separat.",
   faqLabel: "Întrebări frecvente",
   faqTitle: "Înainte de prima zi la casă.",
   faq: [
@@ -167,12 +167,12 @@ const ro = {
     {
       question: "Bonul fiscal se emite și offline?",
       answer:
-        "Înregistrarea locală a vânzării și emiterea bonului fiscal sunt etape separate. Emiterea depinde de FiscalNet și echipamentul local configurat. Starea bonului trebuie verificată în POS.",
+        "Înregistrarea locală a vânzării și emiterea bonului fiscal sunt etape separate. Emiterea depinde de driverul fiscal și echipamentul local configurat. Starea bonului trebuie verificată în POS.",
     },
     {
       question: "Ce echipamente pot conecta?",
       answer:
-        "Case de marcat și imprimante compatibile cu FiscalNet, inclusiv modelele Datecs prezentate mai sus. Confirmă modelul exact și configurarea cu furnizorul tău; echipamentul și licența se plătesc separat.",
+        "Case de marcat și imprimante compatibile cu driverul fiscal, inclusiv modelele Datecs prezentate mai sus. Confirmă modelul exact și configurarea cu furnizorul tău; echipamentul și licența se plătesc separat.",
     },
     {
       question: "Pot folosi aplicația în engleză?",
@@ -287,23 +287,23 @@ const en: typeof ro = {
     },
   ],
   offlineNote:
-    "For short outages: up to 20 entries in the local queue. Keep the browser and its data. Other tills' stock and bank payments do not update offline; fiscal printing depends on your local FiscalNet connection.",
+    "For short outages: up to 20 entries in the local queue. Keep the browser and its data. Other tills' stock and bank payments do not update offline; fiscal printing depends on your local fiscal driver connection.",
   offlineLink: "About offline mode",
   languagesLabel: "Română and English",
   languagesTitle: "One platform. Your team's language.",
   languagesText:
     "Switch the language for the website, app and POS. Your preference stays in this browser as you move from exploring to working.",
-  hardwareLabel: "Hardware through FiscalNet",
+  hardwareLabel: "Hardware through your fiscal driver",
   hardwareTitle: "Our software. Hardware that fits your business.",
   hardwareIntro:
-    "Connect your POS to a fiscal register or printer through locally configured FiscalNet. These are examples of models Datecs lists as compatible with the driver.",
+    "Connect your POS to a fiscal register or printer through a locally configured fiscal driver — we use the FiscalNet driver (driverfiscal.ro). These are examples of models Datecs lists as compatible with the driver.",
   register: "Fiscal register",
   printer: "Fiscal printer",
   model: "View model",
   hardwareNote:
-    "Compatibility depends on the exact model, firmware and local setup. Hardware and the FiscalNet licence are purchased separately from your supplier.",
-  hardwareGuide: "FiscalNet connection guide",
-  hardwareSource: "Official Datecs / FiscalNet list",
+    "Compatibility depends on the exact model, firmware and local setup. Hardware and the fiscal driver licence are purchased separately from your supplier.",
+  hardwareGuide: "Fiscal driver connection guide",
+  hardwareSource: "Official Datecs / fiscal driver list",
   deviceTitle: "On the screen that suits you",
   deviceText:
     "Browser POS on a computer or tablet; reports on your phone. Fiscal printing requires a configured local driver and device.",
@@ -318,7 +318,7 @@ const en: typeof ro = {
   month: "month",
   pricingLink: "Compare all plans",
   pricingNote:
-    "Prices exclude VAT. FiscalNet, hardware and third-party services are separate.",
+    "Prices exclude VAT. The fiscal driver, hardware and third-party services are separate.",
   faqLabel: "Frequently asked questions",
   faqTitle: "Before your first day at the till.",
   faq: [
@@ -330,12 +330,12 @@ const en: typeof ro = {
     {
       question: "Will fiscal receipts print offline?",
       answer:
-        "Recording a sale locally and issuing a fiscal receipt are separate steps. Printing depends on your configured FiscalNet and local equipment. Check the receipt status in the POS.",
+        "Recording a sale locally and issuing a fiscal receipt are separate steps. Printing depends on your configured fiscal driver and local equipment. Check the receipt status in the POS.",
     },
     {
       question: "Which devices can I connect?",
       answer:
-        "FiscalNet-compatible fiscal registers and printers, including the Datecs models shown above. Confirm the exact model and setup with your supplier; hardware and licensing are purchased separately.",
+        "Fiscal registers and printers compatible with your fiscal driver, including the Datecs models shown above. Confirm the exact model and setup with your supplier; hardware and licensing are purchased separately.",
     },
     {
       question: "Can I use the app in English?",

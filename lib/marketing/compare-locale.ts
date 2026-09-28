@@ -18,7 +18,7 @@ const ROW_FRANCHISETECH_RO: Record<string, string> = {
   "Browser POS with products, cart, refunds, and till sessions":
     "POS în browser: produse, coș, retururi, sesiune casă",
   "Records payment method; FiscalNet where configured (Romania)":
-    "Înregistrează metoda de plată; FiscalNet când e configurat (România)",
+    "Înregistrează metoda de plată; driver fiscal când e configurat (România)",
   "Products, ingredients, suppliers, purchase records, low stock":
     "Produse, ingrediente, furnizori, achiziții/NIR, alerte stoc",
   "Recipe builder, cost per portion, margin, can-make counts":
@@ -35,7 +35,7 @@ const ROW_FRANCHISETECH_RO: Record<string, string> = {
 
 export function compareSignupHref(slug: string, locale: MarketingLocale): string {
   const params = new URLSearchParams({
-    plan: "starter",
+    plan: "free",
     utm_source: "compare",
     utm_medium: "organic",
     utm_campaign: "ro-compare-q2",
@@ -70,12 +70,12 @@ export function compareHubFaqs(locale: MarketingLocale): CompareHubFaq[] {
       {
         question: "De ce unii vânzători POS taxează extra rapoartele?",
         answer:
-          "Unele platforme listă ~49€/locație, apoi vând Insights sau rapoarte custom ca modul separat (~19€/lună). franchisetech include vânzări, raport Z și TVA în Starter — comparați costul lunar total. Vezi /compare/ebriza pentru un exemplu concret.",
+          "Unele platforme listă ~49€/locație, apoi vând Insights sau rapoarte custom ca modul separat (~19€/lună). franchisetech include vânzări, raport Z și TVA chiar din planul Free — comparați costul lunar total. Vezi /compare/ebriza pentru un exemplu concret.",
       },
       {
         question: "Pot schimba POS-ul fără să pierd setup-ul fiscal?",
         answer:
-          "FiscalNet și imprimanta fiscală rămân pe PC-ul de casă. Rulați trial paralel, verificați bonurile cu contabilul, apoi migrați produsele — nu presupuneți migrare automată de la alt furnizor.",
+          "Driverul fiscal și imprimanta fiscală rămân pe PC-ul de casă. Testați gratuit în paralel, verificați bonurile cu contabilul, apoi migrați produsele — nu presupuneți migrare automată de la alt furnizor.",
       },
       {
         question: "franchisetech înlocuiește software-ul contabil?",
@@ -93,12 +93,12 @@ export function compareHubFaqs(locale: MarketingLocale): CompareHubFaq[] {
     {
       question: "Why do some POS vendors charge extra for reports?",
       answer:
-        "Some platforms list €49/location then sell Insights or custom reporting as a separate module (often ~€19/month). franchisetech includes sales, Z-style till close, and VAT reports in Starter — compare total monthly cost. See /compare/ebriza for a worked example.",
+        "Some platforms list €49/location then sell Insights or custom reporting as a separate module (often ~€19/month). franchisetech includes sales, Z-style till close, and VAT reports even on the Free plan — compare total monthly cost. See /compare/ebriza for a worked example.",
     },
     {
       question: "Can I switch POS without losing my fiscal setup?",
       answer:
-        "FiscalNet and fiscal printer setup stay on your till PC. Run a parallel trial, verify receipts with your accountant, then migrate products and workflows — do not assume automatic migration from another vendor.",
+        "Your fiscal driver and fiscal printer setup stay on your till PC. Test free in parallel, verify receipts with your accountant, then migrate products and workflows — do not assume automatic migration from another vendor.",
     },
     {
       question: "Does franchisetech replace my accountant software?",

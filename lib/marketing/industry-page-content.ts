@@ -18,9 +18,9 @@ export const primaryIndustryPages: SeoPage[] = [
     path: "/industries/cafes",
     eyebrow: "Cafés & coffee shops",
     title: "POS for Cafes and Coffee Shops",
-    metaTitle: "POS for Cafes — FiscalNet, Recipe Costing, Z-Report | franchisetech",
+    metaTitle: "POS for Cafes — Fiscal Driver, Recipe Costing, Z-Report | franchisetech",
     description:
-      "Browser POS for Romanian cafes: fast counter sales, recipe margins, FiscalNet receipts, unlimited staff, and Z-report in under 30 seconds.",
+      "Browser POS for Romanian cafes: fast counter sales, recipe margins, fiscal driver receipts, unlimited staff, and Z-report in under 30 seconds.",
     h1: "Your cafe sells fast. You know the numbers at close.",
     heroBefore: "Your cafe sells fast. ",
     heroHighlight: "You know the numbers at close",
@@ -32,7 +32,7 @@ export const primaryIndustryPages: SeoPage[] = [
       "One-tap product grid for rush hour",
       "Recipe costing for coffee and food",
       "Cash, card, and meal voucher payments",
-      "FiscalNet fiscal receipts when configured",
+      "Fiscal driver receipts when configured",
       "Z-report and till close in minutes",
       "Unlimited baristas — no per-seat fees",
     ],
@@ -72,7 +72,7 @@ export const primaryIndustryPages: SeoPage[] = [
       ["Counter POS speed", "Browser grid — laptop or tablet", "Varies — often desktop-first"],
       ["Recipe margins", "Built-in recipe costing", "Often limited in POS-only tools"],
       ["Staff pricing", "Unlimited on paid plans", "Check per-terminal or per-user fees"],
-      ["FiscalNet (RO)", "When enabled in Settings", "Varies by vendor and setup"],
+      ["Fiscal driver (RO)", "When enabled in Settings", "Varies by vendor and setup"],
       ["Monthly price listed", "From €49/mo on site", "Often quote-only"],
     ],
     showcase: INDUSTRY_SHOWCASE_DEFAULTS.cafes,
@@ -81,7 +81,7 @@ export const primaryIndustryPages: SeoPage[] = [
       {
         question: "Does it work with my existing fiscal printer?",
         answer:
-          "franchisetech connects via FiscalNet on the cashier PC when enabled. Your certified fiscal device prints the receipt; we send sale data. Check firmware supports QR if you need November 2026 compliance.",
+          "franchisetech connects via a fiscal driver (FiscalNet, driverfiscal.ro) on the cashier PC when enabled. Your certified fiscal device prints the receipt; we send sale data. Check firmware supports QR if you need November 2026 compliance.",
       },
       {
         question: "Can new baristas use it without long training?",
@@ -93,7 +93,7 @@ export const primaryIndustryPages: SeoPage[] = [
       },
       {
         question: "Cash, card, and meal vouchers?",
-        answer: "Payment methods map to FiscalNet codes where configured — cash, card, meal tickets, and more.",
+        answer: "Payment methods map to fiscal driver codes where configured — cash, card, meal tickets, and more.",
       },
       {
         question: "How fast is daily close?",
@@ -113,9 +113,9 @@ export const primaryIndustryPages: SeoPage[] = [
     path: "/industries/restaurants",
     eyebrow: "Restaurants",
     title: "Restaurant POS — Sales, Stock, Z-Report",
-    metaTitle: "Restaurant POS Romania — Sales, Recipes, FiscalNet | franchisetech",
+    metaTitle: "Restaurant POS Romania — Sales, Recipes, Fiscal Driver | franchisetech",
     description:
-      "Restaurant POS in the browser: fast sales, recipe margins, FiscalNet, and Z-report — no dedicated POS hardware required.",
+      "Restaurant POS in the browser: fast sales, recipe margins, a fiscal driver, and Z-report — no dedicated POS hardware required.",
     h1: "From first sale to Z-report — all in one place.",
     heroBefore: "From first sale to ",
     heroHighlight: "Z-report",
@@ -147,7 +147,7 @@ export const primaryIndustryPages: SeoPage[] = [
     featureRows: [
       {
         title: "Fast checkout and fiscal receipts",
-        body: "Open the till, add products, take payment, and issue the fiscal receipt when FiscalNet is enabled.",
+        body: "Open the till, add products, take payment, and issue the fiscal receipt when your fiscal driver is enabled.",
         component: OwnerPosProof,
       },
       {
@@ -174,7 +174,7 @@ export const primaryIndustryPages: SeoPage[] = [
     faqs: [
       {
         question: "Do I need special POS hardware?",
-        answer: "No. franchisetech runs in the browser on tablets you already use. FiscalNet runs on the cashier PC for fiscal receipts.",
+        answer: "No. franchisetech runs in the browser on tablets you already use. The fiscal driver runs on the cashier PC for fiscal receipts.",
       },
       {
         question: "Can I start with counter POS only?",
@@ -201,17 +201,17 @@ export const primaryIndustryPages: SeoPage[] = [
     slug: "takeaways",
     path: "/industries/takeaways",
     eyebrow: "Takeaway & fast food",
-    title: "Takeaway POS — fast counter, FiscalNet",
+    title: "Takeaway POS — fast counter, fiscal driver",
     metaTitle: "Takeaway POS Romania — Fast Counter, Till Close | franchisetech",
     description:
-      "Takeaway and fast food POS: fast counter grid, split cash and card, FiscalNet receipts, and daily Z-report.",
+      "Takeaway and fast food POS: fast counter grid, split cash and card, fiscal driver receipts, and daily Z-report.",
     h1: "Orders out in three taps, not three screens.",
     heroBefore: "Orders out in ",
     heroHighlight: "three taps, not three screens",
     heroAfter: ".",
     heroSubheadline: "A flat product grid built for peak-hour speed, with a fiscal receipt on every sale.",
     intro:
-      "Takeaway operators need queue speed and fiscal compliance, not a feature wall. franchisetech keeps the counter grid flat and fast, and every sale gets a FiscalNet receipt.",
+      "Takeaway operators need queue speed and fiscal compliance, not a feature wall. franchisetech keeps the counter grid flat and fast, and every sale gets a fiscal driver receipt.",
     bullets: [
       "Flat product grid at counter — no nested menus",
       "Split cash and card, with change calculated",
@@ -240,7 +240,7 @@ export const primaryIndustryPages: SeoPage[] = [
       },
       {
         title: "Fiscal on every sale",
-        body: "FiscalNet issues the fiscal receipt locally, on the cashier device, for every sale.",
+        body: "The fiscal driver (FiscalNet, driverfiscal.ro) issues the fiscal receipt locally, on the cashier device, for every sale.",
         component: OwnerPosProof,
       },
       {
@@ -260,8 +260,8 @@ export const primaryIndustryPages: SeoPage[] = [
     sections: [],
     faqs: [
       {
-        question: "Does it work with FiscalNet?",
-        answer: "Yes, when FiscalNet is enabled on the cashier PC. Fiscal receipts follow your configured hardware path.",
+        question: "Does it work with a fiscal driver?",
+        answer: "Yes, when your fiscal driver is enabled on the cashier PC. Fiscal receipts follow your configured hardware path.",
       },
       {
         question: "Can I run from a tablet at the counter?",
@@ -282,16 +282,16 @@ export const primaryIndustryPages: SeoPage[] = [
     ],
     image: "/marketing/live/pos.png",
     ctaTitle: "Start takeaway POS — free forever",
-    ctaSubtitle: "Fast counter, FiscalNet receipts, and Z-report in one setup.",
+    ctaSubtitle: "Fast counter, fiscal driver receipts, and Z-report in one setup.",
   },
   {
     slug: "patisserie-bakery",
     path: "/industries/patisserie-bakery",
     eyebrow: "Patisseries & bakeries",
     title: "POS for Patisseries and Bakeries",
-    metaTitle: "Patisserie POS Romania — Recipe Cost, Bon Consum, FiscalNet",
+    metaTitle: "Patisserie POS Romania — Recipe Cost, Bon Consum, Fiscal Driver",
     description:
-      "Patisserie and bakery POS: recipe cost per croissant, bon de consum for accountants, kg and piece sales, stock and FiscalNet.",
+      "Patisserie and bakery POS: recipe cost per croissant, bon de consum for accountants, kg and piece sales, stock and a fiscal driver.",
     h1: "Know the cost of every croissant before it hits the shelf.",
     heroBefore: "Know the cost of every ",
     heroHighlight: "croissant before it hits the shelf",
@@ -305,7 +305,7 @@ export const primaryIndustryPages: SeoPage[] = [
       "Sell by piece or by kg on POS",
       "Bon de consum from recipe sales",
       "Stock and purchase tracking",
-      "FiscalNet receipts when configured",
+      "Fiscal driver receipts when configured",
     ],
     painPoints: [
       {
@@ -343,7 +343,7 @@ export const primaryIndustryPages: SeoPage[] = [
       ["Recipe costing", "Built-in per portion", "SmartBill: invoicing-first"],
       ["Bon de consum", "From recipe consumption", "Not a POS focus"],
       ["POS + stock together", "One workspace", "Often separate tools"],
-      ["FiscalNet POS", "When configured", "SmartBill: e-Factura focus"],
+      ["Fiscal driver POS", "When configured", "SmartBill: e-Factura focus"],
       ["Listed price", "From €79/mo Operations", "Different product category"],
     ],
     showcase: INDUSTRY_SHOWCASE_DEFAULTS["patisserie-bakery"],
@@ -362,7 +362,7 @@ export const primaryIndustryPages: SeoPage[] = [
         answer: "Products support unit of measure on the catalogue; configure items for retail pieces or weight-based sale as needed.",
       },
       {
-        question: "Works with FiscalNet?",
+        question: "Works with a fiscal driver?",
         answer: "Yes, when enabled on the cashier PC — same path as other food businesses.",
       },
     ],

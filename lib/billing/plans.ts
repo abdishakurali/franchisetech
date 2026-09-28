@@ -99,7 +99,7 @@ export const newPricingPlans: readonly PlanDefinition[] = [
     interval: "month",
     cadence: "/forever",
     annualCadence: "/forever",
-    description: "For one shop just getting started — POS, FiscalNet, fiscal receipts, up to 50 products, 1 location. No card, no expiry.",
+    description: "For one shop just getting started — POS, a fiscal driver, fiscal receipts, up to 50 products, 1 location. No card, no expiry.",
     priceEnv: "", // no Stripe subscription
     annualPriceEnv: "",
     highlighted: false,
@@ -154,7 +154,7 @@ const legacyPricingPlans: readonly PlanDefinition[] = [
     interval: "month",
     cadence: "/month",
     annualCadence: "/month, billed annually",
-    description: "For one shop that needs a legally compliant till with FiscalNet, fiscal receipts, and daily reports.",
+    description: "For one shop that needs a legally compliant till with a fiscal driver, fiscal receipts, and daily reports.",
     priceEnv: "STRIPE_STARTER_PRICE_ID",
     annualPriceEnv: "STRIPE_STARTER_ANNUAL_PRICE_ID",
     highlighted: true,

@@ -106,7 +106,7 @@ export const ro: MarketingMessages = {
       },
       {
         title: "Conformitate fiscală românească inclusă",
-        text: "FiscalNet, Raport Z, ANAF e-Factura și TVA sunt native — nu adăugate ulterior ca opțiuni extra.",
+        text: "Driver fiscal, Raport Z, ANAF e-Factura și TVA sunt native — nu adăugate ulterior ca opțiuni extra.",
       },
       {
         title: "Funcționează pe hardware existent",
@@ -165,8 +165,8 @@ export const ro: MarketingMessages = {
         },
         {
           label: "Emiteți bonul",
-          title: "FiscalNet rămâne pe PC-ul casei",
-          body: "Bonul fiscal pleacă prin configurația locală FiscalNet, cu metodele de plată și grupele TVA mapate corect.",
+          title: "Driverul fiscal rămâne pe PC-ul casei",
+          body: "Bonul fiscal pleacă prin configurația locală a driverului fiscal, cu metodele de plată și grupele TVA mapate corect.",
         },
         {
           label: "Închideți liniștit",
@@ -180,7 +180,7 @@ export const ro: MarketingMessages = {
       title: "Când știți adevărul în fiecare zi, conduceți altfel afacerea.",
       items: [
         { title: "Casa nu se potrivește cu sertarul", text: "Vedeți numerarul așteptat, totalurile card și diferența la închidere — nu o estimare după serviciu." },
-        { title: "Bonul fiscal e încă un pas separat", text: "FiscalNet leagă vânzarea de fluxul local al casei, fără apeluri din server." },
+        { title: "Bonul fiscal e încă un pas separat", text: "Driverul fiscal leagă vânzarea de fluxul local al casei, fără apeluri din server." },
         { title: "Raportul zilei vine prea târziu", text: "Vânzările, numerarul, cardul și TVA-ul sunt vizibile imediat după serviciu." },
         { title: "Contracte POS blocate", text: "POS în browser cu personal nelimitat. Începeți pe dispozitivele pe care le aveți deja." },
       ],
@@ -201,7 +201,7 @@ export const ro: MarketingMessages = {
         imgAlt: "POS franchisetech — grilă produse, coș și încasare",
       },
       {
-        headline: "Bon fiscal prin FiscalNet",
+        headline: "Bon fiscal prin driver fiscal",
         body: "Configurați casa locală, metodele de plată și grupele TVA înainte de prima vânzare reală.",
         href: "/help/romania-fiscalnet",
         img: "/marketing/live/recipes.png",
@@ -325,7 +325,7 @@ export const ro: MarketingMessages = {
       title: "Întrebări de la proprietari",
       items: [
         { question: "Cum funcționează planul gratuit?", answer: "Planul Free e disponibil de la crearea contului, fără card, și nu expiră. Plata lunară începe numai dacă alegeți un plan plătit." },
-        { question: "Am nevoie de hardware POS special?", answer: "Aplicația rulează în browser pe dispozitive compatibile. Pentru bonuri fiscale, verificăm separat casa fiscală și configurația FiscalNet." },
+        { question: "Am nevoie de hardware POS special?", answer: "Aplicația rulează în browser pe dispozitive compatibile. Pentru bonuri fiscale, verificăm separat casa fiscală și configurația driverului fiscal." },
         { question: "Pot vedea marjele pe produsele din meniu?", answer: "Da. Costul rețetelor leagă ingredientele de prețul de vânzare — vedeți costul per porție și marja brută înainte să schimbați meniul." },
         { question: "Există preț per loc?", answer: "Nu. Personal nelimitat fără cost suplimentar per utilizator." },
         { question: "Pot gestiona stocul din același sistem cu POS-ul?", answer: "Da. Achizițiile, furnizorii și nivelurile de stoc stau lângă vânzări — vedeți ce e scăzut înainte de următorul serviciu." },
@@ -340,7 +340,7 @@ export const ro: MarketingMessages = {
     description: "POS, produse, bonuri fiscale, TVA și raport Z pentru cafenele și takeaway din România.",
     heroLabel: "Funcționalități",
     heroTitle: "Tot ce trebuie pentru prima vânzare și închiderea zilei",
-    heroText: "Produse, POS, FiscalNet, TVA și raport Z într-un singur flux simplu. Fără preț per utilizator.",
+    heroText: "Produse, POS, driver fiscal, TVA și raport Z într-un singur flux simplu. Fără preț per utilizator.",
     compareCallout: {
       title: "Evaluați alte soluții?",
       text: "Comparații oneste vs Ebriza, SmartBill, Expressoft și altele — inclusiv când raportarea este modul separat.",
@@ -367,7 +367,7 @@ export const ro: MarketingMessages = {
     heroTitle: "Construit pentru afaceri alimentare care servesc clienți zilnic.",
     heroText:
       "POS, bonuri fiscale și rapoarte zilnice pentru afaceri mici care vor să înceapă rapid.",
-    cardIncludes: ["Casă POS", "FiscalNet", "Raport Z zilnic"],
+    cardIncludes: ["Casă POS", "Driver fiscal", "Raport Z zilnic"],
   },
   partners: {
     title: "Program parteneri franchisetech — Venit recurent pentru contabili HORECA",
@@ -405,7 +405,7 @@ export const ro: MarketingMessages = {
     otherArchetypesLabel: "Și alte profiluri",
     otherArchetypesTitle: "Integratori, consultanți, reselleri POS",
     otherArchetypes: [
-      { title: "Integrator FiscalNet", text: "Recomandați workspace operațional lângă casa fiscală — noi instalăm." },
+      { title: "Integrator driver fiscal", text: "Recomandați workspace operațional lângă casa fiscală — noi instalăm." },
       { title: "Consultant deschidere", text: "Locații noi: POS + checklist de configurare pentru primul serviciu." },
       { title: "Reseller POS local", text: "Add-on cloud cu comision recurent — fără suport tehnic pe umerii dvs." },
     ],
@@ -495,7 +495,7 @@ export const ro: MarketingMessages = {
     },
     notIncludedTitle: "Ce nu este inclus încă",
     notIncludedText:
-      "Clientul cumpără și înregistrează imprimanta fiscală compatibilă. Conectarea FiscalNet și orice flux ANAF e-Factura depind de configurarea și verificarea integrărilor locale. Comenzile online și loialitatea nu sunt incluse încă.",
+      "Clientul cumpără și înregistrează imprimanta fiscală compatibilă. Conectarea driverului fiscal și orice flux ANAF e-Factura depind de configurarea și verificarea integrărilor locale. Comenzile online și loialitatea nu sunt incluse încă.",
     faqTitle: "Întrebări prețuri",
     compareCompetitors: {
       title: "Cost total vs competitori (România)",
@@ -553,7 +553,7 @@ export const ro: MarketingMessages = {
       },
     },
     faqs: [
-      ["Am nevoie de hardware special?", "Aplicația web rulează pe dispozitive compatibile. Bonurile fiscale necesită o casă sau imprimantă fiscală compatibilă și FiscalNet configurat local."],
+      ["Am nevoie de hardware special?", "Aplicația web rulează pe dispozitive compatibile. Bonurile fiscale necesită o casă sau imprimantă fiscală compatibilă și un driver fiscal configurat local."],
       ["Puteți configura produsele mele?", "Configurarea ghidată în aplicație este inclusă. Migrările mari, instruirea echipei și configurarea fiscală la locație sunt servicii separate."],
       ["Trebuie să plătesc de la început?", "Nu. Planul Free e gratuit pentru totdeauna. Plata începe doar dacă alegeți un plan plătit."],
       ["Prețul este pe firmă sau pe locație?", "Prețurile afișate sunt pentru o locație, pe lună. Pentru mai multe locații, solicitați o ofertă bazată pe configurația reală."],

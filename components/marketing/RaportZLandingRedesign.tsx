@@ -6,18 +6,18 @@ type Props = {
   signupHref: string;
 };
 
-const trustBadges = ["FiscalNet, când este configurat", "Grupe TVA configurabile", "Export pentru contabil", "Funcționează pe telefon"];
+const trustBadges = ["Driver fiscal, când este configurat", "Grupe TVA configurabile", "Export pentru contabil", "Funcționează pe telefon"];
 
 const pains = [
   "Închideți casa din memorie și numărați sertarul aproximativ.",
   "Trimiteți contabilului poze cu rapoarte Z pe WhatsApp.",
-  "Nu știți dacă toate vânzările au ajuns prin FiscalNet.",
+  "Nu știți dacă toate vânzările au ajuns prin driverul fiscal.",
   "Stocul și costul rețetelor trăiesc într-un Excel vechi.",
 ];
 
 const flow = [
   ["PAS 1", "Vânzare la POS", "Produse, cotă TVA și metodă de plată alese o dată, corect."],
-  ["PAS 2", "Trimitere FiscalNet", "Datele vânzării pleacă spre casa fiscală, când integrarea e configurată."],
+  ["PAS 2", "Trimitere driver fiscal", "Datele vânzării pleacă spre casa fiscală, când integrarea e configurată."],
   ["PAS 3", "Stare bon", "Trimis, în așteptare sau eșuat — vizibil pe loc, cu reîncercare."],
   ["PAS 4", "Raport Z & sertar", "Totaluri pe TVA, metode de plată și diferența de numerar."],
   ["PAS 5", "Contabil", "Export lunar în loc de poze și totaluri reconstruite manual."],
@@ -30,11 +30,11 @@ const faqs = [
   ],
   [
     "franchisetech generează QR-ul de pe bon?",
-    "Nu. QR-ul de pe bonul fiscal este generat de casa de marcat certificată. franchisetech trimite datele vânzării prin FiscalNet, când integrarea este configurată.",
+    "Nu. QR-ul de pe bonul fiscal este generat de casa de marcat certificată. franchisetech trimite datele vânzării prin driverul fiscal, când integrarea este configurată.",
   ],
   [
     "Trebuie să schimb casa de marcat?",
-    "Nu promitem asta fără verificare. În proba asistată verificăm fluxul FiscalNet, casa fiscală și ce se poate configura pentru localul dumneavoastră.",
+    "Nu promitem asta fără verificare. În proba asistată verificăm fluxul driverului fiscal, casa fiscală și ce se poate configura pentru localul dumneavoastră.",
   ],
   [
     "Pot folosi doar pentru raport Z?",
@@ -123,7 +123,7 @@ function ReceiptStatusTable() {
         <span className="font-mono text-[11px] text-white/60">Cafeneaua Centrală · Casa 1</span>
       </div>
       <div className="hidden grid-cols-[64px_1fr_90px_88px_96px] border-b border-slate-200 bg-slate-50 px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wide text-slate-500 sm:grid">
-        <span>Ora</span><span>Bon</span><span>Plată</span><span>Total</span><span>FiscalNet</span>
+        <span>Ora</span><span>Bon</span><span>Plată</span><span>Total</span><span>Driver fiscal</span>
       </div>
       {rows.map(([time, receipt, payment, total, status, color]) => (
         <div key={receipt} className={`grid gap-2 border-b border-slate-100 px-4 py-3 font-mono text-xs sm:grid-cols-[64px_1fr_90px_88px_96px] ${status === "Eșuat" ? "bg-amber-50" : ""}`}>
@@ -147,7 +147,9 @@ function DisclaimerNote() {
     <div className="rounded-md border border-[#1747c9]/15 bg-[#eaf0ff] p-4 text-sm leading-6 text-slate-700">
       <p>
         QR-ul de pe bonul fiscal este generat de casa de marcat certificată, nu de franchisetech.
-        franchisetech trimite datele vânzării prin FiscalNet, atunci când integrarea este configurată.
+        Datele vânzării ajung la casa fiscală prin driverul fiscal local — folosim driverul FiscalNet
+        (<a href="https://driverfiscal.ro/" target="_blank" rel="noopener noreferrer" className="underline">driverfiscal.ro</a>),
+        atunci când integrarea este configurată.
       </p>
       <p className="mt-2 text-xs text-slate-500">
         Nu înlocuim contabilul, ANAF, furnizorul casei fiscale sau consultanța fiscală. Verificați configurarea împreună cu contabilul.
@@ -169,7 +171,7 @@ export function RaportZLandingRedesign({ signupHref }: Props) {
               Raportul Z nu ar trebui să fie o surpriză la 23:40.
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-8 text-white/70 sm:text-lg">
-              POS în browser, bonuri trimise prin FiscalNet, raport Z și sertarul verificat în același loc.
+              POS în browser, bonuri trimise prin driverul fiscal, raport Z și sertarul verificat în același loc.
               Pentru cafenele și restaurante din România, cu 1-3 locații.
             </p>
             <div className="mt-7">
@@ -208,7 +210,7 @@ export function RaportZLandingRedesign({ signupHref }: Props) {
         <div className="mx-auto max-w-7xl">
           <p className="font-mono text-xs font-semibold uppercase tracking-wide text-[#1747c9]">Fluxul unei zile</p>
           <h2 className="mt-2 max-w-3xl text-2xl font-semibold tracking-tight text-[#101830] sm:text-3xl">
-            Vânzare → FiscalNet → stare bon → raport Z → contabil
+            Vânzare → driver fiscal → stare bon → raport Z → contabil
           </h2>
           <div className="mt-7 grid gap-3 md:grid-cols-5">
             {flow.map(([step, title, text]) => (

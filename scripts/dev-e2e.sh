@@ -6,4 +6,13 @@ set -a
 # shellcheck disable=SC1091
 source "$(dirname "$0")/../.env.e2e.local"
 set +a
-exec npx next dev -p 3200
+# NEXT_DIST_DIR (read by next.config.ts): the actual root cause of the
+# "Persisting failed" / ENOENT build-manifest errors wasn't Turbopack or this
+# sandbox's filesystem — it was this server and a plain `npm run dev` server
+# both writing into the same default .next directory whenever both ran at
+# once. Two dev servers sharing one .next corrupt each other's build
+# manifests under either bundler; `next dev` has no --dist-dir CLI flag, so
+# the output directory is set via next.config.ts instead. --webpack is kept
+# only as a secondary safeguard, not the actual fix.
+export NEXT_DIST_DIR=.next-e2e
+exec npx next dev -p 3200 --webpack

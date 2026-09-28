@@ -27,7 +27,7 @@ export const PARTNER_LINKS: PartnerLinkConfig[] = [
   },
   {
     id: "fiscalnet_integrator",
-    labelRo: "Integrator FiscalNet / casă fiscală",
+    labelRo: "Integrator driver fiscal / casă fiscală",
     utmSource: "partner_fiscalnet_integrator",
     utmCampaign: "ro-partner-2026-h2",
     description: "Instalează case fiscale — recomandă workspace operațional lângă fiscal.",
@@ -91,7 +91,7 @@ export function partnerLeaveBehindUrls(): { label: string; href: string }[] {
   return [
     { label: "Ebriza vs franchisetech (rapoarte incluse)", href: `${BASE}/compare/ebriza?lang=ro` },
     { label: "SmartBill vs franchisetech", href: `${BASE}/compare/smartbill?lang=ro` },
-    { label: "Ghid FiscalNet România", href: `${BASE}/help/romania-fiscalnet?lang=ro` },
+    { label: "Ghid driver fiscal România", href: `${BASE}/help/romania-fiscalnet?lang=ro` },
     { label: "Obiecții frecvente POS", href: `${BASE}/resources/objections-pos-romania?lang=ro` },
     { label: "Program parteneri", href: `${BASE}/partners?lang=ro` },
   ];

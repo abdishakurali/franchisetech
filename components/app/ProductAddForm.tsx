@@ -65,7 +65,17 @@ export function ProductAddForm({
       const fd = new FormData(e.currentTarget);
       const result = await addProduct(fd);
       if (!result.ok) {
-        toast.error(result.error);
+        // addProduct forwards the bare EntitlementDeniedError code
+        // ("entitlement_denied"), not a message — showing it verbatim left
+        // the owner staring at an internal error code with no idea their
+        // plan's product limit was the actual cause.
+        toast.error(
+          result.error === "entitlement_denied"
+            ? locale === "ro"
+              ? "Ai atins limita de produse a planului curent. Faceți upgrade pentru produse nelimitate."
+              : "You've reached your plan's product limit. Upgrade for unlimited products."
+            : result.error,
+        );
         return;
       }
       toast.success(pf.saved);

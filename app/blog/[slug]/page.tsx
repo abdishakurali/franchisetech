@@ -63,10 +63,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: post.description,
       type: "article",
       publishedTime: post.publishedAt,
-      // Not sourcing post.image here — the existing screenshot set (public/marketing,
-      // public/design-marketing) carries stale pre-pivot demo data (EUR pricing,
-      // 9%/13.5% Irish VAT bands). Falls back to the site-wide default OG image
-      // until real, correct per-post photography exists.
+      // No image here on purpose — Next.js's file-convention opengraph-image.tsx
+      // (this same directory) is picked up automatically and takes precedence.
+      // It renders the post's own topic icon + title server-side, so every post
+      // gets a real, always-accurate share image with nothing to source or go
+      // stale, instead of reusing the old screenshot set's pre-pivot demo data.
     },
   };
 }

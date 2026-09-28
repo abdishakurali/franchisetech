@@ -8,6 +8,21 @@ function stringValue(formData: FormData, key: string): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+async function generateLinkWithRetry(
+  admin: Awaited<ReturnType<typeof createServiceClient>>,
+  args: Parameters<Awaited<ReturnType<typeof createServiceClient>>["auth"]["admin"]["generateLink"]>[0],
+) {
+  // generateLink looks the user up by email internally — called immediately
+  // after inviteUserByEmail/admin insert, it can race that write and report
+  // "Email doesn't exist" even though the account was just created.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const result = await admin.auth.admin.generateLink(args);
+    if (!result.error) return result;
+    if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 300 * (attempt + 1)));
+  }
+  return admin.auth.admin.generateLink(args);
+}
+
 function appUrl(): string {
   const configured = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   return process.env.NODE_ENV === "production" ? "https://www.franchisetech.ro" : configured;
@@ -58,7 +73,7 @@ export async function signUpAccountantPartner(formData: FormData): Promise<SignU
 
   if (existingAuthUser) {
     userId = existingAuthUser.id;
-    const { data: linkData } = await admin.auth.admin.generateLink({ type: "magiclink", email, options: { redirectTo } });
+    const { data: linkData } = await generateLinkWithRetry(admin, { type: "magiclink", email, options: { redirectTo } });
     activationLink = linkData?.properties?.action_link ?? null;
   } else {
     const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
@@ -69,7 +84,7 @@ export async function signUpAccountantPartner(formData: FormData): Promise<SignU
       return { ok: false, error: inviteError?.message ?? "Nu am putut crea contul." };
     }
     userId = invited.user.id;
-    const { data: linkData } = await admin.auth.admin.generateLink({ type: "invite", email, options: { redirectTo } });
+    const { data: linkData } = await generateLinkWithRetry(admin, { type: "invite", email, options: { redirectTo } });
     activationLink = linkData?.properties?.action_link ?? null;
   }
 

@@ -33,6 +33,47 @@ export type BlogPost = {
  * (5% hasn't been a valid standalone rate since the Aug 2025 change; replaced with
  * the real 0% case). Before adding further posts, actually check PostHog traffic on
  * this batch first — don't repeat the volume-without-verification pattern.
+ *
+ * 2026-09-26: added 5 more posts, adjacent to two posts that PostHog traffic (checked
+ * before writing) showed were real anchors beyond the original two: inventar-fizic-vs-
+ * scriptic-diferente and program-legal-de-lucru-horeca-romania. Extends into labor-law
+ * fear queries (overtime, meal breaks, ITM inspections, undeclared-work fines) and the
+ * legally-mandated annual inventory — same primary-source-verification bar as before,
+ * this time against Codul Muncii (Legea 53/2003), Legea 108/1999, Legea 239/2025,
+ * Legea 82/1991 and OMFP 2861/2009. The verification pass itself caught two real errors
+ * before publishing: there is no 15-minute statutory minimum meal break for adult
+ * employees (only a 30-minute minimum for minors, art. 134) — a widely repeated myth —
+ * and the old "5+ undeclared workers = criminal offense" rule was abrogated in 2017
+ * (OUG 53/2017); it's been purely a contravention since, now 40.000 lei/person capped
+ * at 1.000.000 lei/employer as of 1 Jan 2026 (Legea 239/2025, doubled from 20.000/
+ * 200.000). Also: Revisal was fully replaced by REGES-Online on 1 Oct 2025 — don't
+ * reference the old name in new content. Added genuine reciprocal links both ways
+ * (edited program-legal-de-lucru-horeca-romania and inventar-fizic-vs-scriptic-diferente
+ * to link forward into this batch, not just the generic footer).
+ *
+ * 2026-09-28: added 10 more posts — 4 general business-finance education (net margin,
+ * cash flow, delivery-platform margin math, cost-of-opening categories; no legal
+ * citations, so no primary-source pass needed) plus 6 compliance/regulatory posts that
+ * did go through primary-source verification first: e-Factura B2C (OUG 69/2024), SAF-T
+ * D406 (OPANAF 1783/2021), the 2026-07-01 minimum wage increase (HG 146/2026), HACCP
+ * (Reg. CE 852/2004 + Legea 150/2004), GDPR for a loyalty program (Reg. UE 2016/679 +
+ * Legea 190/2018 + Legea 506/2004 for SMS marketing), and CAEN codes. The CAEN post
+ * exists because of a genuinely time-sensitive find: Romania's CAEN Rev.2→Rev.3
+ * transition deadline was 2026-09-25, three days before this batch was written — a
+ * dedicated food-truck code (5612) didn't exist under Rev.2. The verification pass
+ * explicitly flagged claims NOT to publish: exact e-Factura B2C penalty amounts and a
+ * "legitimate interest requires a DPO" claim were both only weakly sourced, so both are
+ * hedged/omitted rather than stated as fact. The SAF-T post is deliberately honest about
+ * scope — franchisetech's export covers only stock movements (NIR/sales/adjustments),
+ * not a full certified D406 filing; see lib/ro-accounting/saf-t-xml.ts's own header
+ * comment, which says the same thing about the export itself. Skipped a 7th planned
+ * topic (mandatory HoReCa authorizations/DSP/ISU) as redundant — already covered at
+ * list level in documente-obligatorii-horeca-lista-completa and
+ * checklist-deschidere-cafenea-de-la-zero. Also skipped stating specific delivery-
+ * platform (Glovo/Bolt Food/Tazz) commission percentages — no reliable public source
+ * for current rates, which vary by contract; the delivery-margin post states the
+ * mechanism and hedges the number, following the same pattern already used for card-
+ * processor fees in costuri-fixe-vs-variabile-horeca.
  */
 export const blogPosts: BlogPost[] = [
   {
@@ -315,7 +356,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "De ce marja brută 85% pe cafea nu înseamnă că sunteți profitabil",
-        body: "Asta e greșeala clasică: proprietarul vede 85% marjă pe cafea și crede că afacerea merge bine. Dar marja brută acoperă doar ingredientele.\n\nCe mai trebuie acoperit din acei 12.76 RON per flat white:\n\n- **Chirie**: dacă plătiți 3.000 EUR/lună și vindeți 1.500 cafele pe lună → 2 EUR (≈10 RON) per cafea\n- **Salarii**: dacă aveți 2 baristi cu salariu net 3.500 RON fiecare și vindeți 1.500 cafele → ≈4.67 RON per cafea\n- **Utilități, consumabile, echipamente**: 1–2 RON per cafea\n\nTotal costuri fixe per cafea: ≈15–17 RON. Marja brută per cafea: 12.76 RON.\n\n**La acest volum și la aceste costuri fixe, fiecare flat white vândut la 15 RON generează pierdere.**\n\nSoluții: creșteți prețul, creșteți volumul, reduceți costurile fixe — sau combinați toate trei. Dar fără marja brută calculată corect, nu știți nici de unde să începeți.",
+        body: "Asta e greșeala clasică: proprietarul vede 85% marjă pe cafea și crede că afacerea merge bine. Dar marja brută acoperă doar ingredientele.\n\nCe mai trebuie acoperit din acei 12.76 RON per flat white:\n\n- **Chirie**: dacă plătiți 3.000 EUR/lună și vindeți 1.500 cafele pe lună → 2 EUR (≈10 RON) per cafea\n- **Salarii**: dacă aveți 2 baristi cu salariu net 3.500 RON fiecare și vindeți 1.500 cafele → ≈4.67 RON per cafea\n- **Utilități, consumabile, echipamente**: 1–2 RON per cafea\n\nTotal costuri fixe per cafea: ≈15–17 RON. Marja brută per cafea: 12.76 RON.\n\n**La acest volum și la aceste costuri fixe, fiecare flat white vândut la 15 RON generează pierdere.**\n\nSoluții: creșteți prețul, creșteți volumul, reduceți costurile fixe — sau combinați toate trei. Dar fără marja brută calculată corect, nu știți nici de unde să începeți.\n\nAcest calcul per produs e util, dar rămâne parțial — imaginea completă vine din [marja netă a întregii afaceri, calculată lunar](/blog/marja-neta-vs-marja-bruta-de-ce-conteaza-prima), nu doar din marja brută a unui singur produs.",
       },
       {
         heading: "Cum calculați automat pentru toate produsele din meniu",
@@ -720,7 +761,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cât de des faceți inventar",
-        body: "Pentru produsele perisabile cu valoare mare (cafea, carne, lactate), o verificare săptămânală ține diferențele mici și ușor de urmărit la sursă. Pentru un inventar complet, pe toate produsele din gestiune, o dată pe lună este ritmul obișnuit în HoReCa.\n\nUn inventar complet făcut o dată pe an, ca formalitate contabilă, nu ajută operațional — diferențele acumulate timp de 12 luni devin imposibil de atribuit unei cauze precise.",
+        body: "Pentru produsele perisabile cu valoare mare (cafea, carne, lactate), o verificare săptămânală ține diferențele mici și ușor de urmărit la sursă. Pentru un inventar complet, pe toate produsele din gestiune, o dată pe lună este ritmul obișnuit în HoReCa.\n\nUn inventar complet făcut o dată pe an, doar ca formalitate contabilă, nu ajută operațional — diferențele acumulate timp de 12 luni devin imposibil de atribuit unei cauze precise. Dar inventarul anual rămâne, separat de verificările operative de mai sus, o obligație legală distinctă, cu propriile cerințe de document și termene — [vedeți exact ce trebuie să conțină procesul-verbal și cum tratați o diferență constatată](/blog/diferenta-stoc-inventar-anual-cum-o-documentati).",
       },
       {
         heading: "Cum ajută franchisetech",
@@ -1153,11 +1194,11 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Munca de noapte și pauza de masă",
-        body: "Munca desfășurată în intervalul orar considerat de noapte (de regulă 22:00–06:00) trebuie compensată conform legii — fie prin reducerea programului, fie printr-un spor salarial stabilit prin contractul colectiv aplicabil sau prin contractul individual de muncă. Procentul exact de spor variază în funcție de sectorul de activitate și de ce prevede contractul aplicabil — verificați-l cu un specialist în legislația muncii sau cu contabilul care vă administrează salarizarea, nu presupuneți un procent standard.\n\nPentru orice zi de lucru mai lungă de 6 ore, angajatul are dreptul la o pauză de masă, a cărei durată minimă este stabilită prin contractul colectiv de muncă sau prin regulamentul intern. În HoReCa, pauza trebuie programată real — nu doar trecută pe hârtie — ceea ce înseamnă acoperire suplimentară de personal în orele de vârf, altfel angajatul rămâne fără pauză efectivă.",
+        body: "Munca desfășurată în intervalul orar considerat de noapte (de regulă 22:00–06:00) trebuie compensată conform legii — fie prin reducerea programului, fie printr-un spor salarial stabilit prin contractul colectiv aplicabil sau prin contractul individual de muncă. Procentul exact de spor variază în funcție de sectorul de activitate și de ce prevede contractul aplicabil — verificați-l cu un specialist în legislația muncii sau cu contabilul care vă administrează salarizarea, nu presupuneți un procent standard.\n\nPentru orice zi de lucru mai lungă de 6 ore, angajatul are dreptul la o pauză de masă, a cărei durată minimă este stabilită prin contractul colectiv de muncă sau prin regulamentul intern — legea nu impune un număr fix de minute pentru un angajat adult, orice ar circula pe internet. [Vedeți exact ce spune articolul 134 din Codul Muncii](/blog/pauza-de-masa-cate-minute-prevede-legea) și de unde vine confuzia cu cele «15 minute obligatorii». În HoReCa, pauza trebuie programată real — nu doar trecută pe hârtie — ceea ce înseamnă acoperire suplimentară de personal în orele de vârf, altfel angajatul rămâne fără pauză efectivă.\n\nPentru orele suplimentare, ordinea de compensare e stabilită de lege, nu la alegere — [vedeți cum se calculează și se plătesc corect](/blog/ore-suplimentare-horeca-cum-se-calculeaza-si-platesc).",
       },
       {
         heading: "Evidența orelor de lucru — de ce contează",
-        body: "Angajatorul are obligația de a ține evidența orelor lucrate de fiecare angajat, indiferent de tipul de contract (normă întreagă, timp parțial). La un control de muncă, lipsa evidenței sau evidența care nu corespunde cu programul real afișat este una dintre cele mai frecvente cauze de sancțiune în HoReCa.\n\nProbleme tipice descoperite la control:\n\n- Program afișat diferit de orele efectiv lucrate (angajatul vine mai devreme pentru pregătire, dar ora nu e înregistrată)\n- Ture suplimentare acoperite informal, fără actualizarea evidenței\n- Personal care lucrează fără contract sau cu contract de timp parțial, dar cu program de normă întreagă în realitate\n\nEvidența trebuie să reflecte exact orele lucrate, inclusiv timpul de pregătire înainte de deschidere și de închidere efectivă a casei după ultimul client.",
+        body: "Angajatorul are obligația de a ține evidența orelor lucrate de fiecare angajat, indiferent de tipul de contract (normă întreagă, timp parțial). La un control de muncă, lipsa evidenței sau evidența care nu corespunde cu programul real afișat este una dintre cele mai frecvente cauze de sancțiune în HoReCa.\n\nProbleme tipice descoperite la control:\n\n- Program afișat diferit de orele efectiv lucrate (angajatul vine mai devreme pentru pregătire, dar ora nu e înregistrată)\n- Ture suplimentare acoperite informal, fără actualizarea evidenței\n- Personal care lucrează fără contract sau cu contract de timp parțial, dar cu program de normă întreagă în realitate\n\nEvidența trebuie să reflecte exact orele lucrate, inclusiv timpul de pregătire înainte de deschidere și de închidere efectivă a casei după ultimul client. Iar controlul de muncă poate veni oricând, fără preaviz — [vedeți exact ce verifică ITM la o afacere HoReCa și ce riscați](/blog/control-itm-neanuntat-horeca-ce-verifica-si-ce-riscati).",
       },
       {
         heading: "Checklist practic de conformitate",
@@ -1605,7 +1646,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum vedeți această separare în franchisetech",
-        body: "Costul variabil per produs (materii prime, calculat din prețurile reale de la ultima aprovizionare) vine automat din calculatorul de rețete, actualizat de fiecare dată când introduceți un NIR cu preț nou. Costurile fixe (chirie, salarii, abonamente) rămân în afara sistemului, pentru că nu trec prin vânzări sau stoc — dar cu jumătate din calcul deja făcut corect și automat, separarea fixe/variabile devine un exercițiu de câteva minute, nu o reconstituire manuală de la zero în fiecare lună.",
+        body: "Costul variabil per produs (materii prime, calculat din prețurile reale de la ultima aprovizionare) vine automat din calculatorul de rețete, actualizat de fiecare dată când introduceți un NIR cu preț nou. Costurile fixe (chirie, salarii, abonamente) rămân în afara sistemului, pentru că nu trec prin vânzări sau stoc — dar cu jumătate din calcul deja făcut corect și automat, separarea fixe/variabile devine un exercițiu de câteva minute, nu o reconstituire manuală de la zero în fiecare lună.\n\nSepararea corectă contează și pentru altceva: costurile fixe care ies din cont la date fixe, indiferent de cât ați vândut luna respectivă, sunt exact ce poate crea un decalaj între [profitul de pe hârtie și banii reali din cont](/blog/cash-flow-cafenea-profitabil-pe-hartie-fara-bani-in-cont).",
       },
     ],
   },
@@ -1750,9 +1791,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "fiscalnet-offline-ce-faceti-cand-vreti-sa-emiteti-bonul",
-    title: "Ce faceți dacă FiscalNet e offline când vreți să emiteți bonul",
+    title: "Ce faceți dacă driverul fiscal e offline când vreți să emiteți bonul",
     description:
-      "FiscalNet este integrarea care trimite comanda de emitere către casa de marcat sau imprimanta fiscală — nu aparatul fiscal în sine. Iată ce înseamnă, practic și legal, când pare «offline» chiar în mijlocul unei vânzări.",
+      "Driverul fiscal este integrarea care trimite comanda de emitere către casa de marcat sau imprimanta fiscală — nu aparatul fiscal în sine. Iată ce înseamnă, practic și legal, când pare «offline» chiar în mijlocul unei vânzări.",
     publishedAt: "2026-09-20",
     locale: "ro",
     tags: ["fiscal", "fiscalnet", "pos"],
@@ -1760,12 +1801,12 @@ export const blogPosts: BlogPost[] = [
     relatedFeature: "/features/pos",
     sections: [
       {
-        heading: "Ce este, de fapt, FiscalNet",
-        body: "FiscalNet este stratul de comunicare (driverul/integrarea) care leagă aplicația de vânzare de pe calculator sau tabletă de casa de marcat sau imprimanta fiscală certificată conectată fizic la stația de lucru — prin USB, rețea locală sau Bluetooth, în funcție de model. Rolul lui este să traducă o vânzare finalizată în POS într-o comandă pe care aparatul fiscal o poate executa și să transmită înapoi rezultatul (bon emis, eroare, în așteptare).\n\nAsta e diferit de conexiunea aparatului fiscal la serverele ANAF (SIM de date sau rețea, cu retransmitere automată când revine semnalul) — aceea e tratată separat, într-un alt articol. Aici vorbim despre legătura dintre calculatorul de la casă și aparatul din fața casierului, care e o problemă locală, de cablu sau rețea, nu de conexiune la internet a aparatului însuși.",
+        heading: "Ce este, de fapt, un driver fiscal",
+        body: "Driverul fiscal (noi folosim FiscalNet, driverfiscal.ro) este stratul de comunicare care leagă aplicația de vânzare de pe calculator sau tabletă de casa de marcat sau imprimanta fiscală certificată conectată fizic la stația de lucru — prin USB, rețea locală sau Bluetooth, în funcție de model. Rolul lui este să traducă o vânzare finalizată în POS într-o comandă pe care aparatul fiscal o poate executa și să transmită înapoi rezultatul (bon emis, eroare, în așteptare).\n\nAsta e diferit de conexiunea aparatului fiscal la serverele ANAF (SIM de date sau rețea, cu retransmitere automată când revine semnalul) — aceea e tratată separat, într-un alt articol. Aici vorbim despre legătura dintre calculatorul de la casă și aparatul din fața casierului, care e o problemă locală, de cablu sau rețea, nu de conexiune la internet a aparatului însuși.",
       },
       {
         heading: "De ce contează tipul aparatului dumneavoastră",
-        body: "O **casă de marcat** clasică are propriă tastatură și ecran și poate, în multe cazuri, funcționa și bate manual o vânzare direct de la aparat, chiar dacă legătura cu POS-ul e picată. O **imprimantă fiscală** (fără tastatură proprie) nu poate — depinde integral de comenzi primite de la un calculator conectat, prin exact acest tip de integrare. Dacă FiscalNet e offline și aveți o imprimantă fiscală, aparatul pur și simplu nu are cum să primească vreo comandă de emitere, indiferent cât timp așteptați.\n\nMerită să știți, dinainte, care tip de aparat aveți instalat în local — informația e utilă în secunda în care apare o eroare, nu e ceva de căutat atunci, cu un client la casă.",
+        body: "O **casă de marcat** clasică are propriă tastatură și ecran și poate, în multe cazuri, funcționa și bate manual o vânzare direct de la aparat, chiar dacă legătura cu POS-ul e picată. O **imprimantă fiscală** (fără tastatură proprie) nu poate — depinde integral de comenzi primite de la un calculator conectat, prin exact acest tip de integrare. Dacă driverul fiscal e offline și aveți o imprimantă fiscală, aparatul pur și simplu nu are cum să primească vreo comandă de emitere, indiferent cât timp așteptați.\n\nMerită să știți, dinainte, care tip de aparat aveți instalat în local — informația e utilă în secunda în care apare o eroare, nu e ceva de căutat atunci, cu un client la casă.",
       },
       {
         heading: "Primii pași când vedeți eroarea de conexiune",
@@ -1781,7 +1822,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum gestionează franchisetech acest moment",
-        body: "În franchisetech, starea transmiterii către aparatul fiscal este afișată clar la fiecare vânzare — trimis, în așteptare sau eșuat — nu e ascunsă sub un mesaj generic. Vânzarea în sine se salvează local imediat ce plata este confirmată, independent de rezultatul transmiterii către FiscalNet, ca să nu pierdeți evidența comenzii doar pentru că integrarea are o problemă temporară.\n\nCe aplicația nu face: nu marchează o vânzare drept \"finalizată fiscal\" până nu primește o confirmare reală de la aparat. Dacă transmiterea eșuează, vedeți asta imediat, nu abia la sfârșitul zilei când încercați să închideți casa.",
+        body: "În franchisetech, starea transmiterii către aparatul fiscal este afișată clar la fiecare vânzare — trimis, în așteptare sau eșuat — nu e ascunsă sub un mesaj generic. Vânzarea în sine se salvează local imediat ce plata este confirmată, independent de rezultatul transmiterii către driverul fiscal, ca să nu pierdeți evidența comenzii doar pentru că integrarea are o problemă temporară.\n\nCe aplicația nu face: nu marchează o vânzare drept \"finalizată fiscal\" până nu primește o confirmare reală de la aparat. Dacă transmiterea eșuează, vedeți asta imediat, nu abia la sfârșitul zilei când încercați să închideți casa.",
       },
     ],
   },
@@ -1924,7 +1965,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum reduceți riscul ca un bon să lipsească fără să observați",
-        body: "Cea mai frecventă cauză a unui bon lipsă nu e frauda, ci un pas manual sărit la oră de vârf — o vânzare cash încasată «repede», fără să treacă prin POS. Riscul scade dacă fiscalizarea nu mai depinde de un pas separat: în franchisetech, fiecare vânzare finalizată în POS trimite automat comanda către FiscalNet, care declanșează emiterea bonului la casa fiscală, **când integrarea e configurată** — nu există un moment în care casierul trebuie «să nu uite» să bată vânzarea separat.\n\nAsta nu elimină nevoia de verificare zilnică a sertarului și a rapoartelor — dar reduce exact tipul de discrepanță pe care se bazează mecanismul sumei nejustificate descris mai sus.",
+        body: "Cea mai frecventă cauză a unui bon lipsă nu e frauda, ci un pas manual sărit la oră de vârf — o vânzare cash încasată «repede», fără să treacă prin POS. Riscul scade dacă fiscalizarea nu mai depinde de un pas separat: în franchisetech, fiecare vânzare finalizată în POS trimite automat comanda către driverul fiscal, care declanșează emiterea bonului la casa fiscală, **când integrarea e configurată** — nu există un moment în care casierul trebuie «să nu uite» să bată vânzarea separat.\n\nAsta nu elimină nevoia de verificare zilnică a sertarului și a rapoartelor — dar reduce exact tipul de discrepanță pe care se bazează mecanismul sumei nejustificate descris mai sus.",
       },
     ],
   },
@@ -1994,7 +2035,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce înseamnă pentru dumneavoastră ca afacere",
-        body: "Codul QR, când va deveni obligatoriu, va fi generat de **casa de marcat fiscală certificată**, nu de un soft de gestiune sau de un POS extern — exact cum se întâmplă și acum cu bonul fiscal standard. franchisetech nu generează codul QR de pe bon și nu promite asta: trimite datele vânzării către casa fiscală prin FiscalNet, **când integrarea este configurată**, iar emiterea efectivă a bonului — cu sau fără QR — rămâne responsabilitatea aparatului certificat.\n\nCe puteți face util acum, fără să reacționați exagerat la un proiect încă în dezbatere: întrebați furnizorul casei de marcat dacă are deja un plan de actualizare pentru termenul din proiect, ca să nu vă prindă pe ultima sută de metri dacă termenul rămâne 1 noiembrie 2026.",
+        body: "Codul QR, când va deveni obligatoriu, va fi generat de **casa de marcat fiscală certificată**, nu de un soft de gestiune sau de un POS extern — exact cum se întâmplă și acum cu bonul fiscal standard. franchisetech nu generează codul QR de pe bon și nu promite asta: trimite datele vânzării către casa fiscală prin driverul fiscal, **când integrarea este configurată**, iar emiterea efectivă a bonului — cu sau fără QR — rămâne responsabilitatea aparatului certificat.\n\nCe puteți face util acum, fără să reacționați exagerat la un proiect încă în dezbatere: întrebați furnizorul casei de marcat dacă are deja un plan de actualizare pentru termenul din proiect, ca să nu vă prindă pe ultima sută de metri dacă termenul rămâne 1 noiembrie 2026.",
       },
     ],
   },
@@ -2176,6 +2217,481 @@ export const blogPosts: BlogPost[] = [
       {
         heading: "Cum funcționează în franchisetech",
         body: "franchisetech nu poate — și nu are cum, tehnic — să recreeze un bon fiscal pentru o zi cu Raportul Z deja generat; niciun POS conectat la o casă de marcat certificată nu poate face asta, indiferent de furnizor. Ce oferă e istoricul complet al vânzărilor, căutabil instant pe dată, oră sau produs, ca să aveți răspunsul corect în câteva secunde, nu să promiteți ceva ce nu se poate livra.\n\nÎn plus, generarea Raportului Z necesită drepturi de administrator sau manager, nu e la îndemâna oricărui casier — exact pentru a reduce riscul unei închideri premature care ar transforma o cerere obișnuită de bon într-o discuție despre o zi deja închisă fiscal, cu ore bune înainte ca locația să se închidă efectiv.",
+      },
+    ],
+  },
+  {
+    slug: "ore-suplimentare-horeca-cum-se-calculeaza-si-platesc",
+    title: "Ore suplimentare în HoReCa: cum se calculează și cum se plătesc corect",
+    description:
+      "Codul Muncii limitează timpul de lucru la 48 de ore pe săptămână, inclusiv orele suplimentare, și stabilește cum se compensează — întâi timp liber, apoi un spor de minimum 75%. Ce înseamnă concret pentru o cafenea sau un restaurant cu ture variabile.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["personal", "pontaj"],
+    sections: [
+      {
+        heading: "Plafonul de 48 de ore pe săptămână — ce include și ce nu",
+        body: "Durata normală a timpului de lucru rămâne 8 ore pe zi și 40 de ore pe săptămână (art. 112 din Codul Muncii). Peste acest prag, legea permite muncă suplimentară, dar cu o limită fermă: **timpul total de lucru, inclusiv orele suplimentare, nu poate depăși 48 de ore pe săptămână** (art. 114 alin. 1).\n\nExcepție: se poate depăși 48 de ore într-o săptămână anume, dacă media pe o perioadă de referință de 4 luni calendaristice nu trece de 48 de ore pe săptămână. Contractul colectiv de muncă aplicabil poate extinde această perioadă de referință la maximum 6 luni și, în cazuri speciale, justificate tehnic sau organizatoric, la maximum 12 luni (art. 114 alin. 2-4). Pentru o cafenea cu weekenduri aglomerate și zile de mijloc de săptămână mai libere, exact acest mecanism de mediere pe perioadă de referință e cel care contează, nu o limită rigidă identică în fiecare săptămână.",
+      },
+      {
+        heading: "Ce înseamnă, legal, muncă suplimentară",
+        body: "Munca suplimentară este, conform art. 120 din Codul Muncii, munca prestată peste durata normală a timpului de lucru săptămânal prevăzută la art. 112. Regula de bază: se prestează doar cu acordul salariatului, cu excepția cazurilor de forță majoră sau a lucrărilor urgente pentru prevenirea accidentelor ori înlăturarea consecințelor unui accident.\n\nÎn practică, în HoReCa apare frecvent o zonă gri: un angajat rămâne «să ajute» la o comandă mare sau la un eveniment neplanificat, fără o discuție explicită despre ore suplimentare. Legal, dacă a lucrat peste programul normal, ora contează ca suplimentară, indiferent cât de informal a fost solicitată.",
+      },
+      {
+        heading: "Cum se compensează: întâi timp liber, bani doar dacă nu se poate altfel",
+        body: "Ordinea stabilită de lege nu e la alegere:\n\n- **Regula de bază (art. 122):** munca suplimentară se compensează prin ore libere plătite, acordate în următoarele **90 de zile calendaristice** după ce a fost prestată.\n- **Dacă timpul liber nu e posibil în acest interval (art. 123):** munca suplimentară se plătește prin adăugarea unui spor la salariu, negociat prin contractul colectiv de muncă aplicabil sau prin contractul individual, care **nu poate fi mai mic de 75% din salariul de bază**.\n\nGreșeala frecventă: un proprietar promite verbal «îți dau liber altă dată» și cele 90 de zile trec fără ca timpul liber să fie acordat efectiv — nici înregistrat, nici recuperat. La acel moment, legal, ora suplimentară ar fi trebuit deja plătită cu sporul minim de 75%, nu lăsată «pe listă» la nesfârșit.",
+      },
+      {
+        heading: "Greșelile care apar cel mai des",
+        body: "**Ore suplimentare nescrise nicăieri.** Dacă evidența orelor lucrate nu separă clar orele normale de cele suplimentare, nu aveți de fapt cum să dovediți, la un control sau la un calcul de salarii, câte ore suplimentare a prestat fiecare angajat și dacă au fost compensate corect. Vedeți [metodele reale de pontaj în HoReCa](/blog/pontaj-personal-horeca-metode) dacă evidența actuală se bazează pe memorie sau pe un caiet completat retroactiv.\n\n**Compensarea promisă, dar netrasă în timp.** Fără o dată clară la care s-au acumulat orele suplimentare, fereastra de 90 de zile pentru compensare prin timp liber devine imposibil de urmărit — și, implicit, imposibil de dovedit că a fost respectată.\n\n**Confuzia cu tura de weekend sau de noapte.** O tură de weekend nu e automat «suplimentară» dacă se încadrează în programul normal planificat al angajatului — suplimentară înseamnă strict ce depășește durata normală săptămânală, nu orice tură considerată incomodă.",
+      },
+      {
+        heading: "Checklist practic",
+        body: "- [ ] Evidența orelor separă clar orele normale de cele suplimentare, pentru fiecare angajat\n- [ ] Orele suplimentare sunt acceptate cu acordul angajatului, nu impuse tacit\n- [ ] Totalul săptămânal, inclusiv suplimentar, respectă plafonul de 48 de ore (sau media pe perioada de referință aplicabilă)\n- [ ] Compensarea prin timp liber are o dată de acordare urmărită, în intervalul de 90 de zile\n- [ ] Dacă timpul liber nu a fost acordat în interval, sporul de minimum 75% e calculat și plătit\n- [ ] Regulile de mai sus sunt verificate periodic cu contabilul sau consultantul care administrează salarizarea, nu presupuse din auzite\n\nAceastă listă nu înlocuiește sfatul unui specialist în legislația muncii pentru situații specifice — contracte cu timp parțial, muncă sezonieră sau perioade de referință extinse prin contract colectiv necesită verificare punctuală.",
+      },
+    ],
+  },
+  {
+    slug: "pauza-de-masa-cate-minute-prevede-legea",
+    title: "Pauza de masă la angajați: câte minute prevede, de fapt, legea",
+    description:
+      "Circulă ideea unei pauze obligatorii de 15 minute. Codul Muncii nu prevede așa ceva pentru un angajat adult — iată ce spune exact articolul 134, de unde vine confuzia și ce trebuie scris în regulamentul intern ca să fiți acoperiți la un control.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["personal", "legal"],
+    sections: [
+      {
+        heading: "Mitul celor 15 minute",
+        body: "Căutați «pauza de masă legea muncii minute» și veți găsi, aproape peste tot, aceeași cifră repetată: 15 minute, obligatoriu prin lege. Cifra circulă atât de des în conținut de business românesc încât a devenit, practic, «cunoștință comună» — problema e că nu există în Codul Muncii, la niciun articol, pentru un angajat adult.\n\nNu e o interpretare discutabilă a legii — e o cifră care pur și simplu nu apare în text. Dacă ați scris-o în regulamentul intern crezând că respectați un minim legal, nu greșiți practic (o pauză de 15 minute e perfect validă), dar greșiți pe motivarea din spate.",
+      },
+      {
+        heading: "Ce spune de fapt articolul 134",
+        body: "Codul Muncii, art. 134 alin. (1), prevede că salariații au dreptul la pauză de masă atunci când durata zilnică a timpului de lucru este mai mare de 6 ore, în condițiile stabilite prin **contractul colectiv de muncă aplicabil sau prin regulamentul intern**. Legea nu fixează un număr minim de minute pentru un angajat adult — decizia rămâne la nivelul contractului colectiv sau al regulamentului intern al fiecărui angajator.\n\nSingura cifră fixă din articolul 134 privește minorii: salariații sub 18 ani au dreptul la o pauză de masă de **minimum 30 de minute**, dacă durata zilnică a timpului de lucru depășește 4 ore și jumătate (art. 134 alin. 2). Dacă în local aveți angajați minori (frecvent în HoReCa, pe posturi de vacanță sau part-time), acesta e singurul prag pe care legea chiar îl impune direct.",
+      },
+      {
+        heading: "De ce contează să fie scris, nu doar practicat informal",
+        body: "Pentru că legea lasă durata exactă la latitudinea contractului colectiv sau a regulamentului intern, absența unei cifre scrise nu înseamnă «nu există obligație» — înseamnă că, la un control, nu aveți un standard documentat cu care să demonstrați ce pauză practicați efectiv și de ce.\n\nO pauză «de obicei prin rotație, cam 20-30 de minute, cum prinde fiecare un moment liber» nu e o politică — e o intenție bună fără dovadă scrisă. Fixați o durată clară în regulamentul intern (10, 15, 20, 30 de minute — alegerea e a dumneavoastră, atât timp cât e reală și aplicată), ca să aveți un reper verificabil, nu o practică descrisă diferit de fiecare angajat întrebat separat.",
+      },
+      {
+        heading: "Cum arată o pauză reală într-o tură aglomerată",
+        body: "Scrisă corect în regulament nu ajută dacă, în practică, pauza nu se întâmplă niciodată la orele de vârf. Așa cum discutăm și în [ghidul programului legal de lucru în HoReCa](/blog/program-legal-de-lucru-horeca-romania), pauza trebuie programată real, cu acoperire suplimentară de personal în orele aglomerate — altfel angajatul rămâne, de fapt, fără pauză efectivă, indiferent ce scrie pe hârtie.\n\nO metodă simplă: programați pauzele prin rotație, în funcție de fluxul real de clienți din tura respectivă, nu la o oră fixă identică în fiecare zi — o cafenea are un vârf de dimineață complet diferit de un restaurant cu vârf de prânz sau de seară.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Regulamentul intern specifică o durată clară a pauzei de masă pentru angajați cu program peste 6 ore/zi\n- [ ] Dacă aveți angajați minori, pauza acestora respectă minimum 30 de minute pentru program peste 4,5 ore/zi\n- [ ] Pauza e programată real, cu acoperire de personal în orele de vârf, nu doar «pe hârtie»\n- [ ] Angajații știu exact când și cât durează pauza lor, nu depinde de improvizație zilnică\n- [ ] Nu ați presupus o cifră legală («15 minute») care nu există — verificați ce ați scris efectiv în regulamentul intern\n\nCa la orice detaliu de legislația muncii, pentru situații specifice (program inegal, muncă de noapte, contracte de timp parțial) verificați cu un consultant HR sau cu contabilul care administrează salarizarea afacerii dumneavoastră.",
+      },
+    ],
+  },
+  {
+    slug: "control-itm-neanuntat-horeca-ce-verifica-si-ce-riscati",
+    title: "Control ITM neanunțat la cafenea sau restaurant: ce verifică și ce riscați",
+    description:
+      "Inspecția Muncii poate intra fără preaviz, oricând în programul de funcționare. Ce documente cere efectiv la o verificare HoReCa, ce înseamnă «muncă nedeclarată» și ce riscați, concret, dacă găsește o problemă.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["personal", "control-itm"],
+    sections: [
+      {
+        heading: "Da, ITM poate veni fără să anunțe",
+        body: "Legea nr. 108/1999, republicată, privind înființarea și organizarea Inspecției Muncii, dă inspectorilor de muncă **acces liber, permanent și fără înștiințare prealabilă** la orice loc de muncă aflat sub incidența legii (art. 19 lit. a). Nu există, deci, o obligație de a vă anunța în avans — controlul poate avea loc oricând în programul de funcționare al locației.\n\nO modificare recentă, prin Legea nr. 239/2025, a adăugat un nou articol (19¹) care permite inspectorilor să folosească **camere video portabile** în timpul controalelor, fără a avea nevoie de consimțământul celor verificați — înregistrările se păstrează maximum 6 luni, apoi se distrug.",
+      },
+      {
+        heading: "Ce verifică efectiv la o afacere HoReCa",
+        body: "Un control ITM la o cafenea sau un restaurant se concentrează, de regulă, pe:\n\n- **Contractele individuale de muncă**, înregistrate și transmise prin **REGES-Online** — sistemul care, din 1 octombrie 2025, a înlocuit complet vechiul Revisal (Hotărârea de Guvern nr. 295/2025). Dacă procedurile interne sau contabilul încă vorbesc despre «Revisal», actualizați terminologia — sistemul vechi nu mai există.\n- **Evidența orelor lucrate** — pontajul trebuie să reflecte real programul fiecărui angajat, nu doar orele «oficiale» dintr-un tabel completat retroactiv.\n- **Statul de plată și fluturașii de salariu** — corespondența dintre orele înregistrate și sumele plătite efectiv.\n- **Dosarele de instruire SSM** (securitate și sănătate în muncă) — fișele de instruire semnate, actualizate la angajare și periodic.\n\nAceastă listă nu e un articol unic de lege, ci practica obișnuită a controalelor — combină cerințe din Codul Muncii, din Legea nr. 319/2006 (securitate și sănătate în muncă) și din reglementarea REGES-Online.",
+      },
+      {
+        heading: "Ce înseamnă «muncă nedeclarată» și cât costă",
+        body: "Muncă nedeclarată înseamnă, în esență, un angajat care lucrează efectiv fără contract individual de muncă înregistrat. De la 1 ianuarie 2026, amenda pentru fiecare persoană găsită astfel este de **40.000 de lei**, cu un plafon cumulat de **1.000.000 de lei per angajator** (art. 260 alin. 1 lit. e din Codul Muncii, modificat prin Legea nr. 239/2025) — sumă dublă față de vechiul cuantum de 20.000 lei/200.000 lei.\n\nUn mit persistent, dar depășit: că angajarea a peste 5 persoane nedeclarate atrage automat răspundere penală. Prevederea care spunea asta (art. 264 alin. 4 din Codul Muncii) a fost **abrogată din 2017**, prin OUG nr. 53/2017 — motivul invocat a fost că instanțele respingeau sau achitau constant astfel de dosare, considerând că fapta nu prezintă gradul de pericol social al unei infracțiuni. Din 2017, indiferent de câte persoane sunt găsite nedeclarate, fapta rămâne strict contravențională, sancționată doar cu amendă — [vedeți sumele exacte și ce contează ca muncă nedeclarată](/blog/amenda-munca-nedeclarata-horeca-sumele-reale-2026).",
+      },
+      {
+        heading: "Documente de avut pregătite mereu",
+        body: "- Copiile contractelor individuale de muncă, cu dovada transmiterii în REGES-Online, pentru fiecare angajat activ\n- Evidența actualizată a orelor lucrate, inclusiv orele suplimentare separate distinct\n- Ultimele state de plată și fluturașii de salariu corespunzători\n- Fișele de instruire SSM, semnate și la zi\n- Regulamentul intern, cu politica de pauze și program clar documentată\n\nA avea aceste documente centralizate, nu împrăștiate între contabil, un dosar fizic și memoria managerului de tură, scurtează dramatic un control care oricum vine fără preaviz.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Toți angajații activi au contract individual de muncă transmis în REGES-Online, nu în vechiul Revisal\n- [ ] Evidența orelor lucrate e actualizată zilnic, nu completată retroactiv\n- [ ] Dosarele SSM sunt la zi pentru fiecare angajat\n- [ ] Regulamentul intern documentează clar programul, pauzele și politica de ore suplimentare\n- [ ] Managerii de tură știu ce documente să prezinte unui inspector, fără să aștepte instrucțiuni de la proprietar\n\nCa la orice control, pregătirea din timp contează mai mult decât reacția din momentul respectiv — un dosar incomplet descoperit în fața unui inspector e mult mai greu de rezolvat decât unul verificat din vreme.",
+      },
+    ],
+  },
+  {
+    slug: "amenda-munca-nedeclarata-horeca-sumele-reale-2026",
+    title: "Amenda pentru muncă nedeclarată în HoReCa: sumele reale în 2026",
+    description:
+      "De la 1 ianuarie 2026, amenda pentru muncă nedeclarată s-a dublat. Iată suma exactă per persoană, plafonul per angajator și de ce «5 angajați nedeclarați înseamnă închisoare» nu mai este adevărat din 2017.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["personal", "control-itm"],
+    sections: [
+      {
+        heading: "Ce înseamnă, exact, «muncă nedeclarată»",
+        body: "În sensul strict al controalelor ITM, muncă nedeclarată înseamnă o persoană care prestează activitate pentru un angajator fără să aibă un contract individual de muncă înregistrat și transmis conform legii — practic, un angajat «la negru», complet în afara evidențelor oficiale.\n\nNu se referă la greșeli minore de completare a unui contract existent sau la o întârziere administrativă izolată — vizează situația în care, la momentul controlului, nu există deloc un contract înregistrat pentru persoana găsită la muncă.",
+      },
+      {
+        heading: "Suma amenzii în 2026",
+        body: "Codul Muncii, art. 260 alin. (1) lit. e), modificat prin **Legea nr. 239/2025** (publicată în Monitorul Oficial nr. 1160 din 15 decembrie 2025, în vigoare de la **1 ianuarie 2026**), stabilește amenda pentru muncă nedeclarată la **40.000 de lei pentru fiecare persoană** identificată astfel, cu un plafon cumulat de **1.000.000 de lei per angajator**.\n\nSuma reprezintă o dublare față de reglementarea anterioară, care prevedea 20.000 de lei per persoană și un plafon de 200.000 de lei. Dacă ați reținut cifrele vechi dintr-un articol sau o discuție mai veche, actualizați-le — legea nouă e deja în vigoare la data acestui articol.",
+      },
+      {
+        heading: "Mitul răspunderii penale — de ce nu mai e adevărat din 2017",
+        body: "Până în 2017, Codul Muncii prevedea, la art. 264 alin. (4), că angajarea a mai mult de 5 persoane fără contract înregistrat constituia infracțiune, cu pedeapsă de la 3 luni la 2 ani de închisoare. Această prevedere a fost **abrogată prin OUG nr. 53/2017**, în vigoare din 7 august 2017.\n\nMotivul invocat oficial la momentul abrogării a fost practica judiciară: procurorii și instanțele resping sau achitau constant astfel de dosare, considerând că fapta nu întrunește gradul de pericol social specific unei infracțiuni. De atunci, indiferent de câte persoane sunt găsite nedeclarate la un control — una sau cincizeci —, fapta rămâne **strict contravențională**, sancționată exclusiv cu amenda descrisă mai sus, nu cu răspundere penală.\n\nDacă ați auzit varianta «la 5 angajați nedeclarați rișți dosar penal», e o informație depășită de aproape un deceniu — corectă cândva, dar nu și astăzi.",
+      },
+      {
+        heading: "Cum vă asigurați că sunteți acoperit",
+        body: "Regula practică simplă: niciun angajat nu începe efectiv activitatea înainte ca contractul individual de muncă să fie înregistrat și transmis prin **REGES-Online** — sistemul care a înlocuit complet Revisal din 1 octombrie 2025. Un angajat care «începe mâine, hârtiile le facem săptămâna asta» este exact profilul de risc pe care îl vizează amenda de mai sus.\n\nPentru personal sezonier sau part-time, frecvent în HoReCa, tentația de a amâna documentația «pentru câteva zile de probă» e mare — dar din perspectiva legii, ziua în care persoana lucrează efectiv fără contract înregistrat e suficientă pentru încadrarea ca muncă nedeclarată, indiferent cât de scurtă a fost perioada.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Niciun angajat nu lucrează efectiv înainte ca contractul să fie transmis în REGES-Online\n- [ ] Personalul sezonier sau part-time are aceleași verificări ca personalul permanent, fără excepții informale\n- [ ] Evidența contractelor active e centralizată și ușor de arătat la un control\n- [ ] Ați actualizat terminologia internă de la «Revisal» la «REGES-Online»\n- [ ] Nu vă bazați pe informația veche despre pragul de 5 persoane și răspunderea penală — nu mai e valabilă din 2017\n\nPentru situații specifice de angajare (colaboratori, PFA, muncă sezonieră), verificarea cu un consultant HR sau cu contabilul care administrează salarizarea rămâne cea mai sigură cale — regulile de încadrare corectă a unui raport de muncă au nuanțe pe care un ghid general nu le poate acoperi complet.",
+      },
+    ],
+  },
+  {
+    slug: "diferenta-stoc-inventar-anual-cum-o-documentati",
+    title: "Diferența de stoc la inventarul anual: cum o documentați ca să nu pară nejustificată",
+    description:
+      "Inventarul general anual e obligatoriu prin lege, nu doar o practică bună. Ce trebuie să conțină procesul-verbal, ce termene de 7 zile aveți și cum tratați legal o lipsă sau un plus descoperit la numărătoare.",
+    publishedAt: "2026-09-26",
+    locale: "ro",
+    tags: ["stoc", "contabilitate"],
+    relatedFeature: "/features/stock-management",
+    sections: [
+      {
+        heading: "De ce inventarul anual e o obligație legală, nu doar o practică bună",
+        body: "Legea contabilității nr. 82/1991, republicată, art. 7 alin. (1), obligă orice entitate să efectueze inventarierea generală a elementelor de natura activelor, datoriilor și capitalurilor proprii **cel puțin o dată pe an**. Normele de aplicare (Ordinul Ministerului Finanțelor Publice nr. 2861/2009) adaugă și alte situații care declanșează obligația: începutul activității, fuziune sau divizare, încetarea activității, la cererea organelor de control, la apariția unor indicii de plusuri sau lipsuri în gestiune, la predarea-primirea unei gestiuni, sau în caz de calamități ori alte cazuri prevăzute de lege.\n\nAșa cum discutăm și în [ghidul despre stoc fizic vs. scriptic](/blog/inventar-fizic-vs-scriptic-diferente), verificările frecvente (săptămânale sau lunare) sunt esențiale operațional, dar nu înlocuiesc inventarul general anual — sunt două obligații diferite, cu scopuri diferite.",
+      },
+      {
+        heading: "Ce trebuie să conțină procesul-verbal de inventariere",
+        body: "Potrivit normelor OMFP nr. 2861/2009 (pct. 42), procesul-verbal de inventariere trebuie să conțină, în principal:\n\n- Data întocmirii\n- Numele membrilor comisiei de inventariere\n- Numărul și data deciziei de numire a comisiei\n- Gestiunea (sau gestiunile) inventariată\n- Datele de început și de sfârșit ale operațiunii de inventariere\n- Rezultatele inventarierii\n- Concluziile și propunerile comisiei privind cauzele plusurilor și lipsurilor constatate și persoanele responsabile, cu propuneri de măsuri\n- Volumul stocurilor depreciate, fără mișcare sau greu vandabile, cu propuneri de valorificare\n- Propuneri de scoatere din funcțiune a mijloacelor fixe, respectiv de casare a obiectelor de inventar\n- Constatări privind modul de păstrare, depozitare, conservare și asigurare a integrității bunurilor din gestiune\n\nUn proces-verbal care omite oricare din aceste puncte e incomplet față de cerința legală, chiar dacă numărătoarea fizică a fost făcută corect.",
+      },
+      {
+        heading: "Termenele de 7 zile pe care le uită multă lume",
+        body: "Normele stabilesc două termene distincte de câte 7 zile lucrătoare, ușor de confundat:\n\n- Comisia trebuie să predea propunerile sale administratorului **în cel mult 7 zile lucrătoare** de la terminarea efectivă a operațiunilor de inventariere (pct. 43)\n- După ce administratorul aprobă procesul-verbal, rezultatele trebuie înregistrate în evidența tehnico-operativă **în cel mult 7 zile lucrătoare** de la data aprobării (pct. 45 alin. 1)\n\nÎn practică, multe afaceri mici tratează inventarul ca un eveniment punctual — se numără marfa, se notează o cifră totală, și subiectul se închide. Cele două termene de mai sus există tocmai pentru că legea privește inventarul ca pe un proces cu etape documentate, nu ca pe o singură zi de numărătoare.",
+      },
+      {
+        heading: "Lipsuri și plusuri — ce puteți și ce nu puteți face",
+        body: "Lipsurile imputabile se evaluează la **valoarea de înlocuire** — costul de achiziție la prețul pieței, la data constatării pagubei, la care se adaugă taxele nerecuperabile (inclusiv TVA) și cheltuielile de transport-aprovizionare (pct. 39 din normele OMFP 2861/2009). Comisia are obligația să obțină explicații scrise de la persoanele responsabile pentru fiecare plus, lipsă sau depreciere constatată, înainte de a propune modul de regularizare.\n\nCompensarea lipsurilor cu plusurile este permisă **doar** dacă există risc de confuzie între sortimentele aceluiași produs (diferă doar culoarea, modelul, mărimea sau ambalajul) **și** diferențele privesc aceeași perioadă de gestiune și aceeași gestiune (pct. 40 alin. 3-5). Compensarea **nu este permisă** dacă se dovedește că lipsa provine din furt sau din degradare din vina unei persoane responsabile (pct. 41) — în acel caz, lipsa rămâne imputabilă integral, fără a fi acoperită de un plus constatat în paralel.\n\nDacă la inventarul dumneavoastră apar frecvent lipsuri la un singur produs, fără o cauză evidentă de confuzie între sortimente, merită investigat punctual — vedeți și [cauzele frecvente ale stocului negativ](/blog/stoc-negativ-cauze-si-solutii) pentru un punct de plecare în diagnosticare.",
+      },
+      {
+        heading: "Cum ajută franchisetech",
+        body: "franchisetech nu înlocuiește procesul-verbal legal, comisia numită prin decizie sau obligația de a documenta cauzele plusurilor și lipsurilor — acestea rămân, prin lege, un proces administrativ separat de orice software de gestiune. Ce oferă concret: balanța de stoc calculează automat, din NIR, rețete și vânzările înregistrate prin POS, care ar trebui să fie stocul scriptic la momentul inventarului, produs cu produs.\n\nAsta înseamnă că, atunci când comisia de inventariere numără fizic marfa și compară cu sistemul, pornește de la o cifră scriptică deja corectă — nu de la un fișier Excel actualizat manual, cu propriile erori acumulate în timp. Investigarea unei diferențe mari, cerută de altfel de proces-verbal, are un punct de plecare direct din datele deja existente în sistem.",
+      },
+    ],
+  },
+  {
+    slug: "marja-neta-vs-marja-bruta-de-ce-conteaza-prima",
+    title: "Marja netă vs. marja brută — de ce prima e cea care contează cu adevărat",
+    description:
+      "Marja brută vă arată cât rămâne după ingrediente. Marja netă vă arată cât rămâne, de fapt, în buzunar după toate costurile. Formula completă, cu un exemplu lunar complet pentru o cafenea mică.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["marja", "financiar"],
+    sections: [
+      {
+        heading: "Ce este marja netă și în ce diferă de marja brută",
+        body: "Așa cum arătăm și în [ghidul de calcul al marjei brute](/blog/cum-calculezi-marja-bruta-produs-restaurant), marja brută scade doar costul ingredientelor din prețul de vânzare — nimic altceva. Marja netă merge mai departe: scade absolut toate costurile afacerii dintr-o perioadă (o lună, de regulă) din veniturile totale ale acelei perioade.\n\n**Formula:**\n- Profit net = Venituri totale − Cost materii prime − Costuri fixe − Costuri variabile (altele decât materii prime) − Impozite\n- Marjă netă = (Profit net / Venituri totale) × 100\n\nMarja brută e un indicator per produs, util pentru decizii de meniu și de preț. Marja netă e un indicator per afacere, pe o perioadă întreagă — răspunde la întrebarea reală: la finalul lunii, ați câștigat bani sau nu?",
+      },
+      {
+        heading: "De ce marja brută mare poate ascunde o afacere care nu e profitabilă",
+        body: "O cafenea poate avea marjă brută de 85% pe cafea și, în același timp, să încheie luna pe pierdere — exact scenariul detaliat în [exemplul flat white din ghidul de marjă brută](/blog/cum-calculezi-marja-bruta-produs-restaurant): odată ce scădeți chiria, salariile și utilitățile alocate fiecărei cafele vândute, marja brută de 85% se poate transforma rapid într-o marjă netă negativă, dacă volumul de vânzări nu acoperă costurile fixe.\n\nMarja brută per produs și marja netă a afacerii răspund la întrebări diferite. Un proprietar care urmărește doar marja brută pe produsele din meniu, fără să calculeze niciodată marja netă lunară, poate crede că afacerea merge bine luni de zile înainte să observe că, de fapt, pierde bani constant.",
+      },
+      {
+        heading: "Cum calculați marja netă, pas cu pas, pentru o lună",
+        body: "1. **Adunați toate veniturile lunii** — tot ce ați încasat prin vânzări, indiferent de metoda de plată\n2. **Scădeți costul materiilor prime consumate** în luna respectivă (nu ce ați cumpărat, ci ce ați consumat efectiv — diferența contează dacă ați și stocat marfă pentru luna următoare)\n3. **Scădeți costurile fixe** — chirie, salarii cu normă întreagă, abonamente, asigurări (vedeți [separarea costurilor fixe de cele variabile](/blog/costuri-fixe-vs-variabile-horeca) dacă nu aveți încă această clasificare făcută)\n4. **Scădeți celelalte costuri variabile** — ambalaje, comisioane de card, comisioane de livrare, ore suplimentare\n5. **Scădeți impozitele aferente** (impozit pe profit sau pe venitul microîntreprinderii, după caz — verificați regimul fiscal aplicabil cu contabilul dumneavoastră)\n\nCe rămâne este profitul net al lunii. Împărțit la veniturile totale și înmulțit cu 100, obțineți procentul de marjă netă.",
+      },
+      {
+        heading: "Un exemplu complet, cu cifre ilustrative",
+        body: "Pentru o cafenea mică, cu o lună de vânzări obișnuită (cifrele de mai jos sunt un exemplu ilustrativ, nu un etalon al industriei — fiecare afacere are structura ei de costuri):\n\n- Venituri totale din vânzări: **60.000 RON**\n- Cost materii prime consumate: **13.000 RON**\n- Costuri fixe (chirie, salarii, abonamente, utilități): **32.000 RON**\n- Costuri variabile suplimentare (ambalaje, comisioane card): **3.000 RON**\n- Impozit estimat: **2.400 RON**\n\nProfit net: 60.000 − 13.000 − 32.000 − 3.000 − 2.400 = **9.600 RON**\n\nMarjă netă: 9.600 / 60.000 × 100 = **16%**\n\nObservați diferența față de marja brută: dacă marja brută medie pe produsele din meniu era, să zicem, 75%, marja netă reală a afacerii e de peste patru ori mai mică — pentru că include tot ce marja brută ignoră.",
+      },
+      {
+        heading: "De ce marja netă ar trebui urmărită lunar, nu doar calculată o dată",
+        body: "Marja brută pe un produs nu se schimbă des — variază doar când crește prețul unui ingredient sau modificați rețeta. Marja netă a afacerii se schimbă lunar, pentru că depinde de volumul de vânzări, de sezon, de costurile ocazionale (o reparație, un angajat nou, o lună cu ore suplimentare peste normal).\n\nUrmărirea lunară a marjei nete vă arată tendința reală a afacerii — dacă marja netă scade constant de la o lună la alta, chiar dacă veniturile brute cresc, e un semnal timpuriu care merită investigat, nu ignorat pentru că «vânzările merg bine». Vedeți și [KPI-urile de urmărit săptămânal în HoReCa](/blog/kpi-uri-de-urmarit-saptamanal-horeca) pentru indicatorii care, urmăriți constant, arată devreme unde apare o problemă.",
+      },
+    ],
+  },
+  {
+    slug: "cash-flow-cafenea-profitabil-pe-hartie-fara-bani-in-cont",
+    title: "Cash flow într-o cafenea — de ce poți fi «profitabil pe hârtie» și fără bani în cont",
+    description:
+      "Profitul e un calcul contabil pe o perioadă. Cash flow-ul e mișcarea reală de bani, cu alt timing. De ce cele două pot spune povești complet diferite și cum construiți un tampon financiar simplu.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["financiar", "cash-flow"],
+    sections: [
+      {
+        heading: "Profit și cash flow nu sunt același lucru",
+        body: "Profitul este un calcul contabil: venituri minus cheltuieli, pentru o perioadă definită — o lună, de regulă. Cash flow-ul (fluxul de numerar) este mișcarea reală de bani, intrări și ieșiri, la momentul în care se întâmplă efectiv, nu la momentul în care sunt înregistrate contabil.\n\nO afacere poate fi profitabilă pe hârtie și, în același timp, să aibă dificultăți reale de numerar — dacă banii intră mai târziu decât ies, sau dacă o cheltuială mare cade exact atunci când contul e la un nivel scăzut. Vedeți [diferența dintre marja brută și marja netă](/blog/marja-neta-vs-marja-bruta-de-ce-conteaza-prima) pentru profitabilitate — cash flow-ul e o problemă diferită, de timing, nu de marjă.",
+      },
+      {
+        heading: "De ce apare decalajul, specific în HoReCa",
+        body: "O cafenea sau un restaurant are, de fapt, un avantaj structural de cash flow față de multe alte afaceri: încasați aproape întotdeauna imediat, cash sau card, în timp ce plătiți furnizorii adesea cu termen (14, 30 de zile). Asta înseamnă, în teorie, bani în cont înainte să plătiți marfa care i-a generat.\n\nProblema apare la cheltuielile mari, punctuale, care nu urmează ritmul zilnic al vânzărilor:\n\n- **TVA-ul de plată**, depus trimestrial sau lunar — o sumă acumulată din luni de vânzări, plătită dintr-o dată\n- **Un utilaj esențial stricat** (espressorul, frigiderul de vitrină) — cost mare, neprevăzut, care nu poate fi amânat\n- **Un sezon slab urmat de unul bun** — stocați mai multă marfă înainte ca vânzările sezonului bun să genereze efectiv veniturile\n- **Salarii și contribuții**, care ies din cont la date fixe indiferent dacă luna a fost bună sau slabă\n\nNiciunul din aceste cazuri nu înseamnă că afacerea e neprofitabilă — înseamnă doar că banii nu sunt disponibili exact când sunt necesari.",
+      },
+      {
+        heading: "Semnele că aveți o problemă de cash flow, nu de profitabilitate",
+        body: "- Raportul lunar arată profit, dar soldul din cont scade constant de la o lună la alta\n- Amânați plata furnizorilor sistematic, nu ocazional, chiar și atunci când vânzările sunt bune\n- Folosiți overdraft-ul sau o linie de credit ca practică obișnuită, nu ca soluție de urgență rară\n- Sunteți surprins de suma de TVA de plătit, deși veniturile lunii au fost cunoscute din timp\n\nDacă recunoașteți mai multe din aceste semne, problema nu e câți bani câștigați — e când îi aveți disponibili față de când trebuie să-i plătiți.",
+      },
+      {
+        heading: "Cum construiți un tampon de cash flow simplu",
+        body: "Nu aveți nevoie de un sistem complex de prognoză financiară pentru a reduce riscul — câteva reguli practice ajută semnificativ:\n\n- **Păstrați un fond de rezervă** echivalent cu una-două luni de costuri fixe (chirie, salarii, abonamente), separat de contul operațional curent, pentru cheltuieli neprevăzute\n- **Puneți deoparte TVA-ul colectat pe măsură ce se acumulează**, într-un cont separat, în loc să-l lăsați amestecat cu restul încasărilor — la termenul de plată, suma e deja pusă deoparte, nu trebuie găsită\n- **Estimați cheltuielile mari dinainte** (echipament care se apropie de sfârșitul duratei de viață, contracte care se reînnoiesc) — o cheltuială anticipată afectează mult mai puțin cash flow-ul decât una complet neașteptată\n- **Urmăriți încasările zilnice, nu doar totalul lunar** — un declin de o săptămână-două se observă din timp în datele zilnice, mult înainte să devină vizibil în totalul lunar",
+      },
+      {
+        heading: "Cum ajută datele zilnice din franchisetech",
+        body: "[Raportul Z zilnic](/blog/ce-este-raportul-z-si-cum-il-faci) și registrul de casă arată încasările reale, zi de zi, nu doar un total aproximat la finalul lunii. Asta înseamnă că un declin de încasări — sezonier, cauzat de o problemă operațională sau de concurență nouă în zonă — devine vizibil din primele zile, nu abia când verificați soldul contului și vă întrebați ce s-a întâmplat în ultimele două luni.\n\nCash flow-ul rămâne, în esență, o decizie de disciplină financiară — dar disciplina e mult mai ușor de aplicat când aveți cifrele zilnice la îndemână, nu doar un total lunar reconstituit după fapt.",
+      },
+    ],
+  },
+  {
+    slug: "marja-reala-comenzi-platforme-livrare-glovo-bolt-tazz",
+    title: "Marja reală a unei comenzi prin Glovo, Bolt Food sau Tazz — ce mănâncă din preț înainte să ajungă la dvs.",
+    description:
+      "Prețul afișat în aplicația de delivery nu e ce încasați efectiv. Comisionul platformei, ambalajul suplimentar și TVA-ul neschimbat reduc marja reală — iată cum o calculați corect, per comandă.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["delivery", "marja"],
+    sections: [
+      {
+        heading: "De ce prețul din aplicație nu e ce încasați efectiv",
+        body: "O comandă de 50 de lei prin Glovo, Bolt Food sau Tazz nu vă aduce 50 de lei în cont. Din acea sumă se scad, înainte să ajungă la dumneavoastră: comisionul platformei, eventual costul suplimentar al ambalajului de transport, și, dacă ați activat vreo promoție sau reducere prin platformă, valoarea acesteia. Marja reală per comandă delivery e aproape întotdeauna mai mică decât marja aceluiași produs vândut la masă — problema e că mulți proprietari nu calculează diferența, ci presupun că marja e identică.",
+      },
+      {
+        heading: "Comisionul platformei — variază, dar e semnificativ",
+        body: "Fiecare platformă de livrare percepe un comision din valoarea comenzii, negociat prin contractul de parteneriat — procentul variază semnificativ între platforme și între tipuri de contract (cu sau fără livrare proprie a platformei, cu sau fără promovare inclusă), așa că verificați cifra exactă din contractul dumneavoastră, nu presupuneți un procent standard.\n\nCe rămâne relevant de reținut: acest comision este, de regulă, mult mai mare decât [comisionul unui procesator de plăți cu cardul](/blog/costuri-fixe-vs-variabile-horeca) (de obicei 1-2,5% din valoarea tranzacției) — comisionul de livrare poate ajunge la o parte semnificativă din valoarea comenzii. Diferența asta, pe volum mare de comenzi delivery, schimbă complet calculul de profitabilitate al unui produs care pare identic de rentabil la vânzare directă.",
+      },
+      {
+        heading: "Ambalajul de unică folosință — costul ușor de ignorat",
+        body: "O comandă consumată la masă nu are cost de ambalare. O comandă delivery are aproape întotdeauna: cutie sau pahar cu capac securizat pentru transport, pungă, eventual tacâmuri de unică folosință și șervețele. Dacă [rețeta configurată în sistem](/blog/cum-calculezi-marja-bruta-produs-restaurant) nu include separat acest cost pentru varianta delivery, marja calculată pentru acel produs e supraestimată de fiecare dată când e vândut prin platformă.\n\nSoluția simplă: configurați o variantă separată de rețetă pentru delivery, cu costul de ambalare inclus, în loc să folosiți aceeași rețetă (și, implicit, aceeași marjă calculată) pentru ambele canale de vânzare.",
+      },
+      {
+        heading: "TVA-ul rămâne neschimbat indiferent de canal",
+        body: "Cota de TVA aplicabilă unui produs nu se schimbă în funcție de canalul prin care se vinde — un produs cu o anumită cotă la vânzare directă păstrează aceeași cotă și la vânzare prin platformă de livrare. Ce diferă e baza de calcul a marjei, nu regimul de TVA. Dacă aveți neclarități despre cotele aplicabile la livrare vs. consum local, vedeți [ghidul TVA la livrare vs. consum local](/blog/tva-livrare-delivery-vs-consum-local).",
+      },
+      {
+        heading: "Cum calculați marja reală, per comandă de livrare",
+        body: "**Marjă reală delivery = Preț afișat în aplicație − Comisionul platformei − Costul ambalajului − Costul ingredientelor**\n\nComparați rezultatul cu marja brută a aceluiași produs vândut la masă. Diferența vă arată exact cât «pierdeți» structural pe canalul delivery — informație utilă nu ca să renunțați la delivery, ci ca să luați decizii informate: prețuri diferite pentru delivery dacă platforma permite, sau un meniu delivery mai restrâns, axat pe produsele cu marjă suficient de mare încât să absoarbă comisionul fără să devină nerentabile.",
+      },
+      {
+        heading: "Ce puteți face practic",
+        body: "- Calculați marja reală separat pentru fiecare produs vândut prin delivery, nu presupuneți că e identică cu vânzarea la masă\n- Dacă platforma permite prețuri diferite pentru delivery, ajustați-le să reflecte comisionul, nu doar costul ingredientelor\n- Restrângeți meniul delivery la produsele care rămân rentabile după comision și ambalaj — nu orice produs din meniul fizic merită expus pe platformă\n- Recalculați periodic — comisioanele și condițiile de contract cu platformele se renegociază și se schimbă, uneori fără să observați imediat impactul pe marjă",
+      },
+    ],
+  },
+  {
+    slug: "cat-costa-sa-deschizi-o-cafenea-mica-categoriile-reale-de-cost",
+    title: "Cât costă, de fapt, să deschideți o cafenea mică — categoriile reale de cost",
+    description:
+      "Bugetul de deschidere al unei cafenele e mai mult decât chiria și echipamentul. Categoriile de cost pe care mulți antreprenori le subestimează — și de ce costul cel mai des uitat e capitalul de lucru.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["cafenea", "financiar"],
+    relatedFeature: "/features/setup-onboarding",
+    sections: [
+      {
+        heading: "De ce «bugetul de deschidere» e mai mult decât pare",
+        body: "Mulți antreprenori la prima deschidere bugetează pentru ce văd cel mai ușor — chiria și echipamentul principal — și subestimează sau uită complet alte categorii de cost care apar oricum, indiferent dacă au fost planificate sau nu. Rezultatul obișnuit: bugetul inițial se epuizează înainte de ziua de deschidere, sau afacerea deschide fără rezervă pentru primele luni, exact perioada în care veniturile sunt cele mai imprevizibile.\n\nAcest ghid nu dă o cifră totală unică — variază enorm în funcție de oraș, de starea spațiului și de câte echipamente sunt noi vs. second-hand — ci categoriile pe care orice buget de deschidere trebuie să le acopere, ca să nu fie descoperite pe parcurs.",
+      },
+      {
+        heading: "Categoriile de cost pe care trebuie să le bugetați",
+        body: "- **Amenajarea și renovarea spațiului** — de la zugrăveală și instalații până la adaptarea spațiului la cerințele de alimentație publică (ventilație, grup sanitar, zonă de preparare separată)\n- **Echipamentele esențiale** — espressor, râșniță, vitrină frigorifică, mobilier, casă de marcat fiscală (vedeți [echipamentele esențiale la deschidere](/blog/checklist-deschidere-cafenea-de-la-zero) pentru lista completă)\n- **Stocul inițial** — materii prime, ambalaje, consumabile pentru primele săptămâni de funcționare\n- **Avize, autorizații și taxele aferente** — înființarea firmei, avizul sanitar, autorizația de funcționare, contractul DDD\n- **Software de gestiune și abonamente** — soft de gestiune, contabilitate, internet\n- **Marketing de lansare** — semnalizare, prezență online, eventual o campanie locală pentru primele săptămâni\n- **Capital de lucru** — rezerva de bani pentru perioada în care cheltuielile curg, dar veniturile încă nu s-au stabilizat",
+      },
+      {
+        heading: "Costul cel mai des subestimat: capitalul de lucru",
+        body: "Aproape orice cafenea nouă are o perioadă — de obicei câteva luni — în care veniturile sunt sub costurile fixe curente: clienții încă nu cunosc locul, echipa e nouă și mai lentă, meniul se ajustează pe baza vânzărilor reale. Dacă tot bugetul de deschidere s-a dus în amenajare și echipament, fără rezervă pentru această perioadă, afacerea intră în funcțiune deja sub presiune financiară din prima lună.\n\nCapitalul de lucru necesar nu e un cost punctual, ca un espressor — e o rezervă care acoperă exact decalajul descris în [ghidul de cash flow pentru cafenele](/blog/cash-flow-cafenea-profitabil-pe-hartie-fara-bani-in-cont): cheltuieli certe, venituri încă neconsolidate.",
+      },
+      {
+        heading: "De ce o cifră totală unică ar fi înșelătoare",
+        body: "Costul real de deschidere variază enorm între o cafenea într-un spațiu care necesită renovare completă și una într-un spațiu deja amenajat pentru alimentație publică; între echipament nou și echipament second-hand funcțional; între un oraș mare, cu chirii ridicate, și un oraș mic. Orice cifră unică publicată online ca «buget standard» riscă să fie fie prea optimistă pentru situația dumneavoastră, fie complet nerelevantă.\n\nCe funcționează mai bine: construiți-vă propriul buget pe categoriile de mai sus, cu oferte reale de la furnizori și contractori din zona dumneavoastră, nu pe o cifră generică găsită într-un articol.",
+      },
+      {
+        heading: "Cum reduceți riscul financiar la deschidere",
+        body: "- Nu subestimați capitalul de lucru — e mai valoros să aveți o rezervă mai mare și un echipament mai modest decât invers\n- Luați în calcul echipament second-hand funcțional pentru pozițiile mai puțin critice, păstrând bugetul nou pentru echipamentul care determină direct calitatea (espressorul, în special)\n- Configurați sistemul de gestiune și POS înainte de deschidere, nu în prima săptămână — franchisetech oferă configurare ghidată și un plan gratuit permanent, exact pentru etapa în care fiecare leu din buget contează\n- Calculați marja brută a fiecărui produs din meniul de lansare înainte de deschidere, nu după o lună de vânzări — vedeți [cum calculați marja brută cu exemple reale](/blog/cum-calculezi-marja-bruta-produs-restaurant)",
+      },
+    ],
+  },
+  {
+    slug: "coduri-caen-restaurant-cafenea-2026-rev3",
+    title: "Codurile CAEN pentru restaurant, cafenea sau catering în 2026 — ce s-a schimbat",
+    description:
+      "Termenul de trecere la nomenclatorul CAEN Rev. 3 a expirat pe 25 septembrie 2026. Codurile corecte acum pentru restaurant, bar, catering și food truck — și ce se întâmplă dacă firma dumneavoastră are încă un cod vechi.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["caen", "infiintare"],
+    sections: [
+      {
+        heading: "Termenul de tranziție la CAEN Rev. 3 a expirat deja",
+        body: "România a trecut, în 2026, de la nomenclatorul CAEN Rev. 2 la CAEN Rev. 3, aliniat la clasificarea europeană NACE Rev. 2.1. Termenul stabilit prin Hotărârea Guvernului nr. 284/2025 pentru actualizarea codurilor firmelor deja înregistrate la Registrul Comerțului a fost **25 septembrie 2026** — dacă citiți acest articol la scurt timp după publicare, termenul a trecut deja de câteva zile.\n\nVestea bună: nu există o penalizare sau o dizolvare a firmei pentru actualizarea întârziată a codului CAEN existent — dar orice firmă nou înființată de acum înainte trebuie să folosească direct codurile Rev. 3, iar firmele existente ar trebui să își actualizeze codul la prima ocazie (o modificare oricum necesară, o cerere la ONRC), nu să rămână la infinit cu un cod Rev. 2 care nu mai e nomenclatorul curent.",
+      },
+      {
+        heading: "Codurile corecte acum, pentru fiecare tip de activitate HoReCa",
+        body: "Sub Rev. 3, diviziunea 56 (Restaurante și alte activități de servicii de alimentație) arată astfel:\n\n- **5611 — Restaurante** (codul general pentru restaurant, cafenea cu servire la masă)\n- **5612 — Activități ale unităților mobile de alimentație** — cod nou, dedicat, pentru food truck-uri și vânzare ambulantă de mâncare; sub Rev. 2, aceste activități intrau tot sub codul general de restaurant, fără un cod separat\n- **5621 — Activități de alimentație (catering) pentru evenimente**\n- **5622 — Alte servicii de alimentație n.c.a.** (renumerotat față de vechiul 5629)\n- **5630 — Baruri și alte activități de servire a băuturilor** (cod neschimbat față de Rev. 2)\n- **5640 — Intermediere în alimentație și servire băuturi** — grupă complet nouă în Rev. 3, fără echivalent direct în Rev. 2\n\nDacă operați un food truck, codul 5612 e acum cea mai precisă alegere — anterior, sub Rev. 2, toate food truck-urile foloseau practic același cod ca un restaurant cu locație fixă, ceea ce nu reflecta corect specificul activității.",
+      },
+      {
+        heading: "Ce se întâmplă dacă firma dumneavoastră are încă un cod Rev. 2",
+        body: "Firmele deja înregistrate, cu certificatul constatator emis pe un cod Rev. 2 (de exemplu 5610 pentru restaurant sau 5629 pentru vechiul \"alte activități de alimentație\"), rămân funcționale — nu sunteți obligat să opriți activitatea sau să refaceți actele de urgență. Actualizarea codului la Rev. 3 se face printr-o cerere depusă la Registrul Comerțului, fără costuri suplimentare asociate exclusiv tranziției.\n\nCe merită totuși verificat: dacă urmează să faceți oricum o modificare la firmă (schimbare sediu, adăugare de activitate, modificare asociați), profitați de acel moment pentru a actualiza și codul CAEN la Rev. 3, în loc să tratați cele două ca proceduri separate.",
+      },
+      {
+        heading: "Cum alegeți codul corect pentru activitatea dumneavoastră",
+        body: "- **Cafenea sau restaurant cu servire la masă, locație fixă** → 5611\n- **Food truck sau vânzare ambulantă de mâncare** → 5612\n- **Catering pentru evenimente** (nunți, conferințe, petreceri) → 5621\n- **Alte servicii de alimentație** care nu se încadrează clar în restaurant sau catering → 5622\n- **Bar, cafenea axată pe băuturi**, fără meniu de restaurant complet → 5630\n\nMulte afaceri HoReCa au, de fapt, activitate mixtă (un restaurant care face și catering ocazional, de exemplu) — în acest caz, înregistrați activitatea principală pe codul CAEN principal și adăugați codurile secundare relevante, nu forțați totul sub un singur cod.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Verificați ce cod CAEN are firma dumneavoastră înregistrat acum — Rev. 2 sau Rev. 3\n- [ ] Dacă e Rev. 2, planificați actualizarea la ONRC, ideal odată cu orice altă modificare pe care oricum trebuie să o faceți\n- [ ] Pentru o firmă nouă, folosiți direct codurile Rev. 3 de mai sus\n- [ ] Dacă operați un food truck, folosiți codul dedicat 5612, nu codul general de restaurant\n- [ ] Dacă aveți activitate mixtă (restaurant plus catering, de exemplu), înregistrați și codurile secundare relevante\n\nAceastă listă nu înlocuiește verificarea directă cu contabilul sau cu Registrul Comerțului pentru situația specifică a firmei dumneavoastră, mai ales dacă activitatea nu se încadrează clar într-o singură categorie.",
+      },
+    ],
+  },
+  {
+    slug: "haccp-horeca-mitul-certificatului",
+    title: "HACCP în HoReCa — mitul certificatului vs. obligația reală",
+    description:
+      "Mulți proprietari cred că «rezolvă» HACCP cumpărând un certificat de la o firmă de consultanță. Legea nu cere un certificat — cere proceduri de autocontrol implementate și documentate efectiv, în fiecare zi.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["haccp", "conformitate"],
+    sections: [
+      {
+        heading: "Mitul: «am nevoie de un certificat HACCP»",
+        body: "O confuzie frecventă în HoReCa: proprietarul plătește o firmă de consultanță pentru un «certificat HACCP», îl pune într-un dosar sau pe perete, și consideră subiectul rezolvat. Problema: legea nu cere, de fapt, un certificat — cere ceva diferit, care nu se cumpără o singură dată, ci se aplică zilnic.",
+      },
+      {
+        heading: "Ce spune de fapt legea",
+        body: "Regulamentul (CE) nr. 852/2004 al Parlamentului European și al Consiliului privind igiena produselor alimentare, aplicabil direct în România ca stat membru UE, impune operatorilor din sectorul alimentar obligația de a dezvolta, implementa și menține permanent una sau mai multe proceduri bazate pe principiile HACCP (Hazard Analysis and Critical Control Points) — analiza riscurilor și controlul punctelor critice. Cadrul general este completat, la nivel național, de Legea nr. 150/2004 privind siguranța alimentelor și a hranei pentru animale, republicată.\n\nNicăieri în acest cadru legal nu apare o obligație de a deține un «certificat HACCP» emis de un terț. Ce apare este obligația de a avea un sistem de autocontrol documentat, aplicat efectiv — indiferent de mărimea afacerii. O cafenea cu doi angajați are aceeași obligație legală ca un restaurant mare, chiar dacă amploarea documentației diferă proporțional.",
+      },
+      {
+        heading: "Ce înseamnă, practic, «proceduri HACCP» pentru o cafenea mică",
+        body: "Nu înseamnă un document teoretic de 40 de pagini scris o dată și uitat într-un sertar. Înseamnă proceduri reale, documentate constant:\n\n- **Monitorizarea temperaturilor** la frigidere și vitrine frigorifice, înregistrată periodic (nu doar «pare rece»)\n- **Trasabilitatea materiilor prime** — de unde vine fiecare lot de marfă, cu documentele de recepție păstrate\n- **Proceduri de curățenie și igienizare**, cu un program clar, nu «facem curat când apucăm»\n- **Instruirea personalului** pe igienă alimentară, la angajare și periodic\n- **Gestionarea produselor cu risc** — separarea materiilor prime crude de cele gata de consum, respectarea termenelor de valabilitate\n\nAceste proceduri, documentate constant (chiar și simplu, pe un formular tipărit completat zilnic), reprezintă exact ce cere legea — nu o hârtie cumpărată o singură dată.",
+      },
+      {
+        heading: "De ce un certificat cumpărat nu vă scutește de aplicare efectivă",
+        body: "Un certificat emis de o firmă de consultanță poate fi util ca punct de plecare — mulți consultanți ajută la scrierea procedurilor inițiale, ceea ce are valoare reală. Dar certificatul în sine nu e ce verifică un control DSP sau ANSVSA. Ce se verifică este dacă procedurile chiar se aplică: temperaturile sunt notate real, curățenia se face conform programului, personalul știe și respectă regulile.\n\nUn dosar impecabil cu proceduri scrise, dar fără aplicare zilnică vizibilă, nu rezistă la un control — inspectorul verifică dovezi curente (jurnale de temperatură completate, etichete de trasabilitate), nu doar existența unui document semnat cu luni în urmă.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Aveți proceduri HACCP scrise, adaptate activității reale a locației, nu un șablon generic nefolosit\n- [ ] Temperaturile echipamentelor de refrigerare se înregistrează periodic, nu doar la deschidere\n- [ ] Personalul nou primește instruire pe igienă alimentară înainte de prima tură, nu «din mers»\n- [ ] Documentele de trasabilitate (NIR, facturi) se păstrează sistematic, corelate cu materiile prime din gestiune\n- [ ] Procedurile de curățenie au un program clar, verificabil, nu doar o intenție bună\n\nDacă tocmai deschideți o locație și nu aveți încă un sistem HACCP scris, un consultant specializat în siguranță alimentară vă poate ajuta să-l construiți corect de la început — dar rețineți că valoarea reală stă în aplicare, nu în documentul inițial.",
+      },
+    ],
+  },
+  {
+    slug: "salariul-minim-2026-costuri-personal-horeca",
+    title: "Salariul minim 2026 — ce înseamnă pentru costurile cu personalul într-o cafenea sau restaurant",
+    description:
+      "De la 1 iulie 2026, salariul minim brut pe economie a crescut la 4.325 lei. Ce înseamnă asta pentru costurile cu personalul în HoReCa și de ce vechea excepție pentru industria alimentară nu mai există.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["personal", "salarii"],
+    sections: [
+      {
+        heading: "Noul salariu minim brut — 4.325 lei, de la 1 iulie 2026",
+        body: "Prin Hotărârea de Guvern nr. 146/2026, salariul minim brut pe economie a crescut la **4.325 lei/lună**, de la 1 iulie 2026, pentru un program normal de lucru de 166,667 ore/lună (echivalent 25,949 lei/oră) — o creștere față de nivelul anterior de 4.050 lei. Tot de la aceeași dată, plafonul neimpozabil aplicat salariului minim a scăzut de la 300 la 200 lei.\n\nPentru orice angajat cu normă întreagă plătit la nivelul minim — frecvent cazul personalului la început de carieră în HoReCa — acest nivel reprezintă pragul legal minim, nu o recomandare orientativă.",
+      },
+      {
+        heading: "Nu confundați cu salariul minim din construcții",
+        body: "Există un salariu minim separat, mai mare, pentru sectorul construcțiilor (4.582 lei, stabilit prin OUG nr. 156/2024) — dar acesta **nu se aplică HoReCa**. Dacă ați văzut cifre diferite în articole despre salariul minim, verificați întotdeauna la ce sector se referă înainte de a le aplica propriei afaceri.",
+      },
+      {
+        heading: "Vechea excepție pentru industria alimentară a fost eliminată",
+        body: "Până de curând, exista un salariu minim separat, mai mic, pentru sectoarele agricultură și industrie alimentară. Această excepție a fost **eliminată începând cu 1 iulie 2026**, prin OUG nr. 29/2026, care a abrogat prevederea anterioară — motivul invocat oficial a fost prevenirea disparităților salariale între sectoare. De la această dată, toate sectoarele, inclusiv cele care anterior aveau un prag mai mic, respectă același salariu minim general de 4.325 lei.\n\nDacă ați reținut ideea unui «salariu minim mai mic pentru industria alimentară», actualizați informația — nu mai există, indiferent cum a fost aplicată sau interpretată anterior în legătură cu HoReCa.",
+      },
+      {
+        heading: "Ce înseamnă practic pentru costul total cu un angajat",
+        body: "Salariul brut nu este singurul cost real cu un angajat — la el se adaugă contribuțiile aferente suportate de angajator, care variază în funcție de tipul de contract și condițiile specifice. Nu presupuneți un procent standard fără să verificați — cereți contabilului care vă administrează salarizarea o simulare exactă a costului total per angajat la noul nivel de salariu minim, mai ales dacă aveți mai mulți angajați plătiți la acest nivel și impactul se multiplică direct în costurile fixe lunare.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Verificați dacă vreun angajat este plătit la nivelul vechiului salariu minim (4.050 lei) și necesită ajustare la 4.325 lei\n- [ ] Actualizați bugetul lunar de personal cu noul nivel, de la 1 iulie 2026\n- [ ] Nu aplicați din greșeală un prag mai mic pentru personalul din bucătărie sau producție — excepția pentru industria alimentară nu mai există\n- [ ] Cereți contabilului o simulare a costului total (brut + contribuții angajator) la noul nivel, nu doar cifra brută\n- [ ] Recalculați marja produselor dacă personalul plătit la salariul minim reprezintă o parte semnificativă din costurile fixe — vedeți [cum calculați marja netă a afacerii](/blog/marja-neta-vs-marja-bruta-de-ce-conteaza-prima)",
+      },
+    ],
+  },
+  {
+    slug: "e-factura-b2c-2026-ce-inseamna-pentru-horeca",
+    title: "E-Factura pentru vânzări către persoane fizice — ce înseamnă, de fapt, pentru un local HoReCa",
+    description:
+      "De la 1 ianuarie 2025, e-Factura e obligatorie și pentru vânzările către persoane fizice — dar bonul fiscal obișnuit nu intră sub această obligație. Iată exact când se aplică regula și când nu.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["fiscal", "e-factura"],
+    sections: [
+      {
+        heading: "De la 1 ianuarie 2025, e-Factura e obligatorie și pentru B2C",
+        body: "OUG nr. 69/2024 a extins sistemul RO e-Factura și la tranzacțiile dintre firme și persoane fizice (B2C) — opțional în a doua jumătate a lui 2024, **obligatoriu de la 1 ianuarie 2025**. Multe articole și discuții de proprietari HoReCa din 2025 au tratat asta ca pe o schimbare majoră a modului în care se vinde zilnic la casă — dar, pentru majoritatea vânzărilor dintr-o cafenea sau restaurant, nu e cazul. Vedeți secțiunea următoare pentru motiv.",
+      },
+      {
+        heading: "Bonul fiscal obișnuit NU trece prin e-Factura",
+        body: "Codul Fiscal, la art. 319 alin. (12) și (21), califică un bon fiscal (sau alt document similar emis de o casă de marcat) drept **factură simplificată** atunci când valoarea nu depășește 100 EUR — iar facturile simplificate sunt **exceptate de la obligația de transmitere prin RO e-Factura**. Asta înseamnă că vânzarea obișnuită dintr-o cafenea sau restaurant — un cappuccino, o masă de familie, orice [bon fiscal emis normal prin POS](/blog/bon-fiscal-obligatoriu-cand-si-cum) — **nu trebuie încărcată separat în sistemul e-Factura**. Bonul rămâne exact ce a fost mereu: documentul fiscal al vânzării, emis prin casa de marcat conectată la ANAF.\n\nAceasta e distincția pe care mulți proprietari o ratează: e-Factura B2C nu înseamnă «orice vânzare către un client obișnuit trebuie transmisă prin platforma ANAF» — înseamnă altceva, explicat mai jos.",
+      },
+      {
+        heading: "Când se aplică totuși obligația",
+        body: "Obligația de transmitere prin RO e-Factura se activează atunci când emiteți efectiv o **factură** (nu un bon fiscal) către o persoană fizică — de exemplu, un client care cere o factură cu numele lui, pentru a o deconta la propria firmă sau pentru alte scopuri. În acest caz, factura trebuie transmisă prin sistemul RO e-Factura, în termen de 5 zile lucrătoare de la emitere.\n\nDacă activitatea dumneavoastră constă aproape exclusiv în vânzări prin bon fiscal, iar facturile către persoane fizice sunt rare (cazuri punctuale, la cerere), impactul practic al e-Factura B2C asupra fluxului zilnic de la casă e minim — dar e important să știți exact în ce moment obligația se activează, ca să nu rateze termenul de 5 zile atunci când apare o cerere de factură.",
+      },
+      {
+        heading: "Ce riscați dacă nu respectați termenul",
+        body: "Legea prevede sancțiuni pentru netransmiterea la timp a unei facturi B2C prin RO e-Factura, diferențiate în funcție de categoria de contribuabil — verificați cuantumul actualizat cu contabilul dumneavoastră sau pe portalul ANAF, pentru că aceste amenzi se pot ajusta, și nu vă bazați pe o cifră reținută dintr-un articol mai vechi.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Vânzările obișnuite prin bon fiscal, sub 100 EUR, nu necesită nicio acțiune suplimentară legată de e-Factura\n- [ ] Dacă un client cere o factură (nu doar bon), aveți un proces clar pentru a o emite și transmite prin RO e-Factura în 5 zile lucrătoare\n- [ ] Personalul de la casă știe diferența dintre «dați-mi bonul» și «am nevoie de factură pe firmă», ca să direcționeze corect cererea\n- [ ] Verificați periodic cu contabilul dacă procedura internă reflectă corect regulile curente — zona asta a legislației s-a schimbat de mai multe ori din 2024",
+      },
+    ],
+  },
+  {
+    slug: "raportarea-saf-t-d406-pentru-horeca",
+    title: "Raportarea SAF-T (D406) pentru HoReCa — cine trebuie să o depună și din când",
+    description:
+      "Perioadele de grație pentru contribuabilii mici s-au încheiat — dacă aveți un SRL mic în HoReCa, obligația de raportare SAF-T (D406) se aplică deja. Ce înseamnă concret și ce acoperă exportul din programul de gestiune.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["contabilitate", "saf-t"],
+    sections: [
+      {
+        heading: "Ce este SAF-T și de ce a devenit relevant pentru afaceri mici",
+        body: "SAF-T (Standard Audit File for Tax) este declarația informativă D406, un raport standardizat pe care ANAF îl cere periodic pentru a verifica, electronic, corespondența dintre datele contabile ale unei firme și declarațiile fiscale depuse. Obligația a fost introdusă prin OPANAF nr. 1783/2021 și aplicată gradual, pe categorii de contribuabili:\n\n- **Contribuabili mari**: obligație din 1 ianuarie 2022\n- **Contribuabili mijlocii**: obligație din 1 ianuarie 2023\n- **Contribuabili mici** (categoria în care se încadrează majoritatea afacerilor HoReCa independente): obligație din **1 ianuarie 2025**\n\nPerioadele de grație acordate inițial fiecărei categorii s-au încheiat între timp — dacă operați un SRL mic în HoReCa, obligația se aplică deja efectiv, fără o perioadă de toleranță rămasă.",
+      },
+      {
+        heading: "Ce riscați dacă nu depuneți la timp sau depuneți incorect",
+        body: "Potrivit Codului de procedură fiscală, nedepunerea la termen a declarației D406 se sancționează cu amendă între **1.000 și 5.000 lei**, iar depunerea unei declarații incorecte sau incomplete, cu amendă între **500 și 1.500 lei**. Nu se aplică sancțiune dacă eroarea este corectată înainte de următorul termen de depunere, sau dacă întârzierea s-a datorat unor cauze care nu au ținut de contribuabil.\n\nAceste cuantumuri se pot actualiza — verificați cu contabilul dumneavoastră valoarea curentă la momentul unui eventual control sau al depunerii declarației.",
+      },
+      {
+        heading: "Ce acoperă exportul disponibil în franchisetech — și ce nu",
+        body: "franchisetech oferă un export SAF-T pentru partea de **mișcări de stoc** (recepții prin NIR, ieșiri prin vânzare, scăzăminte, ajustări, retururi) — secțiunea din declarația D406 care se bazează pe date de gestiune, nu pe contabilitatea completă a firmei. Acest export **nu este o depunere certificată de sine stătătoare** — este un draft structurat corect după schema oficială ANAF, care trebuie verificat și integrat de contabilul dumneavoastră în declarația D406 completă a firmei, alături de partea de registru general contabil (jurnal, balanțe, solduri) pe care programul de gestiune nu o gestionează.\n\nUn program de gestiune ca franchisetech nu ține o contabilitate în partidă dublă — nu are conturi contabile, solduri de furnizori sau clienți, sau coduri vamale per produs, elemente pe care schema SAF-T le cere pentru anumite secțiuni. Exportul acoperă exact ce sistemul chiar știe cu certitudine — mișcările de stoc reale, din NIR și vânzări — nu inventează date pentru secțiunile pe care nu le gestionează.",
+      },
+      {
+        heading: "Cum funcționează practic acest flux",
+        body: "1. **Exportați din franchisetech** secțiunea de mișcări de stoc pentru perioada raportată, în formatul XML compatibil cu schema SAF-T\n2. **Trimiteți exportul contabilului dumneavoastră**, care îl validează și îl integrează în declarația D406 completă a firmei\n3. **Contabilul depune declarația finală** către ANAF, cu responsabilitatea de a confirma corectitudinea întregului conținut, nu doar a secțiunii de stoc\n\nAcest flux nu elimină nevoia unui contabil pentru raportarea SAF-T — o reduce la partea pe care contabilul altfel ar trebui să o reconstituie manual din facturi și NIR-uri împrăștiate.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Confirmați cu contabilul dumneavoastră dacă firma se încadrează deja la categoria «contribuabil mic» obligată să depună SAF-T\n- [ ] Verificați termenul de depunere aplicabil situației dumneavoastră (lunar, trimestrial, în funcție de perioada fiscală)\n- [ ] Exportați secțiunea de mișcări de stoc din franchisetech și trimiteți-o contabilului cu suficient timp înainte de termen\n- [ ] Nu presupuneți că exportul de stoc, singur, reprezintă o depunere completă — contabilul trebuie să îl integreze în declarația D406 a firmei",
+      },
+    ],
+  },
+  {
+    slug: "gdpr-program-loializare-date-clienti",
+    title: "GDPR și programul de loializare — ce trebuie să știți înainte să colectați date despre clienți",
+    description:
+      "Un program de fidelizare cu nume și telefon înseamnă că prelucrați date cu caracter personal. Ce bază legală aveți nevoie, dacă vă trebuie un DPO și ce regulă separată se aplică dacă trimiteți SMS-uri promoționale.",
+    publishedAt: "2026-09-28",
+    locale: "ro",
+    tags: ["gdpr", "loializare"],
+    sections: [
+      {
+        heading: "Ce date colectați, de fapt, printr-un program de loializare",
+        body: "Un program de fidelizare simplu — cartelă digitală de vizite, puncte de loialitate, reduceri pentru clienți recurenți — înseamnă, aproape întotdeauna, colectarea a cel puțin numelui și numărului de telefon al clientului. Din momentul în care stocați aceste date, indiferent cât de simplu pare sistemul, intrați sub incidența Regulamentului UE 2016/679 (GDPR) și a legii române de aplicare, Legea nr. 190/2018.",
+      },
+      {
+        heading: "Aveți nevoie de consimțământ — baza legală cea mai sigură",
+        body: "Pentru a colecta legal numele și telefonul unui client în scopul unui program de loializare, cea mai clară și mai sigură bază legală este **consimțământul explicit al clientului**, obținut la momentul înscrierii în program — de exemplu, printr-o bifă clară la înscriere, nu presupus din simplul fapt că a lăsat numărul de telefon la casă.\n\nConsimțământul trebuie să fie specific (pentru programul de loializare, nu generic «pentru marketing în general»), ușor de retras, și documentat — păstrați o evidență a momentului și modului în care fiecare client și-a dat acordul.",
+      },
+      {
+        heading: "Nu aveți nevoie de un DPO doar pentru asta",
+        body: "O confuzie frecventă: proprietarii cred că orice colectare de date personale impune desemnarea unui responsabil cu protecția datelor (DPO). Potrivit precizărilor oficiale ale Autorității Naționale de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP), DPO este obligatoriu doar pentru autorități publice, sau pentru prelucrări de date **la scară largă** ori care implică monitorizare sistematică sau categorii speciale de date.\n\nUn program de loializare pentru clienții unei cafenele sau ale unui restaurant cu 1-3 locații, care colectează doar nume și telefon, nu atinge pragul de «scară largă» definit de autoritate — nu aveți nevoie de un DPO desemnat pentru acest scop, deși documentarea corectă a modului în care gestionați datele rămâne obligatorie indiferent de asta.",
+      },
+      {
+        heading: "Dacă trimiteți SMS-uri promoționale, se aplică o regulă separată",
+        body: "Colectarea numărului de telefon pentru programul de loializare este un lucru; trimiterea de SMS-uri sau mesaje promoționale pe acel număr este altceva, guvernat separat de Legea nr. 506/2004 (transpunerea românească a directivei privind protecția vieții private în comunicațiile electronice). Această lege cere **consimțământ prealabil explicit** pentru trimiterea de comunicări de marketing (SMS, email), cu o excepție limitată («soft opt-in») atunci când datele de contact au fost colectate în contextul unei vânzări similare, iar clientul a avut posibilitatea clară de a refuza la momentul colectării și la fiecare comunicare ulterioară.\n\nPractic: consimțământul pentru cartela de loialitate nu acoperă automat și consimțământul pentru SMS-uri promoționale — dacă intenționați să trimiteți oferte, cereți acest acord separat, explicit, la înscriere.",
+      },
+      {
+        heading: "Ce drepturi au clienții asupra datelor lor",
+        body: "Indiferent de baza legală folosită, clienții își păstrează drepturile garantate de GDPR: dreptul de acces la datele deținute despre ei, dreptul de rectificare dacă sunt greșite, și dreptul la ștergere («dreptul de a fi uitat»), atunci când nu mai există un motiv legal de a le păstra. Aveți nevoie de un proces clar — chiar și simplu, un email sau un formular de contact — prin care un client poate cere ștergerea datelor sale din programul de loializare, și trebuie să răspundeți efectiv, nu doar formal.",
+      },
+      {
+        heading: "Checklist",
+        body: "- [ ] Clienții își dau consimțământul explicit la înscrierea în programul de loializare, nu presupus\n- [ ] Păstrați o evidență a momentului și modului în care fiecare client a consimțit\n- [ ] Nu trimiteți SMS-uri sau email-uri promoționale fără un consimțământ separat, specific pentru asta\n- [ ] Aveți un proces clar prin care un client poate cere ștergerea datelor sale\n- [ ] Nu ați desemnat inutil un DPO doar pentru programul de loializare — nu e obligatoriu la această scară\n\nPentru situații mai complexe (colectarea altor tipuri de date, integrare cu platforme externe de marketing), verificarea cu un specialist în protecția datelor rămâne cea mai sigură cale.",
       },
     ],
   },

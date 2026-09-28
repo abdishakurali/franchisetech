@@ -69,7 +69,7 @@ const faqs = [
   ],
   [
     "Trebuie să schimb casa de marcat?",
-    "Nu promitem asta fără verificare. În proba asistată verificăm împreună fluxul FiscalNet, casa fiscală și ce se poate configura pentru localul dumneavoastră.",
+    "Nu promitem asta fără verificare. În proba asistată verificăm împreună fluxul driverului fiscal, casa fiscală și ce se poate configura pentru localul dumneavoastră.",
   ],
   [
     "Am nevoie de card la înscriere?",
@@ -215,7 +215,9 @@ function DisclaimerNote() {
     <div className="rounded-md border border-[#1747c9]/15 bg-[#eaf0ff] p-4 text-sm leading-6 text-slate-700">
       <p>
         Raportul X fiscal este emis de casa de marcat certificată. franchisetech trimite comanda
-        prin FiscalNet, atunci când integrarea este configurată, și ține în paralel totalurile turei
+        prin driverul fiscal local — folosim driverul FiscalNet
+        (<a href="https://driverfiscal.ro/" target="_blank" rel="noopener noreferrer" className="underline">driverfiscal.ro</a>),
+        atunci când integrarea este configurată — și ține în paralel totalurile turei
         deschise.
       </p>
       <p className="mt-2 text-xs text-slate-500">

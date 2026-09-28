@@ -9,6 +9,10 @@ const industryVanityRedirects = Object.entries(INDUSTRY_VANITY_REDIRECTS).map(([
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Lets scripts/dev-e2e.sh run on its own build output — sharing the
+  // default .next with a concurrently running `npm run dev` corrupts both
+  // servers' build manifests (concurrent writers, same cache directory).
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   turbopack: {
     root: __dirname,
   },

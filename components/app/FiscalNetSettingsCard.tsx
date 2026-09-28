@@ -56,7 +56,10 @@ export function FiscalNetSettingsCard(props: Props) {
       fd.set("fiscalnet_api_host",        apiHost);
       fd.set("fiscalnet_operator_code",   opCode);
       const res = await saveFiscalNetSettings(fd);
-      if (res?.error) setStatus({ ok: false, msg: res.error });
+      // saveFiscalNetSettings forwards the bare EntitlementDeniedError code,
+      // not a message — showing it verbatim left the owner staring at
+      // "entitlement_denied" with no idea their plan was the cause.
+      if (res?.error) setStatus({ ok: false, msg: res.error === "entitlement_denied" ? "This action isn't available on your current plan. Upgrade to continue." : res.error });
       else {
         writeFiscalNetEnabledPreference(enabled);
         setStatus({ ok: true,  msg: "Receipt settings saved." });

@@ -30,7 +30,7 @@ function multiLocationCountryCategory(market: BillingMarket): PlanFeatureCategor
     if (market === "RO") {
     return {
       title: "Romania",
-      items: ["FiscalNet receipt integration (when enabled in Settings)"],
+      items: ["Fiscal driver receipt integration (when enabled in Settings)"],
     };
   }
   return null;
@@ -81,7 +81,7 @@ export function getPlanFeatureCategories(
             {
               title: "Romanian compliance",
               items: [
-                "FiscalNet fiscal receipts",
+                "Fiscal driver fiscal receipts",
                 "Fiscal Z-report (daily close)",
                 "Fiscal X-report (interim)",
                 "TVA groups",
@@ -136,7 +136,7 @@ export function getPlanFeatureCategories(
             {
               title: "Romanian compliance",
               items: [
-                "FiscalNet fiscal receipts",
+                "Fiscal driver fiscal receipts",
                 "Fiscal Z-report (daily close)",
                 "Fiscal X-report (interim)",
                 "TVA groups",
@@ -194,7 +194,7 @@ export function getPlanFeatureCategories(
         ? [
             {
               title: "Fiscal",
-              items: ["FiscalNet este inclus în franchisetech; abonamentul la furnizor se plătește separat"],
+              items: ["Driverul fiscal este inclus în franchisetech; abonamentul la furnizor se plătește separat"],
             },
           ]
         : []),

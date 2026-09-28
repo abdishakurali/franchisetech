@@ -120,7 +120,7 @@ export async function renderCompareOgImage({
           {brand?.market === "ro" ? (
             <>
               <span>•</span>
-              <span>FiscalNet</span>
+              <span>Driver fiscal</span>
             </>
           ) : null}
         </div>

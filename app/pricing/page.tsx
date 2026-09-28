@@ -26,9 +26,10 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function PricingPage() {
+export default async function PricingPage({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
   const locale = await getMarketingLocale();
-  if (locale === "ro") return <ClaudeMarketingShellAuth><DesignPricing /></ClaudeMarketingShellAuth>;
+  const { plan: featuredPlan } = await searchParams;
+  if (locale === "ro") return <ClaudeMarketingShellAuth><DesignPricing featuredPlan={featuredPlan} /></ClaudeMarketingShellAuth>;
   const market = marketFromMarketingLocale(locale);
   const t = getMarketingMessages(locale);
 
@@ -112,6 +113,7 @@ export default async function PricingPage() {
             variant="marketing"
             market={market}
             locale={locale}
+            featuredPlan={featuredPlan}
             labels={{
               mainPlan: t.pricing.mainPlan,
               seeFeatures: t.pricing.seeFeatures,

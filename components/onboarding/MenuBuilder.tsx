@@ -86,7 +86,13 @@ export function MenuBuilder({
       fd.set("name", newCategoryName.trim());
       const result = await addCategoryInline(fd);
       if (!result.ok || !result.category) {
-        toast.error(result.error ?? "Nu s-a putut crea categoria.");
+        toast.error(
+          result.error === "entitlement_denied"
+            ? locale === "ro"
+              ? "Acțiune indisponibilă pentru planul curent."
+              : "This action isn't available on your current plan."
+            : (result.error ?? (locale === "ro" ? "Nu s-a putut crea categoria." : "Couldn't create the category.")),
+        );
         return;
       }
       const category = { id: result.category.id, name: result.category.name };
@@ -139,7 +145,15 @@ export function MenuBuilder({
           const result = await addProductFromPos(fd);
           if (!result.ok) {
             hadError = true;
-            toast.error(result.error ?? "Nu s-a putut adăuga produsul.");
+            // addProductFromPos forwards the bare EntitlementDeniedError
+            // code, not a message, if this ever fires mid-onboarding.
+            toast.error(
+              result.error === "entitlement_denied"
+                ? locale === "ro"
+                  ? "Acțiune indisponibilă pentru planul curent."
+                  : "This action isn't available on your current plan."
+                : (result.error ?? (locale === "ro" ? "Nu s-a putut adăuga produsul." : "Couldn't add the product.")),
+            );
             continue;
           }
           created.push({ id: crypto.randomUUID(), name: row.name.trim(), sale_price: Number(row.price), category_id: categoryId });

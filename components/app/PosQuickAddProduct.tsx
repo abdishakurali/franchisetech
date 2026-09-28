@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { usePosI18n } from "@/lib/pos-i18n-context";
+import { friendlySaleError } from "@/lib/pos-i18n";
 
 type Category = { id: string; name: string };
 
@@ -24,7 +25,7 @@ export function PosQuickAddProduct({
   defaultVatRate: number;
   currency?: string;
 }) {
-  const { t } = usePosI18n();
+  const { t, locale } = usePosI18n();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
@@ -45,7 +46,10 @@ export function PosQuickAddProduct({
     startTransition(async () => {
       const res = await addProductFromPos(fd);
       if (!res.ok) {
-        setStatus({ ok: false, msg: res.error ?? t.somethingWrong });
+        // Same fix as ProductAddForm.tsx: addProductFromPos forwards the bare
+        // EntitlementDeniedError code, not a message — route it through the
+        // existing translator instead of showing it verbatim.
+        setStatus({ ok: false, msg: res.error ? friendlySaleError(res.error, locale) : t.somethingWrong });
         return;
       }
       setStatus({ ok: true, msg: t.productAdded });

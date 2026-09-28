@@ -14,7 +14,7 @@ const PARTNER_TYPES_EN = [
   "Accountant or fiscal consultant",
   "POS / software reseller",
   "Hospitality consultant",
-  "FiscalNet integrator",
+  "Fiscal driver integrator",
   "Multi-site operator",
   "Other",
 ] as const;
@@ -23,7 +23,7 @@ const PARTNER_TYPES_RO = [
   "Contabil sau consultant fiscal",
   "Reseller POS / software",
   "Consultant ospitalitate",
-  "Integrator FiscalNet",
+  "Integrator driver fiscal",
   "Operator multi-locație",
   "Altul",
 ] as const;

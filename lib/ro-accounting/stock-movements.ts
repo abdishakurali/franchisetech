@@ -7,6 +7,7 @@ export type StockMovementProductRef = {
   vat_rate?: number | null;
   name?: string;
   unit_of_measure?: string | null;
+  sku?: string | null;
 };
 
 export type StockMovementQueryRow = {
@@ -112,7 +113,7 @@ export async function fetchStockMovements(
   if (productIds.length > 0) {
     const { data: products } = await supabase
       .from("products")
-      .select("id,name,unit_of_measure,cost_price,vat_rate")
+      .select("id,name,unit_of_measure,cost_price,vat_rate,sku")
       .eq("organisation_id", orgId)
       .in("id", productIds);
 

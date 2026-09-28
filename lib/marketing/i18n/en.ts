@@ -104,7 +104,7 @@ export const en = {
       },
       {
         title: "Romanian fiscal compliance built in",
-        text: "FiscalNet, Z-Report, ANAF e-Factura and VAT support are native — not add-ons bolted on later.",
+        text: "Fiscal driver, Z-Report, ANAF e-Factura and VAT support are native — not add-ons bolted on later.",
       },
       {
         title: "Works on existing hardware",
@@ -162,8 +162,8 @@ export const en = {
         },
         {
           label: "You issue the receipt",
-          title: "FiscalNet stays on the till PC",
-          body: "The fiscal receipt uses the local FiscalNet setup with correctly mapped payment methods and VAT groups.",
+          title: "The fiscal driver stays on the till PC",
+          body: "The fiscal receipt uses the local fiscal driver setup with correctly mapped payment methods and VAT groups.",
         },
         {
           label: "You close clean",
@@ -177,7 +177,7 @@ export const en = {
       title: "When you know the truth every day, you run the business differently.",
       items: [
         { title: "Till doesn't match the drawer", text: "See expected cash, card totals, and difference at close — not a guess after service." },
-        { title: "Fiscal receipt is a separate step", text: "FiscalNet connects the sale to the local register flow without server-side fiscal calls." },
+        { title: "Fiscal receipt is a separate step", text: "The fiscal driver connects the sale to the local register flow without server-side fiscal calls." },
         { title: "Daily numbers arrive too late", text: "Sales, cash, card, and VAT are visible immediately after service." },
         { title: "Locked-in POS contracts", text: "Browser-based POS with unlimited staff. Start on devices you already own." },
       ],
@@ -198,7 +198,7 @@ export const en = {
         imgAlt: "franchisetech POS — product grid, cart, and charge",
       },
       {
-        headline: "Fiscal receipt through FiscalNet",
+        headline: "Fiscal receipt through the fiscal driver",
         body: "Configure the local register, payment methods, and VAT groups before the first real sale.",
         href: "/help/romania-fiscalnet",
         img: "/marketing/live/recipes.png",
@@ -322,7 +322,7 @@ export const en = {
       title: "Questions from owners",
       items: [
         { question: "How does the free plan work?", answer: "The Free plan is available when the account is created, with no card required, and never expires. Monthly billing begins only if you choose a paid plan." },
-        { question: "Do I need special POS hardware?", answer: "The app runs in a browser on supported devices. Fiscal hardware and FiscalNet compatibility are checked separately." },
+        { question: "Do I need special POS hardware?", answer: "The app runs in a browser on supported devices. Fiscal hardware and fiscal driver compatibility are checked separately." },
         { question: "Can I see margins on menu items?", answer: "Yes. Recipe costing links ingredients to sale price so you see cost per portion and gross margin before you change the menu." },
         { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
         { question: "Can I manage stock from the same system as POS?", answer: "Yes. Purchases, suppliers, and stock levels sit beside sales so owners see what is low before the next service." },
@@ -337,7 +337,7 @@ export const en = {
     description: "POS, products, fiscal receipts, VAT, and Z-report for cafes and takeaways in Romania.",
     heroLabel: "Features",
     heroTitle: "Everything needed for the first sale and daily close",
-    heroText: "Products, POS, FiscalNet, VAT, and Z-report in one simple flow. No per-seat pricing.",
+    heroText: "Products, POS, fiscal driver, VAT, and Z-report in one simple flow. No per-seat pricing.",
     compareCallout: {
       title: "Evaluating other tools?",
       text: "Honest comparisons vs Ebriza, SmartBill, Expressoft, and more — including when rivals charge extra for reporting.",
@@ -364,7 +364,7 @@ export const en = {
     heroTitle: "Built for food businesses that serve customers every day.",
     heroText:
       "POS, fiscal receipts, and daily reports for small businesses that need to start quickly.",
-    cardIncludes: ["POS register", "FiscalNet", "Daily Z-style till close"],
+    cardIncludes: ["POS register", "Fiscal driver", "Daily Z-style till close"],
   },
   partners: {
     title: "franchisetech Partner Program — Recurring revenue for HORECA accountants",
@@ -402,7 +402,7 @@ export const en = {
     otherArchetypesLabel: "Other profiles",
     otherArchetypesTitle: "Integrators, consultants, POS resellers",
     otherArchetypes: [
-      { title: "FiscalNet integrator", text: "Recommend an operations workspace beside the fiscal printer — we install." },
+      { title: "Fiscal driver integrator", text: "Recommend an operations workspace beside the fiscal printer — we install." },
       { title: "Opening consultant", text: "New sites: POS + setup checklist for first service." },
       { title: "Local POS reseller", text: "Cloud add-on with recurring commission — no technical support on your shoulders." },
     ],
@@ -492,7 +492,7 @@ export const en = {
     },
     notIncludedTitle: "What is not included yet",
     notIncludedText:
-      "You are responsible for purchasing and registering a compatible fiscal printer. FiscalNet connectivity and any ANAF e-Factura flow depend on verified local integration setup. Online ordering and loyalty are not included yet.",
+      "You are responsible for purchasing and registering a compatible fiscal printer. Fiscal driver connectivity and any ANAF e-Factura flow depend on verified local integration setup. Online ordering and loyalty are not included yet.",
     faqTitle: "Pricing FAQ",
     compareCompetitors: {
       title: "Total cost vs competitors (Romania)",
@@ -550,7 +550,7 @@ export const en = {
       },
     },
     faqs: [
-      ["Do I need special hardware?", "The web app runs on supported devices. Fiscal receipts require compatible fiscal hardware and FiscalNet configured locally."],
+      ["Do I need special hardware?", "The web app runs on supported devices. Fiscal receipts require compatible fiscal hardware and a fiscal driver configured locally."],
       ["Can you set up my products?", "Guided in-app setup is included. Large migrations, team training, and on-site fiscal setup are separate services."],
       ["Do I have to pay to start?", "No. The Free plan is free forever. Payment starts only if you choose a paid plan."],
       ["Is pricing per company or location?", "The displayed prices are per location, per month. Request a quote for a multi-location configuration."],

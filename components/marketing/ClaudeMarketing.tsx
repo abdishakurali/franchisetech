@@ -3,12 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { CreditCard, Package, Wifi, Receipt, FileBarChart, MailCheck, ShieldCheck, Building2 } from "lucide-react";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { pricingPlans } from "@/lib/billing/plans";
 import { HomeFlowDiagram } from "@/components/marketing/HomeFlowDiagram";
-import { PRIMARY_INDUSTRY_NAV, PRIMARY_INDUSTRY_SLUGS } from "@/lib/marketing/industry-verticals";
+import { PRIMARY_INDUSTRY_NAV, PRIMARY_INDUSTRY_SLUGS, type PrimaryIndustrySlug } from "@/lib/marketing/industry-verticals";
 import { primaryIndustryPages } from "@/lib/marketing/industry-page-content";
 import { localizeSeoPage } from "@/lib/marketing/i18n";
 import s from "./ClaudeMarketing.module.css";
@@ -23,6 +23,16 @@ export function DesignTrialLink({ location, plan = "free", children = "Creați c
 
 export function ClaudeMarketingShell({ children, user = null }: { children: ReactNode; user?: ClaudeMarketingUser | null }) {
   const pathname = usePathname();
+  useEffect(() => {
+    // Supabase's admin-generated activation links (accountant-partner welcome
+    // email) can fall back to the project's bare Site URL instead of the
+    // requested redirectTo when that path isn't on the auth redirect
+    // allow-list — landing here with #access_token still in the fragment
+    // instead of on the page that actually consumes it.
+    if (window.location.hash.includes("access_token=") && window.location.hash.includes("refresh_token=")) {
+      window.location.replace(`/partner-dashboard/activate${window.location.hash}`);
+    }
+  }, []);
   const links = pages.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); captureClientEvent("nav_link_clicked", { label, href, location: "design_navigation" }); }}>{label}</Link>);
   const accountLinks = user
     ? <><Link href="/app">Panou</Link><Link href="/app/profile" className="inline-block max-w-[160px] truncate align-bottom">{user.displayName}</Link></>
@@ -38,7 +48,7 @@ export function ClaudeMarketingShell({ children, user = null }: { children: Reac
     <footer className={s.footer}><div className={`${s.container} ${s.footerInner}`}>
       <Link href="/"><Image src="/design-marketing/franchise-tech-logo.svg" alt="FranchiseTech" width={190} height={26} className={s.logo} /></Link>
       <span>franchisetech.ro · suport în română</span>
-      <nav className={s.footerLinks} aria-label="Informații legale"><Link href="/privacy">Confidențialitate</Link><Link href="/terms">Termeni</Link><Link href="/contact">Contact</Link></nav>
+      <nav className={s.footerLinks} aria-label="Informații legale"><Link href="/pentru-contabili">Pentru contabili</Link><Link href="/privacy">Confidențialitate</Link><Link href="/terms">Termeni</Link><Link href="/contact">Contact</Link></nav>
     </div></footer>
   </div>;
 }
@@ -69,7 +79,6 @@ export function DesignFeatures() {
   return <>
     <PageHero eyebrow="Funcționalități" title="Șapte module. Un singur loc pentru ziua de lucru.">De la prima vânzare la închiderea casei. Core acoperă vânzarea și rapoartele zilei; Operations adaugă stoc, achiziții și rețete.</PageHero>
     <section className={`${s.container} ${s.pageSection}`}><div className={s.grid}>{modules.map((module, index) => <article className={s.card} key={module.title}><div className={s.cardTitle}><span className={s.number}>0{index + 1}</span><h2>{module.title}</h2></div><p className={s.body}>{module.body}</p><div className={s.tags}>{module.items.map((item) => <span key={item}>{item}</span>)}</div></article>)}</div></section>
-    <section className={`${s.container} ${s.bottomSpace}`}><div className={`${s.card} ${s.mutedPanel}`}><h2>Ce nu facem (încă)</h2><p className={s.body}>HACCP, senzori de temperatură, integrări de livrare, fidelizare și serviciu la masă nu fac parte din oferta activă. Ne concentrăm pe vânzare, stoc, rețete și închiderea zilei.</p></div></section>
     <DesignFinalCta />
   </>;
 }
@@ -83,7 +92,7 @@ export function DesignHome() {
   ] as const;
   const saleFlow = [
     { icon: CreditCard, label: "Vânzare la POS", detail: "Produse, TVA și metodă de plată alese o dată, corect." },
-    { icon: Receipt, label: "Emitere bon fiscal", detail: "Comanda pleacă spre FiscalNet, când integrarea e configurată." },
+    { icon: Receipt, label: "Emitere bon fiscal", detail: "Comanda pleacă spre driverul fiscal, când integrarea e configurată." },
     { icon: FileBarChart, label: "Raport Z zilnic", detail: "Vânzări, TVA și diferența de numerar, calculate automat." },
   ];
   const offlineFlow = [
@@ -106,7 +115,7 @@ export function DesignHome() {
     <section className={`${s.container} ${s.section}`}><p className={s.eyebrow}>Ce face, pe scurt</p><h2>Patru lucruri, legate între ele.</h2><div className={s.highlights}>{highlights.map(([title, body, image], i) => <article className={s.highlight} key={title}><div className={s.stack}><span className={s.number}>0{i + 1}</span><h3>{title}</h3><p className={s.body}>{body}</p></div><div className={s.imageFrame}><Image src={image} alt={`${title} în FranchiseTech`} width={1600} height={1000} /></div></article>)}</div></section>
     <section className={s.tinted}><div className={`${s.container} ${s.pageSection}`}><div className={s.split}><div className={s.stack}><p className={s.eyebrow}>Portal gratuit pentru contabil</p><h2>Conectează contabilul gratuit. Noi facem predarea.</h2><p className={s.lead}>Datele ajung automat, fără rapoarte trimise lunar pe WhatsApp. Contabilul primește acces securizat, doar pentru citire, și își poate gestiona toate cafenelele dintr-un singur portal.</p><div className={s.actions}><DesignTrialLink location="homepage_accountant">Conectează-ți cafeneaua</DesignTrialLink><Link href="/partners" className={`${s.button} ${s.secondary}`}>Sunt contabil</Link></div><p className={s.meta}>Contabilul nu ocupă un loc plătit și nu poate modifica vânzări, stoc sau setări.</p></div><div className={s.imageFrame}><HomeFlowDiagram steps={accountantFlow} /></div></div></div></section>
     <section className={s.customerVideoSection}><div className={`${s.container} ${s.customerVideoGrid}`}><div className={s.customerVideoCopy}><p className={s.eyebrow}>Folosit într-un local real</p><h2>FranchiseTech, la lucru în Dolce Nera.</h2><p className={s.body}>Nu este o machetă. Clipul arată platforma folosită la punctul de vânzare, în timpul programului.</p><div className={s.customerIdentity}><Image src="/clients/dolce-nera.png" alt="Dolce Nera" width={160} height={80} /><span>Client FranchiseTech</span></div></div><div className={s.customerVideo}><video controls playsInline preload="metadata" poster="/marketing/product-proof/pos-in-cafe-poster.jpg" aria-label="FranchiseTech folosit la Dolce Nera"><source src="/marketing/product-proof/pos-in-cafe.mp4" type="video/mp4" /></video></div></div></section>
-    <section className={s.dark}><div className={`${s.container} ${s.split}`}><div className={s.stack}><p className={s.eyebrow}>Mod offline</p><h2>Cade internetul. Casa vinde mai departe.</h2><p className={s.body}>Cu POS-ul deja deschis, vânzările intră într-o coadă locală de maximum 20 de intrări și se sincronizează când revine conexiunea.</p><p className={s.notice}>Înregistrarea vânzării și emiterea bonului fiscal sunt etape separate. Bonul fiscal depinde de FiscalNet și de echipamentul din local — în POS vezi ce a rămas de emis.</p></div><div className={s.imageFrame}><HomeFlowDiagram steps={offlineFlow} tone="dark" /></div></div></section>
+    <section className={s.dark}><div className={`${s.container} ${s.split}`}><div className={s.stack}><p className={s.eyebrow}>Mod offline</p><h2>Cade internetul. Casa vinde mai departe.</h2><p className={s.body}>Cu POS-ul deja deschis, vânzările intră într-o coadă locală de maximum 20 de intrări și se sincronizează când revine conexiunea.</p><p className={s.notice}>Înregistrarea vânzării și emiterea bonului fiscal sunt etape separate. Bonul fiscal depinde de driverul fiscal și de echipamentul din local — în POS vezi ce a rămas de emis.</p></div><div className={s.imageFrame}><HomeFlowDiagram steps={offlineFlow} tone="dark" /></div></div></section>
     <DesignFinalCta />
   </>;
 }
@@ -116,49 +125,62 @@ const industries = PRIMARY_INDUSTRY_SLUGS.map((slug) => {
   return localizeSeoPage(page, "ro");
 });
 
+// Real photos exist only for cafés and restaurants today — takeaway and
+// patisserie-bakery fall back to the icon tile until matching photography
+// is sourced (not something to guess/download without sign-off).
+const INDUSTRY_CARD_IMAGES: Partial<Record<PrimaryIndustrySlug, string>> = {
+  cafes: "/marketing/industry-cafe.png",
+  restaurants: "/marketing/industry-restaurant.png",
+};
+
 export function DesignIndustries() {
   return <><PageHero eyebrow="Industrii" title="Construit pentru localuri mici, cu bucătărie.">Dacă vinzi ceva ce se prepară din ingrediente, costul real e întrebarea care contează. Dacă vinzi produse ambalate, alte sisteme îți sunt mai potrivite — o spunem înainte să plătești.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={s.grid}>{industries.map((industry) => {
     const nav = PRIMARY_INDUSTRY_NAV.find((n) => n.slug === industry.slug);
     const Icon = nav?.icon;
+    const photo = INDUSTRY_CARD_IMAGES[industry.slug as PrimaryIndustrySlug];
     return <Link key={industry.slug} href={industry.path} className={`${s.card} ${s.imageCard}`}>
-      <div className="flex aspect-[16/9] items-center justify-center bg-secondary">
-        {Icon && <Icon className="h-10 w-10 text-brass" strokeWidth={1.5} aria-hidden />}
-      </div>
+      {photo ? (
+        <Image src={photo} alt={industry.h1} width={1024} height={576} />
+      ) : (
+        <div className="flex aspect-[16/9] items-center justify-center bg-secondary">
+          {Icon && <Icon className="h-10 w-10 text-brass" strokeWidth={1.5} aria-hidden />}
+        </div>
+      )}
       <div className={s.cardContent}><h2>{industry.h1}</h2><p className={s.body}>{industry.heroSubheadline ?? industry.intro}</p><p className={s.meta}>{industry.eyebrow}</p></div>
     </Link>;
   })}</div></section><DesignFinalCta /></>;
 }
 
 const devices = [
-  ["CALCULATOR", "Calculatorul de la casă", "POS în browser, plus agentul FiscalNet instalat local pentru bonuri fiscale. Configurația recomandată dacă emiți bonuri fiscale."],
-  ["TABLETĂ", "Tabletă", "POS în browser, pe tabletă. Emiterea bonului fiscal are nevoie de agentul FiscalNet și de echipamentul configurate local."],
+  ["CALCULATOR", "Calculatorul de la casă", "POS în browser, plus driverul fiscal instalat local pentru bonuri fiscale. Configurația recomandată dacă emiți bonuri fiscale."],
+  ["TABLETĂ", "Tabletă", "POS în browser, pe tabletă. Emiterea bonului fiscal are nevoie de driverul fiscal și de echipamentul configurate local."],
   ["BROWSER", "Laptop sau desktop", "Back-office complet: stoc, recepții, rețete, rapoarte. Nimic de instalat."],
   ["TELEFON", "Telefon", "Rapoarte și cifrele zilei, de oriunde. Nu e pentru vânzare la tejghea."],
 ];
 
 export function DesignHardware() {
   return <>
-    <PageHero eyebrow="Echipamente" title="Software-ul nostru, echipamentul pe care îl ai deja.">POS-ul rulează în browser. Emiterea fiscală trece prin agentul FiscalNet configurat local — serverul nostru nu atinge niciodată echipamentul din local.</PageHero>
+    <PageHero eyebrow="Echipamente" title="Software-ul nostru, echipamentul pe care îl ai deja.">POS-ul rulează în browser. Emiterea fiscală trece prin driverul fiscal configurat local — serverul nostru nu atinge niciodată echipamentul din local.</PageHero>
     <section className={`${s.container} ${s.pageSection}`}><h2 className={s.sectionTitle}>Pe ce rulează</h2><div className={s.grid}>{devices.map(([badge, title, body], index) => <article className={s.card} key={title}><span className={`${s.badge} ${index === 0 ? s.blueBadge : ""}`}>{badge}</span><h3>{title}</h3><p className={s.body}>{body}</p></article>)}</div></section>
-    <section className={s.tinted}><div className={`${s.container} ${s.pageSection}`}><h2 className={s.sectionTitle}>Case de marcat și imprimante fiscale</h2><p className={s.body}>Exemple de echipamente pentru care poți verifica integrarea FiscalNet. Confirmă modelul exact, firmware-ul și configurația locală cu furnizorul tău.</p><div className={`${s.grid} ${s.hardwareGrid}`} style={{ marginTop: 22 }}>{[["datecs-dp25.jpg", "Datecs DP25", "Casă de marcat"], ["datecs-dp150.jpg", "Datecs DP150", "Casă de marcat"], ["datecs-fp700.jpg", "Datecs FP700", "Imprimantă fiscală"]].map(([img, title, type]) => <article key={title} className={`${s.card} ${s.imageCard}`}><div className={s.hardwareImage}><Image src={`/design-marketing/hardware/${img}`} alt={title} width={600} height={450} /></div><div className={s.cardContent}><h3>{title}</h3><p className={s.caption}>{type}</p></div></article>)}</div><p className={s.smallPrint}>Compatibilitatea se confirmă pentru model, firmware și configurația locală. Echipamentul și licența FiscalNet se achiziționează separat, de la furnizorul tău. Fotografii: catalogul Datecs.</p></div></section>
-    <section className={`${s.container} ${s.pageSection}`}><div className={s.grid}><article className={`${s.card} ${s.emphasis}`}><h2>Sertarul de bani — ce facem și ce nu</h2><p className={s.body}><strong>Nu trimitem comenzi de deschidere către sertar.</strong> Sertarul se deschide de la casa de marcat sau manual, ca până acum. Ce facem: urmărim fondul de deschidere, încasările în numerar, fiecare mișcare de numerar și diferența la închidere — ca raportul Z să bată cu ce numeri în sertar.</p><p className={s.meta}>fond deschidere → vânzări numerar → mișcări → numărat la închidere</p></article><article className={s.card}><h2>FiscalNet — agentul local</h2><p className={s.body}>Se instalează pe calculatorul de la casă, de la <a href="https://driverfiscal.ro/" target="_blank" rel="noopener noreferrer">driverfiscal.ro</a>, și vorbește direct cu casa de marcat. POS-ul îl apelează din browserul casierului. Dacă agentul nu răspunde, vezi în POS ce bonuri au rămas de emis. Cerințele exacte de sistem le confirmi cu furnizorul driverului.</p><p className={s.meta}>browser casier → FiscalNet local → casă de marcat</p></article></div></section>
+    <section className={s.tinted}><div className={`${s.container} ${s.pageSection}`}><h2 className={s.sectionTitle}>Case de marcat și imprimante fiscale</h2><p className={s.body}>Exemple de echipamente pentru care poți verifica integrarea driverului fiscal. Confirmă modelul exact, firmware-ul și configurația locală cu furnizorul tău.</p><div className={`${s.grid} ${s.hardwareGrid}`} style={{ marginTop: 22 }}>{[["datecs-dp25.jpg", "Datecs DP25", "Casă de marcat"], ["datecs-dp150.jpg", "Datecs DP150", "Casă de marcat"], ["datecs-fp700.jpg", "Datecs FP700", "Imprimantă fiscală"]].map(([img, title, type]) => <article key={title} className={`${s.card} ${s.imageCard}`}><div className={s.hardwareImage}><Image src={`/design-marketing/hardware/${img}`} alt={title} width={600} height={450} /></div><div className={s.cardContent}><h3>{title}</h3><p className={s.caption}>{type}</p></div></article>)}</div><p className={s.smallPrint}>Compatibilitatea se confirmă pentru model, firmware și configurația locală. Echipamentul și licența driverului fiscal se achiziționează separat, de la furnizorul tău. Fotografii: catalogul Datecs.</p></div></section>
+    <section className={`${s.container} ${s.pageSection}`}><div className={s.grid}><article className={`${s.card} ${s.emphasis}`}><h2>Sertarul de bani — ce facem și ce nu</h2><p className={s.body}><strong>Nu trimitem comenzi de deschidere către sertar.</strong> Sertarul se deschide de la casa de marcat sau manual, ca până acum. Ce facem: urmărim fondul de deschidere, încasările în numerar, fiecare mișcare de numerar și diferența la închidere — ca raportul Z să bată cu ce numeri în sertar.</p><p className={s.meta}>fond deschidere → vânzări numerar → mișcări → numărat la închidere</p></article><article className={s.card}><h2>Driverul fiscal — agentul local</h2><p className={s.body}>Se instalează pe calculatorul de la casă, de la <a href="https://driverfiscal.ro/" target="_blank" rel="noopener noreferrer">driverfiscal.ro</a>, și vorbește direct cu casa de marcat. POS-ul îl apelează din browserul casierului. Dacă agentul nu răspunde, vezi în POS ce bonuri au rămas de emis. Cerințele exacte de sistem le confirmi cu furnizorul driverului.</p><p className={s.meta}>browser casier → driver fiscal local → casă de marcat</p></article></div></section>
     <DesignFinalCta />
   </>;
 }
 
 export const designFaq = [
-  { q: "Trebuie să schimb casa de marcat?", a: "Nu neapărat. Conectarea se face prin agentul FiscalNet configurat local. Confirmă compatibilitatea modelului și configurația cu furnizorul driverului." },
+  { q: "Trebuie să schimb casa de marcat?", a: "Nu neapărat. Conectarea se face prin driverul fiscal configurat local. Confirmă compatibilitatea modelului și configurația cu furnizorul driverului." },
   { q: "Deschideți sertarul de bani din aplicație?", a: "Nu. Sertarul se deschide de la casa de marcat. Noi urmărim fondul, încasările și diferența la închidere, ca raportul Z să bată cu ce numeri." },
   { q: "Merge dacă nu sunt plătitor de TVA?", a: "Da. TVA-ul de la furnizor intră în costul mărfii, iar TVA-ul de vânzare se configurează separat. Cotele de achiziție rămân disponibile pentru facturile furnizorilor." },
-  { q: "Bonul fiscal se emite și offline?", a: "Înregistrarea vânzării și emiterea bonului sunt etape separate. Vânzarea intră în coada locală; emiterea bonului depinde de FiscalNet și de echipamentul local. În POS vezi ce a rămas de emis." },
+  { q: "Bonul fiscal se emite și offline?", a: "Înregistrarea vânzării și emiterea bonului sunt etape separate. Vânzarea intră în coada locală; emiterea bonului depinde de driverul fiscal și de echipamentul local. În POS vezi ce a rămas de emis." },
   { q: "Ce se întâmplă dacă cade internetul?", a: "Cu POS-ul deja deschis, vinzi mai departe: maximum 20 de vânzări în coada locală, sincronizate automat când revine conexiunea." },
   { q: "Am două locații. Merge?", a: "Da — planul Multi include locația de bază și adaugă 29€/lună pentru fiecare locație în plus, cu raportare centrală și comutare între locații." },
 ];
 
 const DESIGN_PRICING_CARD_COPY: Record<"free" | "growth" | "team", { body: string; features: string[]; cta: string; badge?: string }> = {
   free: {
-    body: "Pentru un local la început de drum — vânzare, conectare FiscalNet, bonuri fiscale și rapoartele zilei. Fără card, fără expirare.",
-    features: ["POS fără limită de bonuri", "Până la 50 de produse", "1 locație", "Închidere casă și raport Z", "Registru de casă", "Conectare FiscalNet"],
+    body: "Pentru un local la început de drum — vânzare, conectare driver fiscal, bonuri fiscale și rapoartele zilei. Fără card, fără expirare.",
+    features: ["POS fără limită de bonuri", "Până la 50 de produse", "1 locație", "Închidere casă și raport Z", "Registru de casă", "Conectare driver fiscal"],
     cta: "Creați cont gratuit",
   },
   growth: {
@@ -174,10 +196,11 @@ const DESIGN_PRICING_CARD_COPY: Record<"free" | "growth" | "team", { body: strin
   },
 };
 
-export function DesignPricing() {
+export function DesignPricing({ featuredPlan: requestedPlan }: { featuredPlan?: string } = {}) {
   const plansToShow = pricingPlans.filter((plan): plan is typeof plan & { id: "free" | "growth" | "team" } => plan.id === "free" || plan.id === "growth" || plan.id === "team");
+  const featuredPlan = plansToShow.some((plan) => plan.id === requestedPlan) ? requestedPlan : "growth";
   return <><PageHero eyebrow="Prețuri" title="Trei planuri, cu preț clar pe locație.">Free pentru vânzare și închidere zilnică, fără card. Pro adaugă stoc, achiziții și rețete. Multi e pentru mai multe locații.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={`${s.grid} ${s.plans}`}>{plansToShow.map((plan) => {
     const copy = DESIGN_PRICING_CARD_COPY[plan.id];
-    return <article className={`${s.card} ${s.plan} ${plan.id === "growth" ? s.featured : ""}`} key={plan.id}><div className={s.cardTitle}><h2>{plan.name}</h2>{copy.badge && <span className={`${s.badge} ${s.blueBadge}`}>{copy.badge}</span>}</div><div className={s.price}><strong>{plan.price}</strong><span>{plan.id === "free" ? " / pentru totdeauna" : " / locație / lună"}</span></div><p className={s.body}>{copy.body}</p><ul className={s.features}>{copy.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><DesignTrialLink location="pricing_plan" plan={plan.id}>{copy.cta}</DesignTrialLink></article>;
-  })}</div><p className={s.smallPrint}>Prețurile nu includ TVA. FiscalNet, echipamentele și serviciile terțe se plătesc separat. Anulare oricând, fără contract pe termen lung.</p></section><section className={`${s.container} ${s.bottomSpace}`}><h2 className={s.sectionTitle}>Întrebări frecvente</h2><div className={`${s.grid} ${s.faq}`}>{designFaq.map(({ q, a }) => <article className={s.card} key={q}><h3>{q}</h3><p className={s.body}>{a}</p></article>)}</div></section><DesignFinalCta /></>;
+    return <article className={`${s.card} ${s.plan} ${plan.id === featuredPlan ? s.featured : ""}`} key={plan.id}><div className={s.cardTitle}><h2>{plan.name}</h2>{copy.badge && <span className={`${s.badge} ${s.blueBadge}`}>{copy.badge}</span>}</div><div className={s.price}><strong>{plan.price}</strong><span>{plan.id === "free" ? " / pentru totdeauna" : " / locație / lună"}</span></div><p className={s.body}>{copy.body}</p><ul className={s.features}>{copy.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><DesignTrialLink location="pricing_plan" plan={plan.id}>{copy.cta}</DesignTrialLink></article>;
+  })}</div><p className={s.smallPrint}>Prețurile nu includ TVA. Driverul fiscal, echipamentele și serviciile terțe se plătesc separat. Anulare oricând, fără contract pe termen lung.</p></section><section className={`${s.container} ${s.bottomSpace}`}><h2 className={s.sectionTitle}>Întrebări frecvente</h2><div className={`${s.grid} ${s.faq}`}>{designFaq.map(({ q, a }) => <article className={s.card} key={q}><h3>{q}</h3><p className={s.body}>{a}</p></article>)}</div></section><DesignFinalCta /></>;
 }

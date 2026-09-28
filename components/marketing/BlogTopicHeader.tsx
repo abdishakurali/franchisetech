@@ -48,6 +48,7 @@ const SLUG_ICON_OVERRIDES: Record<string, LucideIcon> = {
 const TAG_ICON_PRIORITY: Array<[string, LucideIcon]> = [
   ["amenzi", AlertTriangle],
   ["control-anaf", ShieldAlert],
+  ["control-itm", ShieldAlert],
   ["defectiune", Printer],
   ["storno", RotateCcw],
   ["fiscalnet", Wifi],
@@ -78,8 +79,11 @@ const TAG_ICON_PRIORITY: Array<[string, LucideIcon]> = [
   ["food-truck", Truck],
   ["franciza", Building2],
   ["multi-locatie", Building2],
+  ["caen", Building2],
   ["pos", CreditCard],
   ["fiscal", Receipt],
+  ["gdpr", ShieldCheck],
+  ["haccp", ShieldCheck],
 ];
 
 function resolveBlogTopicIcon(post: Pick<BlogPost, "slug" | "tags">): LucideIcon {
