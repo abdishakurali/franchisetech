@@ -3,7 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useMemo, startTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import {
   LayoutDashboard, Package, BarChart3,
@@ -67,9 +67,14 @@ type NavItem = {
   exact: boolean;
 };
 
-function isLegalFallbackRoute(pathname: string): boolean {
+function isLegalFallbackRoute(pathname: string, tab: string | null): boolean {
   return (
     pathname.startsWith("/app/billing") ||
+    // Billing itself lives at /app/settings?tab=billing (see app/app/billing/page.tsx,
+    // a redirect shim) — pathname alone can't distinguish it from any other settings
+    // tab, so the tab query param has to be checked too. Without this, a blocked owner
+    // can never reach the one page that lets them pay.
+    (pathname.startsWith("/app/settings") && tab === "billing") ||
     pathname.startsWith("/app/transactions") ||
     pathname.startsWith("/app/reports/z-report") ||
     pathname.startsWith("/app/reports/vat")
@@ -80,7 +85,8 @@ function isSubscriptionBlockedForClient(subStatus?: SubscriptionStatus): boolean
   return (
     subStatus?.state === "none" ||
     subStatus?.state === "canceled" ||
-    subStatus?.state === "incomplete"
+    subStatus?.state === "incomplete" ||
+    subStatus?.state === "past_due_expired"
   );
 }
 
@@ -383,6 +389,7 @@ function AppHeader({
 
 export function AppShell({ user, profile, activeOrg, userRole, setupComplete = false, moduleVisibility, trialDaysLeft = 15, referral, subStatus, accessibleSites = [], activeSiteId = null, children }: AppShellProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createClient();
   const { t, locale } = useAppI18n();
@@ -410,7 +417,7 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   const initials = (profile?.full_name ?? user.email ?? "?")
     .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   const daysLeft = trialDaysLeft;
-  const subscriptionOverlayActive = isSubscriptionBlockedForClient(subStatus) && !isLegalFallbackRoute(pathname);
+  const subscriptionOverlayActive = isSubscriptionBlockedForClient(subStatus) && !isLegalFallbackRoute(pathname, searchParams.get("tab"));
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

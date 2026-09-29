@@ -24,7 +24,11 @@ type ExistingSubscriptionRow = {
   stripe_subscription_id: string | null;
   plan: string | null;
   status: string | null;
+  grace_period_ends_at: string | null;
+  current_period_end: string | null;
 };
+
+const GRACE_PERIOD_DAYS = 3;
 
 export type StripeSubscriptionSyncResult = {
   synced: boolean;
@@ -61,7 +65,7 @@ async function findReusableRow(
 
   const { data: bySubscription } = await supabase
     .from("billing_subscriptions")
-    .select("id, organisation_id, stripe_customer_id, stripe_subscription_id, plan, status")
+    .select("id, organisation_id, stripe_customer_id, stripe_subscription_id, plan, status, grace_period_ends_at, current_period_end")
     .eq("stripe_subscription_id", subscriptionId)
     .maybeSingle();
 
@@ -69,7 +73,7 @@ async function findReusableRow(
 
   const { data: pending } = await supabase
     .from("billing_subscriptions")
-    .select("id, organisation_id, stripe_customer_id, stripe_subscription_id, plan, status")
+    .select("id, organisation_id, stripe_customer_id, stripe_subscription_id, plan, status, grace_period_ends_at, current_period_end")
     .eq("organisation_id", organisationId)
     .eq("stripe_customer_id", customerId)
     .is("stripe_subscription_id", null)
@@ -127,9 +131,23 @@ export async function syncStripeSubscription(
     };
   }
 
+  // Anchored to "now" (when this failure was detected), not to
+  // current_period_end — for a subscription failing mid-cycle,
+  // current_period_end is the end of the still-unpaid period, which can be
+  // weeks away, making the grace period effectively never expire (real
+  // incident, 2026-09-29: 4 failed charges over 4 days, zero escalation,
+  // because grace_period_ends_at kept landing ~a month out). Only set once
+  // per billing cycle — a later retry on the same unpaid invoice must not
+  // push the deadline back out every time Stripe retries the charge.
   let gracePeriodEndsAt: string | null | undefined = undefined;
-  if (opts?.setGracePeriod && sub.current_period_end) {
-    gracePeriodEndsAt = new Date(sub.current_period_end * 1000 + 3 * 86_400_000).toISOString();
+  if (opts?.setGracePeriod) {
+    const sameCycle =
+      existing?.current_period_end && currentPeriodEnd
+        ? new Date(existing.current_period_end).getTime() === currentPeriodEnd * 1000
+        : false;
+    if (!sameCycle || !existing?.grace_period_ends_at) {
+      gracePeriodEndsAt = new Date(Date.now() + GRACE_PERIOD_DAYS * 86_400_000).toISOString();
+    }
   } else if (opts?.clearGracePeriod) {
     gracePeriodEndsAt = null;
   }

@@ -6,8 +6,8 @@ export type SubState =
   | "soft_trial"         // Retired 2026-09 with the trial-to-Free pricing restructure — never produced anymore, kept for type compatibility with existing comparisons
   | "free"               // No Stripe sub — permanent Free plan (replaces the old time-limited soft trial)
   | "active"             // Paid and current
-  | "past_due"           // Payment failed, within 3-day grace period
-  | "past_due_expired"   // Grace period elapsed, billing is urgent but POS remains available
+  | "past_due"           // Payment failed, within grace period (see GRACE_PERIOD_DAYS)
+  | "past_due_expired"   // Grace period elapsed — app access blocked until payment succeeds
   | "canceled"           // Subscription ended
   | "incomplete"         // Checkout started but not completed
   | "none";              // No trial, no subscription
@@ -50,8 +50,9 @@ export function isAccessAllowed(sub: SubscriptionStatus): boolean {
     sub.state === "trialing" ||
     sub.state === "soft_trial" ||
     sub.state === "free" ||
-    sub.state === "past_due" ||   // within grace period — still allowed
-    sub.state === "past_due_expired" // overdue, but restaurants must keep selling
+    sub.state === "past_due" // within grace period — still allowed
+    // past_due_expired is NOT allowed — grace period (see GRACE_PERIOD_DAYS in
+    // lib/billing/stripe-sync.ts) has elapsed with no successful payment.
   );
 }
 
@@ -63,7 +64,8 @@ export function isSubscriptionBlockedForApp(sub: SubscriptionStatus | null | und
   return (
     sub?.state === "none" ||
     sub?.state === "canceled" ||
-    sub?.state === "incomplete"
+    sub?.state === "incomplete" ||
+    sub?.state === "past_due_expired"
   );
 }
 
@@ -84,7 +86,7 @@ function humanLabel(
     case "past_due":          return graceDaysLeft !== null
                                 ? `Payment failed — ${graceDaysLeft} day${graceDaysLeft === 1 ? "" : "s"} to update payment`
                                 : "Payment failed — update your card to continue";
-    case "past_due_expired":  return "Payment overdue — update card; POS remains available";
+    case "past_due_expired":  return "Payment overdue — update your card to restore access";
     case "canceled":          return "Subscription ended";
     case "incomplete":        return "Checkout not completed";
     default:                  return "No active plan";
