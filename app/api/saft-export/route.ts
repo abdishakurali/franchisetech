@@ -60,9 +60,26 @@ export async function GET(req: Request) {
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("name,company_legal_name,anaf_cif,fiscalnet_cif")
+    .select("name,company_legal_name,anaf_cif,fiscalnet_cif,company_address,anaf_city,anaf_phone,anaf_bank_iban")
     .eq("id", orgId)
     .single();
+
+  // ANAF's own schema requires Header/Company/Address, /Contact/Telephone, and
+  // /BankAccount (confirmed via the real DUKIntegrator validator) — none of
+  // these can be blank without producing an invalid file, so refuse rather
+  // than silently emitting empty tags.
+  const missingFiscalFields: string[] = [];
+  if (!org?.anaf_cif && !org?.fiscalnet_cif) missingFiscalFields.push("CUI");
+  if (!org?.company_address) missingFiscalFields.push("adresă");
+  if (!org?.anaf_city) missingFiscalFields.push("oraș");
+  if (!org?.anaf_phone) missingFiscalFields.push("telefon firmă");
+  if (!org?.anaf_bank_iban) missingFiscalFields.push("IBAN");
+  if (missingFiscalFields.length > 0) {
+    return new NextResponse(
+      `Completează în Setări → Date fiscale: ${missingFiscalFields.join(", ")}. Sunt necesare pentru un export SAF-T valid.`,
+      { status: 422 }
+    );
+  }
 
   const { data: vatRateRows } = await supabase
     .from("vat_rates")
@@ -128,6 +145,10 @@ export async function GET(req: Request) {
       companyName: org?.company_legal_name ?? org?.name ?? "franchisetech",
       selectionStartDate: `${year}-${monthStart}-01`,
       selectionEndDate: `${year}-${monthStart}-${String(daysInMonth).padStart(2, "0")}`,
+      street: org?.company_address ?? "",
+      city: org?.anaf_city ?? "",
+      phone: org?.anaf_phone ?? "",
+      bankIban: org?.anaf_bank_iban ?? "",
     },
     suppliers,
     products: [...productMap.values()],
