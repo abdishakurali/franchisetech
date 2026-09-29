@@ -25,6 +25,9 @@ export async function saveOrgCui(formData: FormData): Promise<SaveOrgCuiResult> 
   const adresa = ((formData.get("adresa") as string | null) ?? "").trim() || null;
   const vatRegistered = formData.get("vat_registered") === "true";
   const verified = formData.get("verified") === "true";
+  const city = ((formData.get("city") as string | null) ?? "").trim() || null;
+  const phone = ((formData.get("phone") as string | null) ?? "").trim() || null;
+  const iban = ((formData.get("iban") as string | null) ?? "").trim().toUpperCase().replace(/\s+/g, "") || null;
 
   await supabase
     .from("organisations")
@@ -35,6 +38,9 @@ export async function saveOrgCui(formData: FormData): Promise<SaveOrgCuiResult> 
       company_legal_name: denumire,
       company_address: adresa,
       anaf_vat_registered: vatRegistered,
+      anaf_city: city,
+      anaf_phone: phone,
+      anaf_bank_iban: iban,
     })
     .eq("id", orgId);
 
