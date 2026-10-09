@@ -40,6 +40,27 @@ export function daysUntil(iso: string | null): number | null {
   return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000));
 }
 
+export function resolveSubscriptionState(
+  status: string,
+  currentPeriodEnd: string | null,
+  gracePeriodEndsAt: string | null,
+): SubState {
+  switch (status) {
+    case "trialing": return "trialing";
+    case "active": return "active";
+    case "past_due":
+      return gracePeriodEndsAt && new Date(gracePeriodEndsAt) <= new Date()
+        ? "past_due_expired"
+        : "past_due";
+    case "canceled":
+      return currentPeriodEnd && new Date(currentPeriodEnd) > new Date()
+        ? "active"
+        : "canceled";
+    case "incomplete": return "incomplete";
+    default: return "none";
+  }
+}
+
 /**
  * Returns true if the subscription state allows full access to the app.
  * Use this on the backend — never trust client-sent subscription state.
@@ -153,20 +174,7 @@ export const getSubscriptionStatus = cache(async function getSubscriptionStatus(
   const gracePeriodEndsAt = (sub as Record<string, unknown>).grace_period_ends_at as string | null ?? null;
   const graceDaysLeft = daysUntil(gracePeriodEndsAt);
 
-  let state: SubState;
-  switch (status) {
-    case "trialing":   state = "trialing";   break;
-    case "active":     state = "active";     break;
-    case "past_due":
-      // Distinguish: within grace window vs expired
-      state = gracePeriodEndsAt && new Date(gracePeriodEndsAt) <= new Date()
-        ? "past_due_expired"
-        : "past_due";
-      break;
-    case "canceled":   state = "canceled";   break;
-    case "incomplete": state = "incomplete"; break;
-    default:           state = "none";
-  }
+  const state = resolveSubscriptionState(status, sub.current_period_end ?? null, gracePeriodEndsAt);
 
   const trialDays = state === "trialing" ? stripeTrialDays : softTrialDays;
 

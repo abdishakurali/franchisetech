@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAccessAllowed, isSubscriptionBlockedForApp, type SubState, type SubscriptionStatus } from "./subscription";
+import { isAccessAllowed, isSubscriptionBlockedForApp, resolveSubscriptionState, type SubState, type SubscriptionStatus } from "./subscription";
 
 function statusFor(state: SubState): SubscriptionStatus {
   return {
@@ -47,5 +47,15 @@ describe("isAccessAllowed / isSubscriptionBlockedForApp", () => {
   it("treats a null/undefined status as blocked, not allowed by default", () => {
     expect(isSubscriptionBlockedForApp(null)).toBe(false);
     expect(isSubscriptionBlockedForApp(undefined)).toBe(false);
+  });
+});
+
+describe("resolveSubscriptionState", () => {
+  it("keeps a canceled subscription active through its paid period", () => {
+    expect(resolveSubscriptionState("canceled", "2099-10-25T08:13:25.000Z", null)).toBe("active");
+  });
+
+  it("blocks a canceled subscription after its paid period", () => {
+    expect(resolveSubscriptionState("canceled", "2020-10-25T08:13:25.000Z", null)).toBe("canceled");
   });
 });
