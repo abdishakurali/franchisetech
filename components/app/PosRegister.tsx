@@ -205,7 +205,7 @@ function ProductTileMedia({
 
   if (showImage) {
     return (
-      <div className="h-10 w-full shrink-0 overflow-hidden bg-secondary sm:h-11">
+      <div className="h-9 w-full shrink-0 overflow-hidden bg-secondary">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imageUrl!}
@@ -222,11 +222,11 @@ function ProductTileMedia({
   const Icon = cfg.icon;
   return (
     <div
-      className={cn("flex h-10 w-full shrink-0 items-center justify-center sm:h-11", cfg.bg)}
+      className={cn("flex h-9 w-full shrink-0 items-center justify-center", cfg.bg)}
       style={cfg.style}
       aria-hidden
     >
-      <Icon className={cn("h-5 w-5 opacity-50 sm:h-6 sm:w-6", cfg.iconColor)} />
+      <Icon className={cn("h-[18px] w-[18px] opacity-50", cfg.iconColor)} />
     </div>
   );
 }
@@ -263,7 +263,7 @@ function ProductGridTile({
       type="button"
       onClick={onClick}
       className={cn(
-        "relative flex min-h-[132px] flex-col overflow-hidden rounded-[10px] border text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40",
+        "relative flex min-h-[112px] flex-col overflow-hidden rounded-[10px] border text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40",
         selected ? "border-brass bg-accent ring-1 ring-brass/20" : "border-border bg-card hover:border-brass/40",
       )}
     >
@@ -289,8 +289,8 @@ function ProductGridTile({
       )}
       <div
         className={cn(
-          "flex min-h-0 flex-1 flex-col justify-between gap-3 p-3 sm:p-4",
-          tileMode === "name" && "py-4",
+          "flex min-h-0 flex-1 flex-col justify-between gap-2 p-2.5 sm:p-3",
+          tileMode === "name" && "py-3",
         )}
       >
         <span
@@ -1681,7 +1681,7 @@ function PosRegisterInner({
           style={{ WebkitOverflowScrolling: "touch" }}
           data-tour="pos-product"
         >
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {filtered.map((p) => {
             const inCart = cart.find((i) => i.product_id === p.id);
             return (

@@ -9,7 +9,7 @@ export default function PosLoading() {
         </div>
       </div>
       <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
-        <div className="grid flex-1 grid-cols-2 gap-3 overflow-hidden p-3 sm:grid-cols-3 sm:p-4 lg:grid-cols-4">
+        <div className="grid flex-1 grid-cols-2 gap-2 overflow-hidden p-3 sm:grid-cols-3 sm:p-4 md:grid-cols-4 lg:grid-cols-6">
           {Array.from({ length: 12 }).map((_, item) => (
             <div key={item} className="aspect-square animate-pulse rounded-xl bg-secondary" />
           ))}
