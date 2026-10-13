@@ -16,6 +16,7 @@ import {
   Warehouse,
 } from "lucide-react";
 import type { AppT } from "@/lib/app-i18n";
+import { shouldShowAccountingReportLink } from "@/lib/accounting-report-access";
 
 export type AppReportLink = {
   href: string;
@@ -176,6 +177,7 @@ export function filterReportLinks(
     accountantPackVisible?: boolean;
     gestiuneVisible?: boolean;
     loyaltyVisible?: boolean;
+    userRole?: string | null;
   },
 ): AppReportLink[] {
   return getAppReportLinks(t).filter((link) => {
@@ -183,11 +185,13 @@ export function filterReportLinks(
     // accountant pack, gestiune, loyalty). Those are the real gates. The
     // marketing-scope flag deliberately does NOT appear here: it trims what the
     // public site advertises, and must not hide reports a customer pays for.
-    if (link.requiresInventory && !input.inventoryVisible) return false;
-    if (link.requiresRecipe && !input.recipeVisible) return false;
-    if (link.requiresAccountantPack && !input.accountantPackVisible) return false;
-    if (link.requiresGestiune && !input.gestiuneVisible) return false;
-    if (link.requiresLoyalty && !input.loyaltyVisible) return false;
-    return true;
+    const baseVisible = !(
+      (link.requiresInventory && !input.inventoryVisible) ||
+      (link.requiresRecipe && !input.recipeVisible) ||
+      (link.requiresAccountantPack && !input.accountantPackVisible) ||
+      (link.requiresGestiune && !input.gestiuneVisible) ||
+      (link.requiresLoyalty && !input.loyaltyVisible)
+    );
+    return shouldShowAccountingReportLink(link.href, input.userRole, baseVisible);
   });
 }

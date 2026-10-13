@@ -13,6 +13,7 @@ import { countsTowardPurchaseSpend } from "@/lib/nir/purchase";
 import { CORE_REPORTS, selectCoreReport } from "@/lib/reports/hub-selection";
 import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendChart";
 import { AccountantAccessCard } from "@/components/app/AccountantAccessCard";
+import { ACCOUNTING_REPORT_PATHS, isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
 
 type Preview = { metrics: Array<[string, string]>; rows: Array<[string, string]>; error?: boolean };
 
@@ -35,8 +36,12 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
     inventoryVisible, recipeVisible, gestiuneVisible,
     accountantPackVisible: Boolean(orgRow?.saga_export_enabled),
     loyaltyVisible: Boolean(orgRow?.loyalty_enabled) && loyaltyEntitled,
+    userRole: membership.role,
   });
   const core = visible.filter((report) => CORE_REPORTS.some((key) => report.href === `/app/reports/${key}`));
+  const accountingReports = isOwnerAccountingReportRole(membership.role)
+    ? visible.filter((report) => (ACCOUNTING_REPORT_PATHS as readonly string[]).includes(report.href))
+    : [];
   const params = await searchParams;
   const period = params.period === "today" || params.period === "week" ? params.period : "month";
   const selected = selectCoreReport(params.report, core.map((report) => report.href));
@@ -128,6 +133,7 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
         </> : <p className="text-sm text-mid">Nu există rapoarte disponibile pentru acest cont.</p>}
       </section>
     </div>
+    {accountingReports.length > 0 && <section className="mt-6"><h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-muted-foreground">Rapoarte contabile</h2><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{accountingReports.map((report) => <Link key={report.href} href={report.href} className="rounded-xl border border-border bg-card p-4 transition hover:border-brass/40"><span className="font-semibold text-foreground">{report.title}</span><span className="mt-1 block text-sm text-muted-foreground">{report.desc}</span></Link>)}</div></section>}
     <section className="mt-6"><h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-muted-foreground">Instrumente operaționale</h2><div className="grid gap-3 sm:grid-cols-2"><Link href="/app/transactions" className="rounded-xl border border-border bg-card p-4 transition hover:border-brass/40"><span className="font-semibold">Tranzacții</span><span className="mt-1 block text-sm text-muted-foreground">Caută bonuri, vânzări, retururi și anulări.</span></Link><Link href="/app/reports/staff" className="rounded-xl border border-border bg-card p-4 transition hover:border-brass/40"><span className="font-semibold">Personal</span><span className="mt-1 block text-sm text-muted-foreground">Activitate casieri, reduceri, anulări și vânzări.</span></Link></div></section>
     {(membership.role === "owner" || membership.role === "manager") && <section className="mt-6"><h2 className="mb-3 text-sm font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contabilitate</h2><AccountantAccessCard compact /><Link href="/app/settings?tab=accountant#accountant" className="mt-3 inline-flex text-sm font-semibold text-brass">Gestionează accesul contabilului →</Link></section>}
   </div>;

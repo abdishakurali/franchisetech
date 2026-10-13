@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 
 const csvCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
 const decimal = (value: unknown) => Number(value ?? 0).toFixed(2).replace(".", ",");
@@ -19,9 +18,6 @@ export async function GET(request: Request) {
     .select("organisation_id,role").eq("user_id", user.id).limit(1).maybeSingle();
   if (!membership || !["owner", "manager"].includes(membership.role ?? "")) {
     return new NextResponse("Nu aveți acces la exporturile contabile.", { status: 403 });
-  }
-  if (!await hasEntitlement(membership.organisation_id, "reports.accountant_pack")) {
-    return new NextResponse("Exportul contabil necesită planul corespunzător.", { status: 403 });
   }
   const orgId = membership.organisation_id;
   const start = `${from}T00:00:00.000Z`;

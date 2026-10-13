@@ -4,6 +4,7 @@ import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/enti
 import { formatMoney } from "@/lib/kitchenops/metrics";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { canAccessAccountingReport } from "@/lib/accounting-report-access";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -20,19 +21,21 @@ export async function GET(req: Request) {
 
   const { data: membership } = await supabase
     .from("organisation_members")
-    .select("organisation_id")
+    .select("organisation_id,role")
     .eq("user_id", user.id)
     .limit(1)
     .single();
   if (!membership) return new NextResponse("No org", { status: 403 });
   const orgId = membership.organisation_id;
 
-  try {
-    await assertEntitlement(orgId, "reports.gestiune", { write: false });
-  } catch (error) {
-    const response = entitlementDeniedResponse(error);
-    if (response) return response;
-    throw error;
+  if (!canAccessAccountingReport(membership.role, false)) {
+    try {
+      await assertEntitlement(orgId, "reports.gestiune", { write: false });
+    } catch (error) {
+      const response = entitlementDeniedResponse(error);
+      if (response) return response;
+      throw error;
+    }
   }
 
   const { data: org } = await supabase

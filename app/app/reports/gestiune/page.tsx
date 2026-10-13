@@ -10,6 +10,7 @@ import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 import { computeGestiuneReport } from "@/lib/ro-accounting/gestiune-data";
+import { isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
 
 const DOCUMENT_TYPE_COLORS: Record<string, string> = {
   stoc_initial: "bg-accent text-foreground",
@@ -25,9 +26,9 @@ export default async function GestiuneReportPage({
 }: {
   searchParams?: Promise<{ from?: string; to?: string }>;
 }) {
-  await requireBusinessModule("inventory");
-  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
-  if (!await hasEntitlement(orgId, "reports.gestiune")) redirect("/app/billing?reason=gestiune_requires_pro");
+  const { countryCode, profileLocale, supabase, orgId, currency, membership } = await getKitchenOpsContext();
+  if (!isOwnerAccountingReportRole(membership.role)) await requireBusinessModule("inventory");
+  if (!isOwnerAccountingReportRole(membership.role) && !(await hasEntitlement(orgId, "reports.gestiune"))) redirect("/app/billing?reason=gestiune_requires_pro");
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
 

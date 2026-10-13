@@ -5,9 +5,10 @@ import { AuditExportButtons } from "@/components/app/AuditExportButtons";
 import { SagaExportButtons } from "@/components/app/SagaExportButtons";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
+import { canAccessAccountingReport } from "@/lib/accounting-report-access";
 
 export default async function AuditExportPage({ searchParams }: { searchParams?: Promise<{ from?: string; to?: string }> }) {
-  const { orgId, countryCode, profileLocale, supabase } = await getKitchenOpsContext();
+  const { orgId, countryCode, profileLocale, supabase, membership } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const { data: orgSettings } = await supabase
     .from("organisations")
@@ -16,7 +17,7 @@ export default async function AuditExportPage({ searchParams }: { searchParams?:
     .maybeSingle();
 
   if (!orgSettings?.saga_export_enabled) redirect("/app/settings?tab=integrations");
-  if (!await hasEntitlement(orgId, "reports.accountant_pack")) redirect("/app/billing?reason=saga_requires_scale");
+  if (!canAccessAccountingReport(membership.role, await hasEntitlement(orgId, "reports.accountant_pack"))) redirect("/app/billing?reason=saga_requires_scale");
 
   const ae = t.reportPages.auditExport;
   const params = await searchParams;

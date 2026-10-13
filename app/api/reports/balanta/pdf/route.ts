@@ -4,6 +4,7 @@ import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { computeBalantaReport } from "@/lib/ro-accounting/balanta-data";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { canAccessAccountingReport } from "@/lib/accounting-report-access";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -14,14 +15,16 @@ export async function GET(req: Request) {
 
   const ctx = await getReportPdfContext();
   if ("error" in ctx) return ctx.error;
-  const { supabase, orgId, org, currency, generatedBy } = ctx;
+  const { supabase, orgId, role, org, currency, generatedBy } = ctx;
 
-  try {
-    await assertEntitlement(orgId, "reports.gestiune", { write: false });
-  } catch (error) {
-    const response = entitlementDeniedResponse(error);
-    if (response) return response;
-    throw error;
+  if (!canAccessAccountingReport(role, false)) {
+    try {
+      await assertEntitlement(orgId, "reports.gestiune", { write: false });
+    } catch (error) {
+      const response = entitlementDeniedResponse(error);
+      if (response) return response;
+      throw error;
+    }
   }
 
   const { items, totals, hasUnknownCost } = await computeBalantaReport(supabase, orgId, from, to, "—");

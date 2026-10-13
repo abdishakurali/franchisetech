@@ -10,6 +10,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
+import { canAccessAccountingReport } from "@/lib/accounting-report-access";
 import { hasAccountantPartnerAccess } from "@/lib/accountant/permissions";
 import { fetchStockMovements, stockMovementQty, stockMovementProduct } from "@/lib/ro-accounting/stock-movements";
 import {
@@ -54,7 +55,7 @@ export async function GET(req: Request) {
   }
 
   const entitled = await hasEntitlement(orgId, "reports.accountant_pack");
-  if (!entitled && !(await hasAccountantPartnerAccess(supabase, orgId))) {
+  if (!canAccessAccountingReport(membership.role, entitled) && !(await hasAccountantPartnerAccess(supabase, orgId))) {
     return new NextResponse("Plan upgrade required for SAF-T export", { status: 403 });
   }
 

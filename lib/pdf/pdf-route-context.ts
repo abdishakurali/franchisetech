@@ -6,6 +6,7 @@ type PdfRouteContext = {
   supabase: SupabaseClient;
   userId: string;
   orgId: string;
+  role: string | null;
   org: { name: string | null; fiscalnet_cif: string | null; currency_code: string | null } | null;
   currency: string;
   generatedBy: string;
@@ -27,7 +28,7 @@ export async function getReportPdfContext(): Promise<PdfRouteContext | { error: 
 
   const { data: membership } = await supabase
     .from("organisation_members")
-    .select("organisation_id")
+    .select("organisation_id,role")
     .eq("user_id", user.id)
     .limit(1)
     .single();
@@ -47,6 +48,7 @@ export async function getReportPdfContext(): Promise<PdfRouteContext | { error: 
     supabase,
     userId: user.id,
     orgId,
+    role: membership.role ?? null,
     org: org ?? null,
     currency: org?.currency_code ?? "EUR",
     generatedBy,

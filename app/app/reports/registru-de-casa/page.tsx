@@ -6,6 +6,7 @@ import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import Link from "next/link";
+import { isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
 
 type LedgerEntry = {
   date: string;
@@ -20,8 +21,8 @@ export default async function RegistruDeCasaReportPage({
 }: {
   searchParams?: Promise<{ from?: string; to?: string }>;
 }) {
-  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
-  if (!await hasEntitlement(orgId, "reports.gestiune")) redirect("/app/billing?reason=gestiune_requires_pro");
+  const { countryCode, profileLocale, supabase, orgId, currency, membership } = await getKitchenOpsContext();
+  if (!isOwnerAccountingReportRole(membership.role) && !(await hasEntitlement(orgId, "reports.gestiune"))) redirect("/app/billing?reason=gestiune_requires_pro");
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const labels = t.reportPages.registruDeCasa;
   const params = await searchParams;

@@ -5,6 +5,7 @@ import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
 import {
   fetchStockMovements,
   stockMovementQty,
@@ -18,8 +19,8 @@ export default async function ConsumReportPage({
 }: {
   searchParams?: Promise<{ from?: string; to?: string }>;
 }) {
-  await requireBusinessModule("inventory");
-  const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
+  const { countryCode, profileLocale, supabase, orgId, currency, membership } = await getKitchenOpsContext();
+  if (!isOwnerAccountingReportRole(membership.role)) await requireBusinessModule("inventory");
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
 

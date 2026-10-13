@@ -13,6 +13,7 @@ import type { BalantaIntegrityStatus } from "@/lib/ro-accounting/balanta";
 import { computeBalantaReport } from "@/lib/ro-accounting/balanta-data";
 import { sumMovementQty } from "@/lib/ro-accounting/balanta-integrity";
 import { fetchStockMovements } from "@/lib/ro-accounting/stock-movements";
+import { canAccessAccountingReport, isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
 
 function integrityBadgeClass(status: BalantaIntegrityStatus): string {
   switch (status) {
@@ -34,13 +35,13 @@ export default async function BalantaReportPage({
 }: {
   searchParams?: Promise<{ from?: string; to?: string }>;
 }) {
-  await requireBusinessModule("inventory");
   const { countryCode, profileLocale, supabase, orgId, currency, membership } =
     await getKitchenOpsContext();
+  if (!isOwnerAccountingReportRole(membership.role)) await requireBusinessModule("inventory");
   // Balanță cantitativ-valorică is a core accounting document (like Raport
   // de Gestiune), independent of the Saga XML/DBF connector -- gated on
   // reports.gestiune (Pro+), not the Saga-specific reports.accountant_pack.
-  if (!await hasEntitlement(orgId, "reports.gestiune")) redirect("/app/billing?reason=gestiune_requires_pro");
+  if (!canAccessAccountingReport(membership.role, await hasEntitlement(orgId, "reports.gestiune"))) redirect("/app/billing?reason=gestiune_requires_pro");
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
   const params = await searchParams;
   const canManage = ["owner", "manager"].includes(membership.role ?? "");
