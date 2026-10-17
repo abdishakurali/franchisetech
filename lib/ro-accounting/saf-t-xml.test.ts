@@ -28,6 +28,10 @@ describe("generateSaftXml", () => {
       companyName: "Test SRL",
       selectionStartDate: "2026-09-01",
       selectionEndDate: "2026-09-30",
+      street: "Str. Exemplu nr. 1",
+      city: "București",
+      phone: "0712345678",
+      bankIban: "RO49AAAA1B31007593840000",
     },
     suppliers: [{ supplierId: "sup-1", name: "Furnizor Test" }],
     products: [{ productCode: "prod-1", description: "Cafea boabe", unitOfMeasure: "kg" }],
@@ -74,6 +78,18 @@ describe("generateSaftXml", () => {
     for (const { code } of MOVEMENT_TYPE_TABLE) {
       expect(xml).toContain(`<MovementType>${code}</MovementType>`);
     }
+  });
+
+  it("emits Header/Company/Address, Contact/Telephone, and BankAccount (ANAF schema requires all three)", () => {
+    const xml = generateSaftXml(baseInput);
+    expect(xml).toContain("<Address>");
+    expect(xml).toContain("<StreetName>Str. Exemplu nr. 1</StreetName>");
+    expect(xml).toContain("<City>București</City>");
+    expect(xml).toContain("<Country>RO</Country>");
+    expect(xml).toContain("<Contact>");
+    expect(xml).toContain("<Telephone>0712345678</Telephone>");
+    expect(xml).toContain("<BankAccount>");
+    expect(xml).toContain("<IBANNumber>RO49AAAA1B31007593840000</IBANNumber>");
   });
 
   it("escapes XML-unsafe characters in free text fields", () => {

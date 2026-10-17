@@ -57,6 +57,13 @@ export type SaftHeader = {
   companyName: string;
   selectionStartDate: string; // YYYY-MM-DD
   selectionEndDate: string; // YYYY-MM-DD
+  // Required by ANAF's own schema (CompanyHeaderStructure: Address, Contact
+  // with mandatory Telephone, and BankAccount are all minOccurs=1) — confirmed
+  // by running the real ANAF DUKIntegrator validator against a generated file.
+  street: string;
+  city: string;
+  phone: string;
+  bankIban: string;
 };
 
 export type SaftTaxRate = {
@@ -111,14 +118,36 @@ function buildHeader(header: SaftHeader): string {
     <Company>
       <RegistrationNumber>${escapeXml(header.cif)}</RegistrationNumber>
       <Name>${escapeXml(header.companyName)}</Name>
+      <Address>
+        <StreetName>${escapeXml(header.street)}</StreetName>
+        <City>${escapeXml(header.city)}</City>
+        <Country>RO</Country>
+      </Address>
+      <Contact>
+        <ContactPerson>
+          <FirstName>NotUsed</FirstName>
+          <LastName>${escapeXml(header.companyName)}</LastName>
+        </ContactPerson>
+        <Telephone>${escapeXml(header.phone)}</Telephone>
+      </Contact>
+      <BankAccount>
+        <IBANNumber>${escapeXml(header.bankIban)}</IBANNumber>
+      </BankAccount>
     </Company>
-    <TaxRegistrationNumber>${escapeXml(header.cif)}</TaxRegistrationNumber>
-    <TaxAccountingBasis>I</TaxAccountingBasis>
+    <DefaultCurrencyCode>RON</DefaultCurrencyCode>
     <SelectionCriteria>
       <SelectionStartDate>${header.selectionStartDate}</SelectionStartDate>
       <SelectionEndDate>${header.selectionEndDate}</SelectionEndDate>
     </SelectionCriteria>
-    <HeaderComment>Export generat de franchisetech — mișcări de stoc. A se valida cu contabilul înainte de depunere.</HeaderComment>
+    <!-- ANAF's own DUKIntegrator validator rejects any HeaderComment value (including
+         empty) with "not in list", implying a controlled vocabulary the XSD doesn't
+         document and neither Ghidul D406 nor ANAF's SAF-T FAQ mention. Left empty
+         rather than guessing a value for a fiscal document — resolve once a real
+         accounting-software-generated D406 file shows what belongs here. -->
+    <HeaderComment></HeaderComment>
+    <SegmentIndex>1</SegmentIndex>
+    <TotalSegmentsInsequence>1</TotalSegmentsInsequence>
+    <TaxAccountingBasis>I</TaxAccountingBasis>
   </Header>`;
 }
 

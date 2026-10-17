@@ -246,6 +246,9 @@ export default async function SettingsPage({
   const taxIdVerified    = Boolean(orgRow?.tax_id_verified ?? false);
   const companyLegalName = (orgRow?.company_legal_name as string | null) ?? "";
   const companyAddress   = (orgRow?.company_address as string | null) ?? "";
+  const companyCity      = (orgRow?.anaf_city as string | null) ?? "";
+  const companyPhone     = (orgRow?.anaf_phone as string | null) ?? "";
+  const companyIban      = (orgRow?.anaf_bank_iban as string | null) ?? "";
 
   const digestAllowed = await hasEntitlement(orgId, "owner_digest.enabled", { write: false });
   const ownerDigestFrequency: "off" | "daily" | "weekly" =
@@ -933,6 +936,9 @@ export default async function SettingsPage({
               initialDenumire={companyLegalName}
               initialAdresa={companyAddress}
               initialVatRegistered={anafVatRegistered}
+              initialCity={companyCity}
+              initialPhone={companyPhone}
+              initialIban={companyIban}
               canEdit={canEdit}
             />
           )}

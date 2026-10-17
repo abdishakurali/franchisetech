@@ -262,6 +262,7 @@ export default async function AccountantWorkspace({
                     </div>
                     {!canExportSaga && <p className="text-xs text-slate-500">Exportul SAGA necesită activarea modulului din Setări → Contabilitate (firma).</p>}
                     <p className="flex items-center gap-1.5 text-xs text-slate-500"><ShieldCheck className="size-3.5 shrink-0" />XML generat conform schemei ANAF · Structura MovementOfGoods</p>
+                    <p className="text-xs text-amber-700">Validat cu validatorul oficial ANAF (DUKIntegrator) pe structura Header/Company. Un singur câmp (HeaderComment) rămâne necompletat — nu am putut confirma valoarea corectă din documentația ANAF. A se verifica cu contabilul înainte de depunere.</p>
                   </article>
                 ) : canSeePurchases ? (
                   <p className="border-t-2 border-slate-200 bg-slate-50 p-4 text-xs text-slate-500 sm:p-5">

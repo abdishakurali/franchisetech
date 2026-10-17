@@ -22,6 +22,9 @@ type Props = {
   initialDenumire?: string;
   initialAdresa?: string;
   initialVatRegistered?: boolean;
+  initialCity?: string;
+  initialPhone?: string;
+  initialIban?: string;
   canEdit?: boolean;
 };
 
@@ -31,9 +34,15 @@ export function CuiLookupCard({
   initialDenumire = "",
   initialAdresa = "",
   initialVatRegistered = false,
+  initialCity = "",
+  initialPhone = "",
+  initialIban = "",
   canEdit = true,
 }: Props) {
   const [cui, setCui] = useState(initialCui);
+  const [city, setCity] = useState(initialCity);
+  const [phone, setPhone] = useState(initialPhone);
+  const [iban, setIban] = useState(initialIban);
   const [result, setResult] = useState<LookupResult | null>(
     initialVerified && initialDenumire
       ? {
@@ -85,6 +94,9 @@ export function CuiLookupCard({
     fd.set("adresa", result.adresa);
     fd.set("vat_registered", String(result.vatRegistered));
     fd.set("verified", "true");
+    fd.set("city", city);
+    fd.set("phone", phone);
+    fd.set("iban", iban);
     setSaved(false);
     startSave(async () => {
       await saveOrgCui(fd);
@@ -164,6 +176,45 @@ export function CuiLookupCard({
                 </div>
               )}
             </div>
+
+            <div className="grid gap-3 sm:grid-cols-3 border-t border-reconciled/20 pt-3">
+              <div>
+                <Label htmlFor="anaf-city">Oraș</Label>
+                <Input
+                  id="anaf-city"
+                  value={city}
+                  onChange={(e) => { setCity(e.target.value); setSaved(false); }}
+                  placeholder="ex: București"
+                  disabled={!canEdit}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="anaf-phone">Telefon firmă</Label>
+                <Input
+                  id="anaf-phone"
+                  value={phone}
+                  onChange={(e) => { setPhone(e.target.value); setSaved(false); }}
+                  placeholder="ex: 0712345678"
+                  disabled={!canEdit}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="anaf-iban">IBAN</Label>
+                <Input
+                  id="anaf-iban"
+                  value={iban}
+                  onChange={(e) => { setIban(e.target.value); setSaved(false); }}
+                  placeholder="ex: RO49AAAA1B31007593840000"
+                  disabled={!canEdit}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Oraș, telefon și IBAN nu vin din ANAF — sunt necesare pentru ca exportul SAF-T (D406) să treacă validarea oficială.
+            </p>
             {canEdit && (
               <Button
                 onClick={handleSave}
