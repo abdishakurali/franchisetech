@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -77,6 +77,7 @@ import { PosQuickAddProduct } from "@/components/app/PosQuickAddProduct";
 import { PosQuickAccessSheet } from "@/components/app/PosQuickAccessSheet";
 import { sortCategoriesByName } from "@/lib/product-categories";
 import { captureClientEvent } from "@/lib/analytics/client-events";
+import { indexCartQuantities, indexProducts } from "@/lib/pos-indexes";
 
 type Product = {
   id: string; name: string; sale_price: number | string; vat_rate?: number | string | null;
@@ -231,7 +232,8 @@ function ProductTileMedia({
   );
 }
 
-function ProductGridTile({
+const ProductGridTile = memo(function ProductGridTile({
+  productId,
   name,
   priceLabel,
   imageUrl,
@@ -241,8 +243,9 @@ function ProductGridTile({
   tileMode,
   inCartQty,
   selected,
-  onClick,
+  onAdd,
 }: {
+  productId: string;
   name: string;
   priceLabel: string;
   imageUrl: string | null | undefined;
@@ -256,12 +259,12 @@ function ProductGridTile({
   tileMode: PosTileMode;
   inCartQty: number;
   selected: boolean;
-  onClick: () => void;
+  onAdd: (productId: string) => void;
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => onAdd(productId)}
       className={cn(
         "relative flex min-h-[112px] flex-col overflow-hidden rounded-[10px] border text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brass/40",
         selected ? "border-brass bg-accent ring-1 ring-brass/20" : "border-border bg-card hover:border-brass/40",
@@ -312,7 +315,7 @@ function ProductGridTile({
       </div>
     </button>
   );
-}
+});
 
 function pickDefaultPaymentId(methods: PaymentMethod[]) {
   return methods.find((m) => m.type === "card")?.id ?? methods[0]?.id ?? "";
@@ -792,8 +795,9 @@ function PosRegisterInner({
   const { locale, t } = usePosI18n();
   const router = useRouter();
   const intlLocale = posIntlLocale(locale);
-  const money = (v: number) =>
-    new Intl.NumberFormat(intlLocale, { style: "currency", currency: currency || "EUR" }).format(v);
+  const money = useCallback((v: number) =>
+    new Intl.NumberFormat(intlLocale, { style: "currency", currency: currency || "EUR" }).format(v),
+  [currency, intlLocale]);
   const chargeRef = useRef<HTMLButtonElement>(null);
   const activationTrackedRef = useRef(false);
   const [showActivationCelebrate, setShowActivationCelebrate] = useState(false);
@@ -1262,6 +1266,8 @@ function PosRegisterInner({
 
   const posProducts = useMemo(() =>
     products.filter((p) => p.available_in_pos !== false && p.is_ingredient !== true), [products]);
+  const productById = useMemo(() => indexProducts(products), [products]);
+  const cartQtyByProductId = useMemo(() => indexCartQuantities(cart), [cart]);
 
   // Computed from the full sellable set, not the search/category-filtered
   // `filtered` list below — which category gets photo tiles shouldn't
@@ -1332,10 +1338,10 @@ function PosRegisterInner({
   }
 
   /** Recalculates the SGR deposit line so its qty always equals sum of has_sgr product qtys */
-  const syncSgr = (items: CartItem[]): CartItem[] => {
+  const syncSgr = useCallback((items: CartItem[]): CartItem[] => {
     if (!sgrEnabled || !sgrProduct) return items;
     const needed = items.reduce((sum, item) => {
-      const prod = products.find((pr) => pr.id === item.product_id);
+      const prod = productById.get(item.product_id);
       return sum + (prod?.has_sgr ? item.quantity : 0);
     }, 0);
     const withoutSgr = items.filter((i) => i.product_id !== sgrProduct!.id);
@@ -1350,9 +1356,11 @@ function PosRegisterInner({
       fiscalnet_vat_group:  vatRateGroupMap[sgrRate] ?? null,
       discount_pct:         0,
     }];
-  };
+  }, [productById, sgrEnabled, sgrProduct, vatRateGroupMap]);
 
-  const addToCart = (p: Product) =>
+  const addToCart = useCallback((productId: string) => {
+    const p = productById.get(productId);
+    if (!p) return;
     setCart((items) => {
       const ex = items.find((i) => i.product_id === p.id);
       const vatRate = Number(p.vat_rate ?? 0);
@@ -1361,6 +1369,7 @@ function PosRegisterInner({
         : [...items, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: Number(p.sale_price), vat_rate: vatRate, fiscalnet_vat_group: vatRateGroupMap[vatRate] ?? null, discount_pct: 0 }];
       return syncSgr(updated);
     });
+  }, [productById, syncSgr, vatRateGroupMap]);
 
   const setQty = (id: string, qty: number) =>
     setCart((items) => {
@@ -1683,10 +1692,11 @@ function PosRegisterInner({
         >
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {filtered.map((p) => {
-            const inCart = cart.find((i) => i.product_id === p.id);
+            const inCartQty = cartQtyByProductId.get(p.id) ?? 0;
             return (
               <ProductGridTile
                 key={p.id}
+                productId={p.id}
                 name={p.name}
                 imageUrl={p.image_url}
                 placeholderType={p.placeholder_type}
@@ -1694,9 +1704,9 @@ function PosRegisterInner({
                 categoryColor={p.pos_category?.color}
                 tileMode={tileModeForProduct(categoryTileModes, p)}
                 priceLabel={money(Number(p.sale_price))}
-                inCartQty={inCart?.quantity ?? 0}
-                selected={Boolean(inCart)}
-                onClick={() => addToCart(p)}
+                inCartQty={inCartQty}
+                selected={inCartQty > 0}
+                onAdd={addToCart}
               />
             );
           })}

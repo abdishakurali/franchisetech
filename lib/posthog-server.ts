@@ -2,6 +2,17 @@ import { PostHog } from "posthog-node";
 
 let posthogClient: PostHog | null = null;
 
+function standardProperties(
+  properties?: Record<string, string | number | boolean | null | undefined>,
+) {
+  return {
+    event_schema_version: 1,
+    event_source: "server",
+    environment: process.env.NODE_ENV ?? "unknown",
+    ...properties,
+  };
+}
+
 export function getPostHogClient(): PostHog | null {
   const token = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
   const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
@@ -58,7 +69,7 @@ export function captureServerEvent(
   try {
     const client = getPostHogClient();
     if (!client) return;
-    client.capture({ distinctId, event, properties, groups });
+    client.capture({ distinctId, event, properties: standardProperties(properties), groups });
   } catch {
     // analytics must not block business flows
   }
@@ -75,13 +86,15 @@ export async function captureServerEventAsync(
   event: string,
   properties?: Record<string, string | number | boolean | null | undefined>,
   groups?: Record<string, string>,
-): Promise<void> {
+): Promise<boolean> {
   try {
     const client = getPostHogClient();
-    if (!client) return;
-    client.capture({ distinctId, event, properties, groups });
+    if (!client) return false;
+    client.capture({ distinctId, event, properties: standardProperties(properties), groups });
     await client.flush();
+    return true;
   } catch {
     // analytics must not block business flows
+    return false;
   }
 }

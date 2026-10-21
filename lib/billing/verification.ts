@@ -1,9 +1,6 @@
-// Card verification → legacy trial-start bookkeeping. Trial retired 2026-09:
-// entitlement resolution (lib/billing/entitlement-resolver.ts) and app access
-// (lib/billing/subscription.ts) no longer read trial_started_at/trial_ends_at
-// at all — every org is permanently on Free until it subscribes — so this
-// still writes those columns and fires trial_started events for whichever
-// analytics still key off them, but it no longer gates anything. Called from
+// Card verification → 15-day trial bookkeeping. Entitlement enforcement is
+// rollout-gated by BILLING_ENFORCE_VERIFIED_TRIAL so existing customer access
+// remains unchanged until production validation is complete. Called from
 // both the verification success page (authed user) and the Stripe webhook (no
 // session), so the update must stay idempotent: only the call that flips
 // trial_started_at from NULL fires the events.

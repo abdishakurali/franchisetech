@@ -71,17 +71,17 @@ async function findReusableRow(
 
   if (bySubscription) return bySubscription as ExistingSubscriptionRow;
 
-  const { data: pending } = await supabase
+  // One canonical snapshot per organisation. Reuse it even when Stripe issued
+  // a replacement subscription id; billing_events retains the history.
+  const { data: canonical } = await supabase
     .from("billing_subscriptions")
     .select("id, organisation_id, stripe_customer_id, stripe_subscription_id, plan, status, grace_period_ends_at, current_period_end")
     .eq("organisation_id", organisationId)
-    .eq("stripe_customer_id", customerId)
-    .is("stripe_subscription_id", null)
-    .order("created_at", { ascending: false })
+    .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
-  return (pending as ExistingSubscriptionRow | null) ?? null;
+  return (canonical as ExistingSubscriptionRow | null) ?? null;
 }
 
 export async function syncStripeSubscription(

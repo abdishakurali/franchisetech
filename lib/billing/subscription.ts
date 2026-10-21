@@ -61,6 +61,15 @@ export function resolveSubscriptionState(
   }
 }
 
+export function resolveNoSubscriptionState(input: {
+  cardVerifiedAt: string | null;
+  trialStartedAt: string | null;
+  trialEndsAt: string | null;
+}): SubState {
+  if (!input.cardVerifiedAt || !input.trialStartedAt || !input.trialEndsAt) return "none";
+  return new Date(input.trialEndsAt) > new Date() ? "soft_trial" : "none";
+}
+
 /**
  * Returns true if the subscription state allows full access to the app.
  * Use this on the backend — never trust client-sent subscription state.
@@ -124,7 +133,7 @@ export const getSubscriptionStatus = cache(async function getSubscriptionStatus(
   const [{ data: org }, { data: sub }] = await Promise.all([
     supabase
       .from("organisations")
-      .select("referral_credit_months, stripe_customer_id")
+      .select("referral_credit_months, stripe_customer_id, card_verified_at, trial_started_at, trial_ends_at")
       .eq("id", orgId)
       .maybeSingle(),
     service
@@ -139,19 +148,25 @@ export const getSubscriptionStatus = cache(async function getSubscriptionStatus(
   const creditMonths = Number(org?.referral_credit_months ?? 0);
   const stripeCustomerId = sub?.stripe_customer_id ?? org?.stripe_customer_id ?? null;
 
-  // Trial retired 2026-09 with the pricing restructure: a brand-new signup
-  // with no billing_subscriptions row is now permanently on the Free plan,
-  // not a time-limited trial. No expiry date, no countdown. (Previously this
-  // fell back to created_at + 15 days — see git history if that ever needs
-  // to be resurrected.)
   if (!sub) {
+    // Preserve current customer access until the restored trial gate is
+    // explicitly enabled after production validation.
+    const enforceVerifiedTrial = process.env.BILLING_ENFORCE_VERIFIED_TRIAL === "true";
+    const trialState = resolveNoSubscriptionState({
+      cardVerifiedAt: org?.card_verified_at ?? null,
+      trialStartedAt: org?.trial_started_at ?? null,
+      trialEndsAt: org?.trial_ends_at ?? null,
+    });
+    const state: SubState = enforceVerifiedTrial ? trialState : "free";
+    const trialEndsAt = trialState === "soft_trial" ? org?.trial_ends_at ?? null : null;
+    const trialDaysLeft = daysUntil(trialEndsAt);
     return {
-      state: "free",
-      plan: "free",
-      label: humanLabel("free", "free", null, false, null),
+      state,
+      plan: state === "free" ? "free" : null,
+      label: humanLabel(state, state === "free" ? "free" : null, trialDaysLeft, false, null),
       urgent: false,
-      showUpgradeCTA: true,
-      trialEndsAt: null,
+      showUpgradeCTA: state !== "soft_trial",
+      trialEndsAt,
       stripeTrialEnd: null,
       periodEnd: null,
       gracePeriodEndsAt: null,
@@ -159,7 +174,7 @@ export const getSubscriptionStatus = cache(async function getSubscriptionStatus(
       creditMonths,
       stripeCustomerId,
       stripeSubscriptionId: null,
-      trialDaysLeft: null,
+      trialDaysLeft,
       graceDaysLeft: null,
     };
   }

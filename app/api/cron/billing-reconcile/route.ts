@@ -6,6 +6,7 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { syncStripeSubscription } from "@/lib/billing/stripe-sync";
+import { selectCanonicalSubscription } from "@/lib/billing/reconciliation";
 
 export const dynamic = "force-dynamic";
 
@@ -35,12 +36,35 @@ export async function POST(req: NextRequest) {
   const { data: rows, error } = await supabase
     .from("billing_subscriptions")
     .select("id, organisation_id, stripe_customer_id, stripe_subscription_id, plan, status")
-    .not("stripe_customer_id", "is", null)
-    .or("status.eq.incomplete,stripe_subscription_id.is.null")
-    .order("updated_at", { ascending: false })
-    .limit(100);
+    .order("updated_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  const billingRows = (rows as BillingRow[]) ?? [];
+  const orgByCustomer = new Map(
+    billingRows
+      .filter((row) => row.stripe_customer_id)
+      .map((row) => [row.stripe_customer_id as string, row.organisation_id]),
+  );
+  const subscriptionsByOrg = new Map<string, Stripe.Subscription[]>();
+
+  // Walk customers, not only locally-known subscription ids. This recovers
+  // subscriptions whose create/update webhook never reached Supabase.
+  for await (const customer of stripe.customers.list({ limit: 100 })) {
+    const organisationId = customer.metadata?.organisation_id ?? orgByCustomer.get(customer.id);
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customer.id,
+      status: "all",
+      limit: 100,
+    });
+    for (const subscription of subscriptions.data) {
+      const resolvedOrganisationId = subscription.metadata?.organisation_id ?? organisationId;
+      if (!resolvedOrganisationId) continue;
+      const candidates = subscriptionsByOrg.get(resolvedOrganisationId) ?? [];
+      candidates.push(subscription);
+      subscriptionsByOrg.set(resolvedOrganisationId, candidates);
+    }
+  }
 
   let checked = 0;
   let synced = 0;
@@ -48,32 +72,31 @@ export async function POST(req: NextRequest) {
   let failed = 0;
   const failures: Array<{ organisationId: string; reason: string }> = [];
 
-  for (const row of (rows as BillingRow[]) ?? []) {
-    if (!row.stripe_customer_id) {
-      skipped++;
-      continue;
-    }
-
+  const rowsByOrg = new Map(billingRows.map((row) => [row.organisation_id, row]));
+  const organisationIds = new Set([...rowsByOrg.keys(), ...subscriptionsByOrg.keys()]);
+  for (const organisationId of organisationIds) {
+    const row = rowsByOrg.get(organisationId);
     checked++;
     try {
-      const subscriptions = await stripe.subscriptions.list({
-        customer: row.stripe_customer_id,
-        status: "all",
-        limit: 10,
-      });
-
-      const subscription = subscriptions.data.find((sub) =>
-        ["active", "trialing", "past_due"].includes(sub.status)
-      );
+      const subscription = selectCanonicalSubscription(subscriptionsByOrg.get(organisationId) ?? []);
 
       if (!subscription) {
-        skipped++;
+        if (row && row.status !== "canceled") {
+          const { error: closeError } = await supabase
+            .from("billing_subscriptions")
+            .update({ status: "canceled", grace_period_ends_at: null, updated_at: new Date().toISOString() })
+            .eq("organisation_id", organisationId);
+          if (closeError) throw closeError;
+          synced++;
+        } else {
+          skipped++;
+        }
         continue;
       }
 
       const result = await syncStripeSubscription(subscription, {
-        fallbackOrganisationId: row.organisation_id,
-        fallbackPlan: row.plan,
+        fallbackOrganisationId: organisationId,
+        fallbackPlan: row?.plan,
         clearGracePeriod: subscription.status !== "past_due",
       });
 
@@ -81,11 +104,11 @@ export async function POST(req: NextRequest) {
         synced++;
       } else {
         failed++;
-        failures.push({ organisationId: row.organisation_id, reason: result.reason ?? "unknown" });
+        failures.push({ organisationId, reason: result.reason ?? "unknown" });
       }
     } catch (err) {
       failed++;
-      failures.push({ organisationId: row.organisation_id, reason: err instanceof Error ? err.message : String(err) });
+      failures.push({ organisationId, reason: err instanceof Error ? err.message : String(err) });
     }
   }
 

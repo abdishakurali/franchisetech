@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAccessAllowed, isSubscriptionBlockedForApp, resolveSubscriptionState, type SubState, type SubscriptionStatus } from "./subscription";
+import { isAccessAllowed, isSubscriptionBlockedForApp, resolveNoSubscriptionState, resolveSubscriptionState, type SubState, type SubscriptionStatus } from "./subscription";
 
 function statusFor(state: SubState): SubscriptionStatus {
   return {
@@ -57,5 +57,23 @@ describe("resolveSubscriptionState", () => {
 
   it("blocks a canceled subscription after its paid period", () => {
     expect(resolveSubscriptionState("canceled", "2020-10-25T08:13:25.000Z", null)).toBe("canceled");
+  });
+});
+
+describe("resolveNoSubscriptionState", () => {
+  it("allows a verified 15-day trial before its deadline", () => {
+    expect(resolveNoSubscriptionState({
+      cardVerifiedAt: "2026-10-01T00:00:00.000Z",
+      trialStartedAt: "2026-10-01T00:00:00.000Z",
+      trialEndsAt: "2099-10-16T00:00:00.000Z",
+    })).toBe("soft_trial");
+  });
+
+  it("does not grant app access before card verification", () => {
+    expect(resolveNoSubscriptionState({
+      cardVerifiedAt: null,
+      trialStartedAt: null,
+      trialEndsAt: null,
+    })).toBe("none");
   });
 });

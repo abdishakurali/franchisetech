@@ -9,7 +9,11 @@ export function captureClientEvent(
 ): void {
   try {
     if (typeof window === "undefined") return;
-    posthog.capture(event, properties);
+    posthog.capture(event, {
+      event_schema_version: 1,
+      event_source: "client",
+      ...properties,
+    });
   } catch {
     // analytics must not block UX
   }

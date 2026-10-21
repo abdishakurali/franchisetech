@@ -8,6 +8,7 @@ import { syncStripeSubscription } from "@/lib/billing/stripe-sync";
 import { startTrialAfterCardVerification } from "@/lib/billing/verification";
 import { reportPaidConversion } from "@/lib/analytics/server-conversions";
 import { captureServerEvent, flushPostHog } from "@/lib/posthog-server";
+import { buildPaymentFailureProperties } from "@/lib/billing/reconciliation";
 
 export const dynamic = "force-dynamic";
 
@@ -161,10 +162,9 @@ export async function POST(request: Request) {
         session.metadata?.purpose === "card_verification" &&
         session.payment_status === "paid"
       ) {
-        // €1 card verification paid — legacy trial-start bookkeeping (see
-        // lib/billing/verification.ts; trial retired 2026-09, this no longer
-        // gates access). Idempotent: the success page may have already run
-        // it; only the first caller wins.
+        // €1 card verification paid — start the documented 15-day trial.
+        // Idempotent: the success page may have already run it; only the first
+        // caller wins. Enforcement remains separately feature-gated.
         const verifyOrgId = session.metadata?.organisation_id ?? session.client_reference_id;
         if (verifyOrgId) {
           await startTrialAfterCardVerification({
@@ -256,10 +256,34 @@ export async function POST(request: Request) {
           const failOrgId = subscription.metadata?.organisation_id ?? null;
           const ownerId = await resolveOrgOwnerId(failOrgId);
           if (ownerId) {
+            let lastPaymentError: Stripe.PaymentIntent.LastPaymentError | null = null;
+            try {
+              const payments = await stripe.invoicePayments.list({
+                invoice: invoice.id,
+                limit: 1,
+                expand: ["data.payment.payment_intent"],
+              });
+              const paymentIntent = payments.data[0]?.payment.payment_intent;
+              if (paymentIntent && typeof paymentIntent !== "string") {
+                lastPaymentError = paymentIntent.last_payment_error;
+              }
+            } catch {
+              // Failure analytics are best-effort; subscription state still syncs.
+            }
             captureServerEvent(
               ownerId,
               "payment_failed",
-              { organisation_id: failOrgId, plan: subscription.metadata?.plan ?? "", amount_due_cents: invoice.amount_paid ?? 0 },
+              {
+                organisation_id: failOrgId,
+                plan: subscription.metadata?.plan ?? "",
+                ...buildPaymentFailureProperties({
+                  id: invoice.id,
+                  amount_due: invoice.amount_due,
+                  attempt_count: invoice.attempt_count,
+                  currency: invoice.currency,
+                  lastPaymentError,
+                }),
+              },
               failOrgId ? { organisation: failOrgId } : undefined,
             );
           }
@@ -375,6 +399,22 @@ export async function POST(request: Request) {
   }
 
   if (processingError) {
+    const cronSecret = process.env.CRON_SECRET;
+    if (cronSecret) {
+      // Stripe will retry the event; reconciliation independently repairs any
+      // partial billing snapshot left by this failed attempt.
+      after(async () => {
+        try {
+          await fetch(new URL("/api/cron/billing-reconcile", request.url), {
+            method: "POST",
+            headers: { authorization: `Bearer ${cronSecret}` },
+            cache: "no-store",
+          });
+        } catch {
+          // Stripe retry remains the primary recovery path.
+        }
+      });
+    }
     return NextResponse.json({ received: false, error: processingError }, { status: 500 });
   }
 
