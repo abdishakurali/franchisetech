@@ -1,3 +1,4 @@
+import { perfSteps } from "@/lib/perf/timing";
 import type { BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
 import { isFiscalNetActive } from "@/lib/fiscalnet/eligibility";
 import { DEFAULT_VAT_GROUPS, DEFAULT_PAYMENT_TYPE_MAP } from "@/lib/fiscalnet/types";
@@ -45,9 +46,57 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   const tabIdParam = params?.tabId ?? null;
   const quickSale = params?.quick === "1";
   const fromOnboarding = params?.onboarding === "1";
+  const perf = perfSteps("pos_page");
   const { countryCode, profileLocale, supabase, orgId, currency, currencySymbol, user, membership } = await getKitchenOpsContext();
-  const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
-  const subscriptionStatus = await getSubscriptionStatus(orgId).catch(() => null);
+  perf.mark("context");
+  // These reads depend only on orgId/user, so they all start now and run
+  // concurrently with the locale + subscription checks below (they were
+  // previously awaited one round at a time). Promise.all/allSettled call .then
+  // on the lazy Supabase builders, which sends the requests immediately.
+  const loyaltyProfileQueries = Promise.all([
+    supabase.from("organisations").select("loyalty_enabled").eq("id", orgId).maybeSingle(),
+    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+  ]);
+  const vatAndFiscalQueries = Promise.allSettled([
+    supabase
+      .from("vat_rates")
+      .select(VAT_RATE_COLUMNS)
+      .eq("organisation_id", orgId)
+      .eq("active", true)
+      .order("sort_order")
+      .order("rate"),
+    supabase
+      .from("organisations")
+      .select("country_code,fiscalnet_enabled,fiscalnet_mock_mode,fiscalnet_connection_mode,fiscalnet_api_host,fiscalnet_payment_type_map,fiscalnet_operator_code,sgr_enabled")
+      .eq("id", orgId)
+      .maybeSingle(),
+  ]);
+  const seedExistenceQueries = Promise.all([
+    supabase.from("product_categories").select("id").eq("organisation_id", orgId).limit(1),
+    supabase.from("payment_methods").select("id").eq("organisation_id", orgId).limit(1),
+  ]);
+  const sessionQueries = Promise.all([
+    supabase
+      .from("pos_sessions")
+      .select("*")
+      .eq("organisation_id", orgId)
+      .eq("status", "open")
+      .order("opened_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("pos_sessions")
+      .select("id,opened_at,closed_at,opening_cash,counted_cash,expected_cash,notes,status,closed_by")
+      .eq("organisation_id", orgId)
+      .in("status", ["closed", "stale"])
+      .order("closed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  const [{ locale, t }, subscriptionStatus] = await Promise.all([
+    getAppLocaleAndText(countryCode, profileLocale),
+    getSubscriptionStatus(orgId).catch(() => null),
+  ]);
   const subscriptionBlocked = isSubscriptionBlockedForApp(subscriptionStatus);
   const billingReason = subscriptionStatus?.state === "past_due_expired" ? "past_due_expired" : "trial_expired";
   if (subscriptionBlocked) {
@@ -102,10 +151,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   // Own small query rather than extending the membership join, per project constraints
   // on lib/kitchenops/data.ts. Combined with the userProfile fetch below (moved
   // up here) since both are independent single-row reads for this same request.
-  const [{ data: loyaltyOrgRow }, { data: userProfile }] = await Promise.all([
-    supabase.from("organisations").select("loyalty_enabled").eq("id", orgId).maybeSingle(),
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-  ]);
+  const [{ data: loyaltyOrgRow }, { data: userProfile }] = await loyaltyProfileQueries;
   const features = {
     kitchenDisplay: !LEAN_PRODUCT_SCOPE_ENABLED && Boolean(orgInfo?.kitchen_display_enabled),
     restaurantOrderFlow: Boolean(orgInfo?.restaurant_order_flow_enabled),
@@ -154,20 +200,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   // config stays non-fatal, same as the try/catch below always did. This
   // also removes the second, duplicate vat_rates round-trip that used to
   // happen later via listActiveVatRates() for the same org.
-  const [vatRatesSettled, fnOrgSettled] = await Promise.allSettled([
-    supabase
-      .from("vat_rates")
-      .select(VAT_RATE_COLUMNS)
-      .eq("organisation_id", orgId)
-      .eq("active", true)
-      .order("sort_order")
-      .order("rate"),
-    supabase
-      .from("organisations")
-      .select("country_code,fiscalnet_enabled,fiscalnet_mock_mode,fiscalnet_connection_mode,fiscalnet_api_host,fiscalnet_payment_type_map,fiscalnet_operator_code,sgr_enabled")
-      .eq("id", orgId)
-      .maybeSingle(),
-  ]);
+  const [vatRatesSettled, fnOrgSettled] = await vatAndFiscalQueries;
   const vatRates = mapVatRateRows(vatRatesSettled.status === "fulfilled" ? vatRatesSettled.value.data : null);
 
   // FiscalNet browser config (passed to PosRegister for client-side API calls)
@@ -212,10 +245,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   // Ensure default categories/methods exist — the two existence checks are
   // independent tables, run concurrently; each conditional seed-insert stays
   // dependent on its own check.
-  const [{ data: existingCats }, { data: existingMethods }] = await Promise.all([
-    supabase.from("product_categories").select("id").eq("organisation_id", orgId).limit(1),
-    supabase.from("payment_methods").select("id").eq("organisation_id", orgId).limit(1),
-  ]);
+  const [{ data: existingCats }, { data: existingMethods }] = await seedExistenceQueries;
   if (!existingCats?.length) {
     await supabase.from("product_categories").insert([
       { organisation_id: orgId, name: "Drinks", color: "#b4903f", sort_order: 1, category_type: "pos" },
@@ -234,34 +264,71 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
 
   // Open session and last-closed session are independent status filters on
   // the same table — run concurrently instead of one after another.
-  const [{ data: sessionData }, { data: lastClosed }] = await Promise.all([
-    supabase
-      .from("pos_sessions")
-      .select("*")
-      .eq("organisation_id", orgId)
-      .eq("status", "open")
-      .order("opened_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from("pos_sessions")
-      .select("id,opened_at,closed_at,opening_cash,counted_cash,expected_cash,notes,status,closed_by")
-      .eq("organisation_id", orgId)
-      .in("status", ["closed", "stale"])
-      .order("closed_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-  ]);
+  const [{ data: sessionData }, { data: lastClosed }] = await sessionQueries;
+  perf.mark("org_and_sessions");
 
   const openSession = sessionData ?? null;
 
+  // Everything below depends only on the two session rows (or on nothing), so
+  // start every query now and await each one where its result is used. This
+  // used to be ~6 sequential round trips on every POS load.
+  // Supabase builders are lazy (the request is sent on .then), so each one is
+  // started explicitly with .then(identity) here.
+  const closerQuery = lastClosed?.closed_by
+    ? supabase.from("profiles").select("full_name,email").eq("id", lastClosed.closed_by).maybeSingle().then((r) => r)
+    : null;
+  const lastTxsQuery = lastClosed
+    ? supabase
+      .from("pos_transactions")
+      .select("total,payment_methods(type)")
+      .eq("organisation_id", orgId)
+      .eq("session_id", lastClosed.id)
+      .eq("status", "completed")
+      .then((r) => r)
+    : null;
+  const openTxsQuery = openSession
+    ? supabase
+      .from("pos_transactions")
+      .select("id,total,payment_methods(type),sale_payments(method,amount),pos_transaction_items(product_name,gross_amount,line_total)")
+      .eq("organisation_id", orgId)
+      .eq("session_id", openSession.id)
+      .eq("status", "completed")
+      .then((r) => r)
+    : null;
+  const movementQuery = openSession
+    ? supabase
+      .from("pos_cash_movements")
+      .select("id,movement_type,amount,reason,performed_at,created_at")
+      .eq("organisation_id", orgId)
+      .eq("session_id", openSession.id)
+      .in("movement_type", ["cash_in", "cash_out"])
+      .order("performed_at", { ascending: true })
+      .then((r) => r)
+    : null;
+  const catalogQueries = Promise.all([
+    supabase
+      .from("products")
+      .select(PRODUCT_LIST_WITH_POS_SELECT)
+      .eq("organisation_id", orgId)
+      .eq("active", true)
+      .order("pos_sort_order", { ascending: true })
+      .order("name", { ascending: true }),
+    supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("sort_order", { ascending: true }).order("name", { ascending: true }),
+    supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at"),
+  ]);
+  const registerQueries = Promise.all([
+    supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
+    supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
+    supabase
+      .from("pos_transactions")
+      .select("*", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("status", "completed"),
+  ]);
+
   let lastClosedBy = "Staff";
-  if (lastClosed?.closed_by) {
-    const { data: closer } = await supabase
-      .from("profiles")
-      .select("full_name,email")
-      .eq("id", lastClosed.closed_by)
-      .maybeSingle();
+  if (closerQuery) {
+    const { data: closer } = await closerQuery;
     lastClosedBy = closer?.full_name || closer?.email || "Staff";
   }
 
@@ -270,13 +337,8 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   let lastSessionTxCount = 0;
   let lastSessionCash = 0;
   let lastSessionCard = 0;
-  if (lastClosed) {
-    const { data: lastTxs } = await supabase
-      .from("pos_transactions")
-      .select("total,payment_methods(type)")
-      .eq("organisation_id", orgId)
-      .eq("session_id", lastClosed.id)
-      .eq("status", "completed");
+  if (lastTxsQuery) {
+    const { data: lastTxs } = await lastTxsQuery;
     for (const tx of lastTxs ?? []) {
       lastSessionTotal += Number(tx.total ?? 0);
       lastSessionTxCount++;
@@ -300,13 +362,8 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     performedAt: string | null;
   }> = [];
   const productTotals = new Map<string, number>();
-  if (openSession) {
-    const { data: txs } = await supabase
-      .from("pos_transactions")
-      .select("id,total,payment_methods(type),sale_payments(method,amount),pos_transaction_items(product_name,gross_amount,line_total)")
-      .eq("organisation_id", orgId)
-      .eq("session_id", openSession.id)
-      .eq("status", "completed");
+  if (openTxsQuery && movementQuery) {
+    const [{ data: txs }, { data: movementRows }] = await Promise.all([openTxsQuery, movementQuery]);
     for (const tx of txs ?? []) {
       txCount++;
       const payments = (tx.sale_payments ?? []) as Array<{ method?: string | null; amount?: number | string | null }>;
@@ -325,13 +382,6 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       }
     }
 
-    const { data: movementRows } = await supabase
-      .from("pos_cash_movements")
-      .select("id,movement_type,amount,reason,performed_at,created_at")
-      .eq("organisation_id", orgId)
-      .eq("session_id", openSession.id)
-      .in("movement_type", ["cash_in", "cash_out"])
-      .order("performed_at", { ascending: true });
 
     for (const row of movementRows ?? []) {
       const absAmount = Math.abs(Number(row.amount ?? 0));
@@ -349,28 +399,12 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   }
   const topProduct = [...productTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 
-  const [{ data: products }, { data: categories }, { data: methods }] = await Promise.all([
-    supabase
-      .from("products")
-      .select(PRODUCT_LIST_WITH_POS_SELECT)
-      .eq("organisation_id", orgId)
-      .eq("active", true)
-      .order("pos_sort_order", { ascending: true })
-      .order("name", { ascending: true }),
-    supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("sort_order", { ascending: true }).order("name", { ascending: true }),
-    supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at"),
-  ]);
+  const [{ data: products }, { data: categories }, { data: methods }] = await catalogQueries;
   const sgrProduct = (products ?? []).find((p) => p.name?.toUpperCase() === "SGR") ?? null;
   const defaultVatRate = getDefaultVatRateValue(vatRates);
-  const [{ data: customers }, { data: recentTransactions }, { count: allTimeCompletedSales }] = await Promise.all([
-    supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
-    supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
-    supabase
-      .from("pos_transactions")
-      .select("*", { count: "exact", head: true })
-      .eq("organisation_id", orgId)
-      .eq("status", "completed"),
-  ]);
+  const [{ data: customers }, { data: recentTransactions }, { count: allTimeCompletedSales }] = await registerQueries;
+  perf.mark("session_and_catalog");
+  perf.done();
   const trackActivationSale = (allTimeCompletedSales ?? 0) === 0;
 
   // ── CLOSED: show open-till form + last session summary + quick links ──

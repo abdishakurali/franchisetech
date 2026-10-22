@@ -34,7 +34,9 @@ import { listActiveVatRates, listAllVatRates } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
 import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
-import { captureServerEventAsync } from "@/lib/posthog-server";
+import { captureServerEvent, captureServerEventAsync, flushPostHog } from "@/lib/posthog-server";
+import { perfSteps, withTiming } from "@/lib/perf/timing";
+import { after } from "next/server";
 import { planPostSaleEffects } from "@/lib/pos-sale-replay";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
 import { resolveCsvVatRate, validatePurchaseVatRate, validateVatRateForOrg, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
@@ -790,13 +792,16 @@ export async function openPosSession(formData: FormData) {
     console.error("openPosSession:", error.message);
     return;
   }
-  await recordGrowthMilestone(supabase, orgId, "till_opened", user.id);
-  await captureServerEventAsync(
-    user.id,
-    "till_opened",
-    { organisation_id: orgId, site_id: siteId },
-    { organisation: orgId },
-  );
+  // Analytics after the response: opening the till must not wait on PostHog.
+  after(async () => {
+    await recordGrowthMilestone(supabase, orgId, "till_opened", user.id);
+    await captureServerEventAsync(
+      user.id,
+      "till_opened",
+      { organisation_id: orgId, site_id: siteId },
+      { organisation: orgId },
+    );
+  });
   const cookieStore = await cookies();
   cookieStore.set("pos_till_open", "1", { path: "/app", maxAge: 60 * 60 * 24 });
   revalidatePath("/app/pos");
@@ -842,7 +847,7 @@ export async function posCashMovement(formData: FormData): Promise<CashMovementR
   // path; a missing function (migration not applied yet) also falls back.
   if (process.env.CASH_MOVEMENT_RPC !== "0") {
     const serviceSupabase = await createServiceClient();
-    const { data, error } = await serviceSupabase.rpc("post_cash_movement", {
+    const { data, error } = await withTiming("post_cash_movement", async () => serviceSupabase.rpc("post_cash_movement", {
       p_org_id: orgId,
       p_actor_id: user.id,
       p_document: {
@@ -852,7 +857,7 @@ export async function posCashMovement(formData: FormData): Promise<CashMovementR
         amount: absAmount,
         reason,
       },
-    });
+    }));
     if (!error) {
       revalidatePath("/app/pos");
       return { ok: true, idempotent: Boolean((data as { idempotent?: boolean } | null)?.idempotent) };
@@ -915,7 +920,11 @@ export async function closePosSession(formData: FormData) {
   const expectedCash = Number(session?.expected_cash ?? 0);
   const difference = countedCash - expectedCash;
 
-  await supabase.from("pos_sessions").update({
+  // Only the request that actually moves the session from open → closed may
+  // write the daily close. A double click / retry finds 0 open rows (the row
+  // lock makes the second UPDATE re-check status) and stops here, so
+  // pos_daily_close never gets a duplicate row.
+  const { data: closedRows } = await supabase.from("pos_sessions").update({
     status: "closed",
     closed_by: user.id,
     closed_at: new Date().toISOString(),
@@ -924,7 +933,11 @@ export async function closePosSession(formData: FormData) {
     cash_breakdown: cashBreakdown,
     notes,
     updated_at: new Date().toISOString(),
-  }).eq("id", sessionId).eq("organisation_id", orgId);
+  }).eq("id", sessionId).eq("organisation_id", orgId).eq("status", "open").select("id");
+  if (!closedRows?.length) {
+    revalidatePath("/app/pos");
+    return;
+  }
 
   const cookieStore = await cookies();
   cookieStore.delete("pos_till_open");
@@ -943,7 +956,7 @@ export async function closePosSession(formData: FormData) {
     closed_by: user.id,
   }).then(() => null, () => null);
 
-  await captureServerEventAsync(
+  after(() => captureServerEventAsync(
     user.id,
     "daily_close_completed",
     {
@@ -953,7 +966,7 @@ export async function closePosSession(formData: FormData) {
       cash_difference: difference,
     },
     { organisation: orgId },
-  );
+  ));
 
   revalidatePath("/app/pos");
   revalidatePath("/app/reports/z-report");
@@ -1143,6 +1156,27 @@ export async function deleteSupplier(formData: FormData) {
   redirect("/app/suppliers");
 }
 
+/**
+ * NIR save/post pre-checks. The VAT check, unit check and product-name lookup
+ * are independent reads, so they run concurrently (previously three sequential
+ * rounds). Errors keep the original priority: VAT first, then unit of measure.
+ */
+async function validatePurchaseLinesAndLoadNames(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  orgId: string,
+  items: Array<{ tax_rate: number; unit_of_measure: string; product_id: string }>,
+) {
+  const [vatValidation, unitValidation, productLookup] = await Promise.all([
+    validateSubmittedVatRates(supabase, orgId, items.map((i) => i.tax_rate)),
+    validateSubmittedUnitsOfMeasure(supabase, orgId, items.map((i) => i.unit_of_measure)),
+    loadProductNameLookup(supabase, items.map((i) => i.product_id)),
+  ]);
+  if (!vatValidation.ok) throw new Error(vatValidation.error);
+  if (!unitValidation.ok) throw new Error(unitValidation.error);
+  return productLookup;
+}
+
 async function loadProductNameLookup(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,
@@ -1244,13 +1278,9 @@ async function ensureDraftPurchaseForPost(
       items = await loadDraftPurchaseItems(supabase, orgId, purchaseId);
     }
     if (!items.length) return null;
-    const vatValidation = await validateSubmittedVatRates(supabase, orgId, items.map((i) => i.tax_rate));
-    if (!vatValidation.ok) throw new Error(vatValidation.error);
-    const unitValidation = await validateSubmittedUnitsOfMeasure(supabase, orgId, items.map((i) => i.unit_of_measure));
-    if (!unitValidation.ok) throw new Error(unitValidation.error);
+    const productLookup = await validatePurchaseLinesAndLoadNames(supabase, orgId, items);
 
     const totals = purchaseLineTotals(items);
-    const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
     await supabase
       .from("purchases")
       .update(buildDraftPurchaseRow(orgId, userId, header, totals))
@@ -1261,13 +1291,9 @@ async function ensureDraftPurchaseForPost(
   }
 
   if (!items.length) return null;
-  const vatValidation = await validateSubmittedVatRates(supabase, orgId, items.map((i) => i.tax_rate));
-  if (!vatValidation.ok) throw new Error(vatValidation.error);
-  const unitValidation = await validateSubmittedUnitsOfMeasure(supabase, orgId, items.map((i) => i.unit_of_measure));
-  if (!unitValidation.ok) throw new Error(unitValidation.error);
+  const productLookup = await validatePurchaseLinesAndLoadNames(supabase, orgId, items);
 
   const totals = purchaseLineTotals(items);
-  const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
   const { data: purchase } = await supabase
     .from("purchases")
     .insert(buildDraftPurchaseRow(orgId, userId, header, totals))
@@ -1343,13 +1369,9 @@ export async function savePurchaseDraft(formData: FormData) {
   const header = parsePurchaseHeaderFromForm(formData);
   const items = parsePurchaseLinesFromForm(formData);
   if (!items.length) return;
-  const vatValidation = await validateSubmittedVatRates(supabase, orgId, items.map((i) => i.tax_rate));
-  if (!vatValidation.ok) throw new Error(vatValidation.error);
-  const unitValidation = await validateSubmittedUnitsOfMeasure(supabase, orgId, items.map((i) => i.unit_of_measure));
-  if (!unitValidation.ok) throw new Error(unitValidation.error);
+  const productLookup = await validatePurchaseLinesAndLoadNames(supabase, orgId, items);
 
   const { subtotalAmount, taxTotal, totalAmount } = purchaseLineTotals(items);
-  const productLookup = await loadProductNameLookup(supabase, items.map((i) => i.product_id));
 
   const row = buildDraftPurchaseRow(orgId, user.id, header, { subtotalAmount, taxTotal, totalAmount });
 
@@ -1378,11 +1400,14 @@ export async function savePurchaseDraft(formData: FormData) {
 }
 
 export async function postNirPurchase(formData: FormData) {
+  const perf = perfSteps("postNirPurchase");
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
   await assertEntitlement(orgId, "purchases.nir");
+  perf.mark("auth");
 
   const draftId = await ensureDraftPurchaseForPost(supabase, orgId, user.id, formData);
+  perf.mark("draft");
   if (!draftId) {
     redirect("/app/purchases/new?error=no_items");
   }
@@ -1393,6 +1418,8 @@ export async function postNirPurchase(formData: FormData) {
     p_org_id: orgId,
     p_actor_id: user.id,
   });
+  perf.mark("rpc");
+  perf.done();
 
   if (error) {
     const code = mapNirPostRpcError(error.message);
@@ -2358,7 +2385,12 @@ export type CompleteSaleResult =
     };
 
 export async function completeSaleReturn(formData: FormData): Promise<CompleteSaleResult> {
+  const perf = perfSteps("completeSaleReturn");
   const { supabase, membership, user, orgId } = await getActiveOrg();
+  perf.mark("auth");
+  // Analytics are queued in memory and flushed after the response is sent, so
+  // PostHog latency never sits between the cashier and "Vânzare salvată".
+  after(flushPostHog);
   if (!canTransact(membership.role)) return { ok: false, error: "Permission denied.", code: "permission_denied" };
   try {
     await assertEntitlement(orgId, "pos.enabled");
@@ -2449,7 +2481,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   );
   let transactionNumber = `KO-${Date.now().toString(36).toUpperCase()}`;
 
-  await captureServerEventAsync(
+  captureServerEvent(
     user.id,
     "sale_started",
     { organisation_id: orgId, site_id: siteId, item_count: cart.length },
@@ -2502,6 +2534,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const stockDepletionEnabled = await hasEntitlement(orgId, "recipes.stock_depletion", { write: true });
 
   const serviceSupabase = await createServiceClient();
+  perf.mark("validate");
   const { data: posted, error: postError } = await serviceSupabase.rpc("post_pos_document", {
     p_org_id: orgId,
     p_actor_id: user.id,
@@ -2549,6 +2582,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     return { ok: false, error: message, code: "unknown" };
   }
 
+  perf.mark("rpc");
   const postedDocument = posted as { transaction_id: string; transaction_number: string; idempotent?: boolean };
   const transactionId = postedDocument.transaction_id;
   transactionNumber = postedDocument.transaction_number;
@@ -2580,8 +2614,16 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const fiscalApiPending = effects.fiscalApiPending;
 
   if (effects.runFirstTimeSideEffects) {
-    await recordGrowthMilestone(supabase, orgId, "first_sale", user.id);
+    // Activation milestone is analytics, not part of the sale — run after the response.
+    after(() => recordGrowthMilestone(supabase, orgId, "first_sale", user.id));
   }
+
+  const fiscalStatusWrite = effects.markFiscalStatus
+    ? supabase.from("pos_transactions")
+      .update({ fiscal_receipt_required: true, fiscal_receipt_status: (fiscalApiPending) ? "api_pending" : "pending" })
+      .eq("id", transactionId).eq("organisation_id", orgId)
+      .then(() => null, () => null)
+    : Promise.resolve(null);
 
   if (effects.runFirstTimeSideEffects && !tableTabId) {
     await createKitchenOrderIfEnabled({
@@ -2603,15 +2645,10 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     revalidatePath("/app/pos");
   }
 
-  if (effects.markFiscalStatus) {
-    await supabase.from("pos_transactions")
-      .update({ fiscal_receipt_required: true, fiscal_receipt_status: (fiscalApiPending) ? "api_pending" : "pending" })
-      .eq("id", transactionId).eq("organisation_id", orgId)
-      .then(() => null, () => null);
-  }
+  await fiscalStatusWrite;
 
   if (effects.runFirstTimeSideEffects) {
-    await captureServerEventAsync(
+    captureServerEvent(
       user.id,
       "sale_completed",
       {
@@ -2627,12 +2664,15 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
 
   // A sale changes only these page-level read models. Do not invalidate the
   // authenticated layout: that remounts navigation and unrelated modules.
-  revalidatePath("/app/pos", "page");
+  // /app/pos is deliberately NOT revalidated here: revalidating the calling
+  // page makes Next re-render the whole POS page (≈11 query rounds) inside this
+  // action's response, which the cashier waits on. PosRegister refreshes the
+  // till summary in the background after the sale is confirmed instead.
   revalidatePath("/app/transactions", "page");
   revalidatePath("/app/reports/sales", "page");
   revalidatePath("/app", "page");
 
-  return {
+  const result: CompleteSaleResult = {
     ok: true,
     transactionId,
     transactionNumber,
@@ -2651,6 +2691,8 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     changeDue: cashOverpay,
     idempotent: idempotentReplay,
   };
+  perf.done();
+  return result;
 }
 
 // ── Payment Methods Management ────────────────────────────────────────────

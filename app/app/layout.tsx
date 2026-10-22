@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
+import { perfSteps } from "@/lib/perf/timing";
 import { headers } from "next/headers";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
 import { AppShell } from "@/components/app/AppShell";
@@ -20,8 +21,10 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const perf = perfSteps("app_layout");
   const supabase = await createClient();
   const { data: { user } } = await getAuthUser();
+  perf.mark("auth");
 
   if (!user) {
     redirect("/login");
@@ -85,21 +88,33 @@ export default async function AppLayout({
   // sale count. Once the 5 days are up, getSubscriptionStatus resolves to a
   // blocked state and the paywall in components/app/AppShell.tsx takes over.
 
-  // Resolve accessible sites and active site (non-blocking — falls back gracefully)
-  let accessibleSites: { id: string; name: string }[] = [];
-  let activeSiteId: string | null = null;
-  if (activeOrg?.id && membership?.id && !subscriptionBlocked) {
-    try {
-      accessibleSites = await listAccessibleSites(supabase, activeOrg.id, membership.id, userRole);
-      activeSiteId = await getActiveSiteId(accessibleSites);
-    } catch {
-      // Non-fatal — layout must not crash if site lookup fails
-    }
-  }
+  const orgReady = Boolean(activeOrg?.id && !subscriptionBlocked);
+  const needsModuleGuard =
+    orgReady && pathname.startsWith("/app/") && !pathname.startsWith("/app/settings") && !pathname.startsWith("/app/billing");
 
-  const referral = activeOrg?.id && !subscriptionBlocked
-    ? await ensureReferralCode(activeOrg.id, false)
-    : null;
+  // Sites, referral, module flags and the module guard are independent reads;
+  // they used to run as four sequential rounds on every navigation.
+  const [sitesResult, referral, moduleFlags] = await Promise.all([
+    // Resolve accessible sites and active site (non-blocking — falls back gracefully)
+    activeOrg?.id && membership?.id && !subscriptionBlocked
+      ? (async () => {
+          try {
+            const sites = await listAccessibleSites(supabase, activeOrg.id, membership.id, userRole);
+            return { sites, activeSiteId: await getActiveSiteId(sites) };
+          } catch {
+            // Non-fatal — layout must not crash if site lookup fails
+            return null;
+          }
+        })()
+      : Promise.resolve(null),
+    orgReady ? ensureReferralCode(activeOrg!.id, false) : Promise.resolve(null),
+    orgReady ? fetchOrgModuleFlags(supabase, activeOrg!.id) : Promise.resolve(null),
+    needsModuleGuard ? requireModuleForPathname(pathname) : Promise.resolve(),
+  ]);
+  perf.mark("org_data");
+  perf.done();
+  const accessibleSites: { id: string; name: string }[] = sitesResult?.sites ?? [];
+  const activeSiteId: string | null = sitesResult?.activeSiteId ?? null;
 
   let setupComplete = false;
   let moduleVisibility = {
@@ -111,9 +126,7 @@ export default async function AppLayout({
     kitchenOps: false,
   };
 
-  if (activeOrg?.id && !subscriptionBlocked) {
-    const moduleFlags = await fetchOrgModuleFlags(supabase, activeOrg.id);
-
+  if (orgReady && moduleFlags) {
     setupComplete = txCount > 0;
     const hasTrial = subStatus?.state === "trialing" || subStatus?.state === "soft_trial";
 
@@ -125,10 +138,6 @@ export default async function AppLayout({
       multiSite: isModuleNavVisible({ org: moduleFlags, module: "multi_site", subscriptionPlan: subStatus?.plan, hasTrial }),
       kitchenOps: isModuleNavVisible({ org: moduleFlags, module: "kitchen_ops", subscriptionPlan: subStatus?.plan, hasTrial }),
     };
-  }
-
-  if (activeOrg?.id && !subscriptionBlocked && pathname.startsWith("/app/") && !pathname.startsWith("/app/settings") && !pathname.startsWith("/app/billing")) {
-    await requireModuleForPathname(pathname);
   }
 
   const { locale: appLocale } = getAppLocaleAndText(

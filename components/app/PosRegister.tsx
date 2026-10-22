@@ -1,5 +1,5 @@
 "use client";
-import { memo, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -820,6 +820,13 @@ function PosRegisterInner({
   // Synchronous double-submit lock: salePending is React state and two taps
   // can both read `false` before the re-render.
   const submittingRef = useRef(false);
+  // completeSaleReturn no longer re-renders this page inside its response (that
+  // made every sale wait for the full POS loader). Refresh the till summary and
+  // recent transactions in the background instead, debounced across quick sales.
+  const tillRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (tillRefreshTimerRef.current) clearTimeout(tillRefreshTimerRef.current);
+  }, []);
   const [paymentMethodId, setPaymentMethodId] = useState(() => pickDefaultPaymentId(paymentMethods));
   const { locale, t } = usePosI18n();
   const router = useRouter();
@@ -1016,6 +1023,13 @@ function PosRegisterInner({
 
   // Offline probe removed — unreliable on slow connections and caused false offline detection.
 
+  function scheduleTillRefresh() {
+    if (tillRefreshTimerRef.current) clearTimeout(tillRefreshTimerRef.current);
+    tillRefreshTimerRef.current = setTimeout(() => {
+      startTransition(() => router.refresh());
+    }, 1500);
+  }
+
   function resetCartAfterSale() {
     setCart([]);
     setTipAmount(0);
@@ -1198,6 +1212,7 @@ function PosRegisterInner({
       setPaymentCartSnapshot(null);
       setSaleStatus(null);
       setSalePending(false);
+      scheduleTillRefresh();
       setLastCompletedSale({
         amountLabel: money(res.total),
         transactionId: res.transactionId,
@@ -1470,6 +1485,7 @@ function PosRegisterInner({
       } else {
         markOfflineSaleSynced(entry.id, res.transactionId);
       }
+      scheduleTillRefresh();
       return true;
     } catch (err) {
       markOfflineSaleSyncFailed(
