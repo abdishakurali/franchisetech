@@ -46,6 +46,8 @@ export type InvoicePdfData = {
   delegateName?: string | null;
   delegateIdDoc?: string | null;
   draft?: boolean;
+  /** e.g. "Stornare factura nr. 19631 din 21.10.2026" */
+  note?: string | null;
 };
 
 const UNIT_LABELS: Record<string, string> = {
@@ -133,6 +135,7 @@ export function InvoicePdfDocument({ data }: { data: InvoicePdfData }) {
           </View>
           <Text>- {data.currency} -</Text>
         </View>
+        {data.note ? <Text style={[s.bold, { marginBottom: 6 }]}>{data.note}</Text> : null}
 
         <View style={s.parties}>
           <PartyBlock title="Furnizor" party={data.seller} />

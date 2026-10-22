@@ -55,9 +55,14 @@ export type InvoiceInput = {
 };
 
 /** Round to N decimal places using half-up (no banker's rounding). */
+/**
+ * Round half away from zero (Romanian practice), symmetric for negatives so a
+ * storno line is the exact negative of the original. The 1e-9 nudge absorbs
+ * binary float error (e.g. 9.5 × 21% = 1.99499999… must round to 2.00).
+ */
 function round(value: number, dp: number): number {
   const factor = Math.pow(10, dp);
-  return Math.round(value * factor) / factor;
+  return (Math.sign(value) * Math.round(Math.abs(value) * factor + 1e-9)) / factor;
 }
 
 /** Format number to exactly N decimal places as string. */

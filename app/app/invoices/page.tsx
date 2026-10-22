@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { displayInvoiceNumber } from "@/lib/invoice-numbering";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
@@ -156,7 +157,7 @@ export default async function InvoicesPage() {
                 <tr key={inv.id} className="hover:bg-secondary">
                   <td className="px-4 py-3 font-medium">
                     <Link href={`/app/invoices/${inv.id}`} className="text-brass hover:underline">
-                      {inv.invoice_number}
+                      {displayInvoiceNumber(inv.invoice_number)}
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-foreground">{inv.buyer_name}</td>

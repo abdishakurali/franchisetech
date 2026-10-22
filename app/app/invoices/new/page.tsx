@@ -68,7 +68,6 @@ export default async function NewInvoicePage({
   }));
 
   let initialDraft: Parameters<typeof InvoiceDraftForm>[0]["initialDraft"] = {
-    invoiceNumber: nextNumber,
     issuerName: (profileResult.data?.full_name as string | null) ?? undefined,
   };
   if (params?.purchaseId) {
@@ -88,7 +87,7 @@ export default async function NewInvoicePage({
       const items = (purchase.purchase_items ?? []) as PurchaseItemRow[];
       initialDraft = {
         ...initialDraft,
-        invoiceNumber: purchase.invoice_number ? `FACT-${purchase.invoice_number}` : nextNumber,
+        invoiceNumber: purchase.invoice_number ? `FACT-${purchase.invoice_number}` : undefined,
         issueDate: String(purchase.supplier_invoice_date ?? purchase.purchase_date ?? "").slice(0, 10) || undefined,
         buyerCif: supplier?.tax_id ?? "",
         buyerName: supplier?.name ?? "",
@@ -107,5 +106,5 @@ export default async function NewInvoicePage({
     }
   }
 
-  return <InvoiceDraftForm vatRates={vatRates} products={products} customers={customers} initialDraft={initialDraft} />;
+  return <InvoiceDraftForm vatRates={vatRates} products={products} customers={customers} initialDraft={initialDraft} nextNumberHint={nextNumber} />;
 }

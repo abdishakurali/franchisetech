@@ -17,6 +17,8 @@ interface AnafSettingsCardProps {
     county: string;
     regCom: string;
     shareCapital: string;
+    invoiceSeries: string;
+    invoiceNextNumber: string;
     bankAccounts: Array<{ bank: string | null; iban: string | null; currency: string | null }>;
   };
 }
@@ -84,6 +86,17 @@ export function AnafSettingsCard({
                   <div className="space-y-1.5">
                     <Label htmlFor="company_county">Județ</Label>
                     <Input id="company_county" name="company_county" defaultValue={seller.county} placeholder="ex: Ilfov" />
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="invoice_series">Serie facturi (opțional)</Label>
+                    <Input id="invoice_series" name="invoice_series" defaultValue={seller.invoiceSeries} placeholder="ex: DN" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="invoice_next_number">Următorul număr de factură</Label>
+                    <Input id="invoice_next_number" name="invoice_next_number" type="number" min="1" step="1" defaultValue={seller.invoiceNextNumber} placeholder="Automat" />
+                    <p className="text-xs text-muted-foreground">Pentru a continua numerotarea din programul vechi. Gol = continuă după ultima factură emisă.</p>
                   </div>
                 </div>
                 <div className="space-y-2">

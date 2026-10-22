@@ -1098,6 +1098,7 @@ const en = {
         opening: "Opening balance",
         invoice_sale: "Invoice sale",
         free_issue: "Free transfer",
+        invoice_return: "Invoice reversal (storno)",
       },
     },
     balanta: {
@@ -2441,6 +2442,7 @@ const ro: typeof en = {
         opening: "Sold inițial",
         invoice_sale: "Vânzare pe factură",
         free_issue: "Transfer gratuit",
+        invoice_return: "Stornare factură",
       },
     },
     balanta: {

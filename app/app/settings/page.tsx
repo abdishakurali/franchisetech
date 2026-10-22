@@ -752,6 +752,8 @@ export default async function SettingsPage({
               county: (orgRow?.company_county as string | null) ?? "",
               regCom: (orgRow?.company_reg_com as string | null) ?? "",
               shareCapital: (orgRow?.company_share_capital as string | null) ?? "",
+              invoiceSeries: (orgRow?.invoice_series as string | null) ?? "",
+              invoiceNextNumber: orgRow?.invoice_next_number ? String(orgRow.invoice_next_number) : "",
               bankAccounts: Array.isArray(orgRow?.invoice_bank_accounts)
                 ? (orgRow.invoice_bank_accounts as Array<{ bank: string | null; iban: string | null; currency: string | null }>)
                 : [],

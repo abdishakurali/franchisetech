@@ -370,6 +370,7 @@ export default async function ProductDetailPage({
                       waste: "Waste",
                       invoice_sale: "Invoice sale",
                       free_issue: "Free transfer",
+                      invoice_return: "Invoice reversal",
                     };
                     return (
                       <div key={m.id} className="flex items-center justify-between text-sm py-1.5 border-b last:border-0">

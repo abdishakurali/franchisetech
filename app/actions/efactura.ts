@@ -13,6 +13,8 @@ import { ratesMatch } from "@/lib/vat-rates";
 import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
 import { createServiceClient } from "@/lib/supabase/server";
 import { toStockQuantity } from "@/lib/invoice-stock-units";
+import { DRAFT_NUMBER_PREFIX } from "@/lib/invoice-numbering";
+import { buildStornoLines } from "@/lib/invoice-storno";
 
 export type EfacturaLineInput = {
   name: string;
@@ -25,7 +27,8 @@ export type EfacturaLineInput = {
 };
 
 export type CreateInvoiceDraftInput = {
-  invoiceNumber: string;
+  /** Optional: empty = the final number is assigned from the locked counter when the invoice is issued. */
+  invoiceNumber?: string;
   issueDate: string;
   dueDate?: string;
   buyerCif: string;
@@ -48,6 +51,11 @@ export type CreateInvoiceDraftInput = {
 };
 
 type StockLineFields = { productId?: string; stockQty?: number; stockUnit?: string };
+
+function draftInvoiceNumber(manual: string | undefined): string {
+  const trimmed = (manual ?? "").trim();
+  return trimmed || `${DRAFT_NUMBER_PREFIX}${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+}
 
 /**
  * Resolves each product line's quantity into the product's stock unit
@@ -130,7 +138,7 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput): Promis
     .from("efactura_invoices")
     .insert({
       organisation_id: orgId,
-      invoice_number: input.invoiceNumber,
+      invoice_number: draftInvoiceNumber(input.invoiceNumber),
       invoice_type: "380",
       issue_date: input.issueDate,
       due_date: input.dueDate ?? null,
@@ -156,7 +164,7 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput): Promis
   if (error) {
     // Unique (organisation_id, invoice_number): also what stops a double-clicked
     // "Salvează" from creating two drafts.
-    if (error.code === "23505") throw new Error(`Numărul de factură ${input.invoiceNumber} există deja. Alegeți alt număr.`);
+    if (error.code === "23505") throw new Error(`Numărul de factură ${input.invoiceNumber ?? ""} există deja. Alegeți alt număr sau lăsați câmpul gol (număr automat).`);
     throw new Error(`Factura nu a putut fi salvată: ${error.message}`);
   }
 
@@ -224,7 +232,7 @@ export async function generateInvoiceXml(invoiceId: string): Promise<{
       address: buyerAddress,
     },
     lines: (inv.line_items as UblLineItem[]),
-    note: undefined,
+    note: (inv.note as string | null) ?? undefined,
   });
 
   const validation = await validateXml(xml);
@@ -298,6 +306,8 @@ export async function submitInvoiceToAnaf(invoiceId: string): Promise<{ indexInc
 function issueErrorMessage(message: string): string {
   if (message.includes("INVOICE_NOT_FOUND")) return "Factura nu a fost găsită.";
   if (message.includes("INVOICE_PRODUCT_NOT_FOUND")) return "Un produs de pe factură nu mai există în catalog. Corectați factura.";
+  if (message.includes("INVOICE_NUMBER_TAKEN")) return "Numărul următor din Setări este deja folosit. Actualizați „Următorul număr de factură” în Setări → e-Factura.";
+  if (message.includes("STORNO_SOURCE_NOT_ISSUED")) return "Factura stornată trebuie să fie emisă.";
   return "Factura nu a putut fi emisă. Încercați din nou — stocul nu va fi scăzut de două ori.";
 }
 
@@ -317,12 +327,84 @@ async function issueInvoiceStock(orgId: string, invoiceId: string) {
 }
 
 /**
+ * Storno: creates the reversing invoice of an issued invoice (same lines,
+ * negative quantities). Issuing it returns the stock. At most one storno per
+ * invoice — enforced by a unique index, so a double click cannot create two.
+ */
+export async function createStornoInvoice(invoiceId: string): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+  const { supabase, orgId, membership, user } = await getKitchenOpsContext();
+  if (!canManage(membership.role)) return { ok: false, error: "Doar managerul sau proprietarul poate storna facturi." };
+  await assertEfacturaInstalled(supabase, orgId);
+  await assertEntitlement(orgId, "fiscal.efactura");
+
+  const { data: src } = await supabase
+    .from("efactura_invoices")
+    .select("*")
+    .eq("id", invoiceId)
+    .eq("organisation_id", orgId)
+    .maybeSingle();
+  if (!src) return { ok: false, error: "Factura nu a fost găsită." };
+  if (!src.issued_at) return { ok: false, error: "Doar o factură emisă poate fi stornată." };
+  if (src.storno_of) return { ok: false, error: "Aceasta este deja o factură de stornare." };
+
+  const { data: existing } = await supabase
+    .from("efactura_invoices")
+    .select("id")
+    .eq("organisation_id", orgId)
+    .eq("storno_of", invoiceId)
+    .maybeSingle();
+  if (existing) return { ok: true, id: String(existing.id) };
+
+  const lines = buildStornoLines((src.line_items ?? []) as Array<UblLineItem & StockLineFields>);
+  const totals = computeInvoiceTotals(lines);
+  const issueDate = new Date().toISOString().slice(0, 10);
+
+  const { data, error } = await supabase
+    .from("efactura_invoices")
+    .insert({
+      organisation_id: orgId,
+      invoice_number: draftInvoiceNumber(undefined),
+      invoice_type: "380",
+      issue_date: issueDate,
+      buyer_cif: src.buyer_cif,
+      buyer_name: src.buyer_name,
+      buyer_address: src.buyer_address,
+      buyer_reg_com: src.buyer_reg_com,
+      customer_id: src.customer_id,
+      line_items: lines,
+      total_excl_vat: totals.totalExclVat,
+      total_vat: totals.totalVat,
+      total_incl_vat: totals.totalInclVat,
+      currency: src.currency,
+      upload_status: "draft",
+      created_by: user.id,
+      issuer_name: src.issuer_name,
+      issuer_id_doc: src.issuer_id_doc,
+      storno_of: invoiceId,
+      note: `Stornare factura nr. ${src.invoice_number} din ${String(src.issue_date).split("-").reverse().join(".")}`,
+    })
+    .select("id")
+    .single();
+  if (error) {
+    if (error.code === "23505") {
+      const { data: again } = await supabase
+        .from("efactura_invoices").select("id").eq("organisation_id", orgId).eq("storno_of", invoiceId).maybeSingle();
+      if (again) return { ok: true, id: String(again.id) };
+    }
+    return { ok: false, error: `Stornarea nu a putut fi creată: ${error.message}` };
+  }
+  revalidatePath("/app/invoices");
+  revalidatePath(`/app/invoices/${invoiceId}`);
+  return { ok: true, id: String(data.id) };
+}
+
+/**
  * Issue the invoice: it becomes final and the sold quantities leave stock.
  * Safe to retry or double-click — the RPC locks the invoice and deducts stock
  * only the first time (issued_at).
  */
 export async function issueSalesInvoice(invoiceId: string): Promise<
-  { ok: true; alreadyIssued: boolean; movements: number } | { ok: false; error: string }
+  { ok: true; alreadyIssued: boolean; movements: number; invoiceNumber: string } | { ok: false; error: string }
 > {
   const { supabase, orgId, membership } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return { ok: false, error: "Doar managerul sau proprietarul poate emite facturi." };
@@ -332,27 +414,34 @@ export async function issueSalesInvoice(invoiceId: string): Promise<
     const result = await issueInvoiceStock(orgId, invoiceId);
     revalidatePath(`/app/invoices/${invoiceId}`);
     revalidatePath("/app/invoices");
-    return { ok: true, alreadyIssued: result.idempotent, movements: result.movements };
+    return { ok: true, alreadyIssued: result.idempotent, movements: result.movements, invoiceNumber: result.invoice_number };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Factura nu a putut fi emisă." };
   }
 }
 
-/** Next number to suggest on a new invoice: highest numeric invoice number + 1. */
+/** The number the next issued invoice will get (shown as a hint on drafts). */
 export async function suggestNextInvoiceNumber(): Promise<string> {
   const { supabase, orgId } = await getKitchenOpsContext();
-  const { data } = await supabase
-    .from("efactura_invoices")
-    .select("invoice_number")
-    .eq("organisation_id", orgId)
-    .order("created_at", { ascending: false })
-    .limit(200);
+  const [{ data: org }, { data: rows }] = await Promise.all([
+    supabase.from("organisations").select("invoice_series,invoice_next_number").eq("id", orgId).maybeSingle(),
+    supabase
+      .from("efactura_invoices")
+      .select("invoice_number")
+      .eq("organisation_id", orgId)
+      .not("issued_at", "is", null)
+      .order("issued_at", { ascending: false })
+      .limit(500),
+  ]);
+  const series = (org?.invoice_series as string | null) ?? "";
+  if (org?.invoice_next_number) return `${series}${org.invoice_next_number}`;
   let max = 0;
-  for (const row of data ?? []) {
-    const n = Number(String(row.invoice_number ?? "").replace(/^\D+/, ""));
-    if (Number.isInteger(n) && n > max) max = n;
+  for (const row of rows ?? []) {
+    const m = String(row.invoice_number ?? "").match(/(\d+)$/);
+    const n = m ? Number(m[1]) : 0;
+    if (!String(row.invoice_number).startsWith(DRAFT_NUMBER_PREFIX) && n > max) max = n;
   }
-  return String(max + 1);
+  return `${series}${max + 1}`;
 }
 
 /** Called from the ANAF OAuth callback route to persist tokens. */
@@ -428,6 +517,9 @@ export async function saveAnafSettings(formData: FormData): Promise<void> {
       .map((i) => ({ bank: text(`bank_name_${i}`), iban: text(`bank_iban_${i}`)?.replace(/\s+/g, "").toUpperCase() ?? null, currency: text(`bank_currency_${i}`) ?? "RON" }))
       .filter((a) => a.iban);
     update.invoice_bank_accounts = accounts;
+    update.invoice_series = text("invoice_series");
+    const nextNumber = Number(text("invoice_next_number") ?? "");
+    update.invoice_next_number = Number.isInteger(nextNumber) && nextNumber > 0 ? nextNumber : null;
   }
 
   await supabase

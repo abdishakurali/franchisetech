@@ -3,8 +3,8 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { generateInvoiceXml, issueSalesInvoice, submitInvoiceToAnaf } from "@/app/actions/efactura";
-import { Loader2, FileCode, Send, CheckCircle, Download, FileText, Stamp } from "lucide-react";
+import { createStornoInvoice, generateInvoiceXml, issueSalesInvoice, submitInvoiceToAnaf } from "@/app/actions/efactura";
+import { Loader2, FileCode, Send, CheckCircle, Download, FileText, Stamp, Undo2 } from "lucide-react";
 
 type Props = {
   invoiceId: string;
@@ -13,12 +13,34 @@ type Props = {
   anafConnected: boolean;
   hasXml: boolean;
   issued: boolean;
+  canStorno: boolean;
 };
 
-export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anafConnected, hasXml, issued }: Props) {
+export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anafConnected, hasXml, issued, canStorno }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [action, setAction] = useState<"xml" | "submit" | "issue" | null>(null);
+  const [action, setAction] = useState<"xml" | "submit" | "issue" | "storno" | null>(null);
+
+  function handleStorno() {
+    if (issuingRef.current) return;
+    if (!window.confirm("Creați factura de stornare? Se creează o ciornă cu aceleași linii, cu cantități negative. Stocul revine doar după ce o emiteți.")) return;
+    issuingRef.current = true;
+    setError(null);
+    setAction("storno");
+    startTransition(async () => {
+      try {
+        const result = await createStornoInvoice(invoiceId);
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        router.push(`/app/invoices/${result.id}`);
+      } finally {
+        issuingRef.current = false;
+        setAction(null);
+      }
+    });
+  }
   const [issueMessage, setIssueMessage] = useState<string | null>(null);
   const issuingRef = useRef(false);
 
@@ -38,7 +60,7 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
         setIssueMessage(
           result.alreadyIssued
             ? "Factura era deja emisă. Stocul nu a fost scăzut din nou."
-            : `Factură emisă. ${result.movements} mișcări de stoc înregistrate.`,
+            : `Factură emisă cu nr. ${result.invoiceNumber}. ${result.movements} mișcări de stoc înregistrate.`,
         );
         router.refresh();
       } finally {
@@ -104,6 +126,12 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
           <Button onClick={handleIssue} disabled={isPending}>
             {action === "issue" && isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Stamp className="mr-1.5 h-4 w-4" />}
             {action === "issue" && isPending ? "Se emite…" : "Emite factura"}
+          </Button>
+        )}
+        {canStorno && (
+          <Button type="button" variant="outline" onClick={handleStorno} disabled={isPending}>
+            {action === "storno" && isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Undo2 className="mr-1.5 h-4 w-4" />}
+            Stornează
           </Button>
         )}
         <a href={`/api/invoices/${invoiceId}/pdf`} target="_blank" rel="noopener">

@@ -7,6 +7,8 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { hasAnafCredentials } from "@/lib/anaf/auth";
 import { ChevronLeft } from "lucide-react";
 import InvoiceActions from "./InvoiceActions";
+import { displayInvoiceNumber } from "@/lib/invoice-numbering";
+import { invoiceLineAmounts, invoiceTotalsByRate } from "@/lib/invoice-totals";
 
 export const metadata: Metadata = {
   title: "Detalii factură | franchisetech",
@@ -50,10 +52,6 @@ function StatusBadge({ status, processingStatus, issued }: { status: string; pro
   return <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm font-medium text-mid">Draft</span>;
 }
 
-function round2(n: number) {
-  return Math.round(n * 100) / 100;
-}
-
 export default async function InvoiceDetailPage({
   params,
 }: {
@@ -80,23 +78,26 @@ export default async function InvoiceDetailPage({
 
   if (!inv) redirect("/app/invoices");
 
-  const anafConnected = await hasAnafCredentials(orgId);
+  const [anafConnected, { data: related }] = await Promise.all([
+    hasAnafCredentials(orgId),
+    // The storno of this invoice, or the invoice this one reverses.
+    supabase
+      .from("efactura_invoices")
+      .select("id,invoice_number,issued_at,storno_of")
+      .eq("organisation_id", orgId)
+      .or(inv.storno_of ? `id.eq.${inv.storno_of}` : `storno_of.eq.${inv.id}`)
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
   const lines = (inv.line_items as UblLine[]) ?? [];
   const buyerAddress = inv.buyer_address as UblAddress | null;
 
-  let exclVat = 0;
-  let totalVat = 0;
-  const vatBreakdown: Record<number, number> = {};
-
-  for (const line of lines) {
-    const ext = round2(line.quantity * line.unitPrice);
-    const lineVat = round2(ext * line.vatRate / 100);
-    exclVat = round2(exclVat + ext);
-    totalVat = round2(totalVat + lineVat);
-    vatBreakdown[line.vatRate] = round2((vatBreakdown[line.vatRate] ?? 0) + lineVat);
-  }
-  const inclVat = round2(exclVat + totalVat);
+  // Same rounding as the PDF and the e-Factura XML.
+  const totals = invoiceTotalsByRate(lines);
+  const exclVat = totals.base;
+  const inclVat = totals.total;
+  const vatBreakdown: Record<number, number> = Object.fromEntries(totals.rates.map((r) => [r.rate, r.vat]));
 
   // ANAF submission only after "Emite factura" (which finalises it and deducts stock).
   const canSubmit = Boolean(inv.issued_at) && ["draft", "failed"].includes(inv.upload_status);
@@ -115,7 +116,7 @@ export default async function InvoiceDetailPage({
 
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">{inv.invoice_number}</h1>
+          <h1 className="text-2xl font-semibold text-foreground">{displayInvoiceNumber(inv.invoice_number)}</h1>
           <p className="text-sm text-muted-foreground">
             {inv.issued_at ? "Emisă" : "Ciornă, datată"} la {new Date(inv.issue_date).toLocaleDateString("ro-RO")}
             {inv.due_date && ` · Scadentă la ${new Date(inv.due_date).toLocaleDateString("ro-RO")}`}
@@ -154,9 +155,24 @@ export default async function InvoiceDetailPage({
         </CardContent>
       </Card>
 
+      {inv.storno_of && related && (
+        <div className="rounded-lg border border-attention/25 bg-attention/10 p-3 text-sm text-attention">
+          Factură de stornare pentru{" "}
+          <Link href={`/app/invoices/${related.id}`} className="font-medium underline">factura nr. {related.invoice_number}</Link>.
+          La emitere, cantitățile revin în stoc.
+        </div>
+      )}
+      {!inv.storno_of && related && (
+        <div className="rounded-lg border border-border bg-secondary p-3 text-sm text-mid">
+          Această factură are o stornare:{" "}
+          <Link href={`/app/invoices/${related.id}`} className="font-medium underline">{displayInvoiceNumber(related.invoice_number)}</Link>
+          {related.issued_at ? " (emisă)" : " (ciornă, încă neemisă)"}.
+        </div>
+      )}
+
       {inv.issued_at && (
         <div className="rounded-lg border border-reconciled/25 bg-reconciled/10 p-3 text-sm text-reconciled">
-          Factură emisă la {new Date(inv.issued_at).toLocaleString("ro-RO")}. Cantitățile au fost scăzute din stoc o singură dată.
+          Factură emisă la {new Date(inv.issued_at).toLocaleString("ro-RO")}. {inv.storno_of ? "Cantitățile au revenit în stoc o singură dată." : "Cantitățile au fost scăzute din stoc o singură dată."}
         </div>
       )}
 
@@ -187,7 +203,7 @@ export default async function InvoiceDetailPage({
                     <td className="px-4 py-2.5 text-right text-foreground">{Number(line.unitPrice).toFixed(2)}</td>
                     <td className="px-4 py-2.5 text-right text-muted-foreground">{line.vatRate}%</td>
                     <td className="px-4 py-2.5 text-right font-medium">
-                      {round2(line.quantity * line.unitPrice).toFixed(2)}
+                      {invoiceLineAmounts(line).value.toFixed(2)}
                     </td>
                   </tr>
                 ))}
@@ -223,6 +239,7 @@ export default async function InvoiceDetailPage({
         anafConnected={anafConnected}
         hasXml={!!inv.xml_content}
         issued={Boolean(inv.issued_at)}
+        canStorno={Boolean(inv.issued_at) && !inv.storno_of && !related}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
 import { InvoicePdfDocument, type InvoicePdfData, type InvoicePdfLine } from "@/lib/pdf/InvoicePdfDocument";
+import { displayInvoiceNumber } from "@/lib/invoice-numbering";
 
 type BuyerAddress = { street?: string | null; city?: string | null } | null;
 
@@ -29,7 +30,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
   const buyerAddress = inv.buyer_address as BuyerAddress;
   const data: InvoicePdfData = {
-    number: String(inv.invoice_number),
+    number: displayInvoiceNumber(inv.invoice_number),
+    note: (inv.note as string | null) ?? null,
     issueDate: String(inv.issue_date),
     dueDate: (inv.due_date as string | null) ?? null,
     currency: String(inv.currency ?? "RON"),
@@ -64,6 +66,6 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     delegateIdDoc: (inv.delegate_id_doc as string | null) ?? null,
   };
 
-  const safeNumber = data.number.replace(/[^A-Za-z0-9_-]/g, "_");
+  const safeNumber = String(inv.invoice_number).replace(/[^A-Za-z0-9_-]/g, "_");
   return renderReportPdfResponse(InvoicePdfDocument({ data }), `Factura_${safeNumber}.pdf`);
 }

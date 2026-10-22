@@ -13,6 +13,7 @@ import { getDefaultVatRateValue } from "@/lib/vat-rates";
 import { VatRateSelect } from "@/components/app/VatRateSelect";
 import { SearchableSelect } from "@/components/app/SearchableSelect";
 import { ANAF_UNIT_OPTIONS } from "@/lib/anaf/unit-codes";
+import { invoiceTotalsByRate } from "@/lib/invoice-totals";
 
 type LineItem = {
   productId: string;
@@ -56,23 +57,14 @@ export type InitialInvoiceDraft = {
   issuerName?: string;
 };
 
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
-
 function computeTotals(lines: LineItem[]) {
-  let exclVat = 0;
-  let vat = 0;
-  for (const line of lines) {
-    const qty = parseFloat(line.quantity) || 0;
-    const price = parseFloat(line.unitPrice) || 0;
-    const rate = parseFloat(line.vatRate) || 0;
-    const ext = round2(qty * price);
-    const lineVat = round2(ext * rate / 100);
-    exclVat = round2(exclVat + ext);
-    vat = round2(vat + lineVat);
-  }
-  return { exclVat, vat, inclVat: round2(exclVat + vat) };
+  // Same rounding as the PDF and the e-Factura XML.
+  const totals = invoiceTotalsByRate(lines.map((line) => ({
+    quantity: parseFloat(line.quantity) || 0,
+    unitPrice: parseFloat(line.unitPrice) || 0,
+    vatRate: parseFloat(line.vatRate) || 0,
+  })));
+  return { exclVat: totals.base, vat: totals.vat, inclVat: totals.total };
 }
 
 export function InvoiceDraftForm({
@@ -80,11 +72,14 @@ export function InvoiceDraftForm({
   products = [],
   customers = [],
   initialDraft,
+  nextNumberHint,
 }: {
   vatRates: OrgVatRate[];
   products?: InvoiceProductOption[];
   customers?: InvoiceCustomerOption[];
   initialDraft?: InitialInvoiceDraft;
+  /** Number the next issued invoice will receive automatically. */
+  nextNumberHint?: string;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -93,7 +88,7 @@ export function InvoiceDraftForm({
   const defaultVatRate = String(getDefaultVatRateValue(vatRates));
 
   const today = new Date().toISOString().slice(0, 10);
-  const [invoiceNumber, setInvoiceNumber] = useState(initialDraft?.invoiceNumber ?? `FACTURA-${new Date().getFullYear()}-001`);
+  const [invoiceNumber, setInvoiceNumber] = useState(initialDraft?.invoiceNumber ?? "");
   const [issueDate, setIssueDate] = useState(initialDraft?.issueDate ?? today);
   const [dueDate, setDueDate] = useState(initialDraft?.dueDate ?? "");
   const [buyerCif, setBuyerCif] = useState(initialDraft?.buyerCif ?? "");
@@ -204,7 +199,7 @@ export function InvoiceDraftForm({
     startTransition(async () => {
       try {
         const result = await createInvoiceDraft({
-          invoiceNumber: invoiceNumber.trim(),
+          invoiceNumber: invoiceNumber.trim() || undefined,
           issueDate,
           dueDate: dueDate || undefined,
           buyerCif: buyerCif.trim(),
@@ -245,8 +240,11 @@ export function InvoiceDraftForm({
           <CardHeader><CardTitle className="text-base">Date factură</CardTitle></CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="invoice_number">Nr. factură</Label>
-              <Input id="invoice_number" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} required />
+              <Label htmlFor="invoice_number">Nr. factură (opțional)</Label>
+              <Input id="invoice_number" value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} placeholder="Automat la emitere" />
+              <p className="text-xs text-muted-foreground">
+                Lăsați gol: numărul se alocă la emitere, în ordine{nextNumberHint ? ` (următorul: ${nextNumberHint})` : ""}.
+              </p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="issue_date">Data emiterii</Label>

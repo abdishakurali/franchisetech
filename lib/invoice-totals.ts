@@ -8,9 +8,11 @@
 
 export type InvoiceTotalsLine = { quantity: number; unitPrice: number; vatRate: number };
 
+// Half away from zero, symmetric for negatives (storno lines mirror the
+// original exactly); same as round() in lib/anaf/ubl-builder.ts.
 const round = (n: number, d: number) => {
   const f = 10 ** d;
-  return Math.round((n + Number.EPSILON) * f) / f;
+  return (Math.sign(n) * Math.round(Math.abs(n) * f + 1e-9)) / f;
 };
 
 export function invoiceLineAmounts(line: InvoiceTotalsLine) {
