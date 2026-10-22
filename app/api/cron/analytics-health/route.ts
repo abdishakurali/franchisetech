@@ -5,7 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
+async function runAnalyticsHealth(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return NextResponse.json({ error: "CRON_SECRET not configured" }, { status: 500 });
   if ((req.headers.get("authorization") ?? "") !== `Bearer ${secret}`) {
@@ -36,3 +36,6 @@ export async function POST(req: NextRequest) {
   const state = analyticsHealthState({ lastSuccessAt });
   return NextResponse.json({ state, delivered, lastSuccessAt }, { status: state === "alert" ? 503 : 200 });
 }
+
+export const GET = runAnalyticsHealth;
+export const POST = runAnalyticsHealth;
