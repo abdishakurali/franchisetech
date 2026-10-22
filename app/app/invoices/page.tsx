@@ -20,9 +20,10 @@ type EfacturaRow = {
   upload_status: string;
   processing_status: string | null;
   created_at: string;
+  issued_at: string | null;
 };
 
-function StatusBadge({ uploadStatus, processingStatus }: { uploadStatus: string; processingStatus: string | null }) {
+function StatusBadge({ uploadStatus, processingStatus, issued }: { uploadStatus: string; processingStatus: string | null; issued: boolean }) {
   if (uploadStatus === "accepted") {
     return <span className="inline-flex items-center rounded-full bg-reconciled/10 px-2.5 py-0.5 text-xs font-medium text-reconciled">Acceptată</span>;
   }
@@ -34,6 +35,9 @@ function StatusBadge({ uploadStatus, processingStatus }: { uploadStatus: string;
   }
   if (uploadStatus === "failed") {
     return <span className="inline-flex items-center rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-orange-700">Eroare</span>;
+  }
+  if (issued) {
+    return <span className="inline-flex items-center rounded-full bg-reconciled/10 px-2.5 py-0.5 text-xs font-medium text-reconciled">Emisă</span>;
   }
   return <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-mid">Draft</span>;
 }
@@ -74,7 +78,7 @@ export default async function InvoicesPage() {
 
   const { data: invoices } = await supabase
     .from("efactura_invoices")
-    .select("id,invoice_number,issue_date,buyer_name,buyer_cif,total_incl_vat,currency,upload_status,processing_status,created_at")
+    .select("id,invoice_number,issue_date,buyer_name,buyer_cif,total_incl_vat,currency,upload_status,processing_status,created_at,issued_at")
     .eq("organisation_id", orgId)
     .order("created_at", { ascending: false })
     .limit(100);
@@ -95,12 +99,17 @@ export default async function InvoicesPage() {
           <h1 className="text-2xl font-semibold text-foreground">e-Factura</h1>
           <p className="text-sm text-muted-foreground">Facturi electronice transmise la ANAF / SPV</p>
         </div>
-        <Link href="/app/invoices/new">
-          <Button>
-            <Plus className="mr-1.5 h-4 w-4" />
-            Factură nouă
-          </Button>
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link href="/app/invoices/free-issue">
+            <Button variant="outline">Transfer gratuit</Button>
+          </Link>
+          <Link href="/app/invoices/new">
+            <Button>
+              <Plus className="mr-1.5 h-4 w-4" />
+              Factură nouă
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -159,7 +168,7 @@ export default async function InvoicesPage() {
                     {Number(inv.total_incl_vat ?? 0).toLocaleString("ro-RO", { minimumFractionDigits: 2 })} {inv.currency ?? "RON"}
                   </td>
                   <td className="px-4 py-3">
-                    <StatusBadge uploadStatus={inv.upload_status} processingStatus={inv.processing_status} />
+                    <StatusBadge uploadStatus={inv.upload_status} processingStatus={inv.processing_status} issued={Boolean(inv.issued_at)} />
                   </td>
                 </tr>
               ))}

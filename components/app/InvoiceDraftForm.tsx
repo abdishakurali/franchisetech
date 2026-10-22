@@ -29,6 +29,18 @@ export type InvoiceProductOption = {
   unitCode: string;
   unitPrice: number;
   vatRate: number | null;
+  /** Product's stock unit (e.g. "kg") — shown so the cashier sees what is deducted. */
+  stockUnit?: string | null;
+  /** False when issuing this product moves no stock (not tracked, no recipe). */
+  deductsStock?: boolean;
+};
+
+export type InvoiceCustomerOption = {
+  id: string;
+  name: string;
+  taxId: string | null;
+  registrationCode: string | null;
+  address: string | null;
 };
 
 export type InitialInvoiceDraft = {
@@ -41,6 +53,7 @@ export type InitialInvoiceDraft = {
   sourcePurchaseId?: string;
   sourcePurchaseLabel?: string;
   lines?: Array<Partial<LineItem>>;
+  issuerName?: string;
 };
 
 function round2(n: number): number {
@@ -65,10 +78,12 @@ function computeTotals(lines: LineItem[]) {
 export function InvoiceDraftForm({
   vatRates,
   products = [],
+  customers = [],
   initialDraft,
 }: {
   vatRates: OrgVatRate[];
   products?: InvoiceProductOption[];
+  customers?: InvoiceCustomerOption[];
   initialDraft?: InitialInvoiceDraft;
 }) {
   const router = useRouter();
@@ -84,6 +99,23 @@ export function InvoiceDraftForm({
   const [buyerCif, setBuyerCif] = useState(initialDraft?.buyerCif ?? "");
   const [buyerName, setBuyerName] = useState(initialDraft?.buyerName ?? "");
   const [buyerAddress, setBuyerAddress] = useState(initialDraft?.buyerAddress ?? "");
+  const [customerId, setCustomerId] = useState("");
+  const [buyerRegCom, setBuyerRegCom] = useState("");
+  const [issuerName, setIssuerName] = useState(initialDraft?.issuerName ?? "");
+  const [issuerIdDoc, setIssuerIdDoc] = useState("");
+  const [delegateName, setDelegateName] = useState("");
+  const [delegateIdDoc, setDelegateIdDoc] = useState("");
+  const productById = new Map(products.map((p) => [p.id, p]));
+
+  function selectCustomer(id: string) {
+    setCustomerId(id);
+    const customer = customers.find((c) => c.id === id);
+    if (!customer) return;
+    setBuyerName(customer.name);
+    setBuyerCif(customer.taxId ?? "");
+    setBuyerRegCom(customer.registrationCode ?? "");
+    setBuyerAddress(customer.address ?? "");
+  }
   const initialLines = initialDraft?.lines?.length
     ? initialDraft.lines.map((line) => ({
         productId: line.productId ?? "",
@@ -157,6 +189,7 @@ export function InvoiceDraftForm({
       quantity: parseFloat(l.quantity) || 0,
       unitPrice: parseFloat(l.unitPrice) || 0,
       vatRate: parseFloat(l.vatRate) || 0,
+      productId: l.productId || undefined,
     }));
 
     if (!buyerCif.trim() || !buyerName.trim()) {
@@ -180,6 +213,12 @@ export function InvoiceDraftForm({
             ? { street: buyerAddress, city: "România", countrySubentity: "RO-B", countryCode: "RO" }
             : undefined,
           lines: parsedLines,
+          customerId: customerId || undefined,
+          buyerRegCom: buyerRegCom.trim() || undefined,
+          issuerName: issuerName.trim() || undefined,
+          issuerIdDoc: issuerIdDoc.trim() || undefined,
+          delegateName: delegateName.trim() || undefined,
+          delegateIdDoc: delegateIdDoc.trim() || undefined,
         });
         router.push(`/app/invoices/${result.id}`);
       } catch (err) {
@@ -223,6 +262,19 @@ export function InvoiceDraftForm({
         <Card>
           <CardHeader><CardTitle className="text-base">Cumpărător</CardTitle></CardHeader>
           <CardContent className="space-y-4">
+            {customers.length > 0 && (
+              <div className="space-y-1.5">
+                <Label>Client salvat (opțional)</Label>
+                <SearchableSelect
+                  name="customer_id"
+                  options={customers.map((c) => ({ value: c.id, label: c.taxId ? `${c.name} · ${c.taxId}` : c.name }))}
+                  defaultValue={customerId}
+                  placeholder="Alege din clienți"
+                  searchPlaceholder="Caută client..."
+                  onValueChange={selectCustomer}
+                />
+              </div>
+            )}
             <div className="flex gap-2">
               <div className="flex-1 space-y-1.5">
                 <Label htmlFor="buyer_cif">CIF cumpărător</Label>
@@ -238,6 +290,10 @@ export function InvoiceDraftForm({
             <div className="space-y-1.5">
               <Label htmlFor="buyer_name">Denumire cumpărător</Label>
               <Input id="buyer_name" placeholder="Companie SRL" value={buyerName} onChange={(e) => setBuyerName(e.target.value)} required />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="buyer_reg_com">Nr. Reg. Com. (opțional)</Label>
+              <Input id="buyer_reg_com" placeholder="ex: J40/1234/2020" value={buyerRegCom} onChange={(e) => setBuyerRegCom(e.target.value)} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="buyer_address">Adresă (opțional)</Label>
@@ -284,11 +340,40 @@ export function InvoiceDraftForm({
                 <Button type="button" variant="ghost" size="sm" onClick={() => removeLine(i)} disabled={lines.length === 1}>
                   <Trash2 className="h-4 w-4 text-muted-foreground" />
                 </Button>
+                {line.productId && productById.get(line.productId) && (
+                  <p className="text-xs text-muted-foreground lg:col-span-7">
+                    {productById.get(line.productId)?.deductsStock === false
+                      ? "Produsul nu are stoc urmărit — emiterea nu modifică stocul."
+                      : `La emitere se scade din stoc, în UM-ul produsului (${productById.get(line.productId)?.stockUnit ?? "buc"}).`}
+                  </p>
+                )}
               </div>
             ))}
             <Button type="button" variant="outline" size="sm" onClick={addLine}>
               <Plus className="mr-1.5 h-4 w-4" /> Adaugă linie
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="text-base">Emitere și expediție (opțional)</CardTitle></CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="issuer_name">Emis de</Label>
+              <Input id="issuer_name" value={issuerName} onChange={(e) => setIssuerName(e.target.value)} placeholder="Nume și prenume" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="issuer_id_doc">CI emitent (serie, nr.)</Label>
+              <Input id="issuer_id_doc" value={issuerIdDoc} onChange={(e) => setIssuerIdDoc(e.target.value)} placeholder="ex: IF 123456" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="delegate_name">Numele delegatului</Label>
+              <Input id="delegate_name" value={delegateName} onChange={(e) => setDelegateName(e.target.value)} placeholder="ex: Curier" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="delegate_id_doc">CI delegat (serie, nr.)</Label>
+              <Input id="delegate_id_doc" value={delegateIdDoc} onChange={(e) => setDelegateIdDoc(e.target.value)} />
+            </div>
           </CardContent>
         </Card>
 

@@ -746,6 +746,16 @@ export default async function SettingsPage({
             anafCif={anafCif}
             anafVatRegistered={anafVatRegistered}
             anafAuthUrl={anafAuthUrl}
+            seller={{
+              legalName: companyLegalName,
+              address: companyAddress,
+              county: (orgRow?.company_county as string | null) ?? "",
+              regCom: (orgRow?.company_reg_com as string | null) ?? "",
+              shareCapital: (orgRow?.company_share_capital as string | null) ?? "",
+              bankAccounts: Array.isArray(orgRow?.invoice_bank_accounts)
+                ? (orgRow.invoice_bank_accounts as Array<{ bank: string | null; iban: string | null; currency: string | null }>)
+                : [],
+            }}
           />
           )}
 

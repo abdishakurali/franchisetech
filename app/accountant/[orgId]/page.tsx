@@ -24,6 +24,8 @@ const MOVEMENT_TYPE_LABELS: Record<string, string> = {
   wastage: "Pierdere",
   return: "Retur",
   opening: "Stoc inițial",
+  invoice_sale: "Vânzare pe factură",
+  free_issue: "Transfer gratuit",
 };
 
 const SECTION_COPY: Record<PackageSection, { label: string; description: string; legal: string }> = {

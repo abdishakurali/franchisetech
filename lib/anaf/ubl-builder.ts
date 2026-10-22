@@ -21,6 +21,8 @@ export type UblParty = {
   legalForm?: string;
   /** "S" = standard VAT, "O" = not VAT registered */
   taxSchemeId?: "S" | "O";
+  /** Legal registration identifier (BT-30 / BT-47), e.g. the bare CUI "28279356". */
+  legalId?: string;
 };
 
 export type UblLineItem = {
@@ -83,6 +85,15 @@ function buildAddress(addr: UblAddress): string {
         </cac:PostalAddress>`;
 }
 
+/**
+ * A VAT identifier carries a country prefix (RO12345678). A bare CUI belongs
+ * to a party that is not VAT registered and must not be declared as a VAT ID
+ * (CIUS-RO): it goes in PartyLegalEntity/CompanyID instead.
+ */
+function hasVatId(taxId: string | undefined): boolean {
+  return /^[A-Z]{2}[0-9A-Z]+$/i.test((taxId ?? "").trim());
+}
+
 function buildParty(party: UblParty, role: "supplier" | "customer"): string {
   const tag = role === "supplier" ? "cac:AccountingSupplierParty" : "cac:AccountingCustomerParty";
   const schemeId = party.taxSchemeId ?? "S";
@@ -91,12 +102,13 @@ function buildParty(party: UblParty, role: "supplier" | "customer"): string {
     <cac:Party>
       <cac:PartyName><cbc:Name>${esc(party.name)}</cbc:Name></cac:PartyName>
       ${buildAddress(party.address)}
-      <cac:PartyTaxScheme>
+      ${hasVatId(party.taxId) ? `<cac:PartyTaxScheme>
         <cbc:CompanyID>${esc(party.taxId)}</cbc:CompanyID>
         <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
-      </cac:PartyTaxScheme>
+      </cac:PartyTaxScheme>` : ""}
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>${esc(party.registrationName ?? party.name)}</cbc:RegistrationName>
+        ${party.legalId ? `<cbc:CompanyID>${esc(party.legalId)}</cbc:CompanyID>` : ""}
         ${party.legalForm ? `<cbc:CompanyLegalForm>${esc(party.legalForm)}</cbc:CompanyLegalForm>` : ""}
       </cac:PartyLegalEntity>
     </cac:Party>

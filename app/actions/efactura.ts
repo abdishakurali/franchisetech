@@ -11,6 +11,8 @@ import type { UblLineItem, UblAddress } from "@/lib/anaf/ubl-builder";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { ratesMatch } from "@/lib/vat-rates";
 import { assertEntitlement } from "@/lib/billing/entitlement-resolver";
+import { createServiceClient } from "@/lib/supabase/server";
+import { toStockQuantity } from "@/lib/invoice-stock-units";
 
 export type EfacturaLineInput = {
   name: string;
@@ -18,6 +20,8 @@ export type EfacturaLineInput = {
   quantity: number;
   unitPrice: number;
   vatRate: number;
+  /** Catalog product sold on this line — its stock is deducted once when the invoice is issued. */
+  productId?: string;
 };
 
 export type CreateInvoiceDraftInput = {
@@ -35,7 +39,46 @@ export type CreateInvoiceDraftInput = {
   };
   lines: EfacturaLineInput[];
   note?: string;
+  customerId?: string;
+  buyerRegCom?: string;
+  issuerName?: string;
+  issuerIdDoc?: string;
+  delegateName?: string;
+  delegateIdDoc?: string;
 };
+
+type StockLineFields = { productId?: string; stockQty?: number; stockUnit?: string };
+
+/**
+ * Resolves each product line's quantity into the product's stock unit
+ * (e.g. 50 GRM → 0.05 kg). Throws a line-numbered Romanian error for an
+ * unknown product or an incompatible unit, before anything is saved.
+ */
+async function resolveStockLines(
+  supabase: Awaited<ReturnType<typeof getKitchenOpsContext>>["supabase"],
+  orgId: string,
+  lines: Array<{ productId?: string; quantity: number; unitCode: string }>,
+): Promise<StockLineFields[]> {
+  const ids = [...new Set(lines.map((l) => l.productId).filter((id): id is string => Boolean(id)))];
+  const productUnits = new Map<string, string | null>();
+  if (ids.length) {
+    const { data, error } = await supabase
+      .from("products")
+      .select("id,unit_of_measure")
+      .eq("organisation_id", orgId)
+      .in("id", ids);
+    if (error) throw new Error("Produsele nu au putut fi verificate. Încercați din nou.");
+    for (const p of data ?? []) productUnits.set(String(p.id), (p.unit_of_measure as string | null) ?? null);
+  }
+  return lines.map((line, i) => {
+    if (!line.productId) return {};
+    if (!productUnits.has(line.productId)) throw new Error(`Linia ${i + 1}: produsul nu mai există în catalog.`);
+    const productUnit = productUnits.get(line.productId) ?? "each";
+    const converted = toStockQuantity(line.quantity, line.unitCode, productUnit);
+    if (!converted.ok) throw new Error(`Linia ${i + 1}: ${converted.error}`);
+    return { productId: line.productId, stockQty: converted.stockQty, stockUnit: productUnit ?? "each" };
+  });
+}
 
 function canManage(role: string | null | undefined) {
   return ["owner", "manager"].includes(role ?? "");
@@ -70,6 +113,7 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput): Promis
     if (invalid) throw new Error(`Cota TVA ${invalid.vatRate}% nu este activă în Setări.`);
   }
 
+  const stockFields = await resolveStockLines(supabase, orgId, input.lines);
   const lines = input.lines.map((l, i) => ({
     id: i + 1,
     name: l.name,
@@ -77,7 +121,8 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput): Promis
     quantity: l.quantity,
     unitPrice: l.unitPrice,
     vatRate: l.vatRate,
-  })) satisfies UblLineItem[];
+    ...stockFields[i],
+  })) satisfies Array<UblLineItem & StockLineFields>;
 
   const totals = computeInvoiceTotals(lines);
 
@@ -98,11 +143,22 @@ export async function createInvoiceDraft(input: CreateInvoiceDraftInput): Promis
       total_incl_vat: totals.totalInclVat,
       upload_status: "draft",
       created_by: user.id,
+      customer_id: input.customerId || null,
+      buyer_reg_com: input.buyerRegCom?.trim() || null,
+      issuer_name: input.issuerName?.trim() || null,
+      issuer_id_doc: input.issuerIdDoc?.trim() || null,
+      delegate_name: input.delegateName?.trim() || null,
+      delegate_id_doc: input.delegateIdDoc?.trim() || null,
     })
     .select("id")
     .single();
 
-  if (error) throw new Error(`Failed to create invoice: ${error.message}`);
+  if (error) {
+    // Unique (organisation_id, invoice_number): also what stops a double-clicked
+    // "Salvează" from creating two drafts.
+    if (error.code === "23505") throw new Error(`Numărul de factură ${input.invoiceNumber} există deja. Alegeți alt număr.`);
+    throw new Error(`Factura nu a putut fi salvată: ${error.message}`);
+  }
 
   revalidatePath("/app/invoices");
   return { id: data.id };
@@ -127,7 +183,7 @@ export async function generateInvoiceXml(invoiceId: string): Promise<{
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("name,company_legal_name,company_address,anaf_cif,fiscalnet_cif,anaf_vat_registered,country_code")
+    .select("name,company_legal_name,company_address,company_reg_com,company_share_capital,anaf_cif,fiscalnet_cif,anaf_vat_registered,country_code")
     .eq("id", orgId)
     .single();
 
@@ -154,11 +210,17 @@ export async function generateInvoiceXml(invoiceId: string): Promise<{
     seller: {
       name: org?.company_legal_name ?? org?.name ?? "—",
       taxId: roTaxId(sellerCui, Boolean(org?.anaf_vat_registered)),
+      legalId: sellerCui ? roTaxId(sellerCui, false) : undefined,
+      legalForm: [org?.company_reg_com, org?.company_share_capital ? `Capital social ${org.company_share_capital}` : null]
+        .filter(Boolean).join(", ") || undefined,
       address: sellerAddress,
     },
     buyer: {
       name: inv.buyer_name,
-      taxId: inv.buyer_cif.startsWith("RO") ? inv.buyer_cif : `RO${inv.buyer_cif}`,
+      // As entered / returned by the ANAF lookup: "RO…" only for VAT payers.
+      // A bare CUI is sent as the legal identifier, not as a VAT number.
+      taxId: inv.buyer_cif.trim().toUpperCase(),
+      legalId: inv.buyer_cif.trim().replace(/^RO/i, ""),
       address: buyerAddress,
     },
     lines: (inv.line_items as UblLineItem[]),
@@ -202,6 +264,10 @@ export async function submitInvoiceToAnaf(invoiceId: string): Promise<{ indexInc
 
   const accessToken = await getOrgAccessToken(orgId);
 
+  // An invoice sent to ANAF is issued: make sure its stock was deducted
+  // (no-op if it already was).
+  await issueInvoiceStock(orgId, invoiceId);
+
   let xml = inv.xml_content as string | null;
   if (!xml) {
     const result = await generateInvoiceXml(invoiceId);
@@ -227,6 +293,66 @@ export async function submitInvoiceToAnaf(invoiceId: string): Promise<{ indexInc
 
   revalidatePath("/app/invoices");
   return { indexIncarcare: uploadResult.indexIncarcare };
+}
+
+function issueErrorMessage(message: string): string {
+  if (message.includes("INVOICE_NOT_FOUND")) return "Factura nu a fost găsită.";
+  if (message.includes("INVOICE_PRODUCT_NOT_FOUND")) return "Un produs de pe factură nu mai există în catalog. Corectați factura.";
+  return "Factura nu a putut fi emisă. Încercați din nou — stocul nu va fi scăzut de două ori.";
+}
+
+async function issueInvoiceStock(orgId: string, invoiceId: string) {
+  const { user } = await getKitchenOpsContext();
+  const service = await createServiceClient();
+  const { data, error } = await service.rpc("issue_sales_invoice", {
+    p_org_id: orgId,
+    p_actor_id: user.id,
+    p_invoice_id: invoiceId,
+  });
+  if (error) {
+    console.error("[invoice] issue_sales_invoice failed", { orgId, invoiceId, message: error.message });
+    throw new Error(issueErrorMessage(error.message ?? ""));
+  }
+  return data as { invoice_number: string; idempotent: boolean; movements: number };
+}
+
+/**
+ * Issue the invoice: it becomes final and the sold quantities leave stock.
+ * Safe to retry or double-click — the RPC locks the invoice and deducts stock
+ * only the first time (issued_at).
+ */
+export async function issueSalesInvoice(invoiceId: string): Promise<
+  { ok: true; alreadyIssued: boolean; movements: number } | { ok: false; error: string }
+> {
+  const { supabase, orgId, membership } = await getKitchenOpsContext();
+  if (!canManage(membership.role)) return { ok: false, error: "Doar managerul sau proprietarul poate emite facturi." };
+  await assertEfacturaInstalled(supabase, orgId);
+  await assertEntitlement(orgId, "fiscal.efactura");
+  try {
+    const result = await issueInvoiceStock(orgId, invoiceId);
+    revalidatePath(`/app/invoices/${invoiceId}`);
+    revalidatePath("/app/invoices");
+    return { ok: true, alreadyIssued: result.idempotent, movements: result.movements };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : "Factura nu a putut fi emisă." };
+  }
+}
+
+/** Next number to suggest on a new invoice: highest numeric invoice number + 1. */
+export async function suggestNextInvoiceNumber(): Promise<string> {
+  const { supabase, orgId } = await getKitchenOpsContext();
+  const { data } = await supabase
+    .from("efactura_invoices")
+    .select("invoice_number")
+    .eq("organisation_id", orgId)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  let max = 0;
+  for (const row of data ?? []) {
+    const n = Number(String(row.invoice_number ?? "").replace(/^\D+/, ""));
+    if (Number.isInteger(n) && n > max) max = n;
+  }
+  return String(max + 1);
 }
 
 /** Called from the ANAF OAuth callback route to persist tokens. */
@@ -284,14 +410,29 @@ export async function saveAnafSettings(formData: FormData): Promise<void> {
 
   const anaf_cif = (formData.get("anaf_cif") as string ?? "").trim();
   const anaf_vat_registered = formData.get("anaf_vat_registered") === "on";
+  const text = (key: string) => ((formData.get(key) as string | null) ?? "").trim() || null;
+
+  const update: Record<string, unknown> = {
+    anaf_cif: anaf_cif || null,
+    fiscalnet_cif: anaf_cif || null,
+    anaf_vat_registered,
+  };
+  // Seller details printed on invoices — only written when the form includes them.
+  if (formData.has("company_legal_name")) {
+    update.company_legal_name = text("company_legal_name");
+    update.company_address = text("company_address");
+    update.company_county = text("company_county");
+    update.company_reg_com = text("company_reg_com");
+    update.company_share_capital = text("company_share_capital");
+    const accounts = [0, 1, 2]
+      .map((i) => ({ bank: text(`bank_name_${i}`), iban: text(`bank_iban_${i}`)?.replace(/\s+/g, "").toUpperCase() ?? null, currency: text(`bank_currency_${i}`) ?? "RON" }))
+      .filter((a) => a.iban);
+    update.invoice_bank_accounts = accounts;
+  }
 
   await supabase
     .from("organisations")
-    .update({
-      anaf_cif: anaf_cif || null,
-      fiscalnet_cif: anaf_cif || null,
-      anaf_vat_registered,
-    })
+    .update(update)
     .eq("id", orgId);
 
   revalidatePath("/app/settings");

@@ -28,7 +28,7 @@ type UblAddress = {
   countryCode?: string;
 };
 
-function StatusBadge({ status, processingStatus }: { status: string; processingStatus: string | null }) {
+function StatusBadge({ status, processingStatus, issued }: { status: string; processingStatus: string | null; issued: boolean }) {
   if (status === "accepted") {
     return <span className="inline-flex items-center rounded-full bg-reconciled/10 px-3 py-1 text-sm font-medium text-reconciled">Acceptată ANAF</span>;
   }
@@ -43,6 +43,9 @@ function StatusBadge({ status, processingStatus }: { status: string; processingS
   }
   if (status === "failed") {
     return <span className="inline-flex items-center rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-orange-700">Eroare trimitere</span>;
+  }
+  if (issued) {
+    return <span className="inline-flex items-center rounded-full bg-reconciled/10 px-3 py-1 text-sm font-medium text-reconciled">Emisă</span>;
   }
   return <span className="inline-flex items-center rounded-full bg-secondary px-3 py-1 text-sm font-medium text-mid">Draft</span>;
 }
@@ -95,7 +98,8 @@ export default async function InvoiceDetailPage({
   }
   const inclVat = round2(exclVat + totalVat);
 
-  const canSubmit = ["draft", "failed"].includes(inv.upload_status);
+  // ANAF submission only after "Emite factura" (which finalises it and deducts stock).
+  const canSubmit = Boolean(inv.issued_at) && ["draft", "failed"].includes(inv.upload_status);
   const isSubmitted = ["uploaded", "accepted", "rejected"].includes(inv.upload_status);
 
   return (
@@ -113,11 +117,11 @@ export default async function InvoiceDetailPage({
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{inv.invoice_number}</h1>
           <p className="text-sm text-muted-foreground">
-            Emisă la {new Date(inv.issue_date).toLocaleDateString("ro-RO")}
+            {inv.issued_at ? "Emisă" : "Ciornă, datată"} la {new Date(inv.issue_date).toLocaleDateString("ro-RO")}
             {inv.due_date && ` · Scadentă la ${new Date(inv.due_date).toLocaleDateString("ro-RO")}`}
           </p>
         </div>
-        <StatusBadge status={inv.upload_status} processingStatus={inv.processing_status} />
+        <StatusBadge status={inv.upload_status} processingStatus={inv.processing_status} issued={Boolean(inv.issued_at)} />
       </div>
 
       {inv.upload_status === "rejected" && inv.error_message && (
@@ -143,12 +147,18 @@ export default async function InvoiceDetailPage({
         </CardHeader>
         <CardContent className="space-y-1 text-sm">
           <p className="font-medium text-foreground">{inv.buyer_name}</p>
-          <p className="text-muted-foreground">CIF: {inv.buyer_cif}</p>
+          <p className="text-muted-foreground">CIF: {inv.buyer_cif}{inv.buyer_reg_com ? ` · RC ${inv.buyer_reg_com}` : ""}</p>
           {buyerAddress?.street && (
             <p className="text-muted-foreground">{buyerAddress.street}{buyerAddress.city ? `, ${buyerAddress.city}` : ""}</p>
           )}
         </CardContent>
       </Card>
+
+      {inv.issued_at && (
+        <div className="rounded-lg border border-reconciled/25 bg-reconciled/10 p-3 text-sm text-reconciled">
+          Factură emisă la {new Date(inv.issued_at).toLocaleString("ro-RO")}. Cantitățile au fost scăzute din stoc o singură dată.
+        </div>
+      )}
 
       {/* Line items */}
       <Card>
@@ -212,6 +222,7 @@ export default async function InvoiceDetailPage({
         isSubmitted={isSubmitted}
         anafConnected={anafConnected}
         hasXml={!!inv.xml_content}
+        issued={Boolean(inv.issued_at)}
       />
     </div>
   );

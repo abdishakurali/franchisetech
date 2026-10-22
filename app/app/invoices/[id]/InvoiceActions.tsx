@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { generateInvoiceXml, submitInvoiceToAnaf } from "@/app/actions/efactura";
-import { Loader2, FileCode, Send, CheckCircle, Download } from "lucide-react";
+import { generateInvoiceXml, issueSalesInvoice, submitInvoiceToAnaf } from "@/app/actions/efactura";
+import { Loader2, FileCode, Send, CheckCircle, Download, FileText, Stamp } from "lucide-react";
 
 type Props = {
   invoiceId: string;
@@ -12,12 +12,41 @@ type Props = {
   isSubmitted: boolean;
   anafConnected: boolean;
   hasXml: boolean;
+  issued: boolean;
 };
 
-export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anafConnected, hasXml }: Props) {
+export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anafConnected, hasXml, issued }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [action, setAction] = useState<"xml" | "submit" | null>(null);
+  const [action, setAction] = useState<"xml" | "submit" | "issue" | null>(null);
+  const [issueMessage, setIssueMessage] = useState<string | null>(null);
+  const issuingRef = useRef(false);
+
+  function handleIssue() {
+    if (issuingRef.current) return;
+    if (!window.confirm("Emiteți factura? După emitere nu mai poate fi modificată, iar cantitățile se scad din stoc.")) return;
+    issuingRef.current = true;
+    setError(null);
+    setAction("issue");
+    startTransition(async () => {
+      try {
+        const result = await issueSalesInvoice(invoiceId);
+        if (!result.ok) {
+          setError(result.error);
+          return;
+        }
+        setIssueMessage(
+          result.alreadyIssued
+            ? "Factura era deja emisă. Stocul nu a fost scăzut din nou."
+            : `Factură emisă. ${result.movements} mișcări de stoc înregistrate.`,
+        );
+        router.refresh();
+      } finally {
+        issuingRef.current = false;
+        setAction(null);
+      }
+    });
+  }
   const [xmlResult, setXmlResult] = useState<{ valid: boolean; errors: string[]; xml?: string } | null>(null);
   const [showXml, setShowXml] = useState(false);
   const [submitResult, setSubmitResult] = useState<{ indexIncarcare: number } | null>(null);
@@ -71,6 +100,18 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3">
+        {!issued && (
+          <Button onClick={handleIssue} disabled={isPending}>
+            {action === "issue" && isPending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Stamp className="mr-1.5 h-4 w-4" />}
+            {action === "issue" && isPending ? "Se emite…" : "Emite factura"}
+          </Button>
+        )}
+        <a href={`/api/invoices/${invoiceId}/pdf`} target="_blank" rel="noopener">
+          <Button type="button" variant="outline">
+            <FileText className="mr-1.5 h-4 w-4" />
+            {issued ? "Descarcă PDF" : "Previzualizare PDF (ciornă)"}
+          </Button>
+        </a>
         {canSubmit && (
           <>
             <Button
@@ -132,6 +173,10 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
           </Button>
         )}
       </div>
+
+      {issueMessage && (
+        <div className="rounded-lg bg-reconciled/10 border border-reconciled/25 p-3 text-sm text-reconciled">{issueMessage}</div>
+      )}
 
       {submitResult && (
         <div className="rounded-lg bg-reconciled/10 border border-reconciled/25 p-3 text-sm text-reconciled">

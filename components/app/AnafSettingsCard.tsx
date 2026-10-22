@@ -11,6 +11,14 @@ interface AnafSettingsCardProps {
   anafCif: string;
   anafVatRegistered: boolean;
   anafAuthUrl: string | null;
+  seller?: {
+    legalName: string;
+    address: string;
+    county: string;
+    regCom: string;
+    shareCapital: string;
+    bankAccounts: Array<{ bank: string | null; iban: string | null; currency: string | null }>;
+  };
 }
 
 export function AnafSettingsCard({
@@ -19,7 +27,9 @@ export function AnafSettingsCard({
   anafCif,
   anafVatRegistered,
   anafAuthUrl,
+  seller,
 }: AnafSettingsCardProps) {
+  const banks = [0, 1, 2].map((i) => seller?.bankAccounts[i] ?? { bank: "", iban: "", currency: "RON" });
   return (
     <Card>
       <CardHeader>
@@ -48,7 +58,47 @@ export function AnafSettingsCard({
                 <Label htmlFor="anaf_vat_registered">Plătitor de TVA (prefix RO în CUI)</Label>
               </div>
             </div>
-            <Button type="submit" size="sm">Salvează CIF</Button>
+            {seller && (
+              <div className="space-y-4 border-t border-border pt-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Date furnizor pe factură</p>
+                  <p className="text-xs text-muted-foreground">Apar în blocul „Furnizor” al facturilor PDF și în XML-ul e-Factura.</p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <Label htmlFor="company_legal_name">Denumire firmă</Label>
+                    <Input id="company_legal_name" name="company_legal_name" defaultValue={seller.legalName} placeholder="ex: S.C. Exemplu SRL" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="company_reg_com">Nr. Reg. Com.</Label>
+                    <Input id="company_reg_com" name="company_reg_com" defaultValue={seller.regCom} placeholder="ex: J40/1234/2020" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="company_share_capital">Capital social</Label>
+                    <Input id="company_share_capital" name="company_share_capital" defaultValue={seller.shareCapital} placeholder="ex: 200 RON" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="company_address">Adresă sediu</Label>
+                    <Input id="company_address" name="company_address" defaultValue={seller.address} placeholder="Str., nr., localitate" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="company_county">Județ</Label>
+                    <Input id="company_county" name="company_county" defaultValue={seller.county} placeholder="ex: Ilfov" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">Conturi bancare (opțional, max. 3)</p>
+                  {banks.map((bank, i) => (
+                    <div key={i} className="grid gap-2 sm:grid-cols-[1fr_1.4fr_6rem]">
+                      <Input name={`bank_name_${i}`} defaultValue={bank.bank ?? ""} placeholder="Banca" aria-label={`Banca ${i + 1}`} />
+                      <Input name={`bank_iban_${i}`} defaultValue={bank.iban ?? ""} placeholder="IBAN RO.." aria-label={`IBAN ${i + 1}`} />
+                      <Input name={`bank_currency_${i}`} defaultValue={bank.currency ?? "RON"} placeholder="RON" aria-label={`Monedă ${i + 1}`} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <Button type="submit" size="sm">{seller ? "Salvează datele firmei" : "Salvează CIF"}</Button>
           </form>
         )}
 

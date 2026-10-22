@@ -26,9 +26,9 @@ const RETAIL_CUSTOMER_CODE = "CLIENTI-DIVERSI";
 // this product does not track per-product customs codes.
 const DEFAULT_COMMODITY_CODE = "00000000";
 
-export type SaftMovementTypeCode = "AR" | "VZ" | "SC" | "AJ" | "RT" | "SI";
+export type SaftMovementTypeCode = "AR" | "VZ" | "VF" | "SC" | "AJ" | "RT" | "SI" | "TG";
 
-/** All 6 real stock_movements.movement_type values, mapped to self-declared SAF-T codes. */
+/** All real stock_movements.movement_type values, mapped to self-declared SAF-T codes. */
 export const MOVEMENT_TYPE_TABLE: ReadonlyArray<{
   dbType: string;
   code: SaftMovementTypeCode;
@@ -40,6 +40,8 @@ export const MOVEMENT_TYPE_TABLE: ReadonlyArray<{
   { dbType: "manual_adjustment", code: "AJ", description: "Ajustare manuală de stoc" },
   { dbType: "return", code: "RT", description: "Retur marfă" },
   { dbType: "opening", code: "SI", description: "Sold inițial" },
+  { dbType: "invoice_sale", code: "VF", description: "Vânzare pe factură" },
+  { dbType: "free_issue", code: "TG", description: "Transfer gratuit (ieșire fără vânzare)" },
 ] as const;
 
 const MOVEMENT_TYPE_BY_DB_TYPE = new Map(MOVEMENT_TYPE_TABLE.map((m) => [m.dbType, m]));

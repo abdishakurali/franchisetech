@@ -1096,6 +1096,8 @@ const en = {
         wastage: "Waste",
         return: "Return",
         opening: "Opening balance",
+        invoice_sale: "Invoice sale",
+        free_issue: "Free transfer",
       },
     },
     balanta: {
@@ -2437,6 +2439,8 @@ const ro: typeof en = {
         wastage: "Pierdere",
         return: "Retur",
         opening: "Sold inițial",
+        invoice_sale: "Vânzare pe factură",
+        free_issue: "Transfer gratuit",
       },
     },
     balanta: {
