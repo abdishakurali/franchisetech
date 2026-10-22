@@ -2,6 +2,24 @@ import { PostHog } from "posthog-node";
 import { shouldRecordAnalyticsDelivery } from "@/lib/analytics/health";
 
 let posthogClient: PostHog | null = null;
+let pendingProductionDelivery = false;
+
+async function recordSuccessfulDelivery(): Promise<void> {
+  try {
+    const { createServiceClient } = await import("@/lib/supabase/server");
+    const service = await createServiceClient();
+    const now = new Date().toISOString();
+    await service.from("analytics_health_checks").upsert({
+      source: "posthog",
+      last_attempt_at: now,
+      last_success_at: now,
+      last_error: null,
+      updated_at: now,
+    });
+  } catch {
+    // Health bookkeeping must not turn analytics into a business-flow dependency.
+  }
+}
 
 function standardProperties(
   properties?: Record<string, string | number | boolean | null | undefined>,
@@ -42,6 +60,10 @@ export function getPostHogClient(): PostHog | null {
 export async function flushPostHog(): Promise<void> {
   try {
     await posthogClient?.flush();
+    if (pendingProductionDelivery) {
+      pendingProductionDelivery = false;
+      await recordSuccessfulDelivery();
+    }
   } catch {
     // analytics must not block business flows
   }
@@ -71,6 +93,7 @@ export function captureServerEvent(
     const client = getPostHogClient();
     if (!client) return;
     client.capture({ distinctId, event, properties: standardProperties(properties), groups });
+    if (shouldRecordAnalyticsDelivery(event)) pendingProductionDelivery = true;
   } catch {
     // analytics must not block business flows
   }
@@ -94,20 +117,7 @@ export async function captureServerEventAsync(
     client.capture({ distinctId, event, properties: standardProperties(properties), groups });
     await client.flush();
     if (shouldRecordAnalyticsDelivery(event)) {
-      try {
-        const { createServiceClient } = await import("@/lib/supabase/server");
-        const service = await createServiceClient();
-        const now = new Date().toISOString();
-        await service.from("analytics_health_checks").upsert({
-          source: "posthog",
-          last_attempt_at: now,
-          last_success_at: now,
-          last_error: null,
-          updated_at: now,
-        });
-      } catch {
-        // Health bookkeeping must not turn analytics into a business-flow dependency.
-      }
+      await recordSuccessfulDelivery();
     }
     return true;
   } catch {

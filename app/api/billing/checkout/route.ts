@@ -86,7 +86,7 @@ export async function POST(request: Request) {
 
   const { data: org } = await service
     .from("organisations")
-    .select("name, referral_code, referral_credit_months")
+    .select("name, referral_code, referral_credit_months, stripe_customer_id")
     .eq("id", orgId)
     .maybeSingle();
 
@@ -115,7 +115,7 @@ export async function POST(request: Request) {
   }
 
   // Get or create Stripe customer
-  let customerId = existingSub?.stripe_customer_id ?? null;
+  let customerId = org?.stripe_customer_id ?? existingSub?.stripe_customer_id ?? null;
   if (customerId) {
     try {
       const customer = await stripe.customers.retrieve(customerId);

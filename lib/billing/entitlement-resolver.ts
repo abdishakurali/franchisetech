@@ -234,6 +234,7 @@ export async function resolveEntitlements(orgId: string): Promise<ResolvedEntitl
       .from("billing_subscriptions")
       .select("plan,status,current_period_end,grace_period_ends_at,created_at")
       .eq("organisation_id", orgId)
+      .not("stripe_subscription_id", "is", null)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
