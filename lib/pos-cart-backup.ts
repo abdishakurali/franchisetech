@@ -1,4 +1,5 @@
 import { normalizeCartLines } from "@/lib/pos-line-discount";
+import { isSaleAttempt, type SaleAttempt } from "@/lib/pos-sale-attempt";
 
 export type CartItemBackup = {
   product_id: string;
@@ -20,6 +21,8 @@ export type CartBackupWrite = {
   paymentMethodId?: string;
   cashReceived?: number | "";
   discountPct?: number;
+  /** In-flight checkout attempt — lets a reload resend the same idempotency key. */
+  saleAttempt?: SaleAttempt | null;
 };
 
 /** Restored after reload — cart + discount only; never payment step or cash received. */
@@ -27,6 +30,7 @@ export type CartBackupRestore = {
   cart: CartItemBackup[];
   sessionId: string;
   discountPct?: number;
+  saleAttempt?: SaleAttempt;
 };
 
 const STORAGE_KEY = "pos_cart_backup";
@@ -44,6 +48,7 @@ export function parseCartBackupRestore(
         cart: normalizeCartLines(backup.cart, backup.discountPct ?? 0),
         sessionId: backup.sessionId,
         discountPct: backup.discountPct,
+        ...(isSaleAttempt(backup.saleAttempt) ? { saleAttempt: backup.saleAttempt } : {}),
       };
     }
   } catch {

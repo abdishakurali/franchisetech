@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, type Dispatch, type RefObject, type SetStateAction } from "react";
+import { useEffect, useMemo, useRef, useState, type Dispatch, type RefObject, type SetStateAction } from "react";
 import { Banknote, CreditCard, Delete, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -93,6 +93,15 @@ export function PosPaymentPanel({
   chargeRef,
   isOffline = false,
 }: Props) {
+  const [saleSlow, setSaleSlow] = useState(false);
+  useEffect(() => {
+    if (!salePending) return;
+    const timer = setTimeout(() => setSaleSlow(true), 4000);
+    return () => {
+      clearTimeout(timer);
+      setSaleSlow(false);
+    };
+  }, [salePending]);
   const selected = paymentMethods.find((m) => m.id === paymentMethodId);
   const isCash = selected?.type === "cash";
 
@@ -299,6 +308,9 @@ export function PosPaymentPanel({
         )}
 
         {saleError && <p className="mt-4 w-full text-center text-sm text-attention">{saleError}</p>}
+        {salePending && saleSlow && (
+          <p role="status" className="mt-4 w-full text-center text-sm font-medium text-attention">{t.saleSlowDoNotRepeat}</p>
+        )}
       </div>
 
       <div className="shrink-0 grid w-full grid-cols-2 gap-2 border-t border-border bg-white px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-4">

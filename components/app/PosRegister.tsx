@@ -78,6 +78,8 @@ import { PosQuickAccessSheet } from "@/components/app/PosQuickAccessSheet";
 import { sortCategoriesByName } from "@/lib/product-categories";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { indexCartQuantities, indexProducts } from "@/lib/pos-indexes";
+import { resolveSaleAttempt, saleAttemptFingerprint, type SaleAttempt } from "@/lib/pos-sale-attempt";
+import { claimFiscalPrint } from "@/lib/fiscalnet/print-guard";
 
 type Product = {
   id: string; name: string; sale_price: number | string; vat_rate?: number | string | null;
@@ -353,15 +355,30 @@ function TillDialog({
   const [message, setMessage] = useState<string | null>(null);
   const [lastTxt, setLastTxt] = useState<{ filename: string; content: string } | null>(null);
   const [pending, setPending] = useState(false);
+  const cashSubmittingRef = useRef(false);
+  // One key per cash in/out entry, reused if the cashier retries after an error.
+  const cashMovementKeyRef = useRef<string | null>(null);
 
   async function handleCashMovement(formData: FormData) {
+    if (cashSubmittingRef.current) return;
+    cashSubmittingRef.current = true;
     setPending(true);
     setLastTxt(null);
     try {
       const amount = Number(formData.get("amount") ?? 0);
-      await posCashMovement(formData);
-      // FiscalNet cash in/out — only when enabled in Settings
-      if (fiscalActive && fiscalNet?.enabled && amount > 0) {
+      cashMovementKeyRef.current ??= crypto.randomUUID();
+      formData.set("idempotency_key", cashMovementKeyRef.current);
+      const result = await posCashMovement(formData);
+      if (!result.ok) {
+        // Nothing recorded — do not open the drawer / send FiscalNet cash in/out.
+        setMessage(result.error);
+        setPending(false);
+        return;
+      }
+      cashMovementKeyRef.current = null;
+      // FiscalNet cash in/out — only when enabled in Settings, and only for the
+      // submission that actually recorded the movement (never on a replay).
+      if (fiscalActive && fiscalNet?.enabled && amount > 0 && !result.idempotent) {
         const fnRes = movementType === "cash_in"
           ? await fiscalBrowserCashIn(fiscalNet, amount)
           : await fiscalBrowserCashOut(fiscalNet, amount);
@@ -369,6 +386,10 @@ function TillDialog({
         console.info("[FiscalNet] cash movement browser result", { type: movementType, ok: fnRes.ok, message: fnRes.message, mode: fiscalNet.connectionMode });
         const fnMsg = fnRes.ok ? ` | FiscalNet: ${fnRes.message}` : ` | ⚠️ FiscalNet: ${fnRes.message}`;
         setMessage(t.cashMovementSaved + fnMsg);
+      } else if (result.idempotent && fiscalActive && fiscalNet?.enabled) {
+        // Recorded by an earlier attempt whose response was lost. We cannot know
+        // whether the fiscal cash in/out reached the device, so do not resend blindly.
+        setMessage(`${t.cashMovementSaved} | ${t.cashMovementAlreadyRecorded}`);
       } else {
         setMessage(t.cashMovementSaved);
       }
@@ -376,6 +397,8 @@ function TillDialog({
     } catch {
       setMessage(t.somethingWrong);
       setPending(false);
+    } finally {
+      cashSubmittingRef.current = false;
     }
   }
 
@@ -392,11 +415,11 @@ function TillDialog({
           <input type="hidden" name="session_id" value={sessionId ?? ""} />
           <input type="hidden" name="movement_type" value={movementType} />
           <div className="grid grid-cols-2 gap-2 rounded-lg bg-secondary p-1">
-            <button type="button" onClick={() => setMovementType("cash_in")}
+            <button type="button" onClick={() => { setMovementType("cash_in"); cashMovementKeyRef.current = null; }}
               className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${movementType === "cash_in" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
               {t.cashIn}
             </button>
-            <button type="button" onClick={() => setMovementType("cash_out")}
+            <button type="button" onClick={() => { setMovementType("cash_out"); cashMovementKeyRef.current = null; }}
               className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${movementType === "cash_out" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}>
               {t.cashOut}
             </button>
@@ -791,6 +814,12 @@ function PosRegisterInner({
   const [cart, setCart] = useState<CartItem[]>(() =>
     normalizeCartLines(initialBackup?.cart ?? [], initialBackup?.discountPct ?? 0)
   );
+  // One idempotency key per checkout attempt (see lib/pos-sale-attempt.ts).
+  // Restored from the cart backup so a reload mid-request resends the same key.
+  const saleAttemptRef = useRef<SaleAttempt | null>(initialBackup?.saleAttempt ?? null);
+  // Synchronous double-submit lock: salePending is React state and two taps
+  // can both read `false` before the re-render.
+  const submittingRef = useRef(false);
   const [paymentMethodId, setPaymentMethodId] = useState(() => pickDefaultPaymentId(paymentMethods));
   const { locale, t } = usePosI18n();
   const router = useRouter();
@@ -996,6 +1025,7 @@ function PosRegisterInner({
     setCartDiscountLei(0);
     setDiscountMode("pct");
     setLoyaltyRewardAppliedForCustomerId(null);
+    saleAttemptRef.current = null;
     clearCartBackupFromStorage();
   }
 
@@ -1032,7 +1062,11 @@ function PosRegisterInner({
 
   function buildSaleFormData(saleCart: CartItem[], dueTotal: number): FormData {
     const fd = new FormData();
-    fd.set("idempotency_key", crypto.randomUUID());
+    saleAttemptRef.current = resolveSaleAttempt(
+      saleAttemptRef.current,
+      saleAttemptFingerprint(sessionId, saleCart, dueTotal),
+    );
+    fd.set("idempotency_key", saleAttemptRef.current.key);
     fd.set("cart_json", JSON.stringify(saleCart));
     fd.set("session_id", sessionId ?? "");
     fd.set("payment_method_id", paymentMethodId);
@@ -1135,6 +1169,7 @@ function PosRegisterInner({
         paymentMethodId,
         cashReceived,
         discountPct: txDiscountPct,
+        saleAttempt: saleAttemptRef.current,
       });
       const res = await completeSaleReturn(fd);
       if (!res.ok || !res.transactionId) {
@@ -1179,7 +1214,7 @@ function PosRegisterInner({
         setPendingTabSubtotal(0);
       }
       setCheckoutStep("complete");
-      if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
+      if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled && claimFiscalPrint(res.transactionId)) {
         void fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
           transactionId: res.transactionId,
           recordAttempt: recordFiscalAttempt,
@@ -1410,7 +1445,10 @@ function PosRegisterInner({
         return false;
       }
       let fiscalDone = !res.fiscalApiPending;
-      if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
+      if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled && !claimFiscalPrint(res.transactionId)) {
+        // Already sent from this browser (another tab or the online path) — do not print twice.
+        fiscalDone = true;
+      } else if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
         try {
           const fnRes = await fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
             transactionId: res.transactionId,
@@ -1848,11 +1886,12 @@ function PosRegisterInner({
       {/* Cart / payment / complete */}
       <form onSubmit={(e) => {
         e.preventDefault();
-        if (!checkoutCart.length || checkoutStep !== "payment" || salePending) return;
+        if (!checkoutCart.length || checkoutStep !== "payment" || salePending || submittingRef.current) return;
         if (browserOffline) {
           queueCurrentSale(checkoutCart, checkoutTotalDue);
           return;
         }
+        submittingRef.current = true;
         const fd = buildSaleFormData(checkoutCart, checkoutTotalDue);
         const amountLabel = money(checkoutTotalDue);
         const cartSnapshot = checkoutCart;
@@ -1861,7 +1900,9 @@ function PosRegisterInner({
         setLastCompletedSale(null);
         setSaleStatus(null);
         setSalePending(true);
-        void persistSaleInBackground(fd, cartSnapshot, amountLabel);
+        void persistSaleInBackground(fd, cartSnapshot, amountLabel).finally(() => {
+          submittingRef.current = false;
+        });
       }} className={cn(
         "flex min-h-0 flex-col bg-card",
         focusedCheckout

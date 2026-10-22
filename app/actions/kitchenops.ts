@@ -35,6 +35,7 @@ import { formCheckboxEnabled } from "@/lib/form-checkbox";
 import { saveOrgModuleFlags, fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEventAsync } from "@/lib/posthog-server";
+import { planPostSaleEffects } from "@/lib/pos-sale-replay";
 import { productModuleVisibility, resolveProductTypeFields } from "@/lib/product-module-fields";
 import { resolveCsvVatRate, validatePurchaseVatRate, validateVatRateForOrg, VAT_DEFAULTS_BY_COUNTRY } from "@/lib/vat-rates";
 import { listOperationalUnitNames, validateOperationalUnit, isReservedUnitName } from "@/lib/units-of-measure";
@@ -801,25 +802,82 @@ export async function openPosSession(formData: FormData) {
   revalidatePath("/app/pos");
 }
 
-export async function posCashMovement(formData: FormData) {
+export type CashMovementResult =
+  | { ok: true; idempotent: boolean }
+  | { ok: false; error: string };
+
+function cashMovementErrorMessage(message: string): string {
+  if (message.includes("OPEN_SESSION_NOT_FOUND")) return "Casa nu este deschisă. Deschideți casa și încercați din nou.";
+  if (message.includes("CASH_MOVEMENT_AMOUNT_INVALID")) return "Suma trebuie să fie mai mare decât zero.";
+  if (message.includes("CASH_MOVEMENT_REASON_REQUIRED")) return "Completați motivul.";
+  return "Mișcarea de numerar nu a fost înregistrată. Încercați din nou.";
+}
+
+function isMissingRpc(error: { code?: string; message?: string } | null): boolean {
+  return Boolean(error && (error.code === "PGRST202" || /could not find the function/i.test(error.message ?? "")));
+}
+
+export async function posCashMovement(formData: FormData): Promise<CashMovementResult> {
   const { supabase, membership, user, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) {
+    return { ok: false, error: "Doar managerul sau proprietarul poate înregistra intrări/ieșiri de numerar." };
+  }
   await assertEntitlement(orgId, "pos.till_sessions");
   const sessionId = stringValue(formData, "session_id");
   const movementType = stringValue(formData, "movement_type"); // "cash_in" | "cash_out"
   const amount = numberValue(formData, "amount", 0);
   const reason = stringValue(formData, "reason");
-  if (!sessionId || !amount || !reason) return;
+  if (movementType !== "cash_in" && movementType !== "cash_out") {
+    return { ok: false, error: "Tip de mișcare invalid." };
+  }
+  if (!sessionId || !amount || !reason) return { ok: false, error: "Completați suma și motivul." };
+  // Client-generated per dialog submission and reused on retry, so a double
+  // click or retried request cannot record the same cash in/out twice.
+  const idempotencyKey = stringValue(formData, "idempotency_key") || crypto.randomUUID();
 
   const absAmount = Math.abs(amount);
-  await supabase.from("pos_cash_movements").insert({
+
+  // Atomic path: insert + expected_cash increment in one locked transaction
+  // (post_cash_movement). Kill switch CASH_MOVEMENT_RPC=0 restores the legacy
+  // path; a missing function (migration not applied yet) also falls back.
+  if (process.env.CASH_MOVEMENT_RPC !== "0") {
+    const serviceSupabase = await createServiceClient();
+    const { data, error } = await serviceSupabase.rpc("post_cash_movement", {
+      p_org_id: orgId,
+      p_actor_id: user.id,
+      p_document: {
+        idempotency_key: idempotencyKey,
+        session_id: sessionId,
+        movement_type: movementType,
+        amount: absAmount,
+        reason,
+      },
+    });
+    if (!error) {
+      revalidatePath("/app/pos");
+      return { ok: true, idempotent: Boolean((data as { idempotent?: boolean } | null)?.idempotent) };
+    }
+    if (!isMissingRpc(error)) {
+      console.error("[pos] post_cash_movement failed", { orgId, code: error.code, message: error.message });
+      return { ok: false, error: cashMovementErrorMessage(error.message ?? "") };
+    }
+    console.warn("[pos] post_cash_movement RPC missing — using legacy cash movement path", { orgId });
+  }
+
+  const { error: insertError } = await supabase.from("pos_cash_movements").insert({
     organisation_id: orgId,
     session_id: sessionId,
     movement_type: movementType,
     amount: movementType === "cash_in" ? absAmount : -absAmount,
     reason,
     performed_by: user.id,
+    idempotency_key: idempotencyKey,
   });
+  if (insertError) {
+    // Unique violation on the idempotency key = this exact submission was already recorded.
+    if (insertError.code === "23505") return { ok: true, idempotent: true };
+    return { ok: false, error: cashMovementErrorMessage(insertError.message ?? "") };
+  }
 
   // Update expected cash
   const delta = movementType === "cash_in" ? absAmount : -absAmount;
@@ -830,6 +888,7 @@ export async function posCashMovement(formData: FormData) {
   }
 
   revalidatePath("/app/pos");
+  return { ok: true, idempotent: false };
 }
 
 export async function closePosSession(formData: FormData) {
@@ -976,7 +1035,7 @@ export async function returnTransactionLine(formData: FormData) {
   if (!item) return;
 
   const serviceSupabase = await createServiceClient();
-  const key = crypto.randomUUID();
+  const key = stringValue(formData, "idempotency_key") || crypto.randomUUID();
   const { error } = await serviceSupabase.rpc("post_pos_return", {
     p_org_id: orgId,
     p_actor_id: user.id,
@@ -2294,6 +2353,8 @@ export type CompleteSaleResult =
       items: Array<{ productName: string; quantity: number; unitPrice: number; vatRate: number; fiscalNetGroup: number | null; discountPercent?: number; discountValue?: number }>;
       fiscalApiPending: boolean;
       changeDue?: number;
+      /** True when this key was already saved — the response describes the existing sale. */
+      idempotent?: boolean;
     };
 
 export async function completeSaleReturn(formData: FormData): Promise<CompleteSaleResult> {
@@ -2431,7 +2492,13 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   if (!paymentsResolved.ok) return { ok: false, error: paymentsResolved.error, code: paymentsResolved.code };
   const { hasCashPayment, cashOverpay, canonicalPayments } = paymentsResolved.result;
 
-  const idempotencyKey = stringValue(formData, "idempotency_key") || crypto.randomUUID();
+  const clientIdempotencyKey = stringValue(formData, "idempotency_key");
+  if (!clientIdempotencyKey) {
+    // Legacy caller without a per-attempt key: still saved, but retries of this
+    // request cannot be deduplicated. Logged so stale clients are visible.
+    console.warn("[pos] completeSaleReturn called without idempotency_key", { orgId });
+  }
+  const idempotencyKey = clientIdempotencyKey || crypto.randomUUID();
   const stockDepletionEnabled = await hasEntitlement(orgId, "recipes.stock_depletion", { write: true });
 
   const serviceSupabase = await createServiceClient();
@@ -2485,9 +2552,38 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
   const postedDocument = posted as { transaction_id: string; transaction_number: string; idempotent?: boolean };
   const transactionId = postedDocument.transaction_id;
   transactionNumber = postedDocument.transaction_number;
-  await recordGrowthMilestone(supabase, orgId, "first_sale", user.id);
+  const idempotentReplay = postedDocument.idempotent === true;
 
-  if (!postedDocument.idempotent && !tableTabId) {
+  // ── FiscalNet: for API mode, mark pending — browser will fire the call ──
+  const countryCode = (orgRow?.country_code as string) ?? null;
+  const fnEnabled = isFiscalNetActive(countryCode, orgRow?.fiscalnet_enabled as boolean | null | undefined);
+  const fnMock    = (orgRow?.fiscalnet_mock_mode as boolean) !== false;
+  const connMode  = (orgRow?.fiscalnet_connection_mode as string) ?? "api";
+
+  let existingFiscalStatus: string | null = null;
+  if (idempotentReplay && fnEnabled) {
+    const { data: existingTx } = await supabase
+      .from("pos_transactions")
+      .select("fiscal_receipt_status")
+      .eq("id", transactionId)
+      .eq("organisation_id", orgId)
+      .maybeSingle();
+    existingFiscalStatus = (existingTx?.fiscal_receipt_status as string | null | undefined) ?? null;
+  }
+  const effects = planPostSaleEffects({
+    idempotent: idempotentReplay,
+    fiscalEnabled: fnEnabled,
+    // For API mode: just mark the flag — browser will call localhost:65400
+    fiscalApiMode: connMode === "file" || !fnMock,
+    existingFiscalStatus,
+  });
+  const fiscalApiPending = effects.fiscalApiPending;
+
+  if (effects.runFirstTimeSideEffects) {
+    await recordGrowthMilestone(supabase, orgId, "first_sale", user.id);
+  }
+
+  if (effects.runFirstTimeSideEffects && !tableTabId) {
     await createKitchenOrderIfEnabled({
       supabase,
       orgId,
@@ -2502,38 +2598,32 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     });
   }
 
-  if (!postedDocument.idempotent && tableServiceEnabled && tableTabId) {
+  if (effects.runFirstTimeSideEffects && tableServiceEnabled && tableTabId) {
     await settleTabAndClose(supabase, orgId, tableTabId, transactionId);
     revalidatePath("/app/pos");
   }
 
-  // ── FiscalNet: for API mode, mark pending — browser will fire the call ──
-  const countryCode = (orgRow?.country_code as string) ?? null;
-  const fnEnabled = isFiscalNetActive(countryCode, orgRow?.fiscalnet_enabled as boolean | null | undefined);
-  const fnMock    = (orgRow?.fiscalnet_mock_mode as boolean) !== false;
-  const connMode  = (orgRow?.fiscalnet_connection_mode as string) ?? "api";
-
-  // For API mode: just mark the flag — browser will call localhost:65400
-  const fiscalApiPending = fnEnabled && (connMode === "file" || !fnMock);
-  if (fnEnabled) {
+  if (effects.markFiscalStatus) {
     await supabase.from("pos_transactions")
       .update({ fiscal_receipt_required: true, fiscal_receipt_status: (fiscalApiPending) ? "api_pending" : "pending" })
       .eq("id", transactionId).eq("organisation_id", orgId)
       .then(() => null, () => null);
   }
 
-  await captureServerEventAsync(
-    user.id,
-    "sale_completed",
-    {
-      organisation_id: orgId,
-      site_id: siteId,
-      transaction_id: transactionId,
-      total: saleTotal,
-      payment_type: paymentType,
-    },
-    { organisation: orgId },
-  );
+  if (effects.runFirstTimeSideEffects) {
+    await captureServerEventAsync(
+      user.id,
+      "sale_completed",
+      {
+        organisation_id: orgId,
+        site_id: siteId,
+        transaction_id: transactionId,
+        total: saleTotal,
+        payment_type: paymentType,
+      },
+      { organisation: orgId },
+    );
+  }
 
   // A sale changes only these page-level read models. Do not invalidate the
   // authenticated layout: that remounts navigation and unrelated modules.
@@ -2559,6 +2649,7 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     })),
     fiscalApiPending,
     changeDue: cashOverpay,
+    idempotent: idempotentReplay,
   };
 }
 

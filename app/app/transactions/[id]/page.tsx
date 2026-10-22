@@ -308,6 +308,9 @@ export default async function TransactionDetailPage({
                 <form key={item.id} action={returnTransactionLine} className="grid gap-2 border-b pb-3 sm:grid-cols-[1fr_5rem_1fr_auto] sm:items-end">
                   <input type="hidden" name="transaction_id" value={tx.id} />
                   <input type="hidden" name="transaction_item_id" value={item.id} />
+                  {/* Fresh per render: a double submit of this form reuses it, so
+                      post_pos_return returns the existing return instead of a second one. */}
+                  <input type="hidden" name="idempotency_key" value={crypto.randomUUID()} />
                   <div>
                     <p className="text-sm font-medium text-foreground">{item.product_name}</p>
                     <p className="text-xs text-muted-foreground">Disponibil pentru retur: {remaining}</p>
