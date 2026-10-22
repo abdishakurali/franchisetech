@@ -70,7 +70,10 @@ function renderRegister() {
     />,
   );
   fireEvent.click(screen.getByText("Espresso Test"));
-  const cashTiles = screen.getAllByRole("button").filter((b) => /numerar|cash/i.test(b.textContent ?? ""));
+  const payButton = screen.getAllByRole("button").find((b) => /^(plată|pay)$/i.test((b.textContent ?? "").trim()));
+  if (!payButton) throw new Error("pay button not rendered");
+  fireEvent.click(payButton);
+  const cashTiles = screen.getAllByRole("button").filter((b) => /^(numerar|cash)$/i.test((b.textContent ?? "").trim()));
   fireEvent.click(cashTiles[0]);
   const form = utils.container.querySelector("form");
   if (!form) throw new Error("checkout form not rendered");

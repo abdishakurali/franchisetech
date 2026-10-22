@@ -2453,23 +2453,29 @@ function PosRegisterInner({
                     disabled={tableTabLocked && !canManage}
                   />
                 )}
-                <div className="grid grid-cols-2 gap-2.5">
-                {selectPrimaryPaymentMethods(paymentMethods).map((method) => <Button
-                  key={method.id}
+                <div className="grid grid-cols-1 gap-2.5">
+                <Button
                   type="button"
                   disabled={!cart.length || !paymentMethods.length || tableTabLocked}
                   data-tour="pos-charge"
-                  className={`h-16 w-full rounded-[10px] text-lg font-bold disabled:opacity-40 ${method.type === "cash" ? "bg-reconciled text-paper hover:bg-reconciled/90" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
+                  className="h-16 w-full rounded-[10px] bg-primary text-lg font-bold text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
                   onClick={() => {
+                    // One "Plată" entry point: the cashier picks Numerar/Card on
+                    // the payment step. Default method and cash pre-fill match
+                    // what tapping that method's tile used to do.
+                    const primary = selectPrimaryPaymentMethods(paymentMethods);
+                    const defaultId = pickDefaultPaymentId(primary);
+                    const method = primary.find((m) => m.id === defaultId);
+                    if (!method) return;
                     setPaymentMethodId(method.id);
                     setCashReceived(method.type === "cash" ? cashExactAmount : "");
                     setPaymentCartSnapshot(normalizeCartLines(cart, txDiscountPct));
                     setCheckoutStep("payment");
                   }}
                 >
-                  {paymentTypeLabel(method.type, method.name, locale)}
-                </Button>)}
-                {!paymentMethods.length && <p className="col-span-2 text-center text-sm text-amber-800">{t.setupPaymentMethods}</p>}
+                  {t.payButton}
+                </Button>
+                {!paymentMethods.length && <p className="text-center text-sm text-amber-800">{t.setupPaymentMethods}</p>}
                 </div>
               </div>
               )}
