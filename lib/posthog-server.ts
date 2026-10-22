@@ -1,4 +1,5 @@
 import { PostHog } from "posthog-node";
+import { shouldRecordAnalyticsDelivery } from "@/lib/analytics/health";
 
 let posthogClient: PostHog | null = null;
 
@@ -92,6 +93,22 @@ export async function captureServerEventAsync(
     if (!client) return false;
     client.capture({ distinctId, event, properties: standardProperties(properties), groups });
     await client.flush();
+    if (shouldRecordAnalyticsDelivery(event)) {
+      try {
+        const { createServiceClient } = await import("@/lib/supabase/server");
+        const service = await createServiceClient();
+        const now = new Date().toISOString();
+        await service.from("analytics_health_checks").upsert({
+          source: "posthog",
+          last_attempt_at: now,
+          last_success_at: now,
+          last_error: null,
+          updated_at: now,
+        });
+      } catch {
+        // Health bookkeeping must not turn analytics into a business-flow dependency.
+      }
+    }
     return true;
   } catch {
     // analytics must not block business flows

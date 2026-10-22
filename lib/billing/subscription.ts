@@ -61,6 +61,10 @@ export function resolveSubscriptionState(
   }
 }
 
+export function isStripeSubscriptionRecord(row: { stripe_subscription_id: string | null }): boolean {
+  return Boolean(row.stripe_subscription_id);
+}
+
 export function resolveNoSubscriptionState(input: {
   cardVerifiedAt: string | null;
   trialStartedAt: string | null;
@@ -140,6 +144,7 @@ export const getSubscriptionStatus = cache(async function getSubscriptionStatus(
       .from("billing_subscriptions")
       .select("plan, status, trial_end, current_period_end, cancel_at_period_end, stripe_customer_id, stripe_subscription_id, grace_period_ends_at")
       .eq("organisation_id", orgId)
+      .not("stripe_subscription_id", "is", null)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),

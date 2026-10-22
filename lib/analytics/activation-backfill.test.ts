@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { activationEventsForOrg } from "@/lib/analytics/activation-backfill";
+import { activationDistinctId, activationEventsForOrg } from "@/lib/analytics/activation-backfill";
 
 describe("activationEventsForOrg", () => {
   it("returns only milestones proven by Supabase timestamps", () => {
@@ -13,5 +13,15 @@ describe("activationEventsForOrg", () => {
       { event: "trial_started", timestamp: "2026-10-01T00:00:00Z" },
       { event: "till_session_opened", timestamp: "2026-10-02T00:00:00Z" },
     ]);
+  });
+});
+
+describe("activationDistinctId", () => {
+  it("uses the Supabase owner id so backfilled events join the live funnel", () => {
+    expect(activationDistinctId("user_1")).toBe("user_1");
+  });
+
+  it("skips organisations whose owner cannot be resolved", () => {
+    expect(activationDistinctId(null)).toBeNull();
   });
 });

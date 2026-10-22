@@ -13,6 +13,10 @@ const milestoneColumns = [
   ["z_report_viewed", "growth_first_report_at"],
 ] as const;
 
+export function activationDistinctId(ownerUserId: string | null | undefined): string | null {
+  return ownerUserId || null;
+}
+
 export function activationEventsForOrg(row: ActivationSourceRow) {
   return milestoneColumns.flatMap(([event, column]) => {
     const timestamp = row[column];

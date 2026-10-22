@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAccessAllowed, isSubscriptionBlockedForApp, resolveNoSubscriptionState, resolveSubscriptionState, type SubState, type SubscriptionStatus } from "./subscription";
+import { isAccessAllowed, isStripeSubscriptionRecord, isSubscriptionBlockedForApp, resolveNoSubscriptionState, resolveSubscriptionState, type SubState, type SubscriptionStatus } from "./subscription";
 
 function statusFor(state: SubState): SubscriptionStatus {
   return {
@@ -57,6 +57,16 @@ describe("resolveSubscriptionState", () => {
 
   it("blocks a canceled subscription after its paid period", () => {
     expect(resolveSubscriptionState("canceled", "2020-10-25T08:13:25.000Z", null)).toBe("canceled");
+  });
+});
+
+describe("isStripeSubscriptionRecord", () => {
+  it("ignores the customer placeholder created by €1 card verification", () => {
+    expect(isStripeSubscriptionRecord({ stripe_subscription_id: null })).toBe(false);
+  });
+
+  it("keeps real Stripe subscriptions authoritative", () => {
+    expect(isStripeSubscriptionRecord({ stripe_subscription_id: "sub_live" })).toBe(true);
   });
 });
 

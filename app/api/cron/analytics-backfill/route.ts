@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { activationEventsForOrg, type ActivationSourceRow } from "@/lib/analytics/activation-backfill";
+import { activationDistinctId, activationEventsForOrg, type ActivationSourceRow } from "@/lib/analytics/activation-backfill";
 import { captureServerEventAsync } from "@/lib/posthog-server";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -18,12 +18,26 @@ export async function POST(req: NextRequest) {
     .select("id,trial_started_at,growth_till_opened_at,growth_first_sale_at,growth_first_report_at");
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  const organisationIds = (organisations ?? []).map((organisation) => organisation.id);
+  const { data: owners } = organisationIds.length
+    ? await service
+        .from("organisation_members")
+        .select("organisation_id,user_id")
+        .in("organisation_id", organisationIds)
+        .eq("role", "owner")
+    : { data: [] };
+  const ownerByOrganisation = new Map(
+    (owners ?? []).map((owner) => [owner.organisation_id, owner.user_id]),
+  );
+
   let delivered = 0;
   let failed = 0;
   for (const organisation of (organisations ?? []) as ActivationSourceRow[]) {
+    const distinctId = activationDistinctId(ownerByOrganisation.get(organisation.id));
+    if (!distinctId) continue;
     for (const milestone of activationEventsForOrg(organisation)) {
       const ok = await captureServerEventAsync(
-        `organisation:${organisation.id}`,
+        distinctId,
         milestone.event,
         {
           organisation_id: organisation.id,

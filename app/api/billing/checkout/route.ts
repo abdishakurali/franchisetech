@@ -116,19 +116,16 @@ export async function POST(request: Request) {
 
   // Get or create Stripe customer
   let customerId = existingSub?.stripe_customer_id ?? null;
-  let customerWasResetForCurrentStripeMode = false;
   if (customerId) {
     try {
       const customer = await stripe.customers.retrieve(customerId);
       if (customer.deleted) {
         customerId = null;
-        customerWasResetForCurrentStripeMode = true;
       }
     } catch (error) {
       const stripeError = error as { code?: string };
       if (stripeError.code === "resource_missing") {
         customerId = null;
-        customerWasResetForCurrentStripeMode = true;
       } else {
         throw error;
       }
@@ -152,22 +149,11 @@ export async function POST(request: Request) {
       updated_at: new Date().toISOString(),
     };
 
-    // Persist it immediately so concurrent requests reuse the same customer.
-    // organisation_id is not unique, so update a pending row or insert explicitly.
-    const { data: pendingSub } = customerWasResetForCurrentStripeMode
-      ? { data: null }
-      : await service
-          .from("billing_subscriptions")
-          .select("id")
-          .eq("organisation_id", orgId)
-          .eq("status", "incomplete")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-    const { error: pendingError } = pendingSub?.id
-      ? await service.from("billing_subscriptions").update(pendingPayload).eq("id", pendingSub.id)
-      : await service.from("billing_subscriptions").insert(pendingPayload);
+    // One canonical row per organisation: update the existing snapshot or
+    // create it atomically so customer recovery cannot violate the unique key.
+    const { error: pendingError } = await service
+      .from("billing_subscriptions")
+      .upsert(pendingPayload, { onConflict: "organisation_id" });
 
     if (pendingError) {
       console.error("[billing] failed to persist checkout customer", pendingError);

@@ -39,7 +39,7 @@ export async function POST() {
 
   const { data: org } = await service
     .from("organisations")
-    .select("name, trial_started_at, card_verified_at")
+    .select("name, trial_started_at, card_verified_at, stripe_customer_id")
     .eq("id", orgId)
     .maybeSingle();
 
@@ -75,7 +75,7 @@ export async function POST() {
     .limit(1)
     .maybeSingle();
 
-  let customerId = existingSub?.stripe_customer_id ?? null;
+  let customerId = org?.stripe_customer_id ?? existingSub?.stripe_customer_id ?? null;
   if (customerId) {
     try {
       const customer = await stripe.customers.retrieve(customerId);
@@ -96,26 +96,12 @@ export async function POST() {
     });
     customerId = customer.id;
 
-    // Persist immediately so concurrent requests and the later subscription
-    // checkout reuse the same customer (same pattern as /api/billing/checkout).
-    const pendingPayload = {
-      organisation_id: orgId,
-      stripe_customer_id: customerId,
-      plan: "starter",
-      status: "incomplete",
-      updated_at: new Date().toISOString(),
-    };
-    const { data: pendingSub } = await service
-      .from("billing_subscriptions")
-      .select("id")
-      .eq("organisation_id", orgId)
-      .eq("status", "incomplete")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const { error: pendingError } = pendingSub?.id
-      ? await service.from("billing_subscriptions").update(pendingPayload).eq("id", pendingSub.id)
-      : await service.from("billing_subscriptions").insert(pendingPayload);
+    // Card verification is not a subscription. Persist the reusable customer
+    // on the organisation without creating a blocking billing snapshot.
+    const { error: pendingError } = await service
+      .from("organisations")
+      .update({ stripe_customer_id: customerId })
+      .eq("id", orgId);
     if (pendingError) {
       console.error("[billing] failed to persist verification customer", pendingError);
       return NextResponse.json({ error: "Could not prepare billing account. Try again." }, { status: 500 });
