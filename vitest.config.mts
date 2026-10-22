@@ -8,6 +8,6 @@ export default defineConfig({
     environment: "node",
     globals: true,
     include: ["**/*.test.{ts,tsx}"],
-    exclude: ["**/.worktrees/**", "**/node_modules/**"],
+    exclude: ["**/.worktrees/**", "**/.claude/**", "**/node_modules/**"],
   },
 });

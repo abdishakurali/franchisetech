@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     ".worktrees/**",
+    // Claude Code session worktrees (separate checkouts of other branches)
+    ".claude/**",
     "next-env.d.ts",
     // macOS resource fork files
     "._*",
