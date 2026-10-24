@@ -7,7 +7,7 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { FileText, Plus } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Facturi e-Factura | franchisetech",
+  title: "Facturi B2B | franchisetech",
 };
 
 type EfacturaRow = {
@@ -60,23 +60,6 @@ export default async function InvoicesPage() {
     .eq("id", orgId)
     .maybeSingle();
 
-  if (!org?.efactura_enabled) {
-    return (
-      <div className="p-6">
-        <div className="mx-auto max-w-xl rounded-xl border border-border bg-card p-6">
-          <FileText className="h-9 w-9 text-muted-foreground" />
-          <h1 className="mt-4 text-xl font-semibold text-foreground">e-Factura nu este instalată</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Instalează integrarea ANAF e-Factura din Marketplace doar dacă emiți facturi B2B prin SPV.
-          </p>
-          <Link href="/app/settings?tab=integrations" className="mt-5 inline-flex">
-            <Button>Deschide Marketplace</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   const { data: invoices } = await supabase
     .from("efactura_invoices")
     .select("id,invoice_number,issue_date,buyer_name,buyer_cif,total_incl_vat,currency,upload_status,processing_status,created_at,issued_at")
@@ -97,8 +80,8 @@ export default async function InvoicesPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">e-Factura</h1>
-          <p className="text-sm text-muted-foreground">Facturi electronice transmise la ANAF / SPV</p>
+          <h1 className="text-2xl font-semibold text-foreground">Facturi B2B</h1>
+          <p className="text-sm text-muted-foreground">Creează, emite și descarcă facturi. Configurezi ANAF doar când le trimiți.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href="/app/invoices/free-issue">
@@ -112,6 +95,12 @@ export default async function InvoicesPage() {
           </Link>
         </div>
       </div>
+
+      {!org?.efactura_enabled && (
+        <div className="rounded-lg border border-border bg-secondary p-3 text-sm text-muted-foreground">
+          Facturarea este disponibilă. Integrarea e-Factura se configurează numai la prima trimitere către ANAF.
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
@@ -133,7 +122,7 @@ export default async function InvoicesPage() {
           <FileText className="h-10 w-10 text-muted-foreground" />
           <div>
             <p className="font-medium text-foreground">Nicio factură emisă încă</p>
-            <p className="mt-1 text-sm text-muted-foreground">Emite prima ta e-Factură și trimite-o automat la ANAF/SPV.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Creează prima factură B2B. Conectarea ANAF se face numai când alegi trimiterea.</p>
           </div>
           <Link href="/app/invoices/new">
             <Button>Factură nouă</Button>

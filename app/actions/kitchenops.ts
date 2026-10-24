@@ -808,7 +808,7 @@ export async function openPosSession(formData: FormData) {
 }
 
 export type CashMovementResult =
-  | { ok: true; idempotent: boolean }
+  | { ok: true; idempotent: boolean; movementId: string }
   | { ok: false; error: string };
 
 function cashMovementErrorMessage(message: string): string {
@@ -839,6 +839,7 @@ export async function posCashMovement(formData: FormData): Promise<CashMovementR
   // Client-generated per dialog submission and reused on retry, so a double
   // click or retried request cannot record the same cash in/out twice.
   const idempotencyKey = stringValue(formData, "idempotency_key") || crypto.randomUUID();
+  const clientReconciles = stringValue(formData, "client_reconciles") === "1";
 
   const absAmount = Math.abs(amount);
 
@@ -859,8 +860,9 @@ export async function posCashMovement(formData: FormData): Promise<CashMovementR
       },
     }));
     if (!error) {
-      revalidatePath("/app/pos");
-      return { ok: true, idempotent: Boolean((data as { idempotent?: boolean } | null)?.idempotent) };
+      if (!clientReconciles) revalidatePath("/app/pos");
+      const payload = data as { idempotent?: boolean; movement_id?: string } | null;
+      return { ok: true, idempotent: Boolean(payload?.idempotent), movementId: payload?.movement_id ?? idempotencyKey };
     }
     if (!isMissingRpc(error)) {
       console.error("[pos] post_cash_movement failed", { orgId, code: error.code, message: error.message });
@@ -869,7 +871,7 @@ export async function posCashMovement(formData: FormData): Promise<CashMovementR
     console.warn("[pos] post_cash_movement RPC missing — using legacy cash movement path", { orgId });
   }
 
-  const { error: insertError } = await supabase.from("pos_cash_movements").insert({
+  const { data: inserted, error: insertError } = await supabase.from("pos_cash_movements").insert({
     organisation_id: orgId,
     session_id: sessionId,
     movement_type: movementType,
@@ -877,10 +879,10 @@ export async function posCashMovement(formData: FormData): Promise<CashMovementR
     reason,
     performed_by: user.id,
     idempotency_key: idempotencyKey,
-  });
+  }).select("id").single();
   if (insertError) {
     // Unique violation on the idempotency key = this exact submission was already recorded.
-    if (insertError.code === "23505") return { ok: true, idempotent: true };
+    if (insertError.code === "23505") return { ok: true, idempotent: true, movementId: idempotencyKey };
     return { ok: false, error: cashMovementErrorMessage(insertError.message ?? "") };
   }
 
@@ -892,8 +894,8 @@ export async function posCashMovement(formData: FormData): Promise<CashMovementR
     await supabase.from("pos_sessions").update({ expected_cash: newExpected }).eq("id", sessionId);
   }
 
-  revalidatePath("/app/pos");
-  return { ok: true, idempotent: false };
+  if (!clientReconciles) revalidatePath("/app/pos");
+  return { ok: true, idempotent: false, movementId: inserted?.id ?? idempotencyKey };
 }
 
 export async function closePosSession(formData: FormData) {

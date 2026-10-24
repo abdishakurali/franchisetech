@@ -113,8 +113,6 @@ async function assertEfacturaInstalled(
 export async function createInvoiceDraft(input: CreateInvoiceDraftInput): Promise<{ id: string }> {
   const { supabase, orgId, membership, user } = await getKitchenOpsContext();
   if (!canManage(membership.role)) redirect("/app/invoices");
-  await assertEfacturaInstalled(supabase, orgId);
-  await assertEntitlement(orgId, "fiscal.efactura");
   const activeVatRates = await listActiveVatRates(supabase, orgId);
   if (activeVatRates.length > 0) {
     const invalid = input.lines.find((line) => !activeVatRates.some((rate) => ratesMatch(rate.rate, line.vatRate)));
@@ -334,8 +332,6 @@ async function issueInvoiceStock(orgId: string, invoiceId: string) {
 export async function createStornoInvoice(invoiceId: string): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const { supabase, orgId, membership, user } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return { ok: false, error: "Doar managerul sau proprietarul poate storna facturi." };
-  await assertEfacturaInstalled(supabase, orgId);
-  await assertEntitlement(orgId, "fiscal.efactura");
 
   const { data: src } = await supabase
     .from("efactura_invoices")
@@ -406,10 +402,8 @@ export async function createStornoInvoice(invoiceId: string): Promise<{ ok: true
 export async function issueSalesInvoice(invoiceId: string): Promise<
   { ok: true; alreadyIssued: boolean; movements: number; invoiceNumber: string } | { ok: false; error: string }
 > {
-  const { supabase, orgId, membership } = await getKitchenOpsContext();
+  const { orgId, membership } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return { ok: false, error: "Doar managerul sau proprietarul poate emite facturi." };
-  await assertEfacturaInstalled(supabase, orgId);
-  await assertEntitlement(orgId, "fiscal.efactura");
   try {
     const result = await issueInvoiceStock(orgId, invoiceId);
     revalidatePath(`/app/invoices/${invoiceId}`);

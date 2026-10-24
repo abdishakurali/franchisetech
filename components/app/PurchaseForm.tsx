@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useDeferredValue, useMemo, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { createSupplierInline, savePurchaseDraft, postNirPurchase } from "@/app/actions/kitchenops";
 import { lookupAnafCompany } from "@/app/actions/partner-lookup";
@@ -16,6 +17,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import type { AppT } from "@/lib/app-i18n";
 import { itemTypeLabel } from "@/lib/product-module-fields";
+import { filterPurchaseOptions, purchaseLineForSelectedProduct, purchaseLineTotalsFromDraft } from "@/lib/nir/form-performance";
 
 type Supplier = { id: string; name: string };
 type Site = { id: string; name: string };
@@ -69,11 +71,10 @@ function SupplierCombobox({
   onSelect: (id: string) => void;
 }) {
   const [query, setQuery] = useState(() => suppliers.find((s) => s.id === selectedId)?.name ?? "");
+  const deferredQuery = useDeferredValue(query);
   const [open, setOpen] = useState(false);
 
-  const filtered = suppliers
-    .filter((s) => s.name.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 10);
+  const filtered = useMemo(() => filterPurchaseOptions(suppliers, deferredQuery, 10), [suppliers, deferredQuery]);
 
   function handleSelect(s: Supplier) {
     onSelect(s.id);
@@ -161,11 +162,10 @@ function PurchaseItemCombobox({
   onSelect: (id: string) => void;
 }) {
   const [query, setQuery] = useState(() => products.find((p) => p.id === productId)?.name ?? "");
+  const deferredQuery = useDeferredValue(query);
   const [open, setOpen] = useState(false);
 
-  const filtered = products
-    .filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
-    .slice(0, 12);
+  const filtered = useMemo(() => filterPurchaseOptions(products, deferredQuery, 12), [products, deferredQuery]);
 
   function getTypeLabel(p: Product) {
     if (p.item_type) return itemTypeLabel(p.item_type, locale);
@@ -252,6 +252,35 @@ function PurchaseItemCombobox({
   );
 }
 
+function PurchaseSubmitButton({
+  action,
+  label,
+  pendingLabel,
+  disabled,
+  variant,
+}: {
+  action: (formData: FormData) => Promise<void>;
+  label: string;
+  pendingLabel: string;
+  disabled: boolean;
+  variant?: "outline";
+}) {
+  const status = useFormStatus();
+  const isThisAction = status.pending && status.action === action;
+  return (
+    <Button
+      type="submit"
+      variant={variant}
+      disabled={disabled || status.pending}
+      aria-busy={isThisAction}
+      className={variant ? undefined : "bg-primary hover:bg-primary/90 text-primary-foreground"}
+      formAction={action}
+    >
+      {isThisAction ? pendingLabel : label}
+    </Button>
+  );
+}
+
 export function PurchaseForm({
   suppliers,
   products,
@@ -318,9 +347,8 @@ export function PurchaseForm({
   }
   function onProductChange(lineId: number, productId: string) {
     const p = products.find((pr) => pr.id === productId);
-    const unitOfMeasure = p?.unit_of_measure && umOptions.includes(p.unit_of_measure) ? p.unit_of_measure : defaultUm;
     setLines((prev) => prev.map((l) => l.id === lineId
-      ? { ...l, product_id: productId, unit_of_measure: unitOfMeasure }
+      ? purchaseLineForSelectedProduct(l, p, umOptions, defaultUm)
       : l));
   }
 
@@ -356,17 +384,18 @@ export function PurchaseForm({
     }
   }
 
-  const lineCalc = lines.map((l) => {
+  const lineCalc = useMemo(() => lines.map((l) => {
     const qty = parseFloat(l.quantity) || 0;
     const cost = parseFloat(l.unit_cost) || 0;
     const rate = parseFloat(l.tax_rate) || 0;
     const subtotal = qty * cost;
     const taxAmount = subtotal * rate / 100;
     return { subtotal, taxAmount, lineTotal: subtotal + taxAmount };
-  });
-  const subtotalSum = lineCalc.reduce((s, l) => s + l.subtotal, 0);
-  const taxSum = lineCalc.reduce((s, l) => s + l.taxAmount, 0);
-  const grandTotal = subtotalSum + taxSum;
+  }), [lines]);
+  const totals = useMemo(() => purchaseLineTotalsFromDraft(lines), [lines]);
+  const subtotalSum = totals.subtotal;
+  const taxSum = totals.tax;
+  const grandTotal = totals.total;
 
   const fmt = (v: number) => {
     if (isRO) return `${v.toFixed(2)} lei`;
@@ -501,7 +530,14 @@ export function PurchaseForm({
                       locale={isRO ? "ro" : "en"}
                       onSelect={(id) => onProductChange(line.id, id)}
                     />
-                    <SearchableSelect name="unit_of_measure" options={unitOptions} defaultValue={line.unit_of_measure} required searchPlaceholder={t.purchases.form.um} />
+                    <SearchableSelect
+                      name="unit_of_measure"
+                      options={unitOptions}
+                      value={line.unit_of_measure}
+                      required
+                      searchPlaceholder={t.purchases.form.um}
+                      onValueChange={(value) => updateLine(line.id, "unit_of_measure", value)}
+                    />
                     <Input
                       name="quantity"
                       type="number" step="0.001" min="0"
@@ -595,22 +631,19 @@ export function PurchaseForm({
 
             <div className="flex flex-wrap gap-3 pt-1">
               <Link href="/app/purchases"><Button variant="outline" type="button">{t.common.cancel}</Button></Link>
-              <Button
-                type="submit"
+              <PurchaseSubmitButton
                 variant="outline"
                 disabled={products.length === 0}
-                formAction={savePurchaseDraft as unknown as (fd: FormData) => Promise<void>}
-              >
-                {t.purchases.form.saveDraft}
-              </Button>
-              <Button
-                type="submit"
+                action={savePurchaseDraft as unknown as (fd: FormData) => Promise<void>}
+                label={t.purchases.form.saveDraft}
+                pendingLabel={isRO ? "Se salvează…" : "Saving…"}
+              />
+              <PurchaseSubmitButton
                 disabled={products.length === 0}
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                formAction={postNirPurchase as unknown as (fd: FormData) => Promise<void>}
-              >
-                {t.purchases.form.postNir}
-              </Button>
+                action={postNirPurchase as unknown as (fd: FormData) => Promise<void>}
+                label={t.purchases.form.postNir}
+                pendingLabel={isRO ? "Se emite NIR…" : "Posting NIR…"}
+              />
             </div>
           </form>
         </CardContent>

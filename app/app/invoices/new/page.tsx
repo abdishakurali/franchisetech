@@ -2,7 +2,6 @@ import { InvoiceDraftForm } from "@/components/app/InvoiceDraftForm";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { mapUnitOfMeasureToAnafCode } from "@/lib/anaf/unit-codes";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
-import { redirect } from "next/navigation";
 import { suggestNextInvoiceNumber } from "@/app/actions/efactura";
 
 type PurchaseItemRow = {
@@ -22,13 +21,6 @@ export default async function NewInvoicePage({
 }) {
   const params = await searchParams;
   const { supabase, orgId, user } = await getKitchenOpsContext();
-  const { data: org } = await supabase
-    .from("organisations")
-    .select("efactura_enabled")
-    .eq("id", orgId)
-    .maybeSingle();
-  if (!org?.efactura_enabled) redirect("/app/settings?tab=integrations");
-
   const [vatRates, productsResult, recipesResult, customersResult, profileResult, nextNumber] = await Promise.all([
     listActiveVatRates(supabase, orgId),
     supabase

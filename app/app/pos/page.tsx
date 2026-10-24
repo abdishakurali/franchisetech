@@ -25,6 +25,7 @@ import { getTabWithTable, getTables, getFloorSections } from "@/app/actions/tabl
 import { PosTableFloor } from "@/components/app/PosTableFloor";
 import { requireActiveSite, listAccessibleSites } from "@/lib/site-context";
 import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendChart";
+import { createServiceClient } from "@/lib/supabase/server";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -295,10 +296,15 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       .eq("status", "completed")
       .then((r) => r)
     : null;
-  const movementQuery = openSession
-    ? supabase
+  // Cash movements are written by the service-only atomic RPC. Read them with
+  // the service client after org/session access has already been authorized,
+  // because legacy RLS installations may not expose these rows to the browser
+  // session even though the till balance was updated successfully.
+  const movementService = openSession ? await createServiceClient() : null;
+  const movementQuery = openSession && movementService
+    ? movementService
       .from("pos_cash_movements")
-      .select("id,movement_type,amount,reason,performed_at,created_at")
+      .select("id,movement_type,amount,reason,performed_at")
       .eq("organisation_id", orgId)
       .eq("session_id", openSession.id)
       .in("movement_type", ["cash_in", "cash_out"])
@@ -393,7 +399,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
         movement_type: movementType,
         amount: absAmount,
         reason: row.reason,
-        performedAt: (row.performed_at ?? row.created_at) as string | null,
+        performedAt: row.performed_at as string | null,
       });
     }
   }

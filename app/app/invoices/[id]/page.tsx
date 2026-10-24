@@ -67,8 +67,6 @@ export default async function InvoiceDetailPage({
     .select("efactura_enabled")
     .eq("id", orgId)
     .maybeSingle();
-  if (!org?.efactura_enabled) redirect("/app/settings?tab=integrations");
-
   const { data: inv } = await supabase
     .from("efactura_invoices")
     .select("*")
@@ -236,6 +234,7 @@ export default async function InvoiceDetailPage({
         invoiceId={id}
         canSubmit={canSubmit}
         isSubmitted={isSubmitted}
+        efacturaEnabled={Boolean(org?.efactura_enabled)}
         anafConnected={anafConnected}
         hasXml={!!inv.xml_content}
         issued={Boolean(inv.issued_at)}

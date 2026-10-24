@@ -10,13 +10,14 @@ type Props = {
   invoiceId: string;
   canSubmit: boolean;
   isSubmitted: boolean;
+  efacturaEnabled: boolean;
   anafConnected: boolean;
   hasXml: boolean;
   issued: boolean;
   canStorno: boolean;
 };
 
-export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anafConnected, hasXml, issued, canStorno }: Props) {
+export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, efacturaEnabled, anafConnected, hasXml, issued, canStorno }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [action, setAction] = useState<"xml" | "submit" | "issue" | "storno" | null>(null);
@@ -140,7 +141,7 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
             {issued ? "Descarcă PDF" : "Previzualizare PDF (ciornă)"}
           </Button>
         </a>
-        {canSubmit && (
+        {canSubmit && efacturaEnabled && (
           <>
             <Button
               variant="outline"
@@ -175,6 +176,16 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, anaf
               </p>
             )}
           </>
+        )}
+
+        {canSubmit && !efacturaEnabled && (
+          <a
+            href="/app/settings?tab=integrations#marketplace"
+            className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/80"
+          >
+            <Send className="mr-1.5 h-4 w-4" />
+            Configurează și trimite la ANAF
+          </a>
         )}
 
         {isSubmitted && (

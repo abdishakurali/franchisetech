@@ -51,6 +51,7 @@ describe("buildMainNav", () => {
       "/app/recipes",
       "/app/stock",
       "/app/purchases",
+      "/app/invoices",
       "/app/reports",
       "/app/settings/accountant",
     ]);
@@ -90,7 +91,7 @@ describe("resolveNavItems", () => {
       moduleVisibility({ recipeCosting: false, inventory: true }),
       { id: "org1", name: "Org" },
     );
-    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/stock", "/app/reports", "/app/settings/accountant"]);
+    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/stock", "/app/invoices", "/app/reports", "/app/settings/accountant"]);
     expect(showStock).toBe(false);
     expect(hrefs(stockNav)).toEqual([]);
   });
@@ -103,7 +104,7 @@ describe("resolveNavItems", () => {
       moduleVisibility({ recipeCosting: true, inventory: true, purchases: true }),
       { id: "org1", name: "Org", country_code: "RO", efactura_enabled: true, kitchen_display_enabled: true, loyalty_enabled: true },
     );
-    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/recipes", "/app/stock", "/app/purchases", "/app/reports", "/app/settings/accountant"]);
+    expect(hrefs(mainNav)).toEqual(["/app", "/app/pos", "/app/products", "/app/recipes", "/app/stock", "/app/purchases", "/app/invoices", "/app/reports", "/app/settings/accountant"]);
   });
 
   it("keeps accountant acquisition outside employee-only navigation", () => {

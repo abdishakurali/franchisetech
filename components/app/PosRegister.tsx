@@ -80,6 +80,7 @@ import { captureClientEvent } from "@/lib/analytics/client-events";
 import { indexCartQuantities, indexProducts } from "@/lib/pos-indexes";
 import { resolveSaleAttempt, saleAttemptFingerprint, type SaleAttempt } from "@/lib/pos-sale-attempt";
 import { claimFiscalPrint } from "@/lib/fiscalnet/print-guard";
+import { reconcileCashSummary, type CashSummaryOperation } from "@/lib/pos/cash-summary";
 
 type Product = {
   id: string; name: string; sale_price: number | string; vat_rate?: number | string | null;
@@ -323,7 +324,7 @@ function pickDefaultPaymentId(methods: PaymentMethod[]) {
   return methods.find((m) => m.type === "card")?.id ?? methods[0]?.id ?? "";
 }
 
-function TillDialog({
+export function TillDialog({
   sessionId,
   fiscalNet,
   fiscalActive = false,
@@ -334,6 +335,7 @@ function TillDialog({
   open: controlledOpen,
   onOpenChange: controlledOnOpenChange,
   showTrigger = true,
+  onRecorded,
 }: {
   sessionId?: string | null;
   fiscalNet?: BrowserFiscalConfig | null;
@@ -345,6 +347,7 @@ function TillDialog({
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   showTrigger?: boolean;
+  onRecorded?: (operation: CashSummaryOperation) => void;
 }) {
   const { t } = usePosI18n();
   const currencySymbol = currency === "RON" ? "lei" : "€";
@@ -366,8 +369,10 @@ function TillDialog({
     setLastTxt(null);
     try {
       const amount = Number(formData.get("amount") ?? 0);
+      const reason = String(formData.get("reason") ?? "").trim();
       cashMovementKeyRef.current ??= crypto.randomUUID();
       formData.set("idempotency_key", cashMovementKeyRef.current);
+      formData.set("client_reconciles", "1");
       const result = await posCashMovement(formData);
       if (!result.ok) {
         // Nothing recorded — do not open the drawer / send FiscalNet cash in/out.
@@ -376,6 +381,15 @@ function TillDialog({
         return;
       }
       cashMovementKeyRef.current = null;
+      if (!result.idempotent) {
+        onRecorded?.({
+          id: result.movementId,
+          movement_type: movementType,
+          amount,
+          reason,
+          performedAt: new Date().toISOString(),
+        });
+      }
       // FiscalNet cash in/out — only when enabled in Settings, and only for the
       // submission that actually recorded the movement (never on a replay).
       if (fiscalActive && fiscalNet?.enabled && amount > 0 && !result.idempotent) {
@@ -425,11 +439,11 @@ function TillDialog({
             </button>
           </div>
           <div>
-            <Label>{t.amount} ({currencySymbol})</Label>
-            <Input name="amount" type="number" step="0.01" min="0.01" required />
+            <Label htmlFor="cash-movement-amount">{t.amount} ({currencySymbol})</Label>
+            <Input id="cash-movement-amount" name="amount" type="number" step="0.01" min="0.01" required />
             <p className="mt-1 text-xs text-muted-foreground">{movementType === "cash_in" ? t.cashInHint : t.cashOutHint}</p>
           </div>
-          <div><Label>{t.reason}</Label><Input name="reason" required placeholder={movementType === "cash_in" ? t.extraFloatPlaceholder : t.supplierPaymentPlaceholder} /></div>
+          <div><Label htmlFor="cash-movement-reason">{t.reason}</Label><Input id="cash-movement-reason" name="reason" required placeholder={movementType === "cash_in" ? t.extraFloatPlaceholder : t.supplierPaymentPlaceholder} /></div>
           {message && (
             <div className={`rounded-lg p-3 text-sm ${message.startsWith("✓") ? "border border-reconciled/25 bg-reconciled/10 text-reconciled" : "border border-attention/25 bg-attention/10 text-attention"}`}>
               <p>{message}</p>
@@ -824,6 +838,11 @@ function PosRegisterInner({
   // made every sale wait for the full POS loader). Refresh the till summary and
   // recent transactions in the background instead, debounced across quick sales.
   const tillRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [confirmedCashOperations, setConfirmedCashOperations] = useState<CashSummaryOperation[]>([]);
+  const liveSummary = useMemo(
+    () => reconcileCashSummary(summary, confirmedCashOperations),
+    [summary, confirmedCashOperations],
+  );
   useEffect(() => () => {
     if (tillRefreshTimerRef.current) clearTimeout(tillRefreshTimerRef.current);
   }, []);
@@ -1853,8 +1872,23 @@ function PosRegisterInner({
           </SheetContent>
         </Sheet>
         <RefundDialog recentTransactions={recentTransactions} currency={currency} open={refundDialogOpen} onOpenChange={setRefundDialogOpen} showTrigger={false} />
-        <TillDialog sessionId={sessionId} fiscalNet={fiscalNet} fiscalActive={fiscalActive} isRO={isRO} currency={currency} orgName={orgName} userName={userName} open={tillDialogOpen} onOpenChange={setTillDialogOpen} showTrigger={false} />
-        <CloseTillDialog sessionId={sessionId} summary={summary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName} open={closeTillDialogOpen} onOpenChange={setCloseTillDialogOpen} showTrigger={false} />
+        <TillDialog
+          sessionId={sessionId}
+          fiscalNet={fiscalNet}
+          fiscalActive={fiscalActive}
+          isRO={isRO}
+          currency={currency}
+          orgName={orgName}
+          userName={userName}
+          open={tillDialogOpen}
+          onOpenChange={setTillDialogOpen}
+          showTrigger={false}
+          onRecorded={(operation) => {
+            setConfirmedCashOperations((current) => [operation, ...current]);
+            scheduleTillRefresh();
+          }}
+        />
+        <CloseTillDialog sessionId={sessionId} summary={liveSummary} fiscalNet={fiscalNet} currency={currency} orgName={orgName} userName={userName} open={closeTillDialogOpen} onOpenChange={setCloseTillDialogOpen} showTrigger={false} />
         {fiscalActive && (
           <Dialog open={zReportOpen} onOpenChange={setZReportOpen}>
             <DialogContent className="sm:max-w-sm">

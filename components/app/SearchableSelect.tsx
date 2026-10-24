@@ -13,6 +13,7 @@ type Option = {
 type Props = {
   name: string;
   options: Option[];
+  value?: string | null;
   defaultValue?: string | null;
   placeholder?: string;
   searchPlaceholder?: string;
@@ -24,6 +25,7 @@ type Props = {
 export function SearchableSelect({
   name,
   options,
+  value: controlledValue,
   defaultValue = "",
   placeholder = "—",
   searchPlaceholder,
@@ -34,7 +36,8 @@ export function SearchableSelect({
   const { t } = useAppI18n();
   const resolvedSearchPlaceholder = searchPlaceholder ?? `${t.common.search}...`;
   const initial = defaultValue ?? "";
-  const [value, setValue] = useState(initial);
+  const [internalValue, setInternalValue] = useState(initial);
+  const value = controlledValue ?? internalValue;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -49,7 +52,7 @@ export function SearchableSelect({
   }, [options, query]);
 
   function choose(option: Option) {
-    setValue(option.value);
+    setInternalValue(option.value);
     onValueChange?.(option.value);
     setQuery("");
     setOpen(false);

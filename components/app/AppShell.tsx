@@ -11,6 +11,7 @@ import {
   CreditCard, ShoppingBag,
   Gift, BookOpen,
   BriefcaseBusiness,
+  ReceiptText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -113,6 +114,7 @@ export function buildMainNav(t: AppT): NavItem[] {
     // became independent of inventory_enabled — gated ONLY on moduleVisibility.
     // purchases below, never folded back under inventory.
     { href: "/app/purchases", label: t.nav.purchases, icon: ShoppingBag, exact: false },
+    { href: "/app/invoices", label: "Facturi B2B", icon: ReceiptText, exact: false },
     { href: "/app/reports", label: t.nav.reports ?? "Reports", icon: BarChart3, exact: false },
     { href: "/app/settings/accountant", label: "Contabil", icon: BriefcaseBusiness, exact: false },
   ];
