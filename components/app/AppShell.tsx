@@ -167,6 +167,13 @@ function navIsActive(pathname: string, href: string, exact: boolean) {
   return exact ? pathname === href : pathname.startsWith(href);
 }
 
+export function prefetchNavTarget(
+  router: { prefetch: (href: string) => void },
+  href: string,
+) {
+  router.prefetch(href);
+}
+
 function HeaderNavLink({
   href,
   label,
@@ -183,11 +190,15 @@ function HeaderNavLink({
   className?: string;
 }) {
   const isActive = navIsActive(pathname, href, exact);
+  const router = useRouter();
+  const prefetchOnIntent = () => prefetchNavTarget(router, href);
 
   return (
     <Link
       href={href}
       onClick={onNavigate}
+      onPointerEnter={prefetchOnIntent}
+      onFocus={prefetchOnIntent}
       aria-current={isActive ? "page" : undefined}
       className={cn(
         "rounded-md px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap",

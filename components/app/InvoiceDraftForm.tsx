@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createInvoiceDraft, lookupBuyerByCif } from "@/app/actions/efactura";
 import { Loader2, Plus, Trash2, Search } from "lucide-react";
 import type { OrgVatRate } from "@/lib/vat-rates";
-import { getDefaultVatRateValue } from "@/lib/vat-rates";
+import { getDefaultVatRateValue, resolveVatRateValue } from "@/lib/vat-rates";
 import { VatRateSelect } from "@/components/app/VatRateSelect";
 import { SearchableSelect } from "@/components/app/SearchableSelect";
 import { ANAF_UNIT_OPTIONS } from "@/lib/anaf/unit-codes";
@@ -118,7 +118,7 @@ export function InvoiceDraftForm({
         unitCode: line.unitCode ?? "C62",
         quantity: line.quantity ?? "1",
         unitPrice: line.unitPrice ?? "",
-        vatRate: line.vatRate ?? defaultVatRate,
+        vatRate: String(resolveVatRateValue(vatRates, Number(line.vatRate), Number(defaultVatRate))),
       }))
     : [{ productId: "", name: "", unitCode: "C62", quantity: "1", unitPrice: "", vatRate: defaultVatRate }];
   const [lines, setLines] = useState<LineItem[]>(initialLines);
@@ -169,7 +169,7 @@ export function InvoiceDraftForm({
           name: product.name,
           unitCode: product.unitCode,
           unitPrice: product.unitPrice ? String(product.unitPrice) : line.unitPrice,
-          vatRate: product.vatRate === null ? line.vatRate : String(product.vatRate),
+          vatRate: String(resolveVatRateValue(vatRates, product.vatRate, Number(defaultVatRate))),
         }
       : line));
   }

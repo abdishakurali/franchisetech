@@ -27,6 +27,9 @@ const nextConfig: NextConfig = {
     // changed.
     staleTimes: {
       dynamic: 30,
+      // Intent-prefetched app routes use the static client cache bucket.
+      // Keep the same short freshness window for multi-user operational data.
+      static: 30,
     },
   },
   async redirects() {

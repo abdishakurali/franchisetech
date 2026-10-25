@@ -15,11 +15,27 @@ import { describe, expect, it } from "vitest";
 import {
   isRoUnregisteredOrg,
   purchaseVatRateOptions,
+  resolveVatRateValue,
   resolveCsvVatRate,
   validatePurchaseVatRate,
   validateVatRateForOrg,
   type OrgVatRate,
 } from "./vat-rates";
+
+describe("resolveVatRateValue — invoice draft path", () => {
+  const activeRates: OrgVatRate[] = [
+    { id: "standard", name: "TVA Standard 19%", rate: 19, active: true, is_default: true },
+    { id: "reduced", name: "TVA Redus 9%", rate: 9, active: true, is_default: false },
+  ];
+
+  it("replaces a product's inactive legacy VAT rate with the active default", () => {
+    expect(resolveVatRateValue(activeRates, 13.5)).toBe(19);
+  });
+
+  it("preserves a product VAT rate that is active", () => {
+    expect(resolveVatRateValue(activeRates, 9)).toBe(9);
+  });
+});
 
 const BUGGY_RO_CATALOG: OrgVatRate[] = [
   { id: "1", name: "TVA 21%", rate: 21, active: true, is_default: true, sort_order: 1 },

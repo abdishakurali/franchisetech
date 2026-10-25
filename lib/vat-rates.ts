@@ -67,7 +67,7 @@ export function resolveVatRateValue(
   }
   const n = Number(requested);
   if (isKnownVatRate(rates, n)) return n;
-  return n;
+  return getDefaultVatRateValue(rates) || fallback;
 }
 
 export function vatRateOptionsForSelect(rates: OrgVatRate[]): OrgVatRate[] {

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { buildMainNav, resolveNavItems } from "@/components/app/AppShell";
+import { describe, expect, it, vi } from "vitest";
+import { buildMainNav, prefetchNavTarget, resolveNavItems } from "@/components/app/AppShell";
 import type { AppT } from "@/lib/app-i18n";
 
 const t = {
@@ -41,6 +41,17 @@ function moduleVisibility(overrides: Partial<{
     ...overrides,
   };
 }
+
+describe("prefetchNavTarget", () => {
+  it("warms only the route the user signals intent to open", () => {
+    const prefetch = vi.fn();
+
+    prefetchNavTarget({ prefetch }, "/app/pos");
+
+    expect(prefetch).toHaveBeenCalledOnce();
+    expect(prefetch).toHaveBeenCalledWith("/app/pos");
+  });
+});
 
 describe("buildMainNav", () => {
   it("returns the full, unrestricted nav regardless of role — role restriction is resolveNavItems' job", () => {
