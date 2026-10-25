@@ -41,37 +41,28 @@ function formatTime(ts: string | null | undefined, locale: "en" | "ro") {
   return new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", { timeStyle: "short", dateStyle: "short" }).format(new Date(ts));
 }
 
-export default async function PosPage({ searchParams }: { searchParams?: Promise<{ welcome?: string; tabId?: string; quick?: string; onboarding?: string }> }) {
+export default async function PosPage({ searchParams }: { searchParams?: Promise<{ welcome?: string; tabId?: string; quick?: string; onboarding?: string; fiscal?: string }> }) {
   const params = await searchParams;
   const showWelcome = params?.welcome === "1";
   const tabIdParam = params?.tabId ?? null;
   const quickSale = params?.quick === "1";
   const fromOnboarding = params?.onboarding === "1";
+  const fiscalOpeningFailed = params?.fiscal === "opening_failed";
   const perf = perfSteps("pos_page");
-  const { countryCode, profileLocale, supabase, orgId, currency, currencySymbol, user, membership } = await getKitchenOpsContext();
+  const { countryCode, profileLocale, supabase, orgId, currency, currencySymbol, user, profile, membership } = await getKitchenOpsContext();
   perf.mark("context");
   // These reads depend only on orgId/user, so they all start now and run
   // concurrently with the locale + subscription checks below (they were
   // previously awaited one round at a time). Promise.all/allSettled call .then
   // on the lazy Supabase builders, which sends the requests immediately.
-  const loyaltyProfileQueries = Promise.all([
-    supabase.from("organisations").select("loyalty_enabled").eq("id", orgId).maybeSingle(),
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-  ]);
-  const vatAndFiscalQueries = Promise.allSettled([
-    supabase
-      .from("vat_rates")
-      .select(VAT_RATE_COLUMNS)
-      .eq("organisation_id", orgId)
-      .eq("active", true)
-      .order("sort_order")
-      .order("rate"),
-    supabase
-      .from("organisations")
-      .select("country_code,fiscalnet_enabled,fiscalnet_mock_mode,fiscalnet_connection_mode,fiscalnet_api_host,fiscalnet_payment_type_map,fiscalnet_operator_code,sgr_enabled")
-      .eq("id", orgId)
-      .maybeSingle(),
-  ]);
+  const vatRatesQuery = supabase
+    .from("vat_rates")
+    .select(VAT_RATE_COLUMNS)
+    .eq("organisation_id", orgId)
+    .eq("active", true)
+    .order("sort_order")
+    .order("rate")
+    .then((result) => result);
   const sessionQueries = Promise.all([
     supabase
       .from("pos_sessions")
@@ -145,10 +136,6 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   const orgRow = (membership as any)?.organisations;
   const orgInfo = Array.isArray(orgRow) ? orgRow[0] : orgRow;
   const orgName: string = orgInfo?.name ?? "Your Business";
-  // Own small query rather than extending the membership join, per project constraints
-  // on lib/kitchenops/data.ts. Combined with the userProfile fetch below (moved
-  // up here) since both are independent single-row reads for this same request.
-  const [{ data: loyaltyOrgRow }, { data: userProfile }] = await loyaltyProfileQueries;
   const features = {
     kitchenDisplay: !LEAN_PRODUCT_SCOPE_ENABLED && Boolean(orgInfo?.kitchen_display_enabled),
     restaurantOrderFlow: Boolean(orgInfo?.restaurant_order_flow_enabled),
@@ -156,7 +143,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     tableService: !LEAN_PRODUCT_SCOPE_ENABLED && Boolean(orgInfo?.table_service_enabled),
     splitPayments: Boolean(orgInfo?.payment_split_enabled),
     tips: Boolean(orgInfo?.tips_enabled),
-    loyalty: !LEAN_PRODUCT_SCOPE_ENABLED && Boolean(loyaltyOrgRow?.loyalty_enabled),
+    loyalty: !LEAN_PRODUCT_SCOPE_ENABLED && Boolean(orgInfo?.loyalty_enabled),
   };
 
   let activeTab: {
@@ -189,7 +176,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     redirect("/app/pos");
   }
   // Current user name for print slips
-  const userName: string = userProfile?.full_name || user.email || "Staff";
+  const userName: string = profile?.full_name || user.email || "Staff";
   // vat_rates and the FiscalNet org config are independent reads — fetched
   // concurrently via allSettled (not Promise.all) so a failure in either one
   // keeps its own existing resilience contract: vatRates falls back to []
@@ -197,8 +184,8 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   // config stays non-fatal, same as the try/catch below always did. This
   // also removes the second, duplicate vat_rates round-trip that used to
   // happen later via listActiveVatRates() for the same org.
-  const [vatRatesSettled, fnOrgSettled] = await vatAndFiscalQueries;
-  const vatRates = mapVatRateRows(vatRatesSettled.status === "fulfilled" ? vatRatesSettled.value.data : null);
+  const { data: vatRateRows } = await vatRatesQuery;
+  const vatRates = mapVatRateRows(vatRateRows);
 
   // FiscalNet browser config (passed to PosRegister for client-side API calls)
   let fiscalNet: BrowserFiscalConfig | null = null;
@@ -207,7 +194,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   // vatRateGroupMap: rate (%) → fiscalnet_vat_group code, built from vat_rates table (source of truth)
   let vatRateGroupMap: Record<number, number> = {};
   try {
-    const fnOrg = fnOrgSettled.status === "fulfilled" ? fnOrgSettled.value.data : null;
+    const fnOrg = orgInfo;
     if (fnOrg) {
       // SGR deposit scheme (Romania only)
       if (fnOrg.country_code === "RO") { sgrEnabled = Boolean(fnOrg.sgr_enabled); isRO = true; }
@@ -605,6 +592,11 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   return (
     <div className="flex flex-1 flex-col min-h-0 bg-card">
       <PosTillStateSync sessionOpen />
+      {fiscalOpeningFailed ? (
+        <div role="alert" className="m-3 rounded-lg border border-attention/25 bg-attention/10 px-4 py-3 text-sm text-attention">
+          Casa a fost deschisă în aplicație, dar FiscalNet local nu a răspuns. Verifică agentul FiscalNet înainte de prima vânzare.
+        </div>
+      ) : null}
       {showWelcome && (products?.length ?? 0) > 0 && <WelcomeBanner locale={locale} />}
       <PosWithTour
         orgId={orgId}

@@ -50,16 +50,26 @@ export default async function DashboardPage() {
   const recipeVisible = isModuleEnabled(orgModules, "recipe_costing");
   const purchasesVisible = isModuleEnabled(orgModules, "purchases");
 
-  const { data: orgRow } = await supabase
-    .from("organisations")
-    .select("onboarding_step,fiscalnet_enabled,loyalty_enabled")
-    .eq("id", orgId)
-    .maybeSingle();
+  const orgRelation = membership.organisations;
+  const orgRow = (Array.isArray(orgRelation) ? orgRelation[0] : orgRelation) as {
+    onboarding_step?: string | null;
+    fiscalnet_enabled?: boolean | null;
+    loyalty_enabled?: boolean | null;
+  } | null;
   const onboardingStep = (orgRow?.onboarding_step ?? null) as OnboardingStep | null;
   const fiscalnetEnabled = isRO && Boolean(orgRow?.fiscalnet_enabled);
   const loyaltyVisible = Boolean(orgRow?.loyalty_enabled);
 
   const last7Start = startOfDay(subDays(new Date(), 6)).toISOString();
+
+  const attentionPromise = getDashboardAttention(supabase, {
+    orgId,
+    locale,
+    currency,
+    inventoryVisible,
+    recipeVisible,
+    fiscalnetEnabled,
+  });
 
   const [todayTxResult, sessionResult, allTimeTxCountResult, last7TxResult] = await Promise.all([
     supabase
@@ -129,14 +139,7 @@ export default async function DashboardPage() {
     value,
   }));
 
-  const attentionItems = await getDashboardAttention(supabase, {
-    orgId,
-    locale,
-    currency,
-    inventoryVisible,
-    recipeVisible,
-    fiscalnetEnabled,
-  });
+  const attentionItems = await attentionPromise;
 
   const moduleCards = [
     inventoryVisible ? { href: "/app/stock", label: moduleLabel("inventory", locale), Icon: Package } : null,

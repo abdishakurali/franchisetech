@@ -8,7 +8,7 @@ import { AppShell } from "@/components/app/AppShell";
 import { AppI18nProvider } from "@/lib/app-i18n-context";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { PostHogIdentify } from "@/components/app/PostHogIdentify";
-import { ensureReferralCode } from "@/lib/referrals";
+import { buildReferralLink } from "@/lib/referrals";
 import { getSubscriptionStatus, isSubscriptionBlockedForApp } from "@/lib/billing/subscription";
 import { listAccessibleSites, getActiveSiteId } from "@/lib/site-context";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
@@ -42,6 +42,7 @@ export default async function AppLayout({
     compact_workstation_nav_enabled?: boolean | null;
     business_profile?: string | null;
     loyalty_enabled?: boolean | null;
+    referral_code?: string | null;
     admin_notes?: unknown;
   } | null);
   // Never forward admin_notes (internal-only) to this client component —
@@ -57,29 +58,11 @@ export default async function AppLayout({
   // surface. Do not expose operational pages even if they know a URL.
   if (userRole === "accountant") redirect("/accountant");
 
-  const [subStatus, completedTxCount] = activeOrg?.id
-    ? await Promise.all([
-        getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null),
-        supabase
-          .from("pos_transactions")
-          .select("*", { count: "exact", head: true })
-          .eq("organisation_id", activeOrg.id)
-          .eq("status", "completed")
-          .then(({ count }) => count ?? 0),
-      ])
-    : [null, 0];
+  const subStatus = activeOrg?.id
+    ? await getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null)
+    : null;
 
   const subscriptionBlocked = isSubscriptionBlockedForApp(subStatus);
-
-  const hasRealSubscription =
-    subStatus?.state === "active" ||
-    subStatus?.state === "trialing" ||
-    subStatus?.state === "past_due";
-
-  // Completed-sale count is needed both for the delayed verification gate
-  // below and for setupComplete further down — computed once here so a new
-  // signup only pays the query cost a single time per request.
-  const txCount = completedTxCount;
 
   // New signups get a fully unrestricted 5-day trial (see
   // lib/billing/subscription.ts's created_at-based fallback) — no forced
@@ -93,7 +76,7 @@ export default async function AppLayout({
 
   // Sites, referral, module flags and the module guard are independent reads;
   // they used to run as four sequential rounds on every navigation.
-  const [sitesResult, referral, moduleFlags] = await Promise.all([
+  const [sitesResult, moduleFlags] = await Promise.all([
     // Resolve accessible sites and active site (non-blocking — falls back gracefully)
     activeOrg?.id && membership?.id && !subscriptionBlocked
       ? (async () => {
@@ -106,7 +89,6 @@ export default async function AppLayout({
           }
         })()
       : Promise.resolve(null),
-    orgReady ? ensureReferralCode(activeOrg!.id, false) : Promise.resolve(null),
     orgReady ? fetchOrgModuleFlags(supabase, activeOrg!.id) : Promise.resolve(null),
     needsModuleGuard ? requireModuleForPathname(pathname) : Promise.resolve(),
   ]);
@@ -115,7 +97,7 @@ export default async function AppLayout({
   const accessibleSites: { id: string; name: string }[] = sitesResult?.sites ?? [];
   const activeSiteId: string | null = sitesResult?.activeSiteId ?? null;
 
-  let setupComplete = false;
+  const setupComplete = false;
   let moduleVisibility = {
     inventory: false,
     purchases: false,
@@ -126,7 +108,6 @@ export default async function AppLayout({
   };
 
   if (orgReady && moduleFlags) {
-    setupComplete = txCount > 0;
     const hasTrial = subStatus?.state === "trialing" || subStatus?.state === "soft_trial";
 
     moduleVisibility = {
@@ -138,6 +119,14 @@ export default async function AppLayout({
       kitchenOps: isModuleNavVisible({ org: moduleFlags, module: "kitchen_ops", subscriptionPlan: subStatus?.plan, hasTrial }),
     };
   }
+
+  const referralCode = activeOrg?.referral_code ?? null;
+  const referral = activeOrg ? {
+    link: referralCode ? buildReferralLink(referralCode) : null,
+    code: referralCode,
+    creditMonths: Number(activeOrg.referral_credit_months ?? 0),
+    daysLeft: subStatus?.trialDaysLeft ?? null,
+  } : null;
 
   const { locale: appLocale } = getAppLocaleAndText(
     activeOrg?.country_code ?? null,

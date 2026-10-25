@@ -10,6 +10,7 @@ import { openPosSession } from "@/app/actions/kitchenops";
 import { downloadFiscalNetTxt, fiscalBrowserCashIn, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
 import { useFiscalNetActive } from "@/lib/fiscalnet/use-fiscalnet-active";
 import { useAppI18n } from "@/lib/app-i18n-context";
+import { openTillDestination } from "@/lib/fiscalnet/open-till-outcome";
 
 interface Props {
   currencySymbol: string;
@@ -45,12 +46,15 @@ export function OpenTillForm({ currencySymbol, currency, orgName, userName, fisc
     try {
       await (openPosSession as (fd: FormData) => Promise<void>)(fd);
 
+      let fiscalOk = true;
       if (fiscalActive && fiscalNet?.enabled) {
         const result = await fiscalBrowserCashIn(fiscalNet, amount);
+        fiscalOk = result.ok;
         if (result.filename && result.content) setLastTxt({ filename: result.filename, content: result.content });
         setMessage(result.ok ? result.message : `FiscalNet: ${result.message}`);
       }
-      setTimeout(() => router.refresh(), 700);
+      router.replace(openTillDestination({ fiscalActive, fiscalOk }));
+      router.refresh();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : t.pos.couldNotOpenTill);
     } finally {
