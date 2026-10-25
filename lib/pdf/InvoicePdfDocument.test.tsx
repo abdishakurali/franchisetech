@@ -37,6 +37,7 @@ const sample: InvoicePdfData = {
   issuerName: "IVAN FLORENTINA",
   issuerIdDoc: "IF 609813",
   delegateName: "CURIER",
+  draft: true,
 };
 
 describe("InvoicePdfDocument", () => {

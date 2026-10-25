@@ -102,7 +102,7 @@ export default async function InvoiceDetailPage({
   const isSubmitted = ["uploaded", "accepted", "rejected"].includes(inv.upload_status);
 
   return (
-    <div className="space-y-6 p-6 max-w-3xl">
+    <div className="mx-auto max-w-3xl space-y-6 p-6">
       <div className="flex items-center gap-3">
         <Link href="/app/invoices">
           <Button variant="ghost" size="sm" className="gap-1">
