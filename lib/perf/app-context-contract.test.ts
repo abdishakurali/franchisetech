@@ -25,8 +25,9 @@ describe("app request context performance contract", () => {
   it("does not block the closed-till screen on register-only data", () => {
     const closedTillBranch = posSource.indexOf("if (!openSession)");
     expect(closedTillBranch).toBeGreaterThan(0);
-    expect(posSource.indexOf("const catalogQueries", closedTillBranch)).toBeGreaterThan(closedTillBranch);
-    expect(posSource.indexOf("const registerQueries", closedTillBranch)).toBeGreaterThan(closedTillBranch);
+    expect(posSource).toContain("const shouldPrefetchRegister = Boolean(openSession)");
+    expect(posSource).toContain("const earlyCatalogQueries = shouldPrefetchRegister");
+    expect(posSource).toContain("const earlyRegisterQueries = shouldPrefetchRegister");
     expect(posSource).not.toContain("seedExistenceQueries");
   });
 
@@ -39,6 +40,11 @@ describe("app request context performance contract", () => {
   it("checks one completed POS sale instead of counting the full history", () => {
     expect(posSource).toContain('const hasCompletedSales = (completedSaleResult.data?.length ?? 0) > 0');
     expect(posSource).not.toContain('select("*", { count: "exact", head: true })');
+  });
+
+  it("overlaps register reads with open-session summary reads", () => {
+    expect(posSource.indexOf("const earlyCatalogQueries")).toBeLessThan(posSource.indexOf("const closerQuery"));
+    expect(posSource).toContain("await Promise.all([earlyCatalogQueries!, earlyRegisterQueries!])");
   });
 
   it("starts dashboard attention work before awaiting sales metrics", () => {

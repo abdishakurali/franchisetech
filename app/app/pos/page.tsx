@@ -233,6 +233,24 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
 
   const openSession = sessionData ?? null;
 
+  const shouldPrefetchRegister = Boolean(openSession) && (!features.tableService || Boolean(tabIdParam) || quickSale);
+  const earlyCatalogQueries = shouldPrefetchRegister ? Promise.all([
+    supabase
+      .from("products")
+      .select(PRODUCT_LIST_WITH_POS_SELECT)
+      .eq("organisation_id", orgId)
+      .eq("active", true)
+      .order("pos_sort_order", { ascending: true })
+      .order("name", { ascending: true }),
+    supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("sort_order", { ascending: true }).order("name", { ascending: true }),
+    supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at"),
+  ]) : null;
+  const earlyRegisterQueries = shouldPrefetchRegister ? Promise.all([
+    supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
+    supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
+    supabase.from("pos_transactions").select("id").eq("organisation_id", orgId).eq("status", "completed").limit(1),
+  ]) : null;
+
   // Everything below depends only on the two session rows (or on nothing), so
   // start every query now and await each one where its result is used. This
   // used to be ~6 sequential round trips on every POS load.
@@ -532,28 +550,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   // Those screens do not need the product catalogue, customers, transaction
   // history, or the all-time activation count, so they can render six reads
   // earlier on the common closed-till path.
-  const catalogQueries = Promise.all([
-    supabase
-      .from("products")
-      .select(PRODUCT_LIST_WITH_POS_SELECT)
-      .eq("organisation_id", orgId)
-      .eq("active", true)
-      .order("pos_sort_order", { ascending: true })
-      .order("name", { ascending: true }),
-    supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("sort_order", { ascending: true }).order("name", { ascending: true }),
-    supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at"),
-  ]);
-  const registerQueries = Promise.all([
-    supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
-    supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
-    supabase
-      .from("pos_transactions")
-      .select("id")
-      .eq("organisation_id", orgId)
-      .eq("status", "completed")
-      .limit(1),
-  ]);
-  const [catalogResults, registerResults] = await Promise.all([catalogQueries, registerQueries]);
+  const [catalogResults, registerResults] = await Promise.all([earlyCatalogQueries!, earlyRegisterQueries!]);
   const [{ data: products }, categoryResult, methodResult] = catalogResults;
   let { data: categories } = categoryResult;
   let { data: methods } = methodResult;
