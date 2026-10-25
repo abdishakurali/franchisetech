@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 const layoutSource = readFileSync(new URL("../../app/app/layout.tsx", import.meta.url), "utf8");
 const contextSource = readFileSync(new URL("../kitchenops/data.ts", import.meta.url), "utf8");
 const posSource = readFileSync(new URL("../../app/app/pos/page.tsx", import.meta.url), "utf8");
+const dashboardSource = readFileSync(new URL("../../app/app/page.tsx", import.meta.url), "utf8");
 
 describe("app request context performance contract", () => {
   it("shares one cached organisation/profile lookup between the layout and page", () => {
@@ -16,7 +17,8 @@ describe("app request context performance contract", () => {
   });
 
   it("returns the full profile from the cached request context", () => {
-    expect(contextSource).toContain('.from("profiles")\n    .select("*")');
+    expect(contextSource).toContain('.from("profiles")');
+    expect(contextSource).toContain('.select("*")');
     expect(contextSource).toContain("profile: profileRow");
   });
 
@@ -35,9 +37,23 @@ describe("app request context performance contract", () => {
   });
 
   it("starts dashboard attention work before awaiting sales metrics", () => {
-    const dashboardSource = readFileSync(new URL("../../app/app/page.tsx", import.meta.url), "utf8");
-    expect(dashboardSource).toContain("const attentionPromise = getDashboardAttention");
-    expect(dashboardSource.indexOf("const attentionPromise")).toBeLessThan(dashboardSource.indexOf("await Promise.all(["));
+    expect(dashboardSource).toContain('const attentionPromise = withTiming("dashboard.attention"');
+    expect(dashboardSource.indexOf("const attentionPromise")).toBeLessThan(dashboardSource.indexOf('await withTiming("dashboard.metrics"'));
     expect(dashboardSource).not.toContain('.select("onboarding_step,fiscalnet_enabled,loyalty_enabled")');
+  });
+
+  it("checks for one historical sale instead of counting the complete transaction table", () => {
+    expect(dashboardSource).toContain('.select("id")');
+    expect(dashboardSource).toContain(".limit(1)");
+    expect(dashboardSource).not.toContain('select("*", { count: "exact", head: true })');
+  });
+
+  it("records dashboard query-group timings", () => {
+    expect(dashboardSource).toContain('withTiming("dashboard.attention"');
+    expect(dashboardSource).toContain('withTiming("dashboard.metrics"');
+  });
+
+  it("loads membership and profile concurrently after authentication", () => {
+    expect(contextSource).toContain("const [membershipResult, profileResult] = await Promise.all([");
   });
 });

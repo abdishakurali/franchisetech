@@ -31,6 +31,7 @@ import { getDashboardAttention } from "@/lib/dashboard/attention";
 import type { OnboardingStep } from "@/lib/onboarding/steps";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { withTiming } from "@/lib/perf/timing";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -62,16 +63,16 @@ export default async function DashboardPage() {
 
   const last7Start = startOfDay(subDays(new Date(), 6)).toISOString();
 
-  const attentionPromise = getDashboardAttention(supabase, {
+  const attentionPromise = withTiming("dashboard.attention", () => getDashboardAttention(supabase, {
     orgId,
     locale,
     currency,
     inventoryVisible,
     recipeVisible,
     fiscalnetEnabled,
-  });
+  }));
 
-  const [todayTxResult, sessionResult, allTimeTxCountResult, last7TxResult] = await Promise.all([
+  const [todayTxResult, sessionResult, anyHistoricalSaleResult, last7TxResult] = await withTiming("dashboard.metrics", () => Promise.all([
     supabase
       .from("pos_transactions")
       .select("total,tip_amount,payment_methods(type)")
@@ -79,17 +80,16 @@ export default async function DashboardPage() {
       .eq("status", "completed")
       .gte("sold_at", todayStart),
     supabase.from("pos_sessions").select("expected_cash,status").eq("organisation_id", orgId).eq("status", "open").limit(1).maybeSingle(),
-    supabase.from("pos_transactions").select("*", { count: "exact", head: true }).eq("organisation_id", orgId).eq("status", "completed"),
+    supabase.from("pos_transactions").select("id").eq("organisation_id", orgId).eq("status", "completed").limit(1),
     supabase
       .from("pos_transactions")
       .select("total,sold_at")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
       .gte("sold_at", last7Start),
-  ]);
+  ]));
 
-  const allTimeTxCount = allTimeTxCountResult.count ?? 0;
-  const showActivationBanner = allTimeTxCount === 0;
+  const showActivationBanner = (anyHistoricalSaleResult.data?.length ?? 0) === 0;
 
   if (showActivationBanner) {
     return (

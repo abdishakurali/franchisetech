@@ -2,6 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient, getAuthUser } from "@/lib/supabase/server";
+import { withTiming } from "@/lib/perf/timing";
 
 const MEMBERSHIP_SELECT_WITH_EFACTURA =
   "id, organisation_id, role, status, organisations(id, name, business_type, country, country_code, currency_code, currency_symbol, onboarding_step, trial_ends_at, referral_code, referral_credit_months, business_profile, inventory_enabled, purchases_enabled, recipe_costing_enabled, team_advanced_enabled, multi_site_ops_enabled, kitchen_display_enabled, saga_export_enabled, loyalty_enabled, restaurant_order_flow_enabled, table_service_enabled, order_types_enabled, kitchen_stations_enabled, product_modifiers_enabled, courses_enabled, kitchen_printing_enabled, payment_split_enabled, tips_enabled, compact_workstation_nav_enabled, sgr_enabled, fiscalnet_enabled, efactura_enabled, fiscalnet_mock_mode, fiscalnet_connection_mode, fiscalnet_api_host, fiscalnet_bonuri_path, fiscalnet_raspuns_path, fiscalnet_auto_print, fiscalnet_ask_before_print, fiscalnet_manual_only, fiscalnet_timeout_ms, fiscalnet_retry_count, fiscalnet_cif, fiscalnet_operator_code, fiscalnet_vat_groups, fiscalnet_payment_type_map, anaf_cif, anaf_vat_registered, tax_id_verified, company_legal_name, company_address, saga_gestiune_code, notification_preferences, owner_digest_enabled, owner_digest_frequency, owner_digest_day_of_week, owner_digest_time_of_day, owner_digest_timezone, owner_digest_recipients)";
@@ -35,12 +36,19 @@ export const getActiveOrg = cache(async function getActiveOrg() {
   const cookieStore = await cookies();
   const selectedOrgId = cookieStore.get("franchisetech_active_org_id")?.value ?? null;
 
-  const membershipResult = await supabase
-    .from("organisation_members")
-    .select(MEMBERSHIP_SELECT_WITH_EFACTURA)
-    .eq("user_id", user.id)
-    .or("status.is.null,status.eq.active")
-    .order("created_at", { ascending: true });
+  const [membershipResult, profileResult] = await Promise.all([
+    withTiming("app_context.membership", async () => supabase
+      .from("organisation_members")
+      .select(MEMBERSHIP_SELECT_WITH_EFACTURA)
+      .eq("user_id", user.id)
+      .or("status.is.null,status.eq.active")
+      .order("created_at", { ascending: true })),
+    withTiming("app_context.profile", async () => supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle()),
+  ]);
   let memberships = membershipResult.data as ActiveMembership[] | null;
   let memError = membershipResult.error;
 
@@ -74,11 +82,7 @@ export const getActiveOrg = cache(async function getActiveOrg() {
   const currencySymbol: string = orgInfo?.currency_symbol ?? "€";
   const countryCode: string | null = orgInfo?.country_code ?? null;
 
-  const { data: profileRow } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle();
+  const profileRow = profileResult.data;
   const profileLocale: string | null = (profileRow?.locale as string | null) ?? null;
 
   return { supabase, user, profile: profileRow, membership, orgId: membership.organisation_id, currency, currencySymbol, countryCode, profileLocale };
