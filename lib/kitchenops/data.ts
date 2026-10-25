@@ -76,12 +76,12 @@ export const getActiveOrg = cache(async function getActiveOrg() {
 
   const { data: profileRow } = await supabase
     .from("profiles")
-    .select("locale")
+    .select("*")
     .eq("id", user.id)
     .maybeSingle();
   const profileLocale: string | null = (profileRow?.locale as string | null) ?? null;
 
-  return { supabase, user, membership, orgId: membership.organisation_id, currency, currencySymbol, countryCode, profileLocale };
+  return { supabase, user, profile: profileRow, membership, orgId: membership.organisation_id, currency, currencySymbol, countryCode, profileLocale };
 });
 
 export function money(value: number | null | undefined) {

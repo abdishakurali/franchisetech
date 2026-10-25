@@ -72,10 +72,6 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       .eq("id", orgId)
       .maybeSingle(),
   ]);
-  const seedExistenceQueries = Promise.all([
-    supabase.from("product_categories").select("id").eq("organisation_id", orgId).limit(1),
-    supabase.from("payment_methods").select("id").eq("organisation_id", orgId).limit(1),
-  ]);
   const sessionQueries = Promise.all([
     supabase
       .from("pos_sessions")
@@ -243,26 +239,6 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     }
   } catch { /* non-fatal */ }
 
-  // Ensure default categories/methods exist — the two existence checks are
-  // independent tables, run concurrently; each conditional seed-insert stays
-  // dependent on its own check.
-  const [{ data: existingCats }, { data: existingMethods }] = await seedExistenceQueries;
-  if (!existingCats?.length) {
-    await supabase.from("product_categories").insert([
-      { organisation_id: orgId, name: "Drinks", color: "#b4903f", sort_order: 1, category_type: "pos" },
-      { organisation_id: orgId, name: "Food", color: "#2f5d50", sort_order: 2, category_type: "pos" },
-      { organisation_id: orgId, name: "Snacks", color: "#8b3a2e", sort_order: 3, category_type: "pos" },
-    ]).then(() => null, () => null);
-  }
-  if (!existingMethods?.length) {
-    await supabase.from("payment_methods").insert([
-      { organisation_id: orgId, name: "Cash", type: "cash" },
-      { organisation_id: orgId, name: "Card", type: "card" },
-      { organisation_id: orgId, name: "Online", type: "online" },
-      { organisation_id: orgId, name: "Other", type: "other" },
-    ]).then(() => null, () => null);
-  }
-
   // Open session and last-closed session are independent status filters on
   // the same table — run concurrently instead of one after another.
   const [{ data: sessionData }, { data: lastClosed }] = await sessionQueries;
@@ -311,27 +287,6 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       .order("performed_at", { ascending: true })
       .then((r) => r)
     : null;
-  const catalogQueries = Promise.all([
-    supabase
-      .from("products")
-      .select(PRODUCT_LIST_WITH_POS_SELECT)
-      .eq("organisation_id", orgId)
-      .eq("active", true)
-      .order("pos_sort_order", { ascending: true })
-      .order("name", { ascending: true }),
-    supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("sort_order", { ascending: true }).order("name", { ascending: true }),
-    supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at"),
-  ]);
-  const registerQueries = Promise.all([
-    supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
-    supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
-    supabase
-      .from("pos_transactions")
-      .select("*", { count: "exact", head: true })
-      .eq("organisation_id", orgId)
-      .eq("status", "completed"),
-  ]);
-
   let lastClosedBy = "Staff";
   if (closerQuery) {
     const { data: closer } = await closerQuery;
@@ -404,14 +359,6 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     }
   }
   const topProduct = [...productTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
-
-  const [{ data: products }, { data: categories }, { data: methods }] = await catalogQueries;
-  const sgrProduct = (products ?? []).find((p) => p.name?.toUpperCase() === "SGR") ?? null;
-  const defaultVatRate = getDefaultVatRateValue(vatRates);
-  const [{ data: customers }, { data: recentTransactions }, { count: allTimeCompletedSales }] = await registerQueries;
-  perf.mark("session_and_catalog");
-  perf.done();
-  const trackActivationSale = (allTimeCompletedSales ?? 0) === 0;
 
   // ── CLOSED: show open-till form + last session summary + quick links ──
   if (!openSession) {
@@ -593,6 +540,67 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       </div>
     );
   }
+
+  // Register-only data starts after the closed-till and floor-picker exits.
+  // Those screens do not need the product catalogue, customers, transaction
+  // history, or the all-time activation count, so they can render six reads
+  // earlier on the common closed-till path.
+  const catalogQueries = Promise.all([
+    supabase
+      .from("products")
+      .select(PRODUCT_LIST_WITH_POS_SELECT)
+      .eq("organisation_id", orgId)
+      .eq("active", true)
+      .order("pos_sort_order", { ascending: true })
+      .order("name", { ascending: true }),
+    supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("sort_order", { ascending: true }).order("name", { ascending: true }),
+    supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at"),
+  ]);
+  const registerQueries = Promise.all([
+    supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
+    supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
+    supabase
+      .from("pos_transactions")
+      .select("*", { count: "exact", head: true })
+      .eq("organisation_id", orgId)
+      .eq("status", "completed"),
+  ]);
+  const [catalogResults, registerResults] = await Promise.all([catalogQueries, registerQueries]);
+  const [{ data: products }, categoryResult, methodResult] = catalogResults;
+  let { data: categories } = categoryResult;
+  let { data: methods } = methodResult;
+  const [{ data: customers }, { data: recentTransactions }, { count: allTimeCompletedSales }] = registerResults;
+
+  // The catalogue reads double as setup checks. Only brand-new organisations
+  // pay for inserts; established registers no longer perform two extra
+  // existence queries on every load.
+  if (!categories?.length || !methods?.length) {
+    const [categorySeed, methodSeed] = await Promise.all([
+      !categories?.length
+        ? supabase.from("product_categories").insert([
+            { organisation_id: orgId, name: "Drinks", color: "#b4903f", sort_order: 1, category_type: "pos" },
+            { organisation_id: orgId, name: "Food", color: "#2f5d50", sort_order: 2, category_type: "pos" },
+            { organisation_id: orgId, name: "Snacks", color: "#8b3a2e", sort_order: 3, category_type: "pos" },
+          ]).select("id,name,color")
+        : Promise.resolve({ data: categories }),
+      !methods?.length
+        ? supabase.from("payment_methods").insert([
+            { organisation_id: orgId, name: "Cash", type: "cash" },
+            { organisation_id: orgId, name: "Card", type: "card" },
+            { organisation_id: orgId, name: "Online", type: "online" },
+            { organisation_id: orgId, name: "Other", type: "other" },
+          ]).select("id,name,type")
+        : Promise.resolve({ data: methods }),
+    ]);
+    categories = categorySeed.data ?? categories;
+    methods = methodSeed.data ?? methods;
+  }
+
+  const sgrProduct = (products ?? []).find((p) => p.name?.toUpperCase() === "SGR") ?? null;
+  const defaultVatRate = getDefaultVatRateValue(vatRates);
+  const trackActivationSale = (allTimeCompletedSales ?? 0) === 0;
+  perf.mark("session_and_catalog");
+  perf.done();
 
   return (
     <div className="flex flex-1 flex-col min-h-0 bg-card">

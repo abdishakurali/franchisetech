@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { redirect } from "next/navigation";
 import { perfSteps } from "@/lib/perf/timing";
 import { headers } from "next/headers";
-import { createClient, getAuthUser } from "@/lib/supabase/server";
+import { getActiveOrg } from "@/lib/kitchenops/data";
 import { AppShell } from "@/components/app/AppShell";
 import { AppI18nProvider } from "@/lib/app-i18n-context";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
@@ -22,31 +22,30 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const perf = perfSteps("app_layout");
-  const supabase = await createClient();
-  const { data: { user } } = await getAuthUser();
-  perf.mark("auth");
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const [{ data: profile }, { data: memberships }, headersList] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", user.id).single(),
-    supabase
-      .from("organisation_members")
-      .select("*, organisations(*)")
-      .eq("user_id", user.id)
-      .or("status.is.null,status.eq.active")
-      .order("created_at", { ascending: true })
-      .limit(1),
+  const [appContext, headersList] = await Promise.all([
+    getActiveOrg(),
     headers(),
   ]);
+  const { supabase, user, profile, membership } = appContext;
+  perf.mark("auth");
 
-  const membership = memberships?.[0] ?? null;
-  const activeOrgFull = membership?.organisations ?? null;
+  const orgRelation = membership?.organisations ?? null;
+  const activeOrgFull = (Array.isArray(orgRelation) ? orgRelation[0] : orgRelation) as ({
+    id: string;
+    name: string;
+    country_code?: string | null;
+    trial_ends_at?: string | null;
+    referral_credit_months?: number | null;
+    kitchen_display_enabled?: boolean | null;
+    table_service_enabled?: boolean | null;
+    efactura_enabled?: boolean | null;
+    compact_workstation_nav_enabled?: boolean | null;
+    business_profile?: string | null;
+    loyalty_enabled?: boolean | null;
+    admin_notes?: unknown;
+  } | null);
   // Never forward admin_notes (internal-only) to this client component —
-  // organisations(*) above pulls every column, but this prop reaches the
-  // tenant's own browser via the RSC payload.
+  // This prop reaches the tenant's browser via the RSC payload.
   const activeOrg = activeOrgFull
     ? (({ admin_notes: _adminNotes, ...rest }) => rest)(activeOrgFull)
     : null;
