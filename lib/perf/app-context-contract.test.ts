@@ -36,6 +36,11 @@ describe("app request context performance contract", () => {
     expect(posSource).not.toContain('.select("country_code,fiscalnet_enabled');
   });
 
+  it("checks one completed POS sale instead of counting the full history", () => {
+    expect(posSource).toContain('const hasCompletedSales = (completedSaleResult.data?.length ?? 0) > 0');
+    expect(posSource).not.toContain('select("*", { count: "exact", head: true })');
+  });
+
   it("starts dashboard attention work before awaiting sales metrics", () => {
     expect(dashboardSource).toContain('const attentionPromise = withTiming("dashboard.attention"');
     expect(dashboardSource.indexOf("const attentionPromise")).toBeLessThan(dashboardSource.indexOf('await withTiming("dashboard.metrics"'));

@@ -548,15 +548,17 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
     supabase
       .from("pos_transactions")
-      .select("*", { count: "exact", head: true })
+      .select("id")
       .eq("organisation_id", orgId)
-      .eq("status", "completed"),
+      .eq("status", "completed")
+      .limit(1),
   ]);
   const [catalogResults, registerResults] = await Promise.all([catalogQueries, registerQueries]);
   const [{ data: products }, categoryResult, methodResult] = catalogResults;
   let { data: categories } = categoryResult;
   let { data: methods } = methodResult;
-  const [{ data: customers }, { data: recentTransactions }, { count: allTimeCompletedSales }] = registerResults;
+  const [{ data: customers }, { data: recentTransactions }, completedSaleResult] = registerResults;
+  const hasCompletedSales = (completedSaleResult.data?.length ?? 0) > 0;
 
   // The catalogue reads double as setup checks. Only brand-new organisations
   // pay for inserts; established registers no longer perform two extra
@@ -585,7 +587,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
 
   const sgrProduct = (products ?? []).find((p) => p.name?.toUpperCase() === "SGR") ?? null;
   const defaultVatRate = getDefaultVatRateValue(vatRates);
-  const trackActivationSale = (allTimeCompletedSales ?? 0) === 0;
+  const trackActivationSale = !hasCompletedSales;
   perf.mark("session_and_catalog");
   perf.done();
 
