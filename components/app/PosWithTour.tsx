@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PosRegister } from "@/components/app/PosRegister";
 import {
   catalogCacheAgeLabel,
@@ -36,24 +36,13 @@ function mergeCatalogProps(props: PosRegisterProps, cached: ReturnType<typeof re
   };
 }
 
-export function buildRegisterProps(props: PosRegisterProps, offline: boolean) {
+export function buildRegisterProps(
+  props: PosRegisterProps,
+  offline: boolean,
+  cachedCatalog?: ReturnType<typeof readPosCatalogCache>,
+) {
   const orgId = props.orgId ?? "";
-  if (orgId && props.products?.length) {
-    writePosCatalogCache({
-      orgId,
-      products: props.products,
-      categories: props.categories ?? [],
-      paymentMethods: props.paymentMethods ?? [],
-      sgrProduct: props.sgrProduct ?? null,
-      sgrEnabled: props.sgrEnabled ?? false,
-      vatRateGroupMap: props.vatRateGroupMap ?? {},
-      defaultVatRate: props.defaultVatRate ?? 0,
-      sessionId: props.sessionId ?? undefined,
-      currency: props.currency,
-      cachedAt: new Date().toISOString(),
-    });
-  }
-  const cached = readPosCatalogCache(orgId);
+  const cached = cachedCatalog === undefined ? readPosCatalogCache(orgId) : cachedCatalog;
   const merged = mergeCatalogProps(props, cached, offline);
   return {
     ...merged,
@@ -91,21 +80,39 @@ function PosRegisterWithCatalog(props: PosRegisterProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const orgId = props.orgId ?? "";
+    if (!orgId || !props.products?.length) return;
+    writePosCatalogCache({
+      orgId,
+      products: props.products,
+      categories: props.categories ?? [],
+      paymentMethods: props.paymentMethods ?? [],
+      sgrProduct: props.sgrProduct ?? null,
+      sgrEnabled: props.sgrEnabled ?? false,
+      vatRateGroupMap: props.vatRateGroupMap ?? {},
+      defaultVatRate: props.defaultVatRate ?? 0,
+      sessionId: props.sessionId ?? undefined,
+      currency: props.currency,
+      cachedAt: new Date().toISOString(),
+    });
+  }, [props]);
+
+  const cachedCatalog = useMemo(
+    () => readPosCatalogCache(props.orgId ?? ""),
+    [props.orgId],
+  );
+
   const registerProps = useMemo(
-    () => buildRegisterProps(props, offline),
-    [props, offline],
+    () => buildRegisterProps(props, offline, cachedCatalog),
+    [props, offline, cachedCatalog],
   );
 
   return <PosRegister {...registerProps} />;
 }
 
 export function PosWithTour(props: PosRegisterProps) {
-  const boot = buildRegisterProps(props, true);
-  return (
-    <Suspense fallback={<PosRegister {...boot} />}>
-      <PosRegisterWithCatalog {...props} />
-    </Suspense>
-  );
+  return <PosRegisterWithCatalog {...props} />;
 }
 
 export { catalogCacheAgeLabel };

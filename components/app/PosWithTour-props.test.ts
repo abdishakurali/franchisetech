@@ -1,4 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { writePosCatalogCache } = vi.hoisted(() => ({
+  writePosCatalogCache: vi.fn(),
+}));
 
 vi.mock("@/components/app/PosRegister", () => ({ PosRegister: vi.fn() }));
 vi.mock("@/lib/pos-offline-queue", () => ({
@@ -8,12 +12,16 @@ vi.mock("@/lib/pos-offline-queue", () => ({
 vi.mock("@/lib/pos-catalog-cache", () => ({
   catalogCacheAgeLabel: vi.fn(),
   readPosCatalogCache: () => null,
-  writePosCatalogCache: vi.fn(),
+  writePosCatalogCache,
 }));
 
 import { buildRegisterProps } from "@/components/app/PosWithTour";
 
 describe("buildRegisterProps", () => {
+  beforeEach(() => {
+    writePosCatalogCache.mockClear();
+  });
+
   it("passes the owner's verified offline state to PosRegister", () => {
     const props = {
       products: [],
@@ -34,5 +42,16 @@ describe("buildRegisterProps", () => {
 
     expect(buildRegisterProps(props, true).browserOffline).toBe(true);
     expect(buildRegisterProps(props, false).browserOffline).toBe(false);
+  });
+
+  it("does not synchronously persist the catalog while deriving render props", () => {
+    buildRegisterProps({
+      orgId: "org-1",
+      products: [{ id: "product-1" }],
+      categories: [],
+      paymentMethods: [],
+    } as never, true);
+
+    expect(writePosCatalogCache).not.toHaveBeenCalled();
   });
 });
