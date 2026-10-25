@@ -58,9 +58,25 @@ export default async function AppLayout({
   // surface. Do not expose operational pages even if they know a URL.
   if (userRole === "accountant") redirect("/accountant");
 
-  const subStatus = activeOrg?.id
-    ? await getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null)
-    : null;
+  const subscriptionPromise = activeOrg?.id
+    ? getSubscriptionStatus(activeOrg.id).catch(() => null as SubscriptionStatus | null)
+    : Promise.resolve(null);
+  const sitesPromise = activeOrg?.id && membership?.id
+    ? (async () => {
+        try {
+          const sites = await listAccessibleSites(supabase, activeOrg.id, membership.id, userRole);
+          return { sites, activeSiteId: await getActiveSiteId(sites) };
+        } catch {
+          return null;
+        }
+      })()
+    : Promise.resolve(null);
+  const moduleFlagsPromise = activeOrg?.id
+    ? fetchOrgModuleFlags(supabase, activeOrg.id)
+    : Promise.resolve(null);
+
+  const [subStatus, prefetchedSites, prefetchedModuleFlags] =
+    await Promise.all([subscriptionPromise, sitesPromise, moduleFlagsPromise]);
 
   const subscriptionBlocked = isSubscriptionBlockedForApp(subStatus);
 
@@ -74,24 +90,9 @@ export default async function AppLayout({
   const needsModuleGuard =
     orgReady && pathname.startsWith("/app/") && !pathname.startsWith("/app/settings") && !pathname.startsWith("/app/billing");
 
-  // Sites, referral, module flags and the module guard are independent reads;
-  // they used to run as four sequential rounds on every navigation.
-  const [sitesResult, moduleFlags] = await Promise.all([
-    // Resolve accessible sites and active site (non-blocking — falls back gracefully)
-    activeOrg?.id && membership?.id && !subscriptionBlocked
-      ? (async () => {
-          try {
-            const sites = await listAccessibleSites(supabase, activeOrg.id, membership.id, userRole);
-            return { sites, activeSiteId: await getActiveSiteId(sites) };
-          } catch {
-            // Non-fatal — layout must not crash if site lookup fails
-            return null;
-          }
-        })()
-      : Promise.resolve(null),
-    orgReady ? fetchOrgModuleFlags(supabase, activeOrg!.id) : Promise.resolve(null),
-    needsModuleGuard ? requireModuleForPathname(pathname) : Promise.resolve(),
-  ]);
+  if (needsModuleGuard) await requireModuleForPathname(pathname);
+  const sitesResult = orgReady ? prefetchedSites : null;
+  const moduleFlags = orgReady ? prefetchedModuleFlags : null;
   perf.mark("org_data");
   perf.done();
   const accessibleSites: { id: string; name: string }[] = sitesResult?.sites ?? [];

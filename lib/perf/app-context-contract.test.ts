@@ -56,4 +56,11 @@ describe("app request context performance contract", () => {
   it("loads membership and profile concurrently after authentication", () => {
     expect(contextSource).toContain("const [membershipResult, profileResult] = await Promise.all([");
   });
+
+  it("starts independent layout organisation reads in one round", () => {
+    expect(layoutSource).toContain("const subscriptionPromise = activeOrg?.id");
+    expect(layoutSource).toContain("const sitesPromise = activeOrg?.id && membership?.id");
+    expect(layoutSource).toContain("const moduleFlagsPromise = activeOrg?.id");
+    expect(layoutSource).toContain("await Promise.all([subscriptionPromise, sitesPromise, moduleFlagsPromise]")
+  });
 });
