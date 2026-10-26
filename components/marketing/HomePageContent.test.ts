@@ -20,8 +20,8 @@ describe("homepage structure", () => {
     }
   });
 
-  it("keeps the primary signup route and analytics (trial retired 2026-09 — Free is permanent)", () => {
-    expect(source).toContain('/signup?plan=free');
+  it("routes the primary signup CTA to the paid Pro plan and keeps analytics", () => {
+    expect(source).toContain('/signup?plan=growth');
     expect(source).toContain('captureClientEvent("cta_clicked"');
   });
 });

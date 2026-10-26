@@ -41,11 +41,9 @@ export const STRIPE_CANONICAL_PRICE_IDS: Record<BillingPlan, string> = {
   operations:     "price_1TkNjPQSKBSEqRxEtqTSm45R",
   scale:          "price_placeholder_scale_monthly",
   multi_location: "price_1TgahZQSKBSEqRxEEtIUQ0pU",
-  // Placeholders until the test-mode Stripe products are created (pending
-  // Stripe CLI re-auth) — same pattern as scale's placeholder above.
   free:           "",
-  growth:         "price_placeholder_growth_monthly",
-  team:           "price_placeholder_team_monthly",
+  growth:         "price_1TgahYQSKBSEqRxEVkgJmk8l",
+  team:           "price_1UUj0cQSKBSEqRxEjRhafznp",
 };
 
 /** Optional one-time €1.00 card verification checkout price (added 2026-07-10). */
@@ -237,6 +235,7 @@ export function isBillingConfigured(): boolean {
  * (STRIPE_CORE_MONTHLY_PRICE_ID). Returns null if no env var is set.
  */
 export function getPriceId(plan: BillingPlan, interval: "month" | "year" = "month"): string | null {
+  const normalized = (value: string | undefined) => value?.trim() || null;
   if (interval === "year") {
     const yearMap: Record<string, string | undefined> = {
       starter:        process.env.STRIPE_STARTER_ANNUAL_PRICE_ID    ?? process.env.STRIPE_CORE_ANNUAL_PRICE_ID,
@@ -248,7 +247,7 @@ export function getPriceId(plan: BillingPlan, interval: "month" | "year" = "mont
       growth:         process.env.STRIPE_GROWTH_ANNUAL_PRICE_ID,
       team:           process.env.STRIPE_TEAM_ANNUAL_PRICE_ID,
     };
-    return yearMap[plan] ?? null;
+    return normalized(yearMap[plan]);
   }
   const monthMap: Record<string, string | undefined> = {
     starter:        process.env.STRIPE_STARTER_PRICE_ID          ?? process.env.STRIPE_CORE_MONTHLY_PRICE_ID,
@@ -260,7 +259,7 @@ export function getPriceId(plan: BillingPlan, interval: "month" | "year" = "mont
     growth:         process.env.STRIPE_GROWTH_PRICE_ID,
     team:           process.env.STRIPE_TEAM_PRICE_ID,
   };
-  return monthMap[plan] ?? null;
+  return normalized(monthMap[plan]);
 }
 
 /** Look up a plan definition by ID. 'core' maps to 'starter', 'operations' maps to 'pro'. */

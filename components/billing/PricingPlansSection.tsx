@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { captureClientEvent } from "@/lib/analytics/client-events";
@@ -227,32 +228,42 @@ export function PricingPlansSection({
   locale = "en",
   featuredPlan,
 }: Props) {
-  // Annual billing is hidden, not just defaulted away from: the live annual
-  // Stripe prices are misconfigured (return the monthly-equivalent amount
-  // instead of the annual total — see docs/adr/0002-annual-pricing-blocked.md),
-  // so checkout on annual 503s every time. A visible toggle that fails on
-  // click is worse than not offering the choice — re-enable once the Stripe
-  // prices are corrected to actually charge the annual total on a yearly
-  // interval.
-  const interval: "month" | "year" = "month";
+  const [interval, setInterval] = useState<"month" | "year">("month");
   const l = labels ?? DEFAULT_LABELS[locale];
 
-  const mainPlans = pricingPlans.filter((plan) => plan.id === "free" || plan.id === "growth");
+  const mainPlans = pricingPlans.filter((plan) => plan.id === "growth");
   const highlightPlan = mainPlans.some((plan) => plan.id === featuredPlan) ? featuredPlan : "growth";
 
   return (
     <div className="space-y-10">
+      <div className="mx-auto flex w-fit rounded-xl border border-border bg-secondary p-1" aria-label={localizedText(locale, "Billing frequency", "Frecvența plății")}>
+        <button
+          type="button"
+          onClick={() => setInterval("month")}
+          className={`rounded-lg px-4 py-2 text-sm font-medium ${interval === "month" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+        >
+          {localizedText(locale, "Monthly", "Lunar")}
+        </button>
+        <button
+          type="button"
+          onClick={() => setInterval("year")}
+          className={`rounded-lg px-4 py-2 text-sm font-medium ${interval === "year" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
+        >
+          {localizedText(locale, "Annual — save 20%", "Anual — economisiți 20%")}
+        </button>
+      </div>
+
       {variant === "marketing" && (
         <div className="rounded-2xl border border-border bg-accent px-5 py-4 text-center text-sm font-medium text-foreground">
-          {l.freeSetupStrip}
+          {localizedText(locale, "Choose monthly flexibility or save 20% with annual billing.", "Alegeți flexibilitate lunară sau economisiți 20% cu plata anuală.")}
         </div>
       )}
 
       {/* Main plan cards */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {mainPlans.map((plan) => {
-          const displayPrice = plan.price;
-          const displayCadence = plan.cadence;
+          const displayPrice = interval === "year" ? plan.annualPrice : plan.price;
+          const displayCadence = interval === "year" ? plan.annualCadence : plan.cadence;
           const shortName = PLAN_SHORT_NAMES[plan.id];
           const isHighlighted = plan.id === highlightPlan;
 
@@ -279,7 +290,7 @@ export function PricingPlansSection({
               <PlanFeaturesAccordion planId={plan.id} market={market} seeFeatures={l.seeFeatures} locale={locale} />
               {variant === "marketing" ? (
                 <Link
-                  href={`/signup?plan=${plan.id}`}
+                  href={`/signup?plan=${plan.id}&interval=${interval}`}
                   className="mt-6 block"
                   onClick={() =>
                     captureClientEvent("pricing_cta_clicked", {
@@ -292,12 +303,6 @@ export function PricingPlansSection({
                 >
                   <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">{l.getStarted}</Button>
                 </Link>
-              ) : plan.id === "free" ? (
-                // Free has no Stripe price — nothing to check out. In the
-                // billing panel it's shown for comparison only.
-                <Button disabled variant="outline" className="mt-6 w-full">
-                  {localizedText(locale, "No card required", "Fără card necesar")}
-                </Button>
               ) : (
                 <div className="mt-6">
                   <PricingCheckoutButton plan={plan.id} loggedIn={loggedIn} configured={configured} interval={interval} />
@@ -317,7 +322,7 @@ export function PricingPlansSection({
             <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">{l.multiTitle}</p>
             <div className="mt-3 flex flex-wrap items-baseline gap-x-8 gap-y-2">
               <p>
-                <span className="text-2xl font-bold text-foreground">{team.price}</span>
+                <span className="text-2xl font-bold text-foreground">{interval === "year" ? team.annualPrice : team.price}</span>
                 <span className="text-sm text-muted-foreground">{localizedText(locale, "/mo base", "/lună bază")}</span>
               </p>
               <p>
@@ -330,7 +335,7 @@ export function PricingPlansSection({
             <PlanFeaturesAccordion planId="team" market={market} seeFeatures={l.seeFeatures} locale={locale} />
             {variant === "marketing" ? (
               <Link
-                href="/signup?plan=team"
+                href={`/signup?plan=team&interval=${interval}`}
                 className="mt-6 block"
                 onClick={() =>
                   captureClientEvent("pricing_cta_clicked", {
@@ -351,30 +356,6 @@ export function PricingPlansSection({
           </div>
         );
       })()}
-
-      {/* Free self-serve setup */}
-      <div className="rounded-2xl border border-reconciled/30 bg-reconciled/10 p-6 sm:p-8">
-        <h2 className="text-lg font-bold text-foreground">{l.setupFreeTitle}</h2>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {l.setupFreeText}
-        </p>
-        {variant === "marketing" && (
-          <Link
-            href="/signup?plan=free"
-            className="mt-6 block"
-            onClick={() =>
-              captureClientEvent("pricing_cta_clicked", {
-                plan: "free",
-                interval,
-                location: "free_setup",
-                cta_text: l.getStarted,
-              })
-            }
-          >
-            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">{l.getStarted}</Button>
-          </Link>
-        )}
-      </div>
 
     </div>
   );

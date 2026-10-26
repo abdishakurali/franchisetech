@@ -88,7 +88,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
             <Link
-              href="/signup?plan=free"
+              href="/signup?plan=growth"
               className="inline-flex w-full items-center justify-center gap-2 rounded-[10px] bg-[#165DFC] px-8 py-3.5 text-sm font-semibold text-white transition hover:bg-[#3E7BFF] sm:w-auto"
             >
               {t.cta.getStarted} <ArrowRight className="h-4 w-4" />
