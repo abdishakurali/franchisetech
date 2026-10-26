@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildPaymentFailureProperties,
   selectCanonicalSubscription,
+  shouldClearGracePeriod,
 } from "@/lib/billing/reconciliation";
 
 describe("selectCanonicalSubscription", () => {
@@ -56,5 +57,15 @@ describe("buildPaymentFailureProperties", () => {
       currency: "eur",
       lastPaymentError: { code: "authentication_required", type: "card_error" },
     }).requires_action).toBe(true);
+  });
+});
+
+describe("shouldClearGracePeriod", () => {
+  it("preserves an explicit grace deadline for canceled subscriptions", () => {
+    expect(shouldClearGracePeriod("canceled")).toBe(false);
+  });
+
+  it("clears grace after an active subscription is restored", () => {
+    expect(shouldClearGracePeriod("active")).toBe(true);
   });
 });

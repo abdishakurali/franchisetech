@@ -58,6 +58,14 @@ describe("resolveSubscriptionState", () => {
   it("blocks a canceled subscription after its paid period", () => {
     expect(resolveSubscriptionState("canceled", "2020-10-25T08:13:25.000Z", null)).toBe("canceled");
   });
+
+  it("allows a canceled subscription during an explicit payment grace period", () => {
+    expect(resolveSubscriptionState("canceled", "2020-10-25T08:13:25.000Z", "2099-10-31T08:13:25.000Z")).toBe("past_due");
+  });
+
+  it("blocks a canceled subscription after its explicit payment grace period", () => {
+    expect(resolveSubscriptionState("canceled", "2020-10-25T08:13:25.000Z", "2020-10-31T08:13:25.000Z")).toBe("canceled");
+  });
 });
 
 describe("isStripeSubscriptionRecord", () => {

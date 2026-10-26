@@ -15,6 +15,10 @@ const STATUS_PRIORITY: Record<string, number> = {
   canceled: 0,
 };
 
+export function shouldClearGracePeriod(subscriptionStatus: string): boolean {
+  return subscriptionStatus !== "past_due" && subscriptionStatus !== "canceled";
+}
+
 export function selectCanonicalSubscription<T extends SubscriptionCandidate>(
   subscriptions: T[],
 ): T | null {

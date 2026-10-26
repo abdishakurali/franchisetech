@@ -53,6 +53,7 @@ export function resolveSubscriptionState(
         ? "past_due_expired"
         : "past_due";
     case "canceled":
+      if (gracePeriodEndsAt && new Date(gracePeriodEndsAt) > new Date()) return "past_due";
       return currentPeriodEnd && new Date(currentPeriodEnd) > new Date()
         ? "active"
         : "canceled";

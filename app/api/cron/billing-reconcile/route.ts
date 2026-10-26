@@ -6,7 +6,7 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { syncStripeSubscription } from "@/lib/billing/stripe-sync";
-import { selectCanonicalSubscription } from "@/lib/billing/reconciliation";
+import { selectCanonicalSubscription, shouldClearGracePeriod } from "@/lib/billing/reconciliation";
 
 export const dynamic = "force-dynamic";
 
@@ -97,7 +97,7 @@ async function runBillingReconcile(req: NextRequest) {
       const result = await syncStripeSubscription(subscription, {
         fallbackOrganisationId: organisationId,
         fallbackPlan: row?.plan,
-        clearGracePeriod: subscription.status !== "past_due",
+        clearGracePeriod: shouldClearGracePeriod(subscription.status),
       });
 
       if (result.synced) {
