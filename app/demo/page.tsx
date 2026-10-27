@@ -9,6 +9,7 @@ import { JsonLd } from "@/components/marketing/JsonLd";
 import { pricingPlans } from "@/lib/billing/plans";
 import { TRIAL_DAYS } from "@/lib/billing/trial";
 import { SITE_URL } from "@/lib/marketing/seo";
+import { DATA_CONTROLLER, DEMO_LEAD_RETENTION_MONTHS } from "@/lib/legal/controller";
 
 const TITLE = "Demonstrație gratuită pentru cafenele și restaurante";
 const DESCRIPTION =
@@ -252,8 +253,8 @@ export default function DemoPage() {
                 <DemoRequestForm />
               </Suspense>
               <p className="mt-4 text-xs leading-5 text-[#8F8F86]">
-                Folosim datele din formular doar ca să te contactăm despre demonstrație. Le păstrăm cel mult 24 de luni dacă nu devii client și nu le trimitem în scopuri de marketing către terți.
-                Poți cere oricând ștergerea lor la info@franchisetech.ro.
+                Folosim datele din formular doar ca să îți răspundem cererii de demonstrație, nu pentru marketing. Le păstrăm cel mult {DEMO_LEAD_RETENTION_MONTHS} de luni dacă nu devii client. Ce date, cine le procesează și drepturile tale:{" "}
+                <Link href="/privacy#cereri-demo" className="underline">nota de informare</Link>. Pentru ștergere, scrie la {DATA_CONTROLLER.contactEmail}.
               </p>
             </div>
           </div>

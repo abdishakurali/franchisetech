@@ -132,4 +132,14 @@ describe("handleDemoRequest", () => {
     expect(calls.map((c) => c[1])).toEqual(["demo_form_submitted"]);
     expect(String(calls[0][0])).toMatch(/^lead_/);
   });
+
+  it("records a test lead's submission but never as a qualified lead", async () => {
+    const store = fakeStore();
+    const d = deps(store);
+    const res = await handleDemoRequest(req(body({ email: "qa-test@franchisetech.ro" }), "192.0.2.9"), d);
+    expect(res.status).toBe(200);
+    const calls = (d.capture as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls.map((c) => c[1])).toEqual(["demo_form_submitted"]);
+    expect(calls[0][2]).toEqual(expect.objectContaining({ is_test: true }));
+  });
 });

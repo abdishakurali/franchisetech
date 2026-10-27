@@ -99,7 +99,8 @@ export function parseDemoLead(body: Record<string, unknown>, now: number = Date.
   }
   if (!(BUSINESS_TYPES as readonly string[]).includes(businessType)) errors.businessType = "Alege tipul afacerii.";
   if (!(LOCATION_OPTIONS as readonly string[]).includes(locations)) errors.locations = "Alege numărul de locații.";
-  if (body.consent !== true && body.consent !== "on") errors.consent = "Bifează acordul ca să te putem contacta.";
+  // No consent checkbox: answering a request the visitor made is processing for
+  // steps before a contract (GDPR art. 6(1)(b)), shown in the privacy notice by the form.
 
   if (Object.keys(errors).length > 0) return { ok: false, spam: false, errors };
 
@@ -152,5 +153,45 @@ export function leadAnalyticsProps(lead: DemoLead): Record<string, string | bool
     utm_medium: lead.utmMedium,
     utm_campaign: lead.utmCampaign,
     has_phone: Boolean(lead.phone),
+    is_test: isTestLead(lead),
   };
 }
+
+/**
+ * Internal test submissions: our own domain, or a business name starting with "TEST".
+ * Stored (so delivery can be checked) but never counted as a lead or a qualified lead.
+ */
+export function isTestLead(lead: Pick<DemoLead, "email" | "businessName">): boolean {
+  return lead.email.toLowerCase().endsWith("@franchisetech.ro") || /^test\b/i.test(lead.businessName.trim());
+}
+
+export const LEAD_STATUSES = ["new", "contacted", "qualified", "demo_completed", "trial_started", "won", "lost", "spam", "test"] as const;
+export type LeadStatus = (typeof LEAD_STATUSES)[number];
+
+/** Statuses that count as real pipeline (everything except spam and test). */
+export const PIPELINE_STATUSES: readonly LeadStatus[] = ["new", "contacted", "qualified", "demo_completed", "trial_started", "won", "lost"];
+
+export const LEAD_STATUS_LABELS: Record<LeadStatus, string> = {
+  new: "Nou",
+  contacted: "Contactat",
+  qualified: "Calificat",
+  demo_completed: "Demo făcut",
+  trial_started: "Trial pornit",
+  won: "Client",
+  lost: "Pierdut",
+  spam: "Spam",
+  test: "Test",
+};
+
+/** Default next step per status, shown when no custom next action is set. */
+export const DEFAULT_NEXT_ACTION: Record<LeadStatus, string | null> = {
+  new: "Răspunde în maximum o zi lucrătoare și propune o oră pentru demo",
+  contacted: "Confirmă ora demonstrației",
+  qualified: "Fă demonstrația pe produsele lor",
+  demo_completed: "Trimite linkul de trial și ajută la configurare",
+  trial_started: "Verifică prima vânzare și închiderea zilei",
+  won: null,
+  lost: null,
+  spam: null,
+  test: null,
+};

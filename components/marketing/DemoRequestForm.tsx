@@ -22,19 +22,27 @@ export function DemoRequestForm() {
   const params = useSearchParams();
   const sourceArticle = params.get("from");
   const ctaId = params.get("cta");
-  const startedAt = useRef<number | null>(null);
+  // Bot guard clock. Starts when the form appears, not on first focus: autofill
+  // (password managers, mobile contact cards) can fill every field without a
+  // focus event, which used to make a real person's first submit bounce.
+  const mountedAt = useRef<number | null>(null);
+  const started = useRef(false);
   const [status, setStatus] = useState<Status>("idle");
   const [formError, setFormError] = useState("");
   const [errors, setErrors] = useState<Partial<Record<DemoLeadField, string>>>({});
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    mountedAt.current = Date.now();
+  }, []);
+
+  useEffect(() => {
     if (status === "error") errorSummaryRef.current?.focus();
   }, [status]);
 
   function markStarted() {
-    if (startedAt.current !== null) return;
-    startedAt.current = Date.now();
+    if (started.current) return;
+    started.current = true;
     // Same event the contact form uses; source/attribution say which form and which article.
     captureClientEvent("contact_form_started", { source: "demo_page", source_article: sourceArticle, cta_id: ctaId });
   }
@@ -50,8 +58,7 @@ export function DemoRequestForm() {
     const acquisition = readAcquisitionClient();
     const payload = {
       ...data,
-      consent: data.consent === "on",
-      started_at: startedAt.current ?? 0,
+      started_at: mountedAt.current ?? 0,
       source_page: "/demo",
       source_article: sourceArticle,
       cta_id: ctaId,
@@ -186,19 +193,15 @@ export function DemoRequestForm() {
         <input id="demo-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
-      <div>
-        <label className="flex items-start gap-3 text-sm leading-6 text-muted-foreground">
-          <input type="checkbox" name="consent" required className="mt-1 h-5 w-5 shrink-0 rounded border-input" {...fieldProps("consent")} />
-          <span>
-            Sunt de acord ca franchisetech să folosească aceste date doar ca să mă contacteze despre demonstrație. Detalii în{" "}
-            <Link href="/privacy" className="underline">
-              politica de confidențialitate
-            </Link>
-            . *
-          </span>
-        </label>
-        {fieldError("consent")}
-      </div>
+      {/* Notice, not a consent checkbox: replying to the visitor's own request is
+          processing for steps before a contract (GDPR art. 6(1)(b)). */}
+      <p className="text-sm leading-6 text-muted-foreground">
+        Folosim datele doar ca să răspundem cererii tale de demonstrație. Detalii în{" "}
+        <Link href="/privacy#cereri-demo" className="underline">
+          nota de informare
+        </Link>
+        .
+      </p>
 
       <Button type="submit" disabled={status === "loading"} className="h-12 w-full text-base">
         {status === "loading" ? (

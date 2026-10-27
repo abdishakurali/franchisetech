@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MIN_FILL_MS, clean, isHorecaFit, isRateLimited, leadAnalyticsProps, parseDemoLead } from "./demo-lead";
+import { MIN_FILL_MS, clean, isHorecaFit, isRateLimited, isTestLead, leadAnalyticsProps, parseDemoLead } from "./demo-lead";
 
 const NOW = 1_800_000_000_000;
 const valid = {
@@ -38,7 +38,7 @@ describe("parseDemoLead", () => {
     const r = parseDemoLead({ started_at: NOW - 20_000 }, NOW);
     expect(r.ok).toBe(false);
     if (!r.ok && !r.spam) {
-      expect(Object.keys(r.errors).sort()).toEqual(["businessName", "businessType", "consent", "contactName", "email", "locations"]);
+      expect(Object.keys(r.errors).sort()).toEqual(["businessName", "businessType", "contactName", "email", "locations"]);
     }
   });
 
@@ -58,9 +58,19 @@ describe("parseDemoLead", () => {
     expect(!r.ok && !r.spam && r.errors.businessType && r.errors.locations).toBeTruthy();
   });
 
-  it("requires consent", () => {
-    const r = parseDemoLead({ ...valid, consent: false }, NOW);
-    expect(!r.ok && !r.spam && r.errors.consent).toBeTruthy();
+  it("does not require a consent checkbox (art. 6(1)(b), notice shown instead)", () => {
+    expect(parseDemoLead({ ...valid, consent: undefined }, NOW).ok).toBe(true);
+  });
+
+  it("recognises internal test leads", () => {
+    const real = parseDemoLead(valid, NOW);
+    const byDomain = parseDemoLead({ ...valid, email: "qa@franchisetech.ro" }, NOW);
+    const byName = parseDemoLead({ ...valid, business_name: "TEST - verificare" }, NOW);
+    if (!real.ok || !byDomain.ok || !byName.ok) throw new Error("expected valid");
+    expect(isTestLead(real.lead)).toBe(false);
+    expect(isTestLead(byDomain.lead)).toBe(true);
+    expect(isTestLead(byName.lead)).toBe(true);
+    expect(isTestLead({ email: "x@y.ro", businessName: "Testarossa Cafe" })).toBe(false);
   });
 
   it("treats the honeypot and link-stuffed messages as spam (silent)", () => {

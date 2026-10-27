@@ -7,6 +7,7 @@ import {
   RATE_LIMIT_WINDOW_MS,
   isHorecaFit,
   isRateLimited,
+  isTestLead,
   leadAnalyticsProps,
   parseDemoLead,
   type DemoLead,
@@ -45,13 +46,11 @@ async function supabaseStore(): Promise<Store> {
       return error ? null : count ?? 0;
     },
     async recentDuplicate(email, sinceIso) {
-      const { data, error } = await db.from("demo_leads").select("id").ilike("email", email).gte("created_at", sinceIso).limit(1);
+      const { data, error } = await db.from("demo_leads").select("id").eq("email", email.toLowerCase()).gte("created_at", sinceIso).limit(1);
       return error ? null : (data?.length ?? 0) > 0;
     },
     async insert(lead, ipHash, consentAt) {
-      const { data, error } = await db
-        .from("demo_leads")
-        .insert({
+      const base = {
           business_name: lead.businessName,
           contact_name: lead.contactName,
           email: lead.email,
@@ -67,11 +66,20 @@ async function supabaseStore(): Promise<Store> {
           utm_campaign: lead.utmCampaign,
           ip_hash: ipHash,
           consent_at: consentAt,
-        })
+      };
+      const test = isTestLead(lead);
+      let { data, error } = await db
+        .from("demo_leads")
+        .insert({ ...base, is_test: test, status: test ? "test" : "new" })
         .select("id")
         .single();
-      if (error) {
-        console.error("[demo-request] lead insert failed", error.code, error.message);
+      // Code deployed before the lifecycle migration: the columns don't exist yet.
+      // Store the lead with the original columns rather than lose it.
+      if (error?.code === "42703") {
+        ({ data, error } = await db.from("demo_leads").insert(base).select("id").single());
+      }
+      if (error || !data) {
+        console.error("[demo-request] lead insert failed", error?.code, error?.message);
         return null;
       }
       return data.id as string;
@@ -146,7 +154,8 @@ export async function handleDemoRequest(request: Request, deps: { store: () => P
     : `lead_${createHash("sha256").update(`${ipHash}:${now}`).digest("hex").slice(0, 20)}`;
   const props = { ...leadAnalyticsProps(lead), stored: Boolean(leadId), notified: sent.success };
   await deps.capture(distinctId, "demo_form_submitted", props);
-  if (isHorecaFit(lead.businessType)) await deps.capture(distinctId, "qualified_lead", props);
+  // Internal test submissions are recorded (to verify delivery) but never counted as qualified.
+  if (isHorecaFit(lead.businessType) && !isTestLead(lead)) await deps.capture(distinctId, "qualified_lead", props);
 
   return NextResponse.json({ ok: true });
 }

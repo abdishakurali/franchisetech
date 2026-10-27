@@ -232,6 +232,18 @@ export async function completePosOnboarding(input: {
         { organisation_id: orgId, trial_days: TRIAL_DAYS, trial_ends_at: trial.endsAt, source: "onboarding" },
         { organisation: orgId },
       );
+      // A demo enquiry from the same email becomes trial_started and is linked to this org,
+      // so lead → trial attribution doesn't depend on the same browser or analytics cookies.
+      // Best effort: never blocks onboarding (and is a no-op before the lifecycle migration).
+      if (user.email) {
+        const { error: leadLinkError } = await service
+          .from("demo_leads")
+          .update({ status: "trial_started", organisation_id: orgId, status_changed_at: trial.startedAt })
+          .eq("email", user.email.toLowerCase())
+          .in("status", ["new", "contacted", "qualified", "demo_completed"])
+          .eq("is_test", false);
+        if (leadLinkError) console.error("onboarding_lead_link_failed", leadLinkError.code, leadLinkError.message);
+      }
     }
   }
 
