@@ -1,7 +1,15 @@
 # Dolce Nera — sales that skipped stock depletion since 26 Oct 2026
 
-**Status: proposal only. Nothing has been changed in production.** Run the SQL below only after the owner
-confirms, and only after the code fix is deployed (otherwise new sales keep creating gaps).
+**Status: EXECUTED 2026-10-27 ~12:45 UTC with the owner's approval — do not run again** (it is idempotent, so a
+re-run inserts nothing). Code fix deployed first (`e0692a5`, first post-deploy sale at 12:43 UTC depleted 11/11).
+Backup before running: `~/franchisetech-backups/supabase/pre-migration-20261027T124411Z` (verified, 98 tables).
+
+Result: 31 sales (2026-10-26 08:48 → 2026-10-27 12:36 UTC), 230 movements, 22 products; in-transaction checks
+0 sales still missing, 230 movements, 0 balance mismatches. After commit, all 32 sales since 25 Oct have exactly
+the expected movement count. Five touched products were already negative before the backfill (ZAHAR BRUN 5 GR,
+PALETE, CAPAC SL37, PAHAR 6 OZ, CAFEA PRAJITA BREZZA DI BARI); it only added what was actually sold.
+Separately, 9 of 82 sales on 19–24 Oct have fewer movements than today's recipes imply — pre-existing, most
+likely recipe edits since, not investigated here.
 
 ## Cause (fixed on branch `seo/www-canonicals-blog-ctas`, not yet deployed)
 
