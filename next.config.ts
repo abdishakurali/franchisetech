@@ -37,6 +37,8 @@ const nextConfig: NextConfig = {
       ...industryVanityRedirects,
       { source: "/romania", destination: "/industries/romania", permanent: true },
       { source: "/preturi", destination: "/pricing", permanent: true },
+      // Mistyped slug that GSC reports with impressions (SEO audit 2026-10-27).
+      { source: "/blog/cum-anulazi-un-bon-fiscal-emis-gresit", destination: "/blog/cum-anulezi-un-bon-fiscal-emis-gresit", permanent: true },
       { source: "/prices", destination: "/pricing", permanent: true },
       { source: "/features/till-close", destination: "/features/z-report", permanent: true },
       { source: "/features/raport-z", destination: "/features/z-report", permanent: true },

@@ -38,6 +38,46 @@ const REGULATION_FEAR_CTAS: Record<string, { eyebrow: string; body: string; href
     href: "/pricing",
     label: "Vezi planurile cu personal nelimitat",
   },
+  // SEO audit 2026-10-27 (GSC Jul–Oct): the posts below carry most organic
+  // clicks or the strongest buyer intent. The QR post previously fell through
+  // to the generic "feature included" CTA, which implied franchisetech
+  // generates the QR code — the certified fiscal device does.
+  "e-obligatoriu-qr-code-pe-bonul-fiscal": {
+    eyebrow: "Codul QR îl pune casa de marcat, nu programul POS",
+    body: "franchisetech nu generează codul QR. Trimite vânzarea, cu produsele, TVA-ul și metoda de plată, către casa de marcat certificată prin driverul fiscal configurat și vă arată dacă bonul a fost emis sau a eșuat.",
+    href: "/features/qr-code-receipts",
+    label: "Vezi cum funcționează integrarea fiscală",
+  },
+  "ce-este-raportul-z-si-cum-il-faci": {
+    eyebrow: "Închiderea zilei, cu cifrele deja calculate",
+    body: "În franchisetech, închiderea sesiunii POS arată numerarul așteptat, încasările pe card și TVA-ul zilei, ca să comparați sertarul cu o cifră exactă înainte de raportul Z de pe casa de marcat.",
+    href: "/features/z-report",
+    label: "Vezi închiderea zilei",
+  },
+  "raport-x-vs-raport-z-diferenta": {
+    eyebrow: "Verificați tura fără să închideți ziua",
+    body: "franchisetech arată în timpul zilei vânzările pe numerar și card din sesiunea deschisă, iar la închidere compară numerarul numărat cu cel așteptat.",
+    href: "/features/z-report",
+    label: "Vezi închiderea zilei",
+  },
+  "export-saga-din-program-gestiune-restaurant": {
+    eyebrow: "Exportul pentru contabil, fără retastare",
+    body: "Planul Pro include exporturile pentru contabil: vânzări, NIR și documente de stoc, generate din ce s-a înregistrat deja în POS și la recepție.",
+    href: "/features/accountant-reports",
+    label: "Vezi exporturile pentru contabil",
+  },
+  "cum-faci-nir-in-romania-fara-excel": {
+    eyebrow: "NIR-ul actualizează stocul direct",
+    body: "În planul Pro, recepția de la furnizor se înregistrează ca NIR și stocul se actualizează imediat, fără un tabel Excel separat de ținut la zi.",
+    href: "/features/nir",
+    label: "Vezi NIR și stocul",
+  },
+  "cum-alegi-un-soft-pos-pentru-cafenea-mica": {
+    eyebrow: "Testați pe produsele dumneavoastră reale",
+    body: "Planul Free nu cere card și nu expiră: POS, driver fiscal și bonuri fiscale pentru o locație. Treceți la Pro doar când aveți nevoie de stoc, rețete și export pentru contabil.",
+    href: "/pricing",
+    label: "Vezi planurile și prețurile",
+  },
   "conectare-casa-marcat-anaf-erori-frecvente": {
     eyebrow: "Starea fiecărui bon, vizibilă înainte să devină problemă",
     body: "franchisetech arată starea fiecărui bon trimis prin FiscalNet — trimis, în așteptare sau eșuat — cu reîncercare directă din POS, nu abia descoperită la o reconciliere de sfârșit de lună.",
@@ -76,6 +116,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   const post = blogPosts.find((p) => p.slug === slug);
   if (!post) notFound();
+  const fearCta = REGULATION_FEAR_CTAS[post.slug];
 
   return (
     <ClaudeMarketingShellAuth>
@@ -125,8 +166,20 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <BlogTopicHeader post={post} size="hero" className="mt-8" />
 
           <div className="mt-10 space-y-10">
-            {post.sections.map((section) => (
+            {post.sections.map((section, sectionIndex) => (
               <div key={section.heading}>
+                {/* Mid-article CTA: most readers leave after the opening answer, so the bottom box alone is rarely seen. */}
+                {fearCta && sectionIndex === 1 && (
+                  <div className="mb-10 rounded-lg border border-blue-100 bg-blue-50/70 p-4">
+                    <p className="text-sm font-semibold text-slate-900">{fearCta.eyebrow}</p>
+                    <Link
+                      href={fearCta.href}
+                      className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline"
+                    >
+                      {fearCta.label} <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                )}
                 <h2 className="text-xl font-bold text-slate-900">{section.heading}</h2>
                 <div className="mt-3 space-y-3">
                   {section.body.split("\n\n").map((para, i) => {
@@ -157,7 +210,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
 
           {(() => {
-            const fearCta = REGULATION_FEAR_CTAS[post.slug];
             if (fearCta) {
               return (
                 <div className="mt-12 rounded-lg border border-blue-100 bg-blue-50/70 p-5 sm:p-6">
@@ -185,7 +237,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <div className="mt-12 rounded-lg border border-blue-100 bg-blue-50/70 p-5 sm:p-6">
                   <p className="text-sm font-semibold text-slate-900">Funcționalitate în franchisetech</p>
                   <p className="mt-1 text-sm text-slate-600">
-                    Vrei să gestionezi asta direct din aplicație? franchisetech are această funcționalitate inclusă.
+                    Vedeți ce înregistrează franchisetech pentru acest subiect și ce rămâne în sarcina casei de marcat sau a contabilului.
                   </p>
                   <Link
                     href={post.relatedFeature}

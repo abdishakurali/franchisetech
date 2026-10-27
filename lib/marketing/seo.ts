@@ -19,7 +19,10 @@ import {
 export type { ComparisonPage } from "@/lib/marketing/comparisons";
 export { comparisonPages, comparisonsByMarket, COMPARE_HUB_PATH } from "@/lib/marketing/comparisons";
 
-export const SITE_URL = "https://franchisetech.ro";
+// www is the primary host on Vercel (apex 308s to www), so canonicals, sitemap
+// and JSON-LD must point at www — pointing them at the apex made every
+// canonical a redirecting URL and split GSC reporting across both hosts.
+export const SITE_URL = "https://www.franchisetech.ro";
 export const BRAND = "franchisetech";
 export const DEFAULT_TITLE = "franchisetech — POS & Business Control for Food Businesses";
 export const DEFAULT_DESCRIPTION =

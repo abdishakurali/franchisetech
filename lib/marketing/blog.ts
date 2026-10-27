@@ -293,7 +293,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Prețuri reale în 2026 pentru cafenele mici",
-        body: "Prețurile afișate public pentru soluțiile uzuale din România:\n\n- **Noxta**: plan gratuit cu funcționalități limitate; planul complet ~€25–30/lună\n- **Franchisetech Core**: €49/lună — POS, raport Z, rapoarte vânzări, personal nelimitat\n- **Franchisetech Operations**: €79/lună — adăugați stoc, rețete și export Saga\n- **Franchisetech Scale**: €109/lună — tot ce include Operations + suport prioritar\n- **Ebriza Pro**: €49/lună bază, dar stocul, KDS și Saga sunt add-on-uri separate care duc totalul la €107+/lună\n- **RezoSoft**: ~600 lei taxă instalare + 75 lei/lună; soluție locală, nu cloud\n\nPentru o cafenea mică care vrea stoc + export Saga inclus fără calcule, planul Operations la €79/lună este cel mai predictibil din punct de vedere al costului total lunar.",
+        body: "Prețurile POS-urilor se schimbă des, iar mulți furnizori afișează doar prețul de bază. Când comparați oferte, cereți în scris costul lunar total pentru exact ce folosiți: POS, raport Z, stoc și NIR, rețete, export pentru contabil, numărul de utilizatori și eventuala taxă de instalare sau echipament.\n\nPlanurile franchisetech, așa cum sunt afișate acum pe [pagina de prețuri](/pricing):\n\n- **Free**: €0, fără card și fără expirare — POS, driver fiscal, bonuri fiscale, până la 50 de produse, o locație\n- **Pro**: €49/lună (€39/lună la plata anuală) — produse nelimitate, stoc, rețete cu cost per porție, flux bucătărie și pachetul de exporturi pentru contabil\n- **Multi**: €79/lună bază + €29 pentru fiecare locație suplimentară — tot ce include Pro, plus mai multe locații și suport prioritar\n\nPentru o cafenea mică, începeți cu Free ca să testați vânzarea și închiderea zilei pe produsele reale, apoi treceți la Pro abia când aveți nevoie de stoc, NIR, rețete și export pentru contabil. Prețul afișat pe pagina de prețuri are întotdeauna prioritate față de acest articol.",
       },
       {
         heading: "Cum testați corect în trial",
@@ -2010,7 +2010,7 @@ export const blogPosts: BlogPost[] = [
     slug: "e-obligatoriu-qr-code-pe-bonul-fiscal",
     title: "E obligatoriu cod QR pe bonul fiscal? Ce se schimbă în 2026",
     description:
-      "Bonul fiscal digital cu cod QR nu mai e doar o discuție teoretică — Ministerul Finanțelor a pus în dezbatere publică un proiect de HG cu termen 1 noiembrie 2026. Iată ce e deja lege, ce e încă proiect și ce nu se schimbă.",
+      "Obligația codului QR pe bon există deja; doar amenzile pentru lipsa lui sunt suspendate până la 1 noiembrie 2026. Ce e lege, ce e încă proiect, cine generează de fapt codul QR și ce verificați la casa de marcat înainte de termen.",
     publishedAt: "2026-09-17",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "casa-de-marcat"],
@@ -2018,12 +2018,16 @@ export const blogPosts: BlogPost[] = [
     relatedFeature: "/features/qr-code-receipts",
     sections: [
       {
+        heading: "Răspunsul scurt (situația la 27 octombrie 2026)",
+        body: "- **Obligația** de a avea cod QR pe bonul fiscal este deja în vigoare.\n- **Amenzile** pentru bonurile emise fără cod QR sunt suspendate prin OUG nr. 68/2025 până la **1 noiembrie 2026**.\n- **O nouă amânare** a fost cerută public, inclusiv de Camera Consultanților Fiscali, dar la data verificării nu era adoptată printr-un act publicat în Monitorul Oficial.\n- **Codul QR îl generează casa de marcat fiscală certificată**, nu programul POS sau de gestiune. Ce aveți de făcut: întrebați furnizorul sau service-ul casei de marcat dacă aparatul are actualizarea necesară.\n\nVerificați Monitorul Oficial sau comunicările Ministerului Finanțelor după 27 octombrie 2026: termenul a fost deja amânat de mai multe ori.",
+      },
+      {
         heading: "Da, premisa e reală — dar verificați stadiul exact",
         body: "Spre deosebire de multe subiecte fiscale «se zvonește că», codul QR pe bonul fiscal chiar este pe agenda oficială a Ministerului Finanțelor. La 1 aprilie 2026, MF a lansat în dezbatere publică un proiect de Hotărâre de Guvern care introduce bonul fiscal digital, cu cod QR, identificator unic și transmitere a datelor către ANAF într-un format standardizat.\n\nImportant: la momentul redactării acestui articol, e vorba despre un **proiect** aflat în dezbatere publică, nu despre o lege deja publicată în Monitorul Oficial. Verificați stadiul curent înainte să luați decizii de buget sau de implementare bazate pe acest termen — proiectele fiscale românești se modifică frecvent între dezbatere și forma finală.",
       },
       {
         heading: "Termenul: 1 noiembrie 2026",
-        body: "Conform proiectului, operatorii economici au la dispoziție termenul de 1 noiembrie 2026 pentru a-și adapta sistemele și pentru a transmite noile date către ANAF. Nu e prima dată când apare acest gen de termen — obligația de a avea cod QR pe bon există în principiu din 2024, sancțiunile pentru lipsa lui au fost programate inițial pentru septembrie 2025, apoi suspendate printr-o ordonanță din decembrie 2025 chiar până la 1 noiembrie 2026, motivat oficial de faptul că aproximativ 900.000 de case de marcat din România aveau nevoie de actualizare software și certificare tehnică la ICI București.\n\nCu alte cuvinte, termenul a tot fost amânat — ceea ce e un motiv în plus să nu tratați 1 noiembrie 2026 ca fiind sigur imuabil, ci ca cea mai recentă variantă cunoscută.",
+        body: "Conform proiectului, operatorii economici au la dispoziție termenul de 1 noiembrie 2026 pentru a-și adapta sistemele și pentru a transmite noile date către ANAF. Nu e prima dată când apare acest gen de termen — obligația de a avea cod QR pe bon există în principiu din 2024, sancțiunile pentru lipsa lui au fost programate inițial pentru septembrie 2025, apoi suspendate prin OUG nr. 68/2025 chiar până la 1 noiembrie 2026, motivat oficial de faptul că aproximativ 900.000 de case de marcat din România aveau nevoie de actualizare software și certificare tehnică la ICI București.\n\nCu alte cuvinte, termenul a tot fost amânat — ceea ce e un motiv în plus să nu tratați 1 noiembrie 2026 ca fiind sigur imuabil, ci ca cea mai recentă variantă cunoscută.",
       },
       {
         heading: "Ce conține, concret, bonul digital cu QR",
