@@ -56,8 +56,8 @@ Organic-Google attribution and a real trial → paid conversion can't be simulat
 
 ## Needs an owner or legal decision
 
-- **Controller identity** — Stripe shows an individual account with no company name. The notice says
-  "Operatorul site-ului franchisetech" until a legal name, address and registration number are given.
+- ~~Controller identity~~ — resolved 2026-10-27: SALUT TECH SRL, CUI 49702253, J23/1669/2024
+  (`lib/legal/controller.ts`). Stripe still lists the account as an individual; worth aligning.
 - **Retention** — 24 months is a placeholder (`DEMO_LEAD_RETENTION_MONTHS`). No automatic deletion yet.
 - **Resend** — data region not confirmed; the US-transfer wording ("garanțiile din capitolul V GDPR") needs legal review.
 - **Cookie consent** — PostHog sets cookies with no banner (ePrivacy). Not addressed here.

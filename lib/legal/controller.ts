@@ -3,15 +3,10 @@
 // explicitly marked as pending an owner decision; nothing is inferred.
 
 export const DATA_CONTROLLER = {
-  /**
-   * PENDING (owner): legal name of the controller as registered (company + CUI + registered
-   * address, or the individual / PFA operating franchisetech.ro). Stripe lists the account as
-   * an individual in Romania with no company name, so this cannot be filled from the code.
-   * While null, the notice names the brand and the contact address only.
-   */
-  legalName: null as string | null,
-  registeredAddress: null as string | null,
-  registrationNumber: null as string | null,
+  /** Trade-register (ONRC) details supplied by the owner on 2026-10-27. */
+  legalName: "SALUT TECH SRL" as string | null,
+  registeredAddress: "Str. Orhideelor nr. 15, ap. BIR. 6, sat Dobroești, jud. Ilfov, cod 077085" as string | null,
+  registrationNumber: "CUI 49702253, Nr. Reg. Com. J23/1669/2024" as string | null,
   brand: "franchisetech",
   website: "franchisetech.ro",
   contactEmail: "info@franchisetech.ro",

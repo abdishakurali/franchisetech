@@ -5,7 +5,7 @@ import { pricingPlans } from "@/lib/billing/plans";
 
 export const AI_ENTITY = {
   name: "franchisetech",
-  legalName: "franchisetech",
+  legalName: "SALUT TECH SRL",
   url: SITE_URL,
   category: "Cloud POS and business operations software for Romanian small businesses",
   description:
