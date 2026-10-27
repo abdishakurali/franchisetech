@@ -265,7 +265,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum testați înainte să decideți",
-        body: "Verificați condițiile de testare ale fiecărei platforme. La franchisetech, planul gratuit e disponibil pentru totdeauna de la crearea contului, fără card; configurarea ghidată în aplicație este inclusă.\n\nTestul corect pe orice platformă POS:\n\n1. Configurați produsele reale (nu demo) cu prețurile dumneavoastră\n2. Faceți câteva vânzări numerar + card\n3. Închideți ziua (raport Z) și comparați numerarul din sertar cu ce arată sistemul\n4. Înregistrați o recepție de marfă (NIR) de la un furnizor real\n5. Exportați datele pentru contabil și trimiteți-i fișierul\n\nDacă fluxul dumneavoastră zilnic funcționează fără probleme pe planul gratuit — sistemul e potrivit. Dacă dați de blocaje sau aveți nevoie de suport pentru pași de bază, ia asta ca semnal.",
+        body: "Verificați condițiile de testare și de anulare ale fiecărei platforme. La franchisetech, planul Pro se plătește lunar sau anual, se poate anula oricând, fără contract pe termen lung, iar configurarea ghidată în aplicație este inclusă.\n\nTestul corect pe orice platformă POS:\n\n1. Configurați produsele reale (nu demo) cu prețurile dumneavoastră\n2. Faceți câteva vânzări numerar + card\n3. Închideți ziua (raport Z) și comparați numerarul din sertar cu ce arată sistemul\n4. Înregistrați o recepție de marfă (NIR) de la un furnizor real\n5. Exportați datele pentru contabil și trimiteți-i fișierul\n\nDacă fluxul dumneavoastră zilnic funcționează fără probleme în prima lună — sistemul e potrivit. Dacă dați de blocaje sau aveți nevoie de suport pentru pași de bază, ia asta ca semnal.",
       },
     ],
   },
@@ -1407,7 +1407,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ziua de deschidere și primele două săptămâni",
-        body: "Multe cafenele fac o deschidere «soft» — câteva zile de funcționare fără promovare, pentru ca personalul și sistemul să se roteze fără presiunea unui val mare de clienți din prima zi.\n\nÎn primele două săptămâni:\n\n- Generați raportul Z în fiecare zi, fără excepție — obișnuiți-vă cu procesul cât timp volumul e încă gestionabil\n- Verificați zilnic dacă stocul scade conform așteptărilor sau apar diferențe neexplicate\n- Ajustați meniul pe baza vânzărilor reale — produsele care nu se vând deloc în primele două săptămâni rareori decolează mai târziu fără o schimbare\n\nFranchisetech oferă configurare ghidată în aplicație pentru produse, rețete și prima sesiune de casă, plus un plan gratuit permanent — util exact pentru etapa asta, când doriți sistemul funcțional înainte de ziua de deschidere, nu în timpul ei.",
+        body: "Multe cafenele fac o deschidere «soft» — câteva zile de funcționare fără promovare, pentru ca personalul și sistemul să se roteze fără presiunea unui val mare de clienți din prima zi.\n\nÎn primele două săptămâni:\n\n- Generați raportul Z în fiecare zi, fără excepție — obișnuiți-vă cu procesul cât timp volumul e încă gestionabil\n- Verificați zilnic dacă stocul scade conform așteptărilor sau apar diferențe neexplicate\n- Ajustați meniul pe baza vânzărilor reale — produsele care nu se vând deloc în primele două săptămâni rareori decolează mai târziu fără o schimbare\n\nFranchisetech oferă configurare ghidată în aplicație pentru produse, rețete și prima sesiune de casă, pe planul Pro (€49/lună sau €39/lună la plata anuală, fără contract pe termen lung) — util exact pentru etapa asta, când doriți sistemul funcțional înainte de ziua de deschidere, nu în timpul ei.",
       },
     ],
   },
@@ -1614,7 +1614,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum vă ajută franchisetech",
-        body: "franchisetech nu introduce pentru dumneavoastră cifra finală a pragului de rentabilitate — costurile fixe (chirie, salarii, abonamente) nu trec prin POS și trebuie introduse de dumneavoastră. Dar vă dă gratuit jumătatea grea a calculului: marja medie reală per bon, calculată din costul rețetelor și din vânzările efective înregistrate, nu dintr-o estimare. Aveți deja acest număr actualizat lunar, în loc să-l reconstitui manual dintr-un Excel la finalul fiecărei luni.",
+        body: "franchisetech nu introduce pentru dumneavoastră cifra finală a pragului de rentabilitate — costurile fixe (chirie, salarii, abonamente) nu trec prin POS și trebuie introduse de dumneavoastră. Dar vă dă direct jumătatea grea a calculului: marja medie reală per bon, calculată din costul rețetelor și din vânzările efective înregistrate, nu dintr-o estimare. Aveți deja acest număr actualizat lunar, în loc să-l reconstitui manual dintr-un Excel la finalul fiecărei luni.",
       },
     ],
   },
@@ -2505,7 +2505,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum reduceți riscul financiar la deschidere",
-        body: "- Nu subestimați capitalul de lucru — e mai valoros să aveți o rezervă mai mare și un echipament mai modest decât invers\n- Luați în calcul echipament second-hand funcțional pentru pozițiile mai puțin critice, păstrând bugetul nou pentru echipamentul care determină direct calitatea (espressorul, în special)\n- Configurați sistemul de gestiune și POS înainte de deschidere, nu în prima săptămână — franchisetech oferă configurare ghidată și un plan gratuit permanent, exact pentru etapa în care fiecare leu din buget contează\n- Calculați marja brută a fiecărui produs din meniul de lansare înainte de deschidere, nu după o lună de vânzări — vedeți [cum calculați marja brută cu exemple reale](/blog/cum-calculezi-marja-bruta-produs-restaurant)",
+        body: "- Nu subestimați capitalul de lucru — e mai valoros să aveți o rezervă mai mare și un echipament mai modest decât invers\n- Luați în calcul echipament second-hand funcțional pentru pozițiile mai puțin critice, păstrând bugetul nou pentru echipamentul care determină direct calitatea (espressorul, în special)\n- Configurați sistemul de gestiune și POS înainte de deschidere, nu în prima săptămână — franchisetech oferă configurare ghidată, iar planul Pro costă €49/lună (€39/lună la plata anuală), fără contract pe termen lung, ca să știți costul lunar exact încă din buget\n- Calculați marja brută a fiecărui produs din meniul de lansare înainte de deschidere, nu după o lună de vânzări — vedeți [cum calculați marja brută cu exemple reale](/blog/cum-calculezi-marja-bruta-produs-restaurant)",
       },
     ],
   },
