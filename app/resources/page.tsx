@@ -229,8 +229,8 @@ export default function ResourcesPage() {
             {(
               [
                 { href: "/compare", title: "Compară software POS", summary: "SmartBill, Saga, RezoSoft, Square — logo-uri și tabele de funcționalități.", icon: Scale },
-                { href: "/resources/pos-software-romania", title: "Software POS România", summary: "FiscalNet, TVA, stoc și raport Z pentru restaurante.", icon: CreditCard },
-                { href: "/resources/choose-pos-romania", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", icon: ListChecks },
+                { href: "/industries/romania", title: "Software POS România", summary: "FiscalNet, TVA, stoc și raport Z pentru restaurante.", icon: CreditCard },
+                { href: "/blog/cum-alegi-un-soft-pos-pentru-cafenea-mica", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", icon: ListChecks },
                 { href: "/industries/romania", title: "POS pentru România", summary: "lei, TVA, FiscalNet, echipă nelimitată.", icon: MapPin },
                 { href: "/compare/smartbill", title: "vs SmartBill", summary: "Facturare vs operațiuni zilnice — comparație onestă.", logo: "/compare/logos/smartbill.png" },
                 { href: "/help/romania-fiscalnet", title: "Ghid FiscalNet", summary: "Configurare pas cu pas pentru bonuri fiscale.", icon: Wifi },
@@ -603,7 +603,7 @@ export default function ResourcesPage() {
             <span className="text-sm font-medium text-muted-foreground">Pagini asociate:</span>
             {[
               ["/compare",                   "Compară POS"],
-              ["/resources/pos-software-romania", "Ghid POS România"],
+              ["/industries/romania", "Ghid POS România"],
               ["/",                          "← Acasă"],
               ["/features/pos",              "Casă de marcat"],
               ["/features/z-report",         "Raport Z"],

@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { INDUSTRY_VANITY_REDIRECTS } from "./lib/marketing/industry-vanity-redirects";
+import { legacyRedirects } from "./lib/marketing/legacy-redirects";
 
 const industryVanityRedirects = Object.entries(INDUSTRY_VANITY_REDIRECTS).map(([source, destination]) => ({
   source,
@@ -35,6 +36,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       ...industryVanityRedirects,
+      // GSC-reported 404s with a live equivalent (see lib/marketing/legacy-redirects.ts).
+      ...legacyRedirects,
       { source: "/romania", destination: "/industries/romania", permanent: true },
       { source: "/preturi", destination: "/pricing", permanent: true },
       // Mistyped slug that GSC reports with impressions (SEO audit 2026-10-27).

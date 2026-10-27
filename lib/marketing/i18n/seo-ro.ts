@@ -53,7 +53,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     related: [
       { label: "Raport Z", href: "/features/z-report" },
       { label: "Cafenele", href: "/industries/cafes" },
-      { label: "Ce au nevoie cafenelele de la POS", href: "/resources/pos-system-for-small-cafes" },
+      { label: "Ce au nevoie cafenelele de la POS", href: "/blog/cum-alegi-un-soft-pos-pentru-cafenea-mica" },
     ],
   },
   "stock-management": {
@@ -103,7 +103,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
       },
     ],
     related: [
-      { label: "Cost rețete", href: "/features/recipe-costing" },
+      { label: "Cum calculați costul rețetelor", href: "/blog/cum-calculezi-costul-unei-retete-cafenea" },
       { label: "Articol despre control stoc", href: "/blog/stoc-negativ-cauze-si-solutii" },
       { label: "Restaurante", href: "/industries/restaurants" },
     ],
@@ -236,7 +236,7 @@ export const seoRoOverrides: Record<string, SeoRoOverrides> = {
     ],
     related: [
       { label: "Gestionare stoc", href: "/features/stock-management" },
-      { label: "Cost rețete", href: "/features/recipe-costing" },
+      { label: "Cum calculați costul rețetelor", href: "/blog/cum-calculezi-costul-unei-retete-cafenea" },
     ],
   },
   nir: {

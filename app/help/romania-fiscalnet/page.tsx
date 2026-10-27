@@ -187,14 +187,14 @@ export default function RomaniaFiscalNetPage() {
         <div className="mx-auto max-w-4xl">
           <h2 className="text-lg font-semibold text-slate-950">Related guides</h2>
           <div className="mt-4 flex flex-wrap gap-3">
-            <Link href="/help/reading-your-z-report" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700">
+            <Link href="/features/z-report" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700">
               Reading your Z-report →
             </Link>
-            <Link href="/help/vat-report" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700">
-              VAT report →
+            <Link href="/help/romania-efactura" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700">
+              e-Factura guide →
             </Link>
-            <Link href="/help/manage-settings" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700">
-              Manage settings →
+            <Link href="/help" className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-blue-300 hover:text-blue-700">
+              All help guides →
             </Link>
           </div>
         </div>
