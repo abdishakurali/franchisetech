@@ -37,7 +37,7 @@ export type DemoLead = {
   utmCampaign: string | null;
 };
 
-export type DemoLeadField = "businessName" | "contactName" | "email" | "phone" | "businessType" | "locations" | "message" | "consent";
+export type DemoLeadField = "businessName" | "contactName" | "email" | "phone" | "businessType" | "locations" | "message" | "consent" | "form";
 
 export type ParseResult =
   | { ok: true; lead: DemoLead }
@@ -73,10 +73,8 @@ export function isHorecaFit(businessType: string): boolean {
 }
 
 export function parseDemoLead(body: Record<string, unknown>, now: number = Date.now()): ParseResult {
-  // Spam: honeypot field humans never see, or a form submitted implausibly fast.
+  // Spam: a honeypot field humans never see gets a silent fake success.
   if (clean(body.website, 200)) return { ok: false, spam: true };
-  const startedAt = Number(body.started_at);
-  if (Number.isFinite(startedAt) && startedAt > 0 && now - startedAt < MIN_FILL_MS) return { ok: false, spam: true };
 
   const businessName = clean(body.business_name, 120);
   const contactName = clean(body.contact_name, 100);
@@ -90,20 +88,27 @@ export function parseDemoLead(body: Record<string, unknown>, now: number = Date.
   if ((message.match(URL_RE) ?? []).length > 2) return { ok: false, spam: true };
 
   const errors: Partial<Record<DemoLeadField, string>> = {};
-  if (!businessName) errors.businessName = "Completați numele afacerii.";
-  if (!contactName) errors.contactName = "Completați numele dumneavoastră.";
-  if (!email) errors.email = "Completați adresa de email.";
+  if (!businessName) errors.businessName = "Completează numele afacerii.";
+  if (!contactName) errors.contactName = "Completează numele tău.";
+  if (!email) errors.email = "Completează adresa de email.";
   // Raw check too: sanitising "<ana>@x.ro" would otherwise produce a different, valid address.
   else if (!EMAIL_RE.test(email) || /[<>"]/.test(String(body.email ?? ""))) errors.email = "Adresa de email nu pare validă.";
   if (phoneRaw) {
     const digits = phoneRaw.replace(/\D/g, "").length;
     if (digits < 9 || digits > 15 || /[^\d\s+().-]/.test(phoneRaw)) errors.phone = "Numărul de telefon nu pare valid.";
   }
-  if (!(BUSINESS_TYPES as readonly string[]).includes(businessType)) errors.businessType = "Alegeți tipul afacerii.";
-  if (!(LOCATION_OPTIONS as readonly string[]).includes(locations)) errors.locations = "Alegeți numărul de locații.";
-  if (body.consent !== true && body.consent !== "on") errors.consent = "Bifați acordul ca să vă putem contacta.";
+  if (!(BUSINESS_TYPES as readonly string[]).includes(businessType)) errors.businessType = "Alege tipul afacerii.";
+  if (!(LOCATION_OPTIONS as readonly string[]).includes(locations)) errors.locations = "Alege numărul de locații.";
+  if (body.consent !== true && body.consent !== "on") errors.consent = "Bifează acordul ca să te putem contacta.";
 
   if (Object.keys(errors).length > 0) return { ok: false, spam: false, errors };
+
+  // A complete form sent implausibly fast is probably a bot, but could be a person
+  // using autofill: never a fake success, just ask them to send it again.
+  const startedAt = Number(body.started_at);
+  if (!Number.isFinite(startedAt) || startedAt <= 0 || now - startedAt < MIN_FILL_MS) {
+    return { ok: false, spam: false, errors: { form: "Te rugăm să verifici datele și să trimiți din nou." } };
+  }
 
   return {
     ok: true,

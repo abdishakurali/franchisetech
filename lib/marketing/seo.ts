@@ -553,6 +553,7 @@ export const resourcePages: ResourcePage[] = [
 export const publicPaths = [
   "/",
   "/contact",
+  "/demo",
   "/pricing",
   "/features",
   ...featurePages.filter((page) => isLeanPublicFeature(page.slug)).map((p) => p.path),

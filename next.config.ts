@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
       { source: "/pos-system", destination: "/features/pos", permanent: true },
       { source: "/franchise-management", destination: "/", permanent: true },
       { source: "/about", destination: "/", permanent: true },
-      { source: "/demo", destination: "/signup?plan=starter", permanent: true },
+      // "/demo" used to redirect to /signup?plan=starter (a retired plan); it is now a real page (app/demo).
       { source: "/faq", destination: "/help", permanent: true },
       { source: "/support", destination: "/help", permanent: true },
       { source: "/docs", destination: "/help", permanent: true },

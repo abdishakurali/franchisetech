@@ -102,7 +102,7 @@ export async function handleDemoRequest(request: Request, deps: { store: () => P
   const result = parseDemoLead(body, now);
   // Spam gets the same response as success so bots learn nothing; nothing is stored or sent.
   if (!result.ok && result.spam) return NextResponse.json({ ok: true });
-  if (!result.ok) return NextResponse.json({ error: "Verificați câmpurile marcate.", errors: result.errors }, { status: 400 });
+  if (!result.ok) return NextResponse.json({ error: "Verifică câmpurile marcate.", errors: result.errors }, { status: 400 });
   const lead = result.lead;
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
@@ -118,7 +118,7 @@ export async function handleDemoRequest(request: Request, deps: { store: () => P
 
   const recent = store ? await store.recentFromIp(ipHash, sinceIso) : null;
   if (recent === null ? memoryRateLimited(ipHash, now) : isRateLimited(recent)) {
-    return NextResponse.json({ error: "Ați trimis deja câteva cereri. Încercați din nou în câteva minute." }, { status: 429 });
+    return NextResponse.json({ error: "Ai trimis deja câteva cereri. Încearcă din nou în câteva minute." }, { status: 429 });
   }
 
   // Double clicks / resubmits: the first request already reached the team.
@@ -136,7 +136,7 @@ export async function handleDemoRequest(request: Request, deps: { store: () => P
   // Never claim success unless the lead is safe somewhere.
   if (!leadId && !sent.success) {
     return NextResponse.json(
-      { error: `Cererea nu a putut fi trimisă acum. Scrieți-ne direct la ${salesInbox()} sau încercați din nou.` },
+      { error: `Cererea nu a putut fi trimisă acum. Scrie-ne direct la ${salesInbox()} sau încearcă din nou.` },
       { status: 503 },
     );
   }

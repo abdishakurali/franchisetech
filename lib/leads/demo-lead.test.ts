@@ -63,10 +63,21 @@ describe("parseDemoLead", () => {
     expect(!r.ok && !r.spam && r.errors.consent).toBeTruthy();
   });
 
-  it("treats the honeypot, instant submits and link-stuffed messages as spam", () => {
+  it("treats the honeypot and link-stuffed messages as spam (silent)", () => {
     expect(parseDemoLead({ ...valid, website: "http://x" }, NOW)).toEqual({ ok: false, spam: true });
-    expect(parseDemoLead({ ...valid, started_at: NOW - MIN_FILL_MS + 1 }, NOW)).toEqual({ ok: false, spam: true });
     expect(parseDemoLead({ ...valid, message: "http://a http://b www.c.ro" }, NOW)).toEqual({ ok: false, spam: true });
+  });
+
+  it("never fakes success for a too-fast or untimed submit: asks to send again", () => {
+    for (const started_at of [NOW - MIN_FILL_MS + 1, 0, undefined]) {
+      const r = parseDemoLead({ ...valid, started_at }, NOW);
+      expect(!r.ok && !r.spam && r.errors.form).toBeTruthy();
+    }
+  });
+
+  it("an empty form sent instantly gets field errors, not a fake success", () => {
+    const r = parseDemoLead({ started_at: NOW - 10 }, NOW);
+    expect(!r.ok && !r.spam && r.errors.email).toBeTruthy();
   });
 
   it("drops an attribution slug that isn't a slug", () => {
