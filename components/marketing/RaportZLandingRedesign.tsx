@@ -25,8 +25,8 @@ const flow = [
 
 const faqs = [
   [
-    "Am nevoie de card la înscriere?",
-    "Planul Free e disponibil de la crearea contului, fără card, și nu expiră. Plata lunară începe numai dacă alegeți un plan plătit.",
+    "Cât costă?",
+    "Pro costă 49 €/locație/lună (39 € la plata anuală), iar Multi 79 €/locație/lună. Fără contract pe termen lung, anulare oricând.",
   ],
   [
     "franchisetech generează QR-ul de pe bon?",
@@ -49,7 +49,7 @@ function PrimaryCta({ signupHref, compact = false }: { signupHref: string; compa
         href={signupHref}
         className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#1747c9] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#0f2f8f] sm:w-auto"
       >
-        Testați închiderea de zi gratuit <ArrowRight className="h-4 w-4" aria-hidden />
+        Începeți cu Pro <ArrowRight className="h-4 w-4" aria-hidden />
       </Link>
       <Link
         href="/features/z-report"
@@ -64,7 +64,7 @@ function PrimaryCta({ signupHref, compact = false }: { signupHref: string; compa
 function TrialMicrocopy({ dark = false }: { dark?: boolean }) {
   return (
     <p className={`mt-3 text-xs leading-6 ${dark ? "text-white/60" : "text-slate-500"}`}>
-      fără card necesar · gratuit pentru totdeauna · upgrade oricând · anulare oricând
+      Pro de la 49 €/lună · plată lunară sau anuală · anulare oricând
     </p>
   );
 }

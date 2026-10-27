@@ -18,7 +18,7 @@ export const en = {
     language: "Language",
   },
   announcement: {
-    text: "Free forever, so you can see whether every evening closes cleanly — free in-app setup included.",
+    text: "Pro from €49/location/month (€39 billed annually), so you can see whether every evening closes cleanly — guided in-app setup included.",
     cta: "Start now",
   },
   footer: {
@@ -26,7 +26,7 @@ export const en = {
     subtagline: "Sell, track stock, close the till, and see real numbers — without POS lock-in or per-seat fees.",
     getStartedTitle: "Ready to get started?",
     getStartedText: "Tell us about your business and we will help configure your first location.",
-    getStartedCta: "Create a free account",
+    getStartedCta: "Create an account",
     features: "Features",
     industries: "Industries",
     company: "Company",
@@ -61,10 +61,10 @@ export const en = {
     },
   },
   cta: {
-    getStarted: "Open till free — forever",
+    getStarted: "Start with Pro",
     talkToSales: "Talk to sales",
-    startTrial: "Create free account",
-    parallelTrial: "Free parallel test — same team, same end-of-day close",
+    startTrial: "Create account",
+    parallelTrial: "Parallel test — same team, same end-of-day close",
     seePricing: "See pricing",
     seeFeatures: "See features",
     learnMore: "Learn more",
@@ -75,12 +75,12 @@ export const en = {
   },
   seoPage: {
     getStarted: "Get started",
-    startTrial: "Create free account",
+    startTrial: "Create account",
     allFeatures: "All features",
     faq: "FAQ",
     related: "Related",
     readyTitle: "Ready to try it?",
-    readyText: "Free forever, with setup help for products, till, and first sale.",
+    readyText: "Pro from €49/location/month (€39 billed annually), with setup help for products, till, and first sale.",
     startTrialLink: "Get started",
     viewFeature: "View feature",
     viewIndustry: "View industry",
@@ -134,7 +134,7 @@ export const en = {
       titleAfter: " where the money went.",
       subtitle: "franchisetech shows sales, cash, card, margin, and stock gaps before you go home.",
       socialProof: "For owners who want daily control, not complicated reports at month end.",
-      trialNote: "No card required · Guided in-app setup · Cancel anytime",
+      trialNote: "Monthly or annual billing · Guided in-app setup · Cancel anytime",
       trustSignals: [
         { title: "No surprises at close", text: "Cash, card, and differences visible before the site closes." },
         { title: "Fast first sale", text: "Demo products, open till, and guided checkout in one session." },
@@ -308,7 +308,7 @@ export const en = {
       title: "See how you make your first sale in under 10 minutes",
       subtitle: "franchisetech takes you from a new account to an open till, demo products, and your first sale — no complicated setup.",
       videoPlaceholder: "Demo video coming soon",
-      cta: "Try for free",
+      cta: "Start with Pro",
       demoCta: "Book a demo",
     },
     compare: {
@@ -321,7 +321,7 @@ export const en = {
     faq: {
       title: "Questions from owners",
       items: [
-        { question: "How does the free plan work?", answer: "The Free plan is available when the account is created, with no card required, and never expires. Monthly billing begins only if you choose a paid plan." },
+        { question: "How does the subscription work?", answer: "Choose Pro for one location or Multi for several, billed monthly or annually (save 20% annually). No long-term contract, cancel anytime." },
         { question: "Do I need special POS hardware?", answer: "The app runs in a browser on supported devices. Fiscal hardware and fiscal driver compatibility are checked separately." },
         { question: "Can I see margins on menu items?", answer: "Yes. Recipe costing links ingredients to sale price so you see cost per portion and gross margin before you change the menu." },
         { question: "Is there per-seat pricing?", answer: "No. Unlimited staff at no extra per-user cost." },
@@ -384,7 +384,7 @@ export const en = {
     howItWorks: [
       { step: "1", title: "You introduce the client", text: "A restaurant or café in your portfolio — we never ask you to run the install." },
       { step: "2", title: "We onboard the client", text: "Products, till, first sale, Z-report — franchisetech leads the setup." },
-      { step: "3", title: "Client pays subscription", text: "Free plan forever, then upgrade to Pro or Multi when needed — clear pricing, no per-seat fees." },
+      { step: "3", title: "Client pays subscription", text: "Pro for one location, Multi as they add locations — clear pricing, no per-seat fees." },
       { step: "4", title: "You earn recurring commission", text: "A share of the subscription while the client stays active. Exact terms confirmed when the program opens." },
     ],
     accountantsLabel: "For accountants",
@@ -443,15 +443,15 @@ export const en = {
   },
   pricing: {
     title: "franchisetech Pricing",
-    description: "Free is free forever, Pro is €49/location/month, and Multi is €79/location/month + €29/extra location. No card required at signup.",
+    description: "Pro is €49/location/month (€39 billed annually), and Multi is €79/location/month (€63 annually) + €29/extra location. No long-term contract.",
     badge: "Simple pricing",
     heroTitle: "Two plans with clear per-location pricing.",
-    heroText: "Free covers sales and daily close, forever. Pro adds stock, purchasing, and recipes.",
-    heroStatFrom: "No card required",
-    heroStatTrial: "Free forever",
+    heroText: "Pro for one location: sales, daily close, stock, purchasing, and recipes. Multi for several locations.",
+    heroStatFrom: "Monthly or annual billing",
+    heroStatTrial: "Cancel anytime",
     heroStatTill: "No long-term contract",
     seeFeatures: "See all features",
-    freeSetupStrip: "Free forever, without a card. Guided in-app setup included.",
+    freeSetupStrip: "Monthly or annual billing, no long-term contract. Guided in-app setup included.",
     setupFreeTitle: "Free in-app setup",
     setupFreeText: "New account → demo products → open till → first sale. Step-by-step guide, no cost.",
     embeddedSignupTitle: "Get started today",
@@ -472,7 +472,7 @@ export const en = {
     fairnessItems: [
       "Unlimited staff — no per-user fees",
       "No hardware lock-in or terminal contracts",
-      "Free forever, without a card",
+      "Monthly or annual billing — save 20% annually",
       "Cancel anytime — no long-term lock-in",
       "Existing subscribers keep their rate when prices change",
     ],
@@ -552,7 +552,7 @@ export const en = {
     faqs: [
       ["Do I need special hardware?", "The web app runs on supported devices. Fiscal receipts require compatible fiscal hardware and a fiscal driver configured locally."],
       ["Can you set up my products?", "Guided in-app setup is included. Large migrations, team training, and on-site fiscal setup are separate services."],
-      ["Do I have to pay to start?", "No. The Free plan is free forever. Payment starts only if you choose a paid plan."],
+      ["How is the subscription billed?", "Pro and Multi are billed monthly or annually (save 20% annually). There is no long-term contract and you can cancel anytime."],
       ["Is pricing per company or location?", "The displayed prices are per location, per month. Request a quote for a multi-location configuration."],
       ["Will my price go up later?", "If we change list prices, existing paying customers keep their current rate unless they change plans."],
     ] as const,
@@ -581,14 +581,14 @@ export const en = {
     homeTeaser: {
       label: "Pricing",
       title: "One workspace. One price per shop.",
-      text: "Free forever, then from {starter}/location/month. No card at signup. No long-term contract.",
+      text: "From {starter}/location/month, billed monthly or annually. No long-term contract.",
       cta: "See all plans",
     },
   },
   auth: {
     loginTitle: "Sign in to franchisetech",
-    signupTitle: "Start your free account",
-    signupDescription: "Guided setup. The Free plan is available when the account is created, with no card required, and never expires.",
+    signupTitle: "Create your franchisetech account",
+    signupDescription: "Guided setup. Choose Pro or Multi, billed monthly or annually.",
     signupLegal: "By signing up you agree that franchisetech supports your records — it does not replace your legal obligations as a food business operator.",
     email: "Email",
     password: "Password",
@@ -629,7 +629,7 @@ export const en = {
     backToBlog: "Back to blog",
     published: "Published",
     ctaTitle: "Try franchisetech on your till",
-    ctaText: "Free forever. Setup help for products, payment methods, and your first sale.",
+    ctaText: "Pro from €49/location/month (€39 billed annually). Setup help for products, payment methods, and your first sale.",
   },
 } as const;
 

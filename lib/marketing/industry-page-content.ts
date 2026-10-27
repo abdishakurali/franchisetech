@@ -105,7 +105,7 @@ export const primaryIndustryPages: SeoPage[] = [
       { label: "Z-report", href: "/features/z-report" },
     ],
     image: "/marketing/industry-cafe.png",
-    ctaTitle: "Open the till free — forever",
+    ctaTitle: "Open the till with franchisetech Pro",
     ctaSubtitle: "Guided setup for cafes: demo products, first sale, and Z-report.",
   },
   {
@@ -194,7 +194,7 @@ export const primaryIndustryPages: SeoPage[] = [
       { label: "Z-report", href: "/features/z-report" },
     ],
     image: "/marketing/industry-restaurant.png",
-    ctaTitle: "Try restaurant POS — free forever",
+    ctaTitle: "Start restaurant POS — franchisetech Pro",
     ctaSubtitle: "Sales, stock, recipes, and till close — configured for daily control.",
   },
   {
@@ -281,7 +281,7 @@ export const primaryIndustryPages: SeoPage[] = [
       { label: "Z-report", href: "/features/z-report" },
     ],
     image: "/marketing/live/pos.png",
-    ctaTitle: "Start takeaway POS — free forever",
+    ctaTitle: "Start takeaway POS — franchisetech Pro",
     ctaSubtitle: "Fast counter, fiscal driver receipts, and Z-report in one setup.",
   },
   {
@@ -368,7 +368,7 @@ export const primaryIndustryPages: SeoPage[] = [
     ],
     related: [],
     image: "/marketing/live/recipes.png",
-    ctaTitle: "Start patisserie POS — free forever",
+    ctaTitle: "Start patisserie POS — franchisetech Pro",
     ctaSubtitle: "Recipes, bon de consum, and counter sales in one place.",
   },
 ];

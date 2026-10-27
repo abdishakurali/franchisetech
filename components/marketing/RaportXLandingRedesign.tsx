@@ -72,8 +72,8 @@ const faqs = [
     "Nu promitem asta fără verificare. În proba asistată verificăm împreună fluxul driverului fiscal, casa fiscală și ce se poate configura pentru localul dumneavoastră.",
   ],
   [
-    "Am nevoie de card la înscriere?",
-    "Planul Free e disponibil de la crearea contului, fără card, și nu expiră. Plata lunară începe numai dacă alegeți un plan plătit.",
+    "Cât costă?",
+    "Pro costă 49 €/locație/lună (39 € la plata anuală), iar Multi 79 €/locație/lună. Fără contract pe termen lung, anulare oricând.",
   ],
   [
     "Merge pe telefon?",
@@ -92,7 +92,7 @@ function PrimaryCta({ signupHref, centered = false }: { signupHref: string; cent
         href={signupHref}
         className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-[#1747c9] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[#0f2f8f] sm:w-auto sm:py-3"
       >
-        Creați cont gratuit <ArrowRight className="h-4 w-4" aria-hidden />
+        Începeți cu Pro <ArrowRight className="h-4 w-4" aria-hidden />
       </Link>
       <Link
         href="/blog/raport-x-vs-raport-z-diferenta"
@@ -107,7 +107,7 @@ function PrimaryCta({ signupHref, centered = false }: { signupHref: string; cent
 function TrialMicrocopy({ dark = false }: { dark?: boolean }) {
   return (
     <p className={`mt-3 text-xs leading-6 ${dark ? "text-white/60" : "text-slate-500"}`}>
-      fără card necesar · gratuit pentru totdeauna · upgrade oricând · anulare oricând
+      Pro de la 49 €/lună · plată lunară sau anuală · anulare oricând
     </p>
   );
 }
