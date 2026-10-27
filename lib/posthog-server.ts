@@ -36,6 +36,8 @@ export function getPostHogClient(): PostHog | null {
   const token = process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN;
   const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
   if (!token) return null;
+  // `next dev` shares the production token; keep local testing out of production funnels.
+  if (process.env.NODE_ENV === "development" && process.env.POSTHOG_CAPTURE_IN_DEV !== "true") return null;
 
   if (!posthogClient) {
     posthogClient = new PostHog(token, {
