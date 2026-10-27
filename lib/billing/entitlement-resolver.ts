@@ -41,7 +41,11 @@ const MULTI_SITE_ENTITLEMENTS: readonly EntitlementKey[] = [
   "fiscal.multi_site",
 ];
 
-const FALLBACK_ENTITLEMENTS: readonly EntitlementKey[] = [
+// Exported for tests. recipes.stock_depletion stays in the fallback on
+// purpose: it isn't a Pro feature the customer "uses", it keeps the stock
+// record true for every sale already made. Dropping it made a lapsed org's
+// sales silently stop writing stock movements (Dolce Nera, 2026-10-26).
+export const FALLBACK_ENTITLEMENTS: readonly EntitlementKey[] = [
   "pos.enabled",
   "pos.discounts",
   "pos.transaction_history",
@@ -65,6 +69,7 @@ const FALLBACK_ENTITLEMENTS: readonly EntitlementKey[] = [
   "kitchen.stations",
   "kitchen.order_types",
   "kitchen.table_service",
+  "recipes.stock_depletion",
 ];
 
 const GRACE_PERIOD_WRITE_BLOCKS = new Set<EntitlementKey>([
@@ -171,12 +176,17 @@ function future(iso: string | null | undefined): boolean {
   return Boolean(iso && new Date(iso).getTime() > Date.now());
 }
 
-function resolveStatus(rawStatus: string | null | undefined, currentPeriodEnd: string | null | undefined, graceEnd: string | null | undefined): EntitlementStatus {
+export function resolveStatus(rawStatus: string | null | undefined, currentPeriodEnd: string | null | undefined, graceEnd: string | null | undefined): EntitlementStatus {
   if (rawStatus === "trialing") return "trialing";
   if (rawStatus === "active") return "active";
   if (rawStatus === "grace_period") return "grace_period";
   if (rawStatus === "past_due") return future(graceEnd) ? "past_due" : "expired";
-  if (rawStatus === "canceled") return future(currentPeriodEnd) ? "active" : "canceled";
+  // Stripe cancels on payment failure before our grace window ends; the
+  // customer still gets the full grace (matches getSubscriptionStatus).
+  if (rawStatus === "canceled") {
+    if (future(graceEnd)) return "past_due";
+    return future(currentPeriodEnd) ? "active" : "canceled";
+  }
   if (rawStatus === "unpaid") return "unpaid";
   return "expired";
 }

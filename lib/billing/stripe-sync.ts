@@ -28,7 +28,8 @@ type ExistingSubscriptionRow = {
   current_period_end: string | null;
 };
 
-const GRACE_PERIOD_DAYS = 3;
+// Billing policy (owner, 2026-10-27): 5 days to pay after a failed renewal.
+const GRACE_PERIOD_DAYS = 5;
 
 export type StripeSubscriptionSyncResult = {
   synced: boolean;
