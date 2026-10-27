@@ -5,6 +5,7 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 import { CTASection } from "@/components/marketing/MarketingShell";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { BlogTopicHeader } from "@/components/marketing/BlogTopicHeader";
+import { BlogCtaLink } from "@/components/marketing/BlogCtaLink";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { blogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
@@ -74,7 +75,7 @@ const REGULATION_FEAR_CTAS: Record<string, { eyebrow: string; body: string; href
   },
   "cum-alegi-un-soft-pos-pentru-cafenea-mica": {
     eyebrow: "Testați pe produsele dumneavoastră reale",
-    body: "Planul Free nu cere card și nu expiră: POS, driver fiscal și bonuri fiscale pentru o locație. Treceți la Pro doar când aveți nevoie de stoc, rețete și export pentru contabil.",
+    body: "Pro costă €49/lună pentru o locație (€39/lună la plata anuală) și include POS, stoc, rețete și export pentru contabil. Multi adaugă mai multe locații. Fără contract pe termen lung, anulare oricând.",
     href: "/pricing",
     label: "Vezi planurile și prețurile",
   },
@@ -172,12 +173,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 {fearCta && sectionIndex === 1 && (
                   <div className="mb-10 rounded-lg border border-blue-100 bg-blue-50/70 p-4">
                     <p className="text-sm font-semibold text-slate-900">{fearCta.eyebrow}</p>
-                    <Link
+                    <BlogCtaLink
                       href={fearCta.href}
                       className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline"
+                      ctaType="primary"
+                      ctaLocation="blog_mid"
+                      ctaText={fearCta.label}
+                      blogSlug={post.slug}
                     >
                       {fearCta.label} <ArrowRight className="h-4 w-4" />
-                    </Link>
+                    </BlogCtaLink>
                   </div>
                 )}
                 <h2 className="text-xl font-bold text-slate-900">{section.heading}</h2>
@@ -216,18 +221,27 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   <p className="text-sm font-semibold text-slate-900">{fearCta.eyebrow}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-700">{fearCta.body}</p>
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                    <Link
+                    <BlogCtaLink
                       href={fearCta.href}
                       className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                      ctaType="primary"
+                      ctaLocation="blog_end"
+                      ctaText={fearCta.label}
+                      blogSlug={post.slug}
                     >
                       {fearCta.label} <ArrowRight className="h-4 w-4" />
-                    </Link>
-                    <Link
+                    </BlogCtaLink>
+                    {/* Matches the live /pricing CTA: Free was retired 2026-10-26, signup now starts on Pro. */}
+                    <BlogCtaLink
                       href="/signup?plan=growth"
                       className="inline-flex items-center justify-center rounded-md border border-blue-200 bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 hover:border-blue-300"
+                      ctaType="secondary"
+                      ctaLocation="blog_end"
+                      ctaText="Începeți Pro"
+                      blogSlug={post.slug}
                     >
-                      Deschide casa gratuit, pentru totdeauna
-                    </Link>
+                      Începeți Pro
+                    </BlogCtaLink>
                   </div>
                 </div>
               );
@@ -239,12 +253,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   <p className="mt-1 text-sm text-slate-600">
                     Vedeți ce înregistrează franchisetech pentru acest subiect și ce rămâne în sarcina casei de marcat sau a contabilului.
                   </p>
-                  <Link
+                  <BlogCtaLink
                     href={post.relatedFeature}
                     className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline"
+                    ctaType="primary"
+                    ctaLocation="blog_related_feature"
+                    ctaText="Descoperă funcționalitatea"
+                    blogSlug={post.slug}
                   >
                     Descoperă funcționalitatea <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  </BlogCtaLink>
                 </div>
               );
             }
