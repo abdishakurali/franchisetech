@@ -77,6 +77,62 @@ export type BlogPost = {
  */
 export const blogPosts: BlogPost[] = [
   {
+    slug: "cum-gestionezi-stocul-intr-o-cafenea-de-la-1-kg-de-cafea-la-profit",
+    title: "Cum gestionați stocul într-o cafenea: de la 1 kg de cafea la profitul real",
+    description:
+      "Un exemplu complet, pe o singură materie primă: câte cafele ies dintr-un kilogram, cât costă una, cât ar fi trebuit să consumați într-o săptămână și cât valorează diferența găsită la inventar.",
+    publishedAt: "2026-10-27",
+    locale: "ro",
+    tags: ["stoc", "cafenea", "retete", "nir"],
+    relatedFeature: "/features/stock-management",
+    sections: [
+      {
+        heading: "Problema: cafeaua se termină mai repede decât arată vânzările",
+        body: "Scenariul e cunoscut în multe cafenele: comandați cafea boabe săptămânal, iar spre vineri sacul e aproape gol, deși vânzările din POS nu par să justifice consumul. Nimeni nu poate spune dacă diferența vine din reglajul râșniței, din băuturi refăcute, din cafelele oferite personalului sau din vânzări neînregistrate.\n\nArticolul urmărește o singură materie primă, cafeaua, de la recepție până la inventar. Același raționament se aplică laptelui, siropurilor sau paharelor. Toate cifrele sunt **ipoteze de exemplu**, marcate ca atare; înlocuiți-le cu prețurile și rețetele dumneavoastră.",
+      },
+      {
+        heading: "Ipotezele exemplului",
+        body: "- Cafea boabe: **120 lei/kg** fără TVA, cumpărată în pungi de 1 kg\n- Rețeta de cappuccino: **18 g** cafea (dublu espresso), **180 ml** lapte\n- Lapte: **7,50 lei/l** fără TVA\n- Pahar, capac și manșon pentru takeaway: **0,70 lei**\n- Plic de zahăr și paletă: **0,10 lei**\n- Preț de vânzare al cappuccinoului: **15,00 lei fără TVA** (prețul de pe meniu, cu TVA, depinde de cota aplicabilă produsului; verificați-o cu contabilul)\n- Reglaj zilnic al râșniței și shot-uri aruncate la calibrare: **3%** din cafea\n\nDacă folosiți un espresso simplu de 7–9 g, toate calculele de mai jos se schimbă proporțional. Pentru formula generală a costului unei rețete, vedeți [cum calculați costul unei rețete pentru cafenea](/blog/cum-calculezi-costul-unei-retete-cafenea).",
+      },
+      {
+        heading: "Câte cafele ies dintr-un kilogram",
+        body: "În teorie: 1.000 g ÷ 18 g = **55 de porții**.\n\nÎn practică, calibrarea râșniței consumă în exemplul nostru 3%, adică aproximativ 30 g pe kilogram. Rămân circa 970 g utilizabile: 970 ÷ 18 = **53 de porții** vândute dintr-un kilogram.\n\nDiferența pare mică, dar schimbă costul real al fiecărei cafele: kilogramul de 120 lei se împarte la 53 de cafele vândute, nu la 55.",
+      },
+      {
+        heading: "Cât costă, de fapt, un cappuccino",
+        body: "- Cafea: 18 g × 0,12 lei/g = **2,16 lei** (cost teoretic)\n- Lapte: 0,18 l × 7,50 lei/l = **1,35 lei**\n- Pahar, capac, manșon: **0,70 lei**\n- Zahăr și paletă: **0,10 lei**\n- **Cost total: 4,31 lei**\n\nCu prețul de 15,00 lei fără TVA, marja brută este 15,00 − 4,31 = **10,69 lei**, adică **71%**.\n\nDacă includeți și cafeaua pierdută la calibrare, costul cafelei dintr-un cappuccino vândut urcă la 120 ÷ 53 = **2,26 lei**, iar costul total la 4,41 lei. Zece bani pe cafea nu par mult, dar la 1.500 de cafele pe lună înseamnă aproximativ 150 de lei.",
+      },
+      {
+        heading: "Cât ar fi trebuit să consumați într-o săptămână",
+        body: "Să presupunem că POS-ul arată **350 de băuturi** vândute într-o săptămână, toate cu dublu espresso de 18 g (cappuccino, latte, flat white, espresso dublu).\n\n- Consum teoretic din rețete: 350 × 18 g = **6,30 kg**\n- Plus calibrarea de 3%: **aproximativ 6,49 kg**\n\nAcesta este consumul **așteptat**. Îl comparați cu consumul **real**, pe care îl aflați doar dintr-o numărătoare:\n\n- Stoc la începutul săptămânii: 10,0 kg\n- Recepționat de la prăjitorie (NIR): 6,0 kg\n- Numărat la sfârșitul săptămânii: 9,0 kg\n- **Consum real: 10,0 + 6,0 − 9,0 = 7,0 kg**",
+      },
+      {
+        heading: "Diferența: 0,5 kg pe săptămână și cât valorează",
+        body: "7,0 kg real − 6,49 kg așteptat = **aproximativ 0,5 kg** de cafea care nu se regăsește în vânzări. Asta înseamnă circa **28 de cappuccino** pe săptămână.\n\nValoarea depinde de unde vine diferența:\n\n- Dacă e **risipă** (shot-uri refăcute, cafea vărsată), pierdeți costul cafelei: 0,51 kg × 120 lei ≈ **61 lei pe săptămână**, adică aproximativ **265 lei pe lună**.\n- Dacă sunt **cafele date fără să fie înregistrate**, pierdeți prețul lor de vânzare: 28 × 15 lei ≈ **420 lei pe săptămână**, adică aproximativ **1.800 lei pe lună**, fără TVA.\n\nDe aceea nu e suficient să știți că diferența există. Trebuie să aflați de unde vine.",
+      },
+      {
+        heading: "De unde vin, de obicei, diferențele la cafea",
+        body: "- **Rețeta din sistem nu bate cu ce face barista**: rețeta spune 18 g, dar se pun constant 20 g\n- **Calibrarea nu e înregistrată**: cafeaua de reglaj iese din stoc fără să apară nicăieri\n- **Băuturi refăcute** la reclamații sau greșeli de comandă\n- **Cafea pentru personal** sau oferită clienților, fără notă de consum\n- **Erori la recepție**: s-au primit 5 pungi, dar în sistem s-au trecut 6\n- **Vânzări neînregistrate**: cea mai scumpă cauză și cea mai greu de văzut fără o comparație regulată\n\nPentru cum faceți corect numărătoarea și cum interpretați o diferență, vedeți [inventar fizic vs. scriptic](/blog/inventar-fizic-vs-scriptic-diferente).",
+      },
+      {
+        heading: "Recepția și NIR-ul: unde începe totul",
+        body: "Calculul de mai sus funcționează doar dacă intrările sunt corecte. Fiecare livrare de la prăjitorie se înregistrează cu cantitatea efectiv primită și prețul din factură. Dacă pe factură scrie 6 kg, dar ați primit 5, recepția trebuie să arate 5 kg, altfel toate diferențele de după sunt false.\n\nPrețul de la recepție contează și pentru cost: dacă punga de cafea se scumpește de la 120 la 135 lei/kg, costul fiecărui cappuccino crește cu 0,27 lei, iar marja scade fără ca cineva să observe, dacă rețeta nu e legată de prețul de achiziție. Detalii despre document în [cum faceți NIR-ul fără Excel](/blog/cum-faci-nir-in-romania-fara-excel).",
+      },
+      {
+        heading: "De ce Excel-ul devine greu de ținut",
+        body: "Toate cifrele de mai sus se pot calcula într-un tabel. Problema e să le țineți la zi săptămână de săptămână:\n\n- vânzările vin din POS, achizițiile din facturi, rețetele dintr-un alt fișier, iar inventarul de pe o foaie de hârtie\n- un singur produs nou sau o rețetă modificată strică formulele\n- prețul cafelei se schimbă, dar costul din tabel rămâne cel vechi\n- calculul se face, de obicei, la sfârșit de lună, când nu mai știți ce s-a întâmplat într-o zi anume\n\nRezultatul: comparația se face rar sau deloc, iar diferența de 0,5 kg pe săptămână devine 2 kg pe lună fără să o vadă nimeni.",
+      },
+      {
+        heading: "Cum funcționează același flux în FranchiseTech",
+        body: "În planul Pro, pașii de mai sus sunt legați între ei:\n\n1. **Recepția**: din **Achiziții → NIR nou** (sau butonul **Recepție marfă** din pagina Stoc) introduceți cafeaua primită; după emiterea NIR-ului, stocul crește cu cantitatea recepționată.\n2. **Rețeta**: cappuccinoul are rețeta lui, cu 18 g cafea, 180 ml lapte și paharul; costul pe porție și marja se calculează din prețurile de achiziție.\n3. **Vânzarea**: fiecare cappuccino vândut în POS scade automat ingredientele din rețetă.\n4. **Inventarul**: în pagina **Inventar** introduceți cantitatea numărată, vedeți diferența față de stocul din sistem și o aplicați dintr-odată.\n5. **Comparația**: raportul **Consum teoretic vs. real** arată, pe produs, ce ar fi trebuit consumat conform rețetelor și ce a ieșit efectiv din stoc.\n\n![Lista de stoc în FranchiseTech, cu stoc minim, status și butonul Recepție marfă](/marketing/live/stock.png)\n\nFranchiseTech nu numără sacul în locul dumneavoastră și nu vă spune singur de ce lipsește cafeaua. Vă dă cifra așteptată, calculată din vânzări și rețete, ca numărătoarea de vineri să răspundă la o întrebare precisă.",
+      },
+      {
+        heading: "Pe scurt",
+        body: "- Dintr-un kilogram de cafea ies, în exemplu, 53 de cappuccino vândute, nu 55\n- Costul real al unui cappuccino include și cafeaua pierdută la calibrare\n- Consumul așteptat se calculează din vânzări × rețetă; consumul real, din stoc inițial + NIR − stoc numărat\n- O diferență de 0,5 kg pe săptămână costă între aproximativ 265 și 1.800 de lei pe lună, după cauză\n- Comparația are sens doar dacă recepțiile și rețetele sunt corecte\n\nDacă vreți să vedeți exemplul acesta pe produsele și rețetele dumneavoastră, [solicitați o demonstrație gratuită](/demo?from=cum-gestionezi-stocul-intr-o-cafenea-de-la-1-kg-de-cafea-la-profit&cta=blog_body).",
+      },
+    ],
+  },
+  {
     slug: "ce-este-raportul-z-si-cum-il-faci",
     title: "Ce este Raportul Z și cum îl faceți corect",
     description:
@@ -113,7 +169,7 @@ export const blogPosts: BlogPost[] = [
     slug: "cum-faci-nir-in-romania-fara-excel",
     title: "Cum faceți NIR-ul în România fără Excel",
     description:
-      "NIR (Nota de Intrare-Recepție) este documentul standard la primirea mărfii de la furnizori — obligatoriu prin lege în anumite situații, recomandat practic în restul cazurilor. Iată exact când este obligatoriu, ce trebuie să conțină și cum îl generați din programul de gestiune.",
+      "Când este obligatoriu NIR-ul, ce trebuie să conțină și cum îl emiteți direct din programul de gestiune, ca recepția să intre automat în stoc, fără tabele Excel.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["nir", "achizitii", "furnizori", "contabilitate"],
@@ -133,7 +189,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum îl faceți în franchisetech",
-        body: "În franchisetech, NIR-ul se creează din **Stoc → Cumpărături / NIR → NIR nou**.\n\n1. Selectați furnizorul (sau adăugați unul nou)\n2. Introduceți referința facturii\n3. Adăugați produsele primite cu cantitate și preț unitar\n4. Apăsați **Emite NIR** — stocul se actualizează automat\n\nCâtă vreme aveți NIR în stadiul de Ciornă, stocul NU se modifică. Abia după emitere, produsele intră în gestiune și apar în rapoartele de stoc.\n\nDupă emitere, NIR-ul apare în istoricul cumpărăturilor și poate fi exportat pentru contabil (CSV sau inclus în exportul Saga XML).",
+        body: "În franchisetech, NIR-ul se creează din **Achiziții → NIR nou** sau din butonul **Recepție marfă** din pagina Stoc.\n\n1. Selectați furnizorul (sau adăugați unul nou)\n2. Introduceți referința facturii\n3. Adăugați produsele primite cu cantitate și preț unitar\n4. Apăsați **Emite NIR** — stocul se actualizează automat\n\nCâtă vreme aveți NIR în stadiul de Ciornă, stocul NU se modifică. Abia după emitere, produsele intră în gestiune și apar în rapoartele de stoc.\n\nDupă emitere, NIR-ul apare în istoricul cumpărăturilor și poate fi exportat pentru contabil (CSV sau inclus în exportul Saga XML).",
       },
       {
         heading: "NIR vs. factură — care e diferența?",
@@ -169,7 +225,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce faceți cu produsele cu marjă negativă?",
-        body: "Dacă un produs apare cu marjă negativă (roșu în aplicație), costul ingredientelor depășește prețul de vânzare. Soluții:\n\n1. **Verificați prețul ingredientelor** — poate s-a introdus un preț greșit la ultimul NIR\n2. **Revizuiți cantitățile din rețetă** — poate porțiile sunt prea mari\n3. **Creșteți prețul de vânzare** — dacă piața permite\n4. **Înlocuiți ingredientul** — alternative mai ieftine cu calitate similară\n\nUn produs cu marjă negativă vândut în volum mare poate nega profitul întregii zile. Identificați-l devreme din lista de rețete.",
+        body: "Dacă un produs apare cu marjă negativă (roșu în aplicație), costul ingredientelor depășește prețul de vânzare. Soluții:\n\n1. **Verificați prețul ingredientelor** — poate s-a introdus un preț greșit la ultimul NIR\n2. **Revizuiți cantitățile din rețetă** — poate porțiile sunt prea mari\n3. **Creșteți prețul de vânzare** — dacă piața permite\n4. **Înlocuiți ingredientul** — alternative mai ieftine cu calitate similară\n\nUn produs cu marjă negativă vândut în volum mare poate nega profitul întregii zile. Identificați-l devreme din lista de rețete.\n\nPentru un exemplu complet, de la punga de cafea recepționată la diferența găsită la inventar, vedeți [cum gestionați stocul într-o cafenea: de la 1 kg de cafea la profitul real](/blog/cum-gestionezi-stocul-intr-o-cafenea-de-la-1-kg-de-cafea-la-profit). Prețurile corecte ale ingredientelor pornesc de la [NIR-ul emis la fiecare recepție](/blog/cum-faci-nir-in-romania-fara-excel).",
       },
     ],
   },
@@ -209,7 +265,7 @@ export const blogPosts: BlogPost[] = [
     slug: "export-saga-din-program-gestiune-restaurant",
     title: "Cum exportați datele în Saga din programul de gestiune",
     description:
-      "Exportul Saga XML permite transferul automat al datelor de vânzări și NIR din franchisetech în software-ul de contabilitate Saga. Eliminați introducerea manuală și erorile de transcriere.",
+      "Exportul Saga XML trimite NIR-urile și vânzările din franchisetech către Saga C, ca fișiere pe care contabilul le importă direct. Ce se exportă, cum îl faceți și ce trebuie verificat înainte.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["saga", "export-contabil", "contabilitate", "nir"],
@@ -217,15 +273,15 @@ export const blogPosts: BlogPost[] = [
     sections: [
       {
         heading: "Ce este exportul Saga?",
-        body: "Saga este unul dintre cele mai utilizate programe de contabilitate în România pentru IMM-uri și PFA-uri. Contabilii care lucrează cu Saga pot importa date direct în format XML, eliminând necesitatea introducerii manuale a fiecărei facturi sau note contabile.\n\nExportul Saga din franchisetech generează fișiere XML compatibile cu Saga C, Saga W și versiunile recente — formatate exact după specificațiile de import ale softului.",
+        body: "Saga este unul dintre cele mai utilizate programe de contabilitate în România pentru IMM-uri și PFA-uri. Contabilii care lucrează cu Saga pot importa date direct în format XML, eliminând necesitatea introducerii manuale a fiecărei facturi sau note contabile.\n\nExportul Saga din franchisetech generează fișiere XML în formatul de import al **Saga C**. Dacă contabilul dumneavoastră lucrează cu altă variantă de Saga, verificați împreună un import de probă pe o lună înainte să vă bazați pe el.",
       },
       {
         heading: "Ce date se exportă?",
-        body: "franchisetech poate exporta în format Saga:\n\n**NIR (Achiziții):** Toate intrările de mărfuri înregistrate ca NIR emis în perioada selectată — furnizor, produse, cantități, valori, TVA.\n\n**Vânzări:** Totalizatorul vânzărilor pe perioadă, defalcat pe cote TVA — echivalentul datelor din Raportul Z zilnic, agregat lunar.\n\n**Export combinat:** NIR + Vânzări într-un singur fișier, pentru import complet într-o singură operațiune.",
+        body: "franchisetech poate exporta în format Saga:\n\n**NIR (Achiziții):** Toate intrările de mărfuri înregistrate ca NIR emis în perioada selectată — furnizor, produse, cantități, valori, TVA.\n\n**Ieșiri (Vânzări):** Vânzările zilnice pe produs din perioada selectată, care în Saga ajung la ieșiri.\n\nCele două exporturi sunt fișiere separate: unul pentru NIR, unul pentru ieșiri.",
       },
       {
         heading: "Cum faceți exportul pas cu pas",
-        body: "1. Du-vă la **Rapoarte → Export audit & Saga**\n2. Selectați perioada (de obicei lunar, în concordanță cu declarațiile fiscale)\n3. Alegeți tipul de export: NIR, Vânzări sau Combinat\n4. Apăsați **Exportați XML**\n5. Salvați fișierul și trimiteți-l contabilului dumneavoastră\n\nContabilul importă fișierul direct în Saga: **Fișier → Import → Documente externe**. Datele apar automat în jurnalele de cumpărări și vânzări.",
+        body: "1. Du-vă la **Rapoarte → Export audit & Saga**\n2. Selectați perioada (de obicei lunar, în concordanță cu declarațiile fiscale)\n3. În secțiunea **Export Saga XML**, apăsați **NIR (Achiziții)** sau **Ieșiri (Vânzări)**\n4. Salvați fișierul și trimiteți-l contabilului dumneavoastră\n\nContabilul importă fișierul din funcția de import XML a programului Saga. Exportul face parte din pachetul pentru contabil, inclus în planul Pro.",
       },
       {
         heading: "Condiții pentru un export corect",
@@ -233,7 +289,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce câștigă contabilul dumneavoastră?",
-        body: "Un contabil care primește export Saga din franchisetech vs. extrase manuale sau Excel:\n\n- **Eliminarea transcrierilor** — nu mai copiază date dintr-un sistem în altul\n- **Reducerea erorilor** — valorile, TVA-ul și furnizorii sunt preluate automat\n- **Timp mai puțin** — un import de o lună de date durează minute, nu ore\n- **Auditabilitate** — fiecare document importat are referință la sursa din franchisetech\n\nPentru afacerile care lucrează cu contabili externi, exportul Saga devine argumentul prin care explicați de ce programul de gestiune plătit se justifică financiar.",
+        body: "Un contabil care primește export Saga din franchisetech vs. extrase manuale sau Excel:\n\n- **Eliminarea transcrierilor** — nu mai copiază date dintr-un sistem în altul\n- **Reducerea erorilor** — valorile, TVA-ul și furnizorii sunt preluate automat\n- **Mai puține verificări** — cifrele vin din aceleași date folosite la casă și la recepție\n- **Auditabilitate** — fiecare document importat are referință la sursa din franchisetech\n\nPentru afacerile care lucrează cu contabili externi, exportul Saga devine argumentul prin care explicați de ce programul de gestiune plătit se justifică financiar.",
       },
     ],
   },
