@@ -189,7 +189,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum îl faceți în franchisetech",
-        body: "În franchisetech, NIR-ul se creează din **Achiziții → NIR nou** sau din butonul **Recepție marfă** din pagina Stoc.\n\n1. Selectați furnizorul (sau adăugați unul nou)\n2. Introduceți referința facturii\n3. Adăugați produsele primite cu cantitate și preț unitar\n4. Apăsați **Emite NIR** — stocul se actualizează automat\n\nCâtă vreme aveți NIR în stadiul de Ciornă, stocul NU se modifică. Abia după emitere, produsele intră în gestiune și apar în rapoartele de stoc.\n\nDupă emitere, NIR-ul apare în istoricul cumpărăturilor și poate fi exportat pentru contabil (CSV sau inclus în exportul Saga XML).",
+        body: "În franchisetech, NIR-ul se creează din **Achiziții → NIR nou** sau din butonul **Recepție marfă** din pagina Stoc.\n\n1. Selectați furnizorul (sau adăugați unul nou)\n2. Introduceți referința facturii\n3. Adăugați produsele primite cu cantitate și preț unitar\n4. Apăsați **Emite NIR** — stocul se actualizează automat\n\nCâtă vreme aveți NIR în stadiul de Ciornă, stocul NU se modifică. Abia după emitere, produsele intră în gestiune și apar în rapoartele de stoc. Ce se întâmplă mai departe cu marfa recepționată, de la rețetă la inventar, vedeți în [exemplul cu 1 kg de cafea](/blog/cum-gestionezi-stocul-intr-o-cafenea-de-la-1-kg-de-cafea-la-profit).\n\nDupă emitere, NIR-ul apare în istoricul cumpărăturilor și poate fi exportat pentru contabil (CSV sau inclus în exportul Saga XML).",
       },
       {
         heading: "NIR vs. factură — care e diferența?",
@@ -821,7 +821,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum ajută franchisetech",
-        body: "Stocul scriptic se calculează automat din NIR, rețete și vânzări înregistrate prin POS, fără introducere manuală separată. Asta înseamnă că diferența constatată la inventarul fizic arată exact ce nu a fost documentat corect în cursul lunii — un scăzământ uitat, o rețetă cu porții greșite — nu o eroare de calcul a sistemului.\n\nBalanța de stoc vă arată intrările și ieșirile pe fiecare produs, deci investigarea unei diferențe mari pornește direct de la datele deja existente, nu de la zero.",
+        body: "Stocul scriptic se calculează automat din NIR, rețete și vânzări înregistrate prin POS, fără introducere manuală separată. Asta înseamnă că diferența constatată la inventarul fizic arată exact ce nu a fost documentat corect în cursul lunii — un scăzământ uitat, o rețetă cu porții greșite — nu o eroare de calcul a sistemului.\n\nBalanța de stoc vă arată intrările și ieșirile pe fiecare produs, deci investigarea unei diferențe mari pornește direct de la datele deja existente, nu de la zero. Pentru un exemplu complet, cu cifre, vedeți [cum gestionați stocul într-o cafenea: de la 1 kg de cafea la profitul real](/blog/cum-gestionezi-stocul-intr-o-cafenea-de-la-1-kg-de-cafea-la-profit).",
       },
     ],
   },
