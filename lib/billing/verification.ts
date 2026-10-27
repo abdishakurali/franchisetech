@@ -1,6 +1,7 @@
-// Card verification → 15-day trial bookkeeping. Entitlement enforcement is
-// rollout-gated by BILLING_ENFORCE_VERIFIED_TRIAL so existing customer access
-// remains unchanged until production validation is complete. Called from
+// Card verification → 15-day trial bookkeeping. Since 2026-10-27 onboarding
+// starts the no-card trial itself (lib/billing/trial.ts), so for new orgs the
+// guard below finds trial_started_at already set and this is a no-op; it only
+// still starts a trial for an org that predates that change. Called from
 // both the verification success page (authed user) and the Stripe webhook (no
 // session), so the update must stay idempotent: only the call that flips
 // trial_started_at from NULL fires the events.
@@ -9,8 +10,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { trackLoopsEvent, upsertLoopsContact } from "@/lib/loops";
 import { captureServerEvent } from "@/lib/posthog-server";
 import { reportTrialConversion } from "@/lib/analytics/server-conversions";
-
-const TRIAL_DAYS = 15;
+import { TRIAL_DAYS } from "@/lib/billing/trial";
 
 type StartTrialInput = {
   organisationId: string;

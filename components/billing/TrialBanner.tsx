@@ -18,18 +18,18 @@ export function TrialBanner({ subStatus, daysLeft, creditMonths, referral, onRef
 
   if (state === "active" && !subStatus?.cancelAtPeriodEnd) return null;
 
-  // Free is the permanent baseline (trial retired 2026-09) — no expiry, no
-  // day countdown. Falling through to the generic trial branch below would
-  // show a false "X days left" that never counts down, since Free orgs never
-  // have a trialDaysLeft value to begin with.
-  if (state === "free") {
+  // Trial over, no subscription: the till keeps working (not blocked), only
+  // the Pro management features are locked — say exactly that, so owners
+  // don't think selling stopped. Falling through to the generic trial branch
+  // below would show a false "0 days left · Pro access".
+  if (state === "trial_expired") {
     return (
-      <div className="trial-banner flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-blue-100 bg-blue-50 px-4 py-2.5 text-sm">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-slate-700">
-          <span className="font-medium">Free plan · up to 50 products, 1 location</span>
-          <span className="hidden text-slate-300 sm:inline">|</span>
-          <Link href="/app/billing" className="text-blue-700 hover:underline">
-            Upgrade for stock, recipes &amp; more
+      <div className="trial-banner flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-sm">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-amber-900">
+          <span className="font-medium">Trial ended · selling and fiscal receipts still work</span>
+          <span className="hidden text-amber-300 sm:inline">|</span>
+          <Link href="/app/billing" className="text-amber-900 underline hover:text-amber-950">
+            Choose a plan for stock, recipes &amp; accounting reports
           </Link>
           {creditMonths > 0 ? (
             <>

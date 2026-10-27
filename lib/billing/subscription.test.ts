@@ -79,19 +79,23 @@ describe("isStripeSubscriptionRecord", () => {
 });
 
 describe("resolveNoSubscriptionState", () => {
-  it("allows a verified 15-day trial before its deadline", () => {
-    expect(resolveNoSubscriptionState({
-      cardVerifiedAt: "2026-10-01T00:00:00.000Z",
-      trialStartedAt: "2026-10-01T00:00:00.000Z",
-      trialEndsAt: "2099-10-16T00:00:00.000Z",
-    })).toBe("soft_trial");
+  const inDays = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString();
+
+  it("is a Pro trial while trial_ends_at is in the future, no card needed", () => {
+    expect(resolveNoSubscriptionState({ trialEndsAt: inDays(15) })).toBe("soft_trial");
   });
 
-  it("does not grant app access before card verification", () => {
-    expect(resolveNoSubscriptionState({
-      cardVerifiedAt: null,
-      trialStartedAt: null,
-      trialEndsAt: null,
-    })).toBe("none");
+  it("is trial_expired once the trial has ended", () => {
+    expect(resolveNoSubscriptionState({ trialEndsAt: inDays(-1) })).toBe("trial_expired");
+  });
+
+  it("treats an org with no trial dates (pre-trial signup) as an ended trial", () => {
+    expect(resolveNoSubscriptionState({ trialEndsAt: null })).toBe("trial_expired");
+  });
+
+  it("never blocks the till after the trial: selling and fiscal receipts keep working", () => {
+    const status = { state: "trial_expired" } as SubscriptionStatus;
+    expect(isSubscriptionBlockedForApp(status)).toBe(false);
+    expect(isAccessAllowed(status)).toBe(true);
   });
 });

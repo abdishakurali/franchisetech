@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 // only needed by resolveEntitlements, which these tests don't call.
 vi.mock("@/lib/supabase/server", () => ({ createServiceClient: vi.fn() }));
 
-import { FALLBACK_ENTITLEMENTS, resolveStatus } from "./entitlement-resolver";
+import { FALLBACK_ENTITLEMENTS, planEntitlements, resolveNoSubscription, resolveStatus } from "./entitlement-resolver";
 
 const DAY = 86_400_000;
 const inDays = (n: number) => new Date(Date.now() + n * DAY).toISOString();
@@ -58,6 +58,27 @@ describe("FALLBACK_ENTITLEMENTS", () => {
   it("keeps selling and fiscal features", () => {
     for (const key of ["pos.enabled", "fiscal.fiscalnet", "fiscal.z_report", "reports.vat"]) {
       expect(FALLBACK_ENTITLEMENTS).toContain(key);
+    }
+  });
+});
+
+describe("resolveNoSubscription — 15-day trial, then reduced access", () => {
+  it("gives Pro (growth) during the trial", () => {
+    expect(resolveNoSubscription(inDays(10))).toEqual({ status: "trialing", currentPlan: "growth" });
+  });
+
+  it("falls back to the reduced set once the trial ends", () => {
+    expect(resolveNoSubscription(inDays(-1))).toEqual({ status: "expired", currentPlan: null });
+  });
+
+  it("treats an org with no trial dates as an ended trial, not as Free", () => {
+    expect(resolveNoSubscription(null)).toEqual({ status: "expired", currentPlan: null });
+  });
+
+  it("Pro during the trial includes the features the reduced set withholds", () => {
+    const pro = planEntitlements("growth");
+    for (const key of ["recipes.enabled", "inventory.enabled", "purchases.nir", "reports.accountant_pack"] as const) {
+      expect(pro).toContain(key);
     }
   });
 });

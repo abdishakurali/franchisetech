@@ -10,28 +10,28 @@ export const metadata = { title: "Verificare card — franchisetech" };
 const copy = {
   ro: {
     title: "Verificare opțională a cardului",
-    body: "Contul rămâne gratuit pentru totdeauna de la creare, fără card. Dacă alegeți verificarea cardului, aceasta presupune o plată unică de 1 € și nu activează automat un abonament.",
+    body: "Perioada de probă Pro de 15 zile pornește la crearea contului, fără card. Dacă alegeți verificarea cardului, aceasta presupune o plată unică de 1 € și nu activează automat un abonament.",
     points: [
       "Plată unică de 1 € — atât, nimic recurent",
-      "Contul rămâne gratuit de la creare, fără această plată",
+      "Perioada de probă nu depinde de această plată",
       "Poți anula oricând — verificarea nu se transformă automat în abonament",
     ],
     button: "Verifică cardul (1 €)",
     loading: "Se deschide plata securizată…",
-    canceled: "Plata a fost anulată. Poți relua verificarea oricând; planul gratuit nu depinde de ea.",
+    canceled: "Plata a fost anulată. Poți relua verificarea oricând; perioada de probă nu depinde de ea.",
     secure: "Plată securizată prin Stripe",
   },
   en: {
     title: "Optional card verification",
-    body: "Your account stays free forever from creation, without a card. If you choose card verification, it is a one-time €1 charge and does not automatically start a subscription.",
+    body: "Your 15-day Pro trial starts when the account is created, with no card. If you choose card verification, it is a one-time €1 charge and does not automatically start a subscription.",
     points: [
       "One-time €1 charge — that's all, nothing recurring",
-      "Your account stays free from creation, without this payment",
+      "Your trial does not depend on this payment",
       "Cancel anytime — verification does not auto-convert to a subscription",
     ],
     button: "Verify card (€1)",
     loading: "Opening secure payment…",
-    canceled: "Payment was canceled. You can retry anytime; the free plan does not depend on it.",
+    canceled: "Payment was canceled. You can retry anytime; your trial does not depend on it.",
     secure: "Secure payment via Stripe",
   },
 } as const;

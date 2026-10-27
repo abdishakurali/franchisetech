@@ -8,13 +8,13 @@ const STRINGS = {
     title: "Ce vrei să gestionezi cu franchisetech?",
     subtitle: "Activează doar ce ai nevoie acum — poți schimba oricând din Setări.",
     timeEstimate: "~30 secunde",
-    trialBadge: "Gratuit pentru totdeauna · fără card necesar",
+    trialBadge: "15 zile Pro gratuit · fără card",
   },
   en: {
     title: "What do you want to manage with franchisetech?",
     subtitle: "Turn on only what you need now — change it anytime in Settings.",
     timeEstimate: "~30 seconds",
-    trialBadge: "Free forever · no card required",
+    trialBadge: "15-day Pro trial · no card required",
   },
 };
 

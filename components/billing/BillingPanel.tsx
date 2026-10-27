@@ -31,6 +31,7 @@ const ENTITLEMENT_UPGRADE_REASONS = new Set([
 function statusColor(state: string) {
   if (state === "active") return "bg-emerald-50 text-emerald-700 border-emerald-200";
   if (state === "trialing" || state === "soft_trial") return "bg-accent text-foreground border-border";
+  if (state === "trial_expired") return "bg-amber-50 text-amber-800 border-amber-200";
   if (state === "past_due" || state === "past_due_expired" || state === "canceled") return "bg-red-50 text-red-700 border-red-200";
   if (state === "incomplete") return "bg-amber-50 text-amber-700 border-amber-200";
   return "bg-secondary text-muted-foreground border-border";
@@ -55,7 +56,8 @@ function statusLabel(locale: AppLocale, state: string) {
   const ro: Record<string, string> = {
     active: "Activ",
     trialing: "Trial Stripe",
-    soft_trial: "Trial gratuit",
+    soft_trial: "Trial Pro",
+    trial_expired: "Trial încheiat",
     past_due: "Plată eșuată",
     past_due_expired: "Plată restantă",
     canceled: "Anulat",
@@ -66,7 +68,8 @@ function statusLabel(locale: AppLocale, state: string) {
   const en: Record<string, string> = {
     active: "Active",
     trialing: "Stripe trial",
-    soft_trial: "Free trial",
+    soft_trial: "Pro trial",
+    trial_expired: "Trial ended",
     past_due: "Payment failed",
     past_due_expired: "Payment overdue",
     canceled: "Canceled",
@@ -82,7 +85,7 @@ const copy = {
     title: "Billing",
     subtitle: "Manage your plan and payment details.",
     trialExpiredTitle: "Your trial has ended.",
-    trialExpiredDesc: "Choose a plan to continue using FranchiseTech. Your data stays saved.",
+    trialExpiredDesc: "You can keep selling and issuing fiscal receipts. Choose a plan to unlock stock, recipes, accounting reports and new products. Your data stays saved.",
     pastDueTitle: "Payment required.",
     pastDueDesc: "Update your payment method to restore access. POS is locked until billing is fixed.",
     upgradeFeatureTitle: "That feature needs the Pro plan.",
@@ -119,7 +122,7 @@ const copy = {
     title: "Facturare",
     subtitle: "Gestionează planul și detaliile de plată.",
     trialExpiredTitle: "Perioada de probă s-a încheiat.",
-    trialExpiredDesc: "Alegeți un plan ca să continuați să folosiți FranchiseTech. Datele dumneavoastră rămân salvate.",
+    trialExpiredDesc: "Puteți vinde și emite bonuri fiscale în continuare. Alegeți un plan pentru stoc, rețete, rapoarte contabile și produse noi. Datele dumneavoastră rămân salvate.",
     pastDueTitle: "Este necesară plata.",
     pastDueDesc: "Actualizați metoda de plată pentru a redobândi accesul. POS-ul este blocat până la rezolvarea facturării.",
     upgradeFeatureTitle: "Acea funcționalitate necesită planul Pro.",
@@ -190,7 +193,7 @@ async function listPaidInvoices(customerId: string | null, locale: AppLocale): P
 function StatusIcon({ state }: { state: string }) {
   if (state === "active") return <CheckCircle2 className="h-5 w-5 text-emerald-600" />;
   if (state === "past_due" || state === "past_due_expired" || state === "canceled") return <AlertCircle className="h-5 w-5 text-red-600" />;
-  if (state === "incomplete") return <AlertTriangle className="h-5 w-5 text-amber-600" />;
+  if (state === "incomplete" || state === "trial_expired") return <AlertTriangle className="h-5 w-5 text-amber-600" />;
   return <Clock className="h-5 w-5 text-brass" />;
 }
 
@@ -237,13 +240,11 @@ export async function BillingPanel({
   const c = copy[locale];
   const sub = resolvedOrganisationId ? await getSubscriptionStatus(resolvedOrganisationId) : null;
   const configured = isBillingConfigured();
-  // "free" belongs here too: getSubscriptionStatus() always returns a real
-  // object (never null) for a Free-plan org — state: "free", showUpgradeCTA:
-  // true — so `!sub` never catches it. Without "free" in this list, a
-  // Free-plan owner opening /app/billing saw the plan cards disappear
-  // entirely: canChoosePlan below fell through to false, and there was no
-  // other checkout entry point in the app.
-  const needsPlan = !sub || ["none", "free", "incomplete", "canceled"].includes(sub.state);
+  // getSubscriptionStatus() always returns a real object (never null), so
+  // every no-subscription state must be listed: without "trial_expired" (or
+  // the retired "free") an owner opening /app/billing would see no plan cards
+  // and have no checkout entry point in the app.
+  const needsPlan = !sub || ["none", "free", "trial_expired", "incomplete", "canceled"].includes(sub.state);
   const canChoosePlan = needsPlan || sub?.state === "soft_trial" || sub?.state === "trialing";
   // Existing subscribers can't self-serve switch plans yet — /api/billing/checkout
   // rejects a new checkout while a subscription is active (avoids a duplicate),
@@ -313,6 +314,7 @@ export async function BillingPanel({
                 {(sub.state === "soft_trial" || sub.state === "trialing") && (
                   <p className="mt-0.5 text-sm opacity-80">{trialText(locale, sub.trialDaysLeft)} {c.trialContinue}</p>
                 )}
+                {sub.state === "trial_expired" && <p className="mt-0.5 text-sm opacity-80">{c.trialExpiredDesc}</p>}
                 {sub.state === "past_due_expired" && <p className="mt-0.5 text-sm opacity-80">{c.graceEnded}</p>}
                 {sub.state === "active" && sub.periodEnd && (
                   <p className="mt-0.5 text-sm opacity-80">

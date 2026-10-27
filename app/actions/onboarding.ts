@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { ensureReferralCode } from "@/lib/referrals";
 import {
   deriveBusinessProfile,
@@ -16,6 +16,7 @@ import { seedOrgVatRatesIfEmpty } from "@/lib/vat-rates-server";
 import { saveOrgModuleFlags } from "@/lib/org-module-flags";
 import { onboardingStepRoute, type OnboardingStep } from "@/lib/onboarding/steps";
 import type { BillingPlan } from "@/lib/billing/plans";
+import { TRIAL_DAYS, trialWindow } from "@/lib/billing/trial";
 import { upsertLoopsContact } from "@/lib/loops";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEvent, flushPostHog } from "@/lib/posthog-server";
@@ -149,10 +150,9 @@ export async function completePosOnboarding(input: {
   const countryLabel = COUNTRY_LABELS[input.countryCode] ?? COUNTRY_LABELS.OTHER;
   const { code: currencyCode, symbol: currencySymbol } = currencyForCountry(input.countryCode);
 
-  // Trial retired 2026-09: no trial timestamps are set here or anywhere else
-  // in onboarding. Every new org is permanently on the Free plan (see
-  // lib/billing/entitlement-resolver.ts / lib/billing/subscription.ts) until
-  // it subscribes.
+  // The 15-day no-card Pro trial is started further down, once the org row
+  // exists (see lib/billing/trial.ts). After it ends, an org without a
+  // subscription keeps selling but loses the Pro management features.
 
   // ── Accountant-partner referral capture ─────────────────────────────────
   // Resolved BEFORE the consumer referral fallback below, and written to its
@@ -206,6 +206,33 @@ export async function completePosOnboarding(input: {
   if (orgUpdateError) {
     console.error("onboarding_org_update_failed", orgUpdateError.message);
     // Non-critical — workspace exists; continue
+  }
+
+  // ── 15-day no-card Pro trial ───────────────────────────────────────────
+  // Started once per org: the IS NULL guard makes a resumed or retried
+  // onboarding a no-op, so it can never restart or extend the trial. Service
+  // client because the trial columns are server-only (owners must not be able
+  // to set their own trial end).
+  {
+    const service = await createServiceClient();
+    const trial = trialWindow();
+    const { data: trialStarted, error: trialError } = await service
+      .from("organisations")
+      .update({ trial_started_at: trial.startedAt, trial_ends_at: trial.endsAt })
+      .eq("id", orgId)
+      .is("trial_started_at", null)
+      .select("id")
+      .maybeSingle();
+    if (trialError) {
+      console.error("onboarding_trial_start_failed", trialError.message);
+    } else if (trialStarted) {
+      captureServerEvent(
+        user.id,
+        "trial_started",
+        { organisation_id: orgId, trial_days: TRIAL_DAYS, trial_ends_at: trial.endsAt, source: "onboarding" },
+        { organisation: orgId },
+      );
+    }
   }
 
   await saveOrgModuleFlags(supabase, orgId, {
@@ -333,12 +360,12 @@ export async function completePosOnboarding(input: {
   }
 
   // ── Loops: non-blocking ────────────────────────────────────────────────
-  // Trial retired 2026-09 — every new org lands permanently on Free until it
-  // subscribes; no card verification step exists anymore.
+  // Every new org starts the 15-day Pro trial above; "growth" (Pro) is the
+  // plan signup defaults to, so it's the honest default here too.
   if (user.email) {
     void upsertLoopsContact(user.email, {
       firstName: input.userName?.trim(),
-      plan: input.preferredPlan ?? "free",
+      plan: input.preferredPlan ?? "growth",
     }).catch((e: unknown) => console.error("onboarding_loops_contact_failed", e));
   }
   // Fire-and-forget capture; flush before the action's request scope ends.
@@ -353,7 +380,7 @@ export async function completePosOnboarding(input: {
     {
       organisation_id: orgId,
       country_code: input.countryCode,
-      plan: input.preferredPlan ?? "free",
+      plan: input.preferredPlan ?? "growth",
       business_type: input.businessType ?? null,
       account_type: accountType,
     },

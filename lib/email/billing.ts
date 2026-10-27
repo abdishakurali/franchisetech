@@ -35,7 +35,7 @@ function buildBillingHtml(params: BillingReminderEmailParams): { subject: string
     case "trial_expired":
       subject = "Perioada de test franchisetech s-a încheiat";
       headline = "Perioada de test s-a încheiat";
-      body = `Perioada de test pentru <strong>${biz}</strong> s-a încheiat. Alege un abonament pentru a păstra accesul la date și pentru a continua utilizarea franchisetech. Datele tale sunt în siguranță.`;
+      body = `Perioada de test pentru <strong>${biz}</strong> s-a încheiat. Puteți vinde și emite bonuri fiscale în continuare. Alegeți un abonament pentru stoc, rețete, rapoarte contabile și produse noi. Datele dumneavoastră sunt în siguranță.`;
       ctaLabel = "Alege abonamentul →";
       headerColor = "#d97706"; // amber
       break;

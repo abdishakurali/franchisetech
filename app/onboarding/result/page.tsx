@@ -81,7 +81,7 @@ export default async function OnboardingResultPage() {
       title={t.title}
       subtitle={t.subtitle}
       stepOfLabel={onboardingStepOfLabel(currentStepIndex, stepLabels.length, locale)}
-      trialBadge={isRO ? "Gratuit pentru totdeauna · fără card necesar" : "Free forever · no card required"}
+      trialBadge={isRO ? "15 zile Pro gratuit · fără card" : "15-day Pro trial · no card required"}
     >
       <div className="space-y-6">
         {lastSale && (

@@ -1,10 +1,12 @@
 import { cache } from "react";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { isTrialActive } from "@/lib/billing/trial";
 
 export type SubState =
   | "trialing"           // Stripe trial active (a Stripe-native trial on the subscription itself)
-  | "soft_trial"         // Retired 2026-09 with the trial-to-Free pricing restructure — never produced anymore, kept for type compatibility with existing comparisons
-  | "free"               // No Stripe sub — permanent Free plan (replaces the old time-limited soft trial)
+  | "soft_trial"         // No Stripe sub, inside the 15-day no-card Pro trial onboarding starts (lib/billing/trial.ts)
+  | "trial_expired"      // No Stripe sub, trial over: can still sell and issue fiscal receipts, Pro features locked until they pay
+  | "free"               // Retired 2026-10-27 (permanent Free plan) — never produced anymore, kept for type compatibility
   | "active"             // Paid and current
   | "past_due"           // Payment failed, within grace period (see GRACE_PERIOD_DAYS)
   | "past_due_expired"   // Grace period elapsed — app access blocked until payment succeeds
@@ -66,13 +68,13 @@ export function isStripeSubscriptionRecord(row: { stripe_subscription_id: string
   return Boolean(row.stripe_subscription_id);
 }
 
-export function resolveNoSubscriptionState(input: {
-  cardVerifiedAt: string | null;
-  trialStartedAt: string | null;
-  trialEndsAt: string | null;
-}): SubState {
-  if (!input.cardVerifiedAt || !input.trialStartedAt || !input.trialEndsAt) return "none";
-  return new Date(input.trialEndsAt) > new Date() ? "soft_trial" : "none";
+/**
+ * No subscription row. An org with no trial dates (created before the trial
+ * existed) counts as an ended trial, never as blocked: selling and fiscal
+ * receipts must keep working (see entitlement-resolver resolveNoSubscription).
+ */
+export function resolveNoSubscriptionState(input: { trialEndsAt: string | null }): SubState {
+  return isTrialActive(input.trialEndsAt) ? "soft_trial" : "trial_expired";
 }
 
 /**
@@ -84,7 +86,8 @@ export function isAccessAllowed(sub: SubscriptionStatus): boolean {
     sub.state === "active" ||
     sub.state === "trialing" ||
     sub.state === "soft_trial" ||
-    sub.state === "free" ||
+    sub.state === "trial_expired" || // reduced, not blocked: selling stays open
+    sub.state === "free" ||          // retired, never produced; kept so old rows can't lock a till
     sub.state === "past_due" // within grace period — still allowed
     // past_due_expired is NOT allowed — grace period (see GRACE_PERIOD_DAYS in
     // lib/billing/stripe-sync.ts) has elapsed with no successful payment.
@@ -113,7 +116,8 @@ function humanLabel(
 ): string {
   switch (state) {
     case "trialing":          return `Stripe trial — ${days ?? "?"} day${days === 1 ? "" : "s"} left`;
-    case "soft_trial":        return `Free trial — ${days ?? "?"} day${days === 1 ? "" : "s"} left`;
+    case "soft_trial":        return `Pro trial — ${days ?? "?"} day${days === 1 ? "" : "s"} left`;
+    case "trial_expired":     return "Trial ended — choose a plan";
     case "free":              return "Free plan";
     case "active":            return cancelAtEnd
                                 ? `${plan ?? "Plan"} · cancels at period end`
@@ -155,23 +159,17 @@ export const getSubscriptionStatus = cache(async function getSubscriptionStatus(
   const stripeCustomerId = sub?.stripe_customer_id ?? org?.stripe_customer_id ?? null;
 
   if (!sub) {
-    // Preserve current customer access until the restored trial gate is
-    // explicitly enabled after production validation.
-    const enforceVerifiedTrial = process.env.BILLING_ENFORCE_VERIFIED_TRIAL === "true";
-    const trialState = resolveNoSubscriptionState({
-      cardVerifiedAt: org?.card_verified_at ?? null,
-      trialStartedAt: org?.trial_started_at ?? null,
-      trialEndsAt: org?.trial_ends_at ?? null,
-    });
-    const state: SubState = enforceVerifiedTrial ? trialState : "free";
-    const trialEndsAt = trialState === "soft_trial" ? org?.trial_ends_at ?? null : null;
-    const trialDaysLeft = daysUntil(trialEndsAt);
+    // 15-day no-card Pro trial (lib/billing/trial.ts), then trial_expired.
+    // Must agree with entitlement-resolver resolveNoSubscription.
+    const state = resolveNoSubscriptionState({ trialEndsAt: org?.trial_ends_at ?? null });
+    const trialEndsAt = org?.trial_ends_at ?? null;
+    const trialDaysLeft = state === "soft_trial" ? daysUntil(trialEndsAt) : null;
     return {
       state,
-      plan: state === "free" ? "free" : null,
-      label: humanLabel(state, state === "free" ? "free" : null, trialDaysLeft, false, null),
-      urgent: false,
-      showUpgradeCTA: state !== "soft_trial",
+      plan: null,
+      label: humanLabel(state, null, trialDaysLeft, false, null),
+      urgent: state === "trial_expired" || (trialDaysLeft !== null && trialDaysLeft <= 3),
+      showUpgradeCTA: true,
       trialEndsAt,
       stripeTrialEnd: null,
       periodEnd: null,

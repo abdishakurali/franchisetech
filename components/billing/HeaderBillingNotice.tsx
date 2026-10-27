@@ -29,10 +29,9 @@ const chipClass =
 export function HeaderBillingNotice({ subStatus, daysLeft, t, className }: Props) {
   const state = subStatus?.state;
 
-  // Free is the permanent baseline (trial retired 2026-09), not a countdown
-  // state — no urgency chip, same as "active". Both still get a quiet plan
-  // badge so there's always somewhere in the header to see the current plan
-  // and upgrade, rather than only surfacing that during urgent states.
+  // Active plans get a quiet plan badge so there's always somewhere in the
+  // header to see the current plan and upgrade, not only in urgent states.
+  // ("free" is retired since 2026-10-27 and no longer produced.)
   if ((state === "active" && !subStatus?.cancelAtPeriodEnd) || state === "free") {
     const planLabel = effectivePlanLabel((subStatus?.plan ?? "free") as EffectiveBillingPlan);
     const showUpgrade = Boolean(subStatus?.plan && UPGRADABLE_PLANS.has(subStatus.plan));
@@ -77,6 +76,18 @@ export function HeaderBillingNotice({ subStatus, daysLeft, t, className }: Props
         <span className="truncate">
           {graceDays != null ? t.shell.billingGraceDays(graceDays) : t.shell.billingUpdateCard}
         </span>
+      </Link>
+    );
+  }
+
+  if (state === "trial_expired") {
+    return (
+      <Link
+        href="/app/billing"
+        className={cn(chipClass, "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100", className)}
+      >
+        <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        <span className="truncate">{t.shell.billingTrialEnded}</span>
       </Link>
     );
   }

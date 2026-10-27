@@ -147,7 +147,7 @@ export function getPlanFeatureCategories(
         : []),
       {
         title: "Included",
-        items: ["Owner and staff roles", "Unlimited staff", "1 location", "No card required, free forever"],
+        items: ["Owner and staff roles", "Unlimited staff", "1 location", "Retired plan — no longer offered"],
       },
     ];
   }

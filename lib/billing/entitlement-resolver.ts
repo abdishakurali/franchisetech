@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { normalizePlan as _normalizePlan, type PlanCode as _PlanCode } from "@/lib/billing/plan-codes";
 import { planEntitlements, type EntitlementKey } from "@/lib/billing/entitlement-catalog";
+import { isTrialActive } from "@/lib/billing/trial";
 
 export type PlanCode = _PlanCode;
 export type { EntitlementKey } from "@/lib/billing/entitlement-catalog";
@@ -176,6 +177,19 @@ function future(iso: string | null | undefined): boolean {
   return Boolean(iso && new Date(iso).getTime() > Date.now());
 }
 
+/**
+ * No subscription row (Free retired 2026-10-27): Pro during the 15-day trial
+ * onboarding starts, then "expired" — the same FALLBACK_ENTITLEMENTS a lapsed
+ * paid org gets (selling, fiscal, daily reports; no stock/recipe/accounting
+ * management, no new products). An org with no trial dates at all (created
+ * before the trial existed) is treated as an ended trial.
+ */
+export function resolveNoSubscription(trialEndsAt: string | null): { status: EntitlementStatus; currentPlan: PlanCode | null } {
+  return isTrialActive(trialEndsAt)
+    ? { status: "trialing", currentPlan: "growth" }
+    : { status: "expired", currentPlan: null };
+}
+
 export function resolveStatus(rawStatus: string | null | undefined, currentPeriodEnd: string | null | undefined, graceEnd: string | null | undefined): EntitlementStatus {
   if (rawStatus === "trialing") return "trialing";
   if (rawStatus === "active") return "active";
@@ -237,7 +251,7 @@ export async function resolveEntitlements(orgId: string): Promise<ResolvedEntitl
   const [{ data: org }, { data: sub }] = await Promise.all([
     service
       .from("organisations")
-      .select("multi_site_ops_enabled")
+      .select("multi_site_ops_enabled, trial_ends_at")
       .eq("id", orgId)
       .maybeSingle(),
     service
@@ -250,13 +264,12 @@ export async function resolveEntitlements(orgId: string): Promise<ResolvedEntitl
       .maybeSingle(),
   ]);
 
-  // No subscription row = permanent Free plan (trial retired 2026-09 — see
-  // lib/billing/subscription.ts). Never "trialing"/expired-by-date anymore;
-  // Free simply never expires.
-  const status: EntitlementStatus = sub
-    ? resolveStatus(sub.status ?? null, sub.current_period_end ?? null, sub.grace_period_ends_at ?? null)
-    : "active";
-  const currentPlan: PlanCode | null = sub ? normalizePlan(sub.plan ?? null) : "free";
+  const { status, currentPlan } = sub
+    ? {
+        status: resolveStatus(sub.status ?? null, sub.current_period_end ?? null, sub.grace_period_ends_at ?? null),
+        currentPlan: normalizePlan(sub.plan ?? null),
+      }
+    : resolveNoSubscription(org?.trial_ends_at ?? null);
   const fallback = status === "expired" || status === "unpaid" || status === "canceled";
   const entitlements = new Set<EntitlementKey>(fallback ? FALLBACK_ENTITLEMENTS : planEntitlements(currentPlan));
   const limits: Record<EntitlementLimitKey, number | "unlimited"> = {

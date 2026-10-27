@@ -50,7 +50,7 @@ const STEPS = [
   {
     n: "1",
     title: "Clientul se înscrie pe franchisetech",
-    body: "Proprietarul HoReCa își creează cont — planul Free e permanent gratuit, fără card. Dvs. primiți linkul de recomandare, distinct de contul clientului.",
+    body: "Proprietarul HoReCa își creează cont și primește 15 zile de probă Pro, fără card. Dvs. primiți linkul de recomandare, distinct de contul clientului.",
   },
   {
     n: "2",
