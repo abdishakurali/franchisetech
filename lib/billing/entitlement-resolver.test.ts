@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 // only needed by resolveEntitlements, which these tests don't call.
 vi.mock("@/lib/supabase/server", () => ({ createServiceClient: vi.fn() }));
 
-import { FALLBACK_ENTITLEMENTS, planEntitlements, resolveNoSubscription, resolveStatus } from "./entitlement-resolver";
+import { FALLBACK_ENTITLEMENTS, planEntitlements, resolveNoSubscription, resolveStatus, usesFallback } from "./entitlement-resolver";
 
 const DAY = 86_400_000;
 const inDays = (n: number) => new Date(Date.now() + n * DAY).toISOString();
@@ -80,5 +80,33 @@ describe("resolveNoSubscription — 15-day trial, then reduced access", () => {
     for (const key of ["recipes.enabled", "inventory.enabled", "purchases.nir", "reports.accountant_pack"] as const) {
       expect(pro).toContain(key);
     }
+  });
+});
+
+describe("lapsed paid plans keep selling with reduced access", () => {
+  const lapsed: Array<[string, string | null, string | null]> = [
+    ["canceled", inDays(-10), inDays(-1)],  // canceled, grace over
+    ["past_due", inDays(-10), inDays(-1)],  // past_due, grace over
+    ["unpaid", inDays(-10), null],
+  ];
+
+  for (const [raw, periodEnd, graceEnd] of lapsed) {
+    it(`${raw} after grace uses the reduced set, which still sells and issues fiscal receipts`, () => {
+      const status = resolveStatus(raw, periodEnd, graceEnd);
+      expect(usesFallback(status)).toBe(true);
+      for (const key of ["pos.enabled", "pos.till_sessions", "fiscal.fiscalnet", "fiscal.z_report", "recipes.stock_depletion"]) {
+        expect(FALLBACK_ENTITLEMENTS).toContain(key);
+      }
+    });
+  }
+
+  it("an ended trial uses the same reduced set", () => {
+    expect(usesFallback(resolveNoSubscription(inDays(-1)).status)).toBe(true);
+  });
+
+  it("active, trialing and in-grace states keep the full plan", () => {
+    expect(usesFallback(resolveStatus("active", null, null))).toBe(false);
+    expect(usesFallback(resolveStatus("canceled", inDays(-1), inDays(3)))).toBe(false);
+    expect(usesFallback(resolveNoSubscription(inDays(5)).status)).toBe(false);
   });
 });

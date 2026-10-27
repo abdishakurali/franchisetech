@@ -190,6 +190,11 @@ export function resolveNoSubscription(trialEndsAt: string | null): { status: Ent
     : { status: "expired", currentPlan: null };
 }
 
+/** Ended trial or lapsed paid plan: reduced FALLBACK_ENTITLEMENTS (still sells), never a locked till. */
+export function usesFallback(status: EntitlementStatus): boolean {
+  return status === "expired" || status === "unpaid" || status === "canceled";
+}
+
 export function resolveStatus(rawStatus: string | null | undefined, currentPeriodEnd: string | null | undefined, graceEnd: string | null | undefined): EntitlementStatus {
   if (rawStatus === "trialing") return "trialing";
   if (rawStatus === "active") return "active";
@@ -270,7 +275,7 @@ export async function resolveEntitlements(orgId: string): Promise<ResolvedEntitl
         currentPlan: normalizePlan(sub.plan ?? null),
       }
     : resolveNoSubscription(org?.trial_ends_at ?? null);
-  const fallback = status === "expired" || status === "unpaid" || status === "canceled";
+  const fallback = usesFallback(status);
   const entitlements = new Set<EntitlementKey>(fallback ? FALLBACK_ENTITLEMENTS : planEntitlements(currentPlan));
   const limits: Record<EntitlementLimitKey, number | "unlimited"> = {
     "kitchen.screen_limit": fallback ? 0 : kitchenScreenLimitForPlan(currentPlan),

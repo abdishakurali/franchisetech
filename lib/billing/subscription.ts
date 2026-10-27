@@ -9,7 +9,7 @@ export type SubState =
   | "free"               // Retired 2026-10-27 (permanent Free plan) — never produced anymore, kept for type compatibility
   | "active"             // Paid and current
   | "past_due"           // Payment failed, within grace period (see GRACE_PERIOD_DAYS)
-  | "past_due_expired"   // Grace period elapsed — app access blocked until payment succeeds
+  | "past_due_expired"   // Grace period elapsed — reduced access (selling stays open) until payment succeeds
   | "canceled"           // Subscription ended
   | "incomplete"         // Checkout started but not completed
   | "none";              // No trial, no subscription
@@ -86,26 +86,17 @@ export function isAccessAllowed(sub: SubscriptionStatus): boolean {
     sub.state === "active" ||
     sub.state === "trialing" ||
     sub.state === "soft_trial" ||
-    sub.state === "trial_expired" || // reduced, not blocked: selling stays open
-    sub.state === "free" ||          // retired, never produced; kept so old rows can't lock a till
+    sub.state === "free" ||          // retired, never produced
     sub.state === "past_due" // within grace period — still allowed
     // past_due_expired is NOT allowed — grace period (see GRACE_PERIOD_DAYS in
     // lib/billing/stripe-sync.ts) has elapsed with no successful payment.
   );
 }
 
-/**
- * Returns true when the main app must be blocked and only legal fallback routes
- * should remain available.
- */
-export function isSubscriptionBlockedForApp(sub: SubscriptionStatus | null | undefined): boolean {
-  return (
-    sub?.state === "none" ||
-    sub?.state === "canceled" ||
-    sub?.state === "incomplete" ||
-    sub?.state === "past_due_expired"
-  );
-}
+// There is deliberately no "app blocked" check (removed 2026-10-27, owner
+// decision): no subscription state locks the till. An ended trial or a lapsed
+// paid plan keeps selling and issuing fiscal receipts; the entitlement
+// resolver's FALLBACK_ENTITLEMENTS takes away only the Pro features.
 
 function humanLabel(
   state: SubState,
@@ -125,7 +116,7 @@ function humanLabel(
     case "past_due":          return graceDaysLeft !== null
                                 ? `Payment failed — ${graceDaysLeft} day${graceDaysLeft === 1 ? "" : "s"} to update payment`
                                 : "Payment failed — update your card to continue";
-    case "past_due_expired":  return "Payment overdue — update your card to restore access";
+    case "past_due_expired":  return "Payment overdue — update your card to restore Pro features";
     case "canceled":          return "Subscription ended";
     case "incomplete":        return "Checkout not completed";
     default:                  return "No active plan";

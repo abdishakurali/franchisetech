@@ -9,7 +9,7 @@ import { AppI18nProvider } from "@/lib/app-i18n-context";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { PostHogIdentify } from "@/components/app/PostHogIdentify";
 import { buildReferralLink } from "@/lib/referrals";
-import { getSubscriptionStatus, isSubscriptionBlockedForApp } from "@/lib/billing/subscription";
+import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { listAccessibleSites, getActiveSiteId } from "@/lib/site-context";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { isModuleNavVisible } from "@/lib/business-modules";
@@ -78,15 +78,10 @@ export default async function AppLayout({
   const [subStatus, prefetchedSites, prefetchedModuleFlags] =
     await Promise.all([subscriptionPromise, sitesPromise, moduleFlagsPromise]);
 
-  const subscriptionBlocked = isSubscriptionBlockedForApp(subStatus);
-
-  // New signups get a fully unrestricted 5-day trial (see
-  // lib/billing/subscription.ts's created_at-based fallback) — no forced
-  // card-verification redirect mid-trial, regardless of Z-report views or
-  // sale count. Once the 5 days are up, getSubscriptionStatus resolves to a
-  // blocked state and the paywall in components/app/AppShell.tsx takes over.
-
-  const orgReady = Boolean(activeOrg?.id && !subscriptionBlocked);
+  // No subscription state locks the app (owner decision 2026-10-27): an
+  // ended trial or a lapsed paid plan keeps selling and fiscal receipts and
+  // only loses the Pro features, which the entitlement resolver enforces.
+  const orgReady = Boolean(activeOrg?.id);
   const needsModuleGuard =
     orgReady && pathname.startsWith("/app/") && !pathname.startsWith("/app/settings") && !pathname.startsWith("/app/billing");
 

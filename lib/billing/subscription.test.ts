@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isAccessAllowed, isStripeSubscriptionRecord, isSubscriptionBlockedForApp, resolveNoSubscriptionState, resolveSubscriptionState, type SubState, type SubscriptionStatus } from "./subscription";
+import { isAccessAllowed, isStripeSubscriptionRecord, resolveNoSubscriptionState, resolveSubscriptionState, type SubState, type SubscriptionStatus } from "./subscription";
 
 function statusFor(state: SubState): SubscriptionStatus {
   return {
@@ -21,32 +21,27 @@ function statusFor(state: SubState): SubscriptionStatus {
   };
 }
 
-describe("isAccessAllowed / isSubscriptionBlockedForApp", () => {
-  const allowedStates: SubState[] = ["active", "trialing", "soft_trial", "free", "past_due"];
-  const blockedStates: SubState[] = ["none", "canceled", "incomplete", "past_due_expired"];
+describe("isAccessAllowed (full, Pro-level access)", () => {
+  const fullStates: SubState[] = ["active", "trialing", "soft_trial", "free", "past_due"];
+  const reducedStates: SubState[] = ["none", "trial_expired", "canceled", "incomplete", "past_due_expired"];
 
-  for (const state of allowedStates) {
-    it(`allows access for "${state}"`, () => {
+  for (const state of fullStates) {
+    it(`gives full access for "${state}"`, () => {
       expect(isAccessAllowed(statusFor(state))).toBe(true);
-      expect(isSubscriptionBlockedForApp(statusFor(state))).toBe(false);
     });
   }
 
-  for (const state of blockedStates) {
-    it(`blocks access for "${state}"`, () => {
+  // Reduced, never locked: these orgs keep selling and fiscal receipts via
+  // FALLBACK_ENTITLEMENTS (see entitlement-resolver.test.ts).
+  for (const state of reducedStates) {
+    it(`gives only reduced access for "${state}"`, () => {
       expect(isAccessAllowed(statusFor(state))).toBe(false);
-      expect(isSubscriptionBlockedForApp(statusFor(state))).toBe(true);
     });
   }
 
   it("past_due (within grace) and past_due_expired (grace elapsed) resolve to opposite access decisions", () => {
     expect(isAccessAllowed(statusFor("past_due"))).toBe(true);
     expect(isAccessAllowed(statusFor("past_due_expired"))).toBe(false);
-  });
-
-  it("treats a null/undefined status as blocked, not allowed by default", () => {
-    expect(isSubscriptionBlockedForApp(null)).toBe(false);
-    expect(isSubscriptionBlockedForApp(undefined)).toBe(false);
   });
 });
 
@@ -93,9 +88,7 @@ describe("resolveNoSubscriptionState", () => {
     expect(resolveNoSubscriptionState({ trialEndsAt: null })).toBe("trial_expired");
   });
 
-  it("never blocks the till after the trial: selling and fiscal receipts keep working", () => {
-    const status = { state: "trial_expired" } as SubscriptionStatus;
-    expect(isSubscriptionBlockedForApp(status)).toBe(false);
-    expect(isAccessAllowed(status)).toBe(true);
+  it("an ended trial has reduced, not full, access", () => {
+    expect(isAccessAllowed({ state: "trial_expired" } as SubscriptionStatus)).toBe(false);
   });
 });

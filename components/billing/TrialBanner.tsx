@@ -53,7 +53,7 @@ export function TrialBanner({ subStatus, daysLeft, creditMonths, referral, onRef
       <div className="flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-red-300 bg-red-100 px-4 py-2.5 text-sm">
         <div className="flex items-center gap-2 text-red-800">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="font-medium">Payment overdue — POS is locked until billing is updated.</span>
+          <span className="font-medium">Payment overdue — selling still works; Pro features are locked until billing is updated.</span>
         </div>
         <Link href="/app/billing">
           <Button size="sm" variant="destructive" className="shrink-0">
@@ -90,7 +90,7 @@ export function TrialBanner({ subStatus, daysLeft, creditMonths, referral, onRef
       <div className="flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-2.5 text-sm">
         <div className="flex items-center gap-2 text-red-700">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span className="font-medium">Your subscription has ended. Resubscribe to continue.</span>
+          <span className="font-medium">Your subscription has ended — selling still works; resubscribe for stock, recipes &amp; accounting reports.</span>
         </div>
         <Link href="/app/billing">
           <Button size="sm" variant="destructive" className="shrink-0">

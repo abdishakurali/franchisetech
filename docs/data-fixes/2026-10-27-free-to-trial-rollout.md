@@ -64,8 +64,10 @@ To give it only to the real prospect, add `and o.name = 'ARIESUL AGROLACT SRL'` 
 - The optional €1 card-verification page still works, but no longer starts a trial for new orgs (onboarding
   already did); nothing in the app links to it.
 
-## Not changed
+## No state locks the till
 
-Paid subscriptions that end (`canceled` after the grace window, or `past_due_expired`) still **lock the POS**
-(`isSubscriptionBlockedForApp`), unlike an ended trial. Whether a lapsed paying customer should also keep
-selling is a separate decision.
+Owner decision 2026-10-27 (follow-up commit): paid subscriptions that lapse (`canceled` after the grace
+window, `past_due_expired`, `unpaid`) get the same reduced access as an ended trial. The POS lock screen, the
+app-wide paywall overlay and `isSubscriptionBlockedForApp` are removed. Dolce Nera, if it has not paid by
+31 Oct, keeps selling and issuing fiscal receipts (and, with c804ae1, depleting stock) but loses stock, recipe
+and accounting management until it pays.

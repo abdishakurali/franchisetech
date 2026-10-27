@@ -43,7 +43,7 @@ function buildBillingHtml(params: BillingReminderEmailParams): { subject: string
     case "past_due_grace":
       subject = `Plata nu a reușit — actualizează metoda de plată`;
       headline = "Plata nu a reușit";
-      body = `Cea mai recentă plată pentru <strong>${biz}</strong> nu a fost procesată. Mai ai <strong>${params.graceDaysLeft ?? 3} zile</strong> pentru a actualiza metoda de plată înainte de restricționarea accesului.`;
+      body = `Cea mai recentă plată pentru <strong>${biz}</strong> nu a fost procesată. Mai aveți <strong>${params.graceDaysLeft ?? 5} zile</strong> pentru a actualiza metoda de plată. După aceea puteți vinde și emite bonuri fiscale în continuare, dar stocul, rețetele, rapoartele contabile și produsele noi se blochează.`;
       ctaLabel = "Actualizează plata →";
       headerColor = "#dc2626"; // red
       break;
@@ -51,7 +51,7 @@ function buildBillingHtml(params: BillingReminderEmailParams): { subject: string
     case "past_due_final":
       subject = "Acces franchisetech restricționat — plata este necesară";
       headline = "Acces restricționat";
-      body = `Perioada de grație pentru <strong>${biz}</strong> s-a încheiat. Actualizează metoda de plată pentru a restabili imediat accesul complet.`;
+      body = `Perioada de grație pentru <strong>${biz}</strong> s-a încheiat. Vânzarea și bonurile fiscale funcționează în continuare; actualizați metoda de plată pentru a redobândi imediat stocul, rețetele, rapoartele contabile și produsele noi.`;
       ctaLabel = "Restabilește accesul →";
       headerColor = "#991b1b"; // dark red
       break;

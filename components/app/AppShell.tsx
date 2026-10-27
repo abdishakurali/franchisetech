@@ -3,7 +3,7 @@
 import { useState, useEffect, useLayoutEffect, useMemo, startTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import {
   LayoutDashboard, Package, BarChart3,
@@ -67,29 +67,6 @@ type NavItem = {
   icon: React.ComponentType<{ className?: string }>;
   exact: boolean;
 };
-
-function isLegalFallbackRoute(pathname: string, tab: string | null): boolean {
-  return (
-    pathname.startsWith("/app/billing") ||
-    // Billing itself lives at /app/settings?tab=billing (see app/app/billing/page.tsx,
-    // a redirect shim) — pathname alone can't distinguish it from any other settings
-    // tab, so the tab query param has to be checked too. Without this, a blocked owner
-    // can never reach the one page that lets them pay.
-    (pathname.startsWith("/app/settings") && tab === "billing") ||
-    pathname.startsWith("/app/transactions") ||
-    pathname.startsWith("/app/reports/z-report") ||
-    pathname.startsWith("/app/reports/vat")
-  );
-}
-
-function isSubscriptionBlockedForClient(subStatus?: SubscriptionStatus): boolean {
-  return (
-    subStatus?.state === "none" ||
-    subStatus?.state === "canceled" ||
-    subStatus?.state === "incomplete" ||
-    subStatus?.state === "past_due_expired"
-  );
-}
 
 /**
  * The full, unrestricted nav. Role-based restriction (cashier/kitchen,
@@ -402,10 +379,9 @@ function AppHeader({
 
 export function AppShell({ user, profile, activeOrg, userRole, setupComplete = false, moduleVisibility, trialDaysLeft = 15, referral, subStatus, accessibleSites = [], activeSiteId = null, children }: AppShellProps) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createClient();
-  const { t, locale } = useAppI18n();
+  const { t } = useAppI18n();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [referralOpen, setReferralOpen] = useState(false);
   const [accountantOpen, setAccountantOpen] = useState(false);
@@ -430,7 +406,6 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
   const initials = (profile?.full_name ?? user.email ?? "?")
     .split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   const daysLeft = trialDaysLeft;
-  const subscriptionOverlayActive = isSubscriptionBlockedForClient(subStatus) && !isLegalFallbackRoute(pathname, searchParams.get("tab"));
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -438,30 +413,9 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
     router.refresh();
   };
 
-  const billingReason = subStatus?.state === "past_due_expired" ? "past_due_expired" : "trial_expired";
-  const overlayCopy = locale === "ro"
-    ? {
-        eyebrow: subStatus?.state === "past_due_expired" ? "Plată necesară" : "Trial expirat",
-        title: "Plătește ca să continui",
-        body: "Accesul la POS este blocat până când plata este actualizată. Datele tale rămân salvate.",
-        pay: "Plătește acum",
-      }
-    : {
-        eyebrow: subStatus?.state === "past_due_expired" ? "Payment required" : "Trial expired",
-        title: "Pay to continue",
-        body: "POS access is blocked until payment is updated. Your data remains saved.",
-        pay: "Pay now",
-      };
-
   return (
     <div className={cn("app-shell app-shell-h relative flex flex-col overflow-hidden", isPosRoute ? "bg-card" : "bg-background")}>
-      <div
-        className={cn(
-          "contents",
-          subscriptionOverlayActive && "pointer-events-none select-none blur-sm opacity-20",
-        )}
-        aria-hidden={subscriptionOverlayActive}
-      >
+      <div className="contents">
       {showAppNav && (
         <AppHeader
           pathname={pathname}
@@ -525,27 +479,6 @@ export function AppShell({ user, profile, activeOrg, userRole, setupComplete = f
       </main>
       </div>
 
-      {subscriptionOverlayActive && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 px-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-sm rounded-md border border-border bg-card p-6 text-center shadow-xl">
-            <p className="text-xs font-semibold uppercase tracking-wide text-attention">
-              {overlayCopy.eyebrow}
-            </p>
-            <h2 className="mt-2 text-xl font-semibold text-foreground">
-              {overlayCopy.title}
-            </h2>
-            <p className="mt-2 text-sm text-mid">
-              {overlayCopy.body}
-            </p>
-            <Link
-              href={`/app/billing?reason=${billingReason}`}
-              className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-paper transition-colors hover:bg-ink/90"
-            >
-              {overlayCopy.pay}
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

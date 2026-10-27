@@ -14,12 +14,11 @@ import { PageHint } from "@/components/app/PageHint";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  AlertTriangle, ReceiptText, RefreshCcw, LayoutDashboard, Store, Calendar, Banknote, CreditCard,
+  ReceiptText, RefreshCcw, LayoutDashboard, Store, Calendar, Banknote, CreditCard,
 } from "lucide-react";
 import { VAT_RATE_COLUMNS, mapVatRateRows } from "@/lib/vat-rates-server";
 import { getDefaultVatRateValue } from "@/lib/vat-rates";
 import { PRODUCT_LIST_WITH_POS_SELECT } from "@/lib/supabase/product-selects";
-import { getSubscriptionStatus, isSubscriptionBlockedForApp } from "@/lib/billing/subscription";
 import { WelcomeBanner } from "@/components/app/WelcomeBanner";
 import { getTabWithTable, getTables, getFloorSections } from "@/app/actions/table-service";
 import { PosTableFloor } from "@/components/app/PosTableFloor";
@@ -81,54 +80,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       .limit(1)
       .maybeSingle(),
   ]);
-  const [{ locale, t }, subscriptionStatus] = await Promise.all([
-    getAppLocaleAndText(countryCode, profileLocale),
-    getSubscriptionStatus(orgId).catch(() => null),
-  ]);
-  const subscriptionBlocked = isSubscriptionBlockedForApp(subscriptionStatus);
-  const billingReason = subscriptionStatus?.state === "past_due_expired" ? "past_due_expired" : "trial_expired";
-  if (subscriptionBlocked) {
-    const copy = locale === "ro"
-      ? {
-          eyebrow: subscriptionStatus?.state === "past_due_expired" ? "Plată necesară" : "Trial expirat",
-          title: "POS blocat până la plată",
-          body: "Nu se pot deschide sesiuni, crea comenzi sau încasa vânzări până când plata este actualizată. Datele tale rămân salvate.",
-          cta: "Plătește acum",
-        }
-      : {
-          eyebrow: subscriptionStatus?.state === "past_due_expired" ? "Payment required" : "Trial expired",
-          title: "POS locked until payment",
-          body: "You cannot open a till, create orders, or take payments until billing is updated. Your data remains saved.",
-          cta: "Pay now",
-        };
-
-    return (
-      <div className="flex min-h-[70vh] items-center justify-center bg-secondary px-4 py-10">
-        <Card className="w-full max-w-md border-attention/15 shadow-sm">
-          <CardContent className="p-6 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-attention/10 text-attention">
-              <AlertTriangle className="h-6 w-6" aria-hidden />
-            </div>
-            <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-attention">
-              {copy.eyebrow}
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold text-foreground">
-              {copy.title}
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-mid">
-              {copy.body}
-            </p>
-            <Link
-              href={`/app/billing?reason=${billingReason}`}
-              className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-white transition-colors hover:bg-ink/90"
-            >
-              {copy.cta}
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const { locale, t } = await getAppLocaleAndText(countryCode, profileLocale);
   const userRole = membership.role as string;
   const canManage = canManagePos(userRole);
   // Org name for print slips
