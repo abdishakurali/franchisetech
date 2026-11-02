@@ -10,6 +10,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { saveFiscalNetSettings } from "@/app/actions/fiscalnet";
 import { writeFiscalNetEnabledPreference } from "@/lib/fiscalnet/client-preference";
+import { probeFiscalNet } from "@/lib/fiscalnet/probe";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,12 +69,18 @@ export function FiscalNetSettingsCard(props: Props) {
     });
   }
 
+  // FiscalNet runs on this computer, so only this browser can reach it; the old
+  // server-side test never could and still showed ✅. This only proves FiscalNet
+  // answers here, never that the register printed.
   function handleTestConnection() {
     setTestResult(null);
     startTest(async () => {
-      const { testFiscalNetConnection } = await import("@/app/actions/fiscalnet");
-      const result = await testFiscalNetConnection();
-      setTestResult({ ok: result.ok, msg: result.message });
+      if (mockMode) {
+        setTestResult({ ok: true, msg: "Mod test: nu se contactează nicio casă de marcat." });
+        return;
+      }
+      const result = await probeFiscalNet(apiHost);
+      setTestResult({ ok: result.reachable, msg: result.message });
     });
   }
 
@@ -141,11 +148,11 @@ export function FiscalNetSettingsCard(props: Props) {
                 />
                 <div className="flex items-center gap-2 pt-1">
                   <Button type="button" variant="outline" size="sm" onClick={handleTestConnection} disabled={testing}>
-                    {testing ? "Se testează…" : "Testează conexiunea"}
+                    {testing ? "Se verifică…" : "Verifică FiscalNet"}
                   </Button>
                   {testResult && (
                     <span className={`text-xs font-medium ${testResult.ok ? "text-reconciled" : "text-attention"}`}>
-                      {testResult.ok ? "✅" : "❌"} {testResult.msg}
+                      {testResult.ok ? "●" : "⚠"} {testResult.msg}
                     </span>
                   )}
                 </div>
