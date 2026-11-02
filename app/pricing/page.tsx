@@ -50,7 +50,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
           operatingSystem: "Web",
           description: t.pricing.description,
           url: `${SITE_URL}/pricing`,
-          offers: pricingPlans.filter((plan) => ["free", "growth", "team"].includes(plan.id)).map((plan) => ({
+          offers: pricingPlans.filter((plan) => ["growth", "team"].includes(plan.id)).map((plan) => ({
             "@type": "Offer",
             name: plan.name,
             price: String(plan.amountCents / 100),

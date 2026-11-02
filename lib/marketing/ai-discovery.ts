@@ -54,7 +54,7 @@ export function aiEntityJsonLd() {
     operatingSystem: "Web browser",
     description: AI_ENTITY.description,
     inLanguage: AI_ENTITY.languages,
-    offers: pricingPlans.filter((plan) => ["free", "growth", "team"].includes(plan.id)).map((plan) => ({
+    offers: pricingPlans.filter((plan) => ["growth", "team"].includes(plan.id)).map((plan) => ({
       "@type": "Offer",
       name: plan.name,
       price: String(plan.amountCents / 100),
