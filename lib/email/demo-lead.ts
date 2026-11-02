@@ -11,7 +11,21 @@ export function salesInbox(): string {
   return process.env.SALES_EMAIL ?? process.env.SUPPORT_EMAIL ?? "info@franchisetech.ro";
 }
 
-export async function sendDemoLeadEmail(lead: DemoLead, leadId: string | null): Promise<{ success: true } | { success: false; error: string }> {
+const KIND_COPY = {
+  demo: { heading: "Cerere de demonstrație", subject: "Cerere demo", footer: "Trimis din formularul de pe /demo." },
+  fiscal_setup: {
+    heading: "Cerere de ajutor: conectare casă de marcat",
+    subject: "Ajutor conectare casă de marcat",
+    footer: "Trimis de un client din pasul FiscalNet al onboarding-ului. Are deja cont franchisetech.",
+  },
+} as const;
+
+export async function sendDemoLeadEmail(
+  lead: DemoLead,
+  leadId: string | null,
+  kind: keyof typeof KIND_COPY = "demo",
+): Promise<{ success: true } | { success: false; error: string }> {
+  const copy = KIND_COPY[kind];
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return { success: false, error: "RESEND_API_KEY not configured" };
   const from = process.env.RESEND_FROM_EMAIL ?? "franchisetech <onboarding@resend.dev>";
@@ -31,9 +45,9 @@ export async function sendDemoLeadEmail(lead: DemoLead, leadId: string | null): 
   const messageHtml = lead.message
     ? `<p><strong>Mesaj:</strong></p><p>${escapeHtml(lead.message).replace(/\n/g, "<br>")}</p>`
     : "<p><strong>Mesaj:</strong> —</p>";
-  const html = `<!doctype html><html><body style="font-family:sans-serif;line-height:1.5"><h2>Cerere de demonstrație</h2>${rows
+  const html = `<!doctype html><html><body style="font-family:sans-serif;line-height:1.5"><h2>${copy.heading}</h2>${rows
     .map(([label, value]) => `<p><strong>${label}:</strong> ${escapeHtml(value)}</p>`)
-    .join("")}${messageHtml}<p style="color:#666;font-size:12px">Trimis din formularul de pe /demo. Răspundeți direct la acest email.</p></body></html>`;
+    .join("")}${messageHtml}<p style="color:#666;font-size:12px">${copy.footer} Răspundeți direct la acest email.</p></body></html>`;
 
   try {
     const resend = new Resend(apiKey);
@@ -41,7 +55,7 @@ export async function sendDemoLeadEmail(lead: DemoLead, leadId: string | null): 
       from,
       to: [salesInbox()],
       replyTo: lead.email,
-      subject: `Cerere demo — ${lead.businessName} (${lead.businessType}, ${lead.locations} loc.)`,
+      subject: `${copy.subject} — ${lead.businessName} (${lead.businessType}, ${lead.locations} loc.)`,
       html,
     });
     return error ? { success: false, error: error.message } : { success: true };

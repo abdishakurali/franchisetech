@@ -1,16 +1,21 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Headset, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { saveFiscalNetSettings, testFiscalNetConnection } from "@/app/actions/fiscalnet";
+import { saveFiscalNetSettings } from "@/app/actions/fiscalnet";
+import { requestFiscalSetupHelp } from "@/app/actions/fiscal-setup-help";
 import { advanceFromFiscal } from "@/app/actions/onboarding-steps";
 import { FISCALNET_SUPPORTED_DEVICES } from "@/lib/fiscalnet/supported-devices";
+import { probeFiscalNet } from "@/lib/fiscalnet/probe";
+import { captureClientEvent } from "@/lib/analytics/client-events";
 
-type ConnectionStatus = "idle" | "testing" | "connected" | "failed";
+// "reachable" only means FiscalNet answered on this computer — never that the
+// register printed. The first Live sale is the real confirmation.
+type ConnectionStatus = "idle" | "testing" | "reachable" | "unreachable";
 
 export function FiscalOnboardingCard({
   initial,
@@ -26,13 +31,32 @@ export function FiscalOnboardingCard({
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [testing, startTest] = useTransition();
   const [continuing, startContinuing] = useTransition();
+  const [helpPhone, setHelpPhone] = useState("");
+  const [helpSent, setHelpSent] = useState(false);
+  const [requestingHelp, startHelp] = useTransition();
 
   function handleTest() {
     setStatus("testing");
     startTest(async () => {
-      const result = await testFiscalNetConnection();
-      setStatus(result.ok ? "connected" : "failed");
+      const result = await probeFiscalNet(apiHost);
+      setStatus(result.reachable ? "reachable" : "unreachable");
       setStatusMsg(result.message);
+      captureClientEvent("fiscal_connection_probed", { reachable: result.reachable, device_brand: deviceBrand || null });
+    });
+  }
+
+  function handleHelpRequest() {
+    startHelp(async () => {
+      const result = await requestFiscalSetupHelp({
+        phone: helpPhone,
+        deviceBrand: deviceBrand || null,
+        lastProbeMessage: status === "unreachable" ? statusMsg : null,
+      });
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      setHelpSent(true);
     });
   }
 
@@ -68,16 +92,24 @@ export function FiscalOnboardingCard({
   }
 
   const statusLabel =
-    status === "connected" ? "● Conectat" : status === "testing" ? "● Se conectează…" : status === "failed" ? "● Neconectat" : "● Neconectat";
+    status === "reachable"
+      ? "● FiscalNet răspunde"
+      : status === "testing"
+        ? "● Se verifică…"
+        : status === "unreachable"
+          ? "● FiscalNet nu răspunde"
+          : "● Neverificat";
   const statusColor =
-    status === "connected" ? "text-reconciled" : status === "testing" ? "text-brass" : "text-mid";
+    status === "reachable" ? "text-reconciled" : status === "testing" ? "text-brass" : "text-mid";
 
   return (
     <div className="space-y-4">
       <label className="flex cursor-pointer items-center justify-between rounded-md border border-border bg-card px-4 py-3">
         <div>
           <p className="text-sm font-medium text-foreground">Conectează casa fiscală</p>
-          <p className="text-xs text-mid">FiscalNet conectează franchisetech la casa de marcat.</p>
+          <p className="text-xs text-mid">
+            FiscalNet conectează franchisetech la casa de marcat. Este un program separat, de la un furnizor terț, cu licență proprie.
+          </p>
         </div>
         <input
           type="checkbox"
@@ -136,7 +168,7 @@ export function FiscalOnboardingCard({
                 <Input value={apiHost} onChange={(e) => setApiHost(e.target.value)} placeholder="http://localhost:65400" />
                 <div className="flex items-center gap-3 pt-1">
                   <Button type="button" variant="outline" size="sm" onClick={handleTest} disabled={testing}>
-                    {testing ? "Se testează…" : "Testează conexiunea"}
+                    {testing ? "Se verifică…" : "Verifică FiscalNet"}
                   </Button>
                   <span className={`text-xs font-medium ${statusColor}`}>{statusLabel}</span>
                 </div>
@@ -146,6 +178,41 @@ export function FiscalOnboardingCard({
           </div>
         </>
       )}
+
+      <div
+        className={`rounded-md border p-4 space-y-3 ${status === "unreachable" ? "border-brass bg-accent" : "border-border bg-card"}`}
+      >
+        <div className="flex items-start gap-3">
+          <Headset className="mt-0.5 h-5 w-5 shrink-0 text-brass" />
+          <div>
+            <p className="text-sm font-medium text-foreground">Vă conectăm noi casa de marcat</p>
+            <p className="text-xs text-mid">
+              Lăsați un număr de telefon și vă sunăm să configurăm împreună FiscalNet, de la distanță. Vă spunem la telefon ce
+              trebuie pentru modelul dumneavoastră. Între timp puteți continua în mod test.
+            </p>
+          </div>
+        </div>
+        {helpSent ? (
+          <p className="text-sm font-medium text-reconciled">
+            Am primit cererea. Vă sunăm la numărul indicat. Puteți continua în mod test până atunci.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={helpPhone}
+              onChange={(e) => setHelpPhone(e.target.value)}
+              placeholder="ex: 0722 123 456"
+              aria-label="Număr de telefon"
+            />
+            <Button type="button" variant="outline" onClick={handleHelpRequest} disabled={requestingHelp || !helpPhone.trim()}>
+              {requestingHelp ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sunați-mă"}
+            </Button>
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-col gap-2 border-t border-border pt-6 sm:flex-row-reverse">
         <Button
