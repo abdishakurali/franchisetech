@@ -86,7 +86,9 @@ export async function fiscalBrowserReceiptAndLog(
     attemptNumber: ctx.attemptNumber ?? 1,
     status,
     mockMode: config.mockMode,
-    responseContent: result.content ?? result.message ?? null,
+    // Prefer what FiscalNet actually returned over our own summary message,
+    // so every attempt can later be checked against the device's real answer.
+    responseContent: result.rawResponse ?? result.content ?? result.message ?? null,
     receiptNumber: result.receiptNumber ?? null,
     errorCode: result.ok ? null : "CLIENT_ERROR",
     errorInfo: result.ok ? null : result.message,

@@ -55,6 +55,26 @@ describe("fiscalBrowserReceiptAndLog", () => {
     );
   });
 
+  it("stores FiscalNet's raw reply as responseContent when there is one, and our message otherwise", async () => {
+    const recordAttempt = vi.fn().mockResolvedValue({ ok: true, attemptId: "a1" });
+
+    fiscalBrowserReceiptMock.mockResolvedValue({
+      ok: true,
+      message: "Comandă trimisă.",
+      rawResponse: 'HTTP 200 {"ReceiptStatus":true,"ReceiptNumber":"77"}',
+    });
+    await fiscalBrowserReceiptAndLog(baseConfig, [], 10, "cash", { transactionId: "tx-raw", recordAttempt });
+    expect(recordAttempt).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "success", responseContent: 'HTTP 200 {"ReceiptStatus":true,"ReceiptNumber":"77"}' })
+    );
+
+    fiscalBrowserReceiptMock.mockResolvedValue({ ok: false, message: "Nu se poate contacta casa fiscală." });
+    await fiscalBrowserReceiptAndLog(baseConfig, [], 10, "cash", { transactionId: "tx-down", recordAttempt });
+    expect(recordAttempt).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: "failed", responseContent: "Nu se poate contacta casa fiscală." })
+    );
+  });
+
   it("logs status failed, with an error code and the failure message, when the agent call fails", async () => {
     fiscalBrowserReceiptMock.mockResolvedValue({ ok: false, message: "Timeout — casa fiscală nu răspunde (>15s)." });
     const recordAttempt = vi.fn().mockResolvedValue({ ok: true });

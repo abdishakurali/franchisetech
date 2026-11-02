@@ -51,7 +51,16 @@ export type BrowserFiscalResult = {
   receiptNumber?: string;
   filename?: string;
   content?: string;
+  /** API mode only: the HTTP status and body FiscalNet actually returned,
+   *  truncated. Recorded for audit; it does not affect `ok`. */
+  rawResponse?: string;
 };
+
+const RAW_RESPONSE_MAX = 2000;
+
+function rawResponseOf(status: number, body: string): string {
+  return `HTTP ${status} ${body}`.slice(0, RAW_RESPONSE_MAX);
+}
 
 // ── Windows file download ────────────────────────────────────────────────────
 
@@ -119,14 +128,15 @@ async function callApi(
     });
     clearTimeout(timer);
     const text = await res.text();
+    const rawResponse = rawResponseOf(res.status, text);
     let parsed: Record<string, unknown> | null = null;
     try { parsed = JSON.parse(text); } catch {}
     if (parsed && parsed.BONOK === "DA") {
-      return { ok: true, message: `Bon tipărit. Nr: ${parsed.NRBON ?? "?"}`, receiptNumber: String(parsed.NRBON ?? "") };
+      return { ok: true, message: `Bon tipărit. Nr: ${parsed.NRBON ?? "?"}`, receiptNumber: String(parsed.NRBON ?? ""), rawResponse };
     }
-    if (parsed?.ERRCODE) return { ok: false, message: `Eroare casă: ${parsed.ERRCODE}` };
-    if (!res.ok)         return { ok: false, message: `HTTP ${res.status}: ${text.slice(0, 200)}` };
-    return { ok: true, message: "Comandă trimisă." };
+    if (parsed?.ERRCODE) return { ok: false, message: `Eroare casă: ${parsed.ERRCODE}`, rawResponse };
+    if (!res.ok)         return { ok: false, message: `HTTP ${res.status}: ${text.slice(0, 200)}`, rawResponse };
+    return { ok: true, message: "Comandă trimisă.", rawResponse };
   } catch (e) {
     clearTimeout(timer);
     const msg = e instanceof Error ? e.message : "Eroare";
