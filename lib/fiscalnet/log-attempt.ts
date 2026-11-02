@@ -75,11 +75,15 @@ export async function fiscalBrowserReceiptAndLog(
 
   if (!config.enabled) return result;
 
+  // "success" only when the device confirmed the receipt. A request that went
+  // through without confirmation is "ambiguous": recorded honestly, never as success.
   const status: RecordFiscalAttemptInput["status"] = config.mockMode
     ? "mock_success"
-    : result.ok
-      ? "success"
-      : "failed";
+    : result.confirmation === "unconfirmed"
+      ? "ambiguous"
+      : result.ok
+        ? "success"
+        : "failed";
 
   const logResult = await recordAttemptWithTimeout(ctx.recordAttempt, {
     transactionId: ctx.transactionId,
@@ -90,7 +94,7 @@ export async function fiscalBrowserReceiptAndLog(
     // so every attempt can later be checked against the device's real answer.
     responseContent: result.rawResponse ?? result.content ?? result.message ?? null,
     receiptNumber: result.receiptNumber ?? null,
-    errorCode: result.ok ? null : "CLIENT_ERROR",
+    errorCode: result.ok ? null : result.errorCode ?? "CLIENT_ERROR",
     errorInfo: result.ok ? null : result.message,
   }).catch((e: unknown) => ({ ok: false, error: e instanceof Error ? e.message : String(e) }));
 

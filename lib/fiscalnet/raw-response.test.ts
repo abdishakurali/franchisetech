@@ -1,12 +1,11 @@
-// Phase 0, step 1: record FiscalNet's real HTTP reply on every API receipt,
-// without changing whether a receipt counts as ok.
+// Phase 0: record FiscalNet's real HTTP reply on every API receipt (step 1)
+// and read the documented confirmation from it (step 2).
 //
 // Runs fiscalBrowserReceipt against a real local HTTP server that answers in
 // the shapes documented at driverfiscal.ro/documentatie-api-fiscalnet
-// (ReceiptStatus / ReceiptNumber / ErrorCode / ErrorInfo). The `ok` values
-// asserted here CHARACTERISE CURRENT BEHAVIOUR, including the known gap that
-// any HTTP 200 counts as ok. Phase 0 step 2 will change that deliberately and
-// must update these expectations on purpose, not by accident.
+// (ReceiptStatus / ReceiptNumber / ErrorCode / ErrorInfo). Before step 2 any
+// HTTP 200 counted as ok; now only ReceiptStatus decides, and a 200 that says
+// nothing is "unconfirmed" (ok stays true, never logged as success).
 
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
@@ -57,7 +56,9 @@ describe("FiscalNet API raw reply capture", () => {
     const result = await sell({ status: 200, body });
 
     expect(result.ok).toBe(true);
-    expect(result.message).toBe("Comandă trimisă.");
+    expect(result.confirmation).toBe("confirmed");
+    expect(result.receiptNumber).toBe("1234");
+    expect(result.message).toBe("Bon fiscal emis. Nr: 1234");
     expect(result.rawResponse).toBe(`HTTP 200 ${body}`);
     const last = received.at(-1)!;
     expect(last.method).toBe("POST");
@@ -65,13 +66,35 @@ describe("FiscalNet API raw reply capture", () => {
     expect(JSON.parse(last.body)).toEqual(["S^Espresso^1200^1000^Buc^2^1", "ST^0", "P^1^1200"]);
   });
 
-  it("captures a documented device error even though it is still treated as ok today (known gap)", async () => {
+  it("treats a documented device error as a failure, with the device's code", async () => {
     const body = JSON.stringify({ ReceiptStatus: false, ErrorCode: "-111015", ErrorInfo: "Hartie terminata" });
     const result = await sell({ status: 200, body });
 
-    expect(result.ok).toBe(true); // the gap Phase 0 step 2 fixes
-    expect(result.rawResponse).toContain('"ReceiptStatus":false');
+    expect(result.ok).toBe(false);
+    expect(result.confirmation).toBe("device_error");
+    expect(result.errorCode).toBe("-111015");
+    expect(result.message).toBe("Eroare casă: -111015 — Hartie terminata");
     expect(result.rawResponse).toContain("Hartie terminata");
+  });
+
+  it("matches ReceiptStatus case-insensitively and accepts string forms", async () => {
+    const lower = await sell({ status: 200, body: JSON.stringify({ receiptStatus: "true", receiptNumber: 42 }) });
+    expect(lower).toMatchObject({ ok: true, confirmation: "confirmed", receiptNumber: "42" });
+    const nu = await sell({ status: 200, body: JSON.stringify({ RECEIPTSTATUS: "NU", ERRORINFO: "Sertar" }) });
+    expect(nu).toMatchObject({ ok: false, confirmation: "device_error", message: "Eroare casă: Sertar" });
+  });
+
+  it("trusts the device's ReceiptStatus over the HTTP status", async () => {
+    const result = await sell({ status: 500, body: JSON.stringify({ ReceiptStatus: false, ErrorCode: "E1" }) });
+    expect(result).toMatchObject({ ok: false, confirmation: "device_error", errorCode: "E1" });
+  });
+
+  it("marks a 200 that confirms nothing as unconfirmed — ok for the POS flow, never a confirmed receipt", async () => {
+    for (const body of ["", "OK", "<html></html>", "[1,2]", "null", JSON.stringify({ ReceiptStatus: "maybe" })]) {
+      const result = await sell({ status: 200, body });
+      expect(result, body).toMatchObject({ ok: true, confirmation: "unconfirmed", message: "Comandă trimisă." });
+      expect(result.receiptNumber, body).toBeUndefined();
+    }
   });
 
   it("keeps HTTP errors failed and records the body", async () => {

@@ -55,6 +55,25 @@ describe("fiscalBrowserReceiptAndLog", () => {
     );
   });
 
+  it("logs ambiguous (never success) when FiscalNet accepted the request but confirmed nothing", async () => {
+    const recordAttempt = vi.fn().mockResolvedValue({ ok: true, attemptId: "a1" });
+    fiscalBrowserReceiptMock.mockResolvedValue({ ok: true, message: "Comandă trimisă.", confirmation: "unconfirmed", rawResponse: "HTTP 200 OK" });
+
+    const result = await fiscalBrowserReceiptAndLog(baseConfig, [], 10, "cash", { transactionId: "tx-amb", recordAttempt });
+
+    expect(result.ok).toBe(true);
+    expect(recordAttempt).toHaveBeenCalledWith(expect.objectContaining({ status: "ambiguous", errorCode: null, receiptNumber: null }));
+  });
+
+  it("logs the device's own error code on a documented device error", async () => {
+    const recordAttempt = vi.fn().mockResolvedValue({ ok: true, attemptId: "a1" });
+    fiscalBrowserReceiptMock.mockResolvedValue({ ok: false, message: "Eroare casă: -111015", confirmation: "device_error", errorCode: "-111015" });
+
+    await fiscalBrowserReceiptAndLog(baseConfig, [], 10, "cash", { transactionId: "tx-dev", recordAttempt });
+
+    expect(recordAttempt).toHaveBeenCalledWith(expect.objectContaining({ status: "failed", errorCode: "-111015", errorInfo: "Eroare casă: -111015" }));
+  });
+
   it("stores FiscalNet's raw reply as responseContent when there is one, and our message otherwise", async () => {
     const recordAttempt = vi.fn().mockResolvedValue({ ok: true, attemptId: "a1" });
 

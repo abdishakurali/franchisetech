@@ -545,7 +545,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       <PosTillStateSync sessionOpen />
       {fiscalOpeningFailed ? (
         <div role="alert" className="m-3 rounded-lg border border-attention/25 bg-attention/10 px-4 py-3 text-sm text-attention">
-          Casa a fost deschisă în aplicație, dar FiscalNet local nu a răspuns. Verifică agentul FiscalNet înainte de prima vânzare.
+          Casa a fost deschisă în aplicație, dar casa de marcat nu a confirmat intrarea de numerar prin FiscalNet. Verifică FiscalNet și casa de marcat înainte de prima vânzare.
         </div>
       ) : null}
       {showWelcome && (products?.length ?? 0) > 0 && <WelcomeBanner locale={locale} />}

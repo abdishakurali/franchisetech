@@ -52,14 +52,44 @@ export type BrowserFiscalResult = {
   filename?: string;
   content?: string;
   /** API mode only: the HTTP status and body FiscalNet actually returned,
-   *  truncated. Recorded for audit; it does not affect `ok`. */
+   *  truncated. Recorded for audit. */
   rawResponse?: string;
+  /** API mode only. "confirmed": the device reported the receipt as issued.
+   *  "device_error": the device reported a failure. "unconfirmed": the request
+   *  went through but the reply said neither — `ok` stays true so the POS
+   *  flow is unchanged, but it must never be recorded as a confirmed receipt. */
+  confirmation?: "confirmed" | "device_error" | "unconfirmed";
+  /** Device error code from the reply, when there is one. */
+  errorCode?: string;
 };
 
 const RAW_RESPONSE_MAX = 2000;
 
 function rawResponseOf(status: number, body: string): string {
   return `HTTP ${status} ${body}`.slice(0, RAW_RESPONSE_MAX);
+}
+
+// FiscalNet's documented HTTP reply: ReceiptStatus (true/false), ReceiptNumber,
+// ReceiptInfo, ErrorCode, ErrorInfo (driverfiscal.ro/documentatie-api-fiscalnet).
+// Keys are matched case-insensitively because the docs are inconsistent on casing.
+type DocumentedReply = { status: boolean; number: string | null; errorCode: string | null; errorInfo: string | null };
+
+function readDocumentedReply(parsed: unknown): DocumentedReply | null {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return null;
+  const fields = new Map(Object.entries(parsed as Record<string, unknown>).map(([k, v]) => [k.toLowerCase(), v]));
+  const raw = fields.get("receiptstatus");
+  const status =
+    raw === true || raw === 1 || (typeof raw === "string" && ["true", "1", "da"].includes(raw.trim().toLowerCase()))
+      ? true
+      : raw === false || raw === 0 || (typeof raw === "string" && ["false", "0", "nu"].includes(raw.trim().toLowerCase()))
+        ? false
+        : null;
+  if (status === null) return null;
+  const text = (key: string) => {
+    const v = fields.get(key);
+    return v === null || v === undefined || String(v).trim() === "" ? null : String(v).trim();
+  };
+  return { status, number: text("receiptnumber"), errorCode: text("errorcode"), errorInfo: text("errorinfo") };
 }
 
 // ── Windows file download ────────────────────────────────────────────────────
@@ -112,9 +142,23 @@ async function downloadLines(lines: string[], prefix = "BON"): Promise<BrowserFi
 
 // ── Android / HTTP API ───────────────────────────────────────────────────────
 
+// What a confirmed reply means for each command. A Z report is not a receipt,
+// so each command says what the device actually confirmed.
+type FiscalCommand = "receipt" | "cash_in" | "cash_out" | "z_report" | "x_report" | "void";
+
+const CONFIRMED_LABEL: Record<FiscalCommand, (n: string | null) => string> = {
+  receipt:  (n) => `Bon fiscal emis. Nr: ${n ?? "?"}`,
+  cash_in:  () => "Intrare numerar confirmată de casă.",
+  cash_out: () => "Ieșire numerar confirmată de casă.",
+  z_report: () => "Raport Z confirmat de casă.",
+  x_report: () => "Raport X confirmat de casă.",
+  void:     () => "Anulare confirmată de casă.",
+};
+
 async function callApi(
   apiHost: string,
   lines: string[],
+  command: FiscalCommand,
   timeoutMs = 15000
 ): Promise<BrowserFiscalResult> {
   const controller = new AbortController();
@@ -131,12 +175,35 @@ async function callApi(
     const rawResponse = rawResponseOf(res.status, text);
     let parsed: Record<string, unknown> | null = null;
     try { parsed = JSON.parse(text); } catch {}
-    if (parsed && parsed.BONOK === "DA") {
-      return { ok: true, message: `Bon tipărit. Nr: ${parsed.NRBON ?? "?"}`, receiptNumber: String(parsed.NRBON ?? ""), rawResponse };
+    // The documented ReceiptStatus is the device's own answer, so it wins over
+    // the HTTP status (which only reflects transport).
+    const documented = readDocumentedReply(parsed);
+    if (documented?.status === true) {
+      return {
+        ok: true,
+        message: CONFIRMED_LABEL[command](documented.number),
+        receiptNumber: documented.number ?? undefined,
+        confirmation: "confirmed",
+        rawResponse,
+      };
     }
-    if (parsed?.ERRCODE) return { ok: false, message: `Eroare casă: ${parsed.ERRCODE}`, rawResponse };
+    if (documented?.status === false) {
+      const detail = [documented.errorCode, documented.errorInfo].filter(Boolean).join(" — ") || "fără detalii";
+      return {
+        ok: false,
+        message: `Eroare casă: ${detail}`,
+        confirmation: "device_error",
+        errorCode: documented.errorCode ?? undefined,
+        rawResponse,
+      };
+    }
+    if (parsed && parsed.BONOK === "DA") {
+      return { ok: true, message: `Bon tipărit. Nr: ${parsed.NRBON ?? "?"}`, receiptNumber: String(parsed.NRBON ?? ""), confirmation: "confirmed", rawResponse };
+    }
+    if (parsed?.ERRCODE) return { ok: false, message: `Eroare casă: ${parsed.ERRCODE}`, confirmation: "device_error", errorCode: String(parsed.ERRCODE), rawResponse };
     if (!res.ok)         return { ok: false, message: `HTTP ${res.status}: ${text.slice(0, 200)}`, rawResponse };
-    return { ok: true, message: "Comandă trimisă.", rawResponse };
+    // Request accepted, but nothing in the reply confirms a receipt.
+    return { ok: true, message: "Comandă trimisă.", confirmation: "unconfirmed", rawResponse };
   } catch (e) {
     clearTimeout(timer);
     const msg = e instanceof Error ? e.message : "Eroare";
@@ -250,7 +317,7 @@ export async function fiscalBrowserReceipt(
     return downloadLines(lines, "BON");
   }
   if (config.mockMode) return { ok: true, message: "Mock — bon simulat (nu s-a trimis la casă)." };
-  return callApi(config.apiHost, lines);
+  return callApi(config.apiHost, lines, "receipt");
 }
 
 export async function fiscalBrowserCashIn(
@@ -261,7 +328,7 @@ export async function fiscalBrowserCashIn(
   const lines = [`I^${encodeMoney(amount)}`];
   if (config.connectionMode === "file") return downloadLines(lines, "CASHIN");
   if (config.mockMode) return { ok: true, message: "Mock — intrare numerar simulată." };
-  return callApi(config.apiHost, lines);
+  return callApi(config.apiHost, lines, "cash_in");
 }
 
 export async function fiscalBrowserCashOut(
@@ -272,7 +339,7 @@ export async function fiscalBrowserCashOut(
   const lines = [`O^${encodeMoney(amount)}`];
   if (config.connectionMode === "file") return downloadLines(lines, "CASHOUT");
   if (config.mockMode) return { ok: true, message: "Mock — ieșire numerar simulată." };
-  return callApi(config.apiHost, lines);
+  return callApi(config.apiHost, lines, "cash_out");
 }
 
 export async function fiscalBrowserZReport(
@@ -282,7 +349,7 @@ export async function fiscalBrowserZReport(
   const lines = ["Z^"];
   if (config.connectionMode === "file") return downloadLines(lines, "ZREPORT");
   if (config.mockMode) return { ok: true, message: "Mock — raport Z simulat." };
-  return callApi(config.apiHost, lines);
+  return callApi(config.apiHost, lines, "z_report");
 }
 
 export async function fiscalBrowserXReport(
@@ -292,7 +359,7 @@ export async function fiscalBrowserXReport(
   const lines = ["X^"];
   if (config.connectionMode === "file") return downloadLines(lines, "XREPORT");
   if (config.mockMode) return { ok: true, message: "Mock — raport X simulat." };
-  return callApi(config.apiHost, lines);
+  return callApi(config.apiHost, lines, "x_report");
 }
 
 export async function fiscalBrowserVoidLast(
@@ -302,5 +369,5 @@ export async function fiscalBrowserVoidLast(
   const lines = ["VB^"];
   if (config.connectionMode === "file") return downloadLines(lines, "VOID");
   if (config.mockMode) return { ok: true, message: "Mock — anulare bon simulată." };
-  return callApi(config.apiHost, lines);
+  return callApi(config.apiHost, lines, "void");
 }
