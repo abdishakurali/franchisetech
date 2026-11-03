@@ -7,7 +7,6 @@ import { OwnerPosProof } from "@/components/marketing/OwnerProofScreens";
 import { SectionLabel } from "@/components/marketing/MarketingShell.primitives";
 import { marketingCard, marketingHeroBg, marketingHeroRadial, marketingSubtext } from "@/lib/marketing/tokens";
 import type { SeoPage } from "@/lib/marketing/seo";
-import { comparisonPages } from "@/lib/marketing/comparisons";
 import { isPrimaryIndustrySlug } from "@/lib/marketing/industry-verticals";
 
 type IndustryUi = {
@@ -15,6 +14,7 @@ type IndustryUi = {
   featuresTitle: string;
   compareTitle: string;
   compareLink: string;
+  compareColumn: string;
   getStarted: string;
   seePricing: string;
   faq: string;
@@ -43,8 +43,6 @@ export function IndustryLandingPage({ page, ui }: IndustryLandingPageProps) {
   const showcase = page.showcase ?? (page.image ? { src: page.image, path: "/app", alt: page.h1 } : null);
   const competitorSlug = page.competitorSlug;
   const compareHref = competitorSlug ? `/compare/${competitorSlug}` : "/compare";
-  const competitorName =
-    comparisonPages.find((p) => p.slug === competitorSlug)?.competitor ?? competitorSlug ?? "Alternative";
 
   if (!useVerticalLayout) {
     return <LegacyIndustryLayout page={page} ui={ui} />;
@@ -150,7 +148,7 @@ export function IndustryLandingPage({ page, ui }: IndustryLandingPageProps) {
                 <div className="grid grid-cols-3 bg-secondary px-4 py-3 text-sm font-bold text-foreground">
                   <span> </span>
                   <span>franchisetech</span>
-                  <span>{competitorName}</span>
+                  <span>{ui.compareColumn}</span>
                 </div>
                 {page.competitorRows.map((row) => (
                   <div

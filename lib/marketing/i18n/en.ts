@@ -93,6 +93,7 @@ export const en = {
     featuresTitle: "Features for your workflow",
     compareTitle: "Why not the alternative?",
     compareLink: "Full comparison",
+    compareColumn: "Typical POS",
   },
   whyOwners: {
     heading: "What we solve every night at close",

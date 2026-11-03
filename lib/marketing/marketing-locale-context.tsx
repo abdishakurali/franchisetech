@@ -53,7 +53,9 @@ export function MarketingLocaleProvider({
 export function useMarketingLocaleContext(): MarketingLocaleContextValue {
   const ctx = useContext(MarketingLocaleContext);
   if (!ctx) {
-    const locale = typeof window === "undefined" ? "en" : readMarketingLocaleClient();
+    // Romanian is the site default (middleware, getMarketingLocale); falling back
+    // to "en" here rendered English buttons on pages without a provider.
+    const locale = typeof window === "undefined" ? "ro" : readMarketingLocaleClient();
     return { locale, t: getMarketingMessages(locale) };
   }
   return ctx;

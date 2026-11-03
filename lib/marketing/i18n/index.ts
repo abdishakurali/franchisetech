@@ -22,7 +22,9 @@ export function localizeSeoPage(page: SeoPage, locale: MarketingLocale): SeoPage
     faqs: override.faqs ?? page.faqs,
     related: override.related ?? page.related,
     painPoints: override.painPoints ?? page.painPoints,
-    featureRows: override.featureRows ?? page.featureRows,
+    featureRows: override.featureRows && page.featureRows
+      ? page.featureRows.map((row, i) => ({ ...row, ...override.featureRows?.[i] }))
+      : page.featureRows,
     competitorRows: override.competitorRows ?? page.competitorRows,
   };
 }

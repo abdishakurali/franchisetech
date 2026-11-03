@@ -180,9 +180,9 @@ const ro = {
         "Da. Româna și engleza sunt disponibile pe site, în aplicație și în POS, cu o preferință comună în browser. Fotografiile, capturile de ecran și clipurile își păstrează limba originală.",
     },
     {
-      question: "Cum funcționează planul gratuit?",
+      question: "Cum funcționează perioada de probă?",
       answer:
-        "Planul Free e disponibil imediat la crearea contului, fără card, și nu expiră. Configurarea ghidată a produselor și fluxului de vânzare este disponibilă în aplicație.",
+        "La crearea contului primiți 15 zile cu toate funcțiile Pro, fără card. După aceea puteți vinde și emite bonuri fiscale în continuare; stocul, rețetele și exporturile pentru contabil necesită abonament Pro sau Multi.",
     },
   ],
   finalTitle: "Următoarea tură, cu mai multă claritate.",
@@ -343,9 +343,9 @@ const en: typeof ro = {
         "Yes. Romanian and English are available on the website, in the app and in the POS, with a shared browser preference. Photos, screenshots and videos retain their original language.",
     },
     {
-      question: "How does the free plan work?",
+      question: "How does the trial work?",
       answer:
-        "The Free plan is available immediately when you create your account, with no card required, and never expires. In-app guidance helps configure products and the sales workflow.",
+        "When you create your account you get 15 days of every Pro feature, with no card. After that you can keep selling and issuing fiscal receipts; stock, recipes and accountant exports need a Pro or Multi subscription.",
     },
   ],
   finalTitle: "Start your next shift with a clearer picture.",

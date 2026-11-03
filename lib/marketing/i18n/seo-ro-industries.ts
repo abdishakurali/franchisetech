@@ -29,12 +29,25 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         text: "Total card, numerar în sertar și tichete masă trebuie să bată fără Excel. Numerar deschidere, vânzări și numerar numărat într-un singur flux raport Z.",
       },
     ],
+    featureRows: [
+      {
+        title: "POS rapid la tejghea",
+        body: "Grilă de produse, coș și încasare pe laptop sau tabletă — fără casă proprietară. Un barista nou poate vinde din prima zi, cu un ecran clar.",
+      },
+      {
+        title: "Cost rețetă pentru fiecare băutură",
+        body: "Legați laptele, cafeaua, siropurile și ambalajele de produsele din meniu. Vedeți costul pe porție, marja brută și câte porții puteți face din stocul curent.",
+      },
+      {
+        title: "Raport Z la închidere",
+        body: "Numerar de deschidere, totaluri numerar și card, intrări și ieșiri de numerar, așteptat vs numărat — cifre de închidere în care pot avea încredere proprietarul și contabilul.",
+      },
+    ],
     competitorRows: [
-      ["Viteză POS la tejghea", "Grilă în browser — laptop sau tabletă", "Variază — adesea desktop"],
-      ["Marje pe rețete", "Cost rețete inclus", "Adesea limitat în POS simplu"],
-      ["Preț personal", "Nelimitat pe plan plătit", "Verificați taxă per terminal"],
-      ["Driver fiscal (RO)", "Când e activat în Setări", "Variază la furnizor"],
-      ["Preț lunar listat", "De la 49€/lună pe site", "Adesea doar la ofertă"],
+      ["POS la tejghea", "Grilă în browser — laptop sau tabletă", "Variază de la furnizor la furnizor"],
+      ["Marje pe rețete", "Cost rețete inclus în Pro", "Verificați dacă e modul separat"],
+      ["Personal", "Nelimitat pe plan plătit", "Verificați taxa per terminal sau per utilizator"],
+      ["Driver fiscal (RO)", "FiscalNet, licență separată, configurat în Setări", "Verificați ce case de marcat suportă"],
     ],
     faqs: [
       {
@@ -48,7 +61,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Urmăresc automat lapte, cafea și siropuri?",
-        answer: "Da, cu planul Operations: rețetele leagă ingredientele de produse, iar vânzările pot reduce stocul când e configurat.",
+        answer: "Da, cu planul Pro: rețetele leagă ingredientele de produse, iar vânzările pot reduce stocul când e configurat.",
       },
       {
         question: "Numerar, card și tichete Sodexo/Benefit?",
@@ -87,12 +100,24 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         text: "Numerar, card și mese împărțite trebuie să reconcilieze un raport Z. Numerar așteptat vs numărat și totaluri card într-o sesiune.",
       },
     ],
+    featureRows: [
+      {
+        title: "Încasare rapidă și bon fiscal",
+        body: "Deschideți casa, adăugați produse, încasați și emiteți bonul fiscal atunci când driverul fiscal este activat.",
+      },
+      {
+        title: "Închiderea zilnică a casei",
+        body: "Proprietarul vede numerarul așteptat, totalurile pe card, defalcarea TVA și fluxul raportului Z într-un singur loc.",
+      },
+      {
+        title: "Panou proprietar și raport Z",
+        body: "Vânzări zilnice, starea casei, defalcarea TVA și pachete de export pentru contabil — din același loc cu POS-ul.",
+      },
+    ],
     competitorRows: [
-      ["Rulează în browser", "Da — laptop sau tabletă", "Adesea hardware dedicat"],
-      ["Stoc + rețete", "Incluse în Operations", "Variază — module extra"],
+      ["Rulează în browser", "Da — laptop sau tabletă", "Verificați dacă cere hardware dedicat"],
+      ["Stoc + rețete", "Incluse în Pro", "Verificați dacă sunt module separate"],
       ["Raport Z / TVA", "Inclus", "Variază după pachet"],
-      ["Preț lunar listat", "De la 79€/lună Operations", "Adesea doar la ofertă"],
-      ["Timp setup", "Sub o oră self-serve", "Adesea proiect la fața locului"],
     ],
     faqs: [
       {
@@ -105,7 +130,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Pot urmări costul rețetelor?",
-        answer: "Da. Planul Operations include rețete, ingrediente, achiziții și rapoarte de marjă.",
+        answer: "Da. Planul Pro include rețete, ingrediente, achiziții și rapoarte de marjă.",
       },
       {
         question: "Defalcare TVA pentru contabil?",
@@ -137,14 +162,27 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         title: "Nu știu ce meniu se vinde de fapt",
-        text: "Raportul de vânzări arată top produse pe interval explicit. Cu Operations vezi și costul pe porție.",
+        text: "Raportul de vânzări arată top produse pe interval explicit. Cu Pro vedeți și costul pe porție.",
+      },
+    ],
+    featureRows: [
+      {
+        title: "Viteză la tejghea",
+        body: "Produse cu preț fix în poziții stabile, căutare și încasare dintr-o atingere — gândit pentru volum mare.",
+      },
+      {
+        title: "Bon fiscal la fiecare vânzare",
+        body: "Driverul fiscal (FiscalNet, driverfiscal.ro) emite bonul fiscal local, pe dispozitivul casierului, pentru fiecare vânzare.",
+      },
+      {
+        title: "Închiderea zilei",
+        body: "Raportul Z și rapoartele de vânzări arată totalurile numerar și card, ca să știți ce s-a întâmplat azi.",
       },
     ],
     competitorRows: [
       ["Grilă de produse", "Tile-uri fixe, poziții stabile", "Variază"],
-      ["Rețete / stoc", "Plan Operations", "Variază"],
-      ["Preț listat", "De la 49€/lună", "Adesea doar la ofertă"],
-      ["POS browser", "Da", "Adesea client instalat"],
+      ["Rețete / stoc", "Plan Pro", "Variază"],
+      ["POS browser", "Da", "Variază"],
     ],
     faqs: [
       {
@@ -161,7 +199,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Pot vedea ce se vinde de fapt?",
-        answer: "Da. Rapoartele de vânzări arată top produse pe orice interval; Operations adaugă cost pe porție și marjă.",
+        answer: "Da. Rapoartele de vânzări arată top produse pe orice interval; Pro adaugă cost pe porție și marjă.",
       },
     ],
     ctaTitle: "Pornește POS takeaway — franchisetech Pro",
@@ -195,9 +233,8 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     competitorRows: [
       ["POS browser", "Tabletă la bar", "Adesea terminale fixe"],
       ["Vânzări rapide", "POS browser", "Variază"],
-      ["Stoc", "Plan Operations", "Variază"],
+      ["Stoc", "Plan Pro", "Variază"],
       ["Taxă personal", "Nelimitat", "Verificați per utilizator"],
-      ["Preț listat", "De la 79€/lună", "Adesea doar la ofertă"],
     ],
     faqs: [
       {
@@ -245,12 +282,25 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         text: "Vindeți la bucată la walk-in și la kg pentru B2B din aceeași listă de produse — cu TVA și înregistrare fiscală corectă.",
       },
     ],
+    featureRows: [
+      {
+        title: "Cost rețetă per produs",
+        body: "Făina, untul, ouăle și ambalajele pe fiecare rețetă. Comparați costul cu prețul de raft și vedeți marja brută pe fiecare produs.",
+      },
+      {
+        title: "Producție din stoc",
+        body: "Vedeți câte bucăți permite stocul de azi înainte să programați cuptorul.",
+      },
+      {
+        title: "POS pentru tejghea și vânzare en-gros",
+        body: "Grilă rapidă pentru vânzarea cu amănuntul; produsele se pot vinde la bucată sau la greutate, după cum sunt configurate în meniu.",
+      },
+    ],
     competitorRows: [
-      ["Cost rețete", "Inclus per porție", "SmartBill: focus facturare"],
-      ["Bon de consum", "Din consum rețete", "Nu e focus POS"],
-      ["POS + stoc împreună", "Un singur workspace", "Adesea unelte separate"],
-      ["Driver fiscal POS", "Când e configurat", "SmartBill: e-Factura"],
-      ["Preț listat", "De la 79€/lună Operations", "Altă categorie produs"],
+      ["Cost rețete", "Inclus per porție", "Variază"],
+      ["Bon de consum", "Din consum rețete", "Verificați dacă e generat automat"],
+      ["POS + stoc împreună", "Un singur workspace", "Variază"],
+      ["Driver fiscal POS", "FiscalNet, când e configurat", "Variază"],
     ],
     faqs: [
       {
@@ -299,10 +349,10 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
     ],
     competitorRows: [
-      ["Tabletă / browser", "Da — principal", "Square: focus hardware"],
+      ["Tabletă / browser", "Da — principal", "Variază"],
       ["Coadă offline", "În POS", "Variază"],
-      ["Stoc alimentar", "Plan Operations", "Square: retail-first"],
-      ["Driver fiscal România", "Când e configurat", "Square: fără fiscal RO"],
+      ["Stoc alimentar", "Plan Pro", "Variază"],
+      ["Driver fiscal România", "FiscalNet, când e configurat", "Verificați suportul pentru casa de marcat"],
       ["Preț lunar listat", "De la 49€/lună", "Focus terminale plată"],
     ],
     faqs: [
@@ -331,7 +381,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     title: "POS multi-locație pentru HoReCa",
     metaTitle: "POS lanț restaurante — panou centralizat | franchisetech",
     description:
-      "2–10 locații: casă și raport Z per site, panou proprietar, catalog și stoc comune, export Saga — 89€/locație/lună, personal nelimitat.",
+      "2–10 locații: casă și raport Z per site, panou proprietar, catalog și stoc comune, export Saga — Multi 79€/lună bază + 29€ per locație în plus, personal nelimitat.",
     h1: "Toate locațiile dumneavoastră, un singur panou. Cifrele reale în fiecare seară.",
     heroBefore: "Toate locațiile dumneavoastră, ",
     heroHighlight: "un singur panou",
@@ -352,16 +402,16 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
     ],
     competitorRows: [
-      ["Preț multi-locație listat", "89€/loc/lună pe Scale", "Nexus: ofertă ERP"],
-      ["POS per site, catalog comun", "Operations + add-on multi", "Amploare ERP, proiecte lungi"],
+      ["Preț multi-locație listat", "Multi 79€/lună + 29€ per locație în plus", "Verificați oferta"],
+      ["POS per site, catalog comun", "Plan Multi", "Variază"],
       ["Setup self-serve", "Ore, nu luni", "Adesea proiect IT"],
       ["Personal / site", "Nelimitat", "Verificați per loc"],
-      ["Export Saga", "Pro/Scale", "Variază"],
+      ["Export Saga", "Pro și Multi", "Variază"],
     ],
     faqs: [
       {
         question: "Cum se prețuiește multi-locația?",
-        answer: "89€/lună per locație activă în plus, peste planul de bază Scale. Personal nelimitat la fiecare site.",
+        answer: "Planul Multi: 79€/lună bază + 29€/lună pentru fiecare locație în plus. Personal nelimitat la fiecare site.",
       },
       {
         question: "Un panou pentru toate locațiile?",
@@ -377,6 +427,6 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
     ],
     ctaTitle: "Crește la multi-locație — vorbește cu noi",
-    ctaSubtitle: "Plan Scale + 89€/site — personal nelimitat peste tot.",
+    ctaSubtitle: "Multi 79€/lună + 29€ per locație în plus — personal nelimitat peste tot.",
   },
 };

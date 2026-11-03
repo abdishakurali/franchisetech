@@ -95,6 +95,7 @@ export const ro: MarketingMessages = {
     featuresTitle: "Funcționalități pentru fluxul dumneavoastră",
     compareTitle: "De ce nu alternativa?",
     compareLink: "Comparație completă",
+    compareColumn: "POS clasic",
   },
   whyOwners: {
     heading: "Ce rezolvăm în fiecare seară",

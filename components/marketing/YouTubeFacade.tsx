@@ -18,7 +18,7 @@ export function YouTubeFacade({ youtubeId, title }: { youtubeId: string; title: 
     return (
       <iframe
         className="absolute inset-0 h-full w-full"
-        src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&modestbranding=1&rel=0`}
+        src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&modestbranding=1&rel=0`}
         title={title}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen

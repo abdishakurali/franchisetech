@@ -10,7 +10,7 @@ export const marketingLocaleOptions = [
 ];
 
 export function readMarketingLocaleClient(): MarketingLocale {
-  if (typeof window === "undefined") return "en";
+  if (typeof window === "undefined") return "ro";
   try {
     const raw = localStorage.getItem(MARKETING_LOCALE_STORAGE_KEY);
     if (isMarketingLocale(raw)) return raw;
@@ -19,7 +19,7 @@ export function readMarketingLocaleClient(): MarketingLocale {
   } catch {
     /* ignore */
   }
-  return "en";
+  return "ro";
 }
 
 export function writeMarketingLocaleClient(locale: MarketingLocale): void {

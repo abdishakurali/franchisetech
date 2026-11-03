@@ -26,4 +26,10 @@ export type SeoLocaleFields = Pick<
   | "ctaSubtitle"
 >;
 
-export type SeoRoOverrides = Partial<SeoLocaleFields>;
+// Feature rows are translated as text only; the illustration (image or
+// component) stays with the base page and is merged back by position.
+export type SeoFeatureRowText = { title: string; body: string };
+
+export type SeoRoOverrides = Partial<Omit<SeoLocaleFields, "featureRows">> & {
+  featureRows?: SeoFeatureRowText[];
+};

@@ -73,7 +73,6 @@ export const primaryIndustryPages: SeoPage[] = [
       ["Recipe margins", "Built-in recipe costing", "Often limited in POS-only tools"],
       ["Staff pricing", "Unlimited on paid plans", "Check per-terminal or per-user fees"],
       ["Fiscal driver (RO)", "When enabled in Settings", "Varies by vendor and setup"],
-      ["Monthly price listed", "From €49/mo on site", "Often quote-only"],
     ],
     showcase: INDUSTRY_SHOWCASE_DEFAULTS.cafes,
     sections: [],
@@ -89,7 +88,7 @@ export const primaryIndustryPages: SeoPage[] = [
       },
       {
         question: "Can I track milk, coffee, and syrups automatically?",
-        answer: "Yes, with Operations: recipes link ingredients to products and sales can reduce stock when configured.",
+        answer: "Yes, with Pro: recipes link ingredients to products and sales can reduce stock when configured.",
       },
       {
         question: "Cash, card, and meal vouchers?",
@@ -164,9 +163,8 @@ export const primaryIndustryPages: SeoPage[] = [
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS.restaurants,
     competitorRows: [
       ["Runs in browser", "Yes — laptop or tablet", "Often dedicated hardware"],
-      ["Stock + recipes", "Included in Operations", "Varies — may need modules"],
+      ["Stock + recipes", "Included in Pro", "Varies — may need modules"],
       ["Z-report / VAT report", "Included", "Varies by package"],
-      ["Listed monthly price", "From €79/mo Operations", "Often quote-only install"],
       ["Setup time", "Under an hour self-serve", "Often on-site project"],
     ],
     showcase: INDUSTRY_SHOWCASE_DEFAULTS.restaurants,
@@ -182,7 +180,7 @@ export const primaryIndustryPages: SeoPage[] = [
       },
       {
         question: "Can I track recipe costs?",
-        answer: "Yes. Operations includes recipes, ingredients, purchases, and margin reports.",
+        answer: "Yes. Pro includes recipes, ingredients, purchases, and margin reports.",
       },
       {
         question: "VAT breakdown for my accountant?",
@@ -215,7 +213,7 @@ export const primaryIndustryPages: SeoPage[] = [
     bullets: [
       "Flat product grid at counter — no nested menus",
       "Split cash and card, with change calculated",
-      "Stock updates as you sell, on Operations",
+      "Stock updates as you sell, on Pro",
       "Z-report and sales reports at close",
     ],
     painPoints: [
@@ -229,7 +227,7 @@ export const primaryIndustryPages: SeoPage[] = [
       },
       {
         title: "Not sure what's actually selling",
-        text: "The sales report shows top items over an explicit date range; Operations adds cost per portion.",
+        text: "The sales report shows top items over an explicit date range; Pro adds cost per portion.",
       },
     ],
     featureRows: [
@@ -252,8 +250,7 @@ export const primaryIndustryPages: SeoPage[] = [
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS.takeaways,
     competitorRows: [
       ["Product grid", "Flat, fixed-position tiles", "Varies"],
-      ["Recipe / stock", "Operations plan", "Varies"],
-      ["Listed price", "From €49/mo", "Often quote-only"],
+      ["Recipe / stock", "Pro plan", "Varies"],
       ["Browser POS", "Yes", "Often installed client"],
     ],
     showcase: INDUSTRY_SHOWCASE_DEFAULTS.takeaways,
@@ -273,7 +270,7 @@ export const primaryIndustryPages: SeoPage[] = [
       },
       {
         question: "Can I track what's actually selling?",
-        answer: "Yes. Sales reports show top items over any date range; Operations adds cost per portion and margin.",
+        answer: "Yes. Sales reports show top items over any date range; Pro adds cost per portion and margin.",
       },
     ],
     related: [
@@ -344,7 +341,6 @@ export const primaryIndustryPages: SeoPage[] = [
       ["Bon de consum", "From recipe consumption", "Not a POS focus"],
       ["POS + stock together", "One workspace", "Often separate tools"],
       ["Fiscal driver POS", "When configured", "SmartBill: e-Factura focus"],
-      ["Listed price", "From €79/mo Operations", "Different product category"],
     ],
     showcase: INDUSTRY_SHOWCASE_DEFAULTS["patisserie-bakery"],
     sections: [],

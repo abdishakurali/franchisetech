@@ -108,7 +108,7 @@ export const comparisonPages: ComparisonPage[] = [
     franchisetechStrengths: [
       "Time-to-first-sale în zile — 15 zile de probă Pro fără card, setup checklist, onboarding ghidat",
       "Preț listat pe site (Pro 49€, Multi 79€) — personal nelimitat",
-      "Raport Z, vânzări și TVA incluse chiar din planul Free — fără add-on doar pentru raportare",
+      "Raport Z, vânzări și TVA incluse în Pro (49€) — fără add-on doar pentru raportare",
       "Multi 79€ bază + 29€/locație suplimentară — fără suite enterprise obligatorie",
       "Coexistă cu SmartBill/Oblio/Saga pentru facturare și e-Factura",
     ],
@@ -151,7 +151,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Segment țintă", "Cafenea/restaurant 1–5 locații, time-to-value rapid", "Lanțuri și operatori enterprise HoReCa/retail"],
       ["Implementare", "Zile — trial self-serve + setup checklist", "Săptămâni/luni — proiect dedicat, training"],
       ["POS register", "Browser: coș, sesiune casă, retururi", "Platformă matură — fluxuri complexe la volum"],
-      ["Raport Z / închidere", "Inclus din Free — așteptat vs numărat", "Disponibil — verificați claritatea în oferta voastră"],
+      ["Raport Z / închidere", "Inclus în Pro — așteptat vs numărat", "Disponibil — verificați claritatea în oferta voastră"],
       ["Stoc & NIR", "Pro — stoc, furnizori, NIR legat de POS", "Module gestiune — adesea parte din suite mai mare"],
       ["Rețete & marje", "Pro — cost porție, marjă, can-make", "Variază — nu focus principal pe marje rețetă"],
       ["Multi", "79€ bază + 29€/locație suplimentară — fără enterprise obligatoriu", "Punct forte la rețele mari — preț la ofertă"],
@@ -170,7 +170,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Comparație franchisetech vs Ebriza: același preț de intrare (~49€/locație), dar rapoarte Z, vânzări și TVA incluse — fără add-on Insights (+19€/lună) și fără taxe ascunse pe raportare.",
     h1: "franchisetech vs Ebriza — preț pe hârtie vs cost real",
     intro:
-      "Ebriza afișează Pro de la 49€/locație/lună — același nivel de preț ca franchisetech Pro. Diferența pe care mulți operatori o descoperă târziu: rapoartele personalizate (Insights) sunt add-on separat (+19€/lună), iar KDS, Saga sau comenzile delivery pot adăuga zeci de euro în plus. franchisetech include raport vânzări, raport Z și raport TVA chiar din planul Free — fără upsell doar ca să vedeți ce s-a vândut ieri.",
+      "Ebriza afișează Pro de la 49€/locație/lună — același nivel de preț ca franchisetech Pro. Diferența pe care mulți operatori o descoperă târziu: rapoartele personalizate (Insights) sunt add-on separat (+19€/lună), iar KDS, Saga sau comenzile delivery pot adăuga zeci de euro în plus. franchisetech Pro include raport vânzări, raport Z și raport TVA — fără upsell doar ca să vedeți ce s-a vândut ieri.",
     betterFor:
       "Ebriza poate fi potrivită dacă aveți nevoie de ecosistemul lor complet (Premium/Titanium, integrări delivery la volum). franchisetech merită evaluat dacă vreți casă + rapoarte zilnice clare la 49€, fără să plătiți extra doar pentru Insights.",
     competitorStrengths: [
@@ -180,7 +180,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Ecosistem matur pentru restaurante cu volum mare",
     ],
     franchisetechStrengths: [
-      "Raport vânzări, raport Z și raport TVA incluse chiar din planul Free — fără add-on Insights",
+      "Raport vânzări, raport Z și raport TVA incluse în Pro (49€) — fără add-on Insights",
       "Fără taxă per angajat; personal nelimitat pe plan",
       "Stoc, NIR, rețete și rapoarte marjă incluse din planul Pro (49€) — fără salt la un tier superior doar pentru gestiune",
       "Browser POS — 15 zile de probă Pro de la crearea contului, fără card; driver fiscal când este configurat",
@@ -203,12 +203,12 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Ebriza Pro și franchisetech Pro costă la fel — care e diferența?",
         answer:
-          "Ambele pornesc de la circa 49€/locație/lună. franchisetech Pro include raport vânzări, raport Z (închidere casă) și raport TVA — și acestea sunt incluse chiar și din planul Free (0€). Pe pagina publică Ebriza, Insights (rapoarte personalizate) este listat ca add-on de 19€/lună — verificați factura voastră actuală dacă folosiți Ebriza.",
+          "Ambele pornesc de la circa 49€/locație/lună. franchisetech Pro include raport vânzări, raport Z (închidere casă) și raport TVA, fără add-on separat pentru raportare. Pe pagina publică Ebriza, Insights (rapoarte personalizate) este listat ca add-on de 19€/lună — verificați factura voastră actuală dacă folosiți Ebriza.",
       },
       {
         question: "Am auzit că raportarea costă extra — e adevărat?",
         answer:
-          "La unii furnizori, da: rapoarte avansate sau „Insights” sunt module plătite separat. La franchisetech, rapoartele zilnice de vânzări, Z și TVA sunt incluse chiar din planul Free — nu trebuie să cumpărați un add-on doar ca să vedeți ce s-a întâmplat la casă.",
+          "La unii furnizori, da: rapoarte avansate sau „Insights” sunt module plătite separat. La franchisetech, rapoartele zilnice de vânzări, Z și TVA sunt incluse în Pro — nu trebuie să cumpărați un add-on doar ca să vedeți ce s-a întâmplat la casă.",
       },
       {
         question: "Ce add-on-uri Ebriza ar putea mări factura?",
@@ -218,7 +218,7 @@ export const comparisonPages: ComparisonPage[] = [
       {
         question: "Pot folosi franchisetech doar pentru rapoarte și casă?",
         answer:
-          "Da. Chiar și planul Free este construit pentru casă, produse și rapoarte zilnice. Pro adaugă stoc, achiziții și rețete.",
+          "Da. Pro (49€) acoperă casa, produsele și rapoartele zilnice, plus stoc, achiziții și rețete.",
       },
     ],
     related: [
@@ -228,15 +228,15 @@ export const comparisonPages: ComparisonPage[] = [
     rows: [
       ["Cost configurare", "0€ self-serve", "0€ — onboarding video gratuit cu consultant"],
       ["Timp până la prima vânzare", "Sub o oră (cale ghidată în aplicație)", "Self-serve, cu onboarding video gratuit"],
-      ["Preț intrare / locație", "Free 0€ — sau Pro 49€/lună cu stoc și rețete", "Pro 49€/locație/lună (+ TVA)"],
-      ["Raport vânzări zilnic", "Inclus din Free", "Raportare timp real pe plan; Insights personalizate +19€/lună (add-on)"],
-      ["Raport Z / închidere casă", "Inclus din Free", "Registru de casă pe plan — verificați dacă rapoarte avansate necesită add-on"],
-      ["Raport TVA", "Inclus din Free", "Facturare & e-Factura pe plan — detaliu raport TVA vs add-on Insights"],
+      ["Preț intrare / locație", "Pro 49€/lună — cu stoc și rețete", "Pro 49€/locație/lună (+ TVA)"],
+      ["Raport vânzări zilnic", "Inclus în Pro", "Raportare timp real pe plan; Insights personalizate +19€/lună (add-on)"],
+      ["Raport Z / închidere casă", "Inclus în Pro", "Registru de casă pe plan — verificați dacă rapoarte avansate necesită add-on"],
+      ["Raport TVA", "Inclus în Pro", "Facturare & e-Factura pe plan — detaliu raport TVA vs add-on Insights"],
       ["Stoc & NIR", "Pro 49€ — stoc, furnizori, achiziții/NIR", "Premium 99€+ sau module gestiune separate"],
       ["Integrări contabilitate (Saga)", "Export rapoarte în plan eligibil", "+39€/lună add-on integrare Saga"],
       ["Comenzi delivery / meniu digital", "Nu în pachet de bază", "0,06€/comandă sau incluse pe tier superior"],
       ["Personal / utilizatori", "Nelimitat pe plan plătit", "Nelimitat"],
-      ["Cost tipic casă + rapoarte zilnice", "0€ (planul Free) — rapoarte zilnice incluse", "49€ — raportare în timp real inclusă; Insights (rapoarte personalizate) +19€"],
+      ["Cost tipic casă + rapoarte zilnice", "49€ (Pro) — rapoarte zilnice incluse", "49€ — raportare în timp real inclusă; Insights (rapoarte personalizate) +19€"],
       ["Cel mai potrivit pentru", "Cafenea/restaurant mic care vrea casă + rapoarte fără surprize", "Operatori care folosesc deja ecosistem Ebriza complet sau volume delivery mari"],
     ],
   },
@@ -261,7 +261,7 @@ export const comparisonPages: ComparisonPage[] = [
       "E-Factura și rapoarte de contabilitate incluse",
     ],
     franchisetechStrengths: [
-      "Prețuri listate pe site: Free 0€, Pro 49€, Multi 79€ + 29€/locație suplimentară — fără cotație sau taxă de implementare",
+      "Prețuri listate pe site: Pro 49€, Multi 79€ + 29€/locație suplimentară — fără cotație sau taxă de implementare",
       "Browser POS — fără instalare locală sau taxă de setup",
       "Raport Z zilnic — numerar așteptat vs numărat, fără Excel",
       "Export Saga C (XML) pentru contabil, la cerere — fără transcriere manuală",
@@ -307,7 +307,7 @@ export const comparisonPages: ComparisonPage[] = [
       ["Ce este", "POS + stoc + rețete + raport Z — management operațional", "POS restaurant (pos.boogit.ro) + app proprie de comandă online"],
       ["Cui se adresează", "Proprietarilor de restaurante/cafenele", "Restaurantelor (POS) și clienților care comandă online"],
       ["POS / casă", "Browser POS — sesiune casă, coș, retururi", "Sistem POS propriu — vânzare, gestiune, KDS"],
-      ["Raport Z / închidere", "Inclus din Free — așteptat vs numărat zilnic", "Neconfirmat pe site — verificați cu furnizorul"],
+      ["Raport Z / închidere", "Inclus în Pro — așteptat vs numărat zilnic", "Neconfirmat pe site — verificați cu furnizorul"],
       ["Stoc & NIR", "Pro — stoc, furnizori, NIR", "Gestiune stoc disponibilă — verificați detaliile cu furnizorul"],
       ["Rețete & marje", "Pro — cost porție, marjă, can-make", "Neconfirmat pe site — verificați cu furnizorul"],
       ["Export contabilitate", "Saga C (XML) disponibil la cerere", "Export automat vânzări/NIR către Saga"],
@@ -341,7 +341,7 @@ export const comparisonPages: ComparisonPage[] = [
     franchisetechStrengths: [
       "Browser cloud — fără instalare, server local sau mentenanță IT",
       "Cost rețete per porție — știți marja brută înainte de a schimba meniul",
-      "Preț lunar listat pe site: 0€ Free, 49€ Pro, 79€ Multi + 29€/locație suplimentară",
+      "Preț lunar listat pe site: 49€ Pro, 79€ Multi + 29€/locație suplimentară",
       "15 zile de probă Pro de la crearea contului, fără card — configurare ghidată în aplicație",
       "Multi la 79€ bază + 29€/locație suplimentară — dashboard unificat, rapoarte separate",
     ],
@@ -415,7 +415,7 @@ export const comparisonPages: ComparisonPage[] = [
       "Chioșcuri self-ordering și aplicație chelner mobil disponibile",
     ],
     franchisetechStrengths: [
-      "Prețuri listate: Free 0€, Pro 49€, Multi 79€ + 29€/locație suplimentară — fără cotație",
+      "Prețuri listate: Pro 49€, Multi 79€ + 29€/locație suplimentară — fără cotație",
       "Implementare self-serve — prima vânzare în ore, fără proiect IT",
       "Browser POS — fără instalare locală sau mentenanță server",
       "Export Saga C (XML) la cerere — contabilul primește fișierul gata de import",

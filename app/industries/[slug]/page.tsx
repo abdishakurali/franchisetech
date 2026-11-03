@@ -30,6 +30,7 @@ export default async function IndustrySlugPage({ params }: { params: Promise<{ s
     featuresTitle: t.industryLanding.featuresTitle,
     compareTitle: t.industryLanding.compareTitle,
     compareLink: t.industryLanding.compareLink,
+    compareColumn: t.industryLanding.compareColumn,
     getStarted: t.seoPage.getStarted,
     seePricing: t.cta.seePricing,
     faq: t.seoPage.faq,

@@ -53,6 +53,9 @@
 .customerVideoCopy h2 { margin:12px 0 18px!important; font-size:clamp(27px,3.4vw,40px); letter-spacing:-.03em; }
 .customerIdentity { display:flex; align-items:center; gap:16px; margin-top:24px; color:var(--mid); font-family:var(--font-space-mono),monospace; font-size:12px; }
 .customerIdentity img { width:112px; height:56px; object-fit:contain; object-position:left center; }
+.customerTestimonial { display:flex; align-items:center; gap:16px; margin-top:24px; }
+.customerTestimonial p { margin:0; color:var(--mid); font-size:14px; line-height:1.5; }
+.customerTestimonialPlayer { position:relative; flex:none; width:120px; aspect-ratio:9/16; overflow:hidden; border-radius:12px; border:1px solid var(--border); background:#111; }
 .customerVideo { max-height:560px; overflow:hidden; border-radius:16px; border:1px solid var(--border); background:#111; box-shadow:0 18px 50px rgba(28,23,18,.16); }
 .customerVideo video { display:block; width:100%; max-height:560px; aspect-ratio:4/3; object-fit:cover; }
 .caption { font-family:var(--font-space-mono),monospace; font-size:11px; color:var(--mid); }
@@ -137,6 +140,7 @@
 .footerInner { padding-block:32px; display:flex; flex-wrap:wrap; gap:22px; justify-content:space-between; align-items:center; }
 .footer .logo { height:30px; filter:brightness(0) invert(1); }
 .footerLinks { display:flex; flex-wrap:wrap; gap:14px; }
+.footerLegal { flex-basis:100%; order:3; line-height:1.6; }
 .footer a,.footer span { font-family:var(--font-space-mono),monospace; font-size:11px; color:#a89e8a; }
 @media(max-width:1060px) { .nav { display:none; } .mobile { display:block; position:relative; } .mobile summary { padding:10px; cursor:pointer; font-size:14px; } .mobile nav { position:absolute; right:0; top:100%; width:230px; padding:8px; border:1px solid var(--border); border-radius:12px; background:var(--paper); display:flex; flex-direction:column; align-items:stretch; } .mobile nav a { padding:12px; } .faq,.plans { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:700px) { .hero,.split,.plans,.tourHeading,.demoVideo,.customerVideoGrid { grid-template-columns:1fr; } .tourGrid { grid-template-columns:1fr; } .highlight,.highlight:nth-child(even) { flex-direction:column; align-items:stretch; } .headerInner { gap:8px; } .logo { max-width:180px; height:28px; } .account a:first-child { display:none; } .account a:last-child { font-size:12px; padding:10px; } .container { padding-inline:20px; } .hero { padding-top:48px; } .heroProduct { transform:none; } .faq { grid-template-columns:1fr; } .customerVideo video { aspect-ratio:9/14; } }
