@@ -62,6 +62,7 @@ export default async function PlatformEfacturaPage() {
           <li>Organizație: {orgId ? "configurată" : "lipsește PLATFORM_BILLING_ORG_ID"}</li>
           <li>Aplicație ANAF (OAuth): {clientId ? "înregistrată" : "neînregistrată (ANAF_CLIENT_ID lipsește)"}</li>
           <li>Autorizare: {token ? `activă, token reînnoit la ${new Date(token.updated_at).toLocaleDateString("ro-RO")}` : "lipsă"}</li>
+          <li>Facturi la plată: {process.env.PLATFORM_INVOICING === "1" ? "se creează automat" : "oprite (PLATFORM_INVOICING, după ce contabilul alege seria)"}</li>
           <li>Trimitere: {process.env.PLATFORM_EFACTURA_UPLOAD === "1" ? "automată" : "oprită (doar validare)"}</li>
         </ul>
         {authLink ? (

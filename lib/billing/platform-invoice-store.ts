@@ -1,6 +1,9 @@
 // Supabase-backed store and wiring for SALUT TECH's own e-Factura queue.
-// Off unless PLATFORM_BILLING_ORG_ID is set: until SALUT TECH exists as an
-// organisation and the accountant has confirmed the VAT category, nothing runs.
+// Two switches: PLATFORM_BILLING_ORG_ID names SALUT TECH's organisation (the
+// admin page and ANAF authorisation need only that); PLATFORM_INVOICING=1 is
+// what makes payments create numbered invoices. Invoice numbers can't be
+// taken back, so that stays off until the accountant has chosen the series
+// and the VAT category.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { UblAddress } from "@/lib/anaf/ubl-builder";
@@ -93,7 +96,7 @@ export function supabasePlatformInvoiceStore(db: SupabaseClient, orgId: string):
 /** Null when platform invoicing is not switched on. */
 export function platformInvoiceDeps(db: SupabaseClient): QueueDeps | null {
   const orgId = process.env.PLATFORM_BILLING_ORG_ID?.trim();
-  if (!orgId) return null;
+  if (!orgId || process.env.PLATFORM_INVOICING !== "1") return null;
   const vatCategory = process.env.PLATFORM_VAT_CATEGORY === "E" ? "E" : "O";
   const config: PlatformInvoiceConfig = { vatCategory, exemptionReason: process.env.PLATFORM_VAT_EXEMPTION_REASON?.trim() || undefined };
   return {
