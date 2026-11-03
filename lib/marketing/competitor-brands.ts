@@ -58,5 +58,5 @@ export function competitorLogoForOg(slug: string): string {
 // entry is a 404 on the homepage. All live comparisons are RO-market
 // (comparisons.ts has no "global" entries yet), so both locales share this list.
 export function featuredCompareSlugs(_locale: "en" | "ro"): string[] {
-  return ["ebriza", "smartbill", "expressoft", "boogit"];
+  return ["ebriza", "boogit"];
 }

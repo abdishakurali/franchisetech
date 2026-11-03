@@ -337,10 +337,10 @@ export const primaryIndustryPages: SeoPage[] = [
     ],
     competitorSlug: INDUSTRY_COMPETITOR_SLUGS["patisserie-bakery"],
     competitorRows: [
-      ["Recipe costing", "Built-in per portion", "SmartBill: invoicing-first"],
+      ["Recipe costing", "Built-in per portion", "Varies"],
       ["Bon de consum", "From recipe consumption", "Not a POS focus"],
       ["POS + stock together", "One workspace", "Often separate tools"],
-      ["Fiscal driver POS", "When configured", "SmartBill: e-Factura focus"],
+      ["Fiscal driver POS", "FiscalNet, when configured", "Varies"],
     ],
     showcase: INDUSTRY_SHOWCASE_DEFAULTS["patisserie-bakery"],
     sections: [],

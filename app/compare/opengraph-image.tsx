@@ -7,6 +7,6 @@ export const contentType = compareOgContentType;
 export default async function Image() {
   return renderCompareOgImage({
     title: "Compare POS for restaurants & cafes",
-    subtitle: "SmartBill, Saga, RezoSoft, Square, SumUp — honest comparisons with logos",
+    subtitle: "Ebriza and Boogit — comparisons checked against their own websites",
   });
 }

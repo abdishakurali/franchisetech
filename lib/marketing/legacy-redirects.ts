@@ -42,6 +42,11 @@ export const LEGACY_REDIRECTS: Record<string, string> = {
   "/compare/bit-soft": "/compare",
   "/compare/rezosoft": "/compare",
   "/compare/vilicorest": "/compare",
+  // Retired 2026-11-03: competitor claims no longer re-verified; low traffic.
+  "/compare/smartbill": "/compare",
+  "/compare/expressoft": "/compare",
+  "/compare/posnet": "/compare",
+  "/compare/rkeeper": "/compare",
   "/industries/food-trucks": "/industries",
   "/industries/bar-pub": "/industries",
   "/industries/multi-site": "/industries",

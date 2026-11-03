@@ -8,7 +8,7 @@ import { blogPosts } from "@/lib/marketing/blog";
 // with lib/marketing/comparisons.ts and lib/marketing/blog.ts as pages are
 // added or cut — a slug here that no longer exists is silently dropped
 // (see the .filter(Boolean) below), not an error.
-const FEATURED_COMPARISON_SLUGS = ["ebriza", "smartbill", "expressoft", "rkeeper", "boogit", "posnet"];
+const FEATURED_COMPARISON_SLUGS = ["ebriza", "boogit"];
 const FEATURED_GUIDE_SLUGS = [
   "bon-fiscal-obligatoriu-cand-si-cum",
   "cum-anulezi-un-bon-fiscal-emis-gresit",

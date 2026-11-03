@@ -95,7 +95,7 @@ export const INDUSTRY_SHOWCASE_DEFAULTS: Record<
 /** Default competitor compare slug per vertical. */
 export const INDUSTRY_COMPETITOR_SLUGS: Record<PrimaryIndustrySlug, string> = {
   cafes: "ebriza",
-  restaurants: "expressoft",
-  takeaways: "posnet",
-  "patisserie-bakery": "smartbill",
+  restaurants: "boogit",
+  takeaways: "boogit",
+  "patisserie-bakery": "ebriza",
 };

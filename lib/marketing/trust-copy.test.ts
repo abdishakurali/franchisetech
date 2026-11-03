@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { comparisonPages } from "./comparisons";
 import { compareSignupHref } from "./compare-locale";
+import { LEGACY_REDIRECTS } from "./legacy-redirects";
 import { getHomepageContent } from "./homepage-content";
 import { localizeSeoPage, ro } from "./i18n";
 import { industryPages } from "./seo";
@@ -63,5 +64,22 @@ describe("public trust copy", () => {
     for (const file of ["app/terms/page.tsx", "app/privacy/page.tsx"]) {
       expect(readFileSync(file, "utf8"), file).toContain("DATA_CONTROLLER.legalName");
     }
+  });
+
+  it("only the two re-verified comparisons are live; retired ones redirect to the hub", () => {
+    expect(comparisonPages.map((p) => p.slug).sort()).toEqual(["boogit", "ebriza"]);
+    for (const slug of ["smartbill", "expressoft", "posnet", "rkeeper"]) {
+      expect(LEGACY_REDIRECTS[`/compare/${slug}`], slug).toBe("/compare");
+    }
+    for (const page of comparisonPages) {
+      const text = JSON.stringify(page);
+      expect(text, page.slug).not.toMatch(/\/compare\/(smartbill|expressoft|posnet|rkeeper)/);
+    }
+  });
+
+  it("Ebriza add-on prices match ebriza.com/ro/preturi as checked on 2026-11-03", () => {
+    const ebriza = JSON.stringify(comparisonPages.find((p) => p.slug === "ebriza"));
+    expect(ebriza).toContain("Kitchen Display (+29€/lună)");
+    expect(ebriza).not.toMatch(/Kitchen Display \+19€/);
   });
 });

@@ -29,11 +29,11 @@ export async function generateMetadata() {
     locale,
     path: "/compare",
     title: isRo
-      ? "Comparații POS România — Ebriza, SmartBill, Expressoft | franchisetech"
-      : "Compare POS & restaurant software — Ebriza, SmartBill, Expressoft | franchisetech",
+      ? "Comparații POS România — Ebriza și Boogit | franchisetech"
+      : "Compare POS & restaurant software — Ebriza and Boogit | franchisetech",
     description: isRo
-      ? "Comparații oneste franchisetech vs Ebriza, SmartBill, Expressoft, Boogit, POSnet, rKeeper și altele — POS, stoc, rețete, FiscalNet, raport Z și cost real."
-      : "Honest comparisons: franchisetech vs Ebriza, SmartBill, Expressoft, and other Romanian restaurant POS options.",
+      ? "Comparații franchisetech vs Ebriza și Boogit, verificate pe site-urile lor — POS, stoc, rețete, FiscalNet, raport Z și cost real."
+      : "Comparisons of franchisetech vs Ebriza and Boogit, checked against their own websites.",
   });
 }
 
@@ -145,7 +145,7 @@ export default async function CompareHubPage() {
             </h2>
             <p className="mt-2 max-w-2xl text-sm text-[#5B5D57]">
               {locale === "ro"
-                ? "Ebriza, Posnet, rKeeper și altele — operațiuni zilnice, delivery, multi-locație."
+                ? "Ebriza și Boogit — operațiuni zilnice, stoc, delivery."
                 : "Daily operations, delivery, and multi-site POS alternatives."}
             </p>
             <div className="mt-8 grid gap-4 grid-cols-1 lg:grid-cols-3">

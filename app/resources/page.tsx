@@ -74,15 +74,6 @@ const GETTING_STARTED: ResourceCard[] = [
     href: "/compare/ebriza",
     cta: "Citește ghidul",
   },
-  {
-    icon: "🧾",
-    category: "Primii pași",
-    title: "SmartBill + franchisetech — folosite împreună",
-    summary: "SmartBill rămâne pentru facturare; franchisetech acoperă POS, stoc, NIR și închiderea de zi.",
-    readTime: "4 min citire",
-    href: "/compare/smartbill",
-    cta: "Citește ghidul",
-  },
 ];
 
 const INDUSTRY_GUIDES: ResourceCard[] = [
@@ -228,11 +219,11 @@ export default function ResourcesPage() {
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {(
               [
-                { href: "/compare", title: "Compară software POS", summary: "SmartBill, Saga, RezoSoft, Square — logo-uri și tabele de funcționalități.", icon: Scale },
+                { href: "/compare", title: "Compară software POS", summary: "Ebriza și Boogit — comparații verificate pe site-urile lor.", icon: Scale },
                 { href: "/industries/romania", title: "Software POS România", summary: "FiscalNet, TVA, stoc și raport Z pentru restaurante.", icon: CreditCard },
                 { href: "/blog/cum-alegi-un-soft-pos-pentru-cafenea-mica", title: "Checklist alegere POS", summary: "Evaluare onestă în 5 pași pentru proprietari RO.", icon: ListChecks },
                 { href: "/industries/romania", title: "POS pentru România", summary: "lei, TVA, FiscalNet, echipă nelimitată.", icon: MapPin },
-                { href: "/compare/smartbill", title: "vs SmartBill", summary: "Facturare vs operațiuni zilnice — comparație onestă.", logo: "/compare/logos/smartbill.png" },
+                { href: "/compare/boogit", title: "vs Boogit", summary: "POS cu livrare vs operațiuni zilnice — comparație onestă.", logo: "/compare/logos/boogit.svg" },
                 { href: "/help/romania-fiscalnet", title: "Ghid FiscalNet", summary: "Configurare pas cu pas pentru bonuri fiscale.", icon: Wifi },
               ] as Array<{ href: string; title: string; summary: string; icon?: LucideIcon; logo?: string }>
             ).map((card) => (

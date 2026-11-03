@@ -90,7 +90,7 @@ export function partnerPortalLink(partnerId: PartnerArchetype, content?: string)
 export function partnerLeaveBehindUrls(): { label: string; href: string }[] {
   return [
     { label: "Ebriza vs franchisetech (rapoarte incluse)", href: `${BASE}/compare/ebriza?lang=ro` },
-    { label: "SmartBill vs franchisetech", href: `${BASE}/compare/smartbill?lang=ro` },
+    { label: "Boogit vs franchisetech", href: `${BASE}/compare/boogit?lang=ro` },
     { label: "Ghid driver fiscal România", href: `${BASE}/help/romania-fiscalnet?lang=ro` },
     { label: "Obiecții frecvente POS", href: `${BASE}/resources/objections-pos-romania?lang=ro` },
     { label: "Program parteneri", href: `${BASE}/partners?lang=ro` },

@@ -36,10 +36,10 @@ export const AI_ENTITY = {
     market: p.market,
   })),
   topRomanianQueries: [
-    { query: "alternativă SmartBill restaurant POS", url: `${SITE_URL}/compare/smartbill` },
+    { query: "alternativă Ebriza cafenea POS", url: `${SITE_URL}/compare/ebriza` },
     { query: "software POS restaurant România driver fiscal", url: `${SITE_URL}/industries/romania` },
     { query: "gestiune stoc restaurant NIR", url: `${SITE_URL}/features/stock-management` },
-    { query: "franchisetech vs Expressoft", url: `${SITE_URL}/compare/expressoft` },
+    { query: "franchisetech vs Boogit", url: `${SITE_URL}/compare/boogit` },
     { query: "casă de marcat cloud browser", url: `${SITE_URL}/features/pos` },
   ],
 } as const;
