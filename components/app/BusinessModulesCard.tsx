@@ -67,7 +67,7 @@ const UI_STRINGS = {
     productModules: "Product modules",
     save: "Save modules",
     on: "On",
-    pro: "Pro",
+    pro: "Higher plan",
   },
   ro: {
     title: "Nivel business & module",
@@ -79,7 +79,7 @@ const UI_STRINGS = {
     productModules: "Module produs",
     save: "Salvează modulele",
     on: "Activ",
-    pro: "Pro",
+    pro: "Alt plan",
   },
 } as const;
 
