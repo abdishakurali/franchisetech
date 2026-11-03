@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { comparisonPages } from "./comparisons";
 import { compareSignupHref } from "./compare-locale";
@@ -51,5 +52,16 @@ describe("public trust copy", () => {
     const text = JSON.stringify([getHomepageContent("ro"), getHomepageContent("en")]);
     expect(text).not.toMatch(/Planul Free|never expires|nu expiră/);
     expect(text).toContain("15 zile");
+  });
+
+  it("legal pages are in Romanian and name the operator", () => {
+    for (const file of ["app/terms/page.tsx", "app/privacy/page.tsx", "app/legal-disclaimer/page.tsx"]) {
+      const src = readFileSync(file, "utf8");
+      expect(src, file).toContain('lang="ro"');
+      expect(src, file).not.toMatch(/Last updated|Terms of Service|Privacy Policy|Contact us at|We may /);
+    }
+    for (const file of ["app/terms/page.tsx", "app/privacy/page.tsx"]) {
+      expect(readFileSync(file, "utf8"), file).toContain("DATA_CONTROLLER.legalName");
+    }
   });
 });

@@ -1,15 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { DATA_CONTROLLER, DEMO_LEAD_PROCESSORS, DEMO_LEAD_RETENTION_MONTHS } from "@/lib/legal/controller";
 
-const updated = "3 June 2026";
+// Romanian translation of the 3 June 2026 policy; the substance is unchanged.
+const updated = "3 noiembrie 2026";
+
+export const metadata: Metadata = {
+  title: "Politica de confidențialitate franchisetech",
+  description: "Ce date prelucrează franchisetech, de ce, cât timp și ce drepturi aveți.",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPage() {
   return (
     <ClaudeMarketingShellAuth>
-      <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-slate-900">Privacy Policy</h1>
-        <p className="mt-2 text-sm text-slate-500">Last updated: {updated}</p>
+      <main lang="ro" className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-slate-900">Politica de confidențialitate</h1>
+        <p className="mt-2 text-sm text-slate-500">Ultima actualizare: {updated} (traducere în limba română; conținutul este cel din 3 iunie 2026)</p>
 
         <section id="cereri-demo" lang="ro" className="mt-8 scroll-mt-24 rounded-lg border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-700">
           <h2 className="text-lg font-semibold text-slate-900">Notă de informare: cereri de demonstrație și formulare de contact</h2>
@@ -78,24 +86,24 @@ export default function PrivacyPage() {
         </section>
 
         <div className="mt-8 space-y-8 text-sm leading-7 text-slate-700">
-          <section><h2 className="font-semibold text-slate-900">1. Who we are</h2><p>franchisetech is cloud POS and business control software for cafes, restaurants, and food businesses.</p></section>
-          <section><h2 className="font-semibold text-slate-900">2. What data we collect</h2><p>We may collect account information such as name, email, and role; business information such as business name and business type; operational records such as POS sales, stock, purchases, food-safety checks, and reports if used; technical information such as IP address, browser/device information, logs, cookies and session data; and support communications if users contact us.</p></section>
-          <section><h2 className="font-semibold text-slate-900">3. How we use data</h2><p>We use data to create and manage accounts, provide the franchisetech service, store and display business records, improve reliability and user experience, troubleshoot and secure the service, and communicate service-related updates.</p></section>
-          <section><h2 className="font-semibold text-slate-900">4. Legal basis</h2><p>Where GDPR applies, our legal bases may include contract or service provision, legitimate interests in securing and improving the service, legal obligations where applicable, and consent where required.</p></section>
-          <section><h2 className="font-semibold text-slate-900">5. Who we share data with</h2><p>We may share data with hosting, database, and authentication providers such as Supabase; infrastructure providers such as hosting, CDN, or server providers; email providers for transactional messages; analytics or support providers if added later; and authorities if legally required.</p></section>
-          <section><h2 className="font-semibold text-slate-900">6. How long we keep data</h2><p>We keep account and operational records while the account is active or as needed to provide the service, unless deletion is requested or legal or operational retention applies.</p></section>
-          <section><h2 className="font-semibold text-slate-900">7. Your rights</h2><p>You may have rights to access, correction, deletion, restriction, objection, portability, withdrawal of consent where applicable, and to complain to the Romanian National Supervisory Authority for Personal Data Processing (ANSPDCP).</p></section>
-          <section><h2 className="font-semibold text-slate-900">8. Security</h2><p>We use reasonable security measures to protect the service and data. No internet service can guarantee perfect security.</p></section>
-          <section><h2 className="font-semibold text-slate-900">9. International transfers</h2><p>Cloud providers may process data outside Romania or the EU. Safeguards may be used where required.</p></section>
-          <section><h2 className="font-semibold text-slate-900">10. Contact</h2><p>Contact us at <a className="text-blue-600 hover:underline" href="mailto:info@franchisetech.ro">info@franchisetech.ro</a>.</p></section>
-          <section><h2 className="font-semibold text-slate-900">11. Changes</h2><p>We may update this policy and change the last updated date.</p></section>
+          <section><h2 className="font-semibold text-slate-900">1. Cine suntem</h2><p>franchisetech este un software în cloud de POS și control al afacerii pentru cafenele, restaurante și alte afaceri din alimentație.</p></section>
+          <section><h2 className="font-semibold text-slate-900">2. Ce date colectăm</h2><p>Putem colecta date de cont, precum numele, adresa de email și rolul; date despre afacere, precum denumirea și tipul afacerii; înregistrări operaționale, precum vânzările din POS, stocul, achizițiile, verificările de siguranță alimentară și rapoartele, dacă sunt folosite; date tehnice, precum adresa IP, informații despre browser și dispozitiv, jurnale, cookie-uri și date de sesiune; precum și mesajele trimise către suport, dacă ne contactați.</p></section>
+          <section><h2 className="font-semibold text-slate-900">3. Cum folosim datele</h2><p>Folosim datele pentru a crea și administra conturile, pentru a furniza serviciul franchisetech, pentru a stoca și afișa înregistrările afacerii, pentru a îmbunătăți fiabilitatea și experiența de utilizare, pentru a depana și securiza serviciul și pentru a vă transmite informări legate de serviciu.</p></section>
+          <section><h2 className="font-semibold text-slate-900">4. Temeiul legal</h2><p>Acolo unde se aplică GDPR, temeiurile noastre legale pot include executarea contractului sau furnizarea serviciului, interesul legitim de a securiza și îmbunătăți serviciul, obligațiile legale, acolo unde este cazul, și consimțământul, acolo unde este necesar.</p></section>
+          <section><h2 className="font-semibold text-slate-900">5. Cu cine împărtășim datele</h2><p>Putem transmite date furnizorilor de găzduire, bază de date și autentificare, precum Supabase; furnizorilor de infrastructură, precum servicii de găzduire, CDN sau servere; furnizorilor de email pentru mesajele tranzacționale; furnizorilor de analiză sau suport, dacă vor fi adăugați ulterior; și autorităților, dacă legea o cere.</p></section>
+          <section><h2 className="font-semibold text-slate-900">6. Cât timp păstrăm datele</h2><p>Păstrăm datele de cont și înregistrările operaționale cât timp contul este activ sau cât este necesar pentru furnizarea serviciului, cu excepția cazului în care se cere ștergerea lor sau se aplică o obligație legală ori operațională de păstrare.</p></section>
+          <section><h2 className="font-semibold text-slate-900">7. Drepturile dumneavoastră</h2><p>Puteți avea dreptul de acces, de rectificare, de ștergere, de restricționare, de opoziție, la portabilitate, de retragere a consimțământului, acolo unde este cazul, și dreptul de a depune o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP).</p></section>
+          <section><h2 className="font-semibold text-slate-900">8. Securitate</h2><p>Folosim măsuri de securitate rezonabile pentru a proteja serviciul și datele. Niciun serviciu online nu poate garanta securitate perfectă.</p></section>
+          <section><h2 className="font-semibold text-slate-900">9. Transferuri internaționale</h2><p>Furnizorii de cloud pot prelucra date în afara României sau a UE. Acolo unde este necesar, se pot folosi garanții adecvate.</p></section>
+          <section><h2 className="font-semibold text-slate-900">10. Contact</h2><p>Ne puteți scrie la <a className="text-blue-600 hover:underline" href="mailto:info@franchisetech.ro">info@franchisetech.ro</a>.</p>{DATA_CONTROLLER.legalName ? <p className="mt-2">Operatorul datelor este {DATA_CONTROLLER.legalName}, {DATA_CONTROLLER.registrationNumber}, {DATA_CONTROLLER.registeredAddress}.</p> : null}</section>
+          <section><h2 className="font-semibold text-slate-900">11. Modificări ale politicii</h2><p>Putem actualiza această politică; în acest caz modificăm data ultimei actualizări.</p></section>
         </div>
 
         <p className="mt-10 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          This policy is a practical starting point and should be reviewed by a qualified legal professional before paid customer use.
+          Această politică este un punct de plecare practic și trebuie revizuită de un jurist calificat.
         </p>
         <p className="mt-6 text-sm text-slate-500">
-          <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>
+          <Link href="/terms" className="text-blue-600 hover:underline">Termeni și condiții</Link>
         </p>
       </main>
     </ClaudeMarketingShellAuth>
