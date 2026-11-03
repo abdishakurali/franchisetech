@@ -878,6 +878,10 @@ function PosRegisterInner({
   const [discountMode, setDiscountMode] = useState<"pct" | "lei">("pct");
   const [cartDiscountLei, setCartDiscountLei] = useState(0);
   const [saleStatus, setSaleStatus] = useState<{ ok: boolean; msg: string; transactionId?: string } | null>(null);
+  // The fiscal reply arrives after the sale screen; the cashier may already be
+  // on the next order, so a failed or unconfirmed receipt stays on screen
+  // until someone confirms they checked the cash register.
+  const [fiscalAlert, setFiscalAlert] = useState<{ kind: "failed" | "unconfirmed"; amountLabel: string; detail: string } | null>(null);
   const [lastFiscalTxt, setLastFiscalTxt] = useState<{ filename: string; content: string } | null>(null);
   const [salePending, setSalePending] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -1263,6 +1267,11 @@ function PosRegisterInner({
           });
           if (fnRes.ok) {
             captureClientEvent("receipt_issued", { transaction_id: res.transactionId, source: "fiscalnet" });
+          }
+          const kind = !fnRes.ok ? "failed" : fnRes.confirmation === "unconfirmed" ? "unconfirmed" : null;
+          if (kind) {
+            setFiscalAlert({ kind, amountLabel: money(res.total), detail: fnRes.message });
+            captureClientEvent("receipt_not_confirmed", { transaction_id: res.transactionId, kind });
           }
         });
       }
@@ -1975,6 +1984,22 @@ function PosRegisterInner({
           onResend={(id) => void resendQueuedSale(id)}
           onDismiss={(id) => { removeOfflineSale(id); setOfflineQueue(listOfflineQueue()); }}
         />
+        )}
+        {fiscalAlert && (
+          <div role="alert" className="shrink-0 border-b border-attention/30 bg-attention/10 px-3 py-2.5 text-sm text-attention sm:px-4">
+            <p className="font-semibold">
+              {fiscalAlert.kind === "failed"
+                ? `Bonul fiscal pentru ${fiscalAlert.amountLabel} NU a fost confirmat de casa de marcat.`
+                : `FiscalNet a primit bonul pentru ${fiscalAlert.amountLabel}, dar nu a confirmat că a fost emis.`}
+            </p>
+            <p className="mt-0.5">
+              Vânzarea este salvată. Verificați pe casa de marcat dacă bonul a ieșit înainte de a-l emite din nou.
+              {fiscalAlert.kind === "failed" && fiscalAlert.detail ? ` Motiv: ${fiscalAlert.detail}` : ""}
+            </p>
+            <button type="button" onClick={() => setFiscalAlert(null)} className="mt-1.5 text-sm font-semibold underline underline-offset-2">
+              Am verificat
+            </button>
+          </div>
         )}
         <div className={cn(
           "flex min-h-0 flex-1 flex-col overflow-hidden",
