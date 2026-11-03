@@ -131,6 +131,12 @@ export async function getOrgAccessToken(orgId: string): Promise<string> {
     return tokenRow.access_token;
   }
 
+  // A token pasted from the accountant's software has no refresh token we
+  // can use (it belongs to her app); it must be replaced, not refreshed.
+  if (!tokenRow.refresh_token) {
+    throw new Error("Tokenul ANAF primit de la contabil a expirat; cereți unul nou și lipiți-l în /app/admin/efactura.");
+  }
+
   // Refresh
   const clientId = process.env.ANAF_CLIENT_ID;
   const clientSecret = process.env.ANAF_CLIENT_SECRET;

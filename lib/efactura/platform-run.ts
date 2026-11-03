@@ -10,6 +10,7 @@ import { anafPort, supabaseWorkerStore } from "@/lib/efactura/platform-worker-st
 import { pollUploadedInvoices } from "@/lib/efactura/poll";
 import { sendPlainAlert } from "@/lib/email/plain-alert";
 import { PLATFORM_SELLER } from "@/lib/legal/controller";
+import { daysUntil, TOKEN_EXPIRY_WARNING_DAYS } from "@/lib/anaf/token-import";
 
 export type PlatformRunResult =
   | { skipped: string }
@@ -45,7 +46,19 @@ export async function runPlatformEfactura(): Promise<PlatformRunResult> {
 
   const { data: held } = await db.from("efactura_invoices").select("invoice_number,error_message")
     .eq("organisation_id", orgId).eq("upload_status", "needs_data").limit(20);
+  const { data: tokenRow } = await db.from("anaf_oauth_tokens").select("expires_at,refresh_token").eq("organisation_id", orgId).maybeSingle();
+  const tokenLines: string[] = [];
+  if (tokenRow && !tokenRow.refresh_token) {
+    // The accountant's token can't be renewed by us; ask for a new one in time.
+    const left = daysUntil(new Date(tokenRow.expires_at));
+    if (left <= TOKEN_EXPIRY_WARNING_DAYS) {
+      tokenLines.push(left < 0
+        ? "Tokenul ANAF de la contabil a expirat. Cereți unul nou și lipiți-l în /app/admin/efactura."
+        : `Tokenul ANAF de la contabil expiră în ${left} zile. Cereți unul nou și lipiți-l în /app/admin/efactura.`);
+    }
+  }
   const lines = [
+    ...tokenLines,
     ...report.alerts,
     ...rejected,
     ...(held ?? []).map((h) => `Factură oprită (date lipsă): ${h.error_message ?? h.invoice_number}`),

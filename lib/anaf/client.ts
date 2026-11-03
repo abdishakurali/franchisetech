@@ -27,7 +27,10 @@ export type ValidationResult = {
 };
 
 function base(env: AnafEnv): string {
-  return ANAF_BASE[env];
+  // End-to-end tests point the client at a stand-in ANAF server. Honoured
+  // only under NODE_ENV=test, so production can never be redirected.
+  const override = process.env.NODE_ENV === "test" ? process.env.ANAF_API_BASE_OVERRIDE : undefined;
+  return override || ANAF_BASE[env];
 }
 
 /**
@@ -123,6 +126,23 @@ export async function downloadReceipt(
 
   const arrayBuffer = await res.arrayBuffer();
   return Buffer.from(arrayBuffer);
+}
+
+/**
+ * A harmless read call (messages of the last day) that proves a token works
+ * for this CUI before we rely on it. 200 = usable; 401/403 = not.
+ */
+export async function checkTokenForCif(
+  accessToken: string,
+  cif: string,
+  env: AnafEnv = "prod",
+): Promise<{ ok: boolean; status: number; detail: string }> {
+  const url = `${base(env)}/listaMesajeFactura?zile=1&cif=${encodeURIComponent(cif)}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  const text = await res.text().catch(() => "");
+  // ANAF answers 200 with an "eroare" field for a CUI the certificate has no SPV rights for.
+  const eroare = text.match(/"eroare"\s*:\s*"([^"]+)"/)?.[1];
+  return { ok: res.ok && !eroare, status: res.status, detail: (eroare ?? text).slice(0, 300) };
 }
 
 // ANAF's public validator needs no OAuth token (api.anaf.ro/.../validare

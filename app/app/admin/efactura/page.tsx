@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isLeadAdmin } from "@/lib/leads/admin";
 import { getAuthorizationUrl } from "@/lib/anaf/auth";
 import { authLinkSecret, signAuthState } from "@/lib/anaf/auth-link";
+import { AnafTokenImportForm } from "@/components/app/AnafTokenImportForm";
 
 export const metadata = { title: "e-Factura SALUT TECH", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -37,8 +38,12 @@ export default async function PlatformEfacturaPage() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://franchisetech.ro";
   const service = await createServiceClient();
 
-  const token = orgId
-    ? (await service.from("anaf_oauth_tokens").select("expires_at,updated_at").eq("organisation_id", orgId).maybeSingle()).data
+  const tokenRow = orgId
+    ? (await service.from("anaf_oauth_tokens").select("expires_at,updated_at,refresh_token").eq("organisation_id", orgId).maybeSingle()).data
+    : null;
+  // Only derived facts leave the server; the token itself never reaches the page.
+  const token = tokenRow
+    ? { expiresAt: new Date(tokenRow.expires_at), fromAccountant: !tokenRow.refresh_token, updatedAt: tokenRow.updated_at as string }
     : null;
   const invoices = orgId
     ? (await service.from("efactura_invoices")
@@ -61,7 +66,16 @@ export default async function PlatformEfacturaPage() {
         <ul className="mt-3 space-y-1 text-muted-foreground">
           <li>Organizație: {orgId ? "configurată" : "lipsește PLATFORM_BILLING_ORG_ID"}</li>
           <li>Aplicație ANAF (OAuth): {clientId ? "înregistrată" : "neînregistrată (ANAF_CLIENT_ID lipsește)"}</li>
-          <li>Autorizare: {token ? `activă, token reînnoit la ${new Date(token.updated_at).toLocaleDateString("ro-RO")}` : "lipsă"}</li>
+          <li>
+            Autorizare:{" "}
+            {!token
+              ? "lipsă"
+              : token.expiresAt <= new Date()
+                ? `expirată la ${token.expiresAt.toLocaleDateString("ro-RO")}`
+                : token.fromAccountant
+                  ? `token de la contabil, valabil până la ${token.expiresAt.toLocaleDateString("ro-RO")} (nu se reînnoiește automat)`
+                  : `activă, se reînnoiește automat (salvată la ${new Date(token.updatedAt).toLocaleDateString("ro-RO")})`}
+          </li>
           <li>Facturi la plată: {process.env.PLATFORM_INVOICING === "1" ? "se creează automat" : "oprite (PLATFORM_INVOICING, după ce contabilul alege seria)"}</li>
           <li>Trimitere: {process.env.PLATFORM_EFACTURA_UPLOAD === "1" ? "automată" : "oprită (doar validare)"}</li>
         </ul>
@@ -74,6 +88,7 @@ export default async function PlatformEfacturaPage() {
             <textarea readOnly value={authLink} className="mt-2 h-24 w-full rounded-md border border-border bg-background p-2 font-mono text-xs" />
           </div>
         ) : null}
+        {orgId ? <AnafTokenImportForm /> : null}
       </section>
 
       <section>
