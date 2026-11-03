@@ -66,6 +66,20 @@ describe("FiscalNet API raw reply capture", () => {
     expect(JSON.parse(last.body)).toEqual(["S^Espresso^1200^1000^Buc^2^1", "ST^0", "P^1^1200"]);
   });
 
+  // Byte-for-byte the reply Dolce Nera's FiscalNet sent on 2026-11-03 (spaces
+  // after colons, empty ErrorCode, Z counter in ReceiptInfo).
+  it("confirms the real reply captured from a live FiscalNet", async () => {
+    const body = '{"ReceiptStatus": true,"ReceiptNumber": "12","ReceiptInfo": "\\r\\nNRZ=2276","ErrorCode": "","ErrorInfo": ""}';
+    const result = await sell({ status: 200, body });
+
+    expect(result.ok).toBe(true);
+    expect(result.confirmation).toBe("confirmed");
+    expect(result.receiptNumber).toBe("12");
+    expect(result.errorCode).toBeUndefined();
+    expect(result.message).toBe("Bon fiscal emis. Nr: 12");
+    expect(result.rawResponse).toBe(`HTTP 200 ${body}`);
+  });
+
   it("treats a documented device error as a failure, with the device's code", async () => {
     const body = JSON.stringify({ ReceiptStatus: false, ErrorCode: "-111015", ErrorInfo: "Hartie terminata" });
     const result = await sell({ status: 200, body });
