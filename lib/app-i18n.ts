@@ -619,9 +619,9 @@ const en = {
       couldNotSave: "Could not save options",
       on: "On",
       off: "Off",
-      pro: "Pro",
+      pro: "Higher plan",
       blockReasonEnable: "Enable this module in Settings when you are ready.",
-      blockReasonPro: "Available on the Pro plan. Choose a plan to use it.",
+      blockReasonPro: "Not included in your current plan. See plans under Billing.",
     },
     notifications: {
       title: "Owner digest email",
@@ -1979,9 +1979,9 @@ const ro: typeof en = {
       couldNotSave: "Opțiunile nu au putut fi salvate",
       on: "Activ",
       off: "Inactiv",
-      pro: "Pro",
+      pro: "Alt plan",
       blockReasonEnable: "Activați acest modul din Setări când sunteți gata.",
-      blockReasonPro: "Disponibil în planul Pro. Alegeți un plan pentru a-l folosi.",
+      blockReasonPro: "Nu este inclus în planul actual. Vedeți planurile la Facturare.",
     },
     notifications: {
       title: "Email rezumat manager",
