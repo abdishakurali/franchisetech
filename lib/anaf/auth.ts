@@ -2,7 +2,9 @@
 // USB token flow: user must insert hardware token + enter PIN once in browser.
 // After first auth, refresh_token enables server-side automation.
 
-import { createClient } from "@/lib/supabase/server";
+// anaf_oauth_tokens is service-role only (RLS, no policies): every caller here
+// passes an organisation it has already authorised.
+import { createServiceClient } from "@/lib/supabase/server";
 
 const ANAF_AUTH_BASE = "https://logincert.anaf.ro/anaf-oauth2/v1";
 
@@ -66,7 +68,8 @@ export async function exchangeCode(
 
 /**
  * Refresh an access token using a stored refresh token.
- * Call before the access token expires (TTL ~1 hour).
+ * ANAF documents 90-day access and 365-day refresh tokens
+ * (Oauth_procedura_inregistrare_aplicatii_portal_ANAF.pdf).
  */
 export async function refreshAccessToken(
   refreshToken: string,
@@ -109,7 +112,7 @@ function parseTokenResponse(data: Record<string, unknown>): TokenPair {
  * Uses service_role to read/write anaf_oauth_tokens (never exposed to client).
  */
 export async function getOrgAccessToken(orgId: string): Promise<string> {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
   const { data: tokenRow, error } = await supabase
     .from("anaf_oauth_tokens")
@@ -136,16 +139,20 @@ export async function getOrgAccessToken(orgId: string): Promise<string> {
   }
 
   const tokens = await refreshAccessToken(tokenRow.refresh_token, clientId, clientSecret);
+  if (!tokens.accessToken) throw new Error("ANAF token refresh returned no access token");
 
-  await supabase
+  // ANAF rotates the refresh token on each refresh; never overwrite it with an
+  // empty one, or the organisation is locked out until re-authorised.
+  const { error: saveError } = await supabase
     .from("anaf_oauth_tokens")
     .update({
       access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
+      refresh_token: tokens.refreshToken || tokenRow.refresh_token,
       expires_at: tokens.expiresAt.toISOString(),
       updated_at: new Date().toISOString(),
     })
     .eq("organisation_id", orgId);
+  if (saveError) throw new Error(`ANAF token save failed: ${saveError.message}`);
 
   return tokens.accessToken;
 }
@@ -158,8 +165,9 @@ export async function storeOrgTokens(
   cif: string,
   tokens: TokenPair,
 ): Promise<void> {
-  const supabase = await createClient();
-  await supabase
+  if (!tokens.accessToken || !tokens.refreshToken) throw new Error("ANAF returned an incomplete token pair");
+  const supabase = await createServiceClient();
+  const { error } = await supabase
     .from("anaf_oauth_tokens")
     .upsert(
       {
@@ -172,13 +180,14 @@ export async function storeOrgTokens(
       },
       { onConflict: "organisation_id" },
     );
+  if (error) throw new Error(`ANAF token save failed: ${error.message}`);
 }
 
 /**
  * Check if an org has ANAF credentials configured.
  */
 export async function hasAnafCredentials(orgId: string): Promise<boolean> {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   const { count } = await supabase
     .from("anaf_oauth_tokens")
     .select("*", { count: "exact", head: true })
@@ -190,7 +199,7 @@ export async function hasAnafCredentials(orgId: string): Promise<boolean> {
  * Remove ANAF credentials for an org (disconnect).
  */
 export async function revokeOrgTokens(orgId: string): Promise<void> {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
   await supabase
     .from("anaf_oauth_tokens")
     .delete()

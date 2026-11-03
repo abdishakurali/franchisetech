@@ -1,72 +1,62 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { exchangeCode, storeOrgTokens } from "@/lib/anaf/auth";
+import { authLinkSecret, verifyAuthState } from "@/lib/anaf/auth-link";
 
+// Two ways in:
+// 1. A signed authorisation link (lib/anaf/auth-link.ts). Whoever holds it —
+//    the owner or their accountant, who is not a member — signs on ANAF with a
+//    certificate; the organisation comes from our signature, not from the URL.
+// 2. Legacy: a signed-in owner/manager with the organisation id as state.
 export async function GET(req: Request): Promise<NextResponse> {
   const url = new URL(req.url);
   const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state"); // we encode orgId as state
+  const state = url.searchParams.get("state");
+  const signedOrgId = verifyAuthState(state, authLinkSecret());
+  const done = (status: "connected" | "error", msg?: string) =>
+    NextResponse.redirect(new URL(
+      signedOrgId
+        ? `/anaf/autorizare?status=${status}${msg ? `&msg=${msg}` : ""}`
+        : `/app/settings?tab=anaf&status=${status}${msg ? `&msg=${msg}` : ""}`,
+      req.url,
+    ));
 
-  if (!code) {
-    return NextResponse.redirect(new URL("/app/settings?tab=anaf&status=error&msg=no_code", req.url));
-  }
+  if (!code) return done("error", "no_code");
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return NextResponse.redirect(new URL("/login", req.url));
-  }
-
-  // orgId comes from state param we set when building the authorization URL
-  const orgId = state ?? null;
+  let orgId: string | null = signedOrgId;
   if (!orgId) {
-    return NextResponse.redirect(new URL("/app/settings?tab=anaf&status=error&msg=missing_state", req.url));
-  }
-
-  // Verify this user is owner/manager of the org
-  const { data: membership } = await supabase
-    .from("organisation_members")
-    .select("role")
-    .eq("organisation_id", orgId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (!membership || !["owner", "manager"].includes(membership.role ?? "")) {
-    return NextResponse.redirect(new URL("/app/settings?tab=anaf&status=error&msg=unauthorized", req.url));
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.redirect(new URL("/login", req.url));
+    if (!state) return done("error", "missing_state");
+    const { data: membership } = await supabase
+      .from("organisation_members")
+      .select("role")
+      .eq("organisation_id", state)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!membership || !["owner", "manager"].includes(membership.role ?? "")) return done("error", "unauthorized");
+    orgId = state;
   }
 
   const clientId = process.env.ANAF_CLIENT_ID;
   const clientSecret = process.env.ANAF_CLIENT_SECRET;
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://franchisetech.ro";
   const redirectUri = `${baseUrl}/api/anaf/auth/callback`;
-
-  if (!clientId || !clientSecret) {
-    return NextResponse.redirect(new URL("/app/settings?tab=anaf&status=error&msg=server_config", req.url));
-  }
+  if (!clientId || !clientSecret) return done("error", "server_config");
 
   try {
+    const service = await createServiceClient();
+    const { data: org } = await service.from("organisations").select("anaf_cif").eq("id", orgId).maybeSingle();
+    if (!org?.anaf_cif) return done("error", "cif_required");
+
     const tokens = await exchangeCode(code, clientId, clientSecret, redirectUri);
-
-    // Fetch CIF from org settings
-    const { data: org } = await supabase
-      .from("organisations")
-      .select("anaf_cif")
-      .eq("id", orgId)
-      .single();
-
-    if (!org?.anaf_cif) {
-      return NextResponse.redirect(
-        new URL("/app/settings?tab=anaf&status=error&msg=cif_required", req.url),
-      );
-    }
-
     await storeOrgTokens(orgId, org.anaf_cif, tokens);
-
-    return NextResponse.redirect(new URL("/app/settings?tab=anaf&status=connected", req.url));
+    return done("connected");
   } catch (err) {
     console.error("[ANAF OAuth callback]", err);
-    return NextResponse.redirect(new URL("/app/settings?tab=anaf&status=error&msg=exchange_failed", req.url));
+    return done("error", "exchange_failed");
   }
 }

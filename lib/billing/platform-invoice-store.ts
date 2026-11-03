@@ -4,7 +4,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { UblAddress } from "@/lib/anaf/ubl-builder";
-import { salesInbox } from "@/lib/email/demo-lead";
+import { sendPlainAlert } from "@/lib/email/plain-alert";
 import { PLATFORM_SELLER } from "@/lib/legal/controller";
 import type { PlatformInvoiceConfig } from "@/lib/billing/platform-invoice";
 import type { PlatformInvoiceStore, QueueDeps, StoredInvoice } from "@/lib/billing/platform-invoice-queue";
@@ -105,13 +105,4 @@ export function platformInvoiceDeps(db: SupabaseClient): QueueDeps | null {
       if (!sent) console.error("platform_invoice_alert_failed", subject);
     },
   };
-}
-
-async function sendPlainAlert(subject: string, body: string): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return false;
-  const { Resend } = await import("resend");
-  const from = process.env.RESEND_FROM_EMAIL ?? "franchisetech <onboarding@resend.dev>";
-  const { error } = await new Resend(apiKey).emails.send({ from, to: [salesInbox()], subject, text: body });
-  return !error;
 }
