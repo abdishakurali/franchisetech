@@ -125,19 +125,16 @@ export async function downloadReceipt(
   return Buffer.from(arrayBuffer);
 }
 
-/**
- * Validate XML against ANAF's validator — use BEFORE uploading.
- * Note: only works on the production endpoint, even during development.
- */
-export async function validateXml(
-  xml: string,
-  env: AnafEnv = "prod",
-): Promise<ValidationResult> {
-  // /validare always runs on prod
-  const url = `${ANAF_BASE.prod}/validare/FACT1`;
-  const res = await fetch(url, {
+// ANAF's public validator needs no OAuth token (api.anaf.ro/.../validare
+// answers 401 without one). Checked 2026-11-03: it returns JSON
+// {"stare":"ok"|"nok","Messages":[{"message":"...codEroare=BR-..."}]}.
+const PUBLIC_VALIDATOR = "https://webservicesp.anaf.ro/prod/FCTEL/rest/validare/FACT1";
+
+/** Validate XML against ANAF's validator — use BEFORE uploading. */
+export async function validateXml(xml: string): Promise<ValidationResult> {
+  const res = await fetch(PUBLIC_VALIDATOR, {
     method: "POST",
-    headers: { "Content-Type": "text/xml" },
+    headers: { "Content-Type": "text/plain" },
     body: xml,
   });
 
@@ -146,12 +143,23 @@ export async function validateXml(
     throw new AnafApiError(`ANAF validate failed: ${res.status}`, res.status, body);
   }
 
-  const text = await res.text();
-  const valid = text.includes("executionStatus=\"0\"") || text.includes("<Errors/>") || !text.includes("<Error");
-  const errorMatches = [...text.matchAll(/<Error[^>]*>([^<]*)<\/Error>/g)];
-  const errors = errorMatches.map((m) => m[1]);
+  return parseValidationResponse(await res.text());
+}
 
-  return { valid: errors.length === 0, errors };
+/** A reply that isn't an explicit "ok" is never treated as valid. */
+export function parseValidationResponse(text: string): ValidationResult {
+  let parsed: { stare?: unknown; Messages?: Array<{ message?: unknown }> } | null = null;
+  try { parsed = JSON.parse(text); } catch { /* not JSON */ }
+  if (!parsed) return { valid: false, errors: [`Răspuns ANAF necunoscut: ${text.slice(0, 200)}`] };
+  const errors = (parsed.Messages ?? [])
+    .map((m) => String(m.message ?? ""))
+    .map((m) => {
+      const code = m.match(/codEroare=([A-Z0-9-]+)/)?.[1];
+      const msg = m.match(/textEroare=([^;]+)/)?.[1]?.trim();
+      return code ? `${code}: ${msg ?? m}` : m;
+    })
+    .filter(Boolean);
+  return { valid: parsed.stare === "ok" && errors.length === 0, errors };
 }
 
 export class AnafApiError extends Error {
