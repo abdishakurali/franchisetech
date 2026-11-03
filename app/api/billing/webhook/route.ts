@@ -9,6 +9,9 @@ import { startTrialAfterCardVerification } from "@/lib/billing/verification";
 import { reportPaidConversion } from "@/lib/analytics/server-conversions";
 import { captureServerEvent, flushPostHog } from "@/lib/posthog-server";
 import { buildPaymentFailureProperties } from "@/lib/billing/reconciliation";
+import { platformInvoiceDeps } from "@/lib/billing/platform-invoice-store";
+import { queuePlatformInvoice } from "@/lib/billing/platform-invoice-queue";
+import type { StripeInvoiceLike } from "@/lib/billing/platform-invoice";
 
 export const dynamic = "force-dynamic";
 
@@ -251,6 +254,22 @@ export async function POST(request: Request) {
           clearGracePeriod: isSuccess,
         });
         if (!sync.synced) throw new Error(`invoice_subscription_sync_failed:${sync.reason ?? "unknown"}`);
+
+        // Our own e-Factura for this payment. Off until PLATFORM_BILLING_ORG_ID
+        // is set; idempotent per Stripe invoice (invoice.paid and
+        // invoice.payment_succeeded both arrive). A failure here must never
+        // fail the webhook — the subscription state above is what matters.
+        if (isSuccess && (invoice.amount_paid ?? 0) > 0) {
+          try {
+            const platformDeps = platformInvoiceDeps(await createServiceClient());
+            if (platformDeps) {
+              const queued = await queuePlatformInvoice(invoice as unknown as StripeInvoiceLike, platformDeps);
+              console.info("platform_invoice", { stripe_invoice: invoice.id, status: queued.status });
+            }
+          } catch (e) {
+            console.error("platform_invoice_failed", { stripe_invoice: invoice.id, error: e instanceof Error ? e.message : String(e) });
+          }
+        }
 
         if (isFailure) {
           const failOrgId = subscription.metadata?.organisation_id ?? null;

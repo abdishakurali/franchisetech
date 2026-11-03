@@ -13,6 +13,23 @@ export const DATA_CONTROLLER = {
 } as const;
 
 /**
+ * SALUT TECH as the seller on our own e-Factura. Address as in the ANAF
+ * registry (webservicesp.anaf.ro PlatitorTvaRest, read 2026-11-03).
+ */
+export const PLATFORM_SELLER = {
+  name: "SALUT TECH S.R.L.",
+  cui: "49702253",
+  regCom: "J23/1669/2024",
+  address: {
+    street: "Str. Orhideelor nr. 15, Biroul nr. 6",
+    city: "Dobroești",
+    postalCode: "077085",
+    countrySubentity: "RO-IF",
+    countryCode: "RO",
+  },
+} as const;
+
+/**
  * PENDING (owner): how long enquiries from people who do not become customers are kept.
  * 24 months is the value shown on /demo since 2026-10-27; confirm or change it.
  */
