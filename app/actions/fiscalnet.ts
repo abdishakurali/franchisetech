@@ -21,9 +21,8 @@ import {
   printFiscalReceipt,
   fiscalXReport, fiscalZReport, fiscalStatus,
   fiscalCashIn, fiscalCashOut, fiscalVoidLast,
-  DEFAULT_VAT_GROUPS, DEFAULT_PAYMENT_TYPE_MAP,
 } from "@/lib/fiscalnet";
-import type { FiscalLineItem, VatGroup, FiscalPaymentCode } from "@/lib/fiscalnet";
+import type { FiscalLineItem } from "@/lib/fiscalnet";
 import { buildFiscalNetConfig } from "@/lib/fiscalnet/config";
 import {
   buildCashInLines,
@@ -36,6 +35,7 @@ import {
   safePath,
 } from "@/lib/fiscalnet";
 import { assertEntitlement, EntitlementDeniedError } from "@/lib/billing/entitlement-resolver";
+import { fiscalNetSettingsUpdate } from "@/lib/fiscalnet/settings-update";
 
 function canManage(role: string): boolean {
   return ["owner", "manager"].includes(role);
@@ -98,64 +98,15 @@ export async function saveFiscalNetSettings(formData: FormData) {
     throw error;
   }
 
-  const enabled          = formData.get("fiscalnet_enabled") === "true";
-  const mockMode         = formData.get("fiscalnet_mock_mode") !== "false";
-  const connectionMode   = formData.get("fiscalnet_connection_mode") === "file" ? "file" : "api";
-  const apiHost          = stringValue(formData, "fiscalnet_api_host") || "http://localhost:65400";
-  const bonuriPath       = stringValue(formData, "fiscalnet_bonuri_path") || null;
-  const raspunsPath      = stringValue(formData, "fiscalnet_raspuns_path") || null;
-  const autoPrint        = formData.get("fiscalnet_auto_print") !== "false";
-  const askBeforePrint   = formData.get("fiscalnet_ask_before_print") === "true";
-  const manualOnly       = formData.get("fiscalnet_manual_only") === "true";
-  const timeoutMs        = numberValue(formData, "fiscalnet_timeout_ms", 30000);
-  const retryCount       = numberValue(formData, "fiscalnet_retry_count", 2);
-  const cif              = stringValue(formData, "fiscalnet_cif") || null;
-  const operatorCode     = stringValue(formData, "fiscalnet_operator_code") || "1";
-
-  let vatGroups: VatGroup[] = DEFAULT_VAT_GROUPS;
-  try {
-    const raw = stringValue(formData, "fiscalnet_vat_groups");
-    if (raw) {
-      const parsed = JSON.parse(raw) as unknown;
-      if (Array.isArray(parsed)) vatGroups = parsed as VatGroup[];
-    }
-  } catch { /* keep defaults */ }
-
-  let paymentTypeMap: Record<string, FiscalPaymentCode> = { ...DEFAULT_PAYMENT_TYPE_MAP };
-  try {
-    const raw = stringValue(formData, "fiscalnet_payment_type_map");
-    if (raw) {
-      const parsed = JSON.parse(raw) as unknown;
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        paymentTypeMap = parsed as Record<string, FiscalPaymentCode>;
-      }
-    }
-  } catch { /* keep defaults */ }
-
-  if (connectionMode === "file") {
-    if (bonuriPath)  { try { safePath(bonuriPath); }  catch { return { error: "Invalid Bonuri path." }; } }
-    if (raspunsPath) { try { safePath(raspunsPath); } catch { return { error: "Invalid Raspuns path." }; } }
-  }
+  // Only the fields the form sent are written (lib/fiscalnet/settings-update.ts);
+  // everything else — the CUI on reports, VAT groups, payment codes — stays.
+  const built = fiscalNetSettingsUpdate(formData, safePath);
+  if ("error" in built) return { error: built.error };
+  if (Object.keys(built.update).length === 0) return { success: true };
 
   const { error } = await supabase
     .from("organisations")
-    .update({
-      fiscalnet_enabled:          enabled,
-      fiscalnet_mock_mode:        mockMode,
-      fiscalnet_connection_mode:  connectionMode,
-      fiscalnet_api_host:         apiHost.replace(/\/$/, ""),
-      fiscalnet_bonuri_path:      bonuriPath,
-      fiscalnet_raspuns_path:     raspunsPath,
-      fiscalnet_auto_print:       autoPrint,
-      fiscalnet_ask_before_print: askBeforePrint,
-      fiscalnet_manual_only:      manualOnly,
-      fiscalnet_timeout_ms:       Math.min(Math.max(timeoutMs, 5000), 120000),
-      fiscalnet_retry_count:      Math.min(Math.max(retryCount, 0), 5),
-      fiscalnet_cif:              cif,
-      fiscalnet_operator_code:    operatorCode,
-      fiscalnet_vat_groups:       vatGroups,
-      fiscalnet_payment_type_map: paymentTypeMap,
-    })
+    .update(built.update)
     .eq("id", orgId);
 
   if (error) return { error: error.message };
