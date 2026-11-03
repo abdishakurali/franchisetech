@@ -21,6 +21,7 @@ import { upsertLoopsContact } from "@/lib/loops";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEvent, flushPostHog } from "@/lib/posthog-server";
 import { deriveAccountType } from "@/lib/analytics/account-type";
+import { sendSignupAlertEmail } from "@/lib/email/signup-alert";
 
 const COUNTRY_LABELS: Record<string, string> = {
   RO: "Romania",
@@ -88,6 +89,7 @@ export async function completePosOnboarding(input: {
 
   let orgId: string | undefined;
   let siteId: string | undefined;
+  let createdNow = false;
 
   if (existingMembership?.organisation_id) {
     // A prior attempt already created the org/membership for this user (the
@@ -136,6 +138,7 @@ export async function completePosOnboarding(input: {
     const created = Array.isArray(data) ? data[0] : data;
     orgId = created?.organisation_id as string | undefined;
     siteId = created?.site_id as string | undefined;
+    createdNow = Boolean(orgId);
   }
 
   if (!orgId) {
@@ -386,6 +389,23 @@ export async function completePosOnboarding(input: {
   // later group() call) since these fire server-side, right at org creation
   // — before the client has necessarily mounted and identified this session.
   const accountType = deriveAccountType(user.email, input.orgName);
+  // Only a brand-new workspace from a real customer alerts the founder; a
+  // resumed onboarding or a test/internal account does not.
+  if (createdNow && accountType === "real_customer" && user.email) {
+    const email = user.email;
+    after(async () => {
+      const sent = await sendSignupAlertEmail({
+        orgName: input.orgName.trim(),
+        businessType: input.businessType ?? null,
+        contactName: input.userName?.trim() || null,
+        email,
+        countryCode: input.countryCode,
+        locationBand: input.locationBand,
+        utm: [input.acquisition?.utm_source, input.acquisition?.utm_medium, input.acquisition?.utm_campaign],
+      });
+      if (!sent.success) console.error("onboarding_signup_alert_failed", sent.error);
+    });
+  }
   captureServerEvent(
     user.id,
     "onboarding_completed",
