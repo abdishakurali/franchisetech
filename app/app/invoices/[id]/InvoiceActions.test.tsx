@@ -32,8 +32,9 @@ describe("B2B invoice actions", () => {
 
     expect(screen.getByRole("button", { name: "Stornează" }).hasAttribute("disabled")).toBe(false);
     expect(screen.getByRole("button", { name: /Descarcă PDF/ }).hasAttribute("disabled")).toBe(false);
-    expect(screen.getByRole("link", { name: /Configurează și trimite la ANAF/ }).getAttribute("href"))
-      .toBe("/app/settings?tab=integrations#marketplace");
+    // No self-serve e-Factura switch exists, so say so instead of linking to a dead end.
+    expect(screen.getByText(/nu este activă pentru firma dumneavoastră/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "cereți activarea" }).getAttribute("href")).toBe("/contact");
     expect(screen.queryByRole("button", { name: "Trimite la ANAF" })).toBeNull();
   });
 });

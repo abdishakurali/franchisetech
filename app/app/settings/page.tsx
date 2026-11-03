@@ -5,7 +5,7 @@ import {
   addVatRate, updateVatRate, deleteVatRate, seedDefaultVatRates,
   addUnit, updateUnit, deleteUnit,
   updateSite,
-  approveProductVat, updateSgrPolicy,
+  approveProductVat,
   updateBusinessProfileAndModules,
 } from "@/app/actions/kitchenops";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,8 +14,7 @@ import { SettingsSection } from "@/components/app/SettingsSection";
 import { SettingsListSection } from "@/components/app/SettingsListSection";
 import { unitLabel } from "@/lib/units-of-measure";
 import { AnafSettingsCard } from "@/components/app/AnafSettingsCard";
-import { TestimonialPromptCard } from "@/components/app/TestimonialPromptCard";
-import { IntegrationCards } from "@/components/app/IntegrationCards";
+import { setBusinessModuleInstalled } from "@/app/actions/org-settings";
 import { VatRatesCard } from "@/components/app/VatRatesCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,8 +39,6 @@ import { getSuggestedFeaturesForIndustry } from "@/lib/restaurant-features";
 import { DEFAULT_OPERATIONAL_UNITS } from "@/lib/units-of-measure";
 import { CuiLookupCard } from "@/components/app/CuiLookupCard";
 import { OwnerDigestCard, type OwnerDigestTeamMember } from "@/components/app/OwnerDigestCard";
-import { NotificationPreferences } from "@/components/app/NotificationPreferences";
-import type { NotificationKey } from "@/app/actions/org-settings";
 import { BillingPanel } from "@/components/billing/BillingPanel";
 import { CheckCircle2, Circle, AlertCircle, ExternalLink } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -103,6 +100,9 @@ const TAB_ALIASES: Record<string, string> = {
   products: "categories",
   operations: "categories",
   integrations: "fiscal",
+  // The Marketplace section was removed (it only listed FiscalNet, which the
+  // Fiscal section now enables itself); old links land on Fiscal.
+  marketplace: "fiscal",
   general: "business",
 };
 
@@ -338,14 +338,14 @@ export default async function SettingsPage({
     : null;
 
   // Data repair (merged from the former /app/settings/data-repair route) —
-  // RO-only, same gate as the VAT review banner above: the VAT queue and SGR
-  // policy concepts are meaningless outside Romanian fiscal compliance.
+  // RO-only, same gate as the VAT review banner above: the VAT queue is
+  // meaningless outside Romanian fiscal compliance. (The SGR policy form was
+  // removed: nothing read sgr_policy; POS uses products.is_sgr_deposit.)
   let dataRepairProducts: Array<{ id: string; name: string; vat_rate: number; vat_status: string | null; category: string | null; inventory_category: unknown }> = [];
   let dataRepairRates: Array<{ id: string; name: string; rate: number }> = [];
   let dataRepairBatches: Array<{ id: string; repair_type: string; status: string; summary: unknown; created_at: string; completed_at: string | null }> = [];
-  let sgrPolicy: { sgr_policy: string | null; sgr_deposit_amount: number | null; sgr_vat_rate: number | null } | null = null;
   if (isRO) {
-    const [{ data: repairProductsData }, { data: ratesData }, { data: batchesData }, { data: sgrData }] = await Promise.all([
+    const [{ data: repairProductsData }, { data: ratesData }, { data: batchesData }] = await Promise.all([
       supabase.from("products")
         .select(`id,name,vat_rate,vat_status,category,${PRODUCT_INVENTORY_CATEGORY_EMBED}(name)`)
         .eq("organisation_id", orgId)
@@ -354,12 +354,10 @@ export default async function SettingsPage({
         .order("name"),
       supabase.from("vat_rates").select("id,name,rate").eq("organisation_id", orgId).eq("active", true).order("sort_order"),
       supabase.from("repair_batches").select("id,repair_type,status,summary,created_at,completed_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(20),
-      supabase.from("organisations").select("sgr_policy,sgr_deposit_amount,sgr_vat_rate").eq("id", orgId).single(),
     ]);
     dataRepairProducts = (repairProductsData ?? []) as typeof dataRepairProducts;
     dataRepairRates = ratesData ?? [];
     dataRepairBatches = batchesData ?? [];
-    sgrPolicy = sgrData ?? null;
   }
 
   // Modules — subscriptionPlan/hasTrial computed the same way app/app/layout.tsx
@@ -452,9 +450,7 @@ export default async function SettingsPage({
   // merged directly into the page as sections too. Old URLs redirect here.
   const sectionNav: Array<{ id: string; label: string }> = [
     { id: "business",         label: t.settings.tabBusiness },
-    ...(isRO && (fiscalnetEnabled || efacturaEnabled || sagaInstalled)
-      ? [{ id: "fiscal", label: "Fiscal" }]
-      : []),
+    ...(isRO ? [{ id: "fiscal", label: "Fiscal" }] : []),
     ...(isRO ? [{ id: "accountant", label: "Contabilitate" }] : []),
     { id: "modules",          label: isRO ? "Module" : "Modules" },
     { id: "units",            label: isRO ? "Unități de măsură" : "Units" },
@@ -462,7 +458,6 @@ export default async function SettingsPage({
     { id: "categories",       label: isRO ? "Categorii" : "Categories" },
     { id: "location",         label: isRO ? "Locație" : "Location" },
     ...(canEdit ? [{ id: "team", label: isRO ? "Echipă" : "Team" }] : []),
-    { id: "marketplace",      label: "Marketplace" },
     ...(tableServiceEnabled ? [{ id: "tables", label: isRO ? "Mese" : "Tables" }] : []),
     { id: "notifications",    label: isRO ? "Notificări" : t.settings.tabNotifications },
     ...(isRO ? [{ id: "data-repair", label: "Controlul datelor" }] : []),
@@ -722,11 +717,8 @@ export default async function SettingsPage({
                 <div className="flex flex-wrap gap-3 items-center">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <AlertCircle className="h-4 w-4 text-amber-500" />
-                    Neconectat la ANAF SPV
+                    Neconectat la ANAF SPV. Autorizarea se face din cardul de mai jos.
                   </div>
-                  <Link href="#marketplace">
-                    <Button size="sm">Conectează cu ANAF SPV &rarr;</Button>
-                  </Link>
                 </div>
               )}
               <Link
@@ -856,16 +848,25 @@ export default async function SettingsPage({
           />
           )}
 
-          {!efacturaEnabled && !fiscalnetEnabled && !sagaInstalled && (
+          {!fiscalnetEnabled && (
             <Card>
               <CardHeader>
-                <CardTitle>Instalează din Marketplace</CardTitle>
-                <CardDescription>Alege e-Factura, FiscalNet sau Saga doar dacă le folosești.</CardDescription>
+                <CardTitle>Bonuri fiscale prin FiscalNet</CardTitle>
+                <CardDescription>
+                  FiscalNet este programul care trimite bonurile din casa franchisetech către casa de marcat. Este al altei firme și are licență proprie, cumpărată separat.
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="#marketplace">
-                  <Button>Deschide Marketplace</Button>
-                </Link>
+                {canEdit ? (
+                  <form action={setBusinessModuleInstalled}>
+                    <input type="hidden" name="module" value="fiscalnet" />
+                    <input type="hidden" name="installed" value="true" />
+                    <input type="hidden" name="returnTo" value="/app/settings?tab=fiscal" />
+                    <Button type="submit">Activează FiscalNet</Button>
+                  </form>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Doar proprietarul sau managerul poate activa FiscalNet.</p>
+                )}
               </CardContent>
             </Card>
           )}
@@ -914,8 +915,8 @@ export default async function SettingsPage({
             <CardDescription>{lockedMessage}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="#marketplace">
-              <Button variant="outline">Deschide Marketplace</Button>
+            <Link href="#billing">
+              <Button variant="outline">Vezi abonamentul</Button>
             </Link>
           </CardContent>
         </Card>
@@ -1111,7 +1112,7 @@ export default async function SettingsPage({
       </section>
 
       {/* ── FISCAL (RO only) ─────────────────────────────────────────── */}
-      {isRO && (fiscalnetEnabled || efacturaEnabled || sagaInstalled) && (
+      {isRO && (
         <section id="fiscal" className="scroll-mt-20">
           <h2 className="mb-4 text-lg font-semibold text-foreground">Fiscal</h2>
           {fiscalEditor}
@@ -1184,24 +1185,6 @@ export default async function SettingsPage({
         </section>
       )}
 
-      {/* ── MARKETPLACE ──────────────────────────────────────────────── */}
-      <section id="marketplace" className="scroll-mt-20">
-        <h2 className="mb-4 text-lg font-semibold text-foreground">Marketplace</h2>
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground mb-4">
-            {isRO
-              ? "Instalează doar modulele de care ai nevoie. Dezinstalarea ascunde meniurile fără să șteargă datele."
-              : "Install only the modules you need. Uninstall hides menus without deleting data."}
-          </p>
-          <IntegrationCards
-            orgId={orgId}
-            countryCode={countryCode}
-            installError={params?.install_error ? decodeURIComponent(params.install_error) : null}
-            returnTo="/app/settings?tab=marketplace"
-          />
-        </div>
-      </section>
-
       {/* ── TABLES ───────────────────────────────────────────────────── */}
       {tableServiceEnabled && (
         <section id="tables" className="scroll-mt-20">
@@ -1236,11 +1219,6 @@ export default async function SettingsPage({
               teamMembers={digestTeamMembers}
             />
           )}
-          <NotificationPreferences
-            initialPrefs={(orgRow?.notification_preferences as Partial<Record<NotificationKey, boolean>>) ?? {}}
-            canEdit={canEdit}
-            reportsIncluded={digestAllowed}
-          />
         </div>
       </section>
 
@@ -1297,28 +1275,6 @@ export default async function SettingsPage({
                     {!dataRepairProducts.length && <TableRow><TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">Nu există produse blocate pentru TVA.</TableCell></TableRow>}
                   </TableBody>
                 </Table>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader><CardTitle className="text-base">Politica SGR aprobată de contabil</CardTitle></CardHeader>
-              <CardContent>
-                <form action={updateSgrPolicy} className="grid gap-3 sm:grid-cols-[1fr_9rem_9rem_auto] sm:items-end">
-                  <label className="text-sm">Tratament
-                    <select name="sgr_policy" defaultValue={sgrPolicy?.sgr_policy ?? "accountant_approval_required"} className="mt-1 h-10 w-full rounded-md border bg-card px-2">
-                      <option value="accountant_approval_required">Necesită aprobarea contabilului</option>
-                      <option value="outside_vat_scope">În afara bazei TVA</option>
-                      <option value="included_in_taxable_base">Inclus în baza taxabilă</option>
-                    </select>
-                  </label>
-                  <label className="text-sm">Garanție
-                    <input name="sgr_deposit_amount" type="number" min="0" step="0.01" defaultValue={Number(sgrPolicy?.sgr_deposit_amount ?? 0.5)} className="mt-1 h-10 w-full rounded-md border px-2" />
-                  </label>
-                  <label className="text-sm">TVA
-                    <input name="sgr_vat_rate" type="number" min="0" step="0.01" defaultValue={Number(sgrPolicy?.sgr_vat_rate ?? 0)} className="mt-1 h-10 w-full rounded-md border px-2" />
-                  </label>
-                  <button className="h-10 rounded-md bg-ink px-4 text-sm font-medium text-white">Salvează</button>
-                </form>
               </CardContent>
             </Card>
 
@@ -1394,10 +1350,6 @@ export default async function SettingsPage({
         </div>
       </section>
 
-      </div>
-
-      <div className="mt-8">
-        <TestimonialPromptCard />
       </div>
     </div>
   );

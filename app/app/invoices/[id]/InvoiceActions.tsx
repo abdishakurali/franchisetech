@@ -179,13 +179,10 @@ export default function InvoiceActions({ invoiceId, canSubmit, isSubmitted, efac
         )}
 
         {canSubmit && !efacturaEnabled && (
-          <a
-            href="/app/settings?tab=integrations#marketplace"
-            className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/80"
-          >
-            <Send className="mr-1.5 h-4 w-4" />
-            Configurează și trimite la ANAF
-          </a>
+          <p className="self-center text-xs text-muted-foreground">
+            Trimiterea la ANAF (e-Factura) nu este activă pentru firma dumneavoastră —{" "}
+            <a href="/contact" className="underline text-brass">cereți activarea</a>
+          </p>
         )}
 
         {isSubmitted && (

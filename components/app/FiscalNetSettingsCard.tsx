@@ -1,8 +1,9 @@
 "use client";
 
 /**
- * RomaniaReceiptSettingsCard
- * Clean: Enable/Mock/Platform/API host only.
+ * FiscalNetSettingsCard
+ * Enable, test/live mode, FiscalNet address and operator code. The connection
+ * mode is kept as saved (api for nearly everyone; file only for old setups).
  * VAT rates and payment methods come from existing product/payment settings.
  */
 
@@ -38,7 +39,7 @@ export function FiscalNetSettingsCard(props: Props) {
   const router = useRouter();
   const [enabled,   setEnabled]   = useState(props.enabled);
   const [mockMode,  setMockMode]  = useState(props.mockMode);
-  const [platform,  setPlatform]  = useState<"api" | "file">(props.connectionMode === "file" ? "file" : "api");
+  const platform: "api" | "file" = props.connectionMode === "file" ? "file" : "api";
   const [apiHost,   setApiHost]   = useState(props.apiHost || "http://localhost:65400");
   const [opCode,    setOpCode]    = useState(props.operatorCode || "1");
 
@@ -60,10 +61,10 @@ export function FiscalNetSettingsCard(props: Props) {
       // saveFiscalNetSettings forwards the bare EntitlementDeniedError code,
       // not a message — showing it verbatim left the owner staring at
       // "entitlement_denied" with no idea their plan was the cause.
-      if (res?.error) setStatus({ ok: false, msg: res.error === "entitlement_denied" ? "This action isn't available on your current plan. Upgrade to continue." : res.error });
+      if (res?.error) setStatus({ ok: false, msg: res.error === "entitlement_denied" ? "Această acțiune nu este disponibilă în planul actual. Alegeți un plan pentru a continua." : res.error });
       else {
         writeFiscalNetEnabledPreference(enabled);
-        setStatus({ ok: true,  msg: "Receipt settings saved." });
+        setStatus({ ok: true,  msg: "Setările FiscalNet au fost salvate." });
         router.refresh();
       }
     });
@@ -89,7 +90,7 @@ export function FiscalNetSettingsCard(props: Props) {
 
       {/* ── Enable ─────────────────────────────────────────────── */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
-        <h2 className="text-base font-semibold text-foreground">Romania receipts</h2>
+        <h2 className="text-base font-semibold text-foreground">Bonuri fiscale (FiscalNet)</h2>
 
         <Toggle
           checked={enabled}
@@ -100,7 +101,7 @@ export function FiscalNetSettingsCard(props: Props) {
 
         {!enabled && (
           <p className="text-xs text-muted-foreground">
-            Sales are still recorded in franchisetech. Fiscal receipts will not be sent to your till device.
+            Vânzările se înregistrează în continuare în franchisetech. Bonurile fiscale nu se trimit la casa de marcat.
           </p>
         )}
 
@@ -114,7 +115,7 @@ export function FiscalNetSettingsCard(props: Props) {
             />
             <p className="mt-1 text-xs text-muted-foreground">
               {mockMode
-                ? "Poți exersa vânzări fără să conectezi o casă fiscală reală."
+                ? "Puteți exersa vânzări fără o casă de marcat reală. Nu se emit bonuri fiscale."
                 : "Bonurile fiscale se trimit către casa configurată mai jos."}
             </p>
           </div>
@@ -123,22 +124,16 @@ export function FiscalNetSettingsCard(props: Props) {
 
       {enabled && (
         <>
-          {/* ── Platform ───────────────────────────────────────── */}
+          {/* ── FiscalNet address ──────────────────────────────── */}
           <div className="rounded-xl border border-border bg-card p-5 space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">How receipts are sent</h3>
-            <div className="grid gap-2">
-              <PlatformCard
-                active={platform === "api"}
-                onClick={() => setPlatform("api")}
-                icon="📱"
-                title="Android"
-                desc="Send to the Android till app on this device"
-              />
-            </div>
+            <h3 className="text-sm font-semibold text-foreground">Unde rulează FiscalNet</h3>
 
             {platform === "api" && (
               <div className="mt-1 space-y-2">
-                <Label className="text-xs text-mid">Device address</Label>
+                <Label className="text-xs text-mid">Adresa FiscalNet</Label>
+                <p className="text-xs text-muted-foreground">
+                  Pe calculatorul de casă este de obicei http://localhost:65400. Dacă FiscalNet rulează pe alt dispozitiv din rețea, folosiți adresa acestuia.
+                </p>
                 <Input
                   type="text"
                   value={apiHost}
@@ -161,14 +156,14 @@ export function FiscalNetSettingsCard(props: Props) {
 
             {platform === "file" && (
               <p className="text-xs text-muted-foreground bg-secondary rounded-lg px-3 py-2">
-                For each sale, cash movement, or day close, franchisetech downloads a TXT receipt file. Save it to the Bonuri folder used by your fiscal receipt software.
+                La fiecare vânzare, mișcare de numerar sau închidere de zi, franchisetech descarcă un fișier TXT. Salvați-l în folderul Bonuri folosit de FiscalNet.
               </p>
             )}
           </div>
 
           {/* ── Operator code ──────────────────────────────────── */}
           <div className="rounded-xl border border-border bg-card p-5 space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">Cashier code</h3>
+            <h3 className="text-sm font-semibold text-foreground">Cod operator (casier)</h3>
             <Input
               type="text"
               value={opCode}
@@ -176,7 +171,7 @@ export function FiscalNetSettingsCard(props: Props) {
               placeholder="1"
               className="w-32"
             />
-            <p className="text-xs text-muted-foreground">The cashier/operator code used for receipts. Default is 1.</p>
+            <p className="text-xs text-muted-foreground">Codul operatorului tipărit pe bonuri. Implicit 1.</p>
           </div>
         </>
       )}
@@ -188,7 +183,7 @@ export function FiscalNetSettingsCard(props: Props) {
         disabled={saving}
         className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
       >
-        {saving ? "Se salvează…" : enabled ? "Save receipt settings" : "Save — receipts disabled"}
+        {saving ? "Se salvează…" : enabled ? "Salvează setările FiscalNet" : "Salvează — bonuri fiscale oprite"}
       </Button>
       {status && (
         <div className={`rounded-lg px-3 py-2 text-sm font-medium border ${status.ok ? "bg-reconciled/10 text-reconciled border-reconciled/25" : "bg-attention/10 text-attention border-attention/25"}`}>
@@ -214,23 +209,5 @@ function Toggle({ checked, onChange, label, color }: {
       </div>
       <span className="text-sm font-medium text-foreground">{label}</span>
     </label>
-  );
-}
-
-function PlatformCard({ active, onClick, icon, title, desc }: {
-  active: boolean; onClick: () => void; icon: string; title: string; desc: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-xl border-2 p-4 text-left transition-colors ${
-        active ? "border-brass bg-accent" : "border-border bg-card hover:border-border"
-      }`}
-    >
-      <div className="text-2xl mb-1">{icon}</div>
-      <p className={`text-sm font-semibold ${active ? "text-brass" : "text-foreground"}`}>{title}</p>
-      <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
-    </button>
   );
 }
