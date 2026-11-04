@@ -62,7 +62,7 @@ export function ContactForm({ source = "contact_page" }: { source?: string }) {
     return (
       <div className="border border-reconciled/25 bg-reconciled/10 p-6" role="status">
         <h3 className="font-semibold text-emerald-950">{isRo ? "Cererea a fost trimisă." : "Request sent."}</h3>
-        <p className="mt-2 text-sm text-reconciled">{isRo ? "Revenim în maximum o zi lucrătoare." : "We will reply within one business day."}</p>
+        <p className="mt-2 text-sm text-reconciled">{isRo ? "Vă sunăm în următoarea zi lucrătoare." : "We call you back the next working day."}</p>
       </div>
     );
   }
@@ -96,7 +96,7 @@ export function ContactForm({ source = "contact_page" }: { source?: string }) {
 
       <details className="group">
         <summary className="cursor-pointer list-none text-sm font-medium text-brass hover:text-brass">
-          {isRo ? "Adaugă detalii (opțional)" : "Add details (optional)"}
+          {isRo ? "Adăugați detalii (opțional)" : "Add details (optional)"}
         </summary>
         <div className="mt-4 space-y-4">
           <div>

@@ -1,4 +1,5 @@
-.site { background:var(--paper); color:var(--ink); font-family:var(--font-body),sans-serif; -webkit-font-smoothing:antialiased; }
+.site { background:var(--paper); color:var(--ink); font-family:var(--font-body),sans-serif; -webkit-font-smoothing:antialiased; min-height:100vh; display:flex; flex-direction:column; }
+.site > main { flex:1 0 auto; }
 .site * { box-sizing:border-box; }
 .site h1,.site h2,.site h3,.site p { margin:0; }
 .site h1,.site h2,.site h3 { font-family:var(--font-display),sans-serif; font-weight:600; text-wrap:balance; }
