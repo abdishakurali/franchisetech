@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { addCategoryInline, addProductFromPos } from "@/app/actions/kitchenops";
 import { advanceFromMenu } from "@/app/actions/onboarding-steps";
+import { formatRatePercent, formatVatRateLabel, ratesMatch, type OrgVatRate } from "@/lib/vat-rates";
 
 type Category = { id: string; name: string };
 type Product = { id: string; name: string; sale_price: number; category_id: string | null };
@@ -26,6 +27,13 @@ const STRINGS = {
     noCategoriesYet: "Nicio categorie încă. Creează prima categorie pentru a începe meniul.",
     currencySuffix: "lei",
     removeRow: "Șterge rândul",
+    vatLegend: "Cota TVA pentru produsele din această categorie",
+    vatHelp: "Cota TVA apare pe bonul fiscal. Dacă nu sunteți sigur, întrebați contabilul.",
+    vatMissingInline: "Alegeți cota TVA pentru această categorie.",
+    vatMissingToast: (name: string) => `Alegeți cota TVA pentru categoria „${name}” înainte de a continua.`,
+    noVatRates: "Nu există cote TVA active. Adăugați-le în Setări înainte de a adăuga produse.",
+    noVatRatesLink: "Deschideți Setări",
+    unregisteredNote: "Firma este setată ca neplătitoare de TVA, așa că este disponibilă doar cota 0%. Puteți schimba această setare în Setări.",
   },
   en: {
     addCategory: "+ Category",
@@ -39,6 +47,13 @@ const STRINGS = {
     noCategoriesYet: "No categories yet. Create your first category to start the menu.",
     currencySuffix: "",
     removeRow: "Remove row",
+    vatLegend: "VAT rate for products in this category",
+    vatHelp: "The VAT rate is printed on the receipt. If you're not sure, ask your accountant.",
+    vatMissingInline: "Choose the VAT rate for this category.",
+    vatMissingToast: (name: string) => `Choose the VAT rate for the "${name}" category before continuing.`,
+    noVatRates: "No active VAT rates. Add them in Settings before adding products.",
+    noVatRatesLink: "Open Settings",
+    unregisteredNote: "This business is set as not VAT-registered, so only the 0% rate is available. You can change this in Settings.",
   },
 };
 
@@ -49,16 +64,25 @@ function blankRows(count: number): DraftRow[] {
 
 export function MenuBuilder({
   locale,
-  defaultVatRate,
+  vatRates,
+  vatRestrictedToZero = false,
   initialCategories,
   initialProducts,
 }: {
   locale: "ro" | "en";
-  defaultVatRate: number;
+  /** The selling VAT rates the owner may pick from (already filtered by the page). */
+  vatRates: OrgVatRate[];
+  /** True when the org's VAT-payer setting limits selling rates to 0%. */
+  vatRestrictedToZero?: boolean;
   initialCategories: Category[];
   initialProducts: Product[];
 }) {
   const t = STRINGS[locale];
+  // The owner must pick a VAT rate per category; nothing is preselected and
+  // there is deliberately no fallback to the org default (see
+  // continueToNext). Keyed by category id; value is the numeric rate.
+  const [vatByCategory, setVatByCategory] = useState<Record<string, number>>({});
+  const [vatMissing, setVatMissing] = useState<Record<string, boolean>>({});
   const [categories, setCategories] = useState(initialCategories);
   const [productsByCategory, setProductsByCategory] = useState<Record<string, Product[]>>(() => {
     const map: Record<string, Product[]> = {};
@@ -122,11 +146,40 @@ export function MenuBuilder({
     }));
   }
 
+  function chooseVat(categoryId: string, rate: number) {
+    setVatByCategory((current) => ({ ...current, [categoryId]: rate }));
+    setVatMissing((current) => ({ ...current, [categoryId]: false }));
+  }
+
+  function chosenVat(categoryId: string): number | null {
+    const rate = vatByCategory[categoryId];
+    if (rate === undefined) return null;
+    return vatRates.some((option) => ratesMatch(option.rate, rate)) ? rate : null;
+  }
+
   // One page-level save: Continue always flushes every non-empty draft row
   // across every category first, then advances — there is no separate
   // per-category save action, so a typed-but-unsaved row can never be
   // silently dropped by clicking Continue.
   function continueToNext() {
+    // Block before saving anything: every category with a filled row needs an
+    // explicit VAT choice, so the save is all-or-nothing on this check.
+    const missing: string[] = [];
+    for (const categoryId of Object.keys(draftRows)) {
+      const hasRows = draftRows[categoryId].some((row) => row.name.trim() && row.price.trim());
+      if (hasRows && chosenVat(categoryId) === null) missing.push(categoryId);
+    }
+    if (missing.length) {
+      setVatMissing((current) => {
+        const next = { ...current };
+        for (const categoryId of missing) next[categoryId] = true;
+        return next;
+      });
+      const firstName = categories.find((c) => c.id === missing[0])?.name ?? "";
+      toast.error(vatRates.length === 0 ? t.noVatRates : t.vatMissingToast(firstName));
+      return;
+    }
+
     startContinuing(async () => {
       const createdByCategory: Record<string, Product[]> = {};
       let totalCreated = 0;
@@ -135,13 +188,15 @@ export function MenuBuilder({
       for (const categoryId of Object.keys(draftRows)) {
         const rows = draftRows[categoryId].filter((row) => row.name.trim() && row.price.trim());
         if (!rows.length) continue;
+        const vatRate = chosenVat(categoryId);
+        if (vatRate === null) continue; // unreachable: guarded above
         const created: Product[] = [];
         for (const row of rows) {
           const fd = new FormData();
           fd.set("name", row.name.trim());
           fd.set("sale_price", row.price.trim());
           fd.set("pos_category_id", categoryId);
-          fd.set("vat_rate", String(defaultVatRate));
+          fd.set("vat_rate", String(vatRate));
           const result = await addProductFromPos(fd);
           if (!result.ok) {
             hadError = true;
@@ -212,6 +267,54 @@ export function MenuBuilder({
               ))}
             </ul>
           )}
+
+          <fieldset
+            className="space-y-2 border-b border-border px-4 py-3"
+            aria-invalid={vatMissing[category.id] ? true : undefined}
+            aria-describedby={`vat-help-${category.id}`}
+          >
+            <legend className="sr-only">{t.vatLegend}</legend>
+            <p aria-hidden="true" className="text-xs font-medium text-foreground">{t.vatLegend}</p>
+            {vatRates.length === 0 ? (
+              <p className="text-xs text-attention">
+                {t.noVatRates}{" "}
+                <Link href="/app/settings?tab=general" className="underline">{t.noVatRatesLink}</Link>
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {vatRates.map((rate) => {
+                  const checked = vatByCategory[category.id] !== undefined && ratesMatch(vatByCategory[category.id], rate.rate);
+                  return (
+                    <label
+                      key={rate.id}
+                      className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm ${
+                        checked ? "border-primary bg-accent font-medium text-foreground" : "border-border bg-card text-foreground"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={`vat-${category.id}`}
+                        value={String(rate.rate)}
+                        checked={checked}
+                        onChange={() => chooseVat(category.id, rate.rate)}
+                        aria-label={formatVatRateLabel(rate)}
+                        className="h-4 w-4 accent-primary"
+                      />
+                      <span className="font-[family-name:var(--font-space-mono)]">{formatRatePercent(rate.rate)}</span>
+                      <span className="text-xs text-muted-foreground">{rate.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+            <p id={`vat-help-${category.id}`} className="text-xs text-muted-foreground">
+              {t.vatHelp}
+              {vatRestrictedToZero ? ` ${t.unregisteredNote}` : ""}
+            </p>
+            {vatMissing[category.id] && (
+              <p role="alert" className="text-xs font-medium text-attention">{t.vatMissingInline}</p>
+            )}
+          </fieldset>
 
           <div className="space-y-2 p-4">
             {draftRows[category.id]?.map((row) => {

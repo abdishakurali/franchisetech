@@ -1,6 +1,6 @@
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
-import { getDefaultVatRateValue } from "@/lib/vat-rates";
+import { isRoUnregisteredOrg, validateVatRateForOrg, vatRateOptionsForSelect } from "@/lib/vat-rates";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { MenuBuilder } from "@/components/onboarding/MenuBuilder";
 import { onboardingStepLabels, onboardingStepOfLabel } from "@/lib/onboarding/steps";
@@ -21,7 +21,7 @@ const STRINGS = {
 };
 
 export default async function OnboardingMenuPage() {
-  const { supabase, orgId, countryCode } = await getActiveOrg();
+  const { supabase, orgId, countryCode, membership } = await getActiveOrg();
   const isRO = countryCode === "RO";
   const locale = isRO ? "ro" : "en";
   const t = STRINGS[locale];
@@ -42,7 +42,18 @@ export default async function OnboardingMenuPage() {
     listActiveVatRates(supabase, orgId),
   ]);
 
-  const defaultVatRate = getDefaultVatRateValue(vatRates ?? []);
+  // The owner picks the VAT rate per category in MenuBuilder; nothing is
+  // preselected. Offer only the rates addProductFromPos would accept for this
+  // org: the same validateVatRateForOrg gate (ANAF registration) the server
+  // applies, so an unregistered RO org isn't offered a rate that is rejected.
+  const orgRow = (Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations) as
+    | { anaf_vat_registered?: boolean | null }
+    | null;
+  const vatOrg = { countryCode, vatRegistered: Boolean(orgRow?.anaf_vat_registered) };
+  const allRates = vatRates ?? [];
+  const selectableVatRates = vatRateOptionsForSelect(allRates).filter(
+    (rate) => validateVatRateForOrg(allRates, rate.rate, vatOrg).ok,
+  );
 
   return (
     <OnboardingShell
@@ -56,7 +67,8 @@ export default async function OnboardingMenuPage() {
     >
       <MenuBuilder
         locale={locale}
-        defaultVatRate={defaultVatRate}
+        vatRates={selectableVatRates}
+        vatRestrictedToZero={isRoUnregisteredOrg(vatOrg)}
         initialCategories={(categories ?? []).map((c) => ({ id: c.id as string, name: c.name as string }))}
         initialProducts={(products ?? []).map((p) => ({
           id: p.id as string,
