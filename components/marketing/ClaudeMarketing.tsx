@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { TRIAL_DAYS } from "@/lib/billing/trial";
 import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { CreditCard, Package, Wifi, Receipt, FileBarChart, MailCheck, ShieldCheck, Building2 } from "lucide-react";
@@ -197,7 +198,7 @@ const DESIGN_PRICING_CARD_COPY: Record<"growth" | "team", { body: string; featur
 export function DesignPricing({ featuredPlan: requestedPlan }: { featuredPlan?: string } = {}) {
   const plansToShow = pricingPlans.filter((plan): plan is typeof plan & { id: "growth" | "team" } => plan.id === "growth" || plan.id === "team");
   const featuredPlan = plansToShow.some((plan) => plan.id === requestedPlan) ? requestedPlan : "growth";
-  return <><PageHero eyebrow="Prețuri" title="Două planuri plătite, cu preț clar.">Pro este pentru o locație. Multi este pentru mai multe locații. Alegeți plata lunară sau anuală și economisiți 20% anual.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={`${s.grid} ${s.plans}`}>{plansToShow.map((plan) => {
+  return <><PageHero eyebrow="Prețuri" title="Două planuri plătite, cu preț clar.">Pro este pentru o locație. Multi este pentru mai multe locații. Începeți cu {TRIAL_DAYS} zile de Pro gratuit, fără card. Apoi alegeți plata lunară sau anuală și economisiți 20% anual.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={`${s.grid} ${s.plans}`}>{plansToShow.map((plan) => {
     const copy = DESIGN_PRICING_CARD_COPY[plan.id];
     return <article className={`${s.card} ${s.plan} ${plan.id === featuredPlan ? s.featured : ""}`} key={plan.id}><div className={s.cardTitle}><h2>{plan.name}</h2>{copy.badge && <span className={`${s.badge} ${s.blueBadge}`}>{copy.badge}</span>}</div><div className={s.price}><strong>{plan.price}</strong><span> / locație / lună</span></div><p className={s.meta}>sau {plan.annualPrice}/lună, facturat anual</p><p className={s.body}>{copy.body}</p><ul className={s.features}>{copy.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><DesignTrialLink location="pricing_plan" plan={plan.id}>{copy.cta}</DesignTrialLink></article>;
   })}</div><p className={s.smallPrint}>Prețurile nu includ TVA. Bonurile fiscale trec prin FiscalNet (driverfiscal.ro), un program al altei firme, cu licență proprie care se cumpără separat, și printr-o casă de marcat compatibilă. Vă putem ajuta să le conectați. Anulare oricând, fără contract pe termen lung.</p></section><section className={`${s.container} ${s.bottomSpace}`}><h2 className={s.sectionTitle}>Întrebări frecvente</h2><div className={`${s.grid} ${s.faq}`}>{designFaq.map(({ q, a }) => <article className={s.card} key={q}><h3>{q}</h3><p className={s.body}>{a}</p></article>)}</div></section><DesignFinalCta /></>;
