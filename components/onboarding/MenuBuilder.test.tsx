@@ -77,7 +77,7 @@ describe("MenuBuilder VAT choice", () => {
     renderBuilder();
     fillRow(0, "Espresso", "9");
 
-    fireEvent.click(screen.getByRole("button", { name: /Adaugă produsele și continuă/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Adăugați produsele și continuați/ }));
 
     expect((await screen.findByRole("alert")).textContent).toBe("Alegeți cota TVA pentru această categorie.");
     expect(toast.error).toHaveBeenCalledWith("Alegeți cota TVA pentru categoria „Cafea” înainte de a continua.");
@@ -91,7 +91,7 @@ describe("MenuBuilder VAT choice", () => {
     fillRow(1, "Cola", "8");
     fireEvent.click(categoryRadios("cat-coffee").find((radio) => radio.value === "11")!);
 
-    fireEvent.click(screen.getByRole("button", { name: /Adaugă produsele și continuă/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Adăugați produsele și continuați/ }));
 
     expect((await screen.findByRole("alert")).textContent).toBe("Alegeți cota TVA pentru această categorie.");
     expect(toast.error).toHaveBeenCalledWith("Alegeți cota TVA pentru categoria „Răcoritoare” înainte de a continua.");
@@ -110,7 +110,7 @@ describe("MenuBuilder VAT choice", () => {
     fireEvent.click(categoryRadios("cat-coffee").find((radio) => radio.value === "11")!);
     fireEvent.click(categoryRadios("cat-drinks").find((radio) => radio.value === "21")!);
 
-    fireEvent.click(screen.getByRole("button", { name: /Adaugă produsele și continuă/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Adăugați produsele și continuați/ }));
 
     await waitFor(() => expect(advanceFromMenu).toHaveBeenCalledTimes(1));
     expect(sentProducts()).toEqual([
@@ -128,7 +128,7 @@ describe("MenuBuilder VAT choice", () => {
     });
 
     expect(screen.getByText("Latte")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /Adaugă produsele și continuă/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Adăugați produsele și continuați/ }));
 
     await waitFor(() => expect(advanceFromMenu).toHaveBeenCalledTimes(1));
     expect(addProductFromPos).not.toHaveBeenCalled();
@@ -146,11 +146,11 @@ describe("MenuBuilder VAT choice", () => {
     expect(screen.getByText(/neplătitoare de TVA/)).toBeTruthy();
 
     fillRow(0, "Espresso", "9");
-    fireEvent.click(screen.getByRole("button", { name: /Adaugă produsele și continuă/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Adăugați produsele și continuați/ }));
     expect(addProductFromPos).not.toHaveBeenCalled();
 
     fireEvent.click(radios[0]);
-    fireEvent.click(screen.getByRole("button", { name: /Adaugă produsele și continuă/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Adăugați produsele și continuați/ }));
     await waitFor(() => expect(advanceFromMenu).toHaveBeenCalledTimes(1));
     expect(sentProducts()).toEqual([{ name: "Espresso", category: "cat-coffee", vat_rate: "0" }]);
   });
@@ -159,7 +159,7 @@ describe("MenuBuilder VAT choice", () => {
     renderBuilder({ vatRates: [], initialCategories: [categories[0]] });
     fillRow(0, "Espresso", "9");
 
-    fireEvent.click(screen.getByRole("button", { name: /Adaugă produsele și continuă/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Adăugați produsele și continuați/ }));
 
     expect(toast.error).toHaveBeenCalledWith("Nu există cote TVA active. Adăugați-le în Setări înainte de a adăuga produse.");
     expect(addProductFromPos).not.toHaveBeenCalled();

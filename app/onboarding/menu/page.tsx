@@ -7,8 +7,8 @@ import { onboardingStepLabels, onboardingStepOfLabel } from "@/lib/onboarding/st
 
 const STRINGS = {
   ro: {
-    title: "Construiește meniul",
-    subtitle: "Adaugă categoriile și produsele tale — apar imediat în POS.",
+    title: "Construiți meniul",
+    subtitle: "Adăugați categoriile și produsele dumneavoastră — apar imediat în POS.",
     timeEstimate: "~3 minute",
     trialBadge: "15 zile Pro gratuit · fără card",
   },
