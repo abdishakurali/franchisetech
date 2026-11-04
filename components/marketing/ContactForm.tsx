@@ -94,35 +94,30 @@ export function ContactForm({ source = "contact_page" }: { source?: string }) {
         </p>
       </div>
 
-      <details className="group">
-        <summary className="cursor-pointer list-none text-sm font-medium text-brass hover:text-brass">
-          {isRo ? "Adăugați detalii (opțional)" : "Add details (optional)"}
-        </summary>
-        <div className="mt-4 space-y-4">
-          <div>
-            <Label htmlFor={`${source}-name`}>{isRo ? "Nume" : "Name"}</Label>
-            <Input id={`${source}-name`} name="name" autoComplete="name" maxLength={100} className="mt-1.5" />
-          </div>
-          <div>
-            <Label htmlFor={`${source}-business-type`}>{isRo ? "Tipul afacerii" : "Business type"}</Label>
-            <select id={`${source}-business-type`} name="businessType" defaultValue="" className="mt-1.5 h-10 w-full rounded-md border border-border bg-card px-3 text-sm">
-              <option value="">{isRo ? "Alegeți" : "Select"}</option>
-              {BUSINESS_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
-            </select>
-          </div>
-          <div>
-            <Label htmlFor={`${source}-message`}>{isRo ? "Întrebarea dumneavoastră" : "Your question"}</Label>
-            <Textarea
-              id={`${source}-message`}
-              name="message"
-              rows={3}
-              maxLength={1500}
-              placeholder={isRo ? "Am o casă de marcat Datecs DP-150. Merge cu ea?" : "I have a Datecs DP-150 register. Does it work?"}
-              className="mt-1.5"
-            />
-          </div>
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor={`${source}-name`}>{isRo ? "Nume (opțional)" : "Name (optional)"}</Label>
+          <Input id={`${source}-name`} name="name" autoComplete="name" maxLength={100} className="mt-1.5" />
         </div>
-      </details>
+        <div>
+          <Label htmlFor={`${source}-business-type`}>{isRo ? "Tipul afacerii (opțional)" : "Business type (optional)"}</Label>
+          <select id={`${source}-business-type`} name="businessType" defaultValue="" className="mt-1.5 h-10 w-full rounded-md border border-border bg-card px-3 text-sm">
+            <option value="">{isRo ? "Alegeți" : "Select"}</option>
+            {BUSINESS_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+          </select>
+        </div>
+        <div>
+          <Label htmlFor={`${source}-message`}>{isRo ? "Întrebarea dumneavoastră (opțional)" : "Your question (optional)"}</Label>
+          <Textarea
+            id={`${source}-message`}
+            name="message"
+            rows={3}
+            maxLength={1500}
+            placeholder={isRo ? "Am o casă de marcat Datecs DP-150. Merge cu ea?" : "I have a Datecs DP-150 register. Does it work?"}
+            className="mt-1.5"
+          />
+          </div>
+      </div>
 
       <label className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
         <input type="checkbox" name="consent" required className="mt-1" />
