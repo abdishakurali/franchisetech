@@ -195,7 +195,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       .order("pos_sort_order", { ascending: true })
       .order("name", { ascending: true }),
     supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("sort_order", { ascending: true }).order("name", { ascending: true }),
-    supabase.from("payment_methods").select("id,name,type").eq("organisation_id", orgId).eq("active", true).order("created_at"),
+    supabase.from("payment_methods").select("id,name,type,fiscalnet_code").eq("organisation_id", orgId).eq("active", true).order("created_at"),
   ]) : null;
   const earlyRegisterQueries = shouldPrefetchRegister ? Promise.all([
     supabase.from("customers").select("id,name,phone,email").eq("organisation_id", orgId).order("name").limit(100),
@@ -527,7 +527,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
             { organisation_id: orgId, name: "Card", type: "card" },
             { organisation_id: orgId, name: "Online", type: "online" },
             { organisation_id: orgId, name: "Other", type: "other" },
-          ]).select("id,name,type")
+          ]).select("id,name,type,fiscalnet_code")
         : Promise.resolve({ data: methods }),
     ]);
     categories = categorySeed.data ?? categories;

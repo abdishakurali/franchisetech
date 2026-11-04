@@ -93,7 +93,7 @@ type Product = {
   inventory_category?: { id: string; name: string; color: string | null } | null;
 };
 type Category = { id: string; name: string; color: string | null };
-type PaymentMethod = { id: string; name: string; type: string };
+type PaymentMethod = { id: string; name: string; type: string; fiscalnet_code?: number | null };
 type CartItem = PosCartLine;
 type SplitPayment = { id: string; payment_method_id: string; amount: number; reference?: string };
 type Customer = { id: string; name: string; phone: string | null; email: string | null };
@@ -1085,6 +1085,9 @@ function PosRegisterInner({
   const splitPaid = activeSplitPayments.reduce((sum, row) => sum + Number(row.amount || 0), 0);
   const splitRemaining = totalDue - splitPaid;
   const selectedPaymentType = paymentMethods.find((m) => m.id === paymentMethodId)?.type ?? "other";
+  // The receipt's payment code comes from the method the sale was saved with.
+  const fiscalPaymentCodeFor = (methodId: string | undefined) =>
+    paymentMethods.find((m) => m.id === methodId)?.fiscalnet_code ?? null;
   const isCashSingle = selectedPaymentType === "cash" && activeSplitPayments.length === 0 && cart.length > 0;
   const cashUnderPaid = isCashSingle && typeof cashReceived === "number" && cashReceived > 0 && cashReceived < totalDue - 0.005;
   const txDiscountPct = transactionDiscountPct(cart);
@@ -1256,6 +1259,7 @@ function PosRegisterInner({
         void fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
           transactionId: res.transactionId,
           recordAttempt: recordFiscalAttempt,
+          paymentCode: fiscalPaymentCodeFor(payload.payment_method_id),
         }).then((fnRes) => {
           if (fiscalActive && fnRes.filename && fnRes.content) {
             setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
@@ -1496,6 +1500,7 @@ function PosRegisterInner({
           const fnRes = await fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
             transactionId: res.transactionId,
             recordAttempt: recordFiscalAttempt,
+            paymentCode: fiscalPaymentCodeFor(entry.payload.payment_method_id),
           });
           if (fiscalActive && fnRes.filename && fnRes.content) {
             setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });

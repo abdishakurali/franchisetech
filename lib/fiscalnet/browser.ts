@@ -217,18 +217,27 @@ async function callApi(
 
 // ── shared line builders ─────────────────────────────────────────────────────
 
+// FiscalNet plain-text P^ payment codes: 1 numerar … 9 Other2.
+function isFiscalPaymentCode(code: number | null | undefined): code is number {
+  return typeof code === "number" && Number.isInteger(code) && code >= 1 && code <= 9;
+}
+
 export function buildFiscalNetReceiptLines(
   items: BrowserFiscalItem[],
   paymentType: string,
   config: BrowserFiscalConfig,
-  total?: number
+  total?: number,
+  methodPaymentCode?: number | null
 ): string[] {
   const vatGroups = config.vatGroups?.length ? config.vatGroups : DEFAULT_VAT_GROUPS;
   const ptMap     = Object.keys(config.paymentTypeMap ?? {}).length ? config.paymentTypeMap : DEFAULT_PAYMENT_TYPE_MAP;
   const opCode    = config.operatorCode ?? "1";
 
+  // The payment method's own FiscalNet code wins (e.g. "Tichete masă" = 4,
+  // FoodStamp in FiscalNet's documented P^ codes 1–9); the per-type map is the
+  // fallback, so a meal ticket stored as type "other" is no longer sent as 8.
   // Payment code must be explicitly configured — do not silently default.
-  const payCode = ptMap[paymentType];
+  const payCode = isFiscalPaymentCode(methodPaymentCode) ? methodPaymentCode : ptMap[paymentType];
   if (payCode == null) {
     throw new Error(
       `FiscalNet: metoda de plată "${paymentType}" nu are cod FN configurat. ` +
@@ -307,11 +316,12 @@ export async function fiscalBrowserReceipt(
   config: BrowserFiscalConfig,
   items: BrowserFiscalItem[],
   total: number,
-  paymentType: string
+  paymentType: string,
+  methodPaymentCode?: number | null
 ): Promise<BrowserFiscalResult> {
   if (!config.enabled) return { ok: true, message: "FiscalNet dezactivat." };
 
-  const lines = buildFiscalNetReceiptLines(items, paymentType, config, total);
+  const lines = buildFiscalNetReceiptLines(items, paymentType, config, total, methodPaymentCode);
 
   if (config.connectionMode === "file") {
     return downloadLines(lines, "BON");

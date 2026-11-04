@@ -69,9 +69,11 @@ export async function fiscalBrowserReceiptAndLog(
     transactionId: string;
     attemptNumber?: number;
     recordAttempt: RecordFiscalAttempt;
+    /** The sale's payment method FiscalNet code, when the method has one. */
+    paymentCode?: number | null;
   }
 ): Promise<BrowserFiscalResult> {
-  const result = await fiscalBrowserReceipt(config, items, total, paymentType);
+  const result = await fiscalBrowserReceipt(config, items, total, paymentType, ctx.paymentCode);
 
   if (!config.enabled) return result;
 

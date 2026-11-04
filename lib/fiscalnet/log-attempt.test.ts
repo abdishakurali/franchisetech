@@ -55,6 +55,13 @@ describe("fiscalBrowserReceiptAndLog", () => {
     );
   });
 
+  it("passes the payment method's FiscalNet code through to the receipt", async () => {
+    fiscalBrowserReceiptMock.mockResolvedValue({ ok: true, message: "Bon tipărit." });
+    const recordAttempt = vi.fn().mockResolvedValue({ ok: true, attemptId: "a1" });
+    await fiscalBrowserReceiptAndLog(baseConfig, [], 10, "other", { transactionId: "tx-meal", recordAttempt, paymentCode: 4 });
+    expect(fiscalBrowserReceiptMock).toHaveBeenCalledWith(baseConfig, [], 10, "other", 4);
+  });
+
   it("logs ambiguous (never success) when FiscalNet accepted the request but confirmed nothing", async () => {
     const recordAttempt = vi.fn().mockResolvedValue({ ok: true, attemptId: "a1" });
     fiscalBrowserReceiptMock.mockResolvedValue({ ok: true, message: "Comandă trimisă.", confirmation: "unconfirmed", rawResponse: "HTTP 200 OK" });

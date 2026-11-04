@@ -155,6 +155,37 @@ describe("FiscalNet TXT command payloads", () => {
     expect(lines).toEqual(["S^Test Product^1000^1000^Buc^5^42", "ST^0", "P^5^1000"]);
   });
 
+  describe("payment code from the payment method", () => {
+    // Dolce Nera's live map and methods (2026-11-04): cash 1, card 2, "Cont Client" other 8.
+    const liveConfig = {
+      enabled: true,
+      mockMode: false,
+      connectionMode: "api" as const,
+      apiHost: "http://localhost:65400",
+      vatGroups: [{ code: 2, rate: 11, label: "TVA 11" }],
+      paymentTypeMap: { card: 2, cash: 1, other: 8, online: 2 },
+      operatorCode: "1",
+    };
+    const item = [{ productName: "Espresso", quantity: 1, unitPrice: 10, vatRate: 11, fiscalNetGroup: 2 }];
+    const payLine = (type: string, code?: number | null) => buildFiscalNetReceiptLines(item, type, liveConfig, 10, code).at(-1);
+
+    it("sends meal tickets (type other, method code 4) as FoodStamp 4, not Other 8", () => {
+      expect(payLine("other", 4)).toBe("P^4^1000");
+      expect(payLine("other")).toBe("P^8^1000");
+    });
+
+    it("prints exactly what Dolce Nera prints today for cash, card and client account", () => {
+      expect(payLine("cash", 1)).toBe(payLine("cash"));
+      expect(payLine("card", 2)).toBe(payLine("card"));
+      expect(payLine("other", 8)).toBe(payLine("other"));
+      expect([payLine("cash", 1), payLine("card", 2), payLine("other", 8)]).toEqual(["P^1^1000", "P^2^1000", "P^8^1000"]);
+    });
+
+    it("falls back to the type map when the method has no valid code", () => {
+      for (const bad of [null, undefined, 0, 10, 2.5]) expect(payLine("card", bad)).toBe("P^2^1000");
+    });
+  });
+
   it("emits DP^ immediately after S^ when item has discountPercent", () => {
     const lines = buildFiscalNetReceiptLines(
       [{ productName: "Croissant", quantity: 1, unitPrice: 3.2, vatRate: 9, fiscalNetGroup: 1, discountPercent: 32 }],
