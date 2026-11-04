@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { TRIAL_DAYS } from "@/lib/billing/trial";
+import { SUPPORT_PHONE_DISPLAY, SUPPORT_PHONE_TEL, SUPPORT_WHATSAPP_URL } from "@/lib/marketing/contact-info";
 import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { CreditCard, Package, Wifi, Receipt, FileBarChart, MailCheck, ShieldCheck, Building2 } from "lucide-react";
@@ -50,7 +51,7 @@ export function ClaudeMarketingShell({ children, user = null }: { children: Reac
     <main>{children}</main>
     <footer className={s.footer}><div className={`${s.container} ${s.footerInner}`}>
       <Link href="/"><Image src="/design-marketing/franchise-tech-logo.svg" alt="FranchiseTech" width={190} height={26} className={s.logo} /></Link>
-      <span>franchisetech.ro · suport în română</span>
+      <span>franchisetech.ro · suport în română · <a href={SUPPORT_PHONE_TEL}>{SUPPORT_PHONE_DISPLAY}</a> · <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">WhatsApp</a></span>
       {DATA_CONTROLLER.legalName ? <span className={s.footerLegal}>{[DATA_CONTROLLER.legalName, DATA_CONTROLLER.registrationNumber, DATA_CONTROLLER.registeredAddress].filter(Boolean).join(" · ")}</span> : null}
       <nav className={s.footerLinks} aria-label="Informații legale"><Link href="/pentru-contabili">Pentru contabili</Link><Link href="/privacy">Confidențialitate</Link><Link href="/terms">Termeni</Link><Link href="/contact">Contact</Link></nav>
     </div></footer>
@@ -178,6 +179,7 @@ export const designFaq = [
   { q: "Merge dacă nu sunt plătitor de TVA?", a: "Da. TVA-ul de la furnizor intră în costul mărfii, iar TVA-ul de vânzare se configurează separat. Cotele de achiziție rămân disponibile pentru facturile furnizorilor." },
   { q: "Bonul fiscal se emite și offline?", a: "Înregistrarea vânzării și emiterea bonului sunt etape separate. Vânzarea intră în coada locală; emiterea bonului depinde de driverul fiscal și de echipamentul local. În POS vedeți ce a rămas de emis." },
   { q: "Ce se întâmplă dacă cade internetul?", a: "Cu POS-ul deja deschis, vindeți mai departe: maximum 20 de vânzări în coada locală, sincronizate automat când revine conexiunea." },
+  { q: "Cât costă configurarea?", a: `Nimic. Vă ajutăm gratuit să importați meniul, să verificați casa de marcat și licența FiscalNet și să faceți prima vânzare. Sunați sau scrieți-ne pe WhatsApp la ${SUPPORT_PHONE_DISPLAY}.` },
   { q: "Am două locații. Merge?", a: "Da — planul Multi include locația de bază și adaugă 29€/lună pentru fiecare locație în plus, cu raportare centrală și comutare între locații." },
 ];
 
@@ -201,5 +203,5 @@ export function DesignPricing({ featuredPlan: requestedPlan }: { featuredPlan?: 
   return <><PageHero eyebrow="Prețuri" title="Două planuri plătite, cu preț clar.">Pro este pentru o locație. Multi este pentru mai multe locații. Începeți cu {TRIAL_DAYS} zile de Pro gratuit, fără card. Apoi alegeți plata lunară sau anuală și economisiți 20% anual.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={`${s.grid} ${s.plans}`}>{plansToShow.map((plan) => {
     const copy = DESIGN_PRICING_CARD_COPY[plan.id];
     return <article className={`${s.card} ${s.plan} ${plan.id === featuredPlan ? s.featured : ""}`} key={plan.id}><div className={s.cardTitle}><h2>{plan.name}</h2>{copy.badge && <span className={`${s.badge} ${s.blueBadge}`}>{copy.badge}</span>}</div><div className={s.price}><strong>{plan.price}</strong><span> / locație / lună</span></div><p className={s.meta}>sau {plan.annualPrice}/lună, facturat anual</p><p className={s.body}>{copy.body}</p><ul className={s.features}>{copy.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><DesignTrialLink location="pricing_plan" plan={plan.id}>{copy.cta}</DesignTrialLink></article>;
-  })}</div><p className={s.smallPrint}>Prețurile nu includ TVA. Bonurile fiscale trec prin FiscalNet (driverfiscal.ro), un program al altei firme, cu licență proprie care se cumpără separat, și printr-o casă de marcat compatibilă. Vă putem ajuta să le conectați. Anulare oricând, fără contract pe termen lung.</p></section><section className={`${s.container} ${s.bottomSpace}`}><h2 className={s.sectionTitle}>Întrebări frecvente</h2><div className={`${s.grid} ${s.faq}`}>{designFaq.map(({ q, a }) => <article className={s.card} key={q}><h3>{q}</h3><p className={s.body}>{a}</p></article>)}</div></section><DesignFinalCta /></>;
+  })}</div><p className={s.smallPrint}>Prețurile nu includ TVA. Bonurile fiscale trec prin FiscalNet (driverfiscal.ro), un program al altei firme, cu licență proprie care se cumpără separat, și printr-o casă de marcat compatibilă. Configurarea este gratuită: vă ajutăm să importați meniul și să conectați FiscalNet cu casa de marcat. Anulare oricând, fără contract pe termen lung.</p></section><section className={`${s.container} ${s.bottomSpace}`}><h2 className={s.sectionTitle}>Întrebări frecvente</h2><div className={`${s.grid} ${s.faq}`}>{designFaq.map(({ q, a }) => <article className={s.card} key={q}><h3>{q}</h3><p className={s.body}>{a}</p></article>)}</div></section><DesignFinalCta /></>;
 }

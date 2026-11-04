@@ -3,6 +3,7 @@ import { ContactForm } from "@/components/marketing/ContactForm";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { DATA_CONTROLLER } from "@/lib/legal/controller";
+import { SUPPORT_PHONE_DISPLAY, SUPPORT_PHONE_TEL, SUPPORT_WHATSAPP_URL } from "@/lib/marketing/contact-info";
 
 export const metadata: Metadata = {
   title: "Contact franchisetech",
@@ -32,6 +33,15 @@ export default async function ContactPage() {
             <p className="mt-5 text-sm text-[#5B5D57]">
               {isRo ? "Preferați emailul? Scrieți-ne la " : "Prefer email? Write to "}
               <a href={`mailto:${EMAIL}`} className="font-medium text-[#0D0F0E] underline underline-offset-2">{EMAIL}</a>.
+            </p>
+            <p className="mt-2 text-sm text-[#5B5D57]">
+              {isRo ? "Telefon: " : "Phone: "}
+              <a href={SUPPORT_PHONE_TEL} className="font-medium text-[#0D0F0E] underline underline-offset-2">{SUPPORT_PHONE_DISPLAY}</a>
+              {" · "}
+              <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-[#0D0F0E] underline underline-offset-2">WhatsApp</a>
+            </p>
+            <p className="mt-2 text-sm text-[#5B5D57]">
+              {isRo ? "Configurarea este gratuită." : "Setup is free."}
             </p>
             {DATA_CONTROLLER.legalName ? (
               <p className="mt-6 text-sm leading-6 text-[#8F8F86]">
