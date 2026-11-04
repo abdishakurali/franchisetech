@@ -43,7 +43,13 @@ interface Props {
   deleteAction: (fd: FormData) => Promise<void>;
   addLabel: string;
   emptyLabel: string;
+  locale?: string | null;
 }
+
+const UI_STRINGS = {
+  en: { active: "Active", inactive: "Inactive", save: "Save", cancel: "Cancel", deleteConfirm: "Delete?", yes: "Yes", no: "No", edit: "Edit", add: "Add" },
+  ro: { active: "Activă", inactive: "Inactivă", save: "Salvați", cancel: "Anulați", deleteConfirm: "Ștergeți?", yes: "Da", no: "Nu", edit: "Editați", add: "Adăugați" },
+} as const;
 
 /**
  * The one shared list pattern for a settings section that's actually a list
@@ -70,7 +76,9 @@ export function SettingsListSection({
   deleteAction,
   addLabel,
   emptyLabel,
+  locale,
 }: Props) {
+  const ui = UI_STRINGS[locale === "ro" ? "ro" : "en"];
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<FieldValues>({});
   const [addingNew, setAddingNew] = useState(false);
@@ -139,7 +147,7 @@ export function SettingsListSection({
                 : "bg-secondary border-border text-muted-foreground"
             }`}
           >
-            {on ? "Active" : "Inactive"}
+            {on ? ui.active : ui.inactive}
           </button>
         </div>
       );
@@ -206,10 +214,10 @@ export function SettingsListSection({
                 ))}
                 <div className="flex items-end gap-1">
                   <Button size="sm" className="h-8" onClick={() => handleSave(row.id)} disabled={isPending}>
-                    Save
+                    {ui.save}
                   </Button>
                   <Button size="sm" variant="ghost" className="h-8" onClick={cancelEdit} disabled={isPending}>
-                    Cancel
+                    {ui.cancel}
                   </Button>
                 </div>
               </div>
@@ -228,14 +236,14 @@ export function SettingsListSection({
                 ) : null}
                 {canEdit && deleteConfirm === row.id ? (
                   <div className="flex items-center gap-1 shrink-0">
-                    <span className="text-xs text-attention">Delete?</span>
-                    <Button size="sm" variant="destructive" className="h-7 px-2 text-xs" onClick={() => handleDelete(row.id)} disabled={isPending}>Yes</Button>
-                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setDeleteConfirm(null)}>No</Button>
+                    <span className="text-xs text-attention">{ui.deleteConfirm}</span>
+                    <Button size="sm" variant="destructive" className="h-7 px-2 text-xs" onClick={() => handleDelete(row.id)} disabled={isPending}>{ui.yes}</Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setDeleteConfirm(null)}>{ui.no}</Button>
                   </div>
                 ) : canEdit ? (
                   <div className="flex items-center gap-1 shrink-0">
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => startEdit(row)}>
-                      Edit
+                      {ui.edit}
                     </Button>
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-red-500 hover:text-attention" onClick={() => setDeleteConfirm(row.id)}>
                       ✕
@@ -253,10 +261,10 @@ export function SettingsListSection({
               ))}
               <div className="flex items-end gap-1">
                 <Button size="sm" className="h-8" onClick={handleAdd} disabled={isPending}>
-                  Add
+                  {ui.add}
                 </Button>
                 <Button size="sm" variant="ghost" className="h-8" onClick={() => { setAddingNew(false); setAddValues(addDefaults); }}>
-                  Cancel
+                  {ui.cancel}
                 </Button>
               </div>
             </div>

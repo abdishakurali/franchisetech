@@ -81,6 +81,13 @@ const FISCALNET_CODE_OPTIONS = [
   { value: "8", label: "8 – Altele" },
 ];
 
+// Display-only Romanian labels; option values are unchanged.
+const METHOD_TYPE_LABELS_RO: Record<string, string> = { cash: "Numerar", card: "Card", online: "Online", other: "Altele" };
+const METHOD_TYPE_OPTIONS_RO = METHOD_TYPE_OPTIONS.map((o) => ({ ...o, label: METHOD_TYPE_LABELS_RO[o.value] ?? o.label }));
+const FISCALNET_CODE_OPTIONS_RO = FISCALNET_CODE_OPTIONS.map((o) =>
+  o.value === "" ? { ...o, label: "— niciunul —" } : o.value === "1" ? { ...o, label: "1 – Numerar" } : o
+);
+
 // Verified against every real ?tab= link in the codebase (grepped, not
 // assumed) rather than trusting the old map, which carried three aliases
 // (features/modules/hardware) that no navigation anywhere ever generates,
@@ -510,6 +517,7 @@ export default async function SettingsPage({
             deleteAction={deleteUnit as unknown as (fd: FormData) => Promise<void>}
             addLabel={isRO ? "+ Adaugă unitate" : "+ Add unit"}
             emptyLabel={isRO ? "Nicio unitate personalizată încă." : "No custom units yet."}
+            locale={locale}
           />
         </div>
   );
@@ -518,32 +526,41 @@ export default async function SettingsPage({
 <div className="space-y-6">
           <SettingsListSection
             title={isRO ? "Metode de plată" : "Payment methods"}
-            description={fiscalnetEnabled ? "FiscalNet enabled — assign a payment code (1–8) to each method." : undefined}
+            description={
+              fiscalnetEnabled
+                ? isRO
+                  ? "FiscalNet este activat — atribuiți fiecărei metode un cod de plată (1–8)."
+                  : "FiscalNet enabled — assign a payment code (1–8) to each method."
+                : undefined
+            }
             rows={((paymentMethods ?? []) as Array<{ id: string; name: string; type: string; active: boolean; fiscalnet_code?: number | null }>).map((m) => ({
               id: m.id,
               primary: m.name,
-              secondary: `${m.type.charAt(0).toUpperCase()}${m.type.slice(1)}${fiscalnetEnabled && m.fiscalnet_code != null ? ` · FN code ${m.fiscalnet_code}` : ""}`,
-              badge: { label: m.active ? "Active" : "Inactive", active: m.active },
+              secondary: isRO
+                ? `${METHOD_TYPE_LABELS_RO[m.type] ?? m.type}${fiscalnetEnabled && m.fiscalnet_code != null ? ` · cod FiscalNet ${m.fiscalnet_code}` : ""}`
+                : `${m.type.charAt(0).toUpperCase()}${m.type.slice(1)}${fiscalnetEnabled && m.fiscalnet_code != null ? ` · FN code ${m.fiscalnet_code}` : ""}`,
+              badge: { label: m.active ? (isRO ? "Activă" : "Active") : (isRO ? "Inactivă" : "Inactive"), active: m.active },
               editValues: { name: m.name, type: m.type, fiscalnet_code: m.fiscalnet_code ?? "", active: m.active },
             }))}
             canEdit={canEdit}
             addFields={[
-              { key: "name", label: "Name", type: "text", placeholder: "e.g. Tichete masă" },
-              { key: "type", label: "Type", type: "select", options: METHOD_TYPE_OPTIONS },
-              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: "FiscalNet code", type: "select" as const, options: FISCALNET_CODE_OPTIONS }] : []),
+              { key: "name", label: isRO ? "Nume" : "Name", type: "text", placeholder: isRO ? "ex. Tichete masă" : "e.g. Tichete masă" },
+              { key: "type", label: isRO ? "Tip" : "Type", type: "select", options: isRO ? METHOD_TYPE_OPTIONS_RO : METHOD_TYPE_OPTIONS },
+              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: isRO ? "Cod FiscalNet" : "FiscalNet code", type: "select" as const, options: isRO ? FISCALNET_CODE_OPTIONS_RO : FISCALNET_CODE_OPTIONS }] : []),
             ]}
             editFields={[
-              { key: "name", label: "Name", type: "text" },
-              { key: "type", label: "Type", type: "select", options: METHOD_TYPE_OPTIONS },
-              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: "FiscalNet code", type: "select" as const, options: FISCALNET_CODE_OPTIONS }] : []),
-              { key: "active", label: "Active", type: "toggle" },
+              { key: "name", label: isRO ? "Nume" : "Name", type: "text" },
+              { key: "type", label: isRO ? "Tip" : "Type", type: "select", options: isRO ? METHOD_TYPE_OPTIONS_RO : METHOD_TYPE_OPTIONS },
+              ...(fiscalnetEnabled ? [{ key: "fiscalnet_code", label: isRO ? "Cod FiscalNet" : "FiscalNet code", type: "select" as const, options: isRO ? FISCALNET_CODE_OPTIONS_RO : FISCALNET_CODE_OPTIONS }] : []),
+              { key: "active", label: isRO ? "Activă" : "Active", type: "toggle" },
             ]}
             addDefaults={{ name: "", type: "cash", fiscalnet_code: "", active: true }}
             addAction={addPaymentMethod as unknown as (fd: FormData) => Promise<void>}
             updateAction={updatePaymentMethod as unknown as (fd: FormData) => Promise<void>}
             deleteAction={deletePaymentMethod as unknown as (fd: FormData) => Promise<void>}
-            addLabel="+ Add payment method"
-            emptyLabel="No payment methods yet."
+            addLabel={isRO ? "+ Adăugați metodă de plată" : "+ Add payment method"}
+            emptyLabel={isRO ? "Nicio metodă de plată încă." : "No payment methods yet."}
+            locale={locale}
           />
         </div>
   );
@@ -603,7 +620,7 @@ export default async function SettingsPage({
             const rows = scopeCats.map((c) => ({
               id: c.id,
               primary: c.name,
-              secondary: `Sort ${c.sort_order ?? 0}`,
+              secondary: `${isRO ? "Ordine" : "Sort"} ${c.sort_order ?? 0}`,
               editValues: {
                 name: c.name,
                 color: c.color ?? "#64748b",
@@ -618,14 +635,14 @@ export default async function SettingsPage({
                 rows={rows}
                 canEdit={canEdit}
                 addFields={[
-                  { key: "name", label: "Name", type: "text", placeholder: scope === "inventory" ? "e.g. MATERIA PRIMA" : "e.g. Hot Drinks" },
-                  { key: "color", label: "Colour", type: "color" },
-                  { key: "sort_order", label: "Sort order", type: "number", placeholder: "1", className: "w-20" },
+                  { key: "name", label: isRO ? "Nume" : "Name", type: "text", placeholder: scope === "inventory" ? (isRO ? "ex. MATERIA PRIMA" : "e.g. MATERIA PRIMA") : (isRO ? "ex. Băuturi calde" : "e.g. Hot Drinks") },
+                  { key: "color", label: isRO ? "Culoare" : "Colour", type: "color" },
+                  { key: "sort_order", label: isRO ? "Ordine afișare" : "Sort order", type: "number", placeholder: "1", className: "w-20" },
                 ]}
                 editFields={[
-                  { key: "name", label: "Name", type: "text" },
-                  { key: "color", label: "Colour", type: "color" },
-                  { key: "sort_order", label: "Sort", type: "number", className: "w-20" },
+                  { key: "name", label: isRO ? "Nume" : "Name", type: "text" },
+                  { key: "color", label: isRO ? "Culoare" : "Colour", type: "color" },
+                  { key: "sort_order", label: isRO ? "Ordine" : "Sort", type: "number", className: "w-20" },
                   { key: "category_type", label: t.settings.type, type: "select", options: typeOptions },
                 ]}
                 hiddenAddValues={{ category_type: scope }}
@@ -633,8 +650,9 @@ export default async function SettingsPage({
                 addAction={addCategory as unknown as (fd: FormData) => Promise<void>}
                 updateAction={updateCategory as unknown as (fd: FormData) => Promise<void>}
                 deleteAction={deleteCategory as unknown as (fd: FormData) => Promise<void>}
-                addLabel="Add category"
-                emptyLabel="No categories yet."
+                addLabel={isRO ? "Adăugați categorie" : "Add category"}
+                emptyLabel={isRO ? "Nicio categorie încă." : "No categories yet."}
+                locale={locale}
               />
             );
           })}
@@ -1106,6 +1124,7 @@ export default async function SettingsPage({
             addAction={addVatRate as unknown as (fd: FormData) => Promise<void>}
             updateAction={updateVatRate as unknown as (fd: FormData) => Promise<void>}
             deleteAction={deleteVatRate as unknown as (fd: FormData) => Promise<void>}
+            locale={locale}
           />
 
         </div>
@@ -1178,10 +1197,10 @@ export default async function SettingsPage({
           <h2 className="mb-4 text-lg font-semibold text-foreground">{isRO ? "Echipă" : "Team"}</h2>
           {teamMembersError && (
             <div className="mb-4 rounded bg-attention/10 px-4 py-3 text-sm text-attention">
-              Error loading members: {teamMembersError}
+              {isRO ? "Eroare la încărcarea membrilor:" : "Error loading members:"} {teamMembersError}
             </div>
           )}
-          <TeamClient initialMembers={teamMembers} advancedRolesAllowed={advancedRolesAllowed} />
+          <TeamClient initialMembers={teamMembers} advancedRolesAllowed={advancedRolesAllowed} locale={locale} />
         </section>
       )}
 
@@ -1319,7 +1338,7 @@ export default async function SettingsPage({
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="break-all rounded-lg bg-secondary px-3 py-2 text-sm text-foreground">{referral.link}</p>
-                  <CopyReferralButton link={referral.link} />
+                  <CopyReferralButton link={referral.link} locale={locale} />
                 </div>
                 {referral.creditMonths > 0 && (
                   <p className="text-sm text-brass">{t.referrals.creditAppliedNote}</p>

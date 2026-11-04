@@ -23,17 +23,67 @@ interface Props {
   addAction: (fd: FormData) => Promise<void>;
   updateAction: (fd: FormData) => Promise<void>;
   deleteAction: (fd: FormData) => Promise<void>;
+  locale?: string | null;
 }
 
-const FISCALNET_GROUPS = [
-  { value: "1", label: "1 — Standard (21%)" },
-  { value: "2", label: "2 — Reduced (11%)" },
-  { value: "3", label: "3 — Super-reduced (5%)" },
-  { value: "4", label: "4 — Zero (0%)" },
-  { value: "5", label: "5 — Exempt" },
-];
+const UI_STRINGS = {
+  en: {
+    title: "VAT / Tax Rates",
+    descFiscalnet: "FiscalNet enabled — assign a VAT group (1–5) to each rate.",
+    desc: "Manage your tax rates. Set one as default for new products.",
+    filter: "Filter by name or rate",
+    filterPlaceholder: "e.g. 19 or TVA Standard",
+    name: "Name",
+    namePlaceholder: "e.g. TVA 21%",
+    rate: "Rate %",
+    fiscalnetGroup: "FiscalNet group",
+    none: "— none —",
+    defaultOn: "★ Default",
+    setDefault: "Set default",
+    save: "Save",
+    cancel: "Cancel",
+    groupLine: (g: number | null | undefined) => `FiscalNet group: ${g != null ? g : "not set"}`,
+    defaultBadge: "Default",
+    deleteConfirm: "Delete?",
+    yes: "Yes",
+    no: "No",
+    edit: "Edit",
+    add: "Add",
+    addRate: "+ Add tax rate",
+    groups: ["1 — Standard (21%)", "2 — Reduced (11%)", "3 — Super-reduced (5%)", "4 — Zero (0%)", "5 — Exempt"],
+  },
+  ro: {
+    title: "Cote TVA",
+    descFiscalnet: "FiscalNet este activat — atribuiți fiecărei cote o grupă TVA (1–5).",
+    desc: "Gestionați cotele de TVA. Setați una ca implicită pentru produsele noi.",
+    filter: "Filtrați după nume sau cotă",
+    filterPlaceholder: "ex. 21 sau TVA Standard",
+    name: "Nume",
+    namePlaceholder: "ex. TVA 21%",
+    rate: "Cotă %",
+    fiscalnetGroup: "Grupă TVA FiscalNet",
+    none: "— niciuna —",
+    defaultOn: "★ Implicită",
+    setDefault: "Setați ca implicită",
+    save: "Salvați",
+    cancel: "Anulați",
+    groupLine: (g: number | null | undefined) => `Grupă TVA FiscalNet: ${g != null ? g : "nesetată"}`,
+    defaultBadge: "Implicită",
+    deleteConfirm: "Ștergeți?",
+    yes: "Da",
+    no: "Nu",
+    edit: "Editați",
+    add: "Adăugați",
+    addRate: "+ Adăugați cotă TVA",
+    groups: ["1 — Standard (21%)", "2 — Redusă (11%)", "3 — Redusă (5%)", "4 — Zero (0%)", "5 — Scutit"],
+  },
+} as const;
 
-export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, updateAction, deleteAction }: Props) {
+const FISCALNET_GROUP_VALUES = ["1", "2", "3", "4", "5"] as const;
+
+export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, updateAction, deleteAction, locale }: Props) {
+  const ui = UI_STRINGS[locale === "ro" ? "ro" : "en"];
+  const FISCALNET_GROUPS = FISCALNET_GROUP_VALUES.map((value, i) => ({ value, label: ui.groups[i] }));
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingNew, setAddingNew] = useState(false);
   const [filter, setFilter] = useState("");
@@ -106,21 +156,21 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
   return (
     <Card>
       <CardHeader>
-        <CardTitle>VAT / Tax Rates</CardTitle>
+        <CardTitle>{ui.title}</CardTitle>
         <CardDescription>
           {fiscalnetEnabled
-            ? "FiscalNet enabled — assign a VAT group (1–5) to each rate."
-            : "Manage your tax rates. Set one as default for new products."}
+            ? ui.descFiscalnet
+            : ui.desc}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {rates.length > 3 && (
           <div className="mb-4">
-            <Label className="text-xs text-muted-foreground">Filter by name or rate</Label>
+            <Label className="text-xs text-muted-foreground">{ui.filter}</Label>
             <Input
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="e.g. 19 or TVA Standard"
+              placeholder={ui.filterPlaceholder}
               className="mt-1 h-9"
             />
           </div>
@@ -131,7 +181,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
               /* ── EDIT ROW ── */
               <div key={v.id} className="py-3 flex flex-wrap items-end gap-2">
                 <div>
-                  <Label className="text-xs text-muted-foreground">Name</Label>
+                  <Label className="text-xs text-muted-foreground">{ui.name}</Label>
                   <Input
                     value={editState.name ?? ""}
                     onChange={(e) => setEditState((s) => ({ ...s, name: e.target.value }))}
@@ -139,7 +189,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground">Rate %</Label>
+                  <Label className="text-xs text-muted-foreground">{ui.rate}</Label>
                   <Input
                     type="number"
                     step="0.01"
@@ -152,13 +202,13 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                 </div>
                 {fiscalnetEnabled && (
                   <div>
-                    <Label className="text-xs text-muted-foreground">FiscalNet group</Label>
+                    <Label className="text-xs text-muted-foreground">{ui.fiscalnetGroup}</Label>
                     <select
                       value={editState.fiscalnet_vat_group != null ? String(editState.fiscalnet_vat_group) : ""}
                       onChange={(e) => setEditState((s) => ({ ...s, fiscalnet_vat_group: e.target.value ? Number(e.target.value) : undefined }))}
                       className="h-8 rounded border border-border px-2 text-sm"
                     >
-                      <option value="">— none —</option>
+                      <option value="">{ui.none}</option>
                       {FISCALNET_GROUPS.map((g) => (
                         <option key={g.value} value={g.value}>{g.label}</option>
                       ))}
@@ -175,15 +225,15 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                         : "bg-secondary border-border text-muted-foreground"
                     }`}
                   >
-                    {editState.is_default ? "★ Default" : "Set default"}
+                    {editState.is_default ? ui.defaultOn : ui.setDefault}
                   </button>
                 </div>
                 <div className="flex items-end gap-1">
                   <Button size="sm" className="h-8" onClick={() => handleSave(v.id)} disabled={isPending}>
-                    Save
+                    {ui.save}
                   </Button>
                   <Button size="sm" variant="ghost" className="h-8" onClick={cancelEdit} disabled={isPending}>
-                    Cancel
+                    {ui.cancel}
                   </Button>
                 </div>
               </div>
@@ -197,21 +247,21 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                   </p>
                   {fiscalnetEnabled && (
                     <p className="text-xs text-muted-foreground">
-                      FiscalNet group: {v.fiscalnet_vat_group != null ? v.fiscalnet_vat_group : "not set"}
+                      {ui.groupLine(v.fiscalnet_vat_group)}
                     </p>
                   )}
                 </div>
-                {!!v.is_default && <Badge variant="secondary" className="shrink-0">Default</Badge>}
+                {!!v.is_default && <Badge variant="secondary" className="shrink-0">{ui.defaultBadge}</Badge>}
                 {canEdit && deleteConfirm === v.id ? (
                   <div className="flex items-center gap-1 shrink-0">
-                    <span className="text-xs text-attention">Delete?</span>
-                    <Button size="sm" variant="destructive" className="h-7 px-2 text-xs" onClick={() => handleDelete(v.id)} disabled={isPending}>Yes</Button>
-                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setDeleteConfirm(null)}>No</Button>
+                    <span className="text-xs text-attention">{ui.deleteConfirm}</span>
+                    <Button size="sm" variant="destructive" className="h-7 px-2 text-xs" onClick={() => handleDelete(v.id)} disabled={isPending}>{ui.yes}</Button>
+                    <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setDeleteConfirm(null)}>{ui.no}</Button>
                   </div>
                 ) : canEdit ? (
                   <div className="flex items-center gap-1 shrink-0">
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => startEdit(v)}>
-                      Edit
+                      {ui.edit}
                     </Button>
                     <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-red-500 hover:text-attention" onClick={() => setDeleteConfirm(v.id)}>
                       ✕
@@ -226,9 +276,9 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
           {canEdit && addingNew && (
             <div className="py-3 flex flex-wrap items-end gap-2 bg-secondary -mx-6 px-6 rounded-b">
               <div>
-                <Label className="text-xs text-muted-foreground">Name</Label>
+                <Label className="text-xs text-muted-foreground">{ui.name}</Label>
                 <Input
-                  placeholder="e.g. TVA 21%"
+                  placeholder={ui.namePlaceholder}
                   value={newState.name}
                   onChange={(e) => setNewState((s) => ({ ...s, name: e.target.value }))}
                   className="h-8 w-28 text-sm"
@@ -236,7 +286,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                 />
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">Rate %</Label>
+                <Label className="text-xs text-muted-foreground">{ui.rate}</Label>
                 <Input
                   type="number"
                   step="0.01"
@@ -250,13 +300,13 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
               </div>
               {fiscalnetEnabled && (
                 <div>
-                  <Label className="text-xs text-muted-foreground">FiscalNet group</Label>
+                  <Label className="text-xs text-muted-foreground">{ui.fiscalnetGroup}</Label>
                   <select
                     value={newState.fiscalnet_vat_group}
                     onChange={(e) => setNewState((s) => ({ ...s, fiscalnet_vat_group: e.target.value }))}
                     className="h-8 rounded border border-border px-2 text-sm"
                   >
-                    <option value="">— none —</option>
+                    <option value="">{ui.none}</option>
                     {FISCALNET_GROUPS.map((g) => (
                       <option key={g.value} value={g.value}>{g.label}</option>
                     ))}
@@ -273,15 +323,15 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
                       : "bg-secondary border-border text-muted-foreground"
                   }`}
                 >
-                  {newState.is_default ? "★ Default" : "Set default"}
+                  {newState.is_default ? ui.defaultOn : ui.setDefault}
                 </button>
               </div>
               <div className="flex items-end gap-1">
                 <Button size="sm" className="h-8" onClick={handleAdd} disabled={isPending || !newState.name.trim() || newState.rate === ""}>
-                  Add
+                  {ui.add}
                 </Button>
                 <Button size="sm" variant="ghost" className="h-8" onClick={() => { setAddingNew(false); setNewState({ name: "", rate: "", is_default: false, fiscalnet_vat_group: "" }); }}>
-                  Cancel
+                  {ui.cancel}
                 </Button>
               </div>
             </div>
@@ -291,7 +341,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
         {canEdit && !addingNew && (
           <div className="mt-3 pt-3 border-t">
             <Button variant="outline" size="sm" onClick={() => { setAddingNew(true); cancelEdit(); }}>
-              + Add tax rate
+              {ui.addRate}
             </Button>
           </div>
         )}

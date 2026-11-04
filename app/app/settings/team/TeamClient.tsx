@@ -39,10 +39,127 @@ const ROLE_LABELS: Record<string, string> = {
   accountant: "Contabil extern",
 };
 
-function StatusBadge({ status }: { status: string }) {
+const ROLE_LABELS_RO: Record<string, string> = {
+  owner: "Proprietar",
+  manager: "Manager",
+  staff: "Personal",
+  cashier: "Casier",
+  kitchen: "Bucătărie",
+  auditor: "Auditor",
+  accountant: "Contabil extern",
+};
+
+const STATUS_LABELS_RO: Record<string, string> = {
+  active: "activ",
+  disabled: "dezactivat",
+  invited: "invitat",
+};
+
+const UI_STRINGS = {
+  en: {
+    title: "Team members",
+    count: (n: number) => `${n} member${n !== 1 ? "s" : ""}`,
+    addMember: "Add team member",
+    name: "Name",
+    email: "Email",
+    role: "Role",
+    status: "Status",
+    joined: "Joined",
+    actions: "Actions",
+    edit: "Edit",
+    resetLink: "Reset link",
+    reEnable: "Re-enable",
+    disable: "Disable",
+    removeConfirm: "Remove?",
+    yes: "Yes",
+    no: "No",
+    remove: "Remove",
+    resetLinkLabel: "Reset link:",
+    empty: "No team members yet.",
+    editTitle: "Edit team member",
+    fullName: "Full name",
+    newPassword: "New password",
+    keepPasswordHint: "(leave blank to keep current)",
+    passwordPlaceholder: "Min. 8 characters",
+    phone: "Phone",
+    jobTitle: "Job title",
+    jobTitleHint: "(displayed under name)",
+    jobTitlePlaceholder: "Barista, Shift manager…",
+    saving: "Saving...",
+    saveChanges: "Save changes",
+    cancel: "Cancel",
+    addDesc: "Create a new user or add an existing one to your organisation.",
+    tempPassword: "Temporary password",
+    tempPasswordHint: "(leave blank to send a reset link)",
+    optional: "Optional",
+    generateResetLink: "Generate password reset link",
+    added: "User added successfully!",
+    resetLinkShare: "Password reset link (share with the user):",
+    adding: "Adding...",
+    addSubmit: "Add member",
+    close: "Close",
+    passwordSet: "Password set successfully.",
+    errAdd: "Failed to add user",
+    errRole: "Could not update role",
+    errMember: "Could not update member",
+    errSave: "Could not save changes",
+    errRemove: "Could not remove member",
+  },
+  ro: {
+    title: "Membrii echipei",
+    count: (n: number) => (n === 1 ? "1 membru" : `${n} membri`),
+    addMember: "Adăugați un membru",
+    name: "Nume",
+    email: "Email",
+    role: "Rol",
+    status: "Stare",
+    joined: "Adăugat la",
+    actions: "Acțiuni",
+    edit: "Editați",
+    resetLink: "Link de resetare",
+    reEnable: "Reactivați",
+    disable: "Dezactivați",
+    removeConfirm: "Eliminați?",
+    yes: "Da",
+    no: "Nu",
+    remove: "Eliminați",
+    resetLinkLabel: "Link de resetare:",
+    empty: "Niciun membru în echipă încă.",
+    editTitle: "Editați membrul echipei",
+    fullName: "Nume complet",
+    newPassword: "Parolă nouă",
+    keepPasswordHint: "(lăsați gol pentru a păstra parola actuală)",
+    passwordPlaceholder: "Min. 8 caractere",
+    phone: "Telefon",
+    jobTitle: "Funcție",
+    jobTitleHint: "(afișată sub nume)",
+    jobTitlePlaceholder: "Barista, Șef de tură…",
+    saving: "Se salvează...",
+    saveChanges: "Salvați modificările",
+    cancel: "Anulați",
+    addDesc: "Creați un utilizator nou sau adăugați unul existent în organizația dumneavoastră.",
+    tempPassword: "Parolă temporară",
+    tempPasswordHint: "(lăsați gol pentru a trimite un link de resetare)",
+    optional: "Opțional",
+    generateResetLink: "Generați un link de resetare a parolei",
+    added: "Utilizatorul a fost adăugat.",
+    resetLinkShare: "Link de resetare a parolei (trimiteți-l utilizatorului):",
+    adding: "Se adaugă...",
+    addSubmit: "Adăugați membrul",
+    close: "Închideți",
+    passwordSet: "Parola a fost setată.",
+    errAdd: "Utilizatorul nu a putut fi adăugat",
+    errRole: "Rolul nu a putut fi actualizat",
+    errMember: "Membrul nu a putut fi actualizat",
+    errSave: "Modificările nu au putut fi salvate",
+    errRemove: "Membrul nu a putut fi eliminat",
+  },
+} as const;
+
+function StatusBadge({ status, ro }: { status: string; ro: boolean }) {
   return (
     <Badge variant={status === "active" ? "secondary" : "outline"} className={status === "disabled" ? "text-red-500 border-attention/25" : ""}>
-      {status}
+      {ro ? (STATUS_LABELS_RO[status] ?? status) : status}
     </Badge>
   );
 }
@@ -50,10 +167,15 @@ function StatusBadge({ status }: { status: string }) {
 export function TeamClient({
   initialMembers,
   advancedRolesAllowed,
+  locale,
 }: {
   initialMembers: Member[];
   advancedRolesAllowed: boolean;
+  locale?: string | null;
 }) {
+  const ro = locale === "ro";
+  const ui = UI_STRINGS[ro ? "ro" : "en"];
+  const roleLabels = ro ? ROLE_LABELS_RO : ROLE_LABELS;
   const [members, setMembers] = useState<Member[]>(initialMembers);
   const [showAddModal, setShowAddModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -95,7 +217,7 @@ export function TeamClient({
       });
       const data = await res.json();
       if (!res.ok) {
-        setAddResult({ error: data.error ?? "Failed to add user" });
+        setAddResult({ error: data.error ?? ui.errAdd });
       } else {
         setAddResult({ resetLink: data.resetLink ?? null });
         setAddForm({ email: "", fullName: "", role: "cashier", phone: "", temporaryPassword: "", sendInvite: false });
@@ -117,7 +239,7 @@ export function TeamClient({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setActionError(data?.error ?? "Could not update role");
+        setActionError(data?.error ?? ui.errRole);
       }
       await refreshMembers();
     } finally {
@@ -131,7 +253,7 @@ export function TeamClient({
     try {
       const res = await fetch(`/api/team/${memberId}/disable`, { method: "POST" });
       const data = await res.json().catch(() => null);
-      if (!res.ok) setActionError(data?.error ?? "Could not update member");
+      if (!res.ok) setActionError(data?.error ?? ui.errMember);
       await refreshMembers();
     } finally {
       setActionLoading(null);
@@ -169,7 +291,7 @@ export function TeamClient({
       });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setEditError(data?.error ?? "Could not save changes");
+        setEditError(data?.error ?? ui.errSave);
         return;
       }
       setEditMember(null);
@@ -186,7 +308,7 @@ export function TeamClient({
       const res = await fetch(`/api/team/${memberId}`, { method: "DELETE" });
       const data = await res.json().catch(() => null);
       if (!res.ok) {
-        setActionError(data?.error ?? "Could not remove member");
+        setActionError(data?.error ?? ui.errRemove);
       } else {
         setConfirmRemoveId(null);
         await refreshMembers();
@@ -208,7 +330,7 @@ export function TeamClient({
       if (data.resetLink) {
         setResetResults((prev) => ({ ...prev, [memberId]: data.resetLink }));
       } else if (data.success) {
-        setResetResults((prev) => ({ ...prev, [memberId]: "Password set successfully." }));
+        setResetResults((prev) => ({ ...prev, [memberId]: ui.passwordSet }));
       }
     } finally {
       setActionLoading(null);
@@ -219,10 +341,10 @@ export function TeamClient({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Team members</h2>
-          <p className="text-sm text-muted-foreground">{members.length} member{members.length !== 1 ? "s" : ""}</p>
+          <h2 className="text-lg font-semibold">{ui.title}</h2>
+          <p className="text-sm text-muted-foreground">{ui.count(members.length)}</p>
         </div>
-        <Button onClick={() => { setShowAddModal(true); setAddResult(null); }}>Add team member</Button>
+        <Button onClick={() => { setShowAddModal(true); setAddResult(null); }}>{ui.addMember}</Button>
       </div>
       {actionError && (
         <div className="rounded bg-attention/10 px-4 py-3 text-sm text-attention">
@@ -237,12 +359,12 @@ export function TeamClient({
             <table className="w-full text-sm">
               <thead className="border-b bg-secondary">
                 <tr>
-                  <th className="text-left px-4 py-3 font-medium text-mid">Name</th>
-                  <th className="text-left px-4 py-3 font-medium text-mid">Email</th>
-                  <th className="text-left px-4 py-3 font-medium text-mid">Role</th>
-                  <th className="text-left px-4 py-3 font-medium text-mid">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-mid">Joined</th>
-                  <th className="text-right px-4 py-3 font-medium text-mid">Actions</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">{ui.name}</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">{ui.email}</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">{ui.role}</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">{ui.status}</th>
+                  <th className="text-left px-4 py-3 font-medium text-mid">{ui.joined}</th>
+                  <th className="text-right px-4 py-3 font-medium text-mid">{ui.actions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -264,11 +386,11 @@ export function TeamClient({
                           ? visibleRoles
                           : [m.role, ...visibleRoles].filter((role, index, arr) => arr.indexOf(role) === index)
                         ).map((r) => (
-                          <option key={r} value={r}>{ROLE_LABELS[r] ?? r}</option>
+                          <option key={r} value={r}>{roleLabels[r] ?? r}</option>
                         ))}
                       </select>
                     </td>
-                    <td className="px-4 py-3"><StatusBadge status={m.status} /></td>
+                    <td className="px-4 py-3"><StatusBadge status={m.status} ro={ro} /></td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {new Date(m.created_at).toLocaleDateString("ro-RO")}
                     </td>
@@ -280,7 +402,7 @@ export function TeamClient({
                           className="h-7 text-xs"
                           onClick={() => openEditModal(m)}
                         >
-                          Edit
+                          {ui.edit}
                         </Button>
                         <Button
                           variant="ghost"
@@ -289,7 +411,7 @@ export function TeamClient({
                           disabled={actionLoading === m.id + "-reset"}
                           onClick={() => handleResetPassword(m.id)}
                         >
-                          {actionLoading === m.id + "-reset" ? "..." : "Reset link"}
+                          {actionLoading === m.id + "-reset" ? "..." : ui.resetLink}
                         </Button>
                         <Button
                           variant="ghost"
@@ -298,11 +420,11 @@ export function TeamClient({
                           disabled={actionLoading === m.id + "-disable"}
                           onClick={() => handleToggleDisable(m.id)}
                         >
-                          {actionLoading === m.id + "-disable" ? "..." : m.status === "disabled" ? "Re-enable" : "Disable"}
+                          {actionLoading === m.id + "-disable" ? "..." : m.status === "disabled" ? ui.reEnable : ui.disable}
                         </Button>
                         {confirmRemoveId === m.id ? (
                           <span className="flex items-center gap-1 text-xs">
-                            <span className="text-mid">Remove?</span>
+                            <span className="text-mid">{ui.removeConfirm}</span>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -310,7 +432,7 @@ export function TeamClient({
                               disabled={actionLoading === m.id + "-remove"}
                               onClick={() => handleRemove(m.id)}
                             >
-                              {actionLoading === m.id + "-remove" ? "..." : "Yes"}
+                              {actionLoading === m.id + "-remove" ? "..." : ui.yes}
                             </Button>
                             <Button
                               variant="ghost"
@@ -318,7 +440,7 @@ export function TeamClient({
                               className="h-7 text-xs px-2"
                               onClick={() => setConfirmRemoveId(null)}
                             >
-                              No
+                              {ui.no}
                             </Button>
                           </span>
                         ) : (
@@ -328,13 +450,13 @@ export function TeamClient({
                             className="h-7 text-xs text-muted-foreground hover:text-attention"
                             onClick={() => setConfirmRemoveId(m.id)}
                           >
-                            Remove
+                            {ui.remove}
                           </Button>
                         )}
                       </div>
                       {resetResults[m.id] && (
                         <div className="mt-1 text-xs text-left">
-                          <p className="text-reconciled font-medium">Reset link:</p>
+                          <p className="text-reconciled font-medium">{ui.resetLinkLabel}</p>
                           <p className="break-all text-mid max-w-xs">{resetResults[m.id]}</p>
                         </div>
                       )}
@@ -342,7 +464,7 @@ export function TeamClient({
                   </tr>
                 ))}
                 {members.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No team members yet.</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">{ui.empty}</td></tr>
                 )}
               </tbody>
             </table>
@@ -355,13 +477,13 @@ export function TeamClient({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <Card className="w-full max-w-md mx-4">
             <CardHeader>
-              <CardTitle>Edit team member</CardTitle>
+              <CardTitle>{ui.editTitle}</CardTitle>
               <CardDescription>{editMember.profile?.email ?? ""}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleEditSave} className="space-y-4">
                 <div>
-                  <Label>Full name</Label>
+                  <Label>{ui.fullName}</Label>
                   <Input
                     value={editForm.fullName}
                     onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
@@ -369,7 +491,7 @@ export function TeamClient({
                   />
                 </div>
                 <div>
-                  <Label>Email</Label>
+                  <Label>{ui.email}</Label>
                   <Input
                     type="email"
                     value={editForm.email}
@@ -378,17 +500,17 @@ export function TeamClient({
                   />
                 </div>
                 <div>
-                  <Label>New password <span className="text-muted-foreground text-xs">(leave blank to keep current)</span></Label>
+                  <Label>{ui.newPassword} <span className="text-muted-foreground text-xs">{ui.keepPasswordHint}</span></Label>
                   <Input
                     type="password"
                     value={editForm.newPassword}
                     onChange={(e) => setEditForm({ ...editForm, newPassword: e.target.value })}
-                    placeholder="Min. 8 characters"
+                    placeholder={ui.passwordPlaceholder}
                     autoComplete="new-password"
                   />
                 </div>
                 <div>
-                  <Label>Phone</Label>
+                  <Label>{ui.phone}</Label>
                   <Input
                     value={editForm.phone}
                     onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
@@ -396,11 +518,11 @@ export function TeamClient({
                   />
                 </div>
                 <div>
-                  <Label>Job title <span className="text-muted-foreground text-xs">(displayed under name)</span></Label>
+                  <Label>{ui.jobTitle} <span className="text-muted-foreground text-xs">{ui.jobTitleHint}</span></Label>
                   <Input
                     value={editForm.roleTitle}
                     onChange={(e) => setEditForm({ ...editForm, roleTitle: e.target.value })}
-                    placeholder="Barista, Shift manager…"
+                    placeholder={ui.jobTitlePlaceholder}
                   />
                 </div>
                 {editError && (
@@ -408,10 +530,10 @@ export function TeamClient({
                 )}
                 <div className="flex gap-2 pt-2">
                   <Button type="submit" disabled={actionLoading === editMember.id + "-edit"} className="flex-1">
-                    {actionLoading === editMember.id + "-edit" ? "Saving..." : "Save changes"}
+                    {actionLoading === editMember.id + "-edit" ? ui.saving : ui.saveChanges}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => setEditMember(null)}>
-                    Cancel
+                    {ui.cancel}
                   </Button>
                 </div>
               </form>
@@ -425,42 +547,42 @@ export function TeamClient({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <Card className="w-full max-w-md mx-4">
             <CardHeader>
-              <CardTitle>Add team member</CardTitle>
-              <CardDescription>Create a new user or add an existing one to your organisation.</CardDescription>
+              <CardTitle>{ui.addMember}</CardTitle>
+              <CardDescription>{ui.addDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleAddUser} className="space-y-4">
                 <div>
-                  <Label>Full name *</Label>
+                  <Label>{ui.fullName} *</Label>
                   <Input required value={addForm.fullName} onChange={(e) => setAddForm({ ...addForm, fullName: e.target.value })} placeholder="Maria Popescu" />
                 </div>
                 <div>
-                  <Label>Email *</Label>
+                  <Label>{ui.email} *</Label>
                   <Input type="email" required value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} placeholder="maria@restaurant.ro" />
                 </div>
                 <div>
-                  <Label>Phone</Label>
+                  <Label>{ui.phone}</Label>
                   <Input value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} placeholder="+40 7xx xxx xxx" />
                 </div>
                 <div>
-                  <Label>Role *</Label>
+                  <Label>{ui.role} *</Label>
                   <select
                     value={addForm.role}
                     onChange={(e) => setAddForm({ ...addForm, role: e.target.value })}
                     className="mt-1 w-full h-10 rounded-md border border-border px-3 text-sm"
                   >
                     {visibleRoles.filter((r) => r !== "owner").map((r) => (
-                      <option key={r} value={r}>{ROLE_LABELS[r] ?? r}</option>
+                      <option key={r} value={r}>{roleLabels[r] ?? r}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <Label>Temporary password <span className="text-muted-foreground text-xs">(leave blank to send a reset link)</span></Label>
+                  <Label>{ui.tempPassword} <span className="text-muted-foreground text-xs">{ui.tempPasswordHint}</span></Label>
                   <Input
                     type="password"
                     value={addForm.temporaryPassword}
                     onChange={(e) => setAddForm({ ...addForm, temporaryPassword: e.target.value })}
-                    placeholder="Optional"
+                    placeholder={ui.optional}
                   />
                 </div>
                 {!addForm.temporaryPassword && (
@@ -471,7 +593,7 @@ export function TeamClient({
                       onChange={(e) => setAddForm({ ...addForm, sendInvite: e.target.checked })}
                       className="rounded"
                     />
-                    Generate password reset link
+                    {ui.generateResetLink}
                   </label>
                 )}
 
@@ -480,10 +602,10 @@ export function TeamClient({
                 )}
                 {addResult?.resetLink !== undefined && !addResult.error && (
                   <div className="bg-reconciled/10 rounded px-3 py-2 text-sm">
-                    <p className="text-reconciled font-medium">User added successfully!</p>
+                    <p className="text-reconciled font-medium">{ui.added}</p>
                     {addResult.resetLink && (
                       <>
-                        <p className="text-xs text-mid mt-1">Password reset link (share with the user):</p>
+                        <p className="text-xs text-mid mt-1">{ui.resetLinkShare}</p>
                         <p className="break-all text-xs text-brass mt-1">{addResult.resetLink}</p>
                       </>
                     )}
@@ -492,10 +614,10 @@ export function TeamClient({
 
                 <div className="flex gap-2 pt-2">
                   <Button type="submit" disabled={loading} className="flex-1">
-                    {loading ? "Adding..." : "Add member"}
+                    {loading ? ui.adding : ui.addSubmit}
                   </Button>
                   <Button type="button" variant="outline" onClick={() => { setShowAddModal(false); setAddResult(null); }}>
-                    Close
+                    {ui.close}
                   </Button>
                 </div>
               </form>

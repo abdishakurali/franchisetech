@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-export function CopyReferralButton({ link }: { link: string }) {
+export function CopyReferralButton({ link, locale }: { link: string; locale?: string | null }) {
+  const ro = locale === "ro";
   const [copied, setCopied] = useState(false);
   return (
     <Button
@@ -15,7 +16,7 @@ export function CopyReferralButton({ link }: { link: string }) {
         setTimeout(() => setCopied(false), 1600);
       }}
     >
-      {copied ? "Copied" : "Copy referral link"}
+      {copied ? (ro ? "Copiat" : "Copied") : ro ? "Copiați linkul de recomandare" : "Copy referral link"}
     </Button>
   );
 }
