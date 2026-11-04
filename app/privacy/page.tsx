@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Confirm } from "@/components/legal/Confirm";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { DATA_CONTROLLER, DEMO_LEAD_PROCESSORS, DEMO_LEAD_RETENTION_MONTHS } from "@/lib/legal/controller";
 
 // Romanian translation of the 3 June 2026 policy; the substance is unchanged.
-const updated = "3 noiembrie 2026";
+const updated = "4 noiembrie 2026";
 
 export const metadata: Metadata = {
   title: "Politica de confidențialitate franchisetech",
@@ -17,7 +18,48 @@ export default function PrivacyPage() {
     <ClaudeMarketingShellAuth>
       <main lang="ro" className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-slate-900">Politica de confidențialitate</h1>
-        <p className="mt-2 text-sm text-slate-500">Ultima actualizare: {updated} (traducere în limba română; conținutul este cel din 3 iunie 2026)</p>
+        <p className="mt-2 text-sm text-slate-500">Ultima actualizare: {updated} (secțiunea 5 actualizată la 4 noiembrie 2026; restul conținutului este cel din 3 iunie 2026)</p>
+
+        <section id="odoo" lang="en" className="mt-8 scroll-mt-24 rounded-lg border border-slate-200 bg-white p-5 text-sm leading-7 text-slate-700">
+          <h2 className="text-lg font-semibold text-slate-900">Odoo services enquiries (English)</h2>
+          <p className="mt-1 text-xs text-slate-500">Updated 4 November 2026. Notă de informare în limba română mai jos.</p>
+          <p className="mt-3">
+            <strong>Controller:</strong> {DATA_CONTROLLER.legalName}, {DATA_CONTROLLER.registrationNumber}, {DATA_CONTROLLER.registeredAddress}, Romania,{" "}
+            <a className="text-blue-600 hover:underline" href={`mailto:${DATA_CONTROLLER.contactEmail}`}>{DATA_CONTROLLER.contactEmail}</a>.
+          </p>
+          <p className="mt-2">
+            <strong>What we collect:</strong> the email address or phone number you enter, and optionally your name, company, country and project
+            description. If you write to us by email, we receive whatever your email contains.
+          </p>
+          <p className="mt-2">
+            <strong>Why and on what basis:</strong> to answer your enquiry and prepare an offer at your request, Article 6(1)(b) GDPR (steps before a
+            contract). We count form visits and submissions without your name, email or phone, and limit repeated submissions per IP address, on the
+            basis of our legitimate interest, Article 6(1)(f) GDPR. We do not use your details for newsletters and we do not sell them.
+          </p>
+          <p className="mt-2">
+            <strong>Where it goes:</strong> the form is processed on Vercel and sent as an email through Resend (a US provider) to our Zoho Mail inbox
+            (EU data centre). It is not stored in a database by the form. Analytics events go to PostHog&rsquo;s EU instance and use a one-way hash in
+            place of your IP and contact details. For transfers outside the EEA we rely on the safeguards in Chapter V GDPR set out in the
+            provider&rsquo;s data processing terms.
+          </p>
+          <p className="mt-2">
+            <strong>How long:</strong> <Confirm>we keep enquiries that do not lead to a contract for up to {DEMO_LEAD_RETENTION_MONTHS} months, then
+            delete them; if you become a client, for the duration of the contract and the periods required by Romanian accounting law.</Confirm>
+          </p>
+          <p className="mt-2">
+            <strong>Your rights:</strong> access, rectification, erasure, restriction, objection and portability. Write to{" "}
+            {DATA_CONTROLLER.contactEmail}; we reply within one month. You can also complain to the Romanian supervisory authority, ANSPDCP (
+            <a className="text-blue-600 hover:underline" href="https://www.dataprotection.ro" target="_blank" rel="noopener noreferrer">dataprotection.ro</a>
+            ), or to the authority in your own EU country. Cookies are explained in the <Link href="/cookies" className="text-blue-600 hover:underline">Cookie Policy</Link>.
+          </p>
+          <h3 lang="ro" className="mt-4 font-semibold text-slate-900">Pe scurt, în română</h3>
+          <p lang="ro">
+            Datele din formularul de pe pagina <Link href="/odoo/ro" className="text-blue-600 hover:underline">Servicii Odoo</Link> (email sau telefon
+            și, opțional, nume, firmă, țară, descrierea proiectului) le folosim doar ca să vă răspundem și să vă trimitem o ofertă (art. 6 alin. (1) lit.
+            b) GDPR). Formularul trimite un email prin Resend către căsuța noastră Zoho Mail și nu salvează datele într-o bază de date. Drepturile și
+            durata de păstrare sunt cele de mai jos.
+          </p>
+        </section>
 
         <section id="cereri-demo" lang="ro" className="mt-8 scroll-mt-24 rounded-lg border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-700">
           <h2 className="text-lg font-semibold text-slate-900">Notă de informare: cereri de demonstrație și formulare de contact</h2>
@@ -90,7 +132,7 @@ export default function PrivacyPage() {
           <section><h2 className="font-semibold text-slate-900">2. Ce date colectăm</h2><p>Putem colecta date de cont, precum numele, adresa de email și rolul; date despre afacere, precum denumirea și tipul afacerii; înregistrări operaționale, precum vânzările din POS, stocul, achizițiile, verificările de siguranță alimentară și rapoartele, dacă sunt folosite; date tehnice, precum adresa IP, informații despre browser și dispozitiv, jurnale, cookie-uri și date de sesiune; precum și mesajele trimise către suport, dacă ne contactați.</p></section>
           <section><h2 className="font-semibold text-slate-900">3. Cum folosim datele</h2><p>Folosim datele pentru a crea și administra conturile, pentru a furniza serviciul franchisetech, pentru a stoca și afișa înregistrările afacerii, pentru a îmbunătăți fiabilitatea și experiența de utilizare, pentru a depana și securiza serviciul și pentru a vă transmite informări legate de serviciu.</p></section>
           <section><h2 className="font-semibold text-slate-900">4. Temeiul legal</h2><p>Acolo unde se aplică GDPR, temeiurile noastre legale pot include executarea contractului sau furnizarea serviciului, interesul legitim de a securiza și îmbunătăți serviciul, obligațiile legale, acolo unde este cazul, și consimțământul, acolo unde este necesar.</p></section>
-          <section><h2 className="font-semibold text-slate-900">5. Cu cine împărtășim datele</h2><p>Putem transmite date furnizorilor de găzduire, bază de date și autentificare, precum Supabase; furnizorilor de infrastructură, precum servicii de găzduire, CDN sau servere; furnizorilor de email pentru mesajele tranzacționale; furnizorilor de analiză sau suport, dacă vor fi adăugați ulterior; și autorităților, dacă legea o cere.</p></section>
+          <section><h2 className="font-semibold text-slate-900">5. Cu cine împărtășim datele</h2><p>Folosim acești furnizori: Vercel (găzduirea site-ului și a aplicației), Supabase (bază de date și autentificare, regiunea UE), Stripe (plăți și abonamente), Resend și Loops (emailuri tranzacționale și despre cont), Zoho Mail (căsuța info@franchisetech.ro), PostHog (statistici de utilizare și erori, instanța UE) și DataFast (statistici de vizite fără cookie-uri). Transmitem date autorităților doar dacă legea o cere. Lista cookie-urilor este în <Link href="/cookies" className="text-blue-600 hover:underline">Politica de cookie-uri</Link>.</p></section>
           <section><h2 className="font-semibold text-slate-900">6. Cât timp păstrăm datele</h2><p>Păstrăm datele de cont și înregistrările operaționale cât timp contul este activ sau cât este necesar pentru furnizarea serviciului, cu excepția cazului în care se cere ștergerea lor sau se aplică o obligație legală ori operațională de păstrare.</p></section>
           <section><h2 className="font-semibold text-slate-900">7. Drepturile dumneavoastră</h2><p>Puteți avea dreptul de acces, de rectificare, de ștergere, de restricționare, de opoziție, la portabilitate, de retragere a consimțământului, acolo unde este cazul, și dreptul de a depune o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP).</p></section>
           <section><h2 className="font-semibold text-slate-900">8. Securitate</h2><p>Folosim măsuri de securitate rezonabile pentru a proteja serviciul și datele. Niciun serviciu online nu poate garanta securitate perfectă.</p></section>
@@ -103,7 +145,7 @@ export default function PrivacyPage() {
           Această politică este un punct de plecare practic și trebuie revizuită de un jurist calificat.
         </p>
         <p className="mt-6 text-sm text-slate-500">
-          <Link href="/terms" className="text-blue-600 hover:underline">Termeni și condiții</Link>
+          <Link href="/terms" className="text-blue-600 hover:underline">Termeni și condiții</Link>{" · "}<Link href="/cookies" className="text-blue-600 hover:underline">Politica de cookie-uri</Link>{" · "}<Link href="/imprint" className="text-blue-600 hover:underline">Date de identificare</Link>
         </p>
       </main>
     </ClaudeMarketingShellAuth>

@@ -53,7 +53,7 @@ export function ClaudeMarketingShell({ children, user = null }: { children: Reac
       <Link href="/"><Image src="/design-marketing/franchise-tech-logo.svg" alt="FranchiseTech" width={190} height={26} className={s.logo} /></Link>
       <span>franchisetech.ro · suport în română · <a href={SUPPORT_PHONE_TEL}>{SUPPORT_PHONE_DISPLAY}</a> · <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">WhatsApp</a></span>
       {DATA_CONTROLLER.legalName ? <span className={s.footerLegal}>{[DATA_CONTROLLER.legalName, DATA_CONTROLLER.registrationNumber, DATA_CONTROLLER.registeredAddress].filter(Boolean).join(" · ")}</span> : null}
-      <nav className={s.footerLinks} aria-label="Informații legale"><Link href="/pentru-contabili">Pentru contabili</Link><Link href="/privacy">Confidențialitate</Link><Link href="/terms">Termeni</Link><Link href="/contact">Contact</Link></nav>
+      <nav className={s.footerLinks} aria-label="Informații legale"><Link href="/pentru-contabili">Pentru contabili</Link><Link href="/odoo">Odoo integration</Link><Link href="/privacy">Confidențialitate</Link><Link href="/terms">Termeni</Link><Link href="/cookies">Cookie-uri</Link><Link href="/imprint">Date firmă</Link><Link href="/contact">Contact</Link></nav>
     </div></footer>
   </div>;
 }

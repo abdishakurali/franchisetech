@@ -34,7 +34,10 @@ export function MarketingFooterClient() {
   const legalLinks = [
     ["/privacy", t.footer.privacy],
     ["/terms", t.footer.terms],
+    ["/cookies", locale === "ro" ? "Cookie-uri" : "Cookies"],
+    ["/imprint", locale === "ro" ? "Date firmă" : "Company details"],
     ["/legal-disclaimer", t.footer.legalDisclaimer],
+    ["/odoo", "Odoo integration"],
   ] as const;
 
   return (

@@ -40,7 +40,7 @@ function priorityFor(path: string): number {
 
 function frequencyFor(path: string): SitemapPathEntry["changeFrequency"] {
   if (path === "/" || path === "/pricing") return "weekly";
-  if (path.startsWith("/legal") || path === "/privacy" || path === "/terms") return "yearly";
+  if (path.startsWith("/legal") || path === "/privacy" || path === "/terms" || path === "/cookies" || path === "/imprint") return "yearly";
   return "monthly";
 }
 
@@ -53,6 +53,10 @@ export function allSitemapPaths(): SitemapPathEntry[] {
     "/login",
     "/signup",
     "/blog",
+    "/odoo",
+    "/odoo/ro",
+    "/cookies",
+    "/imprint",
     ...HELP_ARTICLES.map((a) => `/help/${a.slug}`),
     "/help/romania-fiscalnet",
     "/help/romania-efactura",

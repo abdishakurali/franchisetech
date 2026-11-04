@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Confirm } from "@/components/legal/Confirm";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { DATA_CONTROLLER } from "@/lib/legal/controller";
 
@@ -33,11 +34,45 @@ export default function TermsPage() {
           <section><h2 className="font-semibold text-slate-900">11. Modificări ale termenilor</h2><p>Putem actualiza acești termeni; în acest caz modificăm data ultimei actualizări.</p></section>
         </div>
 
+        <section id="odoo" className="mt-10 scroll-mt-24 rounded-lg border border-slate-200 bg-white p-5 text-sm leading-7 text-slate-700">
+          <h2 lang="en" className="text-lg font-semibold text-slate-900">Odoo apps and Odoo integration services</h2>
+          <p lang="ro" className="text-slate-500">Aplicații Odoo și servicii de integrare Odoo</p>
+          <div lang="en" className="mt-3 space-y-2">
+            <p>
+              <strong>Apps from the Odoo Apps Store.</strong> Our Odoo apps are sold through apps.odoo.com. The purchase is made under the Odoo Apps
+              Store terms, and each app is licensed under the licence stated on its store page (OPL-1 for 21 apps, LGPL-3 for the free Block Customers and Products app). Sections
+              1 to 9 above apply to the franchisetech software, not to these apps.
+            </p>
+            <p>
+              <strong>Integration services.</strong> Odoo integration, configuration, custom development and support are provided by{" "}
+              {DATA_CONTROLLER.legalName} under a written offer that states the scope, the fixed price and the delivery terms. If the offer and these
+              terms differ, the offer applies.
+            </p>
+            <p>
+              <Confirm>
+                Payment terms, warranty period for delivered work, liability cap, governing law (Romanian law) and competent courts are to be set by
+                the owner before these services are offered.
+              </Confirm>
+            </p>
+          </div>
+          <div lang="ro" className="mt-4 space-y-2 text-slate-500">
+            <p>
+              Aplicațiile noastre Odoo se cumpără prin apps.odoo.com, conform termenilor Odoo Apps Store și licenței afișate pe pagina fiecărei aplicații
+              (OPL-1 pentru 21 de aplicații, LGPL-3 pentru aplicația gratuită Block Customers and Products). Secțiunile 1–9 de mai sus se aplică software-ului franchisetech, nu acestor
+              aplicații.
+            </p>
+            <p>
+              Serviciile de integrare, configurare, dezvoltare la comandă și suport pentru Odoo sunt prestate de {DATA_CONTROLLER.legalName} pe baza
+              unei oferte scrise, care stabilește ce se livrează, prețul fix și termenele. Dacă oferta și acești termeni diferă, se aplică oferta.
+            </p>
+          </div>
+        </section>
+
         <p className="mt-10 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           Acești termeni sunt un punct de plecare practic și trebuie revizuiți de un jurist calificat.
         </p>
         <p className="mt-6 text-sm text-slate-500">
-          <Link href="/privacy" className="text-blue-600 hover:underline">Politica de confidențialitate</Link>
+          <Link href="/privacy" className="text-blue-600 hover:underline">Politica de confidențialitate</Link>{" · "}<Link href="/cookies" className="text-blue-600 hover:underline">Politica de cookie-uri</Link>{" · "}<Link href="/imprint" className="text-blue-600 hover:underline">Date de identificare</Link>
         </p>
       </main>
     </ClaudeMarketingShellAuth>
