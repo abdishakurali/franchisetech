@@ -3,7 +3,8 @@ import { ContactForm } from "@/components/marketing/ContactForm";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { DATA_CONTROLLER } from "@/lib/legal/controller";
-import { SUPPORT_PHONE_DISPLAY, SUPPORT_PHONE_TEL, SUPPORT_WHATSAPP_URL } from "@/lib/marketing/contact-info";
+import { SUPPORT_PHONE_DISPLAY } from "@/lib/marketing/contact-info";
+import { SupportContactLink } from "@/components/marketing/SupportContactLink";
 
 export const metadata: Metadata = {
   title: "Contact franchisetech",
@@ -36,9 +37,9 @@ export default async function ContactPage() {
             </p>
             <p className="mt-2 text-sm text-[#5B5D57]">
               {isRo ? "Telefon: " : "Phone: "}
-              <a href={SUPPORT_PHONE_TEL} className="font-medium text-[#0D0F0E] underline underline-offset-2">{SUPPORT_PHONE_DISPLAY}</a>
+              <SupportContactLink channel="phone" location="contact_page" className="font-medium text-[#0D0F0E] underline underline-offset-2">{SUPPORT_PHONE_DISPLAY}</SupportContactLink>
               {" · "}
-              <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-[#0D0F0E] underline underline-offset-2">WhatsApp</a>
+              <SupportContactLink channel="whatsapp" location="contact_page" className="font-medium text-[#0D0F0E] underline underline-offset-2">WhatsApp</SupportContactLink>
             </p>
             <p className="mt-2 text-sm text-[#5B5D57]">
               {isRo ? "Configurarea este gratuită." : "Setup is free."}

@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { TRIAL_DAYS } from "@/lib/billing/trial";
-import { SUPPORT_PHONE_DISPLAY, SUPPORT_PHONE_TEL, SUPPORT_WHATSAPP_URL } from "@/lib/marketing/contact-info";
+import { SUPPORT_PHONE_DISPLAY } from "@/lib/marketing/contact-info";
+import { SupportContactLink } from "@/components/marketing/SupportContactLink";
 import { usePathname } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { CreditCard, Package, Wifi, Receipt, FileBarChart, MailCheck, ShieldCheck, Building2 } from "lucide-react";
@@ -51,7 +52,7 @@ export function ClaudeMarketingShell({ children, user = null }: { children: Reac
     <main>{children}</main>
     <footer className={s.footer}><div className={`${s.container} ${s.footerInner}`}>
       <Link href="/"><Image src="/design-marketing/franchise-tech-logo.svg" alt="FranchiseTech" width={190} height={26} className={s.logo} /></Link>
-      <span>franchisetech.ro · suport în română · <a href={SUPPORT_PHONE_TEL}>{SUPPORT_PHONE_DISPLAY}</a> · <a href={SUPPORT_WHATSAPP_URL} target="_blank" rel="noopener noreferrer">WhatsApp</a></span>
+      <span>franchisetech.ro · suport în română · <SupportContactLink channel="phone" location="footer">{SUPPORT_PHONE_DISPLAY}</SupportContactLink> · <SupportContactLink channel="whatsapp" location="footer">WhatsApp</SupportContactLink></span>
       {DATA_CONTROLLER.legalName ? <span className={s.footerLegal}>{[DATA_CONTROLLER.legalName, DATA_CONTROLLER.registrationNumber, DATA_CONTROLLER.registeredAddress].filter(Boolean).join(" · ")}</span> : null}
       <nav className={s.footerLinks} aria-label="Informații legale"><Link href="/pentru-contabili">Pentru contabili</Link><Link href="/odoo">Odoo integration</Link><Link href="/privacy">Confidențialitate</Link><Link href="/terms">Termeni</Link><Link href="/cookies">Cookie-uri</Link><Link href="/imprint">Date firmă</Link><Link href="/contact">Contact</Link></nav>
     </div></footer>
@@ -102,7 +103,7 @@ export function DesignHome() {
   ];
   const offlineFlow = [
     { icon: Wifi, label: "Cade internetul", detail: "POS-ul rămâne deschis, vânzarea continuă normal." },
-    { icon: Package, label: "Coadă locală", detail: "Maximum 20 de vânzări, păstrate pe stația de lucru." },
+    { icon: Package, label: "Coadă locală", detail: "Maximum 200 de vânzări, păstrate pe stația de lucru." },
     { icon: CreditCard, label: "Sincronizare automată", detail: "Totul se trimite când revine conexiunea — fără pași manuali." },
   ];
   const accountantFlow = [
@@ -120,7 +121,7 @@ export function DesignHome() {
     <section className={`${s.container} ${s.section}`}><p className={s.eyebrow}>Ce face, pe scurt</p><h2>Patru lucruri, legate între ele.</h2><div className={s.highlights}>{highlights.map(([title, body, image], i) => <article className={s.highlight} key={title}><div className={s.stack}><span className={s.number}>0{i + 1}</span><h3>{title}</h3><p className={s.body}>{body}</p></div><div className={s.imageFrame}><Image src={image} alt={`${title} în FranchiseTech`} width={1600} height={1000} /></div></article>)}</div></section>
     <section className={s.tinted}><div className={`${s.container} ${s.pageSection}`}><div className={s.split}><div className={s.stack}><p className={s.eyebrow}>Portal gratuit pentru contabil</p><h2>Conectează contabilul gratuit. Noi facem predarea.</h2><p className={s.lead}>Datele ajung automat, fără rapoarte trimise lunar pe WhatsApp. Contabilul primește acces securizat, doar pentru citire, și își poate gestiona toate cafenelele dintr-un singur portal.</p><div className={s.actions}><DesignTrialLink location="homepage_accountant">Conectează-ți cafeneaua</DesignTrialLink><Link href="/partners" className={`${s.button} ${s.secondary}`}>Sunt contabil</Link></div><p className={s.meta}>Contabilul nu ocupă un loc plătit și nu poate modifica vânzări, stoc sau setări.</p></div><div className={s.imageFrame}><HomeFlowDiagram steps={accountantFlow} /></div></div></div></section>
     <section className={s.customerVideoSection}><div className={`${s.container} ${s.customerVideoGrid}`}><div className={s.customerVideoCopy}><p className={s.eyebrow}>Folosit într-un local real</p><h2>FranchiseTech, la lucru în Dolce Nera.</h2><p className={s.body}>Nu este o machetă. Clipul arată platforma folosită la punctul de vânzare, în timpul programului.</p><div className={s.customerIdentity}><Image src="/clients/dolce-nera.png" alt="Dolce Nera" width={160} height={80} /><span>Client FranchiseTech</span></div><div className={s.customerTestimonial}><div className={s.customerTestimonialPlayer}><YouTubeFacade youtubeId="Uioqt3bKenE" title="Silvia, Dolce Nera, despre FranchiseTech" /></div><p><strong>Silvia, Dolce Nera</strong><br />Cafenea din București care lucrează cu FranchiseTech în fiecare zi de program din iunie 2026.</p></div></div><div className={s.customerVideo}><video controls playsInline preload="metadata" poster="/marketing/product-proof/pos-in-cafe-poster.jpg" aria-label="FranchiseTech folosit la Dolce Nera"><source src="/marketing/product-proof/pos-in-cafe.mp4" type="video/mp4" /></video></div></div></section>
-    <section className={s.dark}><div className={`${s.container} ${s.split}`}><div className={s.stack}><p className={s.eyebrow}>Mod offline</p><h2>Cade internetul. Casa vinde mai departe.</h2><p className={s.body}>Cu POS-ul deja deschis, vânzările intră într-o coadă locală de maximum 20 de intrări și se sincronizează când revine conexiunea.</p><p className={s.notice}>Înregistrarea vânzării și emiterea bonului fiscal sunt etape separate. Bonul fiscal depinde de driverul fiscal și de echipamentul din local — în POS vezi ce a rămas de emis.</p></div><div className={s.imageFrame}><HomeFlowDiagram steps={offlineFlow} tone="dark" /></div></div></section>
+    <section className={s.dark}><div className={`${s.container} ${s.split}`}><div className={s.stack}><p className={s.eyebrow}>Mod offline</p><h2>Cade internetul. Casa vinde mai departe.</h2><p className={s.body}>Cu POS-ul deja deschis, vânzările intră într-o coadă locală de maximum 200 de intrări și se sincronizează când revine conexiunea.</p><p className={s.notice}>Înregistrarea vânzării și emiterea bonului fiscal sunt etape separate. Bonul fiscal depinde de driverul fiscal și de echipamentul din local — în POS vedeți ce a rămas de emis.</p></div><div className={s.imageFrame}><HomeFlowDiagram steps={offlineFlow} tone="dark" /></div></div></section>
     <DesignFinalCta />
   </>;
 }
@@ -178,9 +179,9 @@ export const designFaq = [
   { q: "Deschideți sertarul de bani din aplicație?", a: "Nu. Sertarul se deschide de la casa de marcat. Noi urmărim fondul, încasările și diferența la închidere, ca raportul Z să corespundă cu ce numărați." },
   { q: "Merge dacă nu sunt plătitor de TVA?", a: "Da. TVA-ul de la furnizor intră în costul mărfii, iar TVA-ul de vânzare se configurează separat. Cotele de achiziție rămân disponibile pentru facturile furnizorilor." },
   { q: "Bonul fiscal se emite și offline?", a: "Înregistrarea vânzării și emiterea bonului sunt etape separate. Vânzarea intră în coada locală; emiterea bonului depinde de driverul fiscal și de echipamentul local. În POS vedeți ce a rămas de emis." },
-  { q: "Ce se întâmplă dacă cade internetul?", a: "Cu POS-ul deja deschis, vindeți mai departe: maximum 20 de vânzări în coada locală, sincronizate automat când revine conexiunea." },
+  { q: "Ce se întâmplă dacă cade internetul?", a: "Cu POS-ul deja deschis, vindeți mai departe: maximum 200 de vânzări în coada locală, sincronizate automat când revine conexiunea." },
   { q: "Cât costă configurarea?", a: `Nimic. Vă ajutăm gratuit să importați meniul, să verificați casa de marcat și licența FiscalNet și să faceți prima vânzare. Sunați sau scrieți-ne pe WhatsApp la ${SUPPORT_PHONE_DISPLAY}.` },
-  { q: "Am două locații. Merge?", a: "Da — planul Multi include locația de bază și adaugă 29€/lună pentru fiecare locație în plus, cu raportare centrală și comutare între locații." },
+  { q: "Am două locații. Merge?", a: "Da — planul Multi include prima locație; fiecare locație în plus costă 29 €/lună și se adaugă la cerere, cu raportare centrală și comutare între locații." },
 ];
 
 const DESIGN_PRICING_CARD_COPY: Record<"growth" | "team", { body: string; features: string[]; cta: string; badge?: string }> = {
@@ -192,7 +193,7 @@ const DESIGN_PRICING_CARD_COPY: Record<"growth" | "team", { body: string; featur
   },
   team: {
     body: "Pentru afaceri cu două sau mai multe locații — tot din Pro, plus raportare centrală, comutare între locații și suport prioritar.",
-    features: ["Tot din planul Pro", "Locații multiple", "Comutare între locații", "Rapoarte per locație", "29€/locație suplimentară/lună", "Suport prioritar"],
+    features: ["Tot din planul Pro", "Locații multiple", "Comutare între locații", "Rapoarte per locație", "29 €/lună pentru fiecare locație suplimentară, adăugată la cerere", "Suport prioritar"],
     cta: "Începeți Multi",
   },
 };
@@ -202,6 +203,6 @@ export function DesignPricing({ featuredPlan: requestedPlan }: { featuredPlan?: 
   const featuredPlan = plansToShow.some((plan) => plan.id === requestedPlan) ? requestedPlan : "growth";
   return <><PageHero eyebrow="Prețuri" title="Două planuri plătite, cu preț clar.">Pro este pentru o locație. Multi este pentru mai multe locații. Începeți cu {TRIAL_DAYS} zile de Pro gratuit, fără card. Apoi alegeți plata lunară sau anuală și economisiți 20% anual.</PageHero><section className={`${s.container} ${s.pageSection}`}><div className={`${s.grid} ${s.plans}`}>{plansToShow.map((plan) => {
     const copy = DESIGN_PRICING_CARD_COPY[plan.id];
-    return <article className={`${s.card} ${s.plan} ${plan.id === featuredPlan ? s.featured : ""}`} key={plan.id}><div className={s.cardTitle}><h2>{plan.name}</h2>{copy.badge && <span className={`${s.badge} ${s.blueBadge}`}>{copy.badge}</span>}</div><div className={s.price}><strong>{plan.price}</strong><span> / locație / lună</span></div><p className={s.meta}>sau {plan.annualPrice}/lună, facturat anual</p><p className={s.body}>{copy.body}</p><ul className={s.features}>{copy.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><DesignTrialLink location="pricing_plan" plan={plan.id}>{copy.cta}</DesignTrialLink></article>;
-  })}</div><p className={s.smallPrint}>Prețurile nu includ TVA. Bonurile fiscale trec prin FiscalNet (driverfiscal.ro), un program al altei firme, cu licență proprie care se cumpără separat, și printr-o casă de marcat compatibilă. Configurarea este gratuită: vă ajutăm să importați meniul și să conectați FiscalNet cu casa de marcat. Anulare oricând, fără contract pe termen lung.</p></section><section className={`${s.container} ${s.bottomSpace}`}><h2 className={s.sectionTitle}>Întrebări frecvente</h2><div className={`${s.grid} ${s.faq}`}>{designFaq.map(({ q, a }) => <article className={s.card} key={q}><h3>{q}</h3><p className={s.body}>{a}</p></article>)}</div></section><DesignFinalCta /></>;
+    return <article className={`${s.card} ${s.plan} ${plan.id === featuredPlan ? s.featured : ""}`} key={plan.id}><div className={s.cardTitle}><h2>{plan.name}</h2>{copy.badge && <span className={`${s.badge} ${s.blueBadge}`}>{copy.badge}</span>}</div><div className={s.price}><strong>{plan.price}</strong><span>{plan.id === "team" ? " / lună, include o locație" : " / lună"}</span></div><p className={s.meta}>sau {plan.annualPrice}/lună, facturat anual</p><p className={s.body}>{copy.body}</p><ul className={s.features}>{copy.features.map((feature) => <li key={feature}>{feature}</li>)}</ul><DesignTrialLink location="pricing_plan" plan={plan.id}>{copy.cta}</DesignTrialLink></article>;
+  })}</div><p className={s.smallPrint}>SALUT TECH SRL nu este plătitoare de TVA, deci prețul afișat este prețul final. Bonurile fiscale trec prin FiscalNet (driverfiscal.ro), un program al altei firme, cu licență proprie care se cumpără separat, și printr-o casă de marcat compatibilă. Configurarea este gratuită: vă ajutăm să importați meniul și să conectați FiscalNet cu casa de marcat. Anulare oricând, fără contract pe termen lung.</p></section><section className={`${s.container} ${s.bottomSpace}`}><h2 className={s.sectionTitle}>Întrebări frecvente</h2><div className={`${s.grid} ${s.faq}`}>{designFaq.map(({ q, a }) => <article className={s.card} key={q}><h3>{q}</h3><p className={s.body}>{a}</p></article>)}</div></section><DesignFinalCta /></>;
 }

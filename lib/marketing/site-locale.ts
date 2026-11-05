@@ -59,7 +59,7 @@ export const MARKETING_KEYWORDS_RO = [
   "cod QR bon fiscal",
   "bon fiscal QR ANAF",
   "casa de marcat QR 2026",
-  "obligatie cod QR noiembrie 2026",
+  "amenzi cod QR bon fiscal 2027",
 ] as const;
 
 export const MARKETING_KEYWORDS = MARKETING_KEYWORDS_EN;

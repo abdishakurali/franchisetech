@@ -2064,9 +2064,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "e-obligatoriu-qr-code-pe-bonul-fiscal",
-    title: "E obligatoriu cod QR pe bonul fiscal? Ce se schimbă în 2026",
+    title: "E obligatoriu cod QR pe bonul fiscal? Amenzile, amânate până la 31 octombrie 2027",
     description:
-      "Obligația codului QR pe bon există deja; doar amenzile pentru lipsa lui sunt suspendate până la 1 noiembrie 2026. Ce e lege, ce e încă proiect, cine generează de fapt codul QR și ce verificați la casa de marcat înainte de termen.",
+      "Obligația codului QR pe bon există deja; amenzile pentru lipsa lui sunt suspendate prin OUG nr. 43/2026 până la 31 octombrie 2027 inclusiv. Ce e lege, ce e încă proiect, cine generează de fapt codul QR și ce verificați la casa de marcat.",
     publishedAt: "2026-09-17",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "casa-de-marcat"],
@@ -2074,16 +2074,16 @@ export const blogPosts: BlogPost[] = [
     relatedFeature: "/features/qr-code-receipts",
     sections: [
       {
-        heading: "Răspunsul scurt (situația la 27 octombrie 2026)",
-        body: "- **Obligația** de a avea cod QR pe bonul fiscal este deja în vigoare.\n- **Amenzile** pentru bonurile emise fără cod QR sunt suspendate prin OUG nr. 68/2025 până la **1 noiembrie 2026**.\n- **O nouă amânare** a fost cerută public, inclusiv de Camera Consultanților Fiscali, dar la data verificării nu era adoptată printr-un act publicat în Monitorul Oficial.\n- **Codul QR îl generează casa de marcat fiscală certificată**, nu programul POS sau de gestiune. Ce aveți de făcut: întrebați furnizorul sau service-ul casei de marcat dacă aparatul are actualizarea necesară.\n\nVerificați Monitorul Oficial sau comunicările Ministerului Finanțelor după 27 octombrie 2026: termenul a fost deja amânat de mai multe ori.",
+        heading: "Răspunsul scurt (situația la 5 noiembrie 2026)",
+        body: "- **Obligația** de a avea cod QR pe bonul fiscal este deja în vigoare și nu a fost eliminată.\n- **Amenzile** (2.000–4.000 lei) pentru bonurile emise fără cod QR sunt suspendate prin **OUG nr. 43/2026** (Monitorul Oficial nr. 915 din 30 octombrie 2026) până la **31 octombrie 2027 inclusiv**. Termenul anterior, din OUG nr. 68/2025, era 1 noiembrie 2026.\n- Suspendarea privește doar aceste amenzi; celelalte sancțiuni din legislația caselor de marcat rămân aplicabile.\n- **Codul QR îl generează casa de marcat fiscală certificată**, nu programul POS sau de gestiune. Ce aveți de făcut: întrebați furnizorul sau service-ul casei de marcat dacă aparatul are actualizarea necesară.\n\nTermenul a fost deja amânat de mai multe ori, așa că verificați textul în Monitorul Oficial înainte de decizii de buget.",
       },
       {
         heading: "Da, premisa e reală — dar verificați stadiul exact",
         body: "Spre deosebire de multe subiecte fiscale «se zvonește că», codul QR pe bonul fiscal chiar este pe agenda oficială a Ministerului Finanțelor. La 1 aprilie 2026, MF a lansat în dezbatere publică un proiect de Hotărâre de Guvern care introduce bonul fiscal digital, cu cod QR, identificator unic și transmitere a datelor către ANAF într-un format standardizat.\n\nImportant: la momentul redactării acestui articol, e vorba despre un **proiect** aflat în dezbatere publică, nu despre o lege deja publicată în Monitorul Oficial. Verificați stadiul curent înainte să luați decizii de buget sau de implementare bazate pe acest termen — proiectele fiscale românești se modifică frecvent între dezbatere și forma finală.",
       },
       {
-        heading: "Termenul: 1 noiembrie 2026",
-        body: "Conform proiectului, operatorii economici au la dispoziție termenul de 1 noiembrie 2026 pentru a-și adapta sistemele și pentru a transmite noile date către ANAF. Nu e prima dată când apare acest gen de termen — obligația de a avea cod QR pe bon există în principiu din 2024, sancțiunile pentru lipsa lui au fost programate inițial pentru septembrie 2025, apoi suspendate prin OUG nr. 68/2025 chiar până la 1 noiembrie 2026, motivat oficial de faptul că aproximativ 900.000 de case de marcat din România aveau nevoie de actualizare software și certificare tehnică la ICI București.\n\nCu alte cuvinte, termenul a tot fost amânat — ceea ce e un motiv în plus să nu tratați 1 noiembrie 2026 ca fiind sigur imuabil, ci ca cea mai recentă variantă cunoscută.",
+        heading: "Termenul: 31 octombrie 2027",
+        body: "Obligația de a avea cod QR pe bon există în principiu din 2024. Sancțiunile pentru lipsa lui au fost programate inițial pentru septembrie 2025, apoi suspendate prin OUG nr. 68/2025 până la 1 noiembrie 2026, motivat oficial de faptul că aproximativ 900.000 de case de marcat din România aveau nevoie de actualizare software și certificare tehnică la ICI București. Prin OUG nr. 43/2026, suspendarea a fost prelungită până la 31 octombrie 2027 inclusiv.\n\nCu alte cuvinte, termenul a tot fost amânat. Nu așteptați ultima lună: actualizarea casei de marcat depinde de furnizor și de service, nu de dumneavoastră.",
       },
       {
         heading: "Ce conține, concret, bonul digital cu QR",
@@ -2095,7 +2095,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce înseamnă pentru dumneavoastră ca afacere",
-        body: "Codul QR, când va deveni obligatoriu, va fi generat de **casa de marcat fiscală certificată**, nu de un soft de gestiune sau de un POS extern — exact cum se întâmplă și acum cu bonul fiscal standard. franchisetech nu generează codul QR de pe bon și nu promite asta: trimite datele vânzării către casa fiscală prin driverul fiscal, **când integrarea este configurată**, iar emiterea efectivă a bonului — cu sau fără QR — rămâne responsabilitatea aparatului certificat.\n\nCe puteți face util acum, fără să reacționați exagerat la un proiect încă în dezbatere: întrebați furnizorul casei de marcat dacă are deja un plan de actualizare pentru termenul din proiect, ca să nu vă prindă pe ultima sută de metri dacă termenul rămâne 1 noiembrie 2026.",
+        body: "Codul QR este generat de **casa de marcat fiscală certificată**, nu de un soft de gestiune sau de un POS extern — exact cum se întâmplă și acum cu bonul fiscal standard. franchisetech nu generează codul QR de pe bon și nu promite asta: trimite datele vânzării către casa fiscală prin driverul fiscal, **când integrarea este configurată**, iar emiterea efectivă a bonului — cu sau fără QR — rămâne responsabilitatea aparatului certificat.\n\nCe puteți face util acum, fără să reacționați exagerat la un proiect încă în dezbatere: întrebați furnizorul casei de marcat dacă are deja un plan de actualizare pentru termenul din proiect, ca să nu vă prindă pe ultima sută de metri înainte de 31 octombrie 2027.",
       },
     ],
   },
