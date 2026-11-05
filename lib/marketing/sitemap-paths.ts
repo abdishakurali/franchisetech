@@ -20,6 +20,7 @@ const PRIORITY: Record<string, number> = {
   "/pricing": 0.9,
   "/contact": 0.9,
   "/demo": 0.9,
+  "/clienti/dolce-nera": 0.8,
   "/signup": 0.5,
   "/login": 0.3,
 };

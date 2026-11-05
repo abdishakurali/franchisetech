@@ -6,6 +6,7 @@ import { LEGACY_REDIRECTS } from "./legacy-redirects";
 import { getHomepageContent } from "./homepage-content";
 import { localizeSeoPage, ro } from "./i18n";
 import { industryPages } from "./seo";
+import { allSitemapPaths } from "./sitemap-paths";
 
 // Public copy must match what the product sells today (Pro €49, Multi €79 +
 // €29/extra location, 15-day no-card trial). The Free plan was retired on
@@ -81,5 +82,17 @@ describe("public trust copy", () => {
     const ebriza = JSON.stringify(comparisonPages.find((p) => p.slug === "ebriza"));
     expect(ebriza).toContain("Kitchen Display (+29€/lună)");
     expect(ebriza).not.toMatch(/Kitchen Display \+19€/);
+  });
+
+  it("Dolce Nera case study is in the sitemap, dated, and never claims more than the data shows", () => {
+    expect(allSitemapPaths().map((e) => e.path)).toContain("/clienti/dolce-nera");
+    const src = readFileSync("app/clienti/dolce-nera/page.tsx", "utf8");
+    expect(src).toContain("la 5 noiembrie 2026");
+    expect(src).toContain('location="case_study"');
+    // No revenue, cash differences, subscription state or "all sales" claims.
+    expect(src).not.toMatch(/\blei\b|\bRON\b|încasări|diferență de numerar|abonament|toate vânzările|toate bonurile/i);
+    // Before 2026-11-03 the app stored "command sent", not a receipt number.
+    expect(src).not.toMatch(/99[,.]2\s*%|confirmat de casa de marcat/);
+    expect(readFileSync("components/marketing/ClaudeMarketing.tsx", "utf8")).toContain('href="/clienti/dolce-nera"');
   });
 });

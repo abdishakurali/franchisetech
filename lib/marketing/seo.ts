@@ -554,6 +554,7 @@ export const publicPaths = [
   "/",
   "/contact",
   "/demo",
+  "/clienti/dolce-nera",
   "/pricing",
   "/features",
   ...featurePages.filter((page) => isLeanPublicFeature(page.slug)).map((p) => p.path),
