@@ -73,7 +73,7 @@ const faqs = [
   ],
   [
     "Cât costă?",
-    "Pro costă 49 €/locație/lună (39 € la plata anuală), iar Multi 79 €/locație/lună. Fără contract pe termen lung, anulare oricând.",
+    "Pro costă 49 €/lună pentru o locație (39 € la plata anuală). Multi costă 79 €/lună pentru prima locație (63 € la plata anuală), plus 29 €/lună pentru fiecare locație suplimentară; locațiile suplimentare se adaugă la cerere. Fără contract pe termen lung, anulare oricând.",
   ],
   [
     "Merge pe telefon?",
@@ -150,6 +150,7 @@ function XReportCard() {
           Predă tura
         </span>
       </div>
+      <p className="border-t border-slate-200 bg-white px-4 py-2 text-[11px] text-slate-500">Date fictive, în scop de exemplu</p>
     </div>
   );
 }
@@ -206,6 +207,7 @@ function ShiftHandoverCard() {
       <div className="border-t border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs font-medium text-slate-500">
         Fără diferență · tura 2 începe cu 1.280,00 lei
       </div>
+      <p className="border-t border-slate-200 bg-white px-4 py-2 text-[11px] text-slate-500">Date fictive, în scop de exemplu</p>
     </div>
   );
 }

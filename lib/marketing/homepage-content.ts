@@ -27,9 +27,9 @@ const ro = {
   title: "Știi cât te costă de fapt un cappuccino.",
   intro:
     "Casa de marcat îți spune cât ai vândut. FranchiseTech îți spune cât ai consumat, cât a costat și cât ți-a rămas — din rețete și stoc reale.",
-  trial: "Creează cont gratuit",
+  trial: "Creați cont",
   watch: "Vezi ce face",
-  trialNote: "Gratuit pentru totdeauna · fără card necesar · suport în română",
+  trialNote: "15 zile de probă cu toate funcțiile Pro · fără card · suport în română",
   quickLinks: [
     "Vânzări și stoc",
     "Mod offline",
@@ -89,12 +89,8 @@ const ro = {
   benefitsTitle: "De la prima vânzare până la închiderea zilei.",
   customerProof: {
     label: "Un client, pe față",
-    title: "Dolce Nera, Cluj-Napoca",
-    caption: "O cafenea, o casă, 238 de produse și 115 rețete întreținute zilnic.",
-    stats: [
-      { value: "3.800+", label: "bonuri procesate" },
-      { value: "9.500+", label: "mișcări de stoc urmărite" },
-    ],
+    title: "Dolce Nera, București",
+    caption: "O cafenea cu o casă, care folosește FranchiseTech pentru vânzare, stoc și rețete.",
   },
   pricing: {
     planText: [
@@ -124,7 +120,7 @@ const ro = {
     },
   ],
   offlineNote:
-    "Pentru întreruperi scurte: maximum 20 de intrări în coada locală. Păstrează browserul și datele sale. Stocul celorlalte case și plățile bancare nu se actualizează offline; emiterea fiscală depinde de conexiunea locală cu driverul fiscal.",
+    "Pentru întreruperi scurte: maximum 200 de intrări în coada locală. Păstrează browserul și datele sale. Stocul celorlalte case și plățile bancare nu se actualizează offline; emiterea fiscală depinde de conexiunea locală cu driverul fiscal.",
   offlineLink: "Detalii despre modul offline",
   languagesLabel: "Română și English",
   languagesTitle: "Aceeași platformă. Limba echipei tale.",
@@ -162,7 +158,7 @@ const ro = {
     {
       question: "Pot lucra fără internet?",
       answer:
-        "Cu POS-ul deja încărcat, vânzările se pot pune într-o coadă locală de maximum 20 de intrări. Sincronizarea se reîncearcă atunci când revine conexiunea. Păstrează datele browserului și verifică bonurile fiscale în așteptare.",
+        "Cu POS-ul deja încărcat, vânzările se pot pune într-o coadă locală de maximum 200 de intrări. Sincronizarea se reîncearcă atunci când revine conexiunea. Păstrează datele browserului și verifică bonurile fiscale în așteptare.",
     },
     {
       question: "Bonul fiscal se emite și offline?",
@@ -195,9 +191,9 @@ const en: typeof ro = {
   title: "POS and operations for a business that wants to know what remains.",
   intro:
     "Sales, fiscal receipts, stock and margins in one place. With offline queuing for short internet outages and a clear view of your day.",
-  trial: "Create a free account",
+  trial: "Start your 15-day Pro trial",
   watch: "Watch a customer's story",
-  trialNote: "Free forever · no card required · Romanian support",
+  trialNote: "15-day Pro trial · no card required · support in Romanian",
   quickLinks: ["Sales and stock", "Offline mode", "Hardware", "Customer story"],
   galleryLabel: "The platform in practice",
   galleryTitle: "From the first order to closing time.",
@@ -253,11 +249,7 @@ const en: typeof ro = {
   customerProof: {
     label: "Used in a real café",
     title: "A real business. A clearer day.",
-    caption: "FranchiseTech used daily in a Romanian café.",
-    stats: [
-      { value: "3,800+", label: "receipts recorded" },
-      { value: "9,500+", label: "stock movements" },
-    ],
+    caption: "Dolce Nera, a café in Bucharest, uses FranchiseTech for sales, stock and recipes.",
   },
   pricing: {
     planText: [
@@ -287,7 +279,7 @@ const en: typeof ro = {
     },
   ],
   offlineNote:
-    "For short outages: up to 20 entries in the local queue. Keep the browser and its data. Other tills' stock and bank payments do not update offline; fiscal printing depends on your local fiscal driver connection.",
+    "For short outages: up to 200 entries in the local queue. Keep the browser and its data. Other tills' stock and bank payments do not update offline; fiscal printing depends on your local fiscal driver connection.",
   offlineLink: "About offline mode",
   languagesLabel: "Română and English",
   languagesTitle: "One platform. Your team's language.",
@@ -325,7 +317,7 @@ const en: typeof ro = {
     {
       question: "Can I work without internet?",
       answer:
-        "With the POS already loaded, sales can be stored in a local queue of up to 20 entries. Sync retries when the connection returns. Keep browser data intact and check any pending fiscal receipts.",
+        "With the POS already loaded, sales can be stored in a local queue of up to 200 entries. Sync retries when the connection returns. Keep browser data intact and check any pending fiscal receipts.",
     },
     {
       question: "Will fiscal receipts print offline?",

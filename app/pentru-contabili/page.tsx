@@ -8,26 +8,20 @@ import { SITE_URL } from "@/lib/marketing/seo";
 export const metadata: Metadata = {
   title: "Portal gratuit pentru contabili",
   description:
-    "SAF-T D406 generat automat, export SAGA și acces gratuit, doar pentru citire, la datele clienților dvs. din HoReCa. Program de parteneriat cu comision recurent.",
+    "Export D406 pentru stoc (ciornă), export SAGA și acces gratuit, doar pentru citire, la datele clienților dvs. din HoReCa. Program de parteneriat cu comision recurent.",
   alternates: { canonical: `${SITE_URL}/pentru-contabili` },
   openGraph: {
     title: "Portal gratuit pentru contabili",
-    description: "SAF-T D406 automat, export SAGA și portal dedicat pentru clienții dvs. din HoReCa.",
+    description: "Export D406 pentru stoc (ciornă), export SAGA și portal dedicat pentru clienții dvs. din HoReCa.",
     url: `${SITE_URL}/pentru-contabili`,
   },
 };
 
-const STATS = [
-  { value: "2–4h", label: "pierdute lunar per client HoReCa cu centralizarea manuală a stocurilor" },
-  { value: "12×", label: "termene de depunere D406 pe an, pentru fiecare client obligat la raportare" },
-  { value: "0", label: "case de marcat sau POS-uri generice care produc XML complet conform ANAF" },
-];
-
 const FEATURES = [
   {
     icon: FileCheck2,
-    title: "SAF-T D406 automat",
-    body: "Fișierul de mișcări de stoc se generează direct din datele de gestiune ale clientului — recepții, vânzări, consumuri, ajustări, retururi și sold inițial — în structura MovementOfGoods cerută de ANAF.",
+    title: "Export D406 pentru mișcările de stoc (ciornă de verificat)",
+    body: "Generăm fișierul de mișcări de stoc (MovementOfGoods) din datele de gestiune, în structura din schema ANAF. Este o ciornă: câmpurile pe care un POS nu le poate cunoaște (cont contabil, cod tarifar) sunt completate cu valori de înlocuire. Contabilul dumneavoastră trebuie să-l verifice înainte de depunere.",
   },
   {
     icon: FileSpreadsheet,
@@ -59,8 +53,8 @@ const STEPS = [
   },
   {
     n: "3",
-    title: "La final de lună — descărcați SAF-T și SAGA",
-    body: "Alegeți perioada din portal și descărcați direct fișierele D406 și SAGA, gata pentru depunere sau import.",
+    title: "La final de lună — descărcați D406 și SAGA",
+    body: "Alegeți perioada din portal și descărcați direct fișierele D406 (ciornă de verificat înainte de depunere) și SAGA.",
   },
 ];
 
@@ -95,7 +89,7 @@ export default function PentruContabiliPage() {
           serviceType: "Portal contabil HoReCa",
           provider: { "@type": "Organization", name: "franchisetech", url: SITE_URL },
           areaServed: "RO",
-          description: "SAF-T D406 automat, export SAGA și portal gratuit pentru contabili care gestionează clienți HoReCa.",
+          description: "Export D406 pentru stoc (ciornă), export SAGA și portal gratuit pentru contabili care gestionează clienți HoReCa.",
         }}
       />
 
@@ -108,8 +102,8 @@ export default function PentruContabiliPage() {
               Portalul contabilului pentru clienții dvs. din HoReCa
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
-              SAF-T D406 generat automat, export SAGA gata de import și acces gratuit, doar pentru citire, la datele
-              fiecărui client — fără centralizare manuală, fără fișiere trimise pe email.
+              Export D406 pentru stoc (ciornă de verificat), export SAGA și acces gratuit, doar pentru citire, la
+              datele fiecărui client — fără centralizare manuală, fără fișiere trimise pe email.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
@@ -128,17 +122,6 @@ export default function PentruContabiliPage() {
           </div>
         </section>
 
-        {/* Problem stats */}
-        <section className="border-b border-white/10 px-4 py-16 sm:px-6 lg:px-8">
-          <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-3">
-            {STATS.map((stat) => (
-              <div key={stat.label} className="rounded-lg border border-white/10 bg-white/[0.03] p-6 text-center">
-                <p className="font-[family-name:var(--font-display)] text-4xl font-bold text-[#D9A94E]">{stat.value}</p>
-                <p className="mt-3 text-sm leading-6 text-slate-300">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
 
       {/* What you get */}
@@ -167,7 +150,7 @@ export default function PentruContabiliPage() {
               Structură XML reală, nu o promisiune
             </h2>
             <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">
-              <ShieldCheck className="h-3.5 w-3.5" /> Valid ANAF
+              <ShieldCheck className="h-3.5 w-3.5" /> Structură conformă cu schema D406 (ciornă)
             </span>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-600">
@@ -179,8 +162,9 @@ export default function PentruContabiliPage() {
             <code>{XML_SNIPPET}</code>
           </pre>
           <p className="mt-3 text-xs text-slate-500">
-            Generat conform schemei ANAF D406 — confirmați obligația de depunere și validați rezultatul împreună cu
-            contabilul înainte de a-l depune.
+            Structura urmează schema ANAF D406, dar fișierul este o ciornă: contul contabil și codul tarifar sunt
+            valori de înlocuire. Confirmați obligația de depunere și validați rezultatul împreună cu contabilul
+            înainte de a-l depune.
           </p>
         </div>
       </section>

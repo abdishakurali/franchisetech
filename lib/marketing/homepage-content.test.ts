@@ -8,12 +8,16 @@ describe("simplified homepage content", () => {
       const content = getHomepageContent(locale);
       expect(content.benefits).toHaveLength(4);
       expect(content.screens).toHaveLength(4);
-      expect(content.customerProof.stats.length).toBeGreaterThanOrEqual(2);
+      expect(content.customerProof.title.length).toBeGreaterThan(0);
       expect(content.pricing.planText).toHaveLength(2);
     },
   );
 
-  it("keeps the Romanian free-forever CTA (trial retired 2026-09)", () => {
-    expect(getHomepageContent("ro").trial).toContain("gratuit");
+  it("describes the 15-day no-card Pro trial, not a free-forever plan", () => {
+    for (const locale of ["ro", "en"] as const) {
+      const content = getHomepageContent(locale);
+      expect(content.trialNote).toContain("15");
+      expect(content.trialNote.toLowerCase()).not.toMatch(/forever|totdeauna/);
+    }
   });
 });

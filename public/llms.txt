@@ -1,61 +1,63 @@
 # franchisetech
 
-> Cloud POS and business control for cafes, restaurants, and food businesses in Ireland, Romania, and the EU.
+> Cloud POS and business operations software for small food businesses in Romania: cafés, restaurants, takeaway, patisseries and bakeries.
 
-franchisetech is a browser-based workspace: POS register, kitchen display, stock & purchases, recipe costing, till close (Z-report), and owner reports. Not payments-first — operations-first for owners who need sales, cash, stock, and margins in one place.
+franchisetech is a browser-based workspace: POS register, products and stock, purchases, recipe costing, till close (Z-report) and owner reports. It is operations-first, not a payment-terminal vendor. Operated by SALUT TECH SRL.
 
 **Full AI index:** https://franchisetech.ro/llms-full.txt
 
-## Primary markets
+## Market
 
-- Romania (lei/RON, TVA 19%/9%/5%, FiscalNet when configured): https://franchisetech.ro/industries/romania
-- Ireland (EUR, Irish VAT rates): https://franchisetech.ro/industries/ireland
+- Romania only. Currency: lei (RON). Romanian TVA rates: 21%, 11%, 0%.
+- Fiscal receipts go through the FiscalNet fiscal driver (driverfiscal.ro, a third-party program with its own licence, bought separately) and a compatible fiscal cash register or fiscal printer, when enabled and configured on the till PC.
+- Overview for Romania: https://franchisetech.ro/industries/romania
 
-## Industry verticals (Romania)
+## Industries
 
 - Cafés: https://franchisetech.ro/industries/cafes
 - Restaurants: https://franchisetech.ro/industries/restaurants
-- Takeaway & fast food: https://franchisetech.ro/industries/takeaways
-- Bars & pubs: https://franchisetech.ro/industries/bar-pub
+- Takeaway: https://franchisetech.ro/industries/takeaways
 - Patisseries & bakeries: https://franchisetech.ro/industries/patisserie-bakery
-- Food trucks: https://franchisetech.ro/industries/food-trucks
-- Multi-location: https://franchisetech.ro/industries/multi-site
 
-## High-intent pages
+## Product pages
 
-- Pricing: https://franchisetech.ro/pricing
-- Compare POS (logos + tables): https://franchisetech.ro/compare
-- POS feature: https://franchisetech.ro/features/pos
+- POS: https://franchisetech.ro/features/pos
+- Z-report / till close: https://franchisetech.ro/features/z-report
 - Stock management: https://franchisetech.ro/features/stock-management
-- Recipe costing: https://franchisetech.ro/features/recipe-costing
-- Romania FiscalNet guide: https://franchisetech.ro/help/romania-fiscalnet
-- Resources / guides: https://franchisetech.ro/resources
+- Offline mode: https://franchisetech.ro/features/offline
+- Setup and onboarding: https://franchisetech.ro/features/setup-onboarding
+- QR code on receipts: https://franchisetech.ro/features/qr-code-receipts
+- Hardware (echipamente): https://franchisetech.ro/features/echipamente
+- For accountants: https://franchisetech.ro/pentru-contabili
 
-## Romanian comparisons (images + OG cards)
+## Pricing and trial
 
-- SmartBill: https://franchisetech.ro/compare/smartbill
-- Saga: https://franchisetech.ro/compare/saga
-- RezoSoft: https://franchisetech.ro/compare/rezosoft
-- Expressoft: https://franchisetech.ro/compare/expressoft
-- hePOS: https://franchisetech.ro/compare/hepos
-- VilicoRest: https://franchisetech.ro/compare/vilicorest
+- Pricing: https://franchisetech.ro/pricing (prices exclude VAT)
+- Pro: €49/month for one location (€39/month billed annually).
+- Multi: €79/month for the first location (€63/month billed annually), plus €29/month for each extra location; extra locations are added on request.
+- 15-day trial with all Pro features, no card required. After the trial you can keep selling and issuing fiscal receipts; stock, recipes and accountant exports need a Pro or Multi subscription.
+- Guided setup is free. Unlimited staff on paid plans. No long-term contract.
+- Signup: https://franchisetech.ro/signup
 
-## Romanian SEO resources
+## Comparisons
 
-- Software POS România: https://franchisetech.ro/resources/pos-software-romania
-- Gestiune stoc restaurant: https://franchisetech.ro/resources/stock-management-romania
-- Checklist alegere POS: https://franchisetech.ro/resources/choose-pos-romania
+- Ebriza: https://franchisetech.ro/compare/ebriza
+- Boogit: https://franchisetech.ro/compare/boogit
+- Hub: https://franchisetech.ro/compare
 
-## Trial
+## Help
 
-15-day assisted trial. Signup: https://franchisetech.ro/signup
+- Help centre: https://franchisetech.ro/help
+- FiscalNet guide: https://franchisetech.ro/help/romania-fiscalnet
+- Resources: https://franchisetech.ro/resources
 
 ## Contact
 
-Website: https://franchisetech.ro
-Partners: https://franchisetech.ro/partners
+- Website: https://franchisetech.ro
+- Contact page: https://franchisetech.ro/contact
+- Support phone / WhatsApp: +353 83 805 4778
 
 ## Optional
 
 - Sitemap: https://franchisetech.ro/sitemap.xml
-- Locales: English (default), Romanian (?lang=ro), Italian (?lang=it)
+- Languages: Romanian (default); English can be selected with the language switcher on the site

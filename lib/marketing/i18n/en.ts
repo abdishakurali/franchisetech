@@ -444,7 +444,7 @@ export const en = {
   },
   pricing: {
     title: "franchisetech Pricing",
-    description: "Pro is €49/location/month (€39 billed annually), and Multi is €79/location/month (€63 annually) + €29/extra location. No long-term contract.",
+    description: "Pro is €49/month for one location (€39 billed annually). Multi is €79/month for the first location (€63 billed annually) plus €29/month for each extra location, added on request. 15-day free trial, no card, no long-term contract.",
     badge: "Simple pricing",
     heroTitle: "Two plans with clear per-location pricing.",
     heroText: "Pro for one location: sales, daily close, stock, purchasing, and recipes. Multi for several locations.",
@@ -554,7 +554,7 @@ export const en = {
       ["Do I need special hardware?", "The web app runs on supported devices. Fiscal receipts require compatible fiscal hardware and a fiscal driver configured locally."],
       ["Can you set up my products?", "Guided in-app setup is included. Large migrations, team training, and on-site fiscal setup are separate services."],
       ["How is the subscription billed?", "Pro and Multi are billed monthly or annually (save 20% annually). There is no long-term contract and you can cancel anytime."],
-      ["Is pricing per company or location?", "The displayed prices are per location, per month. Request a quote for a multi-location configuration."],
+      ["Is pricing per company or location?", "Pro covers one location: €49/month (€39 billed annually). Multi is €79/month for the first location (€63 billed annually) plus €29/month for each extra location; extra locations are added on request."],
       ["Will my price go up later?", "If we change list prices, existing paying customers keep their current rate unless they change plans."],
     ] as const,
     hardware: {

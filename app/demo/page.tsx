@@ -75,7 +75,7 @@ const faqs: Array<[string, string]> = [
   ],
   [
     "Cât costă?",
-    `Pro costă ${pro?.price ?? "€49"} pe locație pe lună (${pro?.annualPrice ?? "€39"}/lună la plata anuală), fără TVA. Multi costă ${multi?.price ?? "€79"} pe locație pe lună (${multi?.annualPrice ?? "€63"}/lună anual) plus €29 pentru fiecare locație suplimentară. Driverul fiscal și echipamentele se plătesc separat. Fără contract pe termen lung.`,
+    `Pro costă ${pro?.price ?? "€49"} pe lună pentru o locație (${pro?.annualPrice ?? "€39"}/lună la plata anuală), fără TVA. Multi costă ${multi?.price ?? "€79"} pe lună pentru prima locație (${multi?.annualPrice ?? "€63"}/lună la plata anuală), plus €29 pe lună pentru fiecare locație suplimentară; locațiile suplimentare se adaugă la cerere. Driverul fiscal și echipamentele se plătesc separat. Fără contract pe termen lung.`,
   ],
   [
     "Există o perioadă de probă?",
@@ -182,14 +182,10 @@ export default function DemoPage() {
           <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-2 lg:items-center">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#9DB8FF]">Folosit într-un local real</p>
-              <h2 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-semibold sm:text-3xl">Dolce Nera, Cluj-Napoca</h2>
+              <h2 className="mt-3 font-[family-name:var(--font-display)] text-2xl font-semibold sm:text-3xl">Dolce Nera, București</h2>
               <p className="mt-3 leading-7 text-white/80">
-                O cafenea cu o casă, 238 de produse și 115 rețete întreținute zilnic în FranchiseTech. Clipul arată platforma la punctul de vânzare, în timpul programului.
+                O cafenea cu o casă, care folosește FranchiseTech pentru vânzare, stoc și rețete. Clipul arată platforma la punctul de vânzare, în timpul programului.
               </p>
-              <dl className="mt-6 grid grid-cols-2 gap-4">
-                <div><dt className="text-sm text-white/60">bonuri procesate</dt><dd className="text-2xl font-semibold">3.800+</dd></div>
-                <div><dt className="text-sm text-white/60">mișcări de stoc urmărite</dt><dd className="text-2xl font-semibold">9.500+</dd></div>
-              </dl>
             </div>
             <div className="overflow-hidden rounded-xl border border-white/10">
               <video controls playsInline preload="metadata" poster="/marketing/product-proof/pos-in-cafe-poster.jpg" className="aspect-video w-full" aria-label="FranchiseTech folosit la Dolce Nera">
@@ -206,7 +202,7 @@ export default function DemoPage() {
             <div className="mt-6 grid gap-4 md:grid-cols-2">
               <div className="rounded-xl border-2 border-[#0D0F0E] p-6">
                 <h3 className="text-lg font-semibold">Pro · o locație</h3>
-                <p className="mt-2 text-3xl font-semibold">{pro?.price ?? "€49"}<span className="text-base font-normal text-[#5B5D57]"> / locație / lună</span></p>
+                <p className="mt-2 text-3xl font-semibold">{pro?.price ?? "€49"}<span className="text-base font-normal text-[#5B5D57]"> / lună, o locație</span></p>
                 <p className="text-sm text-[#5B5D57]">sau {pro?.annualPrice ?? "€39"}/lună la plata anuală</p>
                 <ul className="mt-4 space-y-2 text-sm text-[#3B3D38]">
                   {["POS și produse nelimitate", "Stoc, NIR și achiziții", "Rețete cu cost și marjă", "Export pentru contabil"].map((item) => (
@@ -216,8 +212,8 @@ export default function DemoPage() {
               </div>
               <div className="rounded-xl border border-[#E7E6DF] p-6">
                 <h3 className="text-lg font-semibold">Multi · mai multe locații</h3>
-                <p className="mt-2 text-3xl font-semibold">{multi?.price ?? "€79"}<span className="text-base font-normal text-[#5B5D57]"> / locație / lună</span></p>
-                <p className="text-sm text-[#5B5D57]">sau {multi?.annualPrice ?? "€63"}/lună anual, + €29 pentru fiecare locație suplimentară</p>
+                <p className="mt-2 text-3xl font-semibold">{multi?.price ?? "€79"}<span className="text-base font-normal text-[#5B5D57]"> / lună, prima locație</span></p>
+                <p className="text-sm text-[#5B5D57]">sau {multi?.annualPrice ?? "€63"}/lună la plata anuală, plus €29/lună pentru fiecare locație suplimentară (se adaugă la cerere)</p>
                 <ul className="mt-4 space-y-2 text-sm text-[#3B3D38]">
                   {["Tot ce include Pro", "Raportare centrală", "Comutare între locații", "Suport prioritar"].map((item) => (
                     <li key={item} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-[#165DFC]" aria-hidden />{item}</li>

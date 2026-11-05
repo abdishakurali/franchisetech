@@ -122,7 +122,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     faqs: [
       {
         question: "Am nevoie de casă de marcat specială?",
-        answer: "Nu. franchisetech rulează în browser pe tablete. Driverul fiscal rulează pe PC-ul de casă pentru bonuri fiscale.",
+        answer: "Pentru POS nu aveți nevoie de hardware special, doar de un browser. Pentru bonuri fiscale aveți nevoie de o casă de marcat sau o imprimantă fiscală omologată, compatibilă cu driverul fiscal.",
       },
       {
         question: "Pot începe doar cu POS la tejghea?",
@@ -150,7 +150,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
     heroBefore: "Comanda pleacă în ",
     heroHighlight: "trei atingeri, nu în trei ecrane",
     heroAfter: ".",
-    heroSubheadline: "Grilă de produse fixă, gândită pentru viteză la oră de vârf, cu bon fiscal la fiecare vânzare.",
+    heroSubheadline: "Grilă de produse fixă, gândită pentru viteză la oră de vârf, cu bon fiscal pentru fiecare vânzare, când driverul fiscal este configurat.",
     painPoints: [
       {
         title: "La prânz se face coadă și greșim comenzile",
@@ -171,8 +171,8 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
         body: "Produse cu preț fix în poziții stabile, căutare și încasare dintr-o atingere — gândit pentru volum mare.",
       },
       {
-        title: "Bon fiscal la fiecare vânzare",
-        body: "Driverul fiscal (FiscalNet, driverfiscal.ro) emite bonul fiscal local, pe dispozitivul casierului, pentru fiecare vânzare.",
+        title: "Bon fiscal pentru fiecare vânzare, când driverul fiscal este configurat",
+        body: "Driverul fiscal (FiscalNet, driverfiscal.ro) emite bonul fiscal local, pe dispozitivul casierului, când este configurat; în POS vedeți bonurile rămase de emis.",
       },
       {
         title: "Închiderea zilei",

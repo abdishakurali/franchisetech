@@ -107,19 +107,19 @@ export const ro: MarketingMessages = {
       },
       {
         title: "Conformitate fiscală românească inclusă",
-        text: "Driver fiscal, Raport Z, ANAF e-Factura și TVA sunt native — nu adăugate ulterior ca opțiuni extra.",
+        text: "Integrare cu driverul fiscal FiscalNet (licența se cumpără separat), Raport Z și TVA configurate pentru România.",
       },
       {
         title: "Funcționează pe hardware existent",
-        text: "Rulează în browser. Nu este nevoie de terminal POS proprietar scump — folosiți laptopurile și tabletele deja din business.",
+        text: "POS-ul rulează în browser pe laptop sau tabletă. Pentru bonuri fiscale aveți nevoie și de o casă de marcat sau imprimantă fiscală compatibilă.",
       },
       {
         title: "Un singur sistem pentru operațiunile zilnice",
         text: "POS, stoc, achiziții, rețete, raportare și date pentru proprietar — toate conectate într-o platformă cloud.",
       },
       {
-        title: "Onboarding asistat",
-        text: "Noi configurăm business-ul, instruim personalul și îi ajutăm să fie live. Clientul dumneavoastră nu este niciodată lăsat să se descurce singur.",
+        title: "Configurare ghidată gratuită",
+        text: "Configurarea ghidată este gratuită: vă ajutăm să importați produsele și să faceți prima vânzare.",
       },
     ],
   },
@@ -447,7 +447,7 @@ export const ro: MarketingMessages = {
   },
   pricing: {
     title: "Prețuri franchisetech",
-    description: "Pro costă 49 €/locație/lună (39 € la plata anuală), iar Multi 79 €/locație/lună (63 € anual) + 29 €/locație suplimentară. Fără contract pe termen lung.",
+    description: "Pro costă 49 € pe lună (39 € la plata anuală) pentru o locație. Multi costă 79 € pe lună pentru prima locație (63 € la plata anuală) și 29 € pentru fiecare locație suplimentară, adăugată la cerere. 15 zile de probă gratuită, fără card, fără contract.",
     badge: "Prețuri simple",
     heroTitle: "Trei planuri, cu preț clar pe locație.",
     heroText: "Pro pentru o locație: vânzare, închidere zilnică, stoc, achiziții și rețete. Multi pentru mai multe locații.",
@@ -557,7 +557,7 @@ export const ro: MarketingMessages = {
       ["Am nevoie de hardware special?", "Aplicația web rulează pe dispozitive compatibile. Bonurile fiscale necesită o casă sau imprimantă fiscală compatibilă și un driver fiscal configurat local."],
       ["Puteți configura produsele mele?", "Configurarea ghidată în aplicație este inclusă. Migrările mari, instruirea echipei și configurarea fiscală la locație sunt servicii separate."],
       ["Cum se plătește abonamentul?", "Pro și Multi se plătesc lunar sau anual (economisiți 20% anual). Nu există contract pe termen lung și puteți anula oricând."],
-      ["Prețul este pe firmă sau pe locație?", "Prețurile afișate sunt pentru o locație, pe lună. Pentru mai multe locații, solicitați o ofertă bazată pe configurația reală."],
+      ["Prețul este pe firmă sau pe locație?", "Pro este pentru o locație: 49 €/lună (39 € la plata anuală). Multi costă 79 €/lună pentru prima locație (63 € la plata anuală), plus 29 €/lună pentru fiecare locație suplimentară; locațiile suplimentare se adaugă la cerere."],
       ["Mi se va mări prețul?", "Dacă schimbăm prețurile de listă, clienții plătitori existenți păstrează tariful curent, exceptând schimbarea planului."],
       ["Rapoartele costă extra ca la alți furnizori?", "Nu. Raport vânzări, raport Z și raport TVA sunt incluse în Pro și Multi. Unii competitori (ex. Ebriza) taxează Insights separat (+19€/lună) — comparați costul total, nu doar prețul de intrare."],
     ] as const,

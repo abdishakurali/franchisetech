@@ -26,7 +26,7 @@ const flow = [
 const faqs = [
   [
     "Cât costă?",
-    "Pro costă 49 €/locație/lună (39 € la plata anuală), iar Multi 79 €/locație/lună. Fără contract pe termen lung, anulare oricând.",
+    "Pro costă 49 €/lună pentru o locație (39 € la plata anuală). Multi costă 79 €/lună pentru prima locație (63 € la plata anuală), plus 29 €/lună pentru fiecare locație suplimentară; locațiile suplimentare se adaugă la cerere. Fără contract pe termen lung, anulare oricând.",
   ],
   [
     "franchisetech generează QR-ul de pe bon?",
@@ -99,10 +99,10 @@ function ZReportCard() {
           <span>-12,00 lei</span>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2 border-t border-slate-200 bg-slate-50 p-3">
-        <span className="rounded-md bg-[#1747c9] px-3 py-2 text-center text-xs font-semibold text-white">Trimite contabilului</span>
-        <span className="rounded-md border border-slate-300 bg-white px-3 py-2 text-center text-xs font-semibold text-slate-800">Export Saga</span>
+      <div className="border-t border-slate-200 bg-slate-50 p-3">
+        <span className="block rounded-md border border-slate-300 bg-white px-3 py-2 text-center text-xs font-semibold text-slate-800">Export Saga</span>
       </div>
+      <p className="border-t border-slate-200 bg-white px-4 py-2 text-[11px] text-slate-500">Date fictive, în scop de exemplu</p>
     </div>
   );
 }
@@ -138,6 +138,7 @@ function ReceiptStatusTable() {
         <span>148 bonuri · 1 eșuat · 1 în așteptare</span>
         <span className="text-[#1747c9]">Rezolvați înainte de Z →</span>
       </div>
+      <p className="border-t border-slate-200 bg-white px-4 py-2 text-[11px] text-slate-500">Date fictive, în scop de exemplu</p>
     </div>
   );
 }
@@ -239,7 +240,7 @@ export function RaportZLandingRedesign({ signupHref }: Props) {
               nu peste trei săptămâni, de la contabil.
             </p>
             <div className="mt-5 space-y-3 text-sm text-slate-700">
-              {["Filtrare pe stare, casier, metodă de plată", "Reîncercare trimitere pentru bonurile eșuate", "Ziua nu se închide fără confirmare dacă există bonuri nerezolvate"].map((item) => (
+              {["Filtrare pe stare, casier, metodă de plată", "Reîncercare trimitere pentru bonurile eșuate, din POS"].map((item) => (
                 <div key={item} className="flex gap-3">
                   <Check className="mt-0.5 h-4 w-4 text-emerald-700" aria-hidden />
                   <span>{item}</span>
@@ -260,10 +261,10 @@ export function RaportZLandingRedesign({ signupHref }: Props) {
             <div>
               <p className="font-mono text-xs font-semibold uppercase tracking-wide text-[#1747c9]">Dovadă vizuală</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-[#101830] sm:text-3xl">
-                Interfața reală din aplicație — nu capturi vechi, nu decor.
+                Exemplu ilustrativ cu date fictive, desenat după ecranele din aplicație.
               </h2>
               <p className="mt-4 text-base leading-7 text-slate-600">
-                Casa de vânzare și panoul zilnic, exact cum le vede un proprietar de cafenea.
+                Casa de vânzare și panoul zilnic, așa cum sunt organizate în aplicație.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
