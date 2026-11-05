@@ -75,7 +75,7 @@ const faqs: Array<[string, string]> = [
   ],
   [
     "Cât costă?",
-    `Pro costă ${pro?.price ?? "€49"} pe lună pentru o locație (${pro?.annualPrice ?? "€39"}/lună la plata anuală), fără TVA. Multi costă ${multi?.price ?? "€79"} pe lună pentru prima locație (${multi?.annualPrice ?? "€63"}/lună la plata anuală), plus €29 pe lună pentru fiecare locație suplimentară; locațiile suplimentare se adaugă la cerere. Driverul fiscal și echipamentele se plătesc separat. Fără contract pe termen lung.`,
+    `Pro costă ${pro?.price ?? "€49"} pe lună pentru o locație (${pro?.annualPrice ?? "€39"}/lună la plata anuală). SALUT TECH SRL nu este plătitoare de TVA, deci prețul este final. Multi costă ${multi?.price ?? "€79"} pe lună pentru prima locație (${multi?.annualPrice ?? "€63"}/lună la plata anuală), plus €29 pe lună pentru fiecare locație suplimentară; locațiile suplimentare se adaugă la cerere. Driverul fiscal și echipamentele se plătesc separat. Fără contract pe termen lung.`,
   ],
   [
     "Există o perioadă de probă?",
@@ -222,7 +222,7 @@ export default function DemoPage() {
               </div>
             </div>
             <p className="mt-4 text-sm text-[#5B5D57]">
-              Prețurile nu includ TVA. Driverul fiscal și echipamentele se plătesc separat. {TRIAL_DAYS} zile de probă Pro, fără card.{" "}
+              SALUT TECH SRL nu este plătitoare de TVA, deci prețul afișat este prețul final. Driverul fiscal și echipamentele se plătesc separat. {TRIAL_DAYS} zile de probă Pro, fără card.{" "}
               <Link href="/pricing" className="font-medium text-[#165DFC] underline">Vezi toate detaliile de preț</Link>
             </p>
           </div>

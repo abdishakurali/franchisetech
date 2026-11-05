@@ -151,7 +151,7 @@ const ro = {
   month: "lună",
   pricingLink: "Compară toate planurile",
   pricingNote:
-    "Prețuri fără TVA. Driverul fiscal, echipamentele și serviciile terțe se plătesc separat.",
+    "Prețul afișat este final: SALUT TECH SRL nu este plătitoare de TVA. Driverul fiscal, echipamentele și serviciile terțe se plătesc separat.",
   faqLabel: "Întrebări frecvente",
   faqTitle: "Înainte de prima zi la casă.",
   faq: [
@@ -310,7 +310,7 @@ const en: typeof ro = {
   month: "month",
   pricingLink: "Compare all plans",
   pricingNote:
-    "Prices exclude VAT. The fiscal driver, hardware and third-party services are separate.",
+    "The price shown is final: SALUT TECH SRL is not VAT-registered. The fiscal driver, hardware and third-party services are separate.",
   faqLabel: "Frequently asked questions",
   faqTitle: "Before your first day at the till.",
   faq: [
