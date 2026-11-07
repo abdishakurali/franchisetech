@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, Lock, ShieldCheck } from "lucide-react";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { useMarketingMessages, useMarketingLocale } from "@/lib/marketing/use-marketing-locale";
+import { CookieSettingsButton } from "@/components/consent/CookieConsent";
 import { MarketingBrand } from "@/components/marketing/MarketingBrand";
 import { socialLinks } from "@/components/marketing/social";
 import { PRIMARY_INDUSTRY_NAV } from "@/lib/marketing/industry-verticals";
@@ -93,7 +94,10 @@ export function MarketingFooterClient() {
         </div>
 
         <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-xs text-muted-foreground">{copyright}</p>
+          <p className="font-mono text-xs text-muted-foreground">
+            {copyright}{" · "}
+            <CookieSettingsButton className="underline-offset-2 hover:underline">{locale === "ro" ? "Setări cookie-uri" : "Cookie settings"}</CookieSettingsButton>
+          </p>
           <div className="flex flex-wrap items-center gap-4 font-mono text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <Lock className="h-3.5 w-3.5" aria-hidden />

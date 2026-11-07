@@ -1,3 +1,4 @@
+import { hasAnalyticsConsent } from "@/lib/consent";
 import type { MarketingLocale } from "@/lib/marketing/locale";
 
 export const ACQUISITION_COOKIE = "franchisetech_acquisition";
@@ -77,6 +78,8 @@ export function hasAcquisitionData(params: AcquisitionParams): boolean {
 
 export function writeAcquisitionClient(params: AcquisitionParams): void {
   if (typeof window === "undefined") return;
+  // Attribution cookie is analytics: only with cookie consent.
+  if (!hasAnalyticsConsent()) return;
   const payload = JSON.stringify(params);
   document.cookie = `${ACQUISITION_COOKIE}=${encodeURIComponent(payload)};path=/;max-age=2592000;samesite=lax`;
 }

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Confirm } from "@/components/legal/Confirm";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { DATA_CONTROLLER } from "@/lib/legal/controller";
+import { ODOO_WARRANTY_DAYS } from "@/lib/marketing/odoo-services";
 
 // Romanian translation of the 3 June 2026 terms; the substance is unchanged.
 const updated = "3 noiembrie 2026";
@@ -48,12 +48,29 @@ export default function TermsPage() {
               {DATA_CONTROLLER.legalName} under a written offer that states the scope, the fixed price and the delivery terms. If the offer and these
               terms differ, the offer applies.
             </p>
-            <p>
-              <Confirm>
-                Payment terms, warranty period for delivered work, liability cap, governing law (Romanian law) and competent courts are to be set by
-                the owner before these services are offered.
-              </Confirm>
-            </p>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>
+                <strong>Prices and payment.</strong> Prices are in EUR and final; SALUT TECH SRL is not VAT-registered, so no VAT is added. Projects up
+                to €500 are invoiced on delivery. Larger projects are invoiced 50% when the offer is accepted and 50% on delivery. Invoices are due
+                within 14 days. The monthly support plan is invoiced monthly in advance and can be cancelled before the next month starts.
+              </li>
+              <li>
+                <strong>Acceptance and warranty.</strong> You test the delivered work; we fix defects against the agreed scope free of charge for{" "}
+                {ODOO_WARRANTY_DAYS} days after delivery. Changes to the scope are quoted separately.
+              </li>
+              <li>
+                <strong>Your systems and data.</strong> You give us the access needed for the work and keep backups of your Odoo database. When we
+                process personal data on your behalf, we sign a data processing agreement (Article 28 GDPR).
+              </li>
+              <li>
+                <strong>Liability.</strong> Our total liability for a project is limited to the amount you paid for that project, except where the
+                law does not allow a limit (for example for intent or gross negligence). We are not liable for indirect losses such as lost profit.
+              </li>
+              <li>
+                <strong>Law and courts.</strong> Romanian law applies. Disputes go to the competent courts for the registered office of SALUT TECH
+                SRL, unless the law requires otherwise.
+              </li>
+            </ul>
           </div>
           <div lang="ro" className="mt-4 space-y-2 text-slate-500">
             <p>
@@ -64,6 +81,13 @@ export default function TermsPage() {
             <p>
               Serviciile de integrare, configurare, dezvoltare la comandă și suport pentru Odoo sunt prestate de {DATA_CONTROLLER.legalName} pe baza
               unei oferte scrise, care stabilește ce se livrează, prețul fix și termenele. Dacă oferta și acești termeni diferă, se aplică oferta.
+            </p>
+            <p>
+              Prețurile sunt în EUR și sunt finale (SALUT TECH SRL nu este plătitoare de TVA). Proiectele de până la €500 se facturează la livrare;
+              cele mai mari, 50% la acceptarea ofertei și 50% la livrare, cu plata în 14 zile. Corectăm gratuit defectele față de ofertă timp de{" "}
+              {ODOO_WARRANTY_DAYS} de zile de la livrare. Pentru datele personale prelucrate în numele clientului semnăm un acord conform art. 28
+              GDPR. Răspunderea noastră totală pentru un proiect este limitată la suma plătită pentru acel proiect, cu excepțiile prevăzute de lege.
+              Se aplică legea română; litigiile se soluționează de instanțele competente de la sediul SALUT TECH SRL.
             </p>
           </div>
         </section>

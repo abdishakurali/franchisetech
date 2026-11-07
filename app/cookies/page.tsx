@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Confirm } from "@/components/legal/Confirm";
+import { CookieSettingsButton } from "@/components/consent/CookieConsent";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { DATA_CONTROLLER } from "@/lib/legal/controller";
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/cookies" },
 };
 
-const updated = "4 noiembrie 2026 / 4 November 2026";
+const updated = "7 noiembrie 2026 / 7 November 2026";
 
 type Row = { name: string; who: string; ro: string; en: string; duration: string; kind: "necessary" | "preference" | "analytics" };
 
@@ -19,16 +19,17 @@ type Row = { name: string; who: string; ro: string; en: string; duration: string
 // on 2026-11-04. Update this list whenever a new cookie or tracker is added.
 const cookies: Row[] = [
   { name: "sb-…-auth-token", who: "franchisetech (Supabase Auth)", ro: "Vă ține autentificat în cont. Apare doar după ce vă conectați.", en: "Keeps you signed in. Only set after you log in.", duration: "până la 400 de zile / up to 400 days", kind: "necessary" },
+  { name: "franchisetech_consent", who: "franchisetech", ro: "Alegerea dumneavoastră din bannerul de cookie-uri (toate sau doar necesare).", en: "Your choice in the cookie banner (all or necessary only).", duration: "180 de zile / 180 days", kind: "necessary" },
   { name: "pos_till_open", who: "franchisetech", ro: "Ține minte, în aplicație, că sertarul de casă este deschis.", en: "Remembers in the app that a till session is open.", duration: "1 zi / 1 day", kind: "necessary" },
   { name: "franchisetech_locale", who: "franchisetech", ro: "Limba aleasă pentru site (română sau engleză).", en: "Your site language (Romanian or English).", duration: "1 an / 1 year", kind: "preference" },
   { name: "franchisetech_preferred_plan", who: "franchisetech", ro: "Planul ales pe pagina de prețuri, ca să fie preselectat la înscriere.", en: "The plan you picked on the pricing page, preselected at sign-up.", duration: "7 zile / 7 days", kind: "preference" },
-  { name: "franchisetech_acquisition", who: "franchisetech", ro: "Parametrii linkului prin care ați ajuns la înscriere (utm_*, gclid, fbclid, ref), ca să știm ce campanie a adus contul.", en: "The link parameters you arrived with at sign-up (utm_*, gclid, fbclid, ref), so we know which campaign brought the account.", duration: "30 de zile / 30 days", kind: "analytics" },
-  { name: "ph_<cheie>_posthog", who: "PostHog (instanța UE / EU instance)", ro: "Un identificator aleator, ca să numărăm vizitele și pașii din formulare și să vedem erorile din pagină.", en: "A random identifier used to count visits and form steps and to see page errors.", duration: "1 an / 1 year", kind: "analytics" },
+  { name: "franchisetech_acquisition", who: "franchisetech", ro: "Doar cu acordul dumneavoastră: parametrii linkului prin care ați ajuns la înscriere (utm_*, gclid, fbclid, ref), ca să știm ce campanie a adus contul.", en: "Only with your consent: the link parameters you arrived with at sign-up (utm_*, gclid, fbclid, ref), so we know which campaign brought the account.", duration: "30 de zile / 30 days", kind: "analytics" },
+  { name: "ph_<cheie>_posthog", who: "PostHog (instanța UE / EU instance)", ro: "Doar cu acordul dumneavoastră: un identificator aleator, ca să numărăm vizitele și pașii din formulare și să vedem erorile din pagină.", en: "Only with your consent: a random identifier used to count visits and form steps and to see page errors.", duration: "1 an / 1 year", kind: "analytics" },
 ];
 
 const storage: Row[] = [
-  { name: "ph_<cheie>_posthog, …_window_id, …_primary_window_exists", who: "PostHog", ro: "Aceleași date ca cookie-ul PostHog, în localStorage și sessionStorage.", en: "The same data as the PostHog cookie, in localStorage and sessionStorage.", duration: "localStorage: până la ștergere / until cleared; sessionStorage: până închideți fila / until the tab closes", kind: "analytics" },
-  { name: "datafast_session_id, datafast_pageview_state", who: "DataFast (datafa.st)", ro: "Statistici de vizite fără cookie-uri: un identificator de sesiune în sessionStorage.", en: "Cookieless visit statistics: a session identifier in sessionStorage.", duration: "până închideți fila / until the tab closes", kind: "analytics" },
+  { name: "ph_<cheie>_posthog, …_window_id, …_primary_window_exists", who: "PostHog", ro: "Doar cu acordul dumneavoastră: aceleași date ca cookie-ul PostHog, în localStorage și sessionStorage.", en: "Only with your consent: the same data as the PostHog cookie, in localStorage and sessionStorage.", duration: "localStorage: până la ștergere / until cleared; sessionStorage: până închideți fila / until the tab closes", kind: "analytics" },
+  { name: "datafast_session_id, datafast_pageview_state", who: "DataFast (datafa.st)", ro: "Doar cu acordul dumneavoastră: statistici de vizite, cu un identificator de sesiune în sessionStorage.", en: "Only with your consent: visit statistics, with a session identifier in sessionStorage.", duration: "până închideți fila / until the tab closes", kind: "analytics" },
   { name: "franchisetech*", who: "franchisetech", ro: "În aplicație: limba, coșul și vânzările POS nesincronizate, ciorna de configurare, mesaje închise.", en: "In the app: language, POS cart and unsynced sales, setup draft, dismissed hints.", duration: "până la ștergere / until cleared", kind: "necessary" },
 ];
 
@@ -114,20 +115,28 @@ export default function CookiesPage() {
           <section>
             <h2 className="font-semibold text-slate-900">5. Consimțământ și control / Consent and control</h2>
             <p lang="ro">
-              Cookie-urile strict necesare nu au nevoie de consimțământ. Pentru cookie-urile de statistici (PostHog și franchisetech_acquisition){" "}
-              <Confirm>
-                Owner decision needed: the site has no consent banner today, so these are set on the first visit. Romanian Law 506/2004 (art. 4)
-                requires prior consent for cookies that are not strictly necessary. Either add a consent banner or switch PostHog to cookieless mode,
-                then rewrite this paragraph.
-              </Confirm>
+              La prima vizită vă întrebăm, printr-un banner, dacă acceptați cookie-urile de statistici. Până alegeți, și dacă alegeți „Doar
+              necesare&rdquo;, nu salvăm în browser nimic în afară de cookie-urile strict necesare: PostHog numără doar paginile vizitate, cu un
+              identificator păstrat în memoria paginii, care dispare când închideți pagina, fără înregistrarea sesiunii, iar DataFast nu se încarcă.
+              Cookie-urile strict necesare nu au nevoie de consimțământ (Legea nr. 506/2004, art. 4 alin. (6)).
             </p>
-            <p lang="ro" className="mt-2">
+            <p lang="en" className="mt-2 text-slate-500">
+              On your first visit a banner asks whether you accept analytics cookies. Until you choose, and if you choose &ldquo;Necessary
+              only&rdquo;, we store nothing in your browser except strictly necessary cookies: PostHog only counts page views with an identifier kept
+              in the page&rsquo;s memory, which disappears when you close the page, with no session recording, and DataFast is not loaded.
+            </p>
+            <p className="mt-3">
+              <CookieSettingsButton className="rounded-md border border-slate-300 px-3 py-1.5 font-medium text-slate-900 hover:bg-slate-50">
+                Schimbați alegerea / Change your choice
+              </CookieSettingsButton>
+            </p>
+            <p lang="ro" className="mt-3">
               Puteți șterge sau bloca oricând cookie-urile din setările browserului. Dacă blocați cookie-urile strict necesare, autentificarea în aplicație
               nu va funcționa.
             </p>
             <p lang="en" className="mt-2 text-slate-500">
-              Strictly necessary cookies do not need consent. You can delete or block cookies at any time in your browser settings; if you block the strictly
-              necessary ones, signing in to the app will not work.
+              You can also delete or block cookies at any time in your browser settings; if you block the strictly necessary ones, signing in to the app
+              will not work.
             </p>
           </section>
 

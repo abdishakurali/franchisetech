@@ -13,6 +13,7 @@ import { pricingPlans } from "@/lib/billing/plans";
 import { HomeFlowDiagram } from "@/components/marketing/HomeFlowDiagram";
 import { YouTubeFacade } from "@/components/marketing/YouTubeFacade";
 import { DATA_CONTROLLER } from "@/lib/legal/controller";
+import { CookieSettingsButton } from "@/components/consent/CookieConsent";
 import { PRIMARY_INDUSTRY_NAV, PRIMARY_INDUSTRY_SLUGS, type PrimaryIndustrySlug } from "@/lib/marketing/industry-verticals";
 import { primaryIndustryPages } from "@/lib/marketing/industry-page-content";
 import { localizeSeoPage } from "@/lib/marketing/i18n";
@@ -54,7 +55,7 @@ export function ClaudeMarketingShell({ children, user = null }: { children: Reac
       <Link href="/"><Image src="/design-marketing/franchise-tech-logo.svg" alt="FranchiseTech" width={190} height={26} className={s.logo} /></Link>
       <span>franchisetech.ro · suport în română · <SupportContactLink channel="phone" location="footer">{SUPPORT_PHONE_DISPLAY}</SupportContactLink> · <SupportContactLink channel="whatsapp" location="footer">WhatsApp</SupportContactLink></span>
       {DATA_CONTROLLER.legalName ? <span className={s.footerLegal}>{[DATA_CONTROLLER.legalName, DATA_CONTROLLER.registrationNumber, DATA_CONTROLLER.registeredAddress].filter(Boolean).join(" · ")}</span> : null}
-      <nav className={s.footerLinks} aria-label="Informații legale"><Link href="/pentru-contabili">Pentru contabili</Link><Link href="/odoo">Odoo integration</Link><Link href="/privacy">Confidențialitate</Link><Link href="/terms">Termeni</Link><Link href="/cookies">Cookie-uri</Link><Link href="/imprint">Date firmă</Link><Link href="/contact">Contact</Link></nav>
+      <nav className={s.footerLinks} aria-label="Informații legale"><Link href="/pentru-contabili">Pentru contabili</Link><Link href="/odoo">Odoo integration</Link><Link href="/privacy">Confidențialitate</Link><Link href="/terms">Termeni</Link><Link href="/cookies">Cookie-uri</Link><Link href="/imprint">Date firmă</Link><Link href="/contact">Contact</Link><CookieSettingsButton className={s.footerButton}>Setări cookie-uri</CookieSettingsButton></nav>
     </div></footer>
   </div>;
 }

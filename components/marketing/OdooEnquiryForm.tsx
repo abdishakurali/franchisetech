@@ -14,7 +14,7 @@ type Locale = "en" | "ro";
 const copy = {
   en: {
     contact: "Work email or phone",
-    contactHelp: "We reply by email, or by phone if you leave a number.",
+    contactHelp: "We reply within 5 working hours, by email or by phone if you leave a number.",
     name: "Name (optional)",
     company: "Company and country (optional)",
     message: "What should Odoo connect to? (optional)",
@@ -24,12 +24,12 @@ const copy = {
     send: "Send enquiry",
     sending: "Sending",
     sent: "Enquiry sent.",
-    sentHelp: "We will reply by email, or by phone if you left a number.",
+    sentHelp: "We reply within 5 working hours, by email or by phone if you left a number.",
     errors: { 400: "Enter a valid email address or phone number and tick the box.", 429: "Please wait a minute before sending again.", other: "The enquiry could not be sent. Write to info@franchisetech.ro." },
   },
   ro: {
     contact: "Email de serviciu sau telefon",
-    contactHelp: "Răspundem prin email sau, dacă lăsați un număr, telefonic.",
+    contactHelp: "Răspundem în cel mult 5 ore lucrătoare, prin email sau, dacă lăsați un număr, telefonic.",
     name: "Nume (opțional)",
     company: "Firma și țara (opțional)",
     message: "Cu ce trebuie conectat Odoo? (opțional)",
@@ -39,7 +39,7 @@ const copy = {
     send: "Trimiteți cererea",
     sending: "Se trimite",
     sent: "Cererea a fost trimisă.",
-    sentHelp: "Vă răspundem prin email sau, dacă ați lăsat un număr, telefonic.",
+    sentHelp: "Vă răspundem în cel mult 5 ore lucrătoare, prin email sau, dacă ați lăsat un număr, telefonic.",
     errors: { 400: "Introduceți un email sau un telefon valid și bifați acordul.", 429: "Așteptați un minut înainte de a trimite din nou.", other: "Cererea nu a putut fi trimisă. Scrieți la info@franchisetech.ro." },
   },
 } as const;

@@ -141,6 +141,8 @@
 .footerInner { padding-block:32px; display:flex; flex-wrap:wrap; gap:22px; justify-content:space-between; align-items:center; }
 .footer .logo { height:30px; filter:brightness(0) invert(1); }
 .footerLinks { display:flex; flex-wrap:wrap; gap:14px; }
+.footerButton { background:none; border:0; padding:0; cursor:pointer; font-family:var(--font-space-mono),monospace; font-size:11px; color:#a89e8a; }
+.footerButton:hover { text-decoration:underline; }
 .footerLegal { flex-basis:100%; order:3; line-height:1.6; }
 .footer a,.footer span { font-family:var(--font-space-mono),monospace; font-size:11px; color:#a89e8a; }
 @media(max-width:1060px) { .nav { display:none; } .mobile { display:block; position:relative; } .mobile summary { padding:10px; cursor:pointer; font-size:14px; } .mobile nav { position:absolute; right:0; top:100%; width:230px; padding:8px; border:1px solid var(--border); border-radius:12px; background:var(--paper); display:flex; flex-direction:column; align-items:stretch; } .mobile nav a { padding:12px; } .faq,.plans { grid-template-columns:repeat(2,minmax(0,1fr)); } }

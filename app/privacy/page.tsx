@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Confirm } from "@/components/legal/Confirm";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { DATA_CONTROLLER, DEMO_LEAD_PROCESSORS, DEMO_LEAD_RETENTION_MONTHS } from "@/lib/legal/controller";
 
@@ -43,8 +42,8 @@ export default function PrivacyPage() {
             provider&rsquo;s data processing terms.
           </p>
           <p className="mt-2">
-            <strong>How long:</strong> <Confirm>we keep enquiries that do not lead to a contract for up to {DEMO_LEAD_RETENTION_MONTHS} months, then
-            delete them; if you become a client, for the duration of the contract and the periods required by Romanian accounting law.</Confirm>
+            <strong>How long:</strong> we keep enquiries that do not lead to a contract for up to {DEMO_LEAD_RETENTION_MONTHS} months, then
+            delete them; if you become a client, for the duration of the contract and the periods required by Romanian accounting law.
           </p>
           <p className="mt-2">
             <strong>Your rights:</strong> access, rectification, erasure, restriction, objection and portability. Write to{" "}
