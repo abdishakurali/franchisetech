@@ -3,7 +3,8 @@ import { Check } from "lucide-react";
 import { OdooEnquiryForm } from "@/components/marketing/OdooEnquiryForm";
 import { DATA_CONTROLLER } from "@/lib/legal/controller";
 import { SUPPORT_PHONE_DISPLAY, SUPPORT_PHONE_TEL } from "@/lib/marketing/contact-info";
-import { ODOO_APPS, ODOO_TOTAL_TESTS, ODOO_VERSIONS, odooStoreUrl, type OdooAppGroup } from "@/lib/marketing/odoo-apps";
+import { ODOO_APPS, ODOO_APP_COUNT, ODOO_LISTING_COUNT, ODOO_TOTAL_TESTS, ODOO_VERSIONS, odooStoreUrl, type OdooApp, type OdooAppGroup } from "@/lib/marketing/odoo-apps";
+import { ODOO_DEMOS } from "@/lib/marketing/odoo-demos";
 import { ODOO_PACKAGES, ODOO_HOURLY_EUR, ODOO_REPLY_HOURS } from "@/lib/marketing/odoo-services";
 
 type Locale = "en" | "ro";
@@ -19,10 +20,10 @@ const copy = {
     title: "Odoo integration for European companies",
     lead: "We connect Odoo to the systems your business already runs on: online stores, reporting, supplier bills, point of sale and fiscal printers. We build on our own published Odoo apps, so most projects start from tested code, not from a blank page.",
     ctaPrimary: "Get a free fixed-price quote",
-    ctaSecondary: "See our 22 apps",
+    ctaSecondary: `See our ${ODOO_APP_COUNT} apps`,
     ctaDemos: "Watch the demos",
     stats: [
-      ["22", "Odoo apps on apps.odoo.com"],
+      [String(ODOO_APP_COUNT), "Odoo apps on apps.odoo.com"],
       [`${versions[0]}–${versions[versions.length - 1]}`, "Odoo versions supported"],
       [String(ODOO_TOTAL_TESTS), "automated test cases"],
       [`${ODOO_REPLY_HOURS} h`, "reply time on working days"],
@@ -53,19 +54,22 @@ const copy = {
       ["POS and fiscal printers", "Odoo Point of Sale printing Romanian fiscal receipts, refunds and X/Z reports through the FiscalNet driver."],
       ["Access control", "Field-level access rights in Odoo: who can see or edit which fields."],
     ],
-    proofTitle: "Proof: 22 published Odoo apps",
+    proofTitle: `Proof: ${ODOO_APP_COUNT} published Odoo apps`,
     proof: (
       <>
-        All 22 apps are live on apps.odoo.com for Odoo {versions.join(", ")} (110 listings). Their source contains{" "}
+        All {ODOO_APP_COUNT} apps are live on apps.odoo.com for Odoo {versions.join(", ")} ({ODOO_LISTING_COUNT} listings). Their source contains{" "}
         <strong>{ODOO_TOTAL_TESTS} automated test cases</strong>. The Shopify connector suite runs its tests on every change; its last full
         run on 31 October 2026 passed 424 tests with 0 failures on Odoo 20.
       </>
     ),
-    proofNote: "Links open the Odoo 19 listing; each page has a version selector for 16 to 20. Test counts are the test cases in each module, counted on 4 November 2026.",
+    proofNote: "Links open the Odoo 19 listing; each page has a version selector for 16 to 20. Prices are the Odoo Apps Store prices in EUR. A bundle has no price of its own: it installs other apps from the list, and the store charges for those apps. Test counts are the test cases in each module, counted on 8 November 2026.",
     colApp: "App",
     colArea: "Area",
+    colPrice: "Price",
     colTests: "Tests",
-    groups: { shopify: "Shopify", woocommerce: "WooCommerce", reporting: "Reporting", finance: "Finance", inventory: "Inventory", pos: "POS", access: "Access control" },
+    bundle: "Bundle",
+    watchDemo: "Watch demo",
+    groups: { shopify: "Shopify", woocommerce: "WooCommerce", reporting: "Reporting", finance: "Finance", inventory: "Inventory", labels: "Labels and printing", pos: "POS", hr: "Attendance", access: "Access control", technical: "Technical" },
     pricingTitle: "Fixed prices",
     pricingIntro: "Every project starts with a free review and a written fixed price. Prices are in EUR and final: SALUT TECH SRL is not VAT-registered, so no VAT is added.",
     from: "from",
@@ -95,10 +99,10 @@ const copy = {
     title: "Integrare Odoo pentru companii din Europa",
     lead: "Conectăm Odoo la sistemele pe care firma dumneavoastră le folosește deja: magazine online, raportare, facturi de la furnizori, punct de vânzare și case de marcat fiscale. Pornim de la aplicațiile Odoo pe care le-am publicat, așa că majoritatea proiectelor încep de la cod testat, nu de la zero.",
     ctaPrimary: "Cereți o ofertă gratuită la preț fix",
-    ctaSecondary: "Vedeți cele 22 de aplicații",
+    ctaSecondary: `Vedeți cele ${ODOO_APP_COUNT} de aplicații`,
     ctaDemos: "Vedeți demonstrațiile video (în engleză)",
     stats: [
-      ["22", "aplicații Odoo pe apps.odoo.com"],
+      [String(ODOO_APP_COUNT), "aplicații Odoo pe apps.odoo.com"],
       [`${versions[0]}–${versions[versions.length - 1]}`, "versiuni Odoo suportate"],
       [String(ODOO_TOTAL_TESTS), "teste automate"],
       [`${ODOO_REPLY_HOURS} h`, "timp de răspuns în zilele lucrătoare"],
@@ -129,19 +133,22 @@ const copy = {
       ["POS și case de marcat fiscale", "Odoo Point of Sale care tipărește bonuri fiscale, retururi și rapoarte X/Z prin driverul FiscalNet."],
       ["Controlul accesului", "Drepturi de acces la nivel de câmp în Odoo: cine vede sau modifică fiecare câmp."],
     ],
-    proofTitle: "Dovada: 22 de aplicații Odoo publicate",
+    proofTitle: `Dovada: ${ODOO_APP_COUNT} de aplicații Odoo publicate`,
     proof: (
       <>
-        Toate cele 22 de aplicații sunt publicate pe apps.odoo.com pentru Odoo {versions.join(", ")} (110 pagini). Codul lor conține{" "}
+        Toate cele {ODOO_APP_COUNT} de aplicații sunt publicate pe apps.odoo.com pentru Odoo {versions.join(", ")} ({ODOO_LISTING_COUNT} de pagini). Codul lor conține{" "}
         <strong>{ODOO_TOTAL_TESTS} de teste automate</strong>. Suita de conectori Shopify își rulează testele la fiecare modificare; ultima
         rulare completă, din 31 octombrie 2026, a trecut 424 de teste fără nicio eroare pe Odoo 20.
       </>
     ),
-    proofNote: "Linkurile deschid pagina pentru Odoo 19; fiecare pagină are un selector pentru versiunile 16–20. Testele sunt numărate în fiecare modul la 4 noiembrie 2026.",
+    proofNote: "Linkurile deschid pagina pentru Odoo 19; fiecare pagină are un selector pentru versiunile 16–20. Prețurile sunt cele din Odoo Apps Store, în EUR. Un pachet nu are preț propriu: instalează alte aplicații din listă, iar magazinul taxează acele aplicații. Testele sunt numărate în fiecare modul la 8 noiembrie 2026.",
     colApp: "Aplicație",
     colArea: "Domeniu",
+    colPrice: "Preț",
     colTests: "Teste",
-    groups: { shopify: "Shopify", woocommerce: "WooCommerce", reporting: "Raportare", finance: "Financiar", inventory: "Stocuri", pos: "POS", access: "Controlul accesului" },
+    bundle: "Pachet",
+    watchDemo: "Vedeți demo",
+    groups: { shopify: "Shopify", woocommerce: "WooCommerce", reporting: "Raportare", finance: "Financiar", inventory: "Stocuri", labels: "Etichete și imprimare", pos: "POS", hr: "Pontaj", access: "Controlul accesului", technical: "Tehnic" },
     pricingTitle: "Prețuri fixe",
     pricingIntro: "Fiecare proiect începe cu o analiză gratuită și un preț fix, în scris. Prețurile sunt în EUR și sunt finale: SALUT TECH SRL nu este plătitoare de TVA.",
     from: "de la",
@@ -166,7 +173,14 @@ const copy = {
   },
 } as const;
 
-const GROUP_ORDER: OdooAppGroup[] = ["shopify", "woocommerce", "reporting", "finance", "inventory", "pos", "access"];
+const GROUP_ORDER: OdooAppGroup[] = ["shopify", "woocommerce", "reporting", "finance", "inventory", "labels", "pos", "hr", "access", "technical"];
+const DEMO_TECHS = new Set(ODOO_DEMOS.map((demo) => demo.tech));
+
+function appPrice(app: OdooApp, free: string, bundle: string) {
+  if (app.pricing === "free") return free;
+  if (app.pricing === "bundle" || app.priceEur === null) return bundle;
+  return `€${app.priceEur}`;
+}
 
 export function OdooServicesPage({ locale }: { locale: Locale }) {
   const t = copy[locale];
@@ -272,6 +286,7 @@ export function OdooServicesPage({ locale }: { locale: Locale }) {
                 <tr>
                   <th scope="col" className="px-4 py-3 font-semibold">{t.colApp}</th>
                   <th scope="col" className="hidden px-4 py-3 font-semibold sm:table-cell">{t.colArea}</th>
+                  <th scope="col" className="px-4 py-3 text-right font-semibold">{t.colPrice}</th>
                   <th scope="col" className="px-4 py-3 text-right font-semibold">{t.colTests}</th>
                 </tr>
               </thead>
@@ -281,8 +296,12 @@ export function OdooServicesPage({ locale }: { locale: Locale }) {
                     <td className="px-4 py-3">
                       <a href={odooStoreUrl(app.tech)} target="_blank" rel="noopener noreferrer" className="font-medium text-[#165DFC] underline-offset-2 hover:underline">{app.name}</a>
                       <span className="block text-xs text-[#8F8F86] sm:hidden">{t.groups[app.group]}</span>
+                      {DEMO_TECHS.has(app.tech) ? (
+                        <Link href={`/odoo/demos#${app.tech}`} hrefLang="en" className="mt-0.5 block text-xs font-medium text-[#0D0F0E] underline underline-offset-2">{t.watchDemo}</Link>
+                      ) : null}
                     </td>
                     <td className="hidden px-4 py-3 text-[#5B5D57] sm:table-cell">{t.groups[app.group]}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-right text-[#0D0F0E]">{appPrice(app, t.free, t.bundle)}</td>
                     <td className="px-4 py-3 text-right font-mono text-[#0D0F0E]">{app.tests}</td>
                   </tr>
                 ))}
