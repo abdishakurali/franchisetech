@@ -20,6 +20,7 @@ const copy = {
     lead: "We connect Odoo to the systems your business already runs on: online stores, reporting, supplier bills, point of sale and fiscal printers. We build on our own published Odoo apps, so most projects start from tested code, not from a blank page.",
     ctaPrimary: "Get a free fixed-price quote",
     ctaSecondary: "See our 22 apps",
+    ctaDemos: "Watch the demos",
     stats: [
       ["22", "Odoo apps on apps.odoo.com"],
       [`${versions[0]}–${versions[versions.length - 1]}`, "Odoo versions supported"],
@@ -95,6 +96,7 @@ const copy = {
     lead: "Conectăm Odoo la sistemele pe care firma dumneavoastră le folosește deja: magazine online, raportare, facturi de la furnizori, punct de vânzare și case de marcat fiscale. Pornim de la aplicațiile Odoo pe care le-am publicat, așa că majoritatea proiectelor încep de la cod testat, nu de la zero.",
     ctaPrimary: "Cereți o ofertă gratuită la preț fix",
     ctaSecondary: "Vedeți cele 22 de aplicații",
+    ctaDemos: "Vedeți demonstrațiile video (în engleză)",
     stats: [
       ["22", "aplicații Odoo pe apps.odoo.com"],
       [`${versions[0]}–${versions[versions.length - 1]}`, "versiuni Odoo suportate"],
@@ -187,6 +189,7 @@ export function OdooServicesPage({ locale }: { locale: Locale }) {
         <div className="mt-8 flex flex-wrap gap-3">
           <a href="#contact" className="inline-flex min-h-12 items-center rounded-md bg-[#0D0F0E] px-5 text-sm font-semibold text-white">{t.ctaPrimary}</a>
           <a href="#apps" className="inline-flex min-h-12 items-center rounded-md border border-[#0D0F0E]/20 bg-white px-5 text-sm font-semibold text-[#0D0F0E]">{t.ctaSecondary}</a>
+          <Link href="/odoo/demos" hrefLang="en" className="inline-flex min-h-12 items-center rounded-md border border-[#0D0F0E]/20 bg-white px-5 text-sm font-semibold text-[#0D0F0E]">{t.ctaDemos}</Link>
         </div>
 
         <dl className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-[#0D0F0E]/10 bg-[#0D0F0E]/10 lg:grid-cols-4">

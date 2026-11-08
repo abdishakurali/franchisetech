@@ -56,6 +56,7 @@ export function allSitemapPaths(): SitemapPathEntry[] {
     "/blog",
     "/odoo",
     "/odoo/ro",
+    "/odoo/demos",
     "/cookies",
     "/imprint",
     ...HELP_ARTICLES.map((a) => `/help/${a.slug}`),
