@@ -66,13 +66,15 @@ export type RecipeItemRow = {
   total_cost: number;
 };
 
+type RecipeProductJoin = { name: string; sale_price: number; active?: boolean | null };
+
 export type RecipeRow = {
   id: string;
   name: string;
   yield_qty: number | string;
   product_id: string | null;
   cost_computed_at?: string | null;
-  products: { name: string; sale_price: number } | { name: string; sale_price: number }[] | null;
+  products: RecipeProductJoin | RecipeProductJoin[] | null;
   recipe_items: RecipeItemRow[];
 };
 

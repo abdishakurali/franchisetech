@@ -25,7 +25,7 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
 
   const { data: rawRecipes } = await supabase
     .from("recipes")
-    .select("id,name,yield_qty,product_id,cost_computed_at,products(name,sale_price),recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_cost,total_cost)")
+    .select("id,name,yield_qty,product_id,cost_computed_at,products(name,sale_price,active),recipe_items(id,ingredient_product_id,ingredient_name,quantity,unit_cost,total_cost)")
     .eq("organisation_id", orgId)
     .order("created_at", { ascending: false });
 
@@ -167,6 +167,11 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
                         <Link href={`/app/recipes/${recipe.id}`} className="block truncate hover:text-brass">
                           {product?.name ?? recipe.name}
                         </Link>
+                        {product?.active === false ? (
+                          <span className="mt-0.5 inline-block rounded border border-border px-1.5 text-[10px] font-normal text-muted-foreground">
+                            {t.badges.archived}
+                          </span>
+                        ) : null}
                       </TableCell>
                       <TableCell className="text-right tabular-nums text-mid">{ingredientCount}</TableCell>
                       <TableCell className="text-right tabular-nums hidden sm:table-cell">{formatRecipeMoney(salePrice, currency)}</TableCell>

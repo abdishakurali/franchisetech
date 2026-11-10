@@ -14,13 +14,18 @@ type IngredientProduct = {
   unit_of_measure: string | null;
   cost_price: number | null;
   current_stock_qty: number | null;
+  /** Archived product still linked by this recipe: shown, marked, not offered as a new choice. */
+  archived?: boolean;
 };
 
 type SellableProduct = {
   id: string;
   name: string;
   sale_price: number | null;
+  archived?: boolean;
 };
+
+const ARCHIVED_SUFFIX = " (arhivat)";
 
 type IngredientRow = { id: number; product_id: string; quantity: string };
 
@@ -52,9 +57,11 @@ function IngredientPicker({
 
   const selected = products.find((p) => p.id === value);
 
+  // An archived ingredient is only listed when it is the one already selected.
+  const choosable = products.filter((p) => !p.archived || p.id === value);
   const filtered = query.trim()
-    ? products.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
-    : products;
+    ? choosable.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
+    : choosable;
 
   const hasExactMatch = products.some(
     (p) => p.name.toLowerCase() === query.trim().toLowerCase()
@@ -88,7 +95,7 @@ function IngredientPicker({
         className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm text-left flex items-center justify-between gap-2 hover:border-border focus:outline-none focus:ring-2 focus:ring-brass/30"
       >
         <span className={selected ? "text-foreground" : "text-muted-foreground"}>
-          {selected ? `${selected.name} (${selected.unit_of_measure ?? "buc"})` : "— alege articol din stoc —"}
+          {selected ? `${selected.name} (${selected.unit_of_measure ?? "buc"})${selected.archived ? ARCHIVED_SUFFIX : ""}` : "— alege articol din stoc —"}
         </span>
         {selected && (
           <span className="text-muted-foreground text-xs shrink-0">
@@ -134,7 +141,7 @@ function IngredientPicker({
                   onClick={() => selectProduct(p.id)}
                   className={`w-full px-3 py-2 text-sm text-left hover:bg-accent flex justify-between gap-2 ${p.id === value ? "bg-accent font-medium text-brass" : "text-foreground"}`}
                 >
-                  <span>{p.name} <span className="text-muted-foreground font-normal">({p.unit_of_measure ?? "buc"})</span></span>
+                  <span>{p.name} <span className="text-muted-foreground font-normal">({p.unit_of_measure ?? "buc"}){p.archived ? ARCHIVED_SUFFIX : ""}</span></span>
                   <span className="text-muted-foreground shrink-0">{formatRecipeUnitCost(Number(p.cost_price ?? 0), currency)}/unitate</span>
                 </button>
               </li>
@@ -377,9 +384,9 @@ export function RecipeCostCalculator({
               className="h-10 w-full rounded-md border border-border bg-card px-3 text-sm"
             >
               <option value="">— alege produsul —</option>
-              {sellableProducts.map((p) => (
+              {sellableProducts.filter((p) => !p.archived || p.id === selectedProductId).map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} — {formatRecipeMoney(Number(p.sale_price ?? 0), currency)}
+                  {p.name}{p.archived ? ARCHIVED_SUFFIX : ""} — {formatRecipeMoney(Number(p.sale_price ?? 0), currency)}
                 </option>
               ))}
             </select>

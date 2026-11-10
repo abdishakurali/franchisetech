@@ -4,6 +4,7 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { RecipeCostCalculator } from "@/components/app/RecipeCostCalculator";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { recipeCurrencyLabel } from "@/lib/recipe-costing";
+import { buildRecipeProductChoices } from "@/lib/recipe-product-options";
 
 export default async function RecipesNewPage() {
   await requireBusinessModule("recipe_costing");
@@ -11,13 +12,13 @@ export default async function RecipesNewPage() {
 
   const [{ data: sellableProducts }, { data: ingredientProducts }] = await Promise.all([
     supabase.from("products")
-      .select("id,name,sale_price")
+      .select("id,name,sale_price,active")
       .eq("organisation_id", orgId)
       .eq("active", true)
       .or("is_sellable.eq.true,available_in_pos.eq.true")
       .order("name"),
     supabase.from("products")
-      .select("id,name,unit_of_measure,cost_price,current_stock_qty")
+      .select("id,name,unit_of_measure,cost_price,current_stock_qty,active")
       .eq("organisation_id", orgId)
       .eq("active", true)
       .or("is_ingredient.eq.true,is_stock_tracked.eq.true")
@@ -46,8 +47,8 @@ export default async function RecipesNewPage() {
         <CardContent>
           <RecipeCostCalculator
             currency={currency}
-            sellableProducts={(sellableProducts ?? []) as { id: string; name: string; sale_price: number | null }[]}
-            ingredientProducts={(ingredientProducts ?? []) as { id: string; name: string; unit_of_measure: string | null; cost_price: number | null; current_stock_qty: number | null }[]}
+            sellableProducts={buildRecipeProductChoices((sellableProducts ?? []) as { id: string; name: string; sale_price: number | null; active: boolean | null }[], [], [])}
+            ingredientProducts={buildRecipeProductChoices((ingredientProducts ?? []) as { id: string; name: string; unit_of_measure: string | null; cost_price: number | null; current_stock_qty: number | null; active: boolean | null }[], [], [])}
           />
         </CardContent>
       </Card>

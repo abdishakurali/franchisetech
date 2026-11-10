@@ -5,6 +5,7 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { RecipeCostCalculator } from "@/components/app/RecipeCostCalculator";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { updateRecipeFromProducts } from "@/app/actions/kitchenops";
+import { buildRecipeProductChoices, missingLinkedIds } from "@/lib/recipe-product-options";
 
 export default async function RecipeEditPage({ params }: { params: Promise<{ id: string }> }) {
   await requireBusinessModule("recipe_costing");
@@ -19,13 +20,13 @@ export default async function RecipeEditPage({ params }: { params: Promise<{ id:
       .eq("id", id)
       .maybeSingle(),
     supabase.from("products")
-      .select("id,name,sale_price")
+      .select("id,name,sale_price,active")
       .eq("organisation_id", orgId)
       .eq("active", true)
       .or("is_sellable.eq.true,available_in_pos.eq.true")
       .order("name"),
     supabase.from("products")
-      .select("id,name,unit_of_measure,cost_price,current_stock_qty")
+      .select("id,name,unit_of_measure,cost_price,current_stock_qty,active")
       .eq("organisation_id", orgId)
       .eq("active", true)
       .or("is_ingredient.eq.true,is_stock_tracked.eq.true")
@@ -42,6 +43,25 @@ export default async function RecipeEditPage({ params }: { params: Promise<{ id:
     .filter((it) => it.ingredient_product_id)
     .map((it) => ({ product_id: String(it.ingredient_product_id), quantity: String(it.quantity ?? "") }));
   const droppedLines = items.length - initialRows.length;
+
+  // Archived products stay out of the choices, except the ones this recipe
+  // already uses: those are loaded separately (no active filter) and shown
+  // marked "(arhivat)" so the existing link stays visible.
+  const linkedSellableIds = [recipe.product_id as string | null];
+  const linkedIngredientIds = initialRows.map((r) => r.product_id);
+  const missing = [
+    ...missingLinkedIds((sellableProducts ?? []).map((p) => p.id), linkedSellableIds),
+    ...missingLinkedIds((ingredientProducts ?? []).map((p) => p.id), linkedIngredientIds),
+  ];
+  const { data: linkedRows } = missing.length
+    ? await supabase
+        .from("products")
+        .select("id,name,sale_price,unit_of_measure,cost_price,current_stock_qty,active")
+        .eq("organisation_id", orgId)
+        .in("id", [...new Set(missing)])
+    : { data: [] as Array<{ id: string; name: string; sale_price: number | null; unit_of_measure: string | null; cost_price: number | null; current_stock_qty: number | null; active: boolean | null }> };
+  const sellableChoices = buildRecipeProductChoices(sellableProducts ?? [], linkedRows ?? [], linkedSellableIds);
+  const ingredientChoices = buildRecipeProductChoices(ingredientProducts ?? [], linkedRows ?? [], linkedIngredientIds);
 
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-6">
@@ -65,8 +85,8 @@ export default async function RecipeEditPage({ params }: { params: Promise<{ id:
         <CardContent>
           <RecipeCostCalculator
             currency={currency}
-            sellableProducts={sellableProducts ?? []}
-            ingredientProducts={ingredientProducts ?? []}
+            sellableProducts={sellableChoices}
+            ingredientProducts={ingredientChoices}
             recipeId={id}
             initialProductId={recipe.product_id ?? undefined}
             initialYieldQty={String(recipe.yield_qty ?? 1)}

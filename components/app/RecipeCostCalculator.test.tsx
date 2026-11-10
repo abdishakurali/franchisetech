@@ -68,3 +68,29 @@ describe("RecipeCostCalculator currency (display only)", () => {
     expect(container.textContent ?? "").toContain("€18.49 (88.0%)");
   });
 });
+
+describe("RecipeCostCalculator archived products", () => {
+  it("keeps the recipe's archived product visible and marked, and hides other archived products", () => {
+    const { container } = render(
+      <RecipeCostCalculator
+        sellableProducts={[
+          { id: "esp", name: "Espresso", sale_price: 21, archived: true },
+          { id: "old", name: "Frappe vechi", sale_price: 15, archived: true },
+          { id: "lat", name: "Latte", sale_price: 18 },
+        ]}
+        ingredientProducts={[
+          { id: "beans", name: "Cafea boabe", unit_of_measure: "kg", cost_price: 117, current_stock_qty: 1, archived: true },
+        ]}
+        recipeId="r1"
+        initialProductId="esp"
+        initialRows={[{ product_id: "beans", quantity: "0.018" }]}
+        currency="RON"
+      />,
+    );
+    const options = [...container.querySelectorAll("select[name=product_id] option")].map((o) => o.textContent);
+    expect(options).toContain("Espresso (arhivat) — 21.00 lei");
+    expect(options).toContain("Latte — 18.00 lei");
+    expect(options.some((o) => o?.includes("Frappe vechi"))).toBe(false);
+    expect(container.textContent).toContain("Cafea boabe (kg) (arhivat)");
+  });
+});
