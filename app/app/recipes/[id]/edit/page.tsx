@@ -15,7 +15,7 @@ export default async function RecipeEditPage({ params }: { params: Promise<{ id:
   const [{ data: recipe }, { data: sellableProducts }, { data: ingredientProducts }] = await Promise.all([
     supabase
       .from("recipes")
-      .select("id,name,yield_qty,product_id,recipe_items(ingredient_product_id,quantity)")
+      .select("id,name,yield_qty,product_id,recipe_items(ingredient_product_id,quantity,unit_of_measure)")
       .eq("organisation_id", orgId)
       .eq("id", id)
       .maybeSingle(),
@@ -35,13 +35,13 @@ export default async function RecipeEditPage({ params }: { params: Promise<{ id:
 
   if (!recipe) notFound();
 
-  const items = (recipe.recipe_items ?? []) as { ingredient_product_id: string | null; quantity: number | null }[];
+  const items = (recipe.recipe_items ?? []) as { ingredient_product_id: string | null; quantity: number | null; unit_of_measure: string | null }[];
   // Lines whose ingredient was deleted have no product id and cannot be
   // represented in the picker — drop them here so the form still opens, rather
   // than rendering a blank row the user cannot interpret.
   const initialRows = items
     .filter((it) => it.ingredient_product_id)
-    .map((it) => ({ product_id: String(it.ingredient_product_id), quantity: String(it.quantity ?? "") }));
+    .map((it) => ({ product_id: String(it.ingredient_product_id), quantity: String(it.quantity ?? ""), unit_of_measure: it.unit_of_measure }));
   const droppedLines = items.length - initialRows.length;
 
   // Archived products stay out of the choices, except the ones this recipe

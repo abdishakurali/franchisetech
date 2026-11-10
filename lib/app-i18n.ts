@@ -456,6 +456,8 @@ const en = {
     addFirst: "Add first supplier",
   },
   recipes: {
+    unitMismatch: (qty: string, savedUnit: string, productUnit: string) =>
+      `Check the unit: this line was saved as "${savedUnit}", but the ingredient's stock is counted in "${productUnit}". Nothing is converted: each sale deducts ${qty} ${productUnit}. Saving relabels the line as "${productUnit}" without changing the quantity.`,
     title: "Recipes",
     listTitle: "Product ingredients",
     subtitle: "Link ingredients to menu items and see margins.",
@@ -1846,6 +1848,8 @@ const ro: typeof en = {
     addFirst: "Adaugă primul furnizor",
   },
   recipes: {
+    unitMismatch: (qty: string, savedUnit: string, productUnit: string) =>
+      `Verificați unitatea: linia a fost salvată în „${savedUnit}”, dar stocul ingredientului este ținut în „${productUnit}”. Nu se face conversie: fiecare vânzare scade ${qty} ${productUnit}. La salvare linia primește unitatea „${productUnit}”, fără să se schimbe cantitatea.`,
     title: "Rețete",
     listTitle: "Ingrediente produse",
     subtitle: "Leagă ingredientele de meniu și vezi marjele.",

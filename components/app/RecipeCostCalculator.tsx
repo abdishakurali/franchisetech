@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Search, X } from "lucide-react";
 import { addRecipeFromProducts, createIngredientInline } from "@/app/actions/kitchenops";
 import { formatQty, formatRecipeMoney, formatRecipeUnitCost, recipeCurrencyLabel } from "@/lib/recipe-costing";
+import { appText } from "@/lib/app-i18n";
+import { recipeLineUnitWarning } from "@/lib/recipe-unit-warning";
 
 type IngredientProduct = {
   id: string;
@@ -27,7 +29,9 @@ type SellableProduct = {
 
 const ARCHIVED_SUFFIX = " (arhivat)";
 
-type IngredientRow = { id: number; product_id: string; quantity: string };
+/** saved_unit: the unit stored on an existing recipe line (edit mode), used only
+ * to warn when it disagrees with the ingredient's stock unit. */
+type IngredientRow = { id: number; product_id: string; quantity: string; saved_unit?: string | null };
 
 type InlineCreateState = {
   rowId: number;
@@ -272,7 +276,7 @@ export function RecipeCostCalculator({
   recipeId?: string;
   initialProductId?: string;
   initialYieldQty?: string;
-  initialRows?: { product_id: string; quantity: string }[];
+  initialRows?: { product_id: string; quantity: string; unit_of_measure?: string | null }[];
   submitAction?: (fd: FormData) => Promise<void>;
   submitLabel?: string;
 }) {
@@ -280,6 +284,7 @@ export function RecipeCostCalculator({
     id: i,
     product_id: r.product_id,
     quantity: r.quantity,
+    saved_unit: r.unit_of_measure ?? null,
   }));
   const nextId = { current: seededRows.length > 0 ? seededRows.length : 1 };
   const [selectedProductId, setSelectedProductId] = useState(
@@ -339,8 +344,11 @@ export function RecipeCostCalculator({
     setRows((rs) => [...rs, { id: nextId.current++, product_id: "", quantity: "" }]);
   };
   const removeRow = (id: number) => setRows((rs) => rs.filter((r) => r.id !== id));
-  const updateRow = (id: number, field: keyof Omit<IngredientRow, "id">, value: string) => {
-    setRows((rs) => rs.map((r) => r.id === id ? { ...r, [field]: value } : r));
+  const updateRow = (id: number, field: "product_id" | "quantity", value: string) => {
+    // A different ingredient makes the saved unit meaningless, so drop it.
+    setRows((rs) => rs.map((r) => r.id === id
+      ? { ...r, [field]: value, ...(field === "product_id" && value !== r.product_id ? { saved_unit: null } : {}) }
+      : r));
   };
 
   function handleInlineCreateSave(newProduct: IngredientProduct, rowId: number) {
@@ -439,6 +447,8 @@ export function RecipeCostCalculator({
                 const qty = Number(row.quantity) || 0;
                 const rowCost = qty * Number(p?.cost_price ?? 0);
                 const stock = Number(p?.current_stock_qty ?? 0);
+                // This screen is Romanian-only (hard-coded copy), so use the ro text.
+                const unitWarning = p ? recipeLineUnitWarning(row.saved_unit, p.unit_of_measure, row.quantity, appText.ro, "ro") : null;
 
                 return (
                   <div key={row.id} className="grid grid-cols-[1fr_100px_80px_32px] gap-2 items-start">
@@ -454,6 +464,11 @@ export function RecipeCostCalculator({
                       {p && (
                         <p className="text-[10px] text-muted-foreground mt-0.5 pl-1">
                           Stoc disponibil: <span className={stock < qty * 5 ? "text-amber-600 font-medium" : ""}>{formatQty(stock)} {p.unit_of_measure ?? "buc"}</span>
+                        </p>
+                      )}
+                      {unitWarning && (
+                        <p role="status" data-testid="recipe-unit-warning" className="mt-1 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-[11px] text-amber-900">
+                          {unitWarning}
                         </p>
                       )}
                     </div>

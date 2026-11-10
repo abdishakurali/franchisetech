@@ -94,3 +94,59 @@ describe("RecipeCostCalculator archived products", () => {
     expect(container.textContent).toContain("Cafea boabe (kg) (arhivat)");
   });
 });
+
+describe("RecipeCostCalculator unit guard (non-blocking)", () => {
+  it("warns on a saved line whose unit differs in kind from the ingredient unit", () => {
+    const { getAllByTestId } = render(
+      <RecipeCostCalculator
+        sellableProducts={sellable}
+        ingredientProducts={ingredients}
+        recipeId="r1"
+        initialProductId="esp"
+        initialYieldQty="1"
+        initialRows={[
+          { product_id: "cup", quantity: "0.5", unit_of_measure: "kg" }, // kg against each
+          { product_id: "milk", quantity: "1", unit_of_measure: "Buc" }, // Buc against litre
+          { product_id: "beans", quantity: "0.018", unit_of_measure: "kg" }, // matches
+        ]}
+      />,
+    );
+    const warnings = getAllByTestId("recipe-unit-warning");
+    expect(warnings).toHaveLength(2);
+    expect(warnings[0].textContent).toContain("scade 0.5 bucată");
+    expect(warnings[1].textContent).toContain("„Buc”");
+  });
+
+  it("no warning for equivalent labels or for rows without a saved unit", () => {
+    const { queryAllByTestId } = render(
+      <RecipeCostCalculator
+        sellableProducts={sellable}
+        ingredientProducts={ingredients}
+        recipeId="r1"
+        initialProductId="esp"
+        initialYieldQty="1"
+        initialRows={[
+          { product_id: "cup", quantity: "1", unit_of_measure: "Buc" },
+          { product_id: "milk", quantity: "1", unit_of_measure: "litre" },
+          { product_id: "beans", quantity: "0.018" },
+        ]}
+      />,
+    );
+    expect(queryAllByTestId("recipe-unit-warning")).toHaveLength(0);
+  });
+
+  it("the save button stays enabled when a warning shows", () => {
+    const { getByRole } = render(
+      <RecipeCostCalculator
+        sellableProducts={sellable}
+        ingredientProducts={ingredients}
+        recipeId="r1"
+        initialProductId="esp"
+        initialYieldQty="1"
+        initialRows={[{ product_id: "cup", quantity: "0.5", unit_of_measure: "kg" }]}
+        submitLabel="Salvează modificările"
+      />,
+    );
+    expect((getByRole("button", { name: "Salvează modificările" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+});
