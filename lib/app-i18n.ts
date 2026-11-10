@@ -355,6 +355,10 @@ const en = {
       printNir: "Print NIR",
       editDraft: "Edit draft",
       postedSuccess: "NIR posted successfully. Stock has been updated.",
+      draftBannerTitle: "Stock has NOT been updated yet.",
+      draftBannerBody: (button: string) =>
+        `This purchase is only a draft. Press "${button}" at the bottom of this page to add these quantities to stock.`,
+      draftBannerStaff: "Only an owner or manager can post it.",
       draftCancelled: "This draft was cancelled.",
       detailsTitle: "NIR details",
       receivedItems: "Received items",
@@ -1727,6 +1731,10 @@ const ro: typeof en = {
       printNir: "Tipărește NIR",
       editDraft: "Editează ciorna",
       postedSuccess: "NIR emis cu succes. Stocul a fost actualizat.",
+      draftBannerTitle: "Stocul NU a fost actualizat încă.",
+      draftBannerBody: (button: string) =>
+        `Această achiziție este doar ciornă. Apăsați «${button}» jos pe pagină ca să adăugați aceste cantități în stoc.`,
+      draftBannerStaff: "Doar proprietarul sau managerul o poate emite.",
       draftCancelled: "Această ciornă a fost anulată.",
       detailsTitle: "Detalii NIR",
       receivedItems: "Articole primite",

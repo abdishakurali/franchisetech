@@ -243,6 +243,21 @@ export function purchaseErrorRedirect(purchaseId: string | null, code: PurchaseE
   return `${base}?error=${code}`;
 }
 
+/**
+ * Warning shown on a draft purchase: a draft looks "recorded" in the list but
+ * has not moved stock. Null for every other status.
+ */
+export function draftStockBanner(
+  status: PurchaseStatus | string | null | undefined,
+  t: AppT,
+  canPost: boolean,
+): { title: string; body: string } | null {
+  if (status !== "draft") return null;
+  const d = t.purchases.detail;
+  const body = d.draftBannerBody(d.generateNir);
+  return { title: d.draftBannerTitle, body: canPost ? body : `${body} ${d.draftBannerStaff}` };
+}
+
 export function mapNirPostRpcError(message: string | undefined): string | undefined {
   if (!message) return undefined;
   for (const code of [

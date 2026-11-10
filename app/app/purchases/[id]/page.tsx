@@ -13,6 +13,7 @@ import {
   isPurchaseLocked,
   NIR_RO_CODE,
   NIR_RO_TITLE,
+  draftStockBanner,
   purchaseErrorMessage,
   purchaseStatusBadge,
 } from "@/lib/nir/purchase";
@@ -116,6 +117,7 @@ export default async function PurchaseDetailPage({
   const grossTotal = Number(purchase.total_amount ?? netTotal + taxTotal);
 
   const errorMsg = purchaseErrorMessage(query.error, t);
+  const draftBanner = draftStockBanner(purchase.status, t, canManage);
 
   const printTitle = purchase.nir_number
     ? locale === "ro"
@@ -176,6 +178,18 @@ export default async function PurchaseDetailPage({
         </div>
       </div>
 
+      {draftBanner && (
+        <div
+          role="status"
+          data-testid="draft-stock-banner"
+          className="rounded-lg border-2 border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 print:hidden"
+        >
+          <p className="font-semibold">{draftBanner.title}</p>
+          <p className="mt-1">
+            {canManage ? <a href="#post-nir" className="underline">{draftBanner.body}</a> : draftBanner.body}
+          </p>
+        </div>
+      )}
       {query.posted === "1" && (
         <div className="rounded-lg border border-reconciled/25 bg-reconciled/10 p-4 text-sm text-reconciled print:hidden">
           {d.postedSuccess}
@@ -325,7 +339,7 @@ export default async function PurchaseDetailPage({
 
       {canManage && isDraft && (
         <div className="flex flex-wrap gap-3 print:hidden">
-          <form action={postNirPurchase as unknown as (fd: FormData) => Promise<void>}>
+          <form id="post-nir" action={postNirPurchase as unknown as (fd: FormData) => Promise<void>}>
             <input type="hidden" name="purchase_id" value={id} />
             <input type="hidden" name="purchase_date" value={(purchase.purchase_date ?? new Date().toISOString().slice(0, 10)).toString().slice(0, 10)} />
             <input type="hidden" name="nir_date" value={(purchase.nir_date ?? purchase.purchase_date ?? new Date().toISOString().slice(0, 10)).toString().slice(0, 10)} />
