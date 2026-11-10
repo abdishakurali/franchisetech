@@ -359,6 +359,15 @@ const en = {
       draftBannerBody: (button: string) =>
         `This purchase is only a draft. Press "${button}" at the bottom of this page to add these quantities to stock.`,
       draftBannerStaff: "Only an owner or manager can post it.",
+      stockEffect: {
+        title: "Effect on stock",
+        hint: "Added = what this NIR added to stock, in the product's unit. Stock now = current stock, which also changes with every sale after posting. The stock level before posting is not stored.",
+        item: "Item",
+        added: "Added",
+        now: "Stock now",
+        missing: "No stock movement was found for this item. Stock may not have been updated: contact support.",
+        loadError: "The stock effect could not be loaded. Reload the page.",
+      },
       draftCancelled: "This draft was cancelled.",
       detailsTitle: "NIR details",
       receivedItems: "Received items",
@@ -1735,6 +1744,15 @@ const ro: typeof en = {
       draftBannerBody: (button: string) =>
         `Această achiziție este doar ciornă. Apăsați «${button}» jos pe pagină ca să adăugați aceste cantități în stoc.`,
       draftBannerStaff: "Doar proprietarul sau managerul o poate emite.",
+      stockEffect: {
+        title: "Efect asupra stocului",
+        hint: "Adăugat = cât a adăugat acest NIR în stoc, în unitatea produsului. Stoc acum = stocul curent, care se schimbă și cu fiecare vânzare după emitere. Stocul dinainte de emitere nu este salvat.",
+        item: "Articol",
+        added: "Adăugat",
+        now: "Stoc acum",
+        missing: "Nu s-a găsit nicio mișcare de stoc pentru acest articol. Este posibil ca stocul să nu fi fost actualizat: contactați suportul.",
+        loadError: "Efectul asupra stocului nu a putut fi încărcat. Reîncărcați pagina.",
+      },
       draftCancelled: "Această ciornă a fost anulată.",
       detailsTitle: "Detalii NIR",
       receivedItems: "Articole primite",

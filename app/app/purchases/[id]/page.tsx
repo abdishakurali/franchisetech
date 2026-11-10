@@ -17,6 +17,8 @@ import {
   purchaseErrorMessage,
   purchaseStatusBadge,
 } from "@/lib/nir/purchase";
+import { buildStockEffectRows, rowsMissingMovement } from "@/lib/nir/stock-effect";
+import { unitLabel } from "@/lib/units-of-measure";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -119,6 +121,34 @@ export default async function PurchaseDetailPage({
   const errorMsg = purchaseErrorMessage(query.error, t);
   const draftBanner = draftStockBanner(purchase.status, t, canManage);
 
+  // After posting: what this purchase added to stock and the stock now.
+  const isPosted = purchase.status === "posted" || purchase.status === "received";
+  const effectProductIds = [...new Set(items.map((i) => i.product_id).filter((v): v is string => !!v))];
+  let stockEffect: ReturnType<typeof buildStockEffectRows> = [];
+  let stockEffectError = false;
+  if (isPosted && effectProductIds.length) {
+    const [movRes, prodRes] = await Promise.all([
+      supabase
+        .from("stock_movements")
+        .select("product_id,quantity_change")
+        .eq("organisation_id", orgId)
+        .eq("reference_id", id)
+        .eq("movement_type", "purchase_received"),
+      supabase
+        .from("products")
+        .select("id,name,current_stock_qty,unit_of_measure")
+        .eq("organisation_id", orgId)
+        .in("id", effectProductIds),
+    ]);
+    if (movRes.error || prodRes.error) {
+      stockEffectError = true;
+    } else {
+      stockEffect = buildStockEffectRows(items, movRes.data ?? [], prodRes.data ?? []);
+    }
+  }
+  const missingMovement = purchase.nir_number ? rowsMissingMovement(stockEffect) : [];
+  const fmtQty = (v: number) => v.toLocaleString(locale === "ro" ? "ro-RO" : "en-IE", { maximumFractionDigits: 3 });
+
   const printTitle = purchase.nir_number
     ? locale === "ro"
       ? NIR_RO_TITLE
@@ -197,6 +227,51 @@ export default async function PurchaseDetailPage({
       )}
       {errorMsg && (
         <div role="alert" className="rounded-lg border border-attention/25 bg-attention/10 p-4 text-sm text-attention print:hidden">{errorMsg}</div>
+      )}
+
+      {isPosted && (stockEffect.length > 0 || stockEffectError) && (
+        <Card data-testid="stock-effect" className={`print:hidden ${query.posted === "1" ? "border-reconciled/40" : ""}`}>
+          <CardHeader>
+            <CardTitle>{d.stockEffect.title}</CardTitle>
+            <p className="text-xs text-muted-foreground">{d.stockEffect.hint}</p>
+          </CardHeader>
+          <CardContent>
+            {stockEffectError ? (
+              <p role="alert" className="text-sm text-attention">{d.stockEffect.loadError}</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{d.stockEffect.item}</TableHead>
+                    <TableHead className="text-right">{d.stockEffect.added}</TableHead>
+                    <TableHead className="text-right">{d.stockEffect.now}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {stockEffect.map((row) => {
+                    const u = unitLabel(row.productUnit, locale === "ro" ? "ro" : "en");
+                    return (
+                      <TableRow key={row.productId}>
+                        <TableCell className="font-medium">{row.name}</TableCell>
+                        <TableCell className="text-right font-mono tabular-nums">
+                          {row.added === null ? "—" : `+${fmtQty(row.added)} ${u}`}
+                        </TableCell>
+                        <TableCell className={`text-right font-mono tabular-nums ${row.now !== null && row.now < 0 ? "text-attention" : ""}`}>
+                          {row.now === null ? "—" : `${fmtQty(row.now)} ${u}`}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+            {missingMovement.length > 0 && (
+              <p role="alert" className="mt-3 text-sm text-attention">
+                {missingMovement.map((r) => r.name).join(", ")}: {d.stockEffect.missing}
+              </p>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       <div id="nir-print-area" className="space-y-6">
