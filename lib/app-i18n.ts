@@ -346,6 +346,8 @@ const en = {
       unitCost: "Unit cost",
       um: "Unit",
       lineTotal: "Line total",
+      unitMismatch: (qty: string, productUnit: string, lineUnit: string) =>
+        `Check the unit: this product's stock is counted in "${productUnit}", but this line says "${lineUnit}". Nothing is converted: stock will increase by ${qty} ${productUnit}. Saving is still allowed.`,
       subtotal: "Subtotal",
       tax: "Tax",
       total: "Total",
@@ -1731,6 +1733,8 @@ const ro: typeof en = {
       unitCost: "Cost unitar",
       um: "UM",
       lineTotal: "Total linie",
+      unitMismatch: (qty: string, productUnit: string, lineUnit: string) =>
+        `Verificați unitatea: stocul acestui produs este ținut în „${productUnit}”, dar linia este în „${lineUnit}”. Nu se face conversie: stocul va crește cu ${qty} ${productUnit}. Puteți salva în continuare.`,
       subtotal: "Subtotal",
       tax: "TVA",
       total: "Total",

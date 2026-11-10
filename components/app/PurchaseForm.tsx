@@ -18,6 +18,7 @@ import { useAppI18n } from "@/lib/app-i18n-context";
 import type { AppT } from "@/lib/app-i18n";
 import { itemTypeLabel } from "@/lib/product-module-fields";
 import { filterPurchaseOptions, purchaseLineForSelectedProduct, purchaseLineTotalsFromDraft } from "@/lib/nir/form-performance";
+import { purchaseLineUnitWarning } from "@/lib/nir/unit-warning";
 
 type Supplier = { id: string; name: string };
 type Site = { id: string; name: string };
@@ -521,8 +522,12 @@ export function PurchaseForm({
               {lines.map((line, idx) => {
                 const calc = lineCalc[idx];
                 const unitOptions = umOptions.map((unit) => ({ value: unit, label: unit }));
+                const productUnit = line.product_id ? products.find((p) => p.id === line.product_id)?.unit_of_measure : null;
+                // Non-blocking: stock math is unchanged, this only explains it.
+                const unitWarning = purchaseLineUnitWarning(line, productUnit, t, isRO ? "ro" : "en");
                 return (
-                  <div key={line.id} className="grid grid-cols-[1fr_80px_90px_90px_90px_80px_80px_36px] gap-2 items-center">
+                  <div key={line.id} className="space-y-1">
+                  <div className="grid grid-cols-[1fr_80px_90px_90px_90px_80px_80px_36px] gap-2 items-center">
                     <PurchaseItemCombobox
                       products={products}
                       productId={line.product_id}
@@ -580,6 +585,12 @@ export function PurchaseForm({
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
+                  </div>
+                  {unitWarning && (
+                    <p role="status" data-testid="unit-mismatch-warning" className="rounded-md border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs text-amber-900">
+                      {unitWarning}
+                    </p>
+                  )}
                   </div>
                 );
               })}
