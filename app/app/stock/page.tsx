@@ -10,6 +10,7 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { STOCK_PRODUCT_SELECT } from "@/lib/supabase/product-selects";
+import { mergeStockPageProducts, postedPurchaseProductIds } from "@/lib/stock-page-products";
 
 export default async function StockPage({
   searchParams,
@@ -22,7 +23,7 @@ export default async function StockPage({
   const showArchived = params?.archived === "1";
   const { countryCode, profileLocale, supabase, orgId } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
-  let products: Array<{id:string;name:string;current_stock_qty:number|null;reorder_level:number|null;unit_of_measure:string|null;active?:boolean|null;inventory_category?:{name:string}|null;supplier?:{name:string}|null}> = [];
+  let products: Array<{id:string;name:string;current_stock_qty:number|null;reorder_level:number|null;unit_of_measure:string|null;active?:boolean|null;inventory_category?:{name:string}|null;supplier?:{name:string}|null;untracked?:boolean}> = [];
   let loadError = false;
   try {
     let query = supabase
@@ -39,6 +40,54 @@ export default async function StockPage({
     products = (data ?? []) as unknown as typeof products;
   } catch {
     loadError = true;
+  }
+
+  // Also list products that are neither stock-tracked nor ingredients but have
+  // stock evidence (purchases, movements, non-zero stock), so a purchased item
+  // can never be invisible here. Best effort: on error the tracked list stands.
+  if (!loadError) {
+    try {
+      let candQuery = supabase
+        .from("products")
+        .select(STOCK_PRODUCT_SELECT)
+        .eq("organisation_id", orgId)
+        .not("is_stock_tracked", "is", true)
+        .not("is_ingredient", "is", true);
+      if (!showArchived) candQuery = candQuery.eq("active", true);
+      const { data: candData, error: candError } = await candQuery;
+      if (candError) throw candError;
+      const candidates = (candData ?? []) as unknown as typeof products;
+      const candIds = candidates.map((c) => c.id);
+      if (candIds.length) {
+        const [movRes, lineRes] = await Promise.all([
+          supabase
+            .from("stock_movements")
+            .select("product_id")
+            .eq("organisation_id", orgId)
+            .neq("movement_type", "sale_used")
+            .in("product_id", candIds),
+          supabase
+            .from("purchase_items")
+            .select("product_id,purchase_id")
+            .eq("organisation_id", orgId)
+            .in("product_id", candIds),
+        ]);
+        if (movRes.error) throw movRes.error;
+        if (lineRes.error) throw lineRes.error;
+        const lines = (lineRes.data ?? []) as Array<{ product_id: string | null; purchase_id: string | null }>;
+        const purchaseIds = [...new Set(lines.map((l) => l.purchase_id).filter((v): v is string => !!v))];
+        const purRes = purchaseIds.length
+          ? await supabase.from("purchases").select("id,status").eq("organisation_id", orgId).in("id", purchaseIds)
+          : { data: [], error: null };
+        if (purRes.error) throw purRes.error;
+        products = mergeStockPageProducts(products, candidates, {
+          purchasedIds: postedPurchaseProductIds(lines, (purRes.data ?? []) as Array<{ id: string; status: string | null }>),
+          movedIds: ((movRes.data ?? []) as Array<{ product_id: string | null }>).map((m) => m.product_id).filter((v): v is string => !!v),
+        });
+      }
+    } catch (error) {
+      console.error("[stock] untracked-with-evidence lookup failed", error);
+    }
   }
 
   const allRows = products;
@@ -111,6 +160,11 @@ export default async function StockPage({
                         <TableCell className="font-medium max-w-[160px] sm:max-w-none">
                           <Link className="block truncate hover:text-brass" href={`/app/products/${r.id}`}>{r.name}</Link>
                           {r.inventory_category?.name && <p className="mt-0.5 text-xs font-normal text-muted-foreground">{r.inventory_category.name}</p>}
+                          {r.untracked && (
+                            <Badge variant="outline" title={t.stock.untrackedHint} className="mt-1 border-amber-200 bg-amber-50 text-[11px] font-normal text-amber-900">
+                              {t.stock.untrackedBadge}
+                            </Badge>
+                          )}
                           <p className="mt-0.5 text-xs text-muted-foreground sm:hidden">
                             {t.stock.reorderAt}: {reorder} · {r.unit_of_measure ?? "each"}
                           </p>

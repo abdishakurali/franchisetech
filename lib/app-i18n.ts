@@ -285,6 +285,8 @@ const en = {
     clickToEditQty: "Click to update on-hand quantity",
     showArchived: "Show archived",
     hideArchived: "Hide archived",
+    untrackedBadge: "Not stock-tracked",
+    untrackedHint: "Listed because it has purchases or stock movements. Turn on stock tracking on the product to monitor it.",
   },
   purchases: {
     title: "Purchases",
@@ -1672,6 +1674,8 @@ const ro: typeof en = {
     clickToEditQty: "Apasă pentru a actualiza stocul",
     showArchived: "Arată arhivate",
     hideArchived: "Ascunde arhivate",
+    untrackedBadge: "Neurmărit în stoc",
+    untrackedHint: "Apare aici pentru că are achiziții sau mișcări de stoc. Activați urmărirea stocului pe produs ca să îl monitorizați.",
   },
   purchases: {
     title: "Achiziții",
