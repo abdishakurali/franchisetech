@@ -13,6 +13,7 @@ import {
   isPurchaseLocked,
   NIR_RO_CODE,
   NIR_RO_TITLE,
+  purchaseErrorMessage,
   purchaseStatusBadge,
 } from "@/lib/nir/purchase";
 
@@ -114,13 +115,7 @@ export default async function PurchaseDetailPage({
   const taxTotal = Number(purchase.tax_total ?? items.reduce((s, i) => s + Number(i.tax_amount ?? 0), 0));
   const grossTotal = Number(purchase.total_amount ?? netTotal + taxTotal);
 
-  const errorMsg = query.error === "already_posted"
-    ? d.errors.alreadyPosted
-    : query.error === "cannot_cancel"
-      ? d.errors.cannotCancel
-      : query.error === "nir_number"
-        ? d.errors.nirNumber
-        : null;
+  const errorMsg = purchaseErrorMessage(query.error, t);
 
   const printTitle = purchase.nir_number
     ? locale === "ro"
@@ -187,7 +182,7 @@ export default async function PurchaseDetailPage({
         </div>
       )}
       {errorMsg && (
-        <div className="rounded-lg border border-attention/25 bg-attention/10 p-4 text-sm text-attention print:hidden">{errorMsg}</div>
+        <div role="alert" className="rounded-lg border border-attention/25 bg-attention/10 p-4 text-sm text-attention print:hidden">{errorMsg}</div>
       )}
 
       <div id="nir-print-area" className="space-y-6">

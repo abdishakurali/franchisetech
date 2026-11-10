@@ -190,6 +190,59 @@ export function nirPostErrorRedirect(
   }
 }
 
+/** Every `?error=` value nirPostErrorRedirect can produce. */
+export const NIR_POST_ERROR_CODES = [
+  "already_posted",
+  "cancelled",
+  "invalid_status",
+  "no_items",
+  "post_failed",
+] as const;
+
+/**
+ * Every `?error=` value the purchase pages can receive. Each one MUST have a
+ * message in t.purchases.detail.errors (en and ro) — an unknown code used to
+ * leave the user on an ordinary-looking draft with no explanation.
+ */
+export const PURCHASE_ERROR_CODES = [
+  ...NIR_POST_ERROR_CODES,
+  "cannot_cancel",
+  "nir_number",
+  "entitlement_denied",
+  "save_failed",
+  "invalid_lines",
+  "not_allowed",
+] as const;
+
+export type PurchaseErrorCode = (typeof PURCHASE_ERROR_CODES)[number];
+
+const PURCHASE_ERROR_KEYS: Record<PurchaseErrorCode, keyof AppT["purchases"]["detail"]["errors"]> = {
+  already_posted: "alreadyPosted",
+  cancelled: "cancelled",
+  invalid_status: "invalidStatus",
+  no_items: "noItems",
+  post_failed: "postFailed",
+  cannot_cancel: "cannotCancel",
+  nir_number: "nirNumber",
+  entitlement_denied: "entitlementDenied",
+  save_failed: "saveFailed",
+  invalid_lines: "invalidLines",
+  not_allowed: "notAllowed",
+};
+
+/** Message for a purchase `?error=` code, or null when there is no error.
+ * An unrecognised code still shows the generic failure message: never hide it. */
+export function purchaseErrorMessage(code: string | null | undefined, t: AppT): string | null {
+  if (!code) return null;
+  const key = PURCHASE_ERROR_KEYS[code as PurchaseErrorCode] ?? "postFailed";
+  return t.purchases.detail.errors[key];
+}
+
+export function purchaseErrorRedirect(purchaseId: string | null, code: PurchaseErrorCode): string {
+  const base = purchaseId ? `/app/purchases/${purchaseId}` : "/app/purchases/new";
+  return `${base}?error=${code}`;
+}
+
 export function mapNirPostRpcError(message: string | undefined): string | undefined {
   if (!message) return undefined;
   for (const code of [

@@ -26,9 +26,12 @@ import {
   mapNirPostRpcError,
   nirPostErrorRedirect,
   parsePurchaseLinesFromForm,
+  purchaseErrorRedirect,
   purchaseLineTotals,
+  type PurchaseErrorCode,
   type PurchaseLineInput,
 } from "@/lib/nir/purchase";
+import { replacePurchaseItems } from "@/lib/nir/purchase-items-write";
 import { createServiceClient } from "@/lib/supabase/server";
 import { listActiveVatRates, listAllVatRates } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
@@ -1168,15 +1171,42 @@ async function validatePurchaseLinesAndLoadNames(
   supabase: any,
   orgId: string,
   items: Array<{ tax_rate: number; unit_of_measure: string; product_id: string }>,
+  purchaseId: string | null,
 ) {
   const [vatValidation, unitValidation, productLookup] = await Promise.all([
     validateSubmittedVatRates(supabase, orgId, items.map((i) => i.tax_rate)),
     validateSubmittedUnitsOfMeasure(supabase, orgId, items.map((i) => i.unit_of_measure)),
     loadProductNameLookup(supabase, items.map((i) => i.product_id)),
   ]);
-  if (!vatValidation.ok) throw new Error(vatValidation.error);
-  if (!unitValidation.ok) throw new Error(unitValidation.error);
+  // Used to throw to the generic error page; now the purchase page explains it.
+  if (!vatValidation.ok || !unitValidation.ok) {
+    console.error("[purchases] invalid lines", !vatValidation.ok ? vatValidation.error : unitValidation.ok ? "" : unitValidation.error);
+    redirect(purchaseErrorRedirect(purchaseId, "invalid_lines"));
+  }
   return productLookup;
+}
+
+/** Owner/manager + purchases.nir entitlement, or redirect with a visible message
+ * (staff and a denied plan used to get a silent no-op or the error page). */
+async function assertCanWritePurchases(
+  role: string | null,
+  orgId: string,
+  purchaseId: string | null,
+) {
+  if (!canManage(role)) redirect(purchaseErrorRedirect(purchaseId, "not_allowed"));
+  let denied = false;
+  try {
+    await assertEntitlement(orgId, "purchases.nir");
+  } catch (error) {
+    if (!(error instanceof EntitlementDeniedError)) throw error;
+    denied = true;
+  }
+  if (denied) redirect(purchaseErrorRedirect(purchaseId, "entitlement_denied"));
+}
+
+function failPurchaseWrite(purchaseId: string | null, what: string, message: unknown, code: PurchaseErrorCode = "save_failed"): never {
+  console.error(`[purchases] ${what} failed`, message);
+  redirect(purchaseErrorRedirect(purchaseId, code));
 }
 
 async function loadProductNameLookup(
@@ -1189,34 +1219,6 @@ async function loadProductNameLookup(
   const { data: prods } = await supabase.from("products").select("id,name").in("id", productIds);
   for (const p of prods ?? []) productLookup.set(p.id, p.name);
   return productLookup;
-}
-
-async function replacePurchaseItems(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  supabase: any,
-  orgId: string,
-  purchaseId: string,
-  items: PurchaseLineInput[],
-  productLookup: Map<string, string>
-) {
-  await supabase.from("purchase_items").delete().eq("purchase_id", purchaseId).eq("organisation_id", orgId);
-  if (!items.length) return;
-  await supabase.from("purchase_items").insert(
-    items.map((item) => ({
-      organisation_id: orgId,
-      purchase_id: purchaseId,
-      product_id: item.product_id,
-      product_name: productLookup.get(item.product_id) || "Item",
-      item_name: productLookup.get(item.product_id) || "Item",
-      quantity: item.quantity,
-      received_quantity: item.received_quantity,
-      unit_cost: item.unit_cost,
-      total_cost: item.total_cost,
-      tax_rate: item.tax_rate,
-      tax_amount: item.tax_amount,
-      unit_of_measure: item.unit_of_measure,
-    }))
-  );
 }
 
 function buildDraftPurchaseRow(
@@ -1265,7 +1267,7 @@ async function ensureDraftPurchaseForPost(
       .eq("id", purchaseId)
       .eq("organisation_id", orgId)
       .single();
-    if (!existing) return null;
+    if (!existing) redirect(purchaseErrorRedirect(purchaseId, "invalid_status"));
     if (isAlreadyPosted(existing.status, existing.posted_at, existing.nir_number)) {
       redirect(`/app/purchases/${purchaseId}?error=already_posted`);
     }
@@ -1280,29 +1282,33 @@ async function ensureDraftPurchaseForPost(
       items = await loadDraftPurchaseItems(supabase, orgId, purchaseId);
     }
     if (!items.length) return null;
-    const productLookup = await validatePurchaseLinesAndLoadNames(supabase, orgId, items);
+    const productLookup = await validatePurchaseLinesAndLoadNames(supabase, orgId, items, purchaseId);
 
     const totals = purchaseLineTotals(items);
-    await supabase
+    const { error: updateError } = await supabase
       .from("purchases")
       .update(buildDraftPurchaseRow(orgId, userId, header, totals))
       .eq("id", purchaseId)
       .eq("organisation_id", orgId);
-    await replacePurchaseItems(supabase, orgId, purchaseId, items, productLookup);
+    if (updateError) failPurchaseWrite(purchaseId, "draft header update", updateError.message);
+    const written = await replacePurchaseItems(supabase, orgId, purchaseId, items, productLookup);
+    if (!written.ok) failPurchaseWrite(purchaseId, `purchase_items ${written.stage}`, written.message);
     return purchaseId;
   }
 
   if (!items.length) return null;
-  const productLookup = await validatePurchaseLinesAndLoadNames(supabase, orgId, items);
+  const productLookup = await validatePurchaseLinesAndLoadNames(supabase, orgId, items, null);
 
   const totals = purchaseLineTotals(items);
-  const { data: purchase } = await supabase
+  const { data: purchase, error: insertError } = await supabase
     .from("purchases")
     .insert(buildDraftPurchaseRow(orgId, userId, header, totals))
     .select("id")
     .single();
-  if (!purchase) return null;
-  await replacePurchaseItems(supabase, orgId, purchase.id, items, productLookup);
+  if (insertError || !purchase) failPurchaseWrite(null, "purchase insert", insertError?.message);
+  const written = await replacePurchaseItems(supabase, orgId, purchase.id, items, productLookup);
+  // The header row exists now, so send them to that draft with the message.
+  if (!written.ok) failPurchaseWrite(purchase.id, `purchase_items ${written.stage}`, written.message);
   return purchase.id;
 }
 
@@ -1364,14 +1370,13 @@ async function loadDraftPurchaseItems(
 
 export async function savePurchaseDraft(formData: FormData) {
   const { supabase, membership, user, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
-  await assertEntitlement(orgId, "purchases.nir");
-
   const purchaseId = stringValue(formData, "purchase_id") || null;
+  await assertCanWritePurchases(membership.role, orgId, purchaseId);
+
   const header = parsePurchaseHeaderFromForm(formData);
   const items = parsePurchaseLinesFromForm(formData);
-  if (!items.length) return;
-  const productLookup = await validatePurchaseLinesAndLoadNames(supabase, orgId, items);
+  if (!items.length) redirect(purchaseErrorRedirect(purchaseId, "no_items"));
+  const productLookup = await validatePurchaseLinesAndLoadNames(supabase, orgId, items, purchaseId);
 
   const { subtotalAmount, taxTotal, totalAmount } = purchaseLineTotals(items);
 
@@ -1386,14 +1391,19 @@ export async function savePurchaseDraft(formData: FormData) {
       .eq("id", purchaseId)
       .eq("organisation_id", orgId)
       .single();
-    if (!existing || existing.status !== "draft" || existing.posted_at) return;
-    await supabase.from("purchases").update(row).eq("id", purchaseId).eq("organisation_id", orgId);
-    await replacePurchaseItems(supabase, orgId, purchaseId, items, productLookup);
+    if (!existing) redirect(purchaseErrorRedirect(purchaseId, "invalid_status"));
+    if (existing.status === "cancelled") redirect(purchaseErrorRedirect(purchaseId, "cancelled"));
+    if (existing.status !== "draft" || existing.posted_at) redirect(purchaseErrorRedirect(purchaseId, "already_posted"));
+    const { error: updateError } = await supabase.from("purchases").update(row).eq("id", purchaseId).eq("organisation_id", orgId);
+    if (updateError) failPurchaseWrite(purchaseId, "draft header update", updateError.message);
+    const written = await replacePurchaseItems(supabase, orgId, purchaseId, items, productLookup);
+    if (!written.ok) failPurchaseWrite(purchaseId, `purchase_items ${written.stage}`, written.message);
   } else {
-    const { data: purchase } = await supabase.from("purchases").insert(row).select("id").single();
-    if (!purchase) return;
+    const { data: purchase, error: insertError } = await supabase.from("purchases").insert(row).select("id").single();
+    if (insertError || !purchase) failPurchaseWrite(null, "purchase insert", insertError?.message);
     targetId = purchase.id;
-    await replacePurchaseItems(supabase, orgId, purchase.id, items, productLookup);
+    const written = await replacePurchaseItems(supabase, orgId, purchase.id, items, productLookup);
+    if (!written.ok) failPurchaseWrite(purchase.id, `purchase_items ${written.stage}`, written.message);
   }
 
   revalidatePath("/app/purchases");
@@ -1404,14 +1414,13 @@ export async function savePurchaseDraft(formData: FormData) {
 export async function postNirPurchase(formData: FormData) {
   const perf = perfSteps("postNirPurchase");
   const { supabase, membership, user, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
-  await assertEntitlement(orgId, "purchases.nir");
+  await assertCanWritePurchases(membership.role, orgId, stringValue(formData, "purchase_id") || null);
   perf.mark("auth");
 
   const draftId = await ensureDraftPurchaseForPost(supabase, orgId, user.id, formData);
   perf.mark("draft");
   if (!draftId) {
-    redirect("/app/purchases/new?error=no_items");
+    redirect(purchaseErrorRedirect(stringValue(formData, "purchase_id") || null, "no_items"));
   }
 
   const serviceSupabase = await createServiceClient();
@@ -1425,6 +1434,7 @@ export async function postNirPurchase(formData: FormData) {
 
   if (error) {
     const code = mapNirPostRpcError(error.message);
+    console.error("[purchases] post_nir_purchase failed", draftId, error.message);
     redirect(nirPostErrorRedirect(draftId, code));
   }
 

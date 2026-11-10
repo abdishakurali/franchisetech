@@ -4,10 +4,20 @@ import { PurchaseForm } from "@/components/app/PurchaseForm";
 import { listActiveVatRates } from "@/lib/vat-rates-server";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { listOperationalUnitNames } from "@/lib/units-of-measure";
+import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { purchaseErrorMessage } from "@/lib/nir/purchase";
 
-export default async function PurchasesNewPage() {
+export default async function PurchasesNewPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   await requireBusinessModule("purchases");
-  const { supabase, orgId, currency, membership, user, countryCode } = await getKitchenOpsContext();
+  const query = await searchParams;
+  const { supabase, orgId, currency, membership, user, countryCode, profileLocale } = await getKitchenOpsContext();
+  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
+  // Save/post failures redirect here with ?error=; this page used to read none.
+  const errorMsg = purchaseErrorMessage(query.error, t);
   const [suppRes, prodRes, sites, vatRates, units] = await Promise.all([
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     supabase
@@ -22,15 +32,24 @@ export default async function PurchasesNewPage() {
     listOperationalUnitNames(supabase, orgId),
   ]);
   return (
-    <PurchaseForm
-      suppliers={suppRes.data ?? []}
-      products={(prodRes.data ?? []) as never}
-      sites={sites}
-      currency={currency}
-      currentUserId={user?.id}
-      vatRates={vatRates}
-      units={units}
-      countryCode={countryCode}
-    />
+    <>
+      {errorMsg && (
+        <div className="mx-auto max-w-4xl px-6 pt-6">
+          <div role="alert" className="rounded-lg border border-attention/25 bg-attention/10 p-4 text-sm text-attention">
+            {errorMsg}
+          </div>
+        </div>
+      )}
+      <PurchaseForm
+        suppliers={suppRes.data ?? []}
+        products={(prodRes.data ?? []) as never}
+        sites={sites}
+        currency={currency}
+        currentUserId={user?.id}
+        vatRates={vatRates}
+        units={units}
+        countryCode={countryCode}
+      />
+    </>
   );
 }

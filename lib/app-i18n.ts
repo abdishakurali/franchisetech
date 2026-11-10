@@ -381,6 +381,20 @@ const en = {
         alreadyPosted: "This NIR was already posted.",
         cannotCancel: "Only drafts can be cancelled.",
         nirNumber: "Could not generate NIR number. Check migration 037.",
+        cancelled: "This purchase was cancelled, so it cannot be posted. Stock was not changed.",
+        invalidStatus:
+          "This purchase is no longer a draft (or was not found), so it was not posted. Stock was not changed. Reload the page and check its status.",
+        noItems:
+          "The NIR has no line with a product and a quantity above 0, so it was not posted. Stock was not changed. Add at least one line and try again.",
+        postFailed:
+          "The NIR could not be posted. Stock was NOT updated. The purchase is still a draft: press Post NIR again, and contact support if it fails again.",
+        entitlementDenied:
+          "Your current plan does not include purchases / NIR, so nothing was saved. Check your subscription in Settings or contact support.",
+        saveFailed:
+          "The purchase or its lines could not be saved. Stock was NOT updated. Check the lines and save again.",
+        invalidLines:
+          "A line uses a VAT rate or unit of measure that is not set up in Settings. Nothing was saved. Fix the line and try again.",
+        notAllowed: "Only an owner or manager can save or post purchases. Nothing was saved.",
       },
     },
     print: {
@@ -1739,6 +1753,20 @@ const ro: typeof en = {
         alreadyPosted: "NIR-ul a fost deja emis.",
         cannotCancel: "Doar ciornele pot fi anulate.",
         nirNumber: "Nu s-a putut genera numărul NIR. Verificați migrarea 037.",
+        cancelled: "Această achiziție a fost anulată, deci nu poate fi emisă. Stocul nu a fost modificat.",
+        invalidStatus:
+          "Această achiziție nu mai este ciornă (sau nu a fost găsită), deci nu a fost emisă. Stocul nu a fost modificat. Reîncărcați pagina și verificați starea.",
+        noItems:
+          "NIR-ul nu are nicio linie cu produs și cantitate mai mare de 0, deci nu a fost emis. Stocul nu a fost modificat. Adăugați cel puțin o linie și încercați din nou.",
+        postFailed:
+          "NIR-ul nu a putut fi emis. Stocul NU a fost actualizat. Achiziția a rămas ciornă: apăsați din nou «Generează NIR», iar dacă eșuează iar, contactați suportul.",
+        entitlementDenied:
+          "Abonamentul actual nu include achiziții / NIR, deci nimic nu a fost salvat. Verificați abonamentul în Setări sau contactați suportul.",
+        saveFailed:
+          "Achiziția sau liniile ei nu au putut fi salvate. Stocul NU a fost actualizat. Verificați liniile și salvați din nou.",
+        invalidLines:
+          "O linie are o cotă TVA sau o unitate de măsură care nu este configurată în Setări. Nimic nu a fost salvat. Corectați linia și încercați din nou.",
+        notAllowed: "Doar proprietarul sau managerul poate salva sau emite achiziții. Nimic nu a fost salvat.",
       },
     },
     print: {
