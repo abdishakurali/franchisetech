@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Search, X } from "lucide-react";
 import { addRecipeFromProducts, createIngredientInline } from "@/app/actions/kitchenops";
-import { formatQty } from "@/lib/recipe-costing";
+import { formatQty, formatRecipeMoney, formatRecipeUnitCost, recipeCurrencyLabel } from "@/lib/recipe-costing";
 
 type IngredientProduct = {
   id: string;
@@ -29,10 +29,6 @@ type InlineCreateState = {
   initialName: string;
 } | null;
 
-function money(v: number) {
-  return new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" }).format(v);
-}
-
 // Searchable ingredient picker with inline create
 function IngredientPicker({
   rowId,
@@ -40,12 +36,14 @@ function IngredientPicker({
   products,
   onChange,
   onInlineCreate,
+  currency,
 }: {
   rowId: number;
   value: string;
   products: IngredientProduct[];
   onChange: (id: string) => void;
   onInlineCreate: (rowId: number, name: string) => void;
+  currency: string;
 }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -94,7 +92,7 @@ function IngredientPicker({
         </span>
         {selected && (
           <span className="text-muted-foreground text-xs shrink-0">
-            €{Number(selected.cost_price ?? 0).toFixed(4)}/unit
+            {formatRecipeUnitCost(Number(selected.cost_price ?? 0), currency)}/unit
           </span>
         )}
       </button>
@@ -137,7 +135,7 @@ function IngredientPicker({
                   className={`w-full px-3 py-2 text-sm text-left hover:bg-accent flex justify-between gap-2 ${p.id === value ? "bg-accent font-medium text-brass" : "text-foreground"}`}
                 >
                   <span>{p.name} <span className="text-muted-foreground font-normal">({p.unit_of_measure ?? "buc"})</span></span>
-                  <span className="text-muted-foreground shrink-0">€{Number(p.cost_price ?? 0).toFixed(4)}/unitate</span>
+                  <span className="text-muted-foreground shrink-0">{formatRecipeUnitCost(Number(p.cost_price ?? 0), currency)}/unitate</span>
                 </button>
               </li>
             ))}
@@ -172,7 +170,9 @@ function InlineCreateModal({
   initialName,
   onSave,
   onCancel,
+  currency,
 }: {
+  currency: string;
   initialName: string;
   onSave: (product: IngredientProduct) => void;
   onCancel: () => void;
@@ -222,7 +222,7 @@ function InlineCreateModal({
               </select>
             </div>
             <div>
-              <Label>Cost per unitate (€)</Label>
+              <Label>Cost per unitate ({recipeCurrencyLabel(currency)})</Label>
               <Input name="cost_price" type="number" step="0.0001" min="0" defaultValue="0" className="mt-1" />
             </div>
           </div>
@@ -255,7 +255,11 @@ export function RecipeCostCalculator({
   initialRows,
   submitAction,
   submitLabel,
+  // Org currency (organisations.currency_code). Display only: amounts are
+  // printed as stored, never converted.
+  currency = "EUR",
 }: {
+  currency?: string;
   sellableProducts: SellableProduct[];
   ingredientProducts: IngredientProduct[];
   recipeId?: string;
@@ -346,6 +350,7 @@ export function RecipeCostCalculator({
           initialName={inlineCreate.initialName}
           onSave={(p) => handleInlineCreateSave(p, inlineCreate.rowId)}
           onCancel={() => setInlineCreate(null)}
+          currency={currency}
         />
       )}
 
@@ -374,7 +379,7 @@ export function RecipeCostCalculator({
               <option value="">— alege produsul —</option>
               {sellableProducts.map((p) => (
                 <option key={p.id} value={p.id}>
-                  {p.name} — €{Number(p.sale_price ?? 0).toFixed(2)}
+                  {p.name} — {formatRecipeMoney(Number(p.sale_price ?? 0), currency)}
                 </option>
               ))}
             </select>
@@ -437,6 +442,7 @@ export function RecipeCostCalculator({
                         products={allIngredients}
                         onChange={(id) => updateRow(row.id, "product_id", id)}
                         onInlineCreate={(rowId, name) => setInlineCreate({ rowId, initialName: name })}
+                        currency={currency}
                       />
                       {p && (
                         <p className="text-[10px] text-muted-foreground mt-0.5 pl-1">
@@ -456,7 +462,7 @@ export function RecipeCostCalculator({
                     />
                     <div className="h-10 flex items-center justify-end">
                       <span className="text-sm font-medium text-foreground">
-                        {rowCost > 0 ? money(rowCost) : "—"}
+                        {rowCost > 0 ? formatRecipeMoney(rowCost, currency) : "—"}
                       </span>
                     </div>
                     <button
@@ -496,7 +502,7 @@ export function RecipeCostCalculator({
                 return (
                   <div key={i} className="flex justify-between text-sm text-mid">
                     <span>{p.name} × {qty} {p.unit_of_measure ?? "buc"}</span>
-                    <span className="tabular-nums">{money(cost)}</span>
+                    <span className="tabular-nums">{formatRecipeMoney(cost, currency)}</span>
                   </div>
                 );
               })}
@@ -505,25 +511,25 @@ export function RecipeCostCalculator({
             <div className="border-t border-border pt-3 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-mid">Cost total ingrediente ({yieldQty} porții)</span>
-                <strong className="tabular-nums">{money(totalCost)}</strong>
+                <strong className="tabular-nums">{formatRecipeMoney(totalCost, currency)}</strong>
               </div>
               {Number(yieldQty) > 1 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-mid">Cost per porție</span>
-                  <strong className="tabular-nums">{money(costPerUnit)}</strong>
+                  <strong className="tabular-nums">{formatRecipeMoney(costPerUnit, currency)}</strong>
                 </div>
               )}
               {salePrice > 0 && (
                 <>
                   <div className="flex justify-between text-sm">
                     <span className="text-mid">Preț vânzare</span>
-                    <strong className="tabular-nums">{money(salePrice)}</strong>
+                    <strong className="tabular-nums">{formatRecipeMoney(salePrice, currency)}</strong>
                   </div>
                   <div className={`flex justify-between text-base font-bold pt-1 border-t border-border ${
                     marginPct >= 60 ? "text-reconciled" : marginPct >= 30 ? "text-amber-600" : "text-attention"
                   }`}>
                     <span>Marjă brută</span>
-                    <span className="tabular-nums">{money(margin)} ({marginPct.toFixed(1)}%)</span>
+                    <span className="tabular-nums">{formatRecipeMoney(margin, currency)} ({marginPct.toFixed(1)}%)</span>
                   </div>
                 </>
               )}

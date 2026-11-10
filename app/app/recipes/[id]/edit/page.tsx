@@ -9,7 +9,7 @@ import { updateRecipeFromProducts } from "@/app/actions/kitchenops";
 export default async function RecipeEditPage({ params }: { params: Promise<{ id: string }> }) {
   await requireBusinessModule("recipe_costing");
   const { id } = await params;
-  const { supabase, orgId } = await getKitchenOpsContext();
+  const { supabase, orgId, currency } = await getKitchenOpsContext();
 
   const [{ data: recipe }, { data: sellableProducts }, { data: ingredientProducts }] = await Promise.all([
     supabase
@@ -64,6 +64,7 @@ export default async function RecipeEditPage({ params }: { params: Promise<{ id:
         </CardHeader>
         <CardContent>
           <RecipeCostCalculator
+            currency={currency}
             sellableProducts={sellableProducts ?? []}
             ingredientProducts={ingredientProducts ?? []}
             recipeId={id}

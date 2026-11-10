@@ -3,10 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { RecipeCostCalculator } from "@/components/app/RecipeCostCalculator";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { recipeCurrencyLabel } from "@/lib/recipe-costing";
 
 export default async function RecipesNewPage() {
   await requireBusinessModule("recipe_costing");
-  const { supabase, orgId } = await getKitchenOpsContext();
+  const { supabase, orgId, currency } = await getKitchenOpsContext();
 
   const [{ data: sellableProducts }, { data: ingredientProducts }] = await Promise.all([
     supabase.from("products")
@@ -35,7 +36,7 @@ export default async function RecipesNewPage() {
       {!hasIngredients && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           <p className="font-medium mb-1">Niciun articol de stoc adăugat încă.</p>
-          <p>Adaugă articole de stoc cu un cost per unitate (ex. 0,012€/g pentru pui) pentru a calcula costul ingredientelor.</p>
+          <p>Adaugă articole de stoc cu un cost per unitate (ex. 0,012 {recipeCurrencyLabel(currency)}/g pentru pui) pentru a calcula costul ingredientelor.</p>
           <Link href="/app/products/import-ingredients" className="mt-2 inline-flex font-medium underline">Importă articole de stoc →</Link>
         </div>
       )}
@@ -44,6 +45,7 @@ export default async function RecipesNewPage() {
         <CardHeader><CardTitle>Calculator cost ingrediente</CardTitle></CardHeader>
         <CardContent>
           <RecipeCostCalculator
+            currency={currency}
             sellableProducts={(sellableProducts ?? []) as { id: string; name: string; sale_price: number | null }[]}
             ingredientProducts={(ingredientProducts ?? []) as { id: string; name: string; unit_of_measure: string | null; cost_price: number | null; current_stock_qty: number | null }[]}
           />

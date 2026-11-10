@@ -27,6 +27,26 @@ export function formatRecipeMoney(v: number, currency = "EUR") {
   return new Intl.NumberFormat("en-IE", { style: "currency", currency: currency || "EUR" }).format(v);
 }
 
+/** Per-unit ingredient cost (e.g. coffee per gram) needs more decimals than a
+ * line total. Display only: the number is printed as stored, never converted. */
+export function formatRecipeUnitCost(v: number, currency = "EUR", decimals = 4) {
+  const n = Number(v ?? 0);
+  if (currency === "RON") return `${n.toFixed(decimals)} lei`;
+  return new Intl.NumberFormat("en-IE", {
+    style: "currency",
+    currency: currency || "EUR",
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(n);
+}
+
+/** Short currency label for form labels such as "Cost per unitate (lei)". */
+export function recipeCurrencyLabel(currency = "EUR") {
+  if (currency === "RON") return "lei";
+  if (!currency || currency === "EUR") return "€";
+  return currency;
+}
+
 /** Rounds a stock quantity to 2dp to hide float drift (e.g. 443.24999999999966) without changing the stored value. */
 export function formatQty(v: number) {
   return Number(v.toFixed(2));
