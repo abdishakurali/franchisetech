@@ -53,7 +53,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       {
         question: "Funcționează cu imprimanta de bon pe care o am deja?",
         answer:
-          "franchisetech se conectează prin driverul fiscal pe PC-ul de casă când e activat. Casa de marcat tipărește bonul; noi trimitem datele vânzării. Verificați firmware QR pentru noiembrie 2026.",
+          "franchisetech se conectează prin driverul fiscal pe PC-ul de casă când e activat. Casa de marcat tipărește bonul; noi trimitem datele vânzării. Întrebați furnizorul casei de marcat dacă modelul are actualizarea pentru bonul cu cod QR (amenzile sunt suspendate până la 31 octombrie 2027).",
       },
       {
         question: "Baristele noi pot vinde din prima zi?",

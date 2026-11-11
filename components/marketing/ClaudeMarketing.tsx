@@ -23,7 +23,7 @@ const pages = [["/", "Acasă"], ["/features", "Funcționalități"], ["/industri
 
 export type ClaudeMarketingUser = { displayName: string; initials: string };
 
-export function DesignTrialLink({ location, plan = "growth", children = "Alegeți planul" }: { location: string; plan?: "starter" | "pro" | "free" | "growth" | "team"; children?: ReactNode }) {
+export function DesignTrialLink({ location, plan = "growth", children = "Încercați gratuit 15 zile" }: { location: string; plan?: "starter" | "pro" | "free" | "growth" | "team"; children?: ReactNode }) {
   return <Link className={s.button} href={`/signup?plan=${plan}`} onClick={() => captureClientEvent("cta_clicked", { location, destination: `/signup?plan=${plan}` })}>{children}</Link>;
 }
 
@@ -42,7 +42,7 @@ export function ClaudeMarketingShell({ children, user = null }: { children: Reac
   const links = pages.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href ? "page" : undefined} onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); captureClientEvent("nav_link_clicked", { label, href, location: "design_navigation" }); }}>{label}</Link>);
   const accountLinks = user
     ? <><Link href="/app">Panou</Link><Link href="/app/profile" className="inline-block max-w-[160px] truncate align-bottom">{user.displayName}</Link></>
-    : <><Link href="/login">Autentificare</Link><Link href="/signup?plan=growth">Alegeți planul</Link></>;
+    : <><Link href="/login">Autentificare</Link><Link href="/signup?plan=growth">Încercați gratuit 15 zile</Link></>;
   return <div className={s.site}>
     <header className={s.header}><div className={`${s.container} ${s.headerInner}`}>
       <Link href="/" aria-label="FranchiseTech — Acasă"><Image src="/design-marketing/franchise-tech-logo.svg" alt="FranchiseTech" width={190} height={26} className={s.logo} priority /></Link>
@@ -188,7 +188,7 @@ export const designFaq = [
 
 const DESIGN_PRICING_CARD_COPY: Record<"growth" | "team", { body: string; features: string[]; cta: string; badge?: string }> = {
   growth: {
-    body: "Pentru proprietarii care vor stoc, cost pe rețetă și marja reală, plus pachetul de export pentru contabil. Ăsta e planul pentru care există produsul.",
+    body: "Pentru proprietarii care vor stoc, cost pe rețetă și marja reală, plus pachetul de export pentru contabil.",
     features: ["POS și produse nelimitate", "Stoc și recepții (NIR)", "Rețete și cost pe produs", "Food cost și marjă pe meniu", "Bon de consum și fișă de magazie", "Inventar și consum teoretic vs. real", "Pachet export contabil (CSV + XML)"],
     cta: "Începeți Pro",
     badge: "GESTIUNE",
