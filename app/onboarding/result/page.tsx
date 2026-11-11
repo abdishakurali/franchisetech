@@ -3,10 +3,13 @@ import { getActiveOrg } from "@/lib/kitchenops/data";
 import { OnboardingShell } from "@/components/onboarding/OnboardingShell";
 import { onboardingStepLabels, onboardingStepGroupIndex, onboardingStepOfLabel } from "@/lib/onboarding/steps";
 import { CompleteOnboardingButton } from "@/components/onboarding/CompleteOnboardingButton";
+import { isFiscalNetActive } from "@/lib/fiscalnet/eligibility";
+import { posText } from "@/lib/pos-i18n";
 
 const STRINGS = {
   ro: {
     title: "Prima vânzare este gata",
+    testTitle: "Vânzarea de test este salvată",
     subtitle: "Iată ce a învățat franchisetech din prima ta vânzare.",
     salesToday: "Vânzări azi",
     orders: "Comenzi",
@@ -20,6 +23,7 @@ const STRINGS = {
   },
   en: {
     title: "Your first sale is done",
+    testTitle: "Your test sale is saved",
     subtitle: "Here's what franchisetech learned from your first sale.",
     salesToday: "Sales today",
     orders: "Orders",
@@ -50,7 +54,7 @@ export default async function OnboardingResultPage() {
       .maybeSingle(),
     supabase
       .from("organisations")
-      .select("inventory_enabled, recipe_costing_enabled")
+      .select("inventory_enabled, recipe_costing_enabled, country_code, fiscalnet_enabled, fiscalnet_mock_mode")
       .eq("id", orgId)
       .maybeSingle(),
   ]);
@@ -71,6 +75,12 @@ export default async function OnboardingResultPage() {
   const paymentType = (lastSale?.payment_methods as { type?: string } | null)?.type;
   const items = (lastSale?.pos_transaction_items ?? []) as Array<{ product_name: string; quantity: number; unit_price: number }>;
 
+  // FiscalNet test mode: the sale is saved but no fiscal receipt was issued.
+  // Same rule as the POS test-mode card (mock mode is on unless set to false).
+  const fiscalTestMode = Boolean(
+    org && isFiscalNetActive(org.country_code, org.fiscalnet_enabled) && org.fiscalnet_mock_mode !== false,
+  );
+
   const stepLabels = onboardingStepLabels(isRO, locale);
   const currentStepIndex = onboardingStepGroupIndex("result", isRO);
 
@@ -78,12 +88,15 @@ export default async function OnboardingResultPage() {
     <OnboardingShell
       stepLabels={stepLabels}
       currentStepIndex={currentStepIndex}
-      title={t.title}
+      title={fiscalTestMode ? t.testTitle : t.title}
       subtitle={t.subtitle}
       stepOfLabel={onboardingStepOfLabel(currentStepIndex, stepLabels.length, locale)}
       trialBadge={isRO ? "15 zile Pro gratuit · fără card" : "15-day Pro trial · no card required"}
     >
       <div className="space-y-6">
+        {fiscalTestMode && (
+          <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">{posText[locale].saleTestMode}</p>
+        )}
         {lastSale && (
           <div className="rounded-md border border-border bg-card p-4">
             <p className="font-[family-name:var(--font-display)] text-3xl font-semibold text-foreground">

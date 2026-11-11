@@ -13,7 +13,20 @@ export type SignupAlert = {
   countryCode: string;
   locationBand: string;
   utm: Array<string | undefined>;
+  /** ISO time the workspace was created. Shown in Bucharest time. */
+  signupAt?: string;
 };
+
+/** "11.11.2026, 14:05" in Europe/Bucharest; "—" when missing or invalid. */
+export function formatBucharestTime(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  return new Intl.DateTimeFormat("ro-RO", {
+    timeZone: "Europe/Bucharest",
+    day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
+  }).format(d);
+}
 
 function escapeHtml(value: string) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -26,6 +39,7 @@ export function buildSignupAlertEmail(alert: SignupAlert): { subject: string; ht
     ["Tip afacere", dash(alert.businessType)],
     ["Persoană de contact", dash(alert.contactName)],
     ["Email", alert.email],
+    ["Ora înscrierii", formatBucharestTime(alert.signupAt)],
     ["Țară", alert.countryCode],
     ["Locații", alert.locationBand],
     ["UTM", alert.utm.filter(Boolean).join(" / ") || "—"],

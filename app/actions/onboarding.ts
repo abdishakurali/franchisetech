@@ -393,6 +393,7 @@ export async function completePosOnboarding(input: {
   // resumed onboarding or a test/internal account does not.
   if (createdNow && accountType === "real_customer" && user.email) {
     const email = user.email;
+    const signupAt = new Date().toISOString();
     after(async () => {
       const sent = await sendSignupAlertEmail({
         orgName: input.orgName.trim(),
@@ -402,6 +403,7 @@ export async function completePosOnboarding(input: {
         countryCode: input.countryCode,
         locationBand: input.locationBand,
         utm: [input.acquisition?.utm_source, input.acquisition?.utm_medium, input.acquisition?.utm_campaign],
+        signupAt,
       });
       if (!sent.success) console.error("onboarding_signup_alert_failed", sent.error);
     });
