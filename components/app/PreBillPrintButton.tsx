@@ -66,7 +66,7 @@ table{width:100%;border-collapse:collapse;margin:12px 0} td{padding:4px 0;border
 </style></head><body>
 <h1>NOTĂ DE PLATĂ</h1>
 <p class="muted">${data.tableName}${data.coverCount ? ` · ${data.coverCount} pers.` : ""}</p>
-<p class="muted">${new Date(data.openedAt).toLocaleString("ro-RO")}</p>
+<p class="muted">${new Date(data.openedAt).toLocaleString("ro-RO", { timeZone: "Europe/Bucharest" })}</p>
 <table>${lineRows}</table>
 <table>
 <tr class="total"><td>Total de plată</td><td style="text-align:right">${money(data.subtotal, currency)}</td></tr>

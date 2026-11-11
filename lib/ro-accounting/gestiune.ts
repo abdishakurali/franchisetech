@@ -15,6 +15,8 @@ export type GestiuneMovement = {
   date: string;
   documentType: "stoc_initial" | "nir" | "consum" | "vanzare" | "stoc_final" | "ajustare";
   documentNumber?: string;
+  /** For "ajustare" rows only: whether the (non-negative) values enter or leave stock. */
+  direction?: "in" | "out";
   description: string;
   tva19: number;
   tva9: number;

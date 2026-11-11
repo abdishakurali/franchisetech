@@ -32,7 +32,7 @@ export type ProductRow = {
 
 const money = (value: number) => new Intl.NumberFormat("ro-RO", { style: "currency", currency: "RON" }).format(value);
 const qty = (value: number) => new Intl.NumberFormat("ro-RO", { maximumFractionDigits: 3 }).format(value);
-const when = (value: string) => new Intl.DateTimeFormat("ro-RO", { dateStyle: "medium" }).format(new Date(value));
+const when = (value: string) => new Intl.DateTimeFormat("ro-RO", { dateStyle: "medium", timeZone: "Europe/Bucharest" }).format(new Date(value));
 
 type Tab = "movements" | "nir" | "products";
 

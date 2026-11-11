@@ -686,7 +686,7 @@ export default async function SettingsPage({
                   <p className="text-muted-foreground">Ultima încercare</p>
                   <p className="font-medium">
                     {fiscalLastAttemptAt
-                      ? `${new Date(fiscalLastAttemptAt).toLocaleString("ro-RO")} (${fiscalLastAttemptStatus ?? "—"})`
+                      ? `${new Date(fiscalLastAttemptAt).toLocaleString("ro-RO", { timeZone: "Europe/Bucharest" })} (${fiscalLastAttemptStatus ?? "—"})`
                       : "Niciodată"}
                   </p>
                 </div>
@@ -698,7 +698,7 @@ export default async function SettingsPage({
                   <p className="text-muted-foreground">Rapoarte Z generate</p>
                   <p className="font-medium">
                     {zReportsDoneCount}
-                    {lastZReportAt ? ` (ultimul: ${new Date(lastZReportAt).toLocaleDateString("ro-RO")})` : ""}
+                    {lastZReportAt ? ` (ultimul: ${new Date(lastZReportAt).toLocaleDateString("ro-RO", { timeZone: "Europe/Bucharest" })})` : ""}
                   </p>
                 </div>
               </div>
@@ -1255,7 +1255,7 @@ export default async function SettingsPage({
               </div>
               <div className="border-l-4 border-amber-500 bg-card p-4">
                 <p className="text-sm text-muted-foreground">Blocarea începe</p>
-                <p className="mt-1 text-sm font-semibold">{complianceEnforcementAt ? new Date(complianceEnforcementAt).toLocaleString("ro-RO") : "Imediat"}</p>
+                <p className="mt-1 text-sm font-semibold">{complianceEnforcementAt ? new Date(complianceEnforcementAt).toLocaleString("ro-RO", { timeZone: "Europe/Bucharest" }) : "Imediat"}</p>
               </div>
               <div className="border-l-4 border-emerald-600 bg-card p-4">
                 <p className="text-sm text-muted-foreground">Loturi finalizate</p>
@@ -1302,7 +1302,7 @@ export default async function SettingsPage({
               <CardContent className="space-y-2">
                 {dataRepairBatches.map((batch) => (
                   <div key={batch.id} className="flex items-center justify-between border-b py-2 text-sm">
-                    <span>{batch.repair_type} · {new Date(batch.created_at).toLocaleString("ro-RO")}</span>
+                    <span>{batch.repair_type} · {new Date(batch.created_at).toLocaleString("ro-RO", { timeZone: "Europe/Bucharest" })}</span>
                     <Badge variant="outline">{batch.status}</Badge>
                   </div>
                 ))}

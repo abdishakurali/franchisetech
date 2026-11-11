@@ -38,7 +38,7 @@ function statusColor(state: string) {
 }
 
 function formatDate(locale: AppLocale, iso: string) {
-  return new Date(iso).toLocaleDateString(locale === "ro" ? "ro-RO" : "en-IE");
+  return new Date(iso).toLocaleDateString(locale === "ro" ? "ro-RO" : "en-IE", { timeZone: "Europe/Bucharest" });
 }
 
 function trialText(locale: AppLocale, days: number | null) {

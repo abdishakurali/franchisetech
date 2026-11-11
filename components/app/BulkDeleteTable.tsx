@@ -25,7 +25,10 @@ type Product = {
   product_categories: { name: string } | null;
 };
 
-function StockCell({ product, updateStock, clickHint }: { product: Product; updateStock?: (fd: FormData) => Promise<void>; clickHint: string }) {
+type UpdateStockAction = (fd: FormData) => Promise<{ ok: true } | { ok: false; error: string }>;
+
+function StockCell({ product, updateStock, clickHint }: { product: Product; updateStock?: UpdateStockAction; clickHint: string }) {
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [val, setVal] = useState(String(product.current_stock_qty ?? 0));
@@ -47,14 +50,21 @@ function StockCell({ product, updateStock, clickHint }: { product: Product; upda
   }
 
   async function save() {
-    if (!updateStock) return;
+    if (!updateStock || saving) return;
     setSaving(true);
     try {
       const fd = new FormData();
       fd.set("product_id", product.id);
       fd.set("quantity", val);
-      await updateStock(fd);
+      const result = await updateStock(fd);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
       setEditing(false);
+      router.refresh();
+    } catch {
+      toast.error("Stocul nu a fost salvat. Încercați din nou.");
     } finally {
       setSaving(false);
     }
@@ -88,7 +98,7 @@ export function ProductsBulkTable({
 }: {
   products: Product[];
   deleteAction: (ids: string[]) => Promise<{ archived: number; deleted: number; blocked: number } | void>;
-  updateStockAction?: (fd: FormData) => Promise<void>;
+  updateStockAction?: UpdateStockAction;
   inventoryVisible?: boolean;
   recipeVisible?: boolean;
   currency?: string;

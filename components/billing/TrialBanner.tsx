@@ -103,7 +103,7 @@ export function TrialBanner({ subStatus, daysLeft, creditMonths, referral, onRef
 
   if (state === "active" && subStatus?.cancelAtPeriodEnd) {
     const cancelDate = subStatus.periodEnd
-      ? new Date(subStatus.periodEnd).toLocaleDateString("en-IE")
+      ? new Date(subStatus.periodEnd).toLocaleDateString("en-IE", { timeZone: "Europe/Bucharest" })
       : "soon";
     return (
       <div className="flex print:hidden flex-wrap items-center justify-between gap-3 border-b border-amber-200 bg-amber-50 px-4 py-2.5 text-sm">

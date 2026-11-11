@@ -188,7 +188,7 @@ export function KitchenDisplayClient({
                             <div className="flex items-start justify-between gap-2">
                               <CardTitle className="text-base leading-tight">{order.order_number ?? t.kitchen.orderFallback}</CardTitle>
                               <div className={`rounded-md px-1.5 py-0.5 text-right text-[10px] font-semibold tabular-nums leading-tight ${urgent ? "bg-attention/10 text-attention" : "bg-secondary text-muted-foreground"}`}>
-                                <p>{new Date(order.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                                <p>{new Date(order.created_at).toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Bucharest" })}</p>
                                 <p className="font-bold">{elapsedLabel}</p>
                               </div>
                             </div>

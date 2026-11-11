@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppI18n } from "@/lib/app-i18n-context";
+import { toast } from "sonner";
 
 export function StockAdjustCell({
   productId,
@@ -11,7 +12,7 @@ export function StockAdjustCell({
 }: {
   productId: string;
   currentQty: number;
-  updateStock: (fd: FormData) => Promise<void>;
+  updateStock: (fd: FormData) => Promise<{ ok: true } | { ok: false; error: string }>;
 }) {
   const { t } = useAppI18n();
   const router = useRouter();
@@ -20,14 +21,21 @@ export function StockAdjustCell({
   const [saving, setSaving] = useState(false);
 
   async function save() {
+    if (saving) return;
     setSaving(true);
     try {
       const fd = new FormData();
       fd.set("product_id", productId);
       fd.set("quantity", val);
-      await updateStock(fd);
+      const result = await updateStock(fd);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
       setEditing(false);
       router.refresh();
+    } catch {
+      toast.error("Stocul nu a fost salvat. Încercați din nou.");
     } finally {
       setSaving(false);
     }

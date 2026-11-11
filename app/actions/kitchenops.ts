@@ -2024,21 +2024,39 @@ export async function createIngredientInline(formData: FormData): Promise<{ id: 
   return data as { id: string; name: string; unit_of_measure: string | null; cost_price: number | null; current_stock_qty: number | null };
 }
 
-export async function updateProductStock(formData: FormData): Promise<void> {
+export type UpdateProductStockResult = { ok: true } | { ok: false; error: string };
+
+// Returns a result instead of throwing. A thrown server-action error reaches
+// the browser only as "An error occurred in the Server Components render"
+// (digest, message stripped), and the inline stock cells awaited this with
+// try/finally and no catch: every refusal (no permission, plan without
+// inventory, product not found) was an unhandled rejection with no message
+// on screen, so the user pressed ✓/Enter again.
+export async function updateProductStock(formData: FormData): Promise<UpdateProductStockResult> {
   const { supabase, membership, orgId, user } = await getActiveOrg();
-  if (!canManage(membership.role)) throw new Error("Permission denied");
-  await assertEntitlement(orgId, "inventory.enabled");
+  if (!canManage(membership.role)) {
+    return { ok: false, error: "Doar proprietarul sau managerul poate modifica stocul." };
+  }
+  try {
+    await assertEntitlement(orgId, "inventory.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
   const productId = stringValue(formData, "product_id");
-  if (!productId) throw new Error("Product ID required");
-  const qty = numberValue(formData, "quantity", 0);
+  if (!productId) return { ok: false, error: "Produs lipsă." };
+  const rawQty = stringValue(formData, "quantity");
+  const qty = Number(rawQty);
+  if (!rawQty || !Number.isFinite(qty)) return { ok: false, error: "Cantitate invalidă." };
 
   const { data: before, error: readError } = await supabase
     .from("products")
     .select("current_stock_qty, unit_of_measure")
     .eq("id", productId)
     .eq("organisation_id", orgId)
-    .single();
-  if (readError) throw new Error(readError.message);
+    .maybeSingle();
+  if (readError) return { ok: false, error: readError.message };
+  if (!before) return { ok: false, error: "Produsul nu a fost găsit." };
 
   const oldQty = Number(before?.current_stock_qty ?? 0);
   const delta = qty - oldQty;
@@ -2053,7 +2071,7 @@ export async function updateProductStock(formData: FormData): Promise<void> {
       reason: "Manual stock adjustment",
       performed_by: user.id,
     });
-    if (movementError) throw new Error(movementError.message);
+    if (movementError) return { ok: false, error: movementError.message };
   }
 
   const { error } = await supabase
@@ -2061,12 +2079,13 @@ export async function updateProductStock(formData: FormData): Promise<void> {
     .update({ current_stock_qty: qty })
     .eq("id", productId)
     .eq("organisation_id", orgId);
-  if (error) throw new Error(error.message);
+  if (error) return { ok: false, error: error.message };
   revalidatePath("/app/products");
   revalidatePath("/app/stock");
   revalidatePath("/app/recipes");
   revalidatePath("/app/reports/balanta");
   revalidatePath("/app/reports/gestiune");
+  return { ok: true };
 }
 
 export async function bulkUpdateProductStock(formData: FormData): Promise<{ ok: boolean; error?: string; updated?: number }> {
