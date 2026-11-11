@@ -2099,7 +2099,10 @@ export async function updateProductStock(formData: FormData): Promise<UpdateProd
     .eq("id", productId)
     .eq("organisation_id", orgId)
     .maybeSingle();
-  if (readError) return { ok: false, error: readError.message };
+  if (readError) {
+    console.error("[updateProductStock] read failed", readError.message);
+    return { ok: false, error: "Stocul nu s-a salvat. Încercați din nou." };
+  }
   if (!before) return { ok: false, error: "Produsul nu a fost găsit." };
 
   // Stock first, then the movement, with a rollback of the stock if the
