@@ -4,7 +4,9 @@ import {
   stockMovementQty,
   stockMovementProduct,
   stockMovementUnitCost,
+  StockMovementsQueryError,
 } from "@/lib/ro-accounting/stock-movements";
+import { fetchOpeningStock, type VatBucket } from "@/lib/ro-accounting/opening-stock";
 import type { GestiuneMovement } from "@/lib/ro-accounting/gestiune";
 
 type PurchaseRow = {
@@ -16,8 +18,6 @@ type PurchaseRow = {
   tax_total: number | null;
   purchase_items: Array<{ tax_rate: number | null; total_cost: number | null }>;
 };
-
-type VatBucket = { tva19: number; tva9: number; tva5: number; tva0: number; total: number };
 
 export type GestiuneReportData = {
   org: { name: string | null; fiscalnet_cif: string | null } | null;
@@ -48,6 +48,7 @@ export async function computeGestiuneReport(
   fromDate: string,
   toDate: string,
   labels: { openingBalance: string; unknownSupplier: string; rawConsumption: string; zReportItems: (count: number) => string },
+  options: { signal?: AbortSignal } = {},
 ): Promise<GestiuneReportData> {
   const periodStart = `${fromDate}T00:00:00.000Z`;
   const periodEnd = `${toDate}T23:59:59.999Z`;
@@ -61,30 +62,11 @@ export async function computeGestiuneReport(
   const movements: GestiuneMovement[] = [];
   let hasUnknownCost = false;
 
-  const movementsBeforePeriod = await fetchStockMovements(supabase, orgId, { before: periodStart });
-
-  // Opening stock is a NET running balance -- purchases/opening entries add
-  // (positive quantity_change), consumption subtracts (negative
-  // quantity_change). Math.abs() here would treat consumption as inbound
-  // stock and wildly overstate the balance.
-  const openingStock: VatBucket = { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0 };
-  for (const m of movementsBeforePeriod) {
-    const qty = stockMovementQty(m);
-    const cost = stockMovementUnitCost(m);
-    if (cost == null) {
-      hasUnknownCost = true;
-      continue;
-    }
-    const value = qty * cost;
-    const prod = stockMovementProduct(m);
-    const vatRate = Number(prod?.vat_rate ?? 21);
-
-    if (vatRate === 21) openingStock.tva19 += value;
-    else if (vatRate === 11) openingStock.tva9 += value;
-    else if (vatRate === 5) openingStock.tva5 += value;
-    else openingStock.tva0 += value;
-    openingStock.total += value;
-  }
+  // Aggregated per (product, unit_cost) -- never row-by-row over the whole
+  // history before the period. See lib/ro-accounting/opening-stock.ts.
+  const opening = await fetchOpeningStock(supabase, orgId, periodStart, { signal: options.signal });
+  const openingStock: VatBucket = opening.openingStock;
+  if (opening.hasUnknownCost) hasUnknownCost = true;
 
   if (openingStock.total > 0) {
     movements.push({
@@ -95,7 +77,7 @@ export async function computeGestiuneReport(
     });
   }
 
-  const { data: purchases } = await supabase
+  let purchasesQuery = supabase
     .from("purchases")
     .select(`
       id, purchase_date, supplier, invoice_number, total_amount, tax_total,
@@ -106,6 +88,11 @@ export async function computeGestiuneReport(
     .gte("purchase_date", periodStart)
     .lte("purchase_date", periodEnd)
     .order("purchase_date");
+  if (options.signal) purchasesQuery = purchasesQuery.abortSignal(options.signal);
+  const { data: purchases, error: purchasesError } = await purchasesQuery;
+  if (purchasesError) {
+    throw new StockMovementsQueryError(`purchases query failed: ${purchasesError.message}`, purchasesError);
+  }
 
   for (const p of (purchases ?? []) as PurchaseRow[]) {
     const nirByVat: VatBucket = { tva19: 0, tva9: 0, tva5: 0, tva0: 0, total: 0 };
@@ -130,11 +117,12 @@ export async function computeGestiuneReport(
     }
   }
 
-  const consumMovements = await fetchStockMovements(supabase, orgId, {
-    movementType: "sale_used",
-    from: periodStart,
-    to: periodEnd,
-  });
+  const consumMovements = await fetchStockMovements(
+    supabase,
+    orgId,
+    { movementType: "sale_used", from: periodStart, to: periodEnd },
+    { signal: options.signal, throwOnError: true },
+  );
 
   const consumByDate = new Map<string, VatBucket>();
   for (const m of consumMovements) {
