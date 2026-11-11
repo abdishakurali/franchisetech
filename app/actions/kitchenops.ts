@@ -32,6 +32,7 @@ import {
   type PurchaseLineInput,
 } from "@/lib/nir/purchase";
 import { replacePurchaseItems } from "@/lib/nir/purchase-items-write";
+import { replaceRecipeItems } from "@/lib/recipe-items-write";
 import { createServiceClient } from "@/lib/supabase/server";
 import { listActiveVatRates, listAllVatRates } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
@@ -279,13 +280,26 @@ async function createKitchenOrderIfEnabled({
   }
 }
 
-export async function addCategory(formData: FormData) {
+/** Result for the add/edit/delete actions behind SettingsListSection
+ * (categories, payment methods). Before 2026-11-12 these returned nothing and
+ * ignored the Supabase error, so a refused save looked like it worked. */
+export type SettingsListActionResult = { ok: true } | { ok: false; error: "in_use" | "failed" };
+
+function settingsListResult(error: { code?: string; message?: string } | null, where: string): SettingsListActionResult {
+  if (!error) return { ok: true };
+  console.error(`[settings] ${where} failed`, error.code, error.message);
+  // 23503 = foreign_key_violation: the row is still referenced (e.g. a payment
+  // method already used on sales).
+  return { ok: false, error: error.code === "23503" ? "in_use" : "failed" };
+}
+
+export async function addCategory(formData: FormData): Promise<SettingsListActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "products.enabled");
   const name = stringValue(formData, "name");
-  if (!name) return;
-  await supabase.from("product_categories").insert({
+  if (!name) return { ok: false, error: "failed" };
+  const { error } = await supabase.from("product_categories").insert({
     organisation_id: orgId, name,
     color: stringValue(formData, "color") || null,
     sort_order: numberValue(formData, "sort_order"),
@@ -297,9 +311,11 @@ export async function addCategory(formData: FormData) {
     // Matches addCategoryInline's already-established default below.
     category_type: stringValue(formData, "category_type") || "both",
   });
+  if (error) return settingsListResult(error, "addCategory");
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
   revalidatePath("/app/pos");
+  return { ok: true };
 }
 
 // Inline category creation — used by the onboarding menu builder and any
@@ -339,37 +355,44 @@ export async function addCategoryInline(
   return { ok: true, category: { id: data.id as string, name: data.name as string } };
 }
 
-export async function updateCategory(formData: FormData) {
+export async function updateCategory(formData: FormData): Promise<SettingsListActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
   const name = stringValue(formData, "name");
-  if (!id || !name) return;
+  if (!id || !name) return { ok: false, error: "failed" };
   const categoryType = stringValue(formData, "category_type");
-  await supabase.from("product_categories").update({
+  const { error } = await supabase.from("product_categories").update({
     name,
     color: stringValue(formData, "color") || null,
     sort_order: numberValue(formData, "sort_order"),
     ...(categoryType ? { category_type: categoryType } : {}),
   }).eq("id", id).eq("organisation_id", orgId);
+  if (error) return settingsListResult(error, "updateCategory");
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
   revalidatePath("/app/pos");
+  return { ok: true };
 }
 
-export async function deleteCategory(formData: FormData) {
+export async function deleteCategory(formData: FormData): Promise<SettingsListActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
-  if (!id) return;
-  await supabase.from("products").update({ category_id: null }).eq("organisation_id", orgId).eq("category_id", id);
-  await supabase.from("products").update({ pos_category_id: null }).eq("organisation_id", orgId).eq("pos_category_id", id);
-  await supabase.from("product_categories").delete().eq("id", id).eq("organisation_id", orgId);
+  if (!id) return { ok: false, error: "failed" };
+  // Delete first. products.category_id and products.pos_category_id are
+  // ON DELETE SET NULL, so the database unlinks the products in the same
+  // statement. Before 2026-11-12 the products were unlinked first and the
+  // delete result was ignored: a refused delete left the category in place but
+  // took every product out of it (and off its POS tab), with no message.
+  const { error } = await supabase.from("product_categories").delete().eq("id", id).eq("organisation_id", orgId);
+  if (error) return settingsListResult(error, "deleteCategory");
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
   revalidatePath("/app/pos");
+  return { ok: true };
 }
 
 export async function approveProductVat(formData: FormData) {
@@ -1478,19 +1501,24 @@ export async function addRecipe(formData: FormData) {
   revalidatePath("/app/recipes");
 }
 
+/** Returned only on failure; success redirects. "empty": no ingredient with a
+ * quantity > 0 was submitted. "failed": nothing (or, for a header-only
+ * failure, only the ingredient lines) was saved; the owner sees a message. */
+export type RecipeActionResult = { ok: false; error: "empty" | "failed" };
+
 /** Replaces an existing recipe's product, batch size and ingredient lines.
  * Items are rewritten wholesale rather than diffed: recipe_items carry no
  * external references, so a clean replace avoids partial-update states if the
  * user removes lines. Costs are re-read from products so an edit always
  * reflects current ingredient prices. */
-export async function updateRecipeFromProducts(formData: FormData) {
+export async function updateRecipeFromProducts(formData: FormData): Promise<RecipeActionResult | void> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "recipes.enabled");
 
   const recipeId = stringValue(formData, "recipe_id");
   const productId = stringValue(formData, "product_id");
-  if (!recipeId || !productId) return;
+  if (!recipeId || !productId) return { ok: false, error: "failed" };
 
   // Scope the lookup to the org so one tenant can never edit another's recipe.
   const { data: existing } = await supabase
@@ -1499,7 +1527,7 @@ export async function updateRecipeFromProducts(formData: FormData) {
     .eq("id", recipeId)
     .eq("organisation_id", orgId)
     .maybeSingle();
-  if (!existing) return;
+  if (!existing) return { ok: false, error: "failed" };
 
   const recipeName = stringValue(formData, "name") || "Recipe";
   const yieldQty = numberValue(formData, "yield_qty", 1);
@@ -1508,21 +1536,15 @@ export async function updateRecipeFromProducts(formData: FormData) {
 
   // Refuse to save an empty recipe — silently clearing every line would look
   // like data loss to the user.
-  if (!ingredientProductIds.length || ingredientProductIds.every((id, i) => !id || !(quantities[i] > 0))) return;
+  if (!ingredientProductIds.length || ingredientProductIds.every((id, i) => !id || !(quantities[i] > 0))) {
+    return { ok: false, error: "empty" };
+  }
 
   const { data: ingredientProducts } = await supabase
     .from("products")
     .select("id,name,unit_of_measure,cost_price")
     .in("id", ingredientProductIds.filter(Boolean));
   const productMap = new Map((ingredientProducts ?? []).map((p) => [p.id, p]));
-
-  await supabase
-    .from("recipes")
-    .update({ product_id: productId, name: recipeName, yield_qty: yieldQty, cost_computed_at: new Date().toISOString() })
-    .eq("id", recipeId)
-    .eq("organisation_id", orgId);
-
-  await supabase.from("recipe_items").delete().eq("recipe_id", recipeId).eq("organisation_id", orgId);
 
   const items = ingredientProductIds.flatMap((pid, i) => {
     if (!pid || !(quantities[i] > 0)) return [];
@@ -1537,26 +1559,47 @@ export async function updateRecipeFromProducts(formData: FormData) {
       unit_cost: unitCost, total_cost: totalCost, unit, cost: totalCost,
     }];
   });
-  if (items.length) await supabase.from("recipe_items").insert(items);
+
+  // Lines first: replaceRecipeItems inserts the new lines before it deletes
+  // the old ones, so a failed save never leaves the recipe empty (before
+  // 2026-11-12 the delete ran first and the insert error was ignored).
+  const written = await replaceRecipeItems(supabase, orgId, recipeId, items);
+  if (!written.ok) {
+    console.error("[recipes] update lines failed", recipeId, written.stage, written.message);
+    return { ok: false, error: "failed" };
+  }
+
+  const { error: headerError } = await supabase
+    .from("recipes")
+    .update({ product_id: productId, name: recipeName, yield_qty: yieldQty, cost_computed_at: new Date().toISOString() })
+    .eq("id", recipeId)
+    .eq("organisation_id", orgId);
+  if (headerError) {
+    console.error("[recipes] update header failed", recipeId, headerError.message);
+    revalidatePath(`/app/recipes/${recipeId}`);
+    return { ok: false, error: "failed" };
+  }
 
   revalidatePath("/app/recipes");
   revalidatePath(`/app/recipes/${recipeId}`);
   redirect(`/app/recipes/${recipeId}?saved=1`);
 }
 
-export async function addRecipeFromProducts(formData: FormData) {
+export async function addRecipeFromProducts(formData: FormData): Promise<RecipeActionResult | void> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "recipes.enabled");
   const productId = stringValue(formData, "product_id");
-  if (!productId) return;
+  if (!productId) return { ok: false, error: "failed" };
   const recipeName = stringValue(formData, "name") || "Recipe";
   const yieldQty = numberValue(formData, "yield_qty", 1);
 
   const ingredientProductIds = formData.getAll("ingredient_product_id").map((v) => String(v)).filter(Boolean);
   const quantities = formData.getAll("quantity").map((v) => Number(v || 0));
 
-  if (!ingredientProductIds.length || ingredientProductIds.every((id, i) => !id || !(quantities[i] > 0))) return;
+  if (!ingredientProductIds.length || ingredientProductIds.every((id, i) => !id || !(quantities[i] > 0))) {
+    return { ok: false, error: "empty" };
+  }
 
   // Fetch ingredient product details (name, unit, cost)
   const { data: ingredientProducts } = await supabase
@@ -1566,11 +1609,14 @@ export async function addRecipeFromProducts(formData: FormData) {
 
   const productMap = new Map((ingredientProducts ?? []).map((p) => [p.id, p]));
 
-  const { data: recipe } = await supabase.from("recipes").insert({
+  const { data: recipe, error: recipeError } = await supabase.from("recipes").insert({
     organisation_id: orgId, product_id: productId, name: recipeName, yield_qty: yieldQty,
     cost_computed_at: new Date().toISOString(),
   }).select("id").single();
-  if (!recipe) return;
+  if (recipeError || !recipe) {
+    console.error("[recipes] insert failed", recipeError?.message);
+    return { ok: false, error: "failed" };
+  }
 
   const items = ingredientProductIds.flatMap((pid, i) => {
     if (!pid || !(quantities[i] > 0)) return [];
@@ -1591,7 +1637,14 @@ export async function addRecipeFromProducts(formData: FormData) {
     }];
   });
 
-  if (items.length) await supabase.from("recipe_items").insert(items);
+  const { error: itemsError } = await supabase.from("recipe_items").insert(items);
+  if (itemsError) {
+    // Do not leave a recipe with no ingredients behind: before 2026-11-12 this
+    // error was ignored and the owner was sent to the list as if it had saved.
+    console.error("[recipes] insert lines failed", recipe.id, itemsError.message);
+    await supabase.from("recipes").delete().eq("id", recipe.id).eq("organisation_id", orgId);
+    return { ok: false, error: "failed" };
+  }
 
   revalidatePath("/app/recipes");
   redirect("/app/recipes");
@@ -2709,29 +2762,31 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
 
 // ── Payment Methods Management ────────────────────────────────────────────
 
-export async function addPaymentMethod(formData: FormData): Promise<void> {
+export async function addPaymentMethod(formData: FormData): Promise<SettingsListActionResult> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "vat.enabled");
   const name = stringValue(formData, "name");
   const type = stringValue(formData, "type") || "other";
   const fiscalnetCode = formData.get("fiscalnet_code") ? Number(formData.get("fiscalnet_code")) : null;
-  if (!name) return;
-  await supabase.from("payment_methods").insert({
+  if (!name) return { ok: false, error: "failed" };
+  const { error } = await supabase.from("payment_methods").insert({
     organisation_id: orgId,
     name,
     type,
     fiscalnet_code: fiscalnetCode,
     active: true,
   });
+  if (error) return settingsListResult(error, "addPaymentMethod");
   revalidatePath("/app/settings");
+  return { ok: true };
 }
 
-export async function updatePaymentMethod(formData: FormData): Promise<void> {
+export async function updatePaymentMethod(formData: FormData): Promise<SettingsListActionResult> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "vat.enabled");
   const id = stringValue(formData, "id");
   const name = stringValue(formData, "name");
@@ -2739,25 +2794,31 @@ export async function updatePaymentMethod(formData: FormData): Promise<void> {
   const active = formData.get("active") === "true";
   const fcRaw = formData.get("fiscalnet_code");
   const fiscalnetCode = fcRaw && String(fcRaw).trim() !== "" ? Number(fcRaw) : null;
-  if (!id) return;
+  if (!id) return { ok: false, error: "failed" };
   const updates: Record<string, unknown> = {};
   if (name) updates.name = name;
   if (type) updates.type = type;
   updates.active = active;
   updates.fiscalnet_code = fiscalnetCode;
-  await supabase.from("payment_methods").update(updates).eq("id", id).eq("organisation_id", orgId);
+  const { error } = await supabase.from("payment_methods").update(updates).eq("id", id).eq("organisation_id", orgId);
+  if (error) return settingsListResult(error, "updatePaymentMethod");
   revalidatePath("/app/settings");
+  return { ok: true };
 }
 
-export async function deletePaymentMethod(formData: FormData): Promise<void> {
+export async function deletePaymentMethod(formData: FormData): Promise<SettingsListActionResult> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "vat.enabled");
   const id = stringValue(formData, "id");
-  if (!id) return;
-  await supabase.from("payment_methods").delete().eq("id", id).eq("organisation_id", orgId);
+  if (!id) return { ok: false, error: "failed" };
+  // A method already used on sales is still referenced (FK without ON DELETE),
+  // so the delete is refused with 23503; the card tells the owner to deactivate it.
+  const { error } = await supabase.from("payment_methods").delete().eq("id", id).eq("organisation_id", orgId);
+  if (error) return settingsListResult(error, "deletePaymentMethod");
   revalidatePath("/app/settings");
+  return { ok: true };
 }
 
 // ── VAT Rates Management ─────────────────────────────────────────────────

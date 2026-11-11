@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 
 vi.mock("@/app/actions/kitchenops", () => ({
   addRecipeFromProducts: vi.fn(),
@@ -148,5 +148,64 @@ describe("RecipeCostCalculator unit guard (non-blocking)", () => {
       />,
     );
     expect((getByRole("button", { name: "Salvează modificările" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+});
+
+describe("RecipeCostCalculator save failure (no silent save)", () => {
+  it("shows a Romanian message and keeps the lines when the action reports failure", async () => {
+    const submitAction = vi.fn().mockResolvedValue({ ok: false, error: "failed" });
+    const { getByRole, findByRole, container } = render(
+      <RecipeCostCalculator
+        sellableProducts={sellable}
+        ingredientProducts={ingredients}
+        recipeId="r1"
+        initialProductId="esp"
+        initialYieldQty="1"
+        initialRows={rows}
+        submitAction={submitAction}
+        submitLabel="Salvează modificările"
+      />,
+    );
+    fireEvent.click(getByRole("button", { name: "Salvează modificările" }));
+    const alert = await findByRole("alert");
+    expect(alert.textContent).toContain("Rețeta nu s-a salvat");
+    expect(submitAction).toHaveBeenCalledTimes(1);
+    // Lines are still on screen: total cost 2.5149 unchanged.
+    expect(container.textContent).toContain("€2.51");
+  });
+
+  it("explains an empty recipe refusal", async () => {
+    const submitAction = vi.fn().mockResolvedValue({ ok: false, error: "empty" });
+    const { getByRole, findByRole } = render(
+      <RecipeCostCalculator
+        sellableProducts={sellable}
+        ingredientProducts={ingredients}
+        recipeId="r1"
+        initialProductId="esp"
+        initialRows={rows}
+        submitAction={submitAction}
+        submitLabel="Salvează modificările"
+      />,
+    );
+    fireEvent.click(getByRole("button", { name: "Salvează modificările" }));
+    expect((await findByRole("alert")).textContent).toContain("cel puțin un ingredient");
+  });
+
+  it("shows no message when the action does not return a failure (success redirects)", async () => {
+    const submitAction = vi.fn().mockResolvedValue(undefined);
+    const { getByRole, queryByRole } = render(
+      <RecipeCostCalculator
+        sellableProducts={sellable}
+        ingredientProducts={ingredients}
+        recipeId="r1"
+        initialProductId="esp"
+        initialRows={rows}
+        submitAction={submitAction}
+        submitLabel="Salvează modificările"
+      />,
+    );
+    fireEvent.click(getByRole("button", { name: "Salvează modificările" }));
+    await waitFor(() => expect(submitAction).toHaveBeenCalledTimes(1));
+    expect(queryByRole("alert")).toBeNull();
   });
 });

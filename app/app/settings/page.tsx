@@ -555,9 +555,9 @@ export default async function SettingsPage({
               { key: "active", label: isRO ? "Activă" : "Active", type: "toggle" },
             ]}
             addDefaults={{ name: "", type: "cash", fiscalnet_code: "", active: true }}
-            addAction={addPaymentMethod as unknown as (fd: FormData) => Promise<void>}
-            updateAction={updatePaymentMethod as unknown as (fd: FormData) => Promise<void>}
-            deleteAction={deletePaymentMethod as unknown as (fd: FormData) => Promise<void>}
+            addAction={addPaymentMethod}
+            updateAction={updatePaymentMethod}
+            deleteAction={deletePaymentMethod}
             addLabel={isRO ? "+ Adăugați metodă de plată" : "+ Add payment method"}
             emptyLabel={isRO ? "Nicio metodă de plată încă." : "No payment methods yet."}
             locale={locale}
@@ -647,9 +647,9 @@ export default async function SettingsPage({
                 ]}
                 hiddenAddValues={{ category_type: scope }}
                 addDefaults={{ name: "", color: "#2563eb", sort_order: "" }}
-                addAction={addCategory as unknown as (fd: FormData) => Promise<void>}
-                updateAction={updateCategory as unknown as (fd: FormData) => Promise<void>}
-                deleteAction={deleteCategory as unknown as (fd: FormData) => Promise<void>}
+                addAction={addCategory}
+                updateAction={updateCategory}
+                deleteAction={deleteCategory}
                 addLabel={isRO ? "Adăugați categorie" : "Add category"}
                 emptyLabel={isRO ? "Nicio categorie încă." : "No categories yet."}
                 locale={locale}

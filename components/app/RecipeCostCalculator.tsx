@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Search, X } from "lucide-react";
-import { addRecipeFromProducts, createIngredientInline } from "@/app/actions/kitchenops";
+import { addRecipeFromProducts, createIngredientInline, type RecipeActionResult } from "@/app/actions/kitchenops";
 import { formatQty, formatRecipeMoney, formatRecipeUnitCost, recipeCurrencyLabel } from "@/lib/recipe-costing";
 import { appText } from "@/lib/app-i18n";
 import { recipeLineUnitWarning } from "@/lib/recipe-unit-warning";
@@ -28,6 +28,11 @@ type SellableProduct = {
 };
 
 const ARCHIVED_SUFFIX = " (arhivat)";
+
+const RECIPE_SAVE_ERRORS: Record<RecipeActionResult["error"], string> = {
+  empty: "Adăugați cel puțin un ingredient cu o cantitate mai mare decât zero.",
+  failed: "Rețeta nu s-a salvat. Încercați din nou; dacă se repetă, scrieți-ne pe WhatsApp.",
+};
 
 /** saved_unit: the unit stored on an existing recipe line (edit mode), used only
  * to warn when it disagrees with the ingredient's stock unit. */
@@ -277,9 +282,17 @@ export function RecipeCostCalculator({
   initialProductId?: string;
   initialYieldQty?: string;
   initialRows?: { product_id: string; quantity: string; unit_of_measure?: string | null }[];
-  submitAction?: (fd: FormData) => Promise<void>;
+  submitAction?: (fd: FormData) => Promise<RecipeActionResult | void>;
   submitLabel?: string;
 }) {
+  // Success redirects (server side). A returned result means nothing was
+  // saved, so the form keeps what the owner typed and says why.
+  const [saveError, setSaveError] = useState<string | null>(null);
+  async function submitRecipe(fd: FormData) {
+    setSaveError(null);
+    const res = await (submitAction ?? addRecipeFromProducts)(fd);
+    if (res && res.ok === false) setSaveError(RECIPE_SAVE_ERRORS[res.error] ?? RECIPE_SAVE_ERRORS.failed);
+  }
   const seededRows: IngredientRow[] = (initialRows ?? []).map((r, i) => ({
     id: i,
     product_id: r.product_id,
@@ -369,12 +382,7 @@ export function RecipeCostCalculator({
         />
       )}
 
-      <form
-        action={
-          (submitAction ?? addRecipeFromProducts) as unknown as (fd: FormData) => Promise<void>
-        }
-        className="space-y-5"
-      >
+      <form action={submitRecipe} className="space-y-5">
         {/* Hidden recipe name — auto-set to selected product name */}
         <input type="hidden" name="name" value={recipeName || "Ingrediente"} />
         {recipeId ? <input type="hidden" name="recipe_id" value={recipeId} /> : null}
@@ -586,6 +594,12 @@ export function RecipeCostCalculator({
               )}
             </div>
           </div>
+        )}
+
+        {saveError && (
+          <p role="alert" className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            {saveError}
+          </p>
         )}
 
         <div className="flex gap-3 pt-2 border-t border-border">
