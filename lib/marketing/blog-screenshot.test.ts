@@ -12,7 +12,7 @@ describe("blogScreenshotFor", () => {
   });
   it("gives every published article a live screen", () => {
     for (const post of blogPosts) {
-      expect(blogScreenshotFor(post).src).toMatch(/^\/marketing\/live\/(pos|stock|recipes|dashboard)\.png$/);
+      expect(blogScreenshotFor(post).src).toMatch(/^\/marketing\/live\/(pos|stock|recipes|reports|dashboard)\.png$/);
     }
   });
 });
