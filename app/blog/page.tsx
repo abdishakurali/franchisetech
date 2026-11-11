@@ -14,6 +14,15 @@ export const metadata: Metadata = {
   description:
     "Ghiduri practice pentru proprietarii de cafenele și restaurante din România: raport Z, NIR, rețete, contabilitate, gestiune stoc.",
   alternates: { canonical: `${SITE_URL}/blog` },
+  openGraph: {
+    title: "Blog — Resurse pentru cafenele și restaurante",
+    description:
+      "Ghiduri practice pentru proprietarii de cafenele și restaurante din România: raport Z, NIR, rețete, contabilitate, gestiune stoc.",
+    url: `${SITE_URL}/blog`,
+    siteName: "franchisetech",
+    type: "website",
+    locale: "ro_RO",
+  },
 };
 
 export default function BlogPage() {

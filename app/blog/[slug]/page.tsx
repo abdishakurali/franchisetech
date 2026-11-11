@@ -10,7 +10,7 @@ import { BlogCtaLink } from "@/components/marketing/BlogCtaLink";
 import { BlogAuthorBox } from "@/components/marketing/BlogAuthorBox";
 import { BLOG_SCREENSHOT_CAPTION, blogScreenshotFor } from "@/lib/marketing/blog-screenshot";
 import { JsonLd } from "@/components/marketing/JsonLd";
-import { blogPosts } from "@/lib/marketing/blog";
+import { blogPosts, relatedBlogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
 import { REGULATION_FEAR_CTAS, demoHref } from "@/lib/marketing/blog-ctas";
 
@@ -23,12 +23,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = blogPosts.find((p) => p.slug === slug);
   if (!post) return {};
   return {
-    title: post.title,
+    // Article titles average ~65 characters before the " | franchisetech"
+    // suffix, so the suffix only pushed the keyword-bearing end of the title
+    // out of the search result. The brand is still shown via og:site_name and
+    // the site name Google displays above the result.
+    title: { absolute: post.title },
     description: post.description,
     alternates: { canonical: `${SITE_URL}/blog/${post.slug}` },
     openGraph: {
       title: post.title,
       description: post.description,
+      url: `${SITE_URL}/blog/${post.slug}`,
+      siteName: "franchisetech",
+      locale: post.locale === "ro" ? "ro_RO" : "en",
       type: "article",
       publishedTime: post.publishedAt,
       // No image here on purpose — Next.js's file-convention opengraph-image.tsx
@@ -55,8 +62,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           headline: post.title,
           description: post.description,
           datePublished: post.publishedAt,
+          inLanguage: post.locale === "ro" ? "ro-RO" : "en",
+          mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` },
+          // Same image the file-convention opengraph-image.tsx serves for this post.
+          image: `${SITE_URL}/blog/${post.slug}/opengraph-image`,
           author: { "@type": "Person", name: "Abdishakur Ali", jobTitle: "Fondator", worksFor: { "@type": "Organization", name: "franchisetech" } },
-          publisher: { "@type": "Organization", name: "franchisetech", url: SITE_URL },
+          publisher: {
+            "@type": "Organization",
+            name: "franchisetech",
+            url: SITE_URL,
+            logo: { "@type": "ImageObject", url: `${SITE_URL}/franchise-tech-logo.png`, width: 900, height: 237 },
+          },
         }}
       />
       <JsonLd
@@ -239,10 +255,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <div className="mx-auto max-w-3xl">
           <h2 className="text-base font-semibold text-slate-900">Mai multe articole</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {blogPosts
-              .filter((p) => p.slug !== post.slug)
-              .slice(0, 4)
-              .map((related) => (
+            {relatedBlogPosts(post, 4).map((related) => (
                 <Link
                   key={related.slug}
                   href={`/blog/${related.slug}`}

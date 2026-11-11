@@ -7,8 +7,10 @@ import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { Search } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Help centre",
-  description: "Step-by-step guides for using franchisetech — POS, stock management, reports, recipe costing, and more.",
+  title: "Centru de ajutor: ghiduri pas cu pas",
+  description: "Ghiduri pas cu pas pentru franchisetech: POS, gestiunea stocului, rapoarte, costul rețetelor și închiderea zilei.",
+  // Without its own canonical this page inherited the homepage's.
+  alternates: { canonical: "/help" },
 };
 
 const UI = {

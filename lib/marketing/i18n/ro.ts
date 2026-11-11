@@ -361,7 +361,7 @@ export const ro: MarketingMessages = {
     helpCentre: "Centru de ajutor →",
   },
   industriesIndex: {
-    title: "Industrii — franchisetech",
+    title: "POS pentru cafenele, takeaway și restaurante",
     description:
       "POS în cloud pentru cafenele și takeaway cu o locație în România.",
     label: "Industrii",
@@ -446,7 +446,7 @@ export const ro: MarketingMessages = {
     },
   },
   pricing: {
-    title: "Prețuri franchisetech",
+    title: "Prețuri POS fiscal pentru afaceri mici",
     description: "Pro costă 49 € pe lună (39 € la plata anuală) pentru o locație. Multi costă 79 € pe lună pentru prima locație (63 € la plata anuală) și 29 € pentru fiecare locație suplimentară, adăugată la cerere. 15 zile de probă gratuită, fără card, fără contract.",
     badge: "Prețuri simple",
     heroTitle: "Trei planuri, cu preț clar pe locație.",

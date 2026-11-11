@@ -5,7 +5,7 @@ import { CTASection } from "@/components/marketing/MarketingShell";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 
 export const metadata: Metadata = {
-  title: "Ghiduri POS și închidere zilnică | franchisetech",
+  title: { absolute: "Ghiduri POS și închidere zilnică | franchisetech" },
   description:
     "Ghiduri practice pentru configurarea POS, produse, TVA, FiscalNet, închiderea zilnică și raportare.",
   alternates: { canonical: "/resources" },

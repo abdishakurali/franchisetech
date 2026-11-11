@@ -8,10 +8,11 @@ import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketing
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { PricingPlansSection } from "@/components/billing/PricingPlansSection";
 import { PricingEmailSignup } from "@/components/marketing/PricingEmailSignup";
-import { SITE_URL } from "@/lib/marketing/seo";
+import { brandedTitle, DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/marketing/seo";
 import { pricingPlans } from "@/lib/billing/plans";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
+import { marketingOpenGraphLocale } from "@/lib/marketing/locale";
 import { marketFromMarketingLocale, pricingNotIncludedText } from "@/lib/billing/market";
 
 const demoUrl = process.env.NEXT_PUBLIC_DEMO_BOOKING_URL || null;
@@ -20,9 +21,18 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getMarketingLocale();
   const t = getMarketingMessages(locale);
   return {
-    title: t.pricing.title,
+    title: brandedTitle(t.pricing.title),
     description: t.pricing.description,
     alternates: { canonical: "/pricing" },
+    openGraph: {
+      title: t.pricing.title,
+      description: t.pricing.description,
+      url: "/pricing",
+      siteName: "franchisetech",
+      type: "website",
+      locale: marketingOpenGraphLocale(locale),
+      images: [DEFAULT_OG_IMAGE],
+    },
   };
 }
 

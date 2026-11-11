@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { CTASection } from "@/components/marketing/MarketingShell";
 import { JsonLd } from "@/components/marketing/JsonLd";
-import { industryPages, SITE_URL } from "@/lib/marketing/seo";
+import { brandedTitle, industryPages, SITE_URL } from "@/lib/marketing/seo";
 import { PRIMARY_INDUSTRY_NAV, PRIMARY_INDUSTRY_SLUGS } from "@/lib/marketing/industry-verticals";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { getMarketingMessages, localizeSeoPage } from "@/lib/marketing/i18n";
@@ -21,7 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getMarketingLocale();
   const t = getMarketingMessages(locale);
   return {
-    title: t.industriesIndex.title,
+    title: brandedTitle(t.industriesIndex.title),
     description: t.industriesIndex.description,
     alternates: localeAlternates("/industries", locale),
   };

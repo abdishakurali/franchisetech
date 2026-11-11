@@ -8,7 +8,7 @@ import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketing
 const updated = "3 noiembrie 2026";
 
 export const metadata: Metadata = {
-  title: "Declinarea responsabilității franchisetech",
+  title: { absolute: "Declinarea responsabilității franchisetech" },
   description: "Ce face și ce nu face franchisetech în privința obligațiilor fiscale, TVA și FiscalNet.",
   alternates: { canonical: "/legal-disclaimer" },
 };

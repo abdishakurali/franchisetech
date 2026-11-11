@@ -3,7 +3,7 @@ import { Fraunces, Public_Sans, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_URL } from "@/lib/marketing/seo";
-import { localeAlternates, marketingKeywords } from "@/lib/marketing/site-locale";
+import { marketingKeywords } from "@/lib/marketing/site-locale";
 import { getMarketingLocale } from "@/lib/marketing/locale-server";
 import { marketingHtmlLang, marketingOpenGraphLocale } from "@/lib/marketing/locale";
 import { getMarketingMessages } from "@/lib/marketing/i18n";
@@ -50,19 +50,23 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: "franchisetech",
     metadataBase: new URL(SITE_URL),
     manifest: "/manifest.webmanifest",
-    alternates: localeAlternates("/", locale),
+    // No `alternates` here: a root-level canonical of "/" is inherited by every
+    // page that doesn't set its own, which told Google /help, /signup, /login
+    // and /accountant-partners were duplicates of the homepage. Each page sets
+    // its own canonical (the homepage in app/page.tsx).
     robots: {
       index: true,
       follow: true,
       googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
     },
+    // No og:title/description/url here: pages without their own openGraph
+    // inherited the homepage's, so a shared /pricing or /blog link previewed as
+    // the homepage. Without them, link previews fall back to the page <title>
+    // and meta description. The homepage sets its own in app/page.tsx.
     openGraph: {
-      title: t.home.meta.title || DEFAULT_TITLE,
-      description: t.home.meta.description || DEFAULT_DESCRIPTION,
       siteName: "franchisetech",
       type: "website",
       locale: marketingOpenGraphLocale(locale),
-      url: SITE_URL,
       // Not the old /marketing/live/dashboard.png — stale pre-pivot screenshot
       // (EUR pricing, Irish VAT bands). Falls back to the real logo until a
       // correct, current OG image exists.
@@ -70,8 +74,6 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: t.home.meta.title || DEFAULT_TITLE,
-      description: t.home.meta.description || DEFAULT_DESCRIPTION,
       images: ["/franchise-tech-logo.png"],
     },
     icons: {

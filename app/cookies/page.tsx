@@ -5,7 +5,7 @@ import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketing
 import { DATA_CONTROLLER } from "@/lib/legal/controller";
 
 export const metadata: Metadata = {
-  title: "Politica de cookie-uri / Cookie Policy | franchisetech",
+  title: { absolute: "Politica de cookie-uri / Cookie Policy | franchisetech" },
   description: "Ce cookie-uri și ce date stocate în browser folosește franchisetech.ro, de ce și cât timp.",
   alternates: { canonical: "/cookies" },
 };

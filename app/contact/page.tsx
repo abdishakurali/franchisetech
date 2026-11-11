@@ -7,7 +7,7 @@ import { SUPPORT_PHONE_DISPLAY } from "@/lib/marketing/contact-info";
 import { SupportContactLink } from "@/components/marketing/SupportContactLink";
 
 export const metadata: Metadata = {
-  title: "Contact franchisetech",
+  title: { absolute: "Contact franchisetech" },
   description: "Lăsați un număr de telefon și vă sunăm în următoarea zi lucrătoare: configurare, casa de marcat sau contul dumneavoastră.",
   alternates: { canonical: "/contact" },
 };

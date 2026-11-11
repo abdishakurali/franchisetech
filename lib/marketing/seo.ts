@@ -28,6 +28,18 @@ export const DEFAULT_TITLE = "franchisetech — POS & Business Control for Food 
 export const DEFAULT_DESCRIPTION =
   "Stop guessing after service: run POS, close the till, track stock, see margins, and review daily sales — one platform for cafes and restaurants. No per-seat fees.";
 
+/** Site-wide share image (the real logo) until a correct, current OG image exists. */
+export const DEFAULT_OG_IMAGE = { url: "/franchise-tech-logo.png", width: 900, height: 237, alt: "franchisetech" };
+
+/**
+ * The root layout applies the "%s | franchisetech" title template. Titles that
+ * already name the brand would render it twice ("… | franchisetech | franchisetech"),
+ * so those opt out of the template.
+ */
+export function brandedTitle(title: string): Metadata["title"] {
+  return /franchisetech/i.test(title) ? { absolute: title } : title;
+}
+
 export type IndustryPainPoint = { title: string; text: string };
 
 export type IndustryFeatureRow =
@@ -587,7 +599,7 @@ export function pageMetadata(
   // stale pre-pivot screenshots (EUR pricing, Irish VAT bands). Falls back
   // to the site-wide default OG image in app/layout.tsx.
   return {
-    title: page.metaTitle,
+    title: brandedTitle(page.metaTitle),
     description: page.description,
     keywords: marketingKeywords(locale),
     alternates: localeAlternates(page.path, locale),
@@ -595,7 +607,12 @@ export function pageMetadata(
       title: page.metaTitle,
       description: page.description,
       url: page.path,
+      siteName: BRAND,
+      type: "website",
       locale: marketingOpenGraphLocale(locale),
+      // A page-level openGraph replaces the root layout's whole openGraph
+      // object, so without this the page has no og:image at all.
+      images: [DEFAULT_OG_IMAGE],
     },
     twitter: {
       card: "summary_large_image",
@@ -636,7 +653,7 @@ export function seoMeta({
   title,
   description,
   path,
-  image = "/marketing/live/pos.png",
+  image,
   locale = "en" as MarketingLocale,
 }: {
   title: string;
@@ -645,8 +662,11 @@ export function seoMeta({
   image?: string;
   locale?: MarketingLocale;
 }): Metadata {
+  // Default used to be /marketing/live/pos.png, a stale pre-pivot screenshot
+  // (see pageMetadata above); fall back to the site-wide logo instead.
+  const ogImage = image ? { url: image, width: 1200, height: 750, alt: title } : { ...DEFAULT_OG_IMAGE, alt: title };
   return {
-    title,
+    title: brandedTitle(title),
     description,
     keywords: marketingKeywords(locale),
     alternates: localeAlternates(path, locale),
@@ -654,14 +674,16 @@ export function seoMeta({
       title,
       description,
       url: path,
+      siteName: BRAND,
+      type: "website",
       locale: marketingOpenGraphLocale(locale),
-      images: [{ url: image, width: 1200, height: 750, alt: title }],
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [image],
+      images: [ogImage.url],
     },
   };
 }
