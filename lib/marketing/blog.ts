@@ -297,7 +297,7 @@ export const blogPosts: BlogPost[] = [
     slug: "diferenta-dintre-ebriza-si-franchisetech-pret-real",
     title: "Ebriza vs Franchisetech — prețul real plătit în fiecare lună",
     description:
-      "Ebriza vs Franchisetech: Ebriza afișează €49/lună, dar POS + stoc + KDS + Saga ajung la €107+/lună. Comparația costului real pentru cafenele.",
+      "Ebriza afișează €49/lună, dar stocul e inclus abia din Premium (€99) și exportul Saga costă separat. Costul real pentru o cafenea.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["comparatie", "preturi", "ebriza"],
@@ -305,15 +305,15 @@ export const blogPosts: BlogPost[] = [
     sections: [
       {
         heading: "Ce afișează Ebriza și ce plătiți de fapt",
-        body: "Ebriza are două planuri afișate: Pro la €49/lună și Premium la €99/lună. Problema nu este prețul de bază — este ce nu este inclus în el.\n\nUn restaurant sau cafenea care are nevoie de POS, gestiune stoc, ecran bucătărie (KDS) și export Saga pentru contabil ajunge la un cost real de €107–157/lună pe Ebriza, nu €49.\n\nIată defalcarea:\n\n- **Ebriza Pro** (POS + rapoarte de bază): €49/lună\n- **Stoc + NIR + rețete**: incluse doar din planul Premium, adică +€50/lună față de Pro\n- **Ecran bucătărie (KDS)**: modul separat, +€19/lună\n- **Export Saga pentru contabil**: modul separat, +€39/lună\n\n**Total pentru o cafenea care vrea POS + stoc + KDS + Saga:**\n- Pe Ebriza Pro + add-on-uri: **€107/lună**\n- Pe Ebriza Premium + add-on-uri: **€157/lună**",
+        body: "Ebriza are trei planuri afișate pe web.ebriza.com/ro/preturi (citit la 11 noiembrie 2026, prețuri fără TVA): Pro €49, Premium €99 și Titanium €179 pe locație pe lună. Problema nu este prețul de bază, ci ce nu este inclus în el.\n\n- **Ebriza Pro** (POS + rapoarte de bază): €49/lună\n- **Stoc + NIR + rețete**: incluse doar din planul Premium (€99/lună)\n- **Ecran bucătărie (KDS)**: modul separat, +€29/lună\n- **Export Saga pentru contabil**: modul separat, +€39/lună\n\n**O cafenea care vrea POS + stoc + export Saga** ajunge pe Ebriza la Premium + Saga: **€138/lună**, iar cu KDS la **€167/lună**. Prețurile se pot schimba: verificați pagina lor înainte de decizie."",
       },
       {
-        heading: "Ce include Franchisetech Pro la €79/lună",
-        body: "Franchisetech Pro costă €79/lună. Ce este inclus fără niciun supliment:\n\n- **POS complet** cu mod offline (funcționează fără internet, sincronizare automată la reconectare)\n- **Gestiune stoc + NIR** (notă de intrare-recepție, actualizare automată la recepție marfă)\n- **Calculator rețete** cu cost per porție și marjă brută per produs\n- **Raport Z zilnic**, raport TVA, raport gestiune\n- **Bon de consum**, Balanță cantitativ-valorică\n- **Export Saga XML** pentru contabil\n- **Personal nelimitat** — nicio taxă per casier, ospătar sau manager\n\nNu există module separate de plătit pentru funcționalitățile de bază ale unei cafenele mici din România.",
+        heading: "Ce include Franchisetech Pro la €49/lună",
+        body: "Franchisetech Pro costă €49/lună (o locație; €39/lună la plata anuală). Ce este inclus fără niciun supliment:\n\n- **POS complet** cu mod offline (funcționează fără internet, sincronizare automată la reconectare)\n- **Gestiune stoc + NIR** (notă de intrare-recepție, actualizare automată la recepție marfă)\n- **Calculator rețete** cu cost per porție și marjă brută per produs\n- **Raport Z zilnic**, raport TVA, raport gestiune\n- **Bon de consum**, Balanță cantitativ-valorică\n- **Export Saga XML** pentru contabil\n- **Personal nelimitat** — nicio taxă per casier, ospătar sau manager\n\nNu există module separate de plătit pentru funcționalitățile de bază ale unei cafenele mici din România.",
       },
       {
         heading: "Comparație directă — cost lunar real pentru o cafenea medie",
-        body: "Scenariul concret: o cafenea cu 2 casieri, gestiune stoc lunară, export lunar Saga pentru contabil, ecran în bar pentru preparare.\n\n**Ebriza Pro cu add-on-urile necesare:**\n- Ebriza Pro: €49\n- KDS (ecran bucătărie): +€19\n- Export Saga: +€39\n- **Total: €107/lună**\n\n**Franchisetech Pro:**\n- €79/lună — totul inclus\n\n**Diferența: €28/lună = €336/an.** Pe doi ani: €672 în plus pentru aceleași funcționalități.\n\n**Ebriza Premium cu add-on-urile necesare:**\n- Ebriza Premium: €99\n- KDS: +€19\n- Export Saga: +€39\n- **Total: €157/lună**\n\nVersus Franchisetech Pro €79: diferența este €78/lună = **€936/an**.",
+        body: "Scenariul concret: o cafenea cu 2 casieri, gestiune stoc lunară și export lunar Saga pentru contabil.\n\n**Ebriza** (stocul cere Premium): Premium €99 + export Saga €39 = **€138/lună**\n\n**Franchisetech Pro**: **€49/lună**, cu stoc, rețete și export pentru contabil incluse\n\n**Diferența: €89/lună, adică €1.068/an.**\n\nPrețurile Ebriza sunt cele afișate pe web.ebriza.com/ro/preturi la 11 noiembrie 2026, fără TVA. Dacă aveți nevoie de ecran de bucătărie (KDS), Ebriza îl vinde separat (+€29/lună); întrebați-ne ce putem oferi pentru cazul dumneavoastră."",
       },
       {
         heading: "Ce oferă Ebriza în plus față de Franchisetech",
@@ -886,7 +886,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum funcționează în franchisetech",
-        body: "Pentru afacerile cu mai multe locații, franchisetech are un modul dedicat de transfer intern de stoc. Alegeți locația sursă și locația destinație, selectați produsul și cantitatea, iar sistemul generează automat bonul de transfer cu valoarea calculată din costul de achiziție curent.\n\nStocul ambelor locații se actualizează instant — locația sursă scade, locația destinație crește, fără să introduceți nimic manual de două ori. Istoricul transferurilor rămâne vizibil per locație, util atât pentru inventariere, cât și pentru contabil la închiderea lunii.",
+        body: "Transferul automat de stoc între locații nu există încă în franchisetech: este pe lista de dezvoltare. Până atunci, stocul fiecărei locații se urmărește separat, iar un transfer se documentează ca ieșire din locația sursă și intrare în locația destinație, cu bonul de transfer semnat, la costul de achiziție curent. Exportul pentru contabil arată ambele mișcări.",
       },
     ],
   },
