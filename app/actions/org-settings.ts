@@ -11,22 +11,28 @@ function canManage(role: string | null | undefined) {
 
 // ── CUI / fiscal identity ─────────────────────────────────────────────────────
 
-export type SaveOrgCuiResult = { error?: string };
+// Before 2026-11-12 the update error was ignored and this always returned {},
+// so the card showed "Salvat" even when the CUI and ANAF VAT status were not
+// written. The VAT-rate card sends owners here to re-check the CUI, so a
+// silent failure here left them stuck.
+export type SaveOrgCuiResult =
+  | { ok: true }
+  | { ok: false; error: "unauthorized" | "missing_cui" | "failed" };
 
 export async function saveOrgCui(formData: FormData): Promise<SaveOrgCuiResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return { error: "Unauthorized" };
+  if (!canManage(membership.role)) return { ok: false, error: "unauthorized" };
 
   const raw = (formData.get("cui") as string | null) ?? "";
   const cui = raw.trim().replace(/^RO/i, "").replace(/[^0-9]/g, "");
-  if (!cui) return { error: "CUI lipsă" };
+  if (!cui) return { ok: false, error: "missing_cui" };
 
   const denumire = ((formData.get("denumire") as string | null) ?? "").trim() || null;
   const adresa = ((formData.get("adresa") as string | null) ?? "").trim() || null;
   const vatRegistered = formData.get("vat_registered") === "true";
   const verified = formData.get("verified") === "true";
 
-  await supabase
+  const { error } = await supabase
     .from("organisations")
     .update({
       fiscalnet_cif: cui,
@@ -37,11 +43,15 @@ export async function saveOrgCui(formData: FormData): Promise<SaveOrgCuiResult> 
       anaf_vat_registered: vatRegistered,
     })
     .eq("id", orgId);
+  if (error) {
+    console.error("[settings] saveOrgCui failed", error.code, error.message);
+    return { ok: false, error: "failed" };
+  }
 
   revalidatePath("/app/settings");
   revalidatePath("/app/invoices");
   revalidatePath("/app/onboarding");
-  return {};
+  return { ok: true };
 }
 
 // ── Notification preferences ──────────────────────────────────────────────────

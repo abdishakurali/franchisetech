@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import type { SettingsListActionResult } from "@/app/actions/kitchenops";
 
 type FieldType = "text" | "select" | "color" | "number" | "toggle";
 
@@ -38,17 +39,26 @@ interface Props {
   editFields: ListFieldDef[];
   hiddenAddValues?: Record<string, string>;
   addDefaults: FieldValues;
-  addAction: (fd: FormData) => Promise<void>;
-  updateAction: (fd: FormData) => Promise<void>;
-  deleteAction: (fd: FormData) => Promise<void>;
+  // Actions that still return void are treated as success (units, for now).
+  addAction: (fd: FormData) => Promise<SettingsListActionResult | void>;
+  updateAction: (fd: FormData) => Promise<SettingsListActionResult | void>;
+  deleteAction: (fd: FormData) => Promise<SettingsListActionResult | void>;
   addLabel: string;
   emptyLabel: string;
   locale?: string | null;
 }
 
 const UI_STRINGS = {
-  en: { active: "Active", inactive: "Inactive", save: "Save", cancel: "Cancel", deleteConfirm: "Delete?", yes: "Yes", no: "No", edit: "Edit", add: "Add" },
-  ro: { active: "Activă", inactive: "Inactivă", save: "Salvați", cancel: "Anulați", deleteConfirm: "Ștergeți?", yes: "Da", no: "Nu", edit: "Editați", add: "Adăugați" },
+  en: {
+    active: "Active", inactive: "Inactive", save: "Save", cancel: "Cancel", deleteConfirm: "Delete?", yes: "Yes", no: "No", edit: "Edit", add: "Add",
+    errInUse: "This item is already used on sales, so it cannot be deleted. Edit it and set it to Inactive instead.",
+    errFailed: "The change was not saved. Try again; if it repeats, write to us on WhatsApp.",
+  },
+  ro: {
+    active: "Activă", inactive: "Inactivă", save: "Salvați", cancel: "Anulați", deleteConfirm: "Ștergeți?", yes: "Da", no: "Nu", edit: "Editați", add: "Adăugați",
+    errInUse: "Elementul este deja folosit în vânzări, deci nu poate fi șters. Editați-l și setați-l ca inactiv.",
+    errFailed: "Modificarea nu s-a salvat. Încercați din nou; dacă se repetă, scrieți-ne pe WhatsApp.",
+  },
 } as const;
 
 /**
@@ -85,6 +95,14 @@ export function SettingsListSection({
   const [addValues, setAddValues] = useState<FieldValues>(addDefaults);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  // Keep the edit/add form open on failure so nothing the owner typed is lost.
+  function showResult(res: SettingsListActionResult | void): boolean {
+    if (!res || res.ok) { setError(null); return true; }
+    setError(res.error === "in_use" ? ui.errInUse : ui.errFailed);
+    return false;
+  }
 
   function startEdit(row: ListRow) {
     setEditingId(row.id);
@@ -102,8 +120,7 @@ export function SettingsListSection({
     fd.set("id", id);
     for (const f of editFields) fd.set(f.key, String(editValues[f.key] ?? ""));
     startTransition(async () => {
-      await updateAction(fd);
-      setEditingId(null);
+      if (showResult(await updateAction(fd))) setEditingId(null);
     });
   }
 
@@ -111,7 +128,7 @@ export function SettingsListSection({
     const fd = new FormData();
     fd.set("id", id);
     startTransition(async () => {
-      await deleteAction(fd);
+      showResult(await deleteAction(fd));
       setDeleteConfirm(null);
     });
   }
@@ -121,7 +138,7 @@ export function SettingsListSection({
     for (const [k, v] of Object.entries(hiddenAddValues ?? {})) fd.set(k, v);
     for (const f of addFields) fd.set(f.key, String(addValues[f.key] ?? ""));
     startTransition(async () => {
-      await addAction(fd);
+      if (!showResult(await addAction(fd))) return;
       setAddValues(addDefaults);
       setAddingNew(false);
     });
@@ -202,6 +219,11 @@ export function SettingsListSection({
         {description ? <CardDescription>{description}</CardDescription> : null}
       </CardHeader>
       <CardContent>
+        {error && (
+          <p role="alert" className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            {error}
+          </p>
+        )}
         <div className="divide-y divide-border">
           {rows.length === 0 && !addingNew ? (
             <p className="py-3 text-sm text-muted-foreground">{emptyLabel}</p>

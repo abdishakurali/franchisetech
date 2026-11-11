@@ -7,7 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { saveOrgCui } from "@/app/actions/org-settings";
+import { saveOrgCui, type SaveOrgCuiResult } from "@/app/actions/org-settings";
+
+const SAVE_ERRORS: Record<Extract<SaveOrgCuiResult, { ok: false }>["error"], string> = {
+  unauthorized: "Doar proprietarul sau managerul poate salva datele legale.",
+  missing_cui: "Introduceți CUI-ul firmei.",
+  failed: "Datele legale nu s-au salvat. Încercați din nou; dacă se repetă, scrieți-ne pe WhatsApp.",
+};
 
 type LookupResult = {
   denumire: string;
@@ -86,8 +92,13 @@ export function CuiLookupCard({
     fd.set("vat_registered", String(result.vatRegistered));
     fd.set("verified", "true");
     setSaved(false);
+    setError(null);
     startSave(async () => {
-      await saveOrgCui(fd);
+      const res = await saveOrgCui(fd);
+      if (!res.ok) {
+        setError(SAVE_ERRORS[res.error]);
+        return;
+      }
       setSaved(true);
     });
   }

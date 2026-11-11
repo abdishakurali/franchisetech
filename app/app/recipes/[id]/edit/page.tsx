@@ -91,7 +91,7 @@ export default async function RecipeEditPage({ params }: { params: Promise<{ id:
             initialProductId={recipe.product_id ?? undefined}
             initialYieldQty={String(recipe.yield_qty ?? 1)}
             initialRows={initialRows}
-            submitAction={updateRecipeFromProducts as unknown as (fd: FormData) => Promise<void>}
+            submitAction={updateRecipeFromProducts}
             submitLabel="Salvează modificările"
           />
         </CardContent>
