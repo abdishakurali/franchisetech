@@ -1121,9 +1121,9 @@ export default async function SettingsPage({
             rates={(vatRates ?? []) as Array<{ id: string; name: string; rate: number; is_default?: boolean | null; active?: boolean | null; fiscalnet_vat_group?: number | null }>}
             fiscalnetEnabled={fiscalnetEnabled}
             canEdit={canEdit}
-            addAction={addVatRate as unknown as (fd: FormData) => Promise<void>}
-            updateAction={updateVatRate as unknown as (fd: FormData) => Promise<void>}
-            deleteAction={deleteVatRate as unknown as (fd: FormData) => Promise<void>}
+            addAction={addVatRate}
+            updateAction={updateVatRate}
+            deleteAction={deleteVatRate}
             locale={locale}
           />
 

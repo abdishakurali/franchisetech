@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import type { VatActionResult } from "@/app/actions/kitchenops";
 
 interface VatRate {
   id: string;
@@ -20,9 +21,9 @@ interface Props {
   rates: VatRate[];
   fiscalnetEnabled: boolean;
   canEdit: boolean;
-  addAction: (fd: FormData) => Promise<void>;
-  updateAction: (fd: FormData) => Promise<void>;
-  deleteAction: (fd: FormData) => Promise<void>;
+  addAction: (fd: FormData) => Promise<VatActionResult>;
+  updateAction: (fd: FormData) => Promise<VatActionResult>;
+  deleteAction: (fd: FormData) => Promise<VatActionResult>;
   locale?: string | null;
 }
 
@@ -51,6 +52,8 @@ const UI_STRINGS = {
     add: "Add",
     addRate: "+ Add tax rate",
     groups: ["1 — Standard (21%)", "2 — Reduced (11%)", "3 — Super-reduced (5%)", "4 — Zero (0%)", "5 — Exempt"],
+    errNotVatRegistered: "Your company is not VAT-registered (ANAF), so only the 0% rate can be active. If it became VAT-registered, re-check the CUI with ANAF in Settings → Business.",
+    errFailed: "The change was not saved. Try again; if it repeats, write to us on WhatsApp.",
   },
   ro: {
     title: "Cote TVA",
@@ -76,6 +79,8 @@ const UI_STRINGS = {
     add: "Adăugați",
     addRate: "+ Adăugați cotă TVA",
     groups: ["1 — Standard (21%)", "2 — Redusă (11%)", "3 — Redusă (5%)", "4 — Zero (0%)", "5 — Scutit"],
+    errNotVatRegistered: "Firma nu este plătitoare de TVA (conform ANAF), deci doar cota 0% poate fi activă. Dacă firma a devenit plătitoare, verificați din nou CUI-ul la ANAF în Setări → Business.",
+    errFailed: "Modificarea nu s-a salvat. Încercați din nou; dacă se repetă, scrieți-ne pe WhatsApp.",
   },
 } as const;
 
@@ -93,6 +98,13 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
   });
   const [isPending, startTransition] = useTransition();
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  function showResult(res: VatActionResult | void): boolean {
+    if (!res || res.ok) { setError(null); return true; }
+    setError(res.error === "not_vat_registered" ? ui.errNotVatRegistered : ui.errFailed);
+    return false;
+  }
 
   function startEdit(v: VatRate) {
     setEditingId(v.id);
@@ -118,8 +130,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
     fd.set("active", "true");
     fd.set("fiscalnet_vat_group", String(editState.fiscalnet_vat_group ?? ""));
     startTransition(async () => {
-      await updateAction(fd);
-      setEditingId(null);
+      if (showResult(await updateAction(fd))) setEditingId(null);
     });
   }
 
@@ -127,7 +138,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
     const fd = new FormData();
     fd.set("id", id);
     startTransition(async () => {
-      await deleteAction(fd);
+      showResult(await deleteAction(fd));
       setDeleteConfirm(null);
     });
   }
@@ -140,7 +151,7 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
     fd.set("is_default", String(newState.is_default));
     fd.set("fiscalnet_vat_group", newState.fiscalnet_vat_group);
     startTransition(async () => {
-      await addAction(fd);
+      if (!showResult(await addAction(fd))) return;
       setNewState({ name: "", rate: "", is_default: false, fiscalnet_vat_group: "" });
       setAddingNew(false);
     });
@@ -164,6 +175,11 @@ export function VatRatesCard({ rates, fiscalnetEnabled, canEdit, addAction, upda
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {error && (
+          <p role="alert" className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+            {error}
+          </p>
+        )}
         {rates.length > 3 && (
           <div className="mb-4">
             <Label className="text-xs text-muted-foreground">{ui.filter}</Label>

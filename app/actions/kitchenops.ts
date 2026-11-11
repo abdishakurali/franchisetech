@@ -2769,62 +2769,92 @@ function isSaneVatRate(rate: number): boolean {
   return Number.isFinite(rate) && !(rate > 0 && rate < 1);
 }
 
-export async function addVatRate(formData: FormData): Promise<void> {
+export type VatActionResult = { ok: true } | { ok: false; error: "not_vat_registered" | "failed" };
+
+// The DB trigger enforce_vat_registration_on_vat_rates (errcode 23514) blocks
+// non-zero active/default rates for RO orgs that ANAF lists as not VAT-registered.
+// That rule is correct; before 2026-11-11 the error was swallowed and the owner saw
+// a save that silently did nothing.
+function vatError(error: { code?: string; message?: string } | null): VatActionResult {
+  if (!error) return { ok: true };
+  if (error.code === "23514" && /not VAT-registered/i.test(error.message ?? "")) {
+    return { ok: false, error: "not_vat_registered" };
+  }
+  return { ok: false, error: "failed" };
+}
+
+export async function addVatRate(formData: FormData): Promise<VatActionResult> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "vat.enabled");
   const name = stringValue(formData, "name");
   const rate = numberValue(formData, "rate");
   const fgRaw = formData.get("fiscalnet_vat_group");
   const fiscalnetVatGroup = fgRaw && String(fgRaw).trim() !== "" ? Number(fgRaw) : null;
   const isDefault = formData.get("is_default") === "true";
-  if (!name || !isSaneVatRate(rate)) return;
+  if (!name || !isSaneVatRate(rate)) return { ok: false, error: "failed" };
+  const { data: inserted, error } = await supabase
+    .from("vat_rates")
+    .insert({
+      organisation_id: orgId,
+      name,
+      rate,
+      fiscalnet_vat_group: fiscalnetVatGroup,
+      is_default: isDefault,
+      active: true,
+    })
+    .select("id")
+    .single();
+  if (error || !inserted) return vatError(error ?? { message: "insert failed" });
+  // Clear the old default only after the new one exists, so a failed save
+  // never leaves the org without a default rate.
   if (isDefault) {
-    await supabase.from("vat_rates").update({ is_default: false }).eq("organisation_id", orgId);
+    await supabase.from("vat_rates").update({ is_default: false }).eq("organisation_id", orgId).neq("id", inserted.id);
   }
-  await supabase.from("vat_rates").insert({
-    organisation_id: orgId,
-    name,
-    rate,
-    fiscalnet_vat_group: fiscalnetVatGroup,
-    is_default: isDefault,
-    active: true,
-  });
   revalidatePath("/app/settings");
   revalidatePath("/app/products");
+  return { ok: true };
 }
 
-export async function updateVatRate(formData: FormData): Promise<void> {
+export async function updateVatRate(formData: FormData): Promise<VatActionResult> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "vat.enabled");
   const id = stringValue(formData, "id");
-  if (!id) return;
+  if (!id) return { ok: false, error: "failed" };
   const name = stringValue(formData, "name");
   const rate = numberValue(formData, "rate");
   const fgRaw = formData.get("fiscalnet_vat_group");
   const fiscalnetVatGroup = fgRaw && String(fgRaw).trim() !== "" ? Number(fgRaw) : null;
   const isDefault = formData.get("is_default") === "true";
   const active = formData.get("active") !== "false";
-  if (!isSaneVatRate(rate)) return;
+  if (!isSaneVatRate(rate)) return { ok: false, error: "failed" };
+  const { error } = await supabase
+    .from("vat_rates")
+    .update({ name, rate, fiscalnet_vat_group: fiscalnetVatGroup, is_default: isDefault, active })
+    .eq("id", id)
+    .eq("organisation_id", orgId);
+  if (error) return vatError(error);
   if (isDefault) {
     await supabase.from("vat_rates").update({ is_default: false }).eq("organisation_id", orgId).neq("id", id);
   }
-  await supabase.from("vat_rates").update({ name, rate, fiscalnet_vat_group: fiscalnetVatGroup, is_default: isDefault, active }).eq("id", id).eq("organisation_id", orgId);
   revalidatePath("/app/settings");
+  return { ok: true };
 }
 
-export async function deleteVatRate(formData: FormData): Promise<void> {
+export async function deleteVatRate(formData: FormData): Promise<VatActionResult> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "vat.enabled");
   const id = stringValue(formData, "id");
-  if (!id) return;
-  await supabase.from("vat_rates").delete().eq("id", id).eq("organisation_id", orgId);
+  if (!id) return { ok: false, error: "failed" };
+  const { error } = await supabase.from("vat_rates").delete().eq("id", id).eq("organisation_id", orgId);
+  if (error) return vatError(error);
   revalidatePath("/app/settings");
+  return { ok: true };
 }
 
 // ── VAT defaults seeding ─────────────────────────────────────────────────
