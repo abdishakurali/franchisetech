@@ -1270,7 +1270,8 @@ function PosRegisterInner({
             mode: fiscalNet.connectionMode,
           });
           if (fnRes.ok) {
-            captureClientEvent("receipt_issued", { transaction_id: res.transactionId, source: "fiscalnet" });
+            // A simulated (mock) receipt is not a fiscal receipt: do not count it as issued.
+            captureClientEvent(fiscalNet.mockMode ? "receipt_simulated" : "receipt_issued", { transaction_id: res.transactionId, source: "fiscalnet" });
           }
           const kind = !fnRes.ok ? "failed" : fnRes.confirmation === "unconfirmed" ? "unconfirmed" : null;
           if (kind) {
@@ -2019,6 +2020,9 @@ function PosRegisterInner({
               </div>
               <p className="mt-4 text-sm font-medium text-muted-foreground">{t.saleComplete}</p>
               <p className="mt-1 text-4xl font-bold tabular-nums text-foreground">{lastCompletedSale.amountLabel}</p>
+              {fiscalActive && fiscalNet?.mockMode && lastCompletedSale.status === "saved" && (
+                <p className="mx-auto mt-3 max-w-xs rounded-lg bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800">{t.saleTestMode}</p>
+              )}
               {showActivationCelebrate && lastCompletedSale.status === "saved" && (
                 <div className="mx-auto mt-4 max-w-xs rounded-xl border border-reconciled/25 bg-reconciled/10 px-4 py-3 text-sm text-reconciled">
                   <p>{t.firstSaleCelebrate}</p>
