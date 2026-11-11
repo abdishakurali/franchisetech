@@ -78,9 +78,9 @@ export type BlogPost = {
 export const blogPosts: BlogPost[] = [
   {
     slug: "cum-gestionezi-stocul-intr-o-cafenea-de-la-1-kg-de-cafea-la-profit",
-    title: "Cum gestionați stocul într-o cafenea: de la 1 kg de cafea la profitul real",
+    title: "Gestiunea stocului într-o cafenea: de la 1 kg de cafea la profit",
     description:
-      "Un exemplu complet, pe o singură materie primă: câte cafele ies dintr-un kilogram, cât costă una, cât ar fi trebuit să consumați într-o săptămână și cât valorează diferența găsită la inventar.",
+      "Gestiunea stocului într-o cafenea, pe un exemplu complet: câte cafele ies dintr-un kilogram, cât costă una și cât valorează diferența de la inventar.",
     publishedAt: "2026-10-27",
     locale: "ro",
     tags: ["stoc", "cafenea", "retete", "nir"],
@@ -136,7 +136,7 @@ export const blogPosts: BlogPost[] = [
     slug: "ce-este-raportul-z-si-cum-il-faci",
     title: "Ce este Raportul Z și cum îl faceți corect",
     description:
-      "Raportul Z este documentul de închidere a casei la sfârşitul zilei. Vă arată câți bani ați încasat, cum s-a plătit și ce diferență există față de ce ar trebui să fie în sertar.",
+      "Raportul Z închide casa la sfârșitul zilei: arată cât ați încasat, cum s-a plătit și ce diferență există față de numerarul din sertar.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["raport-z", "pos", "inchidere-zi"],
@@ -201,7 +201,7 @@ export const blogPosts: BlogPost[] = [
     slug: "cum-calculezi-costul-unei-retete-cafenea",
     title: "Cum calculați costul unei rețete pentru cafenea",
     description:
-      "Costul rețetei vă arată cât cheltuiți efectiv pentru a prepara un produs. Fără el, nu știți dacă vindeți în pierdere sau în profit. Iată cum se calculează și ce marjă este considerată sănătoasă.",
+      "Costul rețetei la cafenea arată cât cheltuiți efectiv pe un produs. Iată cum îl calculați și ce marjă este considerată sănătoasă.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["retete", "cost-reteta", "marja", "menu-engineering"],
@@ -233,7 +233,7 @@ export const blogPosts: BlogPost[] = [
     slug: "bon-de-consum-restaurant-ce-este",
     title: "Bon de consum pentru restaurant — ce este și cum îl generați",
     description:
-      "Bonul de consum documentează materiile prime consumate din gestiune pentru producție. Este obligatoriu când aveți rețete și stoc gestionat. Iată ce trebuie să conțină și cum îl generați automat.",
+      "Bonul de consum documentează materiile prime consumate din gestiune. Când este obligatoriu, ce trebuie să conțină și cum îl generați automat.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["bon-de-consum", "contabilitate", "stoc", "retete"],
@@ -253,7 +253,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum funcționează în franchisetech",
-        body: "franchisetech generează automat bonul de consum din datele de vânzări și rețete.\n\nLogica:\n1. La fiecare vânzare dintr-un produs cu rețetă, sistemul înregistrează consumul de ingrediente\n2. La finalul perioadei, mergeți la **Rapoarte → Bon de consum**\n3. Selectați intervalul de date\n4. Descărcați documentul — conține toate materiile prime consumate, cantitățile și valorile\n\nNu introduceți nimic manual. Dacă aveți rețetele configurate corect și ați înregistrat vânzările prin POS, bonul de consum se generează singur.",
+        body: "franchisetech generează automat bonul de consum din datele de vânzări și rețete.\n\nLogica:\n1. La fiecare vânzare dintr-un produs cu rețetă, sistemul înregistrează consumul de ingrediente\n2. La finalul perioadei, mergeți la **Rapoarte → Bon de consum**\n3. Selectați intervalul de date\n4. Descărcați documentul — conține toate materiile prime consumate, cantitățile și valorile\n\nNu introduceți nimic manual. Dacă aveți rețetele configurate corect și ați înregistrat vânzările prin POS, bonul de consum se generează singur.\n\nLegătura dintre rețete, vânzări și stocul de ingrediente este descrisă pe pagina [gestiunii de stoc](/features/stock-management).",
       },
       {
         heading: "Legătura cu Balanța cantitativ-valorică",
@@ -265,7 +265,7 @@ export const blogPosts: BlogPost[] = [
     slug: "export-saga-din-program-gestiune-restaurant",
     title: "Cum exportați datele în Saga din programul de gestiune",
     description:
-      "Exportul Saga XML trimite NIR-urile și vânzările din franchisetech către Saga C, ca fișiere pe care contabilul le importă direct. Ce se exportă, cum îl faceți și ce trebuie verificat înainte.",
+      "Exportul Saga XML trimite NIR-urile și vânzările din franchisetech către Saga C. Ce se exportă, cum îl faceți și ce verificați înainte.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["saga", "export-contabil", "contabilitate", "nir"],
@@ -295,9 +295,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "diferenta-dintre-ebriza-si-franchisetech-pret-real",
-    title: "Ebriza vs Franchisetech — prețul real pe care îl plătiți în fiecare lună",
+    title: "Ebriza vs Franchisetech — prețul real plătit în fiecare lună",
     description:
-      "Ebriza afișează €49/lună. Ce plătiți de fapt: POS + stoc + KDS + Saga = €107+/lună. Comparație completă Ebriza vs Franchisetech pentru cafenele și restaurante din România.",
+      "Ebriza vs Franchisetech: Ebriza afișează €49/lună, dar POS + stoc + KDS + Saga ajung la €107+/lună. Comparația costului real pentru cafenele.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["comparatie", "preturi", "ebriza"],
@@ -321,15 +321,15 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum testați înainte să decideți",
-        body: "Verificați condițiile de testare și de anulare ale fiecărei platforme. La franchisetech, planul Pro se plătește lunar sau anual, se poate anula oricând, fără contract pe termen lung, iar configurarea ghidată în aplicație este inclusă.\n\nTestul corect pe orice platformă POS:\n\n1. Configurați produsele reale (nu demo) cu prețurile dumneavoastră\n2. Faceți câteva vânzări numerar + card\n3. Închideți ziua (raport Z) și comparați numerarul din sertar cu ce arată sistemul\n4. Înregistrați o recepție de marfă (NIR) de la un furnizor real\n5. Exportați datele pentru contabil și trimiteți-i fișierul\n\nDacă fluxul dumneavoastră zilnic funcționează fără probleme în prima lună — sistemul e potrivit. Dacă dați de blocaje sau aveți nevoie de suport pentru pași de bază, ia asta ca semnal.",
+        body: "Verificați condițiile de testare și de anulare ale fiecărei platforme. La franchisetech, planul Pro se plătește lunar sau anual, se poate anula oricând, fără contract pe termen lung, iar configurarea ghidată în aplicație este inclusă.\n\nTestul corect pe orice platformă POS:\n\n1. Configurați produsele reale (nu demo) cu prețurile dumneavoastră\n2. Faceți câteva vânzări numerar + card\n3. Închideți ziua (raport Z) și comparați numerarul din sertar cu ce arată sistemul\n4. Înregistrați o recepție de marfă (NIR) de la un furnizor real\n5. Exportați datele pentru contabil și trimiteți-i fișierul\n\nDacă fluxul dumneavoastră zilnic funcționează fără probleme în prima lună — sistemul e potrivit. Dacă dați de blocaje sau aveți nevoie de suport pentru pași de bază, ia asta ca semnal.\n\nPlanurile actuale și ce include fiecare sunt pe [pagina de prețuri](/pricing).",
       },
     ],
   },
   {
     slug: "cum-alegi-un-soft-pos-pentru-cafenea-mica",
-    title: "Cum alegeți un soft POS pentru o cafenea mică — fără să plătiți în plus pentru ce nu folosiți",
+    title: "Cum alegeți un soft POS pentru o cafenea mică, fără costuri în plus",
     description:
-      "Ghid practic pentru alegerea unui sistem POS pentru cafenele mici și mijlocii din România: ce funcționalități contează, ce puteți amâna și cât costă real în 2026.",
+      "Cum alegeți un soft POS pentru o cafenea mică din România: ce funcționalități contează, ce puteți amâna și cât costă real în 2026.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["pos", "comparatie", "cafenea"],
@@ -359,9 +359,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "inchidere-zi-cafenea-cum-faci-corect",
-    title: "Închiderea zilei la cafenea — ce trebuie să faceți înainte să plecați acasă",
+    title: "Închiderea zilei la cafenea — ce faceți înainte să plecați acasă",
     description:
-      "Ghid complet pentru închiderea corectă a zilei la cafenea sau restaurant: raport Z, numărarea sertarului, reconciliere numerar/card și arhivare. Ce se întâmplă dacă săriți pași.",
+      "Închiderea zilei la cafenea, pas cu pas: raport Z, numărarea sertarului, reconciliere numerar/card și arhivare. Ce riscați dacă săriți pași.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["operatiuni", "inchidere-zi", "raport-z"],
@@ -391,9 +391,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "cum-calculezi-marja-bruta-produs-restaurant",
-    title: "Cum calculați marja brută pentru un produs din meniu — cu exemple reale",
+    title: "Cum calculați marja brută pentru un produs din meniu, cu exemple",
     description:
-      "Formula completă pentru calculul marjei brute în HoReCa, cu exemple reale: flat white, espresso, burger. Ce procent de marjă este normal și cum calculați automat pentru tot meniul.",
+      "Formula marjei brute în HoReCa, cu exemple reale: flat white, espresso, burger. Ce procent este normal și cum îl calculați pentru tot meniul.",
     publishedAt: "2026-06-23",
     locale: "ro",
     tags: ["marja", "retete", "cost-reteta"],
@@ -416,15 +416,15 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum calculați automat pentru toate produsele din meniu",
-        body: "Calculul manual este util pentru înțelegere, dar devine imposibil de menținut când meniul are 30–50 de produse și prețurile ingredientelor se schimbă lunar.\n\nÎn Franchisetech, calculul marjei brute este automat:\n\n1. **Configurați rețetele** — pentru fiecare produs POS, adăugați ingredientele și cantitățile per porție\n2. **Prețurile vin din NIR** — de fiecare dată când înregistrați o recepție de marfă cu prețul nou, costul rețetelor se actualizează automat\n3. **Lista de rețete afișează per produs**: preț vânzare, cost porție, marjă brută în RON, procent marjă\n4. **Produsele cu marjă negativă** (costul depășește prețul de vânzare) apar marcate — nu le puteți scăpa din vedere\n\nCând furnizorul de lapte vă mărește prețul cu 10%, nu mai calculați manual pentru fiecare produs care conține lapte. Actualizați prețul în NIR și toate rețetele se recalculează automat.",
+        body: "Calculul manual este util pentru înțelegere, dar devine imposibil de menținut când meniul are 30–50 de produse și prețurile ingredientelor se schimbă lunar.\n\nÎn Franchisetech, calculul marjei brute este automat:\n\n1. **Configurați rețetele** — pentru fiecare produs POS, adăugați ingredientele și cantitățile per porție\n2. **Prețurile vin din NIR** — de fiecare dată când înregistrați o recepție de marfă cu prețul nou, costul rețetelor se actualizează automat\n3. **Lista de rețete afișează per produs**: preț vânzare, cost porție, marjă brută în RON, procent marjă\n4. **Produsele cu marjă negativă** (costul depășește prețul de vânzare) apar marcate — nu le puteți scăpa din vedere\n\nCând furnizorul de lapte vă mărește prețul cu 10%, nu mai calculați manual pentru fiecare produs care conține lapte. Actualizați prețul în NIR și toate rețetele se recalculează automat.\n\nLegătura dintre rețete, achiziții și costul ingredientelor este descrisă pe pagina [gestiunii de stoc](/features/stock-management).",
       },
     ],
   },
   {
     slug: "amenzi-control-fiscal-horeca-cele-mai-frecvente",
-    title: "Cele mai frecvente amenzi la control fiscal în HoReCa și cum le evitați",
+    title: "Amenzi frecvente la controlul fiscal în HoReCa și cum le evitați",
     description:
-      "Cele mai frecvente abateri găsite la controalele fiscale în cafenele și restaurante — bon neemis, stoc neconciliat, sertar neexplicat — și cum le preveniți înainte să ajungă amendă.",
+      "Amenzile cele mai frecvente la controlul fiscal în HoReCa: bon neemis, stoc neconciliat, sertar neexplicat. Cum le preveniți din timp.",
     publishedAt: "2026-06-05",
     locale: "ro",
     tags: ["fiscal","control-anaf","amenzi"],
@@ -448,15 +448,15 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum evitați majoritatea acestor amenzi",
-        body: "Toate cele patru abateri de mai sus au o rădăcină comună: date incomplete sau inconsistente între ce se întâmplă fizic în locație și ce apare în sistem. Un flux simplu reduce riscul semnificativ:\n\n- Fiecare vânzare trece prin POS, fără excepții «doar de data asta»\n- Fiecare marfă primită are NIR emis în aceeași zi\n- Raportul Z se generează zilnic și diferențele de numerar se notați imediat\n- Prețurile se actualizează simultan în meniu și în POS\n\nÎn franchisetech, rapoartele Z, NIR-urile și exporturile pentru contabil se păstrează automat pe server — dacă un inspector cere documentele unei perioade, le găsiți în câteva secunde, nu le reconstitui din memorie.",
+        body: "Toate cele patru abateri de mai sus au o rădăcină comună: date incomplete sau inconsistente între ce se întâmplă fizic în locație și ce apare în sistem. Un flux simplu reduce riscul semnificativ:\n\n- Fiecare vânzare trece prin POS, fără excepții «doar de data asta»\n- Fiecare marfă primită are NIR emis în aceeași zi\n- Raportul Z se generează zilnic și diferențele de numerar se notați imediat\n- Prețurile se actualizează simultan în meniu și în POS\n\nÎn franchisetech, rapoartele Z, NIR-urile și exporturile pentru contabil se păstrează automat pe server — dacă un inspector cere documentele unei perioade, le găsiți în câteva secunde, nu le reconstitui din memorie.\n\nÎnchiderea zilei, cu numerarul așteptat, numerarul numărat și diferența dintre ele, este descrisă pe pagina [raportului Z și închiderii casei](/features/z-report).",
       },
     ],
   },
   {
     slug: "bon-fiscal-obligatoriu-cand-si-cum",
-    title: "Când sunteți obligat să emiteți bon fiscal și ce se întâmplă dacă nu o faceți",
+    title: "Bon fiscal obligatoriu: când trebuie emis și ce riscați dacă nu",
     description:
-      "Bonul fiscal rămâne obligatoriu la orice încasare cash de la o persoană fizică, iar din 2024 regula s-a schimbat pentru plata cu cardul. Iată exact când se aplică regula și ce riscați dacă săriți peste ea.",
+      "Bonul fiscal este obligatoriu la orice încasare cash de la o persoană fizică, iar din 2024 regula s-a schimbat la card. Când se aplică și ce riscați.",
     publishedAt: "2026-06-05",
     locale: "ro",
     tags: ["fiscal","bon-fiscal","conformitate"],
@@ -491,9 +491,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "factura-vs-bon-fiscal-diferenta",
-    title: "Factură vs. bon fiscal — care e diferența și când aveți nevoie de fiecare",
+    title: "Factură vs. bon fiscal — diferența și când aveți nevoie de fiecare",
     description:
-      "Bonul fiscal și factura nu sunt interschimbabile. Iată ce document aveți nevoie pentru clienți persoane fizice, ce cereți pentru clienți companii și cum le gestionați corect în POS.",
+      "Factură vs. bon fiscal: ce document emiteți pentru persoane fizice, ce cereți pentru companii și cum le gestionați corect în POS.",
     publishedAt: "2026-06-06",
     locale: "ro",
     tags: ["fiscal","factura","bon-fiscal"],
@@ -526,7 +526,7 @@ export const blogPosts: BlogPost[] = [
     slug: "cum-te-pregatesti-pentru-control-anaf",
     title: "Cum vă pregătiți pentru un control ANAF la cafenea sau restaurant",
     description:
-      "Ghid practic pentru pregătirea unui control fiscal la cafenea sau restaurant: ce documente vă se cer primele, ce verificați inspectorii la fața locului și cum evitați greșelile frecvente.",
+      "Cum vă pregătiți pentru un control ANAF la cafenea sau restaurant: ce documente se cer primele, ce verifică inspectorii și ce greșeli evitați.",
     publishedAt: "2026-06-07",
     locale: "ro",
     tags: ["fiscal","control-anaf"],
@@ -550,7 +550,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Lista de verificare înainte de control",
-        body: "- Rapoartele Z sunt generate zilnic, fără goluri, și arhivate\n- Registrul de casă e la zi și diferențele de numerar sunt notate\n- Toate NIR-urile pentru marfa primită sunt emise, nu în ciornă\n- Meniul afișat corespunde exact cu prețurile din POS\n- Facturile de la furnizori sunt organizate și accesibile\n- Personalul știe unde sunt documentele și cum se generează un raport la cerere\n\nDacă puteți bifa toate punctele de mai sus în orice moment, nu doar înainte de un control anunțat, sunteți pregătit.",
+        body: "- Rapoartele Z sunt generate zilnic, fără goluri, și arhivate\n- Registrul de casă e la zi și diferențele de numerar sunt notate\n- Toate NIR-urile pentru marfa primită sunt emise, nu în ciornă\n- Meniul afișat corespunde exact cu prețurile din POS\n- Facturile de la furnizori sunt organizate și accesibile\n- Personalul știe unde sunt documentele și cum se generează un raport la cerere\n\nDacă puteți bifa toate punctele de mai sus în orice moment, nu doar înainte de un control anunțat, sunteți pregătit.\n\nPentru partea de casă, [închiderea zilei în franchisetech](/features/z-report) păstrează pentru fiecare zi numerarul așteptat, cel numărat și diferența.",
       },
     ],
   },
@@ -558,7 +558,7 @@ export const blogPosts: BlogPost[] = [
     slug: "tva-livrare-delivery-vs-consum-local",
     title: "TVA la livrare (delivery) vs. consum local — ce cotă aplicați",
     description:
-      "Contrar unei confuzii frecvente, canalul de vânzare (masă vs. delivery) nu schimbă, de regulă, cota de TVA la aceeași mâncare. Ce chiar schimbă cota e categoria de produs — alcool, băuturi îndulcite, alimente cu zahăr mult.",
+      "TVA la livrare vs. consum local: canalul de vânzare nu schimbă, de regulă, cota. O schimbă categoria produsului, de exemplu alcoolul.",
     publishedAt: "2026-06-07",
     locale: "ro",
     tags: ["tva","fiscal","delivery"],
@@ -591,7 +591,7 @@ export const blogPosts: BlogPost[] = [
     slug: "cote-tva-diferite-acelasi-bon-cum-se-calculeaza",
     title: "Cum se calculează bonul fiscal când produsele au cote TVA diferite",
     description:
-      "Un singur bon fiscal poate avea produse cu cote TVA diferite. Iată cum se calculează corect fiecare linie, cu un exemplu numeric complet pentru trei cote diferite.",
+      "Cote TVA diferite pe același bon fiscal: cum se calculează corect fiecare linie, cu un exemplu numeric complet pentru trei cote.",
     publishedAt: "2026-06-07",
     locale: "ro",
     tags: ["tva","fiscal","pos"],
@@ -626,9 +626,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "conectare-casa-marcat-anaf-erori-frecvente",
-    title: "Conectarea casei de marcat la ANAF — erori frecvente și cum le rezolvați",
+    title: "Conectarea casei de marcat la ANAF — erori frecvente și soluții",
     description:
-      "Casele de marcat electronice fiscale transmit bonurile către ANAF în timp real. Iată cele mai frecvente erori de conectare, ce le cauzează și cum le rezolvați fără să opriți vânzarea.",
+      "Conectarea casei de marcat la ANAF: cele mai frecvente erori, ce le cauzează și cum le rezolvați fără să opriți vânzarea.",
     publishedAt: "2026-06-09",
     locale: "ro",
     tags: ["fiscal","casa-de-marcat"],
@@ -661,7 +661,7 @@ export const blogPosts: BlogPost[] = [
     slug: "cum-anulezi-un-bon-fiscal-emis-gresit",
     title: "Cum anulați corect un bon fiscal emis greșit (storno)",
     description:
-      "Ați emis un bon fiscal cu produsul greșit sau suma greșită? Iată procedura corectă de stornare, ce se întâmplă dacă observați greșeala după închiderea zilei și greșeli frecvente de evitat.",
+      "Cum anulați un bon fiscal emis greșit: procedura corectă de stornare, ce faceți dacă observați greșeala după închiderea zilei și ce evitați.",
     publishedAt: "2026-06-09",
     locale: "ro",
     tags: ["pos","storno","fiscal"],
@@ -692,9 +692,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "storno-in-horeca-ce-este-cand-se-foloseste",
-    title: "Storno în HoReCa — ce este, când se folosește și ce documente generează",
+    title: "Storno în HoReCa: ce este, când se folosește și ce documente rezultă",
     description:
-      "Stornoul e mecanismul prin care corectați o vânzare deja înregistrată fiscal, fără să ștergeți nimic. Iată cazurile tipice din cafenele și restaurante și ce documente rezultă.",
+      "Stornoul corectează o vânzare deja înregistrată fiscal, fără să ștergeți nimic. Cazurile tipice din cafenele și restaurante și documentele rezultate.",
     publishedAt: "2026-06-10",
     locale: "ro",
     tags: ["pos","storno"],
@@ -725,9 +725,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "cum-inregistrezi-bacsisul-corect-in-pos",
-    title: "Cum înregistrați bacșișul corect în POS, fără să-l amestecați cu vânzarea",
+    title: "Cum înregistrați bacșișul în POS, separat de vânzare",
     description:
-      "Bacșișul nu este parte din vânzarea de produse și nu ar trebui să umfle vânzările nete sau TVA-ul. Iată cum îl înregistrați corect, cash și pe card, și ce spune legea în România.",
+      "Cum înregistrați bacșișul în POS fără să umflați vânzările nete sau TVA-ul, cash și pe card, plus ce spune legea în România.",
     publishedAt: "2026-06-11",
     locale: "ro",
     tags: ["pos","bacsis"],
@@ -760,7 +760,7 @@ export const blogPosts: BlogPost[] = [
     slug: "reconciliere-card-vs-numerar-la-final-de-zi",
     title: "Reconcilierea card vs. numerar la finalul zilei — pas cu pas",
     description:
-      "Ce arată raportul Z despre plățile cu cardul nu este întotdeauna exact ce decontează banca. Iată cum reconciliați corect cele două surse și de unde vin cel mai des discrepanțele.",
+      "Reconcilierea card vs. numerar la final de zi: de ce raportul Z nu arată mereu ce decontează banca și de unde vin cele mai dese discrepanțe.",
     publishedAt: "2026-06-12",
     locale: "ro",
     tags: ["pos","reconciliere","raport-z"],
@@ -791,9 +791,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "inventar-fizic-vs-scriptic-diferente",
-    title: "Inventar fizic vs. scriptic — de unde apar diferențele și cum le corectați",
+    title: "Inventar fizic vs. scriptic: cauzele diferențelor și cum le corectați",
     description:
-      "Stocul scriptic e ce arată sistemul pe hârtie, stocul fizic e ce numărați pe raft. Diferențele dintre ele nu sunt un mister — au surse concrete. Cum le identificați și le corectați.",
+      "Inventar fizic vs. scriptic: stocul din sistem față de ce numărați pe raft. De unde apar diferențele și cum le identificați și corectați.",
     publishedAt: "2026-06-14",
     locale: "ro",
     tags: ["stoc","inventar"],
@@ -830,7 +830,7 @@ export const blogPosts: BlogPost[] = [
     slug: "stoc-materii-prime-vs-produse-finite-diferenta",
     title: "Stoc de materii prime vs. produse finite — ce diferență contează",
     description:
-      "Diferența dintre materii prime și produse finite în gestiunea stocului — de ce separarea lor corectă vă dă costuri reale și rapoarte fiabile la cafenea sau restaurant.",
+      "Stoc de materii prime vs. produse finite: de ce separarea lor corectă în gestiune vă dă costuri reale și rapoarte fiabile la cafenea.",
     publishedAt: "2026-06-17",
     locale: "ro",
     tags: ["stoc","materii-prime"],
@@ -854,7 +854,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum funcționează în franchisetech",
-        body: "În franchisetech, materiile prime intră în gestiune prin NIR — cu unitate de măsură, preț și furnizor. Rețetele leagă fiecare produs finit de cantitățile exacte de materie primă consumate la o porție.\n\nCând vindeți un croissant prin POS, sistemul scade automat 45g de făină, 30g de unt și 15g de ciocolată din stocul de materii prime — nu doar «un croissant» dintr-o listă separată. Rapoartele de stoc arată ambele niveluri: câtă materie primă mai aveți în depozit și câte porții din fiecare produs mai puteți produce cu stocul actual.",
+        body: "În franchisetech, materiile prime intră în gestiune prin NIR — cu unitate de măsură, preț și furnizor. Rețetele leagă fiecare produs finit de cantitățile exacte de materie primă consumate la o porție.\n\nCând vindeți un croissant prin POS, sistemul scade automat 45g de făină, 30g de unt și 15g de ciocolată din stocul de materii prime — nu doar «un croissant» dintr-o listă separată. Rapoartele de stoc arată ambele niveluri: câtă materie primă mai aveți în depozit și câte porții din fiecare produs mai puteți produce cu stocul actual.\n\nIngredientele, rețetele și porțiile posibile sunt descrise pe pagina [gestiunii de stoc](/features/stock-management).",
       },
     ],
   },
@@ -862,7 +862,7 @@ export const blogPosts: BlogPost[] = [
     slug: "transfer-stoc-intre-locatii-cum-il-documentezi",
     title: "Transfer de stoc între locații — cum îl documentați corect",
     description:
-      "Cum documentați corect un transfer de stoc între două locații: ce trebuie să conțină bonul de transfer și de ce un mesaj pe WhatsApp nu este suficient pentru contabilitate.",
+      "Transferul de stoc între locații: ce conține un bon de transfer corect și de ce un mesaj pe WhatsApp nu este suficient pentru contabilitate.",
     publishedAt: "2026-06-17",
     locale: "ro",
     tags: ["stoc","transfer","multi-locatie"],
@@ -882,7 +882,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Exemplu concret de înregistrare",
-        body: "Locația Centru transferă către locația Nord 5 kg de cafea boabe, cost de achiziție 46 lei/kg.\n\n- Cantitate transferată: 5 kg\n- Valoare transferată: 5 × 46 = **230 lei**\n- Stoc locație Centru: scade cu 5 kg (și cu 230 lei valoare)\n- Stoc locație Nord: crește cu 5 kg (și cu 230 lei valoare)\n\nAmbele locații trebuie să reflecte mișcarea în aceeași zi, cu aceeași valoare — altfel balanța cantitativ-valorică pe fiecare gestiune nu se închide corect la finalul lunii.",
+        body: "Locația Centru transferă către locația Nord 5 kg de cafea boabe, cost de achiziție 46 lei/kg.\n\n- Cantitate transferată: 5 kg\n- Valoare transferată: 5 × 46 = **230 lei**\n- Stoc locație Centru: scade cu 5 kg (și cu 230 lei valoare)\n- Stoc locație Nord: crește cu 5 kg (și cu 230 lei valoare)\n\nAmbele locații trebuie să reflecte mișcarea în aceeași zi, cu aceeași valoare — altfel balanța cantitativ-valorică pe fiecare gestiune nu se închide corect la finalul lunii.\n\nÎn [gestiunea de stoc din franchisetech](/features/stock-management), stocul fiecărei locații se urmărește separat, iar fiecare achiziție intră cu cantitate și cost.",
       },
       {
         heading: "Cum funcționează în franchisetech",
@@ -894,7 +894,7 @@ export const blogPosts: BlogPost[] = [
     slug: "stoc-negativ-cauze-si-solutii",
     title: "Stoc negativ în sistem — de unde apare și cum îl reparați",
     description:
-      "De unde apare stocul negativ în sistemul de gestiune, care sunt cauzele frecvente și pașii concreți prin care îl corectați înainte de inventariere sau control fiscal.",
+      "Stocul negativ în sistemul de gestiune: cauzele frecvente și pașii concreți prin care îl corectați înainte de inventar sau de un control.",
     publishedAt: "2026-06-17",
     locale: "ro",
     tags: ["stoc","stoc-negativ"],
@@ -918,7 +918,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum preveniți stocul negativ pe viitor",
-        body: "În franchisetech, rapoartele de stoc semnalează vizual produsele cu cantitate negativă, ca să nu treacă neobservate până la inventarierea generală. Recalibrarea unei rețete (dacă porția reală diferă de cea configurată) se face o singură dată, iar toate vânzările ulterioare scad cantitatea corectă.\n\nDisciplina care contează cel mai mult: NIR-ul se introduce în ziua recepției, nu «mai târziu, când am timp». Un stoc negativ este aproape întotdeauna semnul unei rețete nerealiste sau al unui NIR întârziat — rareori al unui furt, deși merită verificat și acest scenariu dacă diferențele sunt mari și repetate.",
+        body: "În franchisetech, rapoartele de stoc semnalează vizual produsele cu cantitate negativă, ca să nu treacă neobservate până la inventarierea generală. Recalibrarea unei rețete (dacă porția reală diferă de cea configurată) se face o singură dată, iar toate vânzările ulterioare scad cantitatea corectă.\n\nDisciplina care contează cel mai mult: NIR-ul se introduce în ziua recepției, nu «mai târziu, când am timp». Un stoc negativ este aproape întotdeauna semnul unei rețete nerealiste sau al unui NIR întârziat — rareori al unui furt, deși merită verificat și acest scenariu dacă diferențele sunt mari și repetate.\n\nÎn [gestiunea de stoc din franchisetech](/features/stock-management), achizițiile cresc stocul, iar vânzările scad ingredientele pe baza rețetelor configurate.",
       },
     ],
   },
@@ -926,7 +926,7 @@ export const blogPosts: BlogPost[] = [
     slug: "receptie-marfa-fara-factura-ce-faci",
     title: "Recepția mărfii fără factură — ce faceți și cum regularizați ulterior",
     description:
-      "Ce faceți când marfa ajunge fără factură: cum înregistrați recepția pe bază de aviz de expediție și cum regularizați documentul când factura sosește de la furnizor.",
+      "Recepția mărfii fără factură: cum o înregistrați pe baza avizului de expediție și cum regularizați documentul când sosește factura.",
     publishedAt: "2026-06-19",
     locale: "ro",
     tags: ["stoc","nir","furnizori"],
@@ -950,7 +950,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum funcționează în franchisetech",
-        body: "În franchisetech, puteți emite un NIR pe baza avizului de expediție sau a comenzii, cu prețuri estimate, și îl marcați pentru regularizare ulterioară. Când factura sosește, deschideți NIR-ul existent, atașați referința facturii și ajustați prețurile dacă e cazul — nu creați un document nou, corectați pe cel deja emis.\n\nStocul rămâne corect din prima zi, iar costul rețetelor se actualizează automat dacă prețul final diferă de estimarea inițială. Contabilul primește, la final, un NIR complet cu referință clară la factura aferentă.",
+        body: "În franchisetech, puteți emite un NIR pe baza avizului de expediție sau a comenzii, cu prețuri estimate, și îl marcați pentru regularizare ulterioară. Când factura sosește, deschideți NIR-ul existent, atașați referința facturii și ajustați prețurile dacă e cazul — nu creați un document nou, corectați pe cel deja emis.\n\nStocul rămâne corect din prima zi, iar costul rețetelor se actualizează automat dacă prețul final diferă de estimarea inițială. Contabilul primește, la final, un NIR complet cu referință clară la factura aferentă.\n\nModul în care achizițiile de la furnizori actualizează stocul este descris pe pagina [gestiunii de stoc](/features/stock-management).",
       },
     ],
   },
@@ -986,7 +986,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum funcționează în franchisetech",
-        body: "Când adăugați o rețetă nouă în franchisetech, sistemul calculează automat costul din ingredientele configurate și vă arată marja rezultată în timp real, pe măsură ce testați diferite prețuri de vânzare — nu mai calculați manual de fiecare dată când doriți să verificați o variantă de preț.\n\nÎnainte să publicați produsul nou pe POS, puteți vedea exact cum se compară marja lui cu restul meniului, ca să vă asigurați că prețul ales se aliniază cu strategia generală de profitabilitate, nu doar cu instinctul de moment.",
+        body: "Când adăugați o rețetă nouă în franchisetech, sistemul calculează automat costul din ingredientele configurate și vă arată marja rezultată în timp real, pe măsură ce testați diferite prețuri de vânzare — nu mai calculați manual de fiecare dată când doriți să verificați o variantă de preț.\n\nÎnainte să publicați produsul nou pe POS, puteți vedea exact cum se compară marja lui cu restul meniului, ca să vă asigurați că prețul ales se aliniază cu strategia generală de profitabilitate, nu doar cu instinctul de moment.\n\nLegătura dintre rețete, prețurile de achiziție și stoc este descrisă pe pagina [gestiunii de stoc](/features/stock-management).",
       },
     ],
   },
@@ -994,7 +994,7 @@ export const blogPosts: BlogPost[] = [
     slug: "cum-completezi-registrul-de-casa-corect",
     title: "Cum completați corect Registrul de casă, pas cu pas",
     description:
-      "Registrul de casă trebuie completat zilnic, fără ștersături, cu fiecare mișcare de numerar documentată. Iată structura exactă, un exemplu pas cu pas și greșelile frecvente.",
+      "Registrul de casă se completează zilnic, fără ștersături, cu fiecare mișcare de numerar documentată. Structura, un exemplu și greșelile frecvente.",
     publishedAt: "2026-06-24",
     locale: "ro",
     tags: ["registru-de-casa","raport-z"],
@@ -1031,7 +1031,7 @@ export const blogPosts: BlogPost[] = [
     slug: "raport-x-vs-raport-z-diferenta",
     title: "Raport X vs. Raport Z — care e diferența și când folosiți fiecare",
     description:
-      "Raportul X citește totalurile curente fără să închidă ziua fiscal, raportul Z le închide definitiv. Iată diferența practică și când folosiți fiecare, cu exemple concrete.",
+      "Raport X vs. raport Z: X citește totalurile fără să închidă ziua fiscal, Z le închide definitiv. Diferența practică și când folosiți fiecare.",
     publishedAt: "2026-06-25",
     locale: "ro",
     tags: ["raport-z","raport-x"],
@@ -1064,7 +1064,7 @@ export const blogPosts: BlogPost[] = [
     slug: "inchidere-multi-casierie-mai-multe-case-o-zi",
     title: "Închiderea zilei când aveți mai multe case de marcat active",
     description:
-      "Cu două sau mai multe case active simultan, închiderea zilei nu înseamnă un singur raport Z, ci unul per casă, plus o reconciliere separată pentru fiecare casier.",
+      "Închiderea zilei cu mai multe case de marcat: un raport Z pentru fiecare casă, plus o reconciliere separată pentru fiecare casier.",
     publishedAt: "2026-06-25",
     locale: "ro",
     tags: ["raport-z","multi-casierie"],
@@ -1097,7 +1097,7 @@ export const blogPosts: BlogPost[] = [
     slug: "cand-si-cum-depui-numerarul-la-banca",
     title: "Când și cum depuneți numerarul din vânzări la bancă",
     description:
-      "Depunerea numerarului nu e doar drum la bancă — presupune calcul corect al sumei, documentare în registrul de casă și un ritm care nu lasă bani să se adune nejustificat.",
+      "Depunerea numerarului la bancă: cum calculați suma, cum o documentați în registrul de casă și ce ritm evită banii adunați nejustificat.",
     publishedAt: "2026-06-26",
     locale: "ro",
     tags: ["numerar","banca"],
@@ -1128,9 +1128,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "pontaj-personal-horeca-metode",
-    title: "Pontajul personalului în HoReCa — metode simple care chiar funcționează",
+    title: "Pontajul personalului în HoReCa — metode simple care funcționează",
     description:
-      "Cum țineți evidența corectă a orelor lucrate de personal într-o cafenea sau restaurant cu ture variabile — metode reale, de la caietul de pontaj la aplicații dedicate.",
+      "Pontajul personalului în HoReCa cu ture variabile: metode reale, de la caietul de pontaj la aplicații, pentru o evidență corectă a orelor.",
     publishedAt: "2026-06-27",
     locale: "ro",
     tags: ["personal","pontaj"],
@@ -1154,7 +1154,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum legi pontajul de costul real al fiecărei ture",
-        body: "Pontajul nu e doar un exercițiu de conformitate — este datele din care afli cât vă costă efectiv fiecare oră de deschidere. Dacă știți câte ore a lucrat fiecare angajat într-o săptămână și la ce tarif, puteți calcula costul cu personalul per zi și îl puteți compara cu vânzările din aceeași zi.\n\nO tură de vineri seară cu 3 angajați care aduce 1.200 lei vânzări are o structură de cost complet diferită față de o tură de marți dimineață cu aceiași 3 angajați și 400 lei vânzări. Fără pontaj corect, cifra asta rămâne invizibilă — vedeți doar costul lunar total cu salariile, fără să știți care ture sunt eficiente și care nu.",
+        body: "Pontajul nu e doar un exercițiu de conformitate — este datele din care afli cât vă costă efectiv fiecare oră de deschidere. Dacă știți câte ore a lucrat fiecare angajat într-o săptămână și la ce tarif, puteți calcula costul cu personalul per zi și îl puteți compara cu vânzările din aceeași zi.\n\nO tură de vineri seară cu 3 angajați care aduce 1.200 lei vânzări are o structură de cost complet diferită față de o tură de marți dimineață cu aceiași 3 angajați și 400 lei vânzări. Fără pontaj corect, cifra asta rămâne invizibilă — vedeți doar costul lunar total cu salariile, fără să știți care ture sunt eficiente și care nu.\n\nfranchisetech nu ține pontajul, dar [sesiunile de casă din POS](/features/pos) arată vânzările fiecărei deschideri și închideri de casă, pe care le puteți pune lângă orele din pontaj.",
       },
       {
         heading: "Checklist rapid pentru un pontaj care ține",
@@ -1166,7 +1166,7 @@ export const blogPosts: BlogPost[] = [
     slug: "training-casier-nou-angajat-checklist",
     title: "Training pentru un casier nou — checklist complet de prima zi",
     description:
-      "Checklist complet pentru prima zi, prima săptămână și prima lună a unui casier nou — ce trebuie să știe înainte să lucreze singur la casă, fără greșeli scumpe evitabile.",
+      "Training pentru un casier nou: checklist pentru prima zi, prima săptămână și prima lună, ca să lucreze singur la casă fără greșeli scumpe.",
     publishedAt: "2026-06-28",
     locale: "ro",
     tags: ["personal","training","pos"],
@@ -1203,7 +1203,7 @@ export const blogPosts: BlogPost[] = [
     slug: "targeturi-vanzari-per-angajat-cum-le-stabilesti",
     title: "Cum stabiliți targeturi de vânzări realiste per angajat",
     description:
-      "Cum stabiliți targeturi de vânzări realiste pentru barista, ospătari sau casieri, bazate pe date reale din tură, nu pe cifre alese la întâmplare, și ce faceți când nu sunt atinse.",
+      "Targeturi de vânzări per angajat pentru barista, ospătari sau casieri, pe baza datelor reale din tură, și ce faceți când nu sunt atinse.",
     publishedAt: "2026-06-29",
     locale: "ro",
     tags: ["personal","vanzari"],
@@ -1227,7 +1227,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum urmăriți targeturile în franchisetech",
-        body: "Din **Rapoarte → Vânzări per angajat**, vedeți pentru fiecare cont de utilizator (casier, barista, ospătar): valoarea totală a vânzărilor din tură, numărul de tranzacții, valoarea medie a comenzii și rata de atașament pe categorii de produse.\n\nPentru că fiecare vânzare e legată de sesiunea de casă și de utilizatorul logat, nu mai adunați manual bonuri și nu mai cereți fiecărui angajat să-și noteze cifrele. Comparați direct tura de azi cu media ultimelor 10 ture similare, fără calcul separat în Excel.\n\nDatele istorice necesare pentru targeturi realiste există deja în sistem din prima săptămână de utilizare — nu trebuie să așteptați luni de date pentru primul target relevant.",
+        body: "Din **Rapoarte → Vânzări per angajat**, vedeți pentru fiecare cont de utilizator (casier, barista, ospătar): valoarea totală a vânzărilor din tură, numărul de tranzacții, valoarea medie a comenzii și rata de atașament pe categorii de produse.\n\nPentru că fiecare vânzare e legată de sesiunea de casă și de utilizatorul logat, nu mai adunați manual bonuri și nu mai cereți fiecărui angajat să-și noteze cifrele. Comparați direct tura de azi cu media ultimelor 10 ture similare, fără calcul separat în Excel.\n\nDatele istorice necesare pentru targeturi realiste există deja în sistem din prima săptămână de utilizare — nu trebuie să așteptați luni de date pentru primul target relevant.\n\nVânzările înregistrate în [POS-ul franchisetech](/features/pos) rămân urmăribile după serviciu, pe tranzacții și pe sesiuni de casă.",
       },
     ],
   },
@@ -1235,7 +1235,7 @@ export const blogPosts: BlogPost[] = [
     slug: "program-legal-de-lucru-horeca-romania",
     title: "Programul legal de lucru în HoReCa România — ce trebuie să respectați",
     description:
-      "Ghid practic despre programul de lucru în HoReCa România: durata normală, repausul minim, munca de noapte, pauza de masă și evidența orelor, explicat pentru proprietari fără departament HR.",
+      "Programul legal de lucru în HoReCa: durata normală, repausul minim, munca de noapte, pauza de masă și evidența orelor, pentru proprietari.",
     publishedAt: "2026-06-29",
     locale: "ro",
     tags: ["personal","legal"],
@@ -1267,7 +1267,7 @@ export const blogPosts: BlogPost[] = [
     slug: "cum-evaluezi-performanta-unui-barista-ospatar",
     title: "Cum evaluați performanța unui barista sau ospătar, dincolo de vânzări",
     description:
-      "De ce cifra de vânzări nu e suficientă pentru a evalua un barista sau ospătar și ce alți indicatori operaționali contează, urmăriți din datele POS fără muncă manuală.",
+      "Cum evaluați un barista sau ospătar dincolo de cifra de vânzări: indicatorii operaționali care contează, urmăriți din datele POS.",
     publishedAt: "2026-07-01",
     locale: "ro",
     tags: ["personal","performanta"],
@@ -1291,7 +1291,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce rapoarte din franchisetech vă ajută",
-        body: "Din **Rapoarte → Vânzări per angajat**, vedeți cifra de vânzări per cont, defalcată pe ture și zile, comparabilă cu media unor ture similare. Din istoricul sesiunilor de casă, vedeți diferența de sertar per sesiune, deci per angajat și tură, nu doar pe total zi.\n\nRata de anulări/corecții e vizibilă din istoricul tranzacțiilor per utilizator — fiecare anulare e asociată cu contul care a operat-o. Combinate, aceste rapoarte vă dau baza obiectivă pentru evaluare, fără să notați manual nimic pe parcursul lunii — datele există deja din operarea zilnică a POS-ului.",
+        body: "Din **Rapoarte → Vânzări per angajat**, vedeți cifra de vânzări per cont, defalcată pe ture și zile, comparabilă cu media unor ture similare. Din istoricul sesiunilor de casă, vedeți diferența de sertar per sesiune, deci per angajat și tură, nu doar pe total zi.\n\nRata de anulări/corecții e vizibilă din istoricul tranzacțiilor per utilizator — fiecare anulare e asociată cu contul care a operat-o. Combinate, aceste rapoarte vă dau baza obiectivă pentru evaluare, fără să notați manual nimic pe parcursul lunii — datele există deja din operarea zilnică a POS-ului.\n\nRetururile și anulările se păstrează cu motiv în [POS-ul franchisetech](/features/pos), ca să le puteți discuta pe date, nu din memorie.",
       },
     ],
   },
@@ -1299,7 +1299,7 @@ export const blogPosts: BlogPost[] = [
     slug: "export-csv-vs-xml-pentru-contabil",
     title: "Export CSV vs. XML pentru contabil — care e mai potrivit și când",
     description:
-      "Diferența practică dintre exportul CSV și XML pentru contabil: când alegeți unul sau altul, ce riscați dacă alegeți greșit și cum decideți împreună cu contabilul dumneavoastră.",
+      "Export CSV vs. XML pentru contabil: când alegeți fiecare format, ce riscați dacă alegeți greșit și cum decideți împreună cu contabilul.",
     publishedAt: "2026-07-02",
     locale: "ro",
     tags: ["contabilitate","export"],
@@ -1323,15 +1323,15 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum alegeți practic",
-        body: "Întrebați-vă direct contabilul: «Ce format accepți pentru import — ai un soft cu import automat sau lucrezi manual în Excel?» Răspunsul lui decide formatul, nu preferința dumneavoastră.\n\nDacă nu sunteți sigur sau contabilul nu a mai primit date dintr-un program de gestiune până acum, CSV e punctul de plecare mai sigur — poate fi verificat vizual de amândoi înainte să treceți la un flux XML automatizat. Odată ce fluxul e stabil și verificat, XML economisește timp lună de lună, mai ales dacă volumul de tranzacții e mare.\n\nfranchisetech oferă ambele formate de export din aceeași secțiune de rapoarte — alegeți o dată formatul potrivit împreună cu contabilul, apoi exportul lunar devine un singur click, indiferent care variantă ați ales.",
+        body: "Întrebați-vă direct contabilul: «Ce format accepți pentru import — ai un soft cu import automat sau lucrezi manual în Excel?» Răspunsul lui decide formatul, nu preferința dumneavoastră.\n\nDacă nu sunteți sigur sau contabilul nu a mai primit date dintr-un program de gestiune până acum, CSV e punctul de plecare mai sigur — poate fi verificat vizual de amândoi înainte să treceți la un flux XML automatizat. Odată ce fluxul e stabil și verificat, XML economisește timp lună de lună, mai ales dacă volumul de tranzacții e mare.\n\nfranchisetech oferă ambele formate de export din aceeași secțiune de rapoarte — alegeți o dată formatul potrivit împreună cu contabilul, apoi exportul lunar devine un singur click, indiferent care variantă ați ales.\n\nExporturile pentru contabil sunt incluse în planul Pro, prezentat pe [pagina de prețuri](/pricing).",
       },
     ],
   },
   {
     slug: "documente-obligatorii-horeca-lista-completa",
-    title: "Documentele obligatorii într-o cafenea sau restaurant — lista completă 2026",
+    title: "Documente obligatorii pentru cafenea sau restaurant — lista 2026",
     description:
-      "Ce documente obligatorii trebuie să aveți la o cafenea sau restaurant în 2026: autorizații, avize sanitare, rapoarte fiscale zilnice și registre de gestiune stoc.",
+      "Documentele obligatorii la o cafenea sau restaurant în 2026: autorizații, avize sanitare, rapoarte fiscale zilnice și registre de stoc.",
     publishedAt: "2026-07-03",
     locale: "ro",
     tags: ["contabilitate","conformitate"],
@@ -1359,7 +1359,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce acoperă franchisetech și ce rămâne pe umerii dumneavoastră",
-        body: "Franchisetech nu emite autorizații și nu ține evidența avizelor DSP sau ISU — acestea rămân documente fizice, obținute de la instituțiile competente și păstrate separat.\n\nCe acoperă direct: raportul Z zilnic, registrul de casă, NIR-urile la fiecare recepție de marfă, bonul de consum generat automat din vânzările cu rețetă și exportul acestor date pentru contabil. Documentele care demonstrează activitatea comercială și de gestiune curentă sunt generate și arhivate automat, cu istoric complet, oricând le puteți descărca pentru un control.\n\nPractic: ține avizele și autorizațiile într-un dosar (fizic sau scanat) lângă casă, iar pentru tot ce e fiscal și de gestiune zilnică, lasă sistemul să genereze documentele — nu le reconstitui manual la final de lună.",
+        body: "Franchisetech nu emite autorizații și nu ține evidența avizelor DSP sau ISU — acestea rămân documente fizice, obținute de la instituțiile competente și păstrate separat.\n\nCe acoperă direct: raportul Z zilnic, registrul de casă, NIR-urile la fiecare recepție de marfă, bonul de consum generat automat din vânzările cu rețetă și exportul acestor date pentru contabil. Documentele care demonstrează activitatea comercială și de gestiune curentă sunt generate și arhivate automat, cu istoric complet, oricând le puteți descărca pentru un control.\n\nPractic: ține avizele și autorizațiile într-un dosar (fizic sau scanat) lângă casă, iar pentru tot ce e fiscal și de gestiune zilnică, lasă sistemul să genereze documentele — nu le reconstitui manual la final de lună.\n\nCe înregistrează franchisetech la închiderea casei este descris pe pagina [raportului Z și închiderii casei](/features/z-report).",
       },
     ],
   },
@@ -1367,7 +1367,7 @@ export const blogPosts: BlogPost[] = [
     slug: "cheltuieli-deductibile-horeca-ce-poti-trece",
     title: "Cheltuieli deductibile în HoReCa — ce puteți trece și ce nu",
     description:
-      "Ce cheltuieli sunt deductibile fiscal într-o cafenea sau restaurant din România: categorii clar deductibile, cheltuieli cu limite legale și documentele necesare pentru fiecare.",
+      "Cheltuieli deductibile în HoReCa: ce este clar deductibil, ce cheltuieli au limite legale și ce documente păstrați pentru fiecare.",
     publishedAt: "2026-07-03",
     locale: "ro",
     tags: ["contabilitate","cheltuieli"],
@@ -1395,15 +1395,15 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum vă ajută franchisetech să aveți justificarea la îndemână",
-        body: "Franchisetech nu decide ce este deductibil — asta rămâne decizia contabilului, pe baza legislației fiscale în vigoare. Ce poate face sistemul: să păstreze NIR-urile și bonurile de consum organizate, cu furnizor, dată și valoare, astfel încât fiecare leu de marfă intrată în gestiune să aibă documentul care îl justifică.\n\nCând contabilul întreabă «de unde vine factura asta de la furnizorul de cafea», răspunsul e în NIR-ul din sistem, nu într-un teanc de facturi căutate retroactiv.",
+        body: "Franchisetech nu decide ce este deductibil — asta rămâne decizia contabilului, pe baza legislației fiscale în vigoare. Ce poate face sistemul: să păstreze NIR-urile și bonurile de consum organizate, cu furnizor, dată și valoare, astfel încât fiecare leu de marfă intrată în gestiune să aibă documentul care îl justifică.\n\nCând contabilul întreabă «de unde vine factura asta de la furnizorul de cafea», răspunsul e în NIR-ul din sistem, nu într-un teanc de facturi căutate retroactiv.\n\nÎnregistrarea achizițiilor pe produse și furnizori este descrisă pe pagina [gestiunii de stoc](/features/stock-management).",
       },
     ],
   },
   {
     slug: "ce-rapoarte-cere-contabilul-de-la-tine-lunar",
-    title: "Ce rapoarte vă cere contabilul în fiecare lună și de unde le luați rapid",
+    title: "Ce rapoarte vă cere contabilul lunar și de unde le luați rapid",
     description:
-      "Lista completă a rapoartelor cerute lunar de contabil de la o cafenea sau restaurant — raport Z, NIR-uri, bon de consum, extras bancar — și cum le obțineți rapid, fără căutări.",
+      "Rapoartele cerute lunar de contabil unei cafenele sau unui restaurant: raport Z, NIR-uri, bon de consum, extras bancar. Cum le obțineți rapid.",
     publishedAt: "2026-07-04",
     locale: "ro",
     tags: ["contabilitate","rapoarte"],
@@ -1427,7 +1427,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum le generați rapid din franchisetech",
-        body: "Din secțiunea **Rapoarte → Export audit & Saga**, selectați perioada lunară și exportați NIR-urile și vânzările direct în format compatibil cu programele de contabilitate uzuale. Rapoartele Z individuale rămân disponibile oricând în **Rapoarte → Raport Z zilnic**, cu istoric complet.\n\nÎn loc să adunați documentele manual din dosare, emailuri și WhatsApp, trimiteți contabilului un singur export lunar plus accesul la rapoartele arhivate — pachetul e gata în minute, nu în zile.",
+        body: "Din secțiunea **Rapoarte → Export audit & Saga**, selectați perioada lunară și exportați NIR-urile și vânzările direct în format compatibil cu programele de contabilitate uzuale. Rapoartele Z individuale rămân disponibile oricând în **Rapoarte → Raport Z zilnic**, cu istoric complet.\n\nÎn loc să adunați documentele manual din dosare, emailuri și WhatsApp, trimiteți contabilului un singur export lunar plus accesul la rapoartele arhivate — pachetul e gata în minute, nu în zile.\n\nExporturile pentru contabil sunt incluse în planul Pro, prezentat pe [pagina de prețuri](/pricing).",
       },
     ],
   },
@@ -1435,7 +1435,7 @@ export const blogPosts: BlogPost[] = [
     slug: "checklist-deschidere-cafenea-de-la-zero",
     title: "Checklist complet pentru deschiderea unei cafenele de la zero",
     description:
-      "Checklist pas cu pas pentru deschiderea unei cafenele în România: acte și autorizații, amenajare, furnizori, casă de marcat și configurare POS, personal și prima zi de funcționare.",
+      "Checklist pentru deschiderea unei cafenele în România: acte și autorizații, amenajare, furnizori, casă de marcat, POS, personal și prima zi.",
     publishedAt: "2026-07-04",
     locale: "ro",
     tags: ["cafenea","checklist","deschidere"],
@@ -1472,7 +1472,7 @@ export const blogPosts: BlogPost[] = [
     slug: "provocari-gestiune-food-truck-romania",
     title: "Provocările gestiunii unui food truck în România și cum le rezolvați",
     description:
-      "Cele mai frecvente provocări operaționale ale unui food truck din România — mobilitate, conexiune la internet, stoc limitat, vreme — și cum le gestionați fără să pierdeți vânzări.",
+      "Gestiunea unui food truck în România: mobilitate, internet instabil, stoc limitat, vreme. Cum le gestionați fără să pierdeți vânzări.",
     publishedAt: "2026-07-05",
     locale: "ro",
     tags: ["food-truck","gestiune"],
@@ -1509,7 +1509,7 @@ export const blogPosts: BlogPost[] = [
     slug: "stoc-perisabil-patiserie-cum-il-gestionezi",
     title: "Stocul perisabil la o patiserie — cum îl gestionați fără risipă",
     description:
-      "Cum gestionați stocul perisabil la o patiserie din România: planificare producție, rotație FIFO, reduceri de final de zi — ca să reduceți risipa fără să pierdeți vânzări.",
+      "Stocul perisabil la patiserie: planificarea producției, rotația FIFO și reducerile de final de zi, ca să reduceți risipa fără să pierdeți vânzări.",
     publishedAt: "2026-07-05",
     locale: "ro",
     tags: ["patiserie","stoc","risipa"],
@@ -1537,15 +1537,15 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum funcționează în franchisetech",
-        body: "Rapoartele de vânzări per produs, per zi a săptămânii, din franchisetech ajută exact la calibrarea producției descrisă mai sus — vedeți tiparele reale de vânzare, nu presupuneri. NIR-urile la fiecare recepție de materii prime păstrează data intrării, util pentru rotația FIFO a lactatelor și fructelor proaspete.\n\nCând configurați rețetele produselor de patiserie cu costul ingredientelor per porție, puteți calcula rapid cât recuperați dintr-un produs vândut la reducere de final de zi — și dacă acoperă măcar costul materiei prime.",
+        body: "Rapoartele de vânzări per produs, per zi a săptămânii, din franchisetech ajută exact la calibrarea producției descrisă mai sus — vedeți tiparele reale de vânzare, nu presupuneri. NIR-urile la fiecare recepție de materii prime păstrează data intrării, util pentru rotația FIFO a lactatelor și fructelor proaspete.\n\nCând configurați rețetele produselor de patiserie cu costul ingredientelor per porție, puteți calcula rapid cât recuperați dintr-un produs vândut la reducere de final de zi — și dacă acoperă măcar costul materiei prime.\n\nStocul scăzut și porțiile care se mai pot face din stocul actual se văd în [gestiunea de stoc din franchisetech](/features/stock-management).",
       },
     ],
   },
   {
     slug: "franciza-vs-locatie-proprie-ce-alegi",
-    title: "Franciză vs. locație proprie — ce alegeți când deschideți o afacere HoReCa",
+    title: "Franciză vs. locație proprie — ce alegeți la o afacere HoReCa",
     description:
-      "Diferența reală dintre a deschide sub o franciză și a porni o locație proprie în HoReCa: costuri, control asupra meniului și furnizorilor, și întrebări care vă ajută să decideți.",
+      "Franciză vs. locație proprie în HoReCa: diferențele de cost și de control asupra meniului și furnizorilor, plus întrebările care vă ajută să decideți.",
     publishedAt: "2026-07-06",
     locale: "ro",
     tags: ["franciza","strategie"],
@@ -1580,7 +1580,7 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "dark-kitchen-delivery-only-gestiune",
-    title: "Dark kitchen (delivery-only) — cum arată gestiunea fără sală de servire",
+    title: "Dark kitchen (delivery-only) — gestiunea fără sală de servire",
     description:
       "Ce înseamnă operațional și financiar un dark kitchen fără sală de servire: structura costurilor, comisioane delivery și cum calculați marja reală per comandă.",
     publishedAt: "2026-07-07",
@@ -1639,15 +1639,15 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum vă ajută franchisetech",
-        body: "Vânzările de catering pot fi înregistrate și urmărite alături de vânzările zilnice din locație, în același set de rapoarte — nu aveți nevoie de un tabel Excel separat pentru evenimente. Exportul pentru contabil (Saga XML sau CSV) include aceste date agregat, astfel încât contabilul are toate veniturile într-un singur loc, indiferent dacă vin din vânzări zilnice sau din comenzi de catering facturate separat.",
+        body: "Vânzările de catering pot fi înregistrate și urmărite alături de vânzările zilnice din locație, în același set de rapoarte — nu aveți nevoie de un tabel Excel separat pentru evenimente. Exportul pentru contabil (Saga XML sau CSV) include aceste date agregat, astfel încât contabilul are toate veniturile într-un singur loc, indiferent dacă vin din vânzări zilnice sau din comenzi de catering facturate separat.\n\nVânzările zilnice de la casă, cu metoda de plată, se înregistrează în [POS-ul franchisetech](/features/pos).",
       },
     ],
   },
   {
     slug: "cum-calculezi-pragul-de-rentabilitate-breakeven",
-    title: "Cum calculați pragul de rentabilitate (breakeven) pentru afacerea dumneavoastră",
+    title: "Cum calculați pragul de rentabilitate (breakeven) al afacerii",
     description:
-      "Formula completă pentru calculul pragului de rentabilitate în HoReCa, cu exemplu real: costuri fixe, marjă medie pe bon și câte vânzări trebuie să faceți zilnic ca să nu pierdeți bani.",
+      "Pragul de rentabilitate în HoReCa, cu un exemplu real: costuri fixe, marja medie pe bon și câte vânzări zilnice vă trebuie ca să nu pierdeți bani.",
     publishedAt: "2026-07-08",
     locale: "ro",
     tags: ["breakeven","marja","financiar"],
@@ -1671,7 +1671,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum vă ajută franchisetech",
-        body: "franchisetech nu introduce pentru dumneavoastră cifra finală a pragului de rentabilitate — costurile fixe (chirie, salarii, abonamente) nu trec prin POS și trebuie introduse de dumneavoastră. Dar vă dă direct jumătatea grea a calculului: marja medie reală per bon, calculată din costul rețetelor și din vânzările efective înregistrate, nu dintr-o estimare. Aveți deja acest număr actualizat lunar, în loc să-l reconstitui manual dintr-un Excel la finalul fiecărei luni.",
+        body: "franchisetech nu introduce pentru dumneavoastră cifra finală a pragului de rentabilitate — costurile fixe (chirie, salarii, abonamente) nu trec prin POS și trebuie introduse de dumneavoastră. Dar vă dă direct jumătatea grea a calculului: marja medie reală per bon, calculată din costul rețetelor și din vânzările efective înregistrate, nu dintr-o estimare. Aveți deja acest număr actualizat lunar, în loc să-l reconstitui manual dintr-un Excel la finalul fiecărei luni.\n\nTotalurile zilnice pe numerar și card se văd la [închiderea zilei în franchisetech](/features/z-report).",
       },
     ],
   },
@@ -1679,7 +1679,7 @@ export const blogPosts: BlogPost[] = [
     slug: "costuri-fixe-vs-variabile-horeca",
     title: "Costuri fixe vs. variabile în HoReCa — de ce contează să le separați",
     description:
-      "Diferența dintre costurile fixe și variabile într-un restaurant sau cafenea, cu exemple reale în lei și de ce separarea lor stă la baza oricărei decizii de preț.",
+      "Costuri fixe vs. variabile într-o cafenea sau restaurant, cu exemple în lei, și de ce separarea lor stă la baza oricărei decizii de preț.",
     publishedAt: "2026-07-09",
     locale: "ro",
     tags: ["costuri","financiar"],
@@ -1703,7 +1703,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum vedeți această separare în franchisetech",
-        body: "Costul variabil per produs (materii prime, calculat din prețurile reale de la ultima aprovizionare) vine automat din calculatorul de rețete, actualizat de fiecare dată când introduceți un NIR cu preț nou. Costurile fixe (chirie, salarii, abonamente) rămân în afara sistemului, pentru că nu trec prin vânzări sau stoc — dar cu jumătate din calcul deja făcut corect și automat, separarea fixe/variabile devine un exercițiu de câteva minute, nu o reconstituire manuală de la zero în fiecare lună.\n\nSepararea corectă contează și pentru altceva: costurile fixe care ies din cont la date fixe, indiferent de cât ați vândut luna respectivă, sunt exact ce poate crea un decalaj între [profitul de pe hârtie și banii reali din cont](/blog/cash-flow-cafenea-profitabil-pe-hartie-fara-bani-in-cont).",
+        body: "Costul variabil per produs (materii prime, calculat din prețurile reale de la ultima aprovizionare) vine automat din calculatorul de rețete, actualizat de fiecare dată când introduceți un NIR cu preț nou. Costurile fixe (chirie, salarii, abonamente) rămân în afara sistemului, pentru că nu trec prin vânzări sau stoc — dar cu jumătate din calcul deja făcut corect și automat, separarea fixe/variabile devine un exercițiu de câteva minute, nu o reconstituire manuală de la zero în fiecare lună.\n\nSepararea corectă contează și pentru altceva: costurile fixe care ies din cont la date fixe, indiferent de cât ați vândut luna respectivă, sunt exact ce poate crea un decalaj între [profitul de pe hârtie și banii reali din cont](/blog/cash-flow-cafenea-profitabil-pe-hartie-fara-bani-in-cont).\n\nCostul ingredientelor, partea variabilă legată direct de vânzări, vine din achizițiile și rețetele din [gestiunea de stoc](/features/stock-management).",
       },
     ],
   },
@@ -1711,7 +1711,7 @@ export const blogPosts: BlogPost[] = [
     slug: "kpi-uri-de-urmarit-saptamanal-horeca",
     title: "KPI-urile pe care ar trebui să le urmăriți săptămânal în HoReCa",
     description:
-      "Lista KPI-urilor esențiale de urmărit săptămânal într-un restaurant sau cafenea: bon mediu, food cost %, marjă brută, diferență de numerar și cum le citiți corect.",
+      "KPI-urile de urmărit săptămânal în HoReCa: bon mediu, food cost %, marjă brută, diferență de numerar și cum le citiți corect.",
     publishedAt: "2026-07-10",
     locale: "ro",
     tags: ["kpi","rapoarte"],
@@ -1744,7 +1744,7 @@ export const blogPosts: BlogPost[] = [
     slug: "greseli-frecvente-la-raportul-z",
     title: "Greșeli frecvente la raportul Z și cum le evitați",
     description:
-      "Cele mai frecvente greșeli făcute la generarea și verificarea raportului Z zilnic în cafenele și restaurante — și cum le preveniți ca să nu aveți probleme la control.",
+      "Greșelile frecvente la raportul Z în cafenele și restaurante, la generare și la verificare, și cum le preveniți înainte de un control.",
     publishedAt: "2026-07-12",
     locale: "ro",
     tags: ["raport-z","greseli"],
@@ -1781,7 +1781,7 @@ export const blogPosts: BlogPost[] = [
     slug: "pregatire-control-anaf-neanuntat",
     title: "Cum vă pregătiți pentru un control ANAF neanunțat, în orice zi",
     description:
-      "Ghid practic pentru cafenele și restaurante: ce verificați inspectorii ANAF la un control inopinat, ce documente trebuie să aveți mereu la zi și cum evitați amenzile frecvente.",
+      "Controlul ANAF neanunțat la cafenea sau restaurant: ce verifică inspectorii, ce documente țineți mereu la zi și cum evitați amenzile frecvente.",
     publishedAt: "2026-07-14",
     locale: "ro",
     tags: ["fiscal","control-anaf"],
@@ -1809,7 +1809,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum ajută franchisetech să aveți totul la zi",
-        body: "franchisetech arhivează automat fiecare raport Z, fiecare NIR emis și registrul de casă aferent, căutabile instant pe dată din aplicație — nu trebuie să căutați printre dosare fizice sau fișiere Excel când un inspector cere documentele. Cotele de TVA se configurează o singură dată per produs și rămân consistente în toate rapoartele generate ulterior, reducând riscul de eroare la aplicarea cotei greșite.",
+        body: "franchisetech arhivează automat fiecare raport Z, fiecare NIR emis și registrul de casă aferent, căutabile instant pe dată din aplicație — nu trebuie să căutați printre dosare fizice sau fișiere Excel când un inspector cere documentele. Cotele de TVA se configurează o singură dată per produs și rămân consistente în toate rapoartele generate ulterior, reducând riscul de eroare la aplicarea cotei greșite.\n\nCe înregistrează franchisetech la închiderea casei este descris pe pagina [raportului Z și închiderii casei](/features/z-report).",
       },
     ],
   },
@@ -1817,7 +1817,7 @@ export const blogPosts: BlogPost[] = [
     slug: "amenda-neeliberare-bon-fiscal-cat-este-si-cum-o-eviti",
     title: "Amenda pentru neeliberarea bonului fiscal — cât este și cum o evitați",
     description:
-      "Neemiterea bonului fiscal este contravenția cel mai des constatată la control în HoReCa. Iată exact ce spune legea, cum se calculează amenda pe tranșe și ce se întâmplă la o abatere repetată.",
+      "Amenda pentru neeliberarea bonului fiscal, cea mai des constatată abatere în HoReCa: ce spune legea, tranșele amenzii și ce urmează la repetare.",
     publishedAt: "2026-09-19",
     locale: "ro",
     tags: ["fiscal", "amenzi", "bon-fiscal"],
@@ -1850,7 +1850,7 @@ export const blogPosts: BlogPost[] = [
     slug: "fiscalnet-offline-ce-faceti-cand-vreti-sa-emiteti-bonul",
     title: "Ce faceți dacă driverul fiscal e offline când vreți să emiteți bonul",
     description:
-      "Driverul fiscal este integrarea care trimite comanda de emitere către casa de marcat sau imprimanta fiscală — nu aparatul fiscal în sine. Iată ce înseamnă, practic și legal, când pare «offline» chiar în mijlocul unei vânzări.",
+      "Driverul fiscal offline în mijlocul unei vânzări: ce înseamnă, practic și legal, când integrarea cu casa de marcat nu răspunde și ce faceți.",
     publishedAt: "2026-09-20",
     locale: "ro",
     tags: ["fiscal", "fiscalnet", "pos"],
@@ -1885,9 +1885,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "imprimanta-fiscala-nu-tipareste-bonul-ce-faceti",
-    title: "Ce faceți dacă imprimanta fiscală nu tipărește bonul, în mijlocul vânzării",
+    title: "Imprimanta fiscală nu tipărește bonul în timpul vânzării: ce faceți",
     description:
-      "Aparatul fiscal s-a blocat exact când aveați un client la casă? Legea are o procedură exactă pentru această situație — registrul special și chitanțele — nu improvizație.",
+      "Imprimanta fiscală nu tipărește bonul când aveți un client la casă? Legea prevede o procedură exactă, cu registrul special și chitanțele.",
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["fiscal", "casa-de-marcat", "defectiune"],
@@ -1924,7 +1924,7 @@ export const blogPosts: BlogPost[] = [
     slug: "bon-fiscal-suma-gresita-clientul-a-plecat-ce-faceti",
     title: "Bon fiscal emis cu suma greșită, dar clientul a plecat — ce faceți",
     description:
-      "Ați observat abia după ce a plecat clientul că bonul avea suma greșită. Stornoul rămâne procedura corectă, dar fără clientul de față, grija reală este alta: cum documentați diferența de bani.",
+      "Bon fiscal cu suma greșită, observat după ce clientul a plecat: stornoul rămâne procedura corectă, dar contează cum documentați diferența de bani.",
     publishedAt: "2026-09-22",
     locale: "ro",
     tags: ["pos", "storno", "fiscal"],
@@ -1961,7 +1961,7 @@ export const blogPosts: BlogPost[] = [
     slug: "bon-fiscal-pierdut-sau-deteriorat-ce-faci",
     title: "Bon fiscal pierdut sau deteriorat — ce dovadă mai aveți",
     description:
-      "Un client vine fără bon și cere retur, sau dumneavoastră ați pierdut bonul unui echipament cumpărat pentru local. Ce spune legea despre dovada achiziției și ce puteți accepta sau folosi în loc.",
+      "Bon fiscal pierdut sau deteriorat: ce spune legea despre dovada achiziției la un retur și ce puteți accepta sau folosi în locul bonului.",
     publishedAt: "2026-09-09",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "garantie"],
@@ -1998,7 +1998,7 @@ export const blogPosts: BlogPost[] = [
     slug: "ce-risti-daca-nu-ai-bon-fiscal-la-un-control-anaf",
     title: "Ce riscați dacă lipsește bonul fiscal la un control ANAF",
     description:
-      "Nu «amenda generică» — mecanismul exact prin care un inspector transformă un bon lipsă într-o sancțiune, pragurile de amendă în vigoare din 2024 și ce se întâmplă dacă situația se repetă.",
+      "Ce riscați dacă lipsește bonul fiscal la un control ANAF: cum ajunge inspectorul la sancțiune, pragurile din 2024 și ce urmează la repetare.",
     publishedAt: "2026-09-11",
     locale: "ro",
     tags: ["fiscal", "control-anaf", "amenzi"],
@@ -2022,7 +2022,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum reduceți riscul ca un bon să lipsească fără să observați",
-        body: "Cea mai frecventă cauză a unui bon lipsă nu e frauda, ci un pas manual sărit la oră de vârf — o vânzare cash încasată «repede», fără să treacă prin POS. Riscul scade dacă fiscalizarea nu mai depinde de un pas separat: în franchisetech, fiecare vânzare finalizată în POS trimite automat comanda către driverul fiscal, care declanșează emiterea bonului la casa fiscală, **când integrarea e configurată** — nu există un moment în care casierul trebuie «să nu uite» să bată vânzarea separat.\n\nAsta nu elimină nevoia de verificare zilnică a sertarului și a rapoartelor — dar reduce exact tipul de discrepanță pe care se bazează mecanismul sumei nejustificate descris mai sus.",
+        body: "Cea mai frecventă cauză a unui bon lipsă nu e frauda, ci un pas manual sărit la oră de vârf — o vânzare cash încasată «repede», fără să treacă prin POS. Riscul scade dacă fiscalizarea nu mai depinde de un pas separat: în franchisetech, fiecare vânzare finalizată în POS trimite automat comanda către driverul fiscal, care declanșează emiterea bonului la casa fiscală, **când integrarea e configurată** — nu există un moment în care casierul trebuie «să nu uite» să bată vânzarea separat.\n\nAsta nu elimină nevoia de verificare zilnică a sertarului și a rapoartelor — dar reduce exact tipul de discrepanță pe care se bazează mecanismul sumei nejustificate descris mai sus.\n\nLa [închiderea zilei în franchisetech](/features/z-report), numerarul numărat se compară cu cel așteptat, iar diferența rămâne înregistrată.",
       },
     ],
   },
@@ -2030,7 +2030,7 @@ export const blogPosts: BlogPost[] = [
     slug: "bon-fiscal-vs-bon-nefiscal-diferenta-si-cand-gresiti",
     title: "Bon fiscal vs. bon nefiscal — diferența și când greșiți",
     description:
-      "Nota de plată, comanda tipărită din softul de gestiune sau bonul de test al casei de marcat nu sunt bon fiscal. Iată diferența reală și cele trei greșeli frecvente prin care cafenelele și restaurantele le confundă.",
+      "Bon fiscal vs. bon nefiscal: nota de plată sau comanda tipărită nu sunt bon fiscal. Diferența reală și trei greșeli frecvente în HoReCa.",
     publishedAt: "2026-09-14",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "pos"],
@@ -2065,9 +2065,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "e-obligatoriu-qr-code-pe-bonul-fiscal",
-    title: "E obligatoriu cod QR pe bonul fiscal? Amenzile, amânate până la 31 octombrie 2027",
+    title: "E obligatoriu codul QR pe bonul fiscal? Amenzile, amânate până în 2027",
     description:
-      "Obligația codului QR pe bon există deja; amenzile pentru lipsa lui sunt suspendate prin OUG nr. 43/2026 până la 31 octombrie 2027 inclusiv. Ce e lege, ce e încă proiect, cine generează de fapt codul QR și ce verificați la casa de marcat.",
+      "Codul QR pe bonul fiscal este obligatoriu, dar amenzile sunt suspendate până la 31 octombrie 2027. Cine generează codul și ce verificați la casă.",
     publishedAt: "2026-09-17",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "casa-de-marcat"],
@@ -2102,9 +2102,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "diferenta-de-casa-la-final-de-zi-surplus-sau-lipsa",
-    title: "Diferență de casă la final de zi — surplus sau lipsă, ce faceți și cum o documentați",
+    title: "Diferență de casă la final de zi: surplus sau lipsă, ce faceți",
     description:
-      "Sertarul nu se potrivește exact cu raportul Z? O diferență de casă nu e automat o problemă cu ANAF — dar modul în care o documentați poate deveni una. Ce spune legea, ce e doar practică internă și cum notați corect surplusul sau lipsa.",
+      "Diferența de casă la final de zi, surplus sau lipsă, nu e automat o problemă cu ANAF. Ce spune legea și cum documentați corect diferența.",
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["numerar", "registru-de-casa", "raport-z", "operatiuni"],
@@ -2141,7 +2141,7 @@ export const blogPosts: BlogPost[] = [
     slug: "ati-uitat-sa-emiteti-bonul-fiscal-ce-faceti-acum",
     title: "Ați uitat să emiteți bonul fiscal pentru o vânzare — ce faceți acum",
     description:
-      "Descoperiți abia la închiderea zilei, sau a doua zi, că o vânzare n-a trecut deloc prin bon fiscal? Fapta e deja comisă legal — dar diferența dintre un incident izolat corectat cinstit și un tipar de venituri needeclarate contează enorm pentru cât de gravă rămâne situația.",
+      "Ați uitat să emiteți bonul fiscal pentru o vânzare? Ce faceți acum și de ce un incident izolat, corectat cinstit, diferă de un tipar repetat.",
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "amenzi", "control-anaf"],
@@ -2174,7 +2174,7 @@ export const blogPosts: BlogPost[] = [
     slug: "bon-fiscal-cota-tva-gresita-cum-corectati-dupa-emitere",
     title: "Bon fiscal emis cu cotă de TVA greșită — cum corectați după emitere",
     description:
-      "Ați bătut 21% în loc de 11% (sau invers) și bonul s-a tipărit deja — poate clientul a și plecat. Iată ce puteți corecta prin stornare și ce rămâne, real, doar în mâna contabilului.",
+      "Bon fiscal emis cu cota de TVA greșită, 21% în loc de 11% sau invers: ce puteți corecta prin stornare și ce rămâne în sarcina contabilului.",
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["tva", "storno", "fiscal"],
@@ -2209,9 +2209,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "amenda-neconectare-casa-marcat-anaf",
-    title: "Amenda pentru neconectarea casei de marcat la sistemul ANAF — cât este și cum o evitați",
+    title: "Amenda pentru neconectarea casei de marcat la ANAF — cât este",
     description:
-      "Legea obligă orice casă de marcat fiscală să transmită date către ANAF în timp real — nu doar să existe. Amenda pentru neconectare e diferită de cea pentru lipsa bonului fiscal. Iată exact cât este, cu ce articol se aplică și ce înseamnă „conectat” din punct de vedere tehnic.",
+      "Amenda pentru neconectarea casei de marcat la ANAF diferă de cea pentru lipsa bonului. Cât este, ce articol se aplică și ce înseamnă „conectat”.",
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["fiscal", "casa-de-marcat", "amenzi", "control-anaf"],
@@ -2248,7 +2248,7 @@ export const blogPosts: BlogPost[] = [
     slug: "bon-fiscal-cerut-dupa-raportul-z-inchis-ce-faceti",
     title: "Un client cere bon fiscal după ce ați închis Raportul Z — ce faceți",
     description:
-      "Raportul Z de ieri (sau de acum trei săptămâni) e deja generat, iar clientul vrea o dovadă a cumpărăturii. Ce poate și ce nu poate face, tehnic și legal, casa de marcat pentru o zi deja închisă — și ce alternative reale aveți.",
+      "Un client cere bon fiscal după ce ați închis raportul Z: ce poate și ce nu poate face casa de marcat pentru o zi închisă și ce alternative aveți.",
     publishedAt: "2026-09-21",
     locale: "ro",
     tags: ["fiscal", "bon-fiscal", "raport-z"],
@@ -2285,7 +2285,7 @@ export const blogPosts: BlogPost[] = [
     slug: "ore-suplimentare-horeca-cum-se-calculeaza-si-platesc",
     title: "Ore suplimentare în HoReCa: cum se calculează și cum se plătesc corect",
     description:
-      "Codul Muncii limitează timpul de lucru la 48 de ore pe săptămână, inclusiv orele suplimentare, și stabilește cum se compensează — întâi timp liber, apoi un spor de minimum 75%. Ce înseamnă concret pentru o cafenea sau un restaurant cu ture variabile.",
+      "Orele suplimentare în HoReCa: limita de 48 de ore pe săptămână, compensarea întâi cu timp liber și sporul de minimum 75%, pentru ture variabile.",
     publishedAt: "2026-09-26",
     locale: "ro",
     tags: ["personal", "pontaj"],
@@ -2308,7 +2308,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Checklist practic",
-        body: "- [ ] Evidența orelor separă clar orele normale de cele suplimentare, pentru fiecare angajat\n- [ ] Orele suplimentare sunt acceptate cu acordul angajatului, nu impuse tacit\n- [ ] Totalul săptămânal, inclusiv suplimentar, respectă plafonul de 48 de ore (sau media pe perioada de referință aplicabilă)\n- [ ] Compensarea prin timp liber are o dată de acordare urmărită, în intervalul de 90 de zile\n- [ ] Dacă timpul liber nu a fost acordat în interval, sporul de minimum 75% e calculat și plătit\n- [ ] Regulile de mai sus sunt verificate periodic cu contabilul sau consultantul care administrează salarizarea, nu presupuse din auzite\n\nAceastă listă nu înlocuiește sfatul unui specialist în legislația muncii pentru situații specifice — contracte cu timp parțial, muncă sezonieră sau perioade de referință extinse prin contract colectiv necesită verificare punctuală.",
+        body: "- [ ] Evidența orelor separă clar orele normale de cele suplimentare, pentru fiecare angajat\n- [ ] Orele suplimentare sunt acceptate cu acordul angajatului, nu impuse tacit\n- [ ] Totalul săptămânal, inclusiv suplimentar, respectă plafonul de 48 de ore (sau media pe perioada de referință aplicabilă)\n- [ ] Compensarea prin timp liber are o dată de acordare urmărită, în intervalul de 90 de zile\n- [ ] Dacă timpul liber nu a fost acordat în interval, sporul de minimum 75% e calculat și plătit\n- [ ] Regulile de mai sus sunt verificate periodic cu contabilul sau consultantul care administrează salarizarea, nu presupuse din auzite\n\nAceastă listă nu înlocuiește sfatul unui specialist în legislația muncii pentru situații specifice — contracte cu timp parțial, muncă sezonieră sau perioade de referință extinse prin contract colectiv necesită verificare punctuală.\n\nfranchisetech nu calculează orele suplimentare și nu înlocuiește pontajul; [planurile](/pricing) includ personal nelimitat, fără taxă per angajat.",
       },
     ],
   },
@@ -2316,7 +2316,7 @@ export const blogPosts: BlogPost[] = [
     slug: "pauza-de-masa-cate-minute-prevede-legea",
     title: "Pauza de masă la angajați: câte minute prevede, de fapt, legea",
     description:
-      "Circulă ideea unei pauze obligatorii de 15 minute. Codul Muncii nu prevede așa ceva pentru un angajat adult — iată ce spune exact articolul 134, de unde vine confuzia și ce trebuie scris în regulamentul intern ca să fiți acoperiți la un control.",
+      "Pauza de masă: Codul Muncii nu prevede 15 minute obligatorii pentru un angajat adult. Ce spune articolul 134 și ce scrieți în regulamentul intern.",
     publishedAt: "2026-09-26",
     locale: "ro",
     tags: ["personal", "legal"],
@@ -2335,7 +2335,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum arată o pauză reală într-o tură aglomerată",
-        body: "Scrisă corect în regulament nu ajută dacă, în practică, pauza nu se întâmplă niciodată la orele de vârf. Așa cum discutăm și în [ghidul programului legal de lucru în HoReCa](/blog/program-legal-de-lucru-horeca-romania), pauza trebuie programată real, cu acoperire suplimentară de personal în orele aglomerate — altfel angajatul rămâne, de fapt, fără pauză efectivă, indiferent ce scrie pe hârtie.\n\nO metodă simplă: programați pauzele prin rotație, în funcție de fluxul real de clienți din tura respectivă, nu la o oră fixă identică în fiecare zi — o cafenea are un vârf de dimineață complet diferit de un restaurant cu vârf de prânz sau de seară.",
+        body: "Scrisă corect în regulament nu ajută dacă, în practică, pauza nu se întâmplă niciodată la orele de vârf. Așa cum discutăm și în [ghidul programului legal de lucru în HoReCa](/blog/program-legal-de-lucru-horeca-romania), pauza trebuie programată real, cu acoperire suplimentară de personal în orele aglomerate — altfel angajatul rămâne, de fapt, fără pauză efectivă, indiferent ce scrie pe hârtie.\n\nO metodă simplă: programați pauzele prin rotație, în funcție de fluxul real de clienți din tura respectivă, nu la o oră fixă identică în fiecare zi — o cafenea are un vârf de dimineață complet diferit de un restaurant cu vârf de prânz sau de seară.\n\nfranchisetech nu ține evidența pauzelor, dar [POS-ul](/features/pos) poate fi folosit de un număr nelimitat de casieri, fără cost per utilizator.",
       },
       {
         heading: "Checklist",
@@ -2345,9 +2345,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "control-itm-neanuntat-horeca-ce-verifica-si-ce-riscati",
-    title: "Control ITM neanunțat la cafenea sau restaurant: ce verifică și ce riscați",
+    title: "Control ITM neanunțat în HoReCa: ce verifică și ce riscați",
     description:
-      "Inspecția Muncii poate intra fără preaviz, oricând în programul de funcționare. Ce documente cere efectiv la o verificare HoReCa, ce înseamnă «muncă nedeclarată» și ce riscați, concret, dacă găsește o problemă.",
+      "Controlul ITM neanunțat în HoReCa: ce documente cere inspecția, ce înseamnă muncă nedeclarată și ce riscați concret dacă apare o problemă.",
     publishedAt: "2026-09-26",
     locale: "ro",
     tags: ["personal", "control-itm"],
@@ -2366,7 +2366,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Documente de avut pregătite mereu",
-        body: "- Copiile contractelor individuale de muncă, cu dovada transmiterii în REGES-Online, pentru fiecare angajat activ\n- Evidența actualizată a orelor lucrate, inclusiv orele suplimentare separate distinct\n- Ultimele state de plată și fluturașii de salariu corespunzători\n- Fișele de instruire SSM, semnate și la zi\n- Regulamentul intern, cu politica de pauze și program clar documentată\n\nA avea aceste documente centralizate, nu împrăștiate între contabil, un dosar fizic și memoria managerului de tură, scurtează dramatic un control care oricum vine fără preaviz.",
+        body: "- Copiile contractelor individuale de muncă, cu dovada transmiterii în REGES-Online, pentru fiecare angajat activ\n- Evidența actualizată a orelor lucrate, inclusiv orele suplimentare separate distinct\n- Ultimele state de plată și fluturașii de salariu corespunzători\n- Fișele de instruire SSM, semnate și la zi\n- Regulamentul intern, cu politica de pauze și program clar documentată\n\nA avea aceste documente centralizate, nu împrăștiate între contabil, un dosar fizic și memoria managerului de tură, scurtează dramatic un control care oricum vine fără preaviz.\n\nfranchisetech nu ține documentele de personal și nu înlocuiește REGES-Online; [planurile](/pricing) includ personal nelimitat, fără taxă per angajat.",
       },
       {
         heading: "Checklist",
@@ -2378,7 +2378,7 @@ export const blogPosts: BlogPost[] = [
     slug: "amenda-munca-nedeclarata-horeca-sumele-reale-2026",
     title: "Amenda pentru muncă nedeclarată în HoReCa: sumele reale în 2026",
     description:
-      "De la 1 ianuarie 2026, amenda pentru muncă nedeclarată s-a dublat. Iată suma exactă per persoană, plafonul per angajator și de ce «5 angajați nedeclarați înseamnă închisoare» nu mai este adevărat din 2017.",
+      "Amenda pentru muncă nedeclarată s-a dublat de la 1 ianuarie 2026: suma per persoană, plafonul per angajator și de ce nu mai e penal din 2017.",
     publishedAt: "2026-09-26",
     locale: "ro",
     tags: ["personal", "control-itm"],
@@ -2397,7 +2397,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum vă asigurați că sunteți acoperit",
-        body: "Regula practică simplă: niciun angajat nu începe efectiv activitatea înainte ca contractul individual de muncă să fie înregistrat și transmis prin **REGES-Online** — sistemul care a înlocuit complet Revisal din 1 octombrie 2025. Un angajat care «începe mâine, hârtiile le facem săptămâna asta» este exact profilul de risc pe care îl vizează amenda de mai sus.\n\nPentru personal sezonier sau part-time, frecvent în HoReCa, tentația de a amâna documentația «pentru câteva zile de probă» e mare — dar din perspectiva legii, ziua în care persoana lucrează efectiv fără contract înregistrat e suficientă pentru încadrarea ca muncă nedeclarată, indiferent cât de scurtă a fost perioada.",
+        body: "Regula practică simplă: niciun angajat nu începe efectiv activitatea înainte ca contractul individual de muncă să fie înregistrat și transmis prin **REGES-Online** — sistemul care a înlocuit complet Revisal din 1 octombrie 2025. Un angajat care «începe mâine, hârtiile le facem săptămâna asta» este exact profilul de risc pe care îl vizează amenda de mai sus.\n\nPentru personal sezonier sau part-time, frecvent în HoReCa, tentația de a amâna documentația «pentru câteva zile de probă» e mare — dar din perspectiva legii, ziua în care persoana lucrează efectiv fără contract înregistrat e suficientă pentru încadrarea ca muncă nedeclarată, indiferent cât de scurtă a fost perioada.\n\nfranchisetech nu ține evidența contractelor de muncă; [planurile](/pricing) includ personal nelimitat, fără taxă per angajat, deci un angajat nou nu crește costul softului.",
       },
       {
         heading: "Checklist",
@@ -2407,9 +2407,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "diferenta-stoc-inventar-anual-cum-o-documentati",
-    title: "Diferența de stoc la inventarul anual: cum o documentați ca să nu pară nejustificată",
+    title: "Diferența de stoc la inventarul anual: cum o documentați corect",
     description:
-      "Inventarul general anual e obligatoriu prin lege, nu doar o practică bună. Ce trebuie să conțină procesul-verbal, ce termene de 7 zile aveți și cum tratați legal o lipsă sau un plus descoperit la numărătoare.",
+      "Diferența de stoc la inventarul anual: ce conține procesul-verbal, termenele de 7 zile și cum tratați legal o lipsă sau un plus la numărătoare.",
     publishedAt: "2026-09-26",
     locale: "ro",
     tags: ["stoc", "contabilitate"],
@@ -2439,9 +2439,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "marja-neta-vs-marja-bruta-de-ce-conteaza-prima",
-    title: "Marja netă vs. marja brută — de ce prima e cea care contează cu adevărat",
+    title: "Marja netă vs. marja brută — de ce contează mai mult prima",
     description:
-      "Marja brută vă arată cât rămâne după ingrediente. Marja netă vă arată cât rămâne, de fapt, în buzunar după toate costurile. Formula completă, cu un exemplu lunar complet pentru o cafenea mică.",
+      "Marja netă vs. marja brută: brută arată ce rămâne după ingrediente, netă ce rămâne după toate costurile. Formula, cu un exemplu lunar la cafenea.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["marja", "financiar"],
@@ -2464,15 +2464,15 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "De ce marja netă ar trebui urmărită lunar, nu doar calculată o dată",
-        body: "Marja brută pe un produs nu se schimbă des — variază doar când crește prețul unui ingredient sau modificați rețeta. Marja netă a afacerii se schimbă lunar, pentru că depinde de volumul de vânzări, de sezon, de costurile ocazionale (o reparație, un angajat nou, o lună cu ore suplimentare peste normal).\n\nUrmărirea lunară a marjei nete vă arată tendința reală a afacerii — dacă marja netă scade constant de la o lună la alta, chiar dacă veniturile brute cresc, e un semnal timpuriu care merită investigat, nu ignorat pentru că «vânzările merg bine». Vedeți și [KPI-urile de urmărit săptămânal în HoReCa](/blog/kpi-uri-de-urmarit-saptamanal-horeca) pentru indicatorii care, urmăriți constant, arată devreme unde apare o problemă.",
+        body: "Marja brută pe un produs nu se schimbă des — variază doar când crește prețul unui ingredient sau modificați rețeta. Marja netă a afacerii se schimbă lunar, pentru că depinde de volumul de vânzări, de sezon, de costurile ocazionale (o reparație, un angajat nou, o lună cu ore suplimentare peste normal).\n\nUrmărirea lunară a marjei nete vă arată tendința reală a afacerii — dacă marja netă scade constant de la o lună la alta, chiar dacă veniturile brute cresc, e un semnal timpuriu care merită investigat, nu ignorat pentru că «vânzările merg bine». Vedeți și [KPI-urile de urmărit săptămânal în HoReCa](/blog/kpi-uri-de-urmarit-saptamanal-horeca) pentru indicatorii care, urmăriți constant, arată devreme unde apare o problemă.\n\nMarja brută pe produs pornește de la costul rețetelor din [gestiunea de stoc](/features/stock-management); marja netă rămâne un calcul lunar, făcut cu contabilul.",
       },
     ],
   },
   {
     slug: "cash-flow-cafenea-profitabil-pe-hartie-fara-bani-in-cont",
-    title: "Cash flow într-o cafenea — de ce poți fi «profitabil pe hârtie» și fără bani în cont",
+    title: "Cash flow la cafenea: profitabil pe hârtie, dar fără bani în cont",
     description:
-      "Profitul e un calcul contabil pe o perioadă. Cash flow-ul e mișcarea reală de bani, cu alt timing. De ce cele două pot spune povești complet diferite și cum construiți un tampon financiar simplu.",
+      "Cash flow la cafenea: de ce profitul contabil și banii din cont pot spune povești diferite și cum construiți un tampon financiar simplu.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["financiar", "cash-flow"],
@@ -2495,15 +2495,15 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum ajută datele zilnice din franchisetech",
-        body: "[Raportul Z zilnic](/blog/ce-este-raportul-z-si-cum-il-faci) și registrul de casă arată încasările reale, zi de zi, nu doar un total aproximat la finalul lunii. Asta înseamnă că un declin de încasări — sezonier, cauzat de o problemă operațională sau de concurență nouă în zonă — devine vizibil din primele zile, nu abia când verificați soldul contului și vă întrebați ce s-a întâmplat în ultimele două luni.\n\nCash flow-ul rămâne, în esență, o decizie de disciplină financiară — dar disciplina e mult mai ușor de aplicat când aveți cifrele zilnice la îndemână, nu doar un total lunar reconstituit după fapt.",
+        body: "[Raportul Z zilnic](/blog/ce-este-raportul-z-si-cum-il-faci) și registrul de casă arată încasările reale, zi de zi, nu doar un total aproximat la finalul lunii. Asta înseamnă că un declin de încasări — sezonier, cauzat de o problemă operațională sau de concurență nouă în zonă — devine vizibil din primele zile, nu abia când verificați soldul contului și vă întrebați ce s-a întâmplat în ultimele două luni.\n\nCash flow-ul rămâne, în esență, o decizie de disciplină financiară — dar disciplina e mult mai ușor de aplicat când aveți cifrele zilnice la îndemână, nu doar un total lunar reconstituit după fapt.\n\nÎncasările zilnice pe numerar și card se văd la [închiderea zilei în franchisetech](/features/z-report).",
       },
     ],
   },
   {
     slug: "marja-reala-comenzi-platforme-livrare-glovo-bolt-tazz",
-    title: "Marja reală a unei comenzi prin Glovo, Bolt Food sau Tazz — ce mănâncă din preț înainte să ajungă la dvs.",
+    title: "Marja reală a unei comenzi prin Glovo, Bolt Food sau Tazz",
     description:
-      "Prețul afișat în aplicația de delivery nu e ce încasați efectiv. Comisionul platformei, ambalajul suplimentar și TVA-ul neschimbat reduc marja reală — iată cum o calculați corect, per comandă.",
+      "Marja reală pe comenzile Glovo, Bolt Food sau Tazz: comisionul, ambalajul și TVA-ul neschimbat reduc ce încasați. Cum o calculați per comandă.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["delivery", "marja"],
@@ -2518,7 +2518,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ambalajul de unică folosință — costul ușor de ignorat",
-        body: "O comandă consumată la masă nu are cost de ambalare. O comandă delivery are aproape întotdeauna: cutie sau pahar cu capac securizat pentru transport, pungă, eventual tacâmuri de unică folosință și șervețele. Dacă [rețeta configurată în sistem](/blog/cum-calculezi-marja-bruta-produs-restaurant) nu include separat acest cost pentru varianta delivery, marja calculată pentru acel produs e supraestimată de fiecare dată când e vândut prin platformă.\n\nSoluția simplă: configurați o variantă separată de rețetă pentru delivery, cu costul de ambalare inclus, în loc să folosiți aceeași rețetă (și, implicit, aceeași marjă calculată) pentru ambele canale de vânzare.",
+        body: "O comandă consumată la masă nu are cost de ambalare. O comandă delivery are aproape întotdeauna: cutie sau pahar cu capac securizat pentru transport, pungă, eventual tacâmuri de unică folosință și șervețele. Dacă [rețeta configurată în sistem](/blog/cum-calculezi-marja-bruta-produs-restaurant) nu include separat acest cost pentru varianta delivery, marja calculată pentru acel produs e supraestimată de fiecare dată când e vândut prin platformă.\n\nSoluția simplă: configurați o variantă separată de rețetă pentru delivery, cu costul de ambalare inclus, în loc să folosiți aceeași rețetă (și, implicit, aceeași marjă calculată) pentru ambele canale de vânzare.\n\nRețetele și costul ingredientelor sunt descrise pe pagina [gestiunii de stoc](/features/stock-management).",
       },
       {
         heading: "TVA-ul rămâne neschimbat indiferent de canal",
@@ -2536,9 +2536,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "cat-costa-sa-deschizi-o-cafenea-mica-categoriile-reale-de-cost",
-    title: "Cât costă, de fapt, să deschideți o cafenea mică — categoriile reale de cost",
+    title: "Cât costă să deschideți o cafenea mică — categoriile reale de cost",
     description:
-      "Bugetul de deschidere al unei cafenele e mai mult decât chiria și echipamentul. Categoriile de cost pe care mulți antreprenori le subestimează — și de ce costul cel mai des uitat e capitalul de lucru.",
+      "Cât costă să deschideți o cafenea mică: costurile subestimate dincolo de chirie și echipament și de ce capitalul de lucru e cel mai des uitat.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["cafenea", "financiar"],
@@ -2568,9 +2568,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "coduri-caen-restaurant-cafenea-2026-rev3",
-    title: "Codurile CAEN pentru restaurant, cafenea sau catering în 2026 — ce s-a schimbat",
+    title: "Coduri CAEN pentru restaurant, cafenea sau catering în 2026",
     description:
-      "Termenul de trecere la nomenclatorul CAEN Rev. 3 a expirat pe 25 septembrie 2026. Codurile corecte acum pentru restaurant, bar, catering și food truck — și ce se întâmplă dacă firma dumneavoastră are încă un cod vechi.",
+      "Codurile CAEN Rev. 3 pentru restaurant, bar, catering și food truck după termenul din 25 septembrie 2026 și ce faceți dacă aveți încă un cod vechi.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["caen", "infiintare"],
@@ -2589,7 +2589,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cum alegeți codul corect pentru activitatea dumneavoastră",
-        body: "- **Cafenea sau restaurant cu servire la masă, locație fixă** → 5611\n- **Food truck sau vânzare ambulantă de mâncare** → 5612\n- **Catering pentru evenimente** (nunți, conferințe, petreceri) → 5621\n- **Alte servicii de alimentație** care nu se încadrează clar în restaurant sau catering → 5622\n- **Bar, cafenea axată pe băuturi**, fără meniu de restaurant complet → 5630\n\nMulte afaceri HoReCa au, de fapt, activitate mixtă (un restaurant care face și catering ocazional, de exemplu) — în acest caz, înregistrați activitatea principală pe codul CAEN principal și adăugați codurile secundare relevante, nu forțați totul sub un singur cod.",
+        body: "- **Cafenea sau restaurant cu servire la masă, locație fixă** → 5611\n- **Food truck sau vânzare ambulantă de mâncare** → 5612\n- **Catering pentru evenimente** (nunți, conferințe, petreceri) → 5621\n- **Alte servicii de alimentație** care nu se încadrează clar în restaurant sau catering → 5622\n- **Bar, cafenea axată pe băuturi**, fără meniu de restaurant complet → 5630\n\nMulte afaceri HoReCa au, de fapt, activitate mixtă (un restaurant care face și catering ocazional, de exemplu) — în acest caz, înregistrați activitatea principală pe codul CAEN principal și adăugați codurile secundare relevante, nu forțați totul sub un singur cod.\n\nDupă înregistrarea firmei, [configurarea ghidată din franchisetech](/features/setup-onboarding) vă duce de la cont nou la prima vânzare de test.",
       },
       {
         heading: "Checklist",
@@ -2601,7 +2601,7 @@ export const blogPosts: BlogPost[] = [
     slug: "haccp-horeca-mitul-certificatului",
     title: "HACCP în HoReCa — mitul certificatului vs. obligația reală",
     description:
-      "Mulți proprietari cred că «rezolvă» HACCP cumpărând un certificat de la o firmă de consultanță. Legea nu cere un certificat — cere proceduri de autocontrol implementate și documentate efectiv, în fiecare zi.",
+      "HACCP în HoReCa: legea nu cere un certificat cumpărat, ci proceduri de autocontrol aplicate și documentate zilnic. Ce înseamnă pentru o cafenea.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["haccp", "conformitate"],
@@ -2616,7 +2616,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce înseamnă, practic, «proceduri HACCP» pentru o cafenea mică",
-        body: "Nu înseamnă un document teoretic de 40 de pagini scris o dată și uitat într-un sertar. Înseamnă proceduri reale, documentate constant:\n\n- **Monitorizarea temperaturilor** la frigidere și vitrine frigorifice, înregistrată periodic (nu doar «pare rece»)\n- **Trasabilitatea materiilor prime** — de unde vine fiecare lot de marfă, cu documentele de recepție păstrate\n- **Proceduri de curățenie și igienizare**, cu un program clar, nu «facem curat când apucăm»\n- **Instruirea personalului** pe igienă alimentară, la angajare și periodic\n- **Gestionarea produselor cu risc** — separarea materiilor prime crude de cele gata de consum, respectarea termenelor de valabilitate\n\nAceste proceduri, documentate constant (chiar și simplu, pe un formular tipărit completat zilnic), reprezintă exact ce cere legea — nu o hârtie cumpărată o singură dată.",
+        body: "Nu înseamnă un document teoretic de 40 de pagini scris o dată și uitat într-un sertar. Înseamnă proceduri reale, documentate constant:\n\n- **Monitorizarea temperaturilor** la frigidere și vitrine frigorifice, înregistrată periodic (nu doar «pare rece»)\n- **Trasabilitatea materiilor prime** — de unde vine fiecare lot de marfă, cu documentele de recepție păstrate\n- **Proceduri de curățenie și igienizare**, cu un program clar, nu «facem curat când apucăm»\n- **Instruirea personalului** pe igienă alimentară, la angajare și periodic\n- **Gestionarea produselor cu risc** — separarea materiilor prime crude de cele gata de consum, respectarea termenelor de valabilitate\n\nAceste proceduri, documentate constant (chiar și simplu, pe un formular tipărit completat zilnic), reprezintă exact ce cere legea — nu o hârtie cumpărată o singură dată.\n\nAchizițiile înregistrate în [gestiunea de stoc din franchisetech](/features/stock-management) păstrează produsul și furnizorul, dar nu înlocuiesc jurnalele de temperatură sau procedurile HACCP.",
       },
       {
         heading: "De ce un certificat cumpărat nu vă scutește de aplicare efectivă",
@@ -2630,9 +2630,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "salariul-minim-2026-costuri-personal-horeca",
-    title: "Salariul minim 2026 — ce înseamnă pentru costurile cu personalul într-o cafenea sau restaurant",
+    title: "Salariul minim 2026 și costurile cu personalul în HoReCa",
     description:
-      "De la 1 iulie 2026, salariul minim brut pe economie a crescut la 4.325 lei. Ce înseamnă asta pentru costurile cu personalul în HoReCa și de ce vechea excepție pentru industria alimentară nu mai există.",
+      "Salariul minim brut a crescut la 4.325 lei de la 1 iulie 2026. Ce înseamnă pentru costurile cu personalul în HoReCa și ce excepție a dispărut.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["personal", "salarii"],
@@ -2651,7 +2651,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce înseamnă practic pentru costul total cu un angajat",
-        body: "Salariul brut nu este singurul cost real cu un angajat — la el se adaugă contribuțiile aferente suportate de angajator, care variază în funcție de tipul de contract și condițiile specifice. Nu presupuneți un procent standard fără să verificați — cereți contabilului care vă administrează salarizarea o simulare exactă a costului total per angajat la noul nivel de salariu minim, mai ales dacă aveți mai mulți angajați plătiți la acest nivel și impactul se multiplică direct în costurile fixe lunare.",
+        body: "Salariul brut nu este singurul cost real cu un angajat — la el se adaugă contribuțiile aferente suportate de angajator, care variază în funcție de tipul de contract și condițiile specifice. Nu presupuneți un procent standard fără să verificați — cereți contabilului care vă administrează salarizarea o simulare exactă a costului total per angajat la noul nivel de salariu minim, mai ales dacă aveți mai mulți angajați plătiți la acest nivel și impactul se multiplică direct în costurile fixe lunare.\n\nCât privește softul, [planurile franchisetech](/pricing) nu au taxă per angajat, indiferent câți oameni folosesc casa.",
       },
       {
         heading: "Checklist",
@@ -2661,9 +2661,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "e-factura-b2c-2026-ce-inseamna-pentru-horeca",
-    title: "E-Factura pentru vânzări către persoane fizice — ce înseamnă, de fapt, pentru un local HoReCa",
+    title: "E-Factura pentru persoane fizice — ce înseamnă pentru un local HoReCa",
     description:
-      "De la 1 ianuarie 2025, e-Factura e obligatorie și pentru vânzările către persoane fizice — dar bonul fiscal obișnuit nu intră sub această obligație. Iată exact când se aplică regula și când nu.",
+      "E-Factura B2C este obligatorie din 1 ianuarie 2025, dar bonul fiscal obișnuit nu intră sub această obligație. Când se aplică regula în HoReCa.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["fiscal", "e-factura"],
@@ -2674,7 +2674,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Bonul fiscal obișnuit NU trece prin e-Factura",
-        body: "Codul Fiscal, la art. 319 alin. (12) și (21), califică un bon fiscal (sau alt document similar emis de o casă de marcat) drept **factură simplificată** atunci când valoarea nu depășește 100 EUR — iar facturile simplificate sunt **exceptate de la obligația de transmitere prin RO e-Factura**. Asta înseamnă că vânzarea obișnuită dintr-o cafenea sau restaurant — un cappuccino, o masă de familie, orice [bon fiscal emis normal prin POS](/blog/bon-fiscal-obligatoriu-cand-si-cum) — **nu trebuie încărcată separat în sistemul e-Factura**. Bonul rămâne exact ce a fost mereu: documentul fiscal al vânzării, emis prin casa de marcat conectată la ANAF.\n\nAceasta e distincția pe care mulți proprietari o ratează: e-Factura B2C nu înseamnă «orice vânzare către un client obișnuit trebuie transmisă prin platforma ANAF» — înseamnă altceva, explicat mai jos.",
+        body: "Codul Fiscal, la art. 319 alin. (12) și (21), califică un bon fiscal (sau alt document similar emis de o casă de marcat) drept **factură simplificată** atunci când valoarea nu depășește 100 EUR — iar facturile simplificate sunt **exceptate de la obligația de transmitere prin RO e-Factura**. Asta înseamnă că vânzarea obișnuită dintr-o cafenea sau restaurant — un cappuccino, o masă de familie, orice [bon fiscal emis normal prin POS](/blog/bon-fiscal-obligatoriu-cand-si-cum) — **nu trebuie încărcată separat în sistemul e-Factura**. Bonul rămâne exact ce a fost mereu: documentul fiscal al vânzării, emis prin casa de marcat conectată la ANAF.\n\nAceasta e distincția pe care mulți proprietari o ratează: e-Factura B2C nu înseamnă «orice vânzare către un client obișnuit trebuie transmisă prin platforma ANAF» — înseamnă altceva, explicat mai jos.\n\nÎn franchisetech, vânzarea din POS se trimite către casa de marcat prin driverul fiscal; detaliile sunt pe pagina [bonului fiscal în POS](/features/qr-code-receipts).",
       },
       {
         heading: "Când se aplică totuși obligația",
@@ -2692,9 +2692,9 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "raportarea-saf-t-d406-pentru-horeca",
-    title: "Raportarea SAF-T (D406) pentru HoReCa — cine trebuie să o depună și din când",
+    title: "Raportarea SAF-T (D406) în HoReCa — cine o depune și de când",
     description:
-      "Perioadele de grație pentru contribuabilii mici s-au încheiat — dacă aveți un SRL mic în HoReCa, obligația de raportare SAF-T (D406) se aplică deja. Ce înseamnă concret și ce acoperă exportul din programul de gestiune.",
+      "Raportarea SAF-T (D406) se aplică deja și SRL-urilor mici din HoReCa. Ce înseamnă concret și ce acoperă exportul din programul de gestiune.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["contabilitate", "saf-t"],
@@ -2709,7 +2709,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Ce acoperă exportul disponibil în franchisetech — și ce nu",
-        body: "franchisetech oferă un export SAF-T pentru partea de **mișcări de stoc** (recepții prin NIR, ieșiri prin vânzare, scăzăminte, ajustări, retururi) — secțiunea din declarația D406 care se bazează pe date de gestiune, nu pe contabilitatea completă a firmei. Acest export **nu este o depunere certificată de sine stătătoare** — este un draft structurat corect după schema oficială ANAF, care trebuie verificat și integrat de contabilul dumneavoastră în declarația D406 completă a firmei, alături de partea de registru general contabil (jurnal, balanțe, solduri) pe care programul de gestiune nu o gestionează.\n\nUn program de gestiune ca franchisetech nu ține o contabilitate în partidă dublă — nu are conturi contabile, solduri de furnizori sau clienți, sau coduri vamale per produs, elemente pe care schema SAF-T le cere pentru anumite secțiuni. Exportul acoperă exact ce sistemul chiar știe cu certitudine — mișcările de stoc reale, din NIR și vânzări — nu inventează date pentru secțiunile pe care nu le gestionează.",
+        body: "franchisetech oferă un export SAF-T pentru partea de **mișcări de stoc** (recepții prin NIR, ieșiri prin vânzare, scăzăminte, ajustări, retururi) — secțiunea din declarația D406 care se bazează pe date de gestiune, nu pe contabilitatea completă a firmei. Acest export **nu este o depunere certificată de sine stătătoare** — este un draft structurat corect după schema oficială ANAF, care trebuie verificat și integrat de contabilul dumneavoastră în declarația D406 completă a firmei, alături de partea de registru general contabil (jurnal, balanțe, solduri) pe care programul de gestiune nu o gestionează.\n\nUn program de gestiune ca franchisetech nu ține o contabilitate în partidă dublă — nu are conturi contabile, solduri de furnizori sau clienți, sau coduri vamale per produs, elemente pe care schema SAF-T le cere pentru anumite secțiuni. Exportul acoperă exact ce sistemul chiar știe cu certitudine — mișcările de stoc reale, din NIR și vânzări — nu inventează date pentru secțiunile pe care nu le gestionează.\n\nMișcările de stoc din export vin din achizițiile și vânzările înregistrate în [gestiunea de stoc](/features/stock-management).",
       },
       {
         heading: "Cum funcționează practic acest flux",
@@ -2723,16 +2723,16 @@ export const blogPosts: BlogPost[] = [
   },
   {
     slug: "gdpr-program-loializare-date-clienti",
-    title: "GDPR și programul de loializare — ce trebuie să știți înainte să colectați date despre clienți",
+    title: "GDPR pentru programul de loializare — reguli pentru datele clienților",
     description:
-      "Un program de fidelizare cu nume și telefon înseamnă că prelucrați date cu caracter personal. Ce bază legală aveți nevoie, dacă vă trebuie un DPO și ce regulă separată se aplică dacă trimiteți SMS-uri promoționale.",
+      "GDPR pentru programul de loializare: ce bază legală vă trebuie, dacă aveți nevoie de un DPO și ce regulă se aplică la SMS-urile promoționale.",
     publishedAt: "2026-09-28",
     locale: "ro",
     tags: ["gdpr", "loializare"],
     sections: [
       {
         heading: "Ce date colectați, de fapt, printr-un program de loializare",
-        body: "Un program de fidelizare simplu — cartelă digitală de vizite, puncte de loialitate, reduceri pentru clienți recurenți — înseamnă, aproape întotdeauna, colectarea a cel puțin numelui și numărului de telefon al clientului. Din momentul în care stocați aceste date, indiferent cât de simplu pare sistemul, intrați sub incidența Regulamentului UE 2016/679 (GDPR) și a legii române de aplicare, Legea nr. 190/2018.",
+        body: "Un program de fidelizare simplu — cartelă digitală de vizite, puncte de loialitate, reduceri pentru clienți recurenți — înseamnă, aproape întotdeauna, colectarea a cel puțin numelui și numărului de telefon al clientului. Din momentul în care stocați aceste date, indiferent cât de simplu pare sistemul, intrați sub incidența Regulamentului UE 2016/679 (GDPR) și a legii române de aplicare, Legea nr. 190/2018.\n\nDacă atașați clientul la vânzare în [POS-ul franchisetech](/features/pos), aceleași reguli se aplică și datelor păstrate acolo.",
       },
       {
         heading: "Aveți nevoie de consimțământ — baza legală cea mai sigură",
