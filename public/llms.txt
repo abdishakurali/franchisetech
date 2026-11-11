@@ -55,7 +55,7 @@ franchisetech is a browser-based workspace: POS register, products and stock, pu
 
 - Website: https://franchisetech.ro
 - Contact page: https://franchisetech.ro/contact
-- Support phone / WhatsApp: +353 83 805 4778
+- Support phone / WhatsApp: +40 756 491 710
 
 ## Optional
 

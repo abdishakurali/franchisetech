@@ -44,7 +44,7 @@ Core value: "Close the day with truth" — cash drawer vs expected, margin visib
 - Starter: €49/mo (café, POS + products + Z-report)
 - Pro: €79/mo (restaurant, stock + recipes + kitchen)
 - Multi-location: €99/location/mo
-- Setup: free (owner decision 2026-11-04; was €199). Support phone/WhatsApp +353 83 805 4778 in lib/marketing/contact-info.ts
+- Setup: free (owner decision 2026-11-04; was €199). Support phone/WhatsApp +40 756 491 710 in lib/marketing/contact-info.ts
 - Trial: 15 days, starts after a one-time €1 card verification (Stripe Checkout payment mode, card saved for off-session use; price in lib/billing/plans.ts)
 
 ## ICP (Ideal Customer Profile)
