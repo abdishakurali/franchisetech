@@ -16,6 +16,11 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   ajustare: "Ajustare",
 };
 
+const REPORT_DATA_BUDGET_MS = 45_000;
+const REPORT_UNAVAILABLE_MESSAGE =
+  "Raportul de gestiune nu a putut fi generat acum: datele de stoc nu au putut fi citite la timp. " +
+  "Vă rugăm încercați din nou peste câteva minute. Dacă problema persistă, contactați suportul franchisetech.";
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const today = new Date().toISOString().slice(0, 10);
@@ -56,18 +61,37 @@ export async function GET(req: Request) {
   const { data: profile } = await supabase.from("profiles").select("full_name,email").eq("id", user.id).single();
   const generatedBy = profile?.full_name || profile?.email || user.email || "—";
 
-  const { org, movements, totals, openingStock, closingStock, hasUnknownCost } = await computeGestiuneReport(
-    supabase,
-    orgId,
-    from,
-    to,
-    {
-      openingBalance: "Sold la începutul perioadei",
-      unknownSupplier: "Furnizor necunoscut",
-      rawConsumption: "Consum materii prime",
-      zReportItems: (count) => `Raport Z (${count} articole)`,
-    },
-  );
+  // Hard time budget for the data queries: if the database is slow, the
+  // user gets a clear message in seconds instead of a spinner that ends in
+  // Vercel's 300 s function timeout (2026-11-10 incident).
+  let report: Awaited<ReturnType<typeof computeGestiuneReport>>;
+  try {
+    report = await computeGestiuneReport(
+      supabase,
+      orgId,
+      from,
+      to,
+      {
+        openingBalance: "Sold la începutul perioadei",
+        unknownSupplier: "Furnizor necunoscut",
+        rawConsumption: "Consum materii prime",
+        zReportItems: (count) => `Raport Z (${count} articole)`,
+      },
+      { signal: AbortSignal.timeout(REPORT_DATA_BUDGET_MS) },
+    );
+  } catch (error) {
+    console.error("[gestiune/pdf] report data failed", {
+      orgId,
+      from,
+      to,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return new NextResponse(REPORT_UNAVAILABLE_MESSAGE, {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Retry-After": "60" },
+    });
+  }
+  const { org, movements, totals, openingStock, closingStock, hasUnknownCost } = report;
 
   const money = (v: number) => formatMoney(v, currency);
 

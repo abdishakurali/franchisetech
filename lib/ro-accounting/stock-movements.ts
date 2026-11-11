@@ -58,6 +58,59 @@ export const STOCK_MOVEMENT_SELECT =
 
 const PAGE_SIZE = 1000;
 
+/** Thrown (only when the caller opts in with `throwOnError`) instead of
+ * silently returning a truncated list when a page query fails. */
+export class StockMovementsQueryError extends Error {
+  constructor(message: string, readonly cause?: unknown) {
+    super(message);
+    this.name = "StockMovementsQueryError";
+  }
+}
+
+export type FetchStockMovementsOptions = {
+  /** Abort in-flight queries once the caller's time budget is spent. */
+  signal?: AbortSignal;
+  /** Throw StockMovementsQueryError on a failed page instead of logging and
+   * returning the rows fetched so far (the legacy behaviour, which can turn
+   * a timeout into a wrong-but-plausible total). */
+  throwOnError?: boolean;
+  /** Narrower column list; must include id and performed_at (keyset). */
+  select?: string;
+  /** Skip the products lookup (caller resolves products itself). */
+  skipProducts?: boolean;
+};
+
+/** Quote a value for use inside a PostgREST or=(...) filter. */
+function pgrstQuote(value: string): string {
+  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+export async function fetchProductMap(
+  supabase: SupabaseClient,
+  orgId: string,
+  productIds: string[],
+  options: FetchStockMovementsOptions = {},
+): Promise<Map<string, StockMovementProductRef>> {
+  const productMap = new Map<string, StockMovementProductRef>();
+  if (productIds.length === 0) return productMap;
+
+  let query = supabase
+    .from("products")
+    .select("id,name,unit_of_measure,cost_price,vat_rate,sku")
+    .eq("organisation_id", orgId)
+    .in("id", productIds);
+  if (options.signal) query = query.abortSignal(options.signal);
+  const { data: products, error } = await query;
+  if (error && options.throwOnError) {
+    throw new StockMovementsQueryError(`products lookup failed: ${error.message}`, error);
+  }
+
+  for (const p of (products ?? []) as Array<StockMovementProductRef & { id: string }>) {
+    productMap.set(p.id, p);
+  }
+  return productMap;
+}
+
 export async function fetchStockMovements(
   supabase: SupabaseClient,
   orgId: string,
@@ -67,6 +120,7 @@ export async function fetchStockMovements(
     to?: string;
     before?: string;
   } = {},
+  options: FetchStockMovementsOptions = {},
 ): Promise<StockMovementQueryRow[]> {
   // Reads from the unified view (observed stock_movements + any historical
   // reconciliation entries) so reports reflect the complete, corrected
@@ -77,50 +131,60 @@ export async function fetchStockMovements(
   // rows before a recent date), and an un-paginated .select() would
   // silently truncate to the oldest page instead of erroring -- producing a
   // wrong-but-plausible-looking total with no indication anything was cut.
+  //
+  // Keyset (seek) pagination on (performed_at, id), NOT .range() offsets:
+  // OFFSET n makes Postgres produce and discard n rows (through the UNION
+  // ALL view and its RLS checks) on every page, so page k costs ~k pages of
+  // work and the whole fetch is quadratic. On 2026-11-10 that pushed pages
+  // 18-22 of a `before` query past the statement timeout and the gestiune PDF
+  // route past Vercel's 300 s limit. Each keyset page starts where the last
+  // one ended, so every page costs the same.
   const rows: StockMovementQueryRow[] = [];
+  let cursor: { performedAt: string; id: string } | null = null;
   let page = 0;
   for (;;) {
     let query = supabase
       .from("stock_movements_reconciled")
-      .select(STOCK_MOVEMENT_SELECT)
+      .select(options.select ?? STOCK_MOVEMENT_SELECT)
       .eq("organisation_id", orgId);
 
     if (filters.movementType) query = query.eq("movement_type", filters.movementType);
     if (filters.from) query = query.gte("performed_at", filters.from);
     if (filters.to) query = query.lte("performed_at", filters.to);
     if (filters.before) query = query.lt("performed_at", filters.before);
+    if (cursor) {
+      const ts = pgrstQuote(cursor.performedAt);
+      query = query
+        .gte("performed_at", cursor.performedAt)
+        .or(`performed_at.gt.${ts},and(performed_at.eq.${ts},id.gt.${pgrstQuote(cursor.id)})`);
+    }
 
-    const { data, error } = await query
-      .order("performed_at")
-      .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
+    let ordered = query.order("performed_at").order("id").limit(PAGE_SIZE);
+    if (options.signal) ordered = ordered.abortSignal(options.signal);
+    const { data, error } = await ordered;
 
     if (error) {
       console.error("[fetchStockMovements] query failed", { orgId, filters, page, error: error.message });
+      if (options.throwOnError) {
+        throw new StockMovementsQueryError(`stock movements page ${page} failed: ${error.message}`, error);
+      }
       break;
     }
     if (!data?.length) break;
 
-    rows.push(...(data as StockMovementQueryRow[]));
-    if (data.length < PAGE_SIZE) break;
+    const pageRows = data as unknown as Array<StockMovementQueryRow & { id: string }>;
+    rows.push(...pageRows);
+    if (pageRows.length < PAGE_SIZE) break;
+    const last = pageRows[pageRows.length - 1];
+    cursor = { performedAt: last.performed_at, id: last.id };
     page += 1;
   }
 
   if (!rows.length) return [];
+  if (options.skipProducts) return rows;
 
   const productIds = [...new Set(rows.map((r) => r.product_id).filter(Boolean))] as string[];
-  const productMap = new Map<string, StockMovementProductRef>();
-
-  if (productIds.length > 0) {
-    const { data: products } = await supabase
-      .from("products")
-      .select("id,name,unit_of_measure,cost_price,vat_rate,sku")
-      .eq("organisation_id", orgId)
-      .in("id", productIds);
-
-    for (const p of (products ?? []) as Array<StockMovementProductRef & { id: string }>) {
-      productMap.set(p.id, p);
-    }
-  }
+  const productMap = await fetchProductMap(supabase, orgId, productIds, options);
 
   return rows.map((row) => ({
     ...row,
