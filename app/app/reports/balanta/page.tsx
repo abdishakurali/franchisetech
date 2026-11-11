@@ -11,8 +11,7 @@ import { requireBusinessModule } from "@/lib/module-guard";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 import type { BalantaIntegrityStatus } from "@/lib/ro-accounting/balanta";
 import { computeBalantaReport } from "@/lib/ro-accounting/balanta-data";
-import { sumMovementQty } from "@/lib/ro-accounting/balanta-integrity";
-import { fetchStockMovements } from "@/lib/ro-accounting/stock-movements";
+import { fetchLedgerQtyByProduct } from "@/lib/ro-accounting/opening-stock";
 import { canAccessAccountingReport, isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
 
 function integrityBadgeClass(status: BalantaIntegrityStatus): string {
@@ -76,11 +75,12 @@ export default async function BalantaReportPage({
           .from("products")
           .select("id,name,unit_of_measure,current_stock_qty,is_stock_tracked,is_ingredient")
           .eq("organisation_id", orgId);
-        const allMovements = await fetchStockMovements(supabase, orgId, {});
+        // One grouped aggregate, not a download of the whole movement history.
+        const ledgerQtyByProduct = await fetchLedgerQtyByProduct(supabase, orgId);
         return (products ?? [])
           .filter((p) => p.is_stock_tracked || p.is_ingredient)
           .map((p) => {
-            const ledgerQty = sumMovementQty(allMovements, p.id);
+            const ledgerQty = ledgerQtyByProduct.get(p.id) ?? 0;
             const catalogQty = Number(p.current_stock_qty ?? 0);
             return {
               id: p.id,

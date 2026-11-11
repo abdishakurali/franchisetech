@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { deriveAccountType } from "@/lib/analytics/account-type";
 import { formatBucharestTime } from "@/lib/email/signup-alert";
+import { fetchAllIn } from "@/lib/supabase/fetch-all";
 
 // Promise to new cafes: first fiscal receipt within 2 days of signup.
 // Signup time = organisations.created_at. First LIVE receipt = earliest
@@ -121,12 +122,15 @@ export async function fetchReceiptTimelines(supabase: SupabaseClient, sinceIso: 
   const ids = rows.map((o) => o.id);
 
   const [{ data: attempts, error: attemptsErr }, { data: owners, error: ownersErr }] = await Promise.all([
-    supabase
+    // Paged: one live cafe writes ~150 successful attempts a day, so the
+    // cohort passes PostgREST's 1000-row cap and other orgs' first receipt
+    // could be cut off (a false "no live receipt" alert).
+    fetchAllIn(ids, (chunk) => supabase
       .from("fiscal_receipt_attempts")
-      .select("organisation_id, status, mock_mode, attempted_at")
-      .in("organisation_id", ids)
+      .select("id, organisation_id, status, mock_mode, attempted_at")
+      .in("organisation_id", chunk)
       .eq("status", "success")
-      .eq("mock_mode", false),
+      .eq("mock_mode", false)),
     supabase
       .from("organisation_members")
       .select("organisation_id, profiles(email)")

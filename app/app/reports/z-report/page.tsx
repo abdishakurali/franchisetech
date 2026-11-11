@@ -11,6 +11,7 @@ import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { ensureReferralCode } from "@/lib/referrals";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { formatAppDate, intlLocaleForApp } from "@/lib/app-locale";
+import { fetchAll, fetchAllIn } from "@/lib/supabase/fetch-all";
 
 function firstJoined<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
@@ -28,22 +29,21 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
   const dayStart = `${reportDate}T00:00:00.000Z`;
   const dayEnd = `${reportDate}T23:59:59.999Z`;
 
-  const { data: transactions } = await supabase.from("pos_transactions")
+  const { data: transactions } = await fetchAll(() => supabase.from("pos_transactions")
     .select("*,payment_methods(name,type),profiles(full_name,email)")
     .eq("organisation_id", orgId)
     .gte("sold_at", dayStart)
-    .lte("sold_at", dayEnd)
-    .order("sold_at");
+    .lte("sold_at", dayEnd), { keys: ["sold_at", "id"] });
 
   // Scoped by transaction_id (from the already sold_at-filtered transactions
   // above), not pos_transaction_items.created_at -- for migrated historical
   // sales, created_at is the bulk-import timestamp, not the real sale date.
   const transactionIds = (transactions ?? []).map((tx) => tx.id);
   const { data: items } = transactionIds.length
-    ? await supabase.from("pos_transaction_items")
-        .select("product_name,quantity,line_total,vat_rate,net_amount,vat_amount,gross_amount,transaction_id")
+    ? await fetchAllIn(transactionIds, (chunk) => supabase.from("pos_transaction_items")
+        .select("id,product_name,quantity,line_total,vat_rate,net_amount,vat_amount,gross_amount,transaction_id")
         .eq("organisation_id", orgId)
-        .in("transaction_id", transactionIds)
+        .in("transaction_id", chunk))
     : { data: [] as Array<{ product_name: string; quantity: number | null; line_total: number | null; vat_rate: number | null; net_amount: number | null; vat_amount: number | null; gross_amount: number | null; transaction_id: string }> };
 
 

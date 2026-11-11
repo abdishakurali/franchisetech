@@ -6,6 +6,7 @@ import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { fetchAll, sumColumn } from "@/lib/supabase/fetch-all";
 
 type MovementRow = {
   id: string;
@@ -58,22 +59,25 @@ export default async function FisaMagaziePage({
   // The running "Stoc" column inside the table only needs to be correct
   // relative to this anchor, not to reconstruct the product's entire history
   // from zero on every page load.
-  const { data: priorMovements } = await supabase
+  //
+  // Summed in the database: a product used in every coffee (milk, beans)
+  // gets ~150 movements a day, so its history passes PostgREST's 1000-row
+  // cap within a week and a row-by-row sum silently stopped there.
+  const { data: openingSum } = await sumColumn((select) => supabase
     .from("stock_movements_reconciled")
-    .select("quantity_change")
+    .select(select)
     .eq("organisation_id", orgId)
     .eq("product_id", id)
-    .lt("performed_at", windowStart);
-  const openingBalance = (priorMovements ?? []).reduce((sum, m) => sum + Number(m.quantity_change ?? 0), 0);
+    .lt("performed_at", windowStart), "quantity_change", { keys: ["performed_at", "id"] });
+  const openingBalance = openingSum ?? 0;
 
-  const { data: movements } = await supabase
+  const { data: movements } = await fetchAll(() => supabase
     .from("stock_movements_reconciled")
     .select("id,movement_type,quantity_change,unit_cost,reason,performed_at,source")
     .eq("organisation_id", orgId)
     .eq("product_id", id)
     .gte("performed_at", windowStart)
-    .lte("performed_at", windowEnd)
-    .order("performed_at", { ascending: true });
+    .lte("performed_at", windowEnd), { keys: ["performed_at", "id"] });
 
   const rows = (movements ?? []) as MovementRow[];
 

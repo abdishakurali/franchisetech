@@ -23,6 +23,7 @@ import {
   type SagaFactura,
   type SagaLinie,
 } from "@/lib/ro-accounting/saga-xml";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 type PurchaseRow = {
   id: string;
@@ -135,7 +136,7 @@ export async function GET(req: Request) {
       // no supplier_name column -- it's `supplier` (free text) plus an
       // optional FK to suppliers; purchase_items uses unit_cost/
       // unit_of_measure/tax_rate, not unit_price/unit/vat_rate).
-      const { data: purchases } = await supabase
+      const { data: purchases } = await fetchAll(() => supabase
         .from("purchases")
         .select(`
           id,
@@ -149,8 +150,7 @@ export async function GET(req: Request) {
         `)
         .eq("organisation_id", orgId)
         .gte("purchase_date", fromTs)
-        .lte("purchase_date", toTs)
-        .order("purchase_date");
+        .lte("purchase_date", toTs), { keys: ["purchase_date", "id"] });
 
       // Collect product IDs to look up saga_article_code
       const allProductIds = [
@@ -216,17 +216,17 @@ export async function GET(req: Request) {
       // created_at is the bulk-import timestamp, not the real sale date.
       // This generates the actual Saga XML filed with the accountant, so a
       // wrong filter here means a wrong export, not just a wrong UI number.
-      const { data: itemsRaw } = await supabase
+      const { data: itemsRaw } = await fetchAll(() => supabase
         .from("pos_transactions")
         .select(`
-          sold_at,
+          id, sold_at,
           status,
           site_id,
           pos_transaction_items(product_name,quantity,vat_rate,net_amount,vat_amount,gross_amount,line_total)
         `)
         .eq("organisation_id", orgId)
         .gte("sold_at", fromTs)
-        .lte("sold_at", toTs);
+        .lte("sold_at", toTs), { keys: ["sold_at", "id"] });
 
       type RawTransactionItem = { product_name: string | null; quantity: number | null; vat_rate: number | null; net_amount: number | null; vat_amount: number | null; gross_amount: number | null; line_total: number | null };
       type RawTransaction = { sold_at: string; status: string; site_id: string | null; pos_transaction_items: RawTransactionItem[] };

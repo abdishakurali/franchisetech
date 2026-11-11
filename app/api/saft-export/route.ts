@@ -19,6 +19,7 @@ import {
   type SaftSupplier,
   type SaftStockMovementInput,
 } from "@/lib/ro-accounting/saf-t-xml";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -74,12 +75,12 @@ export async function GET(req: Request) {
 
   const movementRows = await fetchStockMovements(supabase, orgId, { from, to });
 
-  const { data: purchaseRows } = await supabase
+  const { data: purchaseRows } = await fetchAll(() => supabase
     .from("purchases")
-    .select("supplier,supplier_id,supplier_rel:suppliers(id,name)")
+    .select("purchase_date,id,supplier,supplier_id,supplier_rel:suppliers(id,name)")
     .eq("organisation_id", orgId)
     .gte("purchase_date", from)
-    .lte("purchase_date", to);
+    .lte("purchase_date", to), { keys: ["purchase_date", "id"] });
 
   type PurchaseRow = { supplier: string | null; supplier_id: string | null; supplier_rel: { id: string; name: string | null } | { id: string; name: string | null }[] | null };
   const supplierMap = new Map<string, string>();

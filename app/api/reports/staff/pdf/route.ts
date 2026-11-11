@@ -2,6 +2,7 @@ import { formatMoney } from "@/lib/kitchenops/metrics";
 import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -14,12 +15,12 @@ export async function GET(req: Request) {
   if ("error" in ctx) return ctx.error;
   const { supabase, orgId, org, currency, generatedBy } = ctx;
 
-  const { data: transactions } = await supabase
+  const { data: transactions } = await fetchAll(() => supabase
     .from("pos_transactions")
-    .select("sold_by,total,tip_amount,discount_total,status")
+    .select("sold_at,id,sold_by,total,tip_amount,discount_total,status")
     .eq("organisation_id", orgId)
     .gte("sold_at", from)
-    .lte("sold_at", `${to}T23:59:59.999`);
+    .lte("sold_at", `${to}T23:59:59.999`), { keys: ["sold_at", "id"] });
 
   const tx = transactions ?? [];
   const userIds = [...new Set(tx.map((t) => t.sold_by).filter(Boolean))] as string[];

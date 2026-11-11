@@ -5,7 +5,8 @@ import { listAccessibleSites } from "@/lib/site-context";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
-import { formatMoney, getKitchenOpsContext, sumRows } from "@/lib/kitchenops/metrics";
+import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { sumColumn } from "@/lib/supabase/fetch-all";
 import { GrowthReportViewTracker } from "@/components/app/GrowthReportViewTracker";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { computeSalesReport } from "@/lib/reports/sales-data";
@@ -44,10 +45,13 @@ export default async function SalesReportPage({
   // day/week, independent of the selected report range -- filtering an
   // already range-scoped dataset would silently show 0 whenever the chosen
   // range doesn't include today.
-  const todayBaseQuery = supabase.from("pos_transactions").select("total").eq("organisation_id", orgId).neq("status", "voided").gte("sold_at", today);
-  const weekBaseQuery = supabase.from("pos_transactions").select("total").eq("organisation_id", orgId).neq("status", "voided").gte("sold_at", week);
-  const { data: todayTx } = await (hasSites ? todayBaseQuery.in("site_id", siteIds) : todayBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000"));
-  const { data: weekTx } = await (hasSites ? weekBaseQuery.in("site_id", siteIds) : weekBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000"));
+  // Summed in the database: a busy week passes PostgREST's 1000-row cap,
+  // and summing only the first 1000 receipts would show a low "This week".
+  const totalSince = (since: string) => sumColumn((select) => {
+    const base = supabase.from("pos_transactions").select(select).eq("organisation_id", orgId).neq("status", "voided").gte("sold_at", since);
+    return hasSites ? base.in("site_id", siteIds) : base.eq("site_id", "00000000-0000-0000-0000-000000000000");
+  }, "total");
+  const [{ data: todayTotal }, { data: weekTotal }] = await Promise.all([totalSince(today), totalSince(week)]);
 
   return (
     <div className="space-y-6 p-6">
@@ -71,8 +75,8 @@ export default async function SalesReportPage({
 
       {/* KPI cards */}
       <div className="grid gap-4 md:grid-cols-5">
-        <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.today}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(sumRows(todayTx, (tx) => Number(tx.total ?? 0)), currency)}</CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.thisWeek}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(sumRows(weekTx, (tx) => Number(tx.total ?? 0)), currency)}</CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.today}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(todayTotal ?? 0, currency)}</CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.thisWeek}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(weekTotal ?? 0, currency)}</CardContent></Card>
         <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.grossExTips}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatMoney(grossExTips, currency)}</CardContent></Card>
         <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{t.transactions.title}</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{transactionCount}</CardContent></Card>
         <Card><CardHeader><CardTitle className="text-sm font-medium text-muted-foreground">{rp.voided}</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-attention">{voidedCount}</CardContent></Card>

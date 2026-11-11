@@ -16,6 +16,7 @@ import {
   stockMovementUnitCost,
 } from "@/lib/ro-accounting/stock-movements";
 import { AccountantWorkspaceTabs, type MovementRow, type NirRow, type ProductRow } from "@/components/app/AccountantWorkspaceTabs";
+import { fetchAll, fetchAllIn } from "@/lib/supabase/fetch-all";
 
 const MOVEMENT_TYPE_LABELS: Record<string, string> = {
   purchase_received: "Intrare",
@@ -82,10 +83,12 @@ export default async function AccountantWorkspace({
   const canSeePurchases = available.includes("purchases");
 
   const [sales, closes, cashMovements, purchases, productsWithoutSalePrice, stockWithoutCost, latestStock, movementRows, productResult] = await Promise.all([
-    supabase.from("pos_transactions").select("id,sold_at,total,status,payment_methods(type)", { count: "exact" }).eq("organisation_id", orgId).gte("sold_at", range.start).lte("sold_at", range.end).order("sold_at", { ascending: false }),
-    supabase.from("pos_sessions").select("id,closed_at,cash_difference,fiscal_z_report_done", { count: "exact" }).eq("organisation_id", orgId).not("closed_at", "is", null).gte("closed_at", range.start).lte("closed_at", range.end).order("closed_at", { ascending: false }),
-    supabase.from("pos_cash_movements").select("id,reason,performed_at", { count: "exact" }).eq("organisation_id", orgId).gte("performed_at", range.start).lte("performed_at", range.end).order("performed_at", { ascending: false }),
-    supabase.from("purchases").select("id,purchase_date,created_at,invoice_number,supplier,supplier_id,nir_number,total_amount,status", { count: "exact" }).eq("organisation_id", orgId).in("status", ["posted", "received"]).gte("purchase_date", range.from).lte("purchase_date", range.to).order("purchase_date", { ascending: false }),
+    // Paged (newest first): a month of receipts passes PostgREST's 1000-row
+    // cap, which made the sales total and readiness counts silently low.
+    fetchAll<{ id: string; sold_at: string; total: number | null; status: string; payment_methods: { type?: string | null } | Array<{ type?: string | null }> | null }>(() => supabase.from("pos_transactions").select("id,sold_at,total,status,payment_methods(type)").eq("organisation_id", orgId).gte("sold_at", range.start).lte("sold_at", range.end), { keys: ["sold_at", "id"], descending: true }),
+    fetchAll<{ id: string; closed_at: string; cash_difference: number | null; fiscal_z_report_done: boolean | null }>(() => supabase.from("pos_sessions").select("id,closed_at,cash_difference,fiscal_z_report_done").eq("organisation_id", orgId).not("closed_at", "is", null).gte("closed_at", range.start).lte("closed_at", range.end), { keys: ["closed_at", "id"], descending: true }),
+    fetchAll<{ id: string; reason: string | null; performed_at: string }>(() => supabase.from("pos_cash_movements").select("id,reason,performed_at").eq("organisation_id", orgId).gte("performed_at", range.start).lte("performed_at", range.end), { keys: ["performed_at", "id"], descending: true }),
+    fetchAll<{ id: string; purchase_date: string; created_at: string | null; invoice_number: string | null; supplier: string | null; supplier_id: string | null; nir_number: string | null; total_amount: number | null; status: string | null }>(() => supabase.from("purchases").select("id,purchase_date,created_at,invoice_number,supplier,supplier_id,nir_number,total_amount,status").eq("organisation_id", orgId).in("status", ["posted", "received"]).gte("purchase_date", range.from).lte("purchase_date", range.to), { keys: ["purchase_date", "id"], descending: true }),
     supabase.from("products").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("active", true).is("sale_price", null),
     supabase.from("canonical_stock_balances").select("product_id", { count: "exact", head: true }).eq("organisation_id", orgId).eq("active", true).is("cost_price", null),
     supabase.from("stock_movements").select("created_at").eq("organisation_id", orgId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
@@ -102,9 +105,7 @@ export default async function AccountantWorkspace({
   const { data: productRows } = productResult;
   const purchaseIds = (purchases.data ?? []).map((row) => row.id);
   const { count: purchaseLinesWithoutCost } = await supabase.from("purchase_items").select("id", { count: "exact", head: true }).eq("organisation_id", orgId).in("purchase_id", purchaseIds.length ? purchaseIds : ["00000000-0000-0000-0000-000000000000"]).or("unit_cost.is.null,unit_cost.lte.0");
-  const { data: purchaseItemRows } = purchaseIds.length
-    ? await supabase.from("purchase_items").select("purchase_id").in("purchase_id", purchaseIds)
-    : { data: [] as Array<{ purchase_id: string | null }> };
+  const { data: purchaseItemRows } = await fetchAllIn<{ purchase_id: string | null }>(purchaseIds, (chunk) => supabase.from("purchase_items").select("id,purchase_id").in("purchase_id", chunk));
   const lineCountByPurchase = new Map<string, number>();
   for (const row of purchaseItemRows ?? []) {
     if (!row.purchase_id) continue;

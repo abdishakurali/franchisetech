@@ -25,6 +25,7 @@ import { PosTableFloor } from "@/components/app/PosTableFloor";
 import { requireActiveSite, listAccessibleSites } from "@/lib/site-context";
 import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendChart";
 import { createServiceClient } from "@/lib/supabase/server";
+import { fetchAll, SALES_LINE_KEYS } from "@/lib/supabase/fetch-all";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -329,13 +330,17 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       const siteIds = sites.map((site) => site.id);
       const trendStart = new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10) + "T00:00:00.000Z";
       const trendEnd = new Date().toISOString();
-      const trendQuery = supabase
-        .from("canonical_sales_lines")
-        .select("sold_at,gross_amount")
-        .eq("organisation_id", orgId)
-        .gte("sold_at", trendStart)
-        .lte("sold_at", trendEnd);
-      const { data: trendLines } = await (siteIds.length ? trendQuery.in("site_id", siteIds) : trendQuery.eq("site_id", "00000000-0000-0000-0000-000000000000"));
+      // Paged: seven days of sales lines (~2,600 for a busy cafe) pass
+      // PostgREST's 1000-row cap, which cut the chart's latest days to 0.
+      const { data: trendLines } = await fetchAll<{ sold_at: string | null; gross_amount: number | null }>(() => {
+        const trendQuery = supabase
+          .from("canonical_sales_lines")
+          .select("sold_at,transaction_item_id,direction,transaction_number,gross_amount")
+          .eq("organisation_id", orgId)
+          .gte("sold_at", trendStart)
+          .lte("sold_at", trendEnd);
+        return siteIds.length ? trendQuery.in("site_id", siteIds) : trendQuery.eq("site_id", "00000000-0000-0000-0000-000000000000");
+      }, { keys: SALES_LINE_KEYS });
       const byDay = new Map<string, number>();
       for (let i = 0; i < 7; i++) {
         const d = new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);

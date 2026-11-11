@@ -84,7 +84,7 @@ function fakeSupabase(tables: Record<string, unknown[]>) {
   const from = (table: string) => {
     const result = { data: tables[table] ?? [], error: null };
     const builder: Record<string, unknown> = {};
-    for (const m of ["select", "gte", "order", "in", "eq"]) builder[m] = () => builder;
+    for (const m of ["select", "gte", "order", "in", "eq", "limit"]) builder[m] = () => builder;
     builder.then = (resolve: (v: unknown) => unknown) => Promise.resolve(result).then(resolve);
     builder.insert = (row: unknown) => {
       inserts.push(row);

@@ -7,25 +7,22 @@ import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { importSuppliersCsv } from "@/app/actions/kitchenops";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { sumByGroup } from "@/lib/supabase/fetch-all";
 
 type SupplierRow = { id: string; name: string; contact_name: string | null; email: string | null; phone: string | null; active: boolean };
-type PurchaseRow = { supplier_id: string | null; total_amount: number | null };
 
 export default async function SuppliersPage() {
   await requireBusinessModule("purchases");
   const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
-  const [suppRes, purchRes] = await Promise.all([
+  // Spend per supplier is summed in the database over the whole purchase
+  // history; a row-by-row sum stopped at PostgREST's 1000-row cap.
+  const [suppRes, spendRes] = await Promise.all([
     supabase.from("suppliers").select("*").eq("organisation_id", orgId).eq("active", true).order("name"),
-    supabase.from("purchases").select("supplier_id,total_amount").eq("organisation_id", orgId),
+    sumByGroup((select) => supabase.from("purchases").select(select).eq("organisation_id", orgId), "supplier_id", "total_amount"),
   ]);
   const suppliers = (suppRes.data ?? []) as SupplierRow[];
-  const purchases = (purchRes.data ?? []) as PurchaseRow[];
-
-  const spendBySupplier = new Map<string, number>();
-  for (const p of purchases) {
-    if (p.supplier_id) spendBySupplier.set(p.supplier_id, (spendBySupplier.get(p.supplier_id) ?? 0) + Number(p.total_amount ?? 0));
-  }
+  const spendBySupplier = spendRes.data ?? new Map<string, number>();
 
   return (
     <div className="space-y-6 p-6">

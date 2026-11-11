@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { fetchAll, PAYMENT_EVENT_KEYS, SALES_LINE_KEYS } from "@/lib/supabase/fetch-all";
 
 type SalesReportItem = {
   transaction_id: string;
@@ -35,15 +36,16 @@ export async function computeSalesReport(
   unknownLabel: string,
 ): Promise<SalesReportData> {
   const hasSites = siteIds.length > 0;
-  const linesBaseQuery = supabase
-    .from("canonical_sales_lines")
-    .select("transaction_id,product_name,quantity,vat_rate,net_amount,vat_amount,gross_amount,direction")
-    .eq("organisation_id", orgId)
-    .gte("sold_at", periodStart)
-    .lte("sold_at", periodEnd);
-  const linesQuery = hasSites ? linesBaseQuery.in("site_id", siteIds) : linesBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000");
-  const { data: lineRows } = await linesQuery;
-  const items = (lineRows ?? []) as SalesReportItem[];
+  const { data: lineRows } = await fetchAll<SalesReportItem>(() => {
+    const linesBaseQuery = supabase
+      .from("canonical_sales_lines")
+      .select("transaction_id,transaction_item_id,transaction_number,sold_at,product_name,quantity,vat_rate,net_amount,vat_amount,gross_amount,direction")
+      .eq("organisation_id", orgId)
+      .gte("sold_at", periodStart)
+      .lte("sold_at", periodEnd);
+    return hasSites ? linesBaseQuery.in("site_id", siteIds) : linesBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000");
+  }, { keys: SALES_LINE_KEYS });
+  const items = lineRows ?? [];
 
   const byProduct = new Map<string, { qty: number; total: number }>();
   for (const item of items) {
@@ -54,13 +56,15 @@ export async function computeSalesReport(
   }
   const productRows = [...byProduct.entries()].map(([name, row]) => ({ name, ...row })).sort((a, b) => b.total - a.total);
 
-  const paymentBaseQuery = supabase
-    .from("canonical_payment_events")
-    .select("method,amount")
-    .eq("organisation_id", orgId)
-    .gte("occurred_at", periodStart)
-    .lte("occurred_at", periodEnd);
-  const { data: paymentRows } = await (hasSites ? paymentBaseQuery.in("site_id", siteIds) : paymentBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000"));
+  const { data: paymentRows } = await fetchAll<{ method: string | null; amount: number | null }>(() => {
+    const paymentBaseQuery = supabase
+      .from("canonical_payment_events")
+      .select("method,amount,occurred_at,idempotency_key")
+      .eq("organisation_id", orgId)
+      .gte("occurred_at", periodStart)
+      .lte("occurred_at", periodEnd);
+    return hasSites ? paymentBaseQuery.in("site_id", siteIds) : paymentBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000");
+  }, { keys: PAYMENT_EVENT_KEYS });
   const byPayment = new Map<string, number>();
   for (const payment of paymentRows ?? []) {
     const methodName = payment.method || unknownLabel;
@@ -80,14 +84,16 @@ export async function computeSalesReport(
     vatByRate.set(rate, entry);
   }
 
-  const txBaseQuery = supabase
-    .from("pos_transactions")
-    .select("id,tip_amount,discount_total")
-    .eq("organisation_id", orgId)
-    .neq("status", "voided")
-    .gte("sold_at", periodStart)
-    .lte("sold_at", periodEnd);
-  const { data: transactions } = await (hasSites ? txBaseQuery.in("site_id", siteIds) : txBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000"));
+  const { data: transactions } = await fetchAll<{ id: string; tip_amount: number | null; discount_total: number | null }>(() => {
+    const txBaseQuery = supabase
+      .from("pos_transactions")
+      .select("id,sold_at,tip_amount,discount_total")
+      .eq("organisation_id", orgId)
+      .neq("status", "voided")
+      .gte("sold_at", periodStart)
+      .lte("sold_at", periodEnd);
+    return hasSites ? txBaseQuery.in("site_id", siteIds) : txBaseQuery.eq("site_id", "00000000-0000-0000-0000-000000000000");
+  }, { keys: ["sold_at", "id"] });
   const totalNet = items.reduce((sum, item) => sum + Number(item.net_amount ?? 0), 0);
   const totalVat = items.reduce((sum, item) => sum + Number(item.vat_amount ?? 0), 0);
   const grossExTips = items.reduce((sum, item) => sum + Number(item.gross_amount ?? 0), 0);

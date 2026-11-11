@@ -8,6 +8,7 @@ import {
 } from "@/lib/ro-accounting/stock-movements";
 import { fetchOpeningStock, type VatBucket } from "@/lib/ro-accounting/opening-stock";
 import type { GestiuneMovement } from "@/lib/ro-accounting/gestiune";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 type PurchaseRow = {
   id: string;
@@ -77,7 +78,8 @@ export async function computeGestiuneReport(
     });
   }
 
-  let purchasesQuery = supabase
+  // Paged: a long period can hold more than PostgREST's 1000-row cap.
+  const { data: purchases, error: purchasesError } = await fetchAll<PurchaseRow>(() => supabase
     .from("purchases")
     .select(`
       id, purchase_date, supplier, invoice_number, total_amount, tax_total,
@@ -86,10 +88,7 @@ export async function computeGestiuneReport(
     .eq("organisation_id", orgId)
     .in("status", ["posted", "received"])
     .gte("purchase_date", periodStart)
-    .lte("purchase_date", periodEnd)
-    .order("purchase_date");
-  if (options.signal) purchasesQuery = purchasesQuery.abortSignal(options.signal);
-  const { data: purchases, error: purchasesError } = await purchasesQuery;
+    .lte("purchase_date", periodEnd), { keys: ["purchase_date", "id"], signal: options.signal });
   if (purchasesError) {
     throw new StockMovementsQueryError(`purchases query failed: ${purchasesError.message}`, purchasesError);
   }

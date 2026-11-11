@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { fetchAll, SALES_LINE_KEYS } from "@/lib/supabase/fetch-all";
 
 export default async function VatReportPage({ searchParams }: { searchParams?: Promise<{from?:string;to?:string}> }) {
   const { countryCode, profileLocale, supabase, orgId, currency } = await getKitchenOpsContext();
@@ -16,12 +17,12 @@ export default async function VatReportPage({ searchParams }: { searchParams?: P
   const from = params?.from ?? monthStart;
   const to = params?.to ?? today;
 
-  const { data: lines } = await supabase
+  const { data: lines } = await fetchAll(() => supabase
     .from("canonical_sales_lines")
-    .select("vat_rate,net_amount,vat_amount,gross_amount")
+    .select("sold_at,transaction_item_id,direction,transaction_number,vat_rate,net_amount,vat_amount,gross_amount")
     .eq("organisation_id", orgId)
     .gte("sold_at", `${from}T00:00:00Z`)
-    .lte("sold_at", `${to}T23:59:59Z`);
+    .lte("sold_at", `${to}T23:59:59Z`), { keys: SALES_LINE_KEYS });
 
   const byRate = new Map<number, { net: number; vat: number; gross: number; count: number }>();
   for (const item of lines ?? []) {

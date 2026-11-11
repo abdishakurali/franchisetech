@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { BalantaItem } from "@/lib/ro-accounting/balanta";
-import { resolveBalantaIntegrity, sumMovementQty, type BalantaProductMeta } from "@/lib/ro-accounting/balanta-integrity";
+import { resolveBalantaIntegrity, type BalantaProductMeta } from "@/lib/ro-accounting/balanta-integrity";
+import { fetchLedgerQtyByProduct, fetchOpeningStockGroups } from "@/lib/ro-accounting/opening-stock";
 import { fetchStockMovements, stockMovementQty, stockMovementUnitCost } from "@/lib/ro-accounting/stock-movements";
 
 type ProductRow = BalantaProductMeta & { vat_rate: number | null };
@@ -34,10 +35,14 @@ export async function computeBalantaReport(
     .select("id,name,unit_of_measure,current_stock_qty,vat_rate,active,is_stock_tracked,is_ingredient")
     .eq("organisation_id", orgId);
 
-  const [movementsDuringPeriod, movementsBeforePeriod, allMovements] = await Promise.all([
+  // Opening balance and ledger quantity are database aggregates, not a
+  // download of every movement ever recorded (twice). That whole-history
+  // read is what pushed the gestiune PDF past Vercel's limit on 2026-11-10;
+  // this report did the same thing. Only the period's own rows are fetched.
+  const [movementsDuringPeriod, openingGroups, ledgerQtyByProduct] = await Promise.all([
     fetchStockMovements(supabase, orgId, { from: periodStart, to: periodEnd }),
-    fetchStockMovements(supabase, orgId, { before: periodStart }),
-    fetchStockMovements(supabase, orgId, {}),
+    fetchOpeningStockGroups(supabase, orgId, periodStart),
+    fetchLedgerQtyByProduct(supabase, orgId),
   ]);
 
   const productMap = new Map<string, ProductRow>();
@@ -55,19 +60,19 @@ export async function computeBalantaReport(
   const emptyBucket = (): Bucket => ({ qty: 0, value: 0, knownQty: 0, hasUnknownCost: false });
 
   const calcOpeningStock = new Map<string, Bucket>();
-  for (const m of movementsBeforePeriod) {
-    if (!m.product_id) continue;
-    const existing = calcOpeningStock.get(m.product_id) ?? emptyBucket();
-    const qty = stockMovementQty(m);
-    const cost = stockMovementUnitCost(m);
-    existing.qty += qty;
-    if (cost != null) {
-      existing.value += qty * cost;
-      existing.knownQty += qty;
+  // Each group is one (product, unit_cost) pair, so qty * cost is exactly
+  // the sum of that group's per-row qty * cost.
+  for (const g of openingGroups) {
+    if (!g.product_id) continue;
+    const existing = calcOpeningStock.get(g.product_id) ?? emptyBucket();
+    existing.qty += g.qty;
+    if (g.unit_cost != null) {
+      existing.value += g.qty * g.unit_cost;
+      existing.knownQty += g.qty;
     } else {
       existing.hasUnknownCost = true;
     }
-    calcOpeningStock.set(m.product_id, existing);
+    calcOpeningStock.set(g.product_id, existing);
   }
 
   const periodEntries = new Map<string, Bucket>();
@@ -135,7 +140,7 @@ export async function computeBalantaReport(
       const avgCost = knownAvailableQty > 0 ? (opening.value + entries.value) / knownAvailableQty : 0;
       const closingValue = closingQty * avgCost;
 
-      const ledgerQty = sumMovementQty(allMovements, productId);
+      const ledgerQty = ledgerQtyByProduct.get(productId) ?? 0;
       const catalogQty = Number(product?.current_stock_qty ?? 0);
       const integrityStatus = resolveBalantaIntegrity(product, { ledgerQty, catalogQty });
 

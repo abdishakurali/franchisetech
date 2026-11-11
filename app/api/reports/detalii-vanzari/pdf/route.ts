@@ -2,6 +2,7 @@ import { formatMoney } from "@/lib/kitchenops/metrics";
 import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 type LineItem = {
   product_id: string | null;
@@ -34,15 +35,15 @@ export async function GET(req: Request) {
   if ("error" in ctx) return ctx.error;
   const { supabase, orgId, org, currency, generatedBy } = ctx;
 
-  const { data: transactions } = await supabase
+  const { data: transactions } = await fetchAll(() => supabase
     .from("pos_transactions")
     .select(`
-      id, status, total_gross, total,
+      sold_at, id, status, total_gross, total,
       pos_transaction_items(product_id,product_name,quantity,vat_rate,net_amount,vat_amount,gross_amount,line_total,discount_amount)
     `)
     .eq("organisation_id", orgId)
     .gte("sold_at", `${from}T00:00:00Z`)
-    .lte("sold_at", `${to}T23:59:59Z`);
+    .lte("sold_at", `${to}T23:59:59Z`), { keys: ["sold_at", "id"] });
 
   const rows = (transactions ?? []) as TransactionRow[];
   const completed = rows.filter((r) => r.status !== "voided");

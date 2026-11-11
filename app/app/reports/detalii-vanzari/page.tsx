@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 type LineItem = {
   product_id: string | null;
@@ -46,10 +47,10 @@ export default async function DetaliiVanzariReportPage({
   // Filtered on pos_transactions.sold_at (the real sale date), not
   // pos_transaction_items.created_at -- for migrated historical sales,
   // created_at is the bulk-import timestamp, not the real sale date.
-  const { data: transactions } = await supabase
+  const { data: transactions } = await fetchAll(() => supabase
     .from("pos_transactions")
     .select(`
-      id,
+      sold_at, id,
       status,
       total_gross,
       total,
@@ -58,7 +59,7 @@ export default async function DetaliiVanzariReportPage({
     `)
     .eq("organisation_id", orgId)
     .gte("sold_at", `${from}T00:00:00Z`)
-    .lte("sold_at", `${to}T23:59:59Z`);
+    .lte("sold_at", `${to}T23:59:59Z`), { keys: ["sold_at", "id"] });
 
   const rows = (transactions ?? []) as TransactionRow[];
   const completed = rows.filter((r) => r.status !== "voided");

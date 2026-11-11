@@ -115,6 +115,78 @@ async function fetchOpeningGroupsAggregated(
 }
 
 /**
+ * Net quantity per (product, snapshotted unit_cost) for every movement
+ * before `before`: one grouped database aggregate, or -- when PostgREST
+ * aggregates are off -- the four needed columns streamed with keyset
+ * pagination and grouped here. Throws on a failed query.
+ */
+export async function fetchOpeningStockGroups(
+  supabase: SupabaseClient,
+  orgId: string,
+  before: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<OpeningStockGroup[]> {
+  const opts: FetchStockMovementsOptions = { ...options, throwOnError: true };
+  const groups = await fetchOpeningGroupsAggregated(supabase, orgId, before, opts);
+  if (groups != null) return groups;
+  const rows = await fetchStockMovements(
+    supabase,
+    orgId,
+    { before },
+    { ...opts, select: "id,product_id,quantity_change,unit_cost,performed_at", skipProducts: true },
+  );
+  return groupMovementsForOpeningStock(rows);
+}
+
+type LedgerAggregateRow = { product_id: string | null; sum: number | string | null };
+
+/**
+ * Ledger quantity per product over the WHOLE movement history (what
+ * sum(quantity_change) says is on hand), as one grouped database aggregate
+ * instead of downloading every movement ever recorded. Falls back to
+ * keyset-paged rows when PostgREST aggregates are off. Throws on failure.
+ */
+export async function fetchLedgerQtyByProduct(
+  supabase: SupabaseClient,
+  orgId: string,
+  options: { signal?: AbortSignal } = {},
+): Promise<Map<string, number>> {
+  const totals = new Map<string, number>();
+  for (let page = 0; ; page += 1) {
+    let query = supabase
+      .from("stock_movements_reconciled")
+      .select("product_id,quantity_change.sum()")
+      .eq("organisation_id", orgId)
+      .order("product_id")
+      .range(page * GROUP_PAGE_SIZE, page * GROUP_PAGE_SIZE + GROUP_PAGE_SIZE - 1);
+    if (options.signal) query = query.abortSignal(options.signal);
+    const { data, error } = await query;
+    if (error) {
+      if (error.code !== AGGREGATES_DISABLED) {
+        throw new StockMovementsQueryError(`ledger quantity aggregate failed: ${error.message}`, error);
+      }
+      const rows = await fetchStockMovements(
+        supabase,
+        orgId,
+        {},
+        { ...options, throwOnError: true, select: "id,product_id,quantity_change,performed_at", skipProducts: true },
+      );
+      totals.clear();
+      for (const row of rows) {
+        if (!row.product_id) continue;
+        totals.set(row.product_id, (totals.get(row.product_id) ?? 0) + stockMovementQty(row));
+      }
+      return totals;
+    }
+    const rows = (data ?? []) as unknown as LedgerAggregateRow[];
+    for (const r of rows) {
+      if (r.product_id) totals.set(r.product_id, Number(r.sum ?? 0));
+    }
+    if (rows.length < GROUP_PAGE_SIZE) return totals;
+  }
+}
+
+/**
  * Opening stock value per VAT bucket for everything before `before`.
  * Uses a database aggregate when available; otherwise streams only the
  * four columns it needs with keyset pagination and groups in memory.
@@ -128,17 +200,7 @@ export async function fetchOpeningStock(
   options: { signal?: AbortSignal } = {},
 ): Promise<OpeningStockResult> {
   const opts: FetchStockMovementsOptions = { ...options, throwOnError: true };
-
-  let groups = await fetchOpeningGroupsAggregated(supabase, orgId, before, opts);
-  if (groups == null) {
-    const rows = await fetchStockMovements(
-      supabase,
-      orgId,
-      { before },
-      { ...opts, select: "id,product_id,quantity_change,unit_cost,performed_at", skipProducts: true },
-    );
-    groups = groupMovementsForOpeningStock(rows);
-  }
+  const groups = await fetchOpeningStockGroups(supabase, orgId, before, options);
 
   const productIds = [...new Set(groups.map((g) => g.product_id).filter(Boolean))] as string[];
   const productMap = await fetchProductMap(supabase, orgId, productIds, opts);
