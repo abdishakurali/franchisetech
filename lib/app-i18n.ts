@@ -415,6 +415,7 @@ const en = {
       errors: {
         alreadyPosted: "This NIR was already posted.",
         cannotCancel: "Only drafts can be cancelled.",
+        cancelFailed: "The draft was not cancelled. Try again; if it repeats, write to us on WhatsApp.",
         nirNumber: "Could not generate NIR number. Check migration 037.",
         cancelled: "This purchase was cancelled, so it cannot be posted. Stock was not changed.",
         invalidStatus:
@@ -1825,6 +1826,7 @@ const ro: typeof en = {
       errors: {
         alreadyPosted: "NIR-ul a fost deja emis.",
         cannotCancel: "Doar ciornele pot fi anulate.",
+        cancelFailed: "Ciorna nu a fost anulată. Încercați din nou; dacă se repetă, scrieți-ne pe WhatsApp.",
         nirNumber: "Nu s-a putut genera numărul NIR. Verificați migrarea 037.",
         cancelled: "Această achiziție a fost anulată, deci nu poate fi emisă. Stocul nu a fost modificat.",
         invalidStatus:

@@ -28,6 +28,7 @@ import { CopyReferralButton } from "@/components/app/CopyReferralButton";
 import { ensureReferralCode } from "@/lib/referrals";
 import { FiscalNetSettingsCard } from "@/components/app/FiscalNetSettingsCard";
 import { ScrollToAnchor } from "@/components/app/ScrollToAnchor";
+import { SaveErrorToast } from "@/components/app/SaveErrorToast";
 import { SettingsSectionNav } from "@/components/app/SettingsSectionNav";
 import { FormSelect } from "@/components/app/FormSelect";
 import { AppLocaleSwitcher } from "@/components/app/AppLocaleSwitcher";
@@ -134,7 +135,7 @@ function canManage(role: string | null | undefined) {
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ tab?: string; locked?: string; msg?: string; reason?: string; checkout?: string; install_error?: string; install?: string }>;
+  searchParams?: Promise<{ tab?: string; locked?: string; msg?: string; reason?: string; checkout?: string; install_error?: string; install?: string; save_error?: string }>;
 }) {
   const params = await searchParams;
   const rawTab = params?.tab ?? "overview";
@@ -512,9 +513,9 @@ export default async function SettingsPage({
               { key: "abbreviation", label: isRO ? "Abreviere" : "Abbreviation", type: "text" },
             ]}
             addDefaults={{ name: "", abbreviation: "" }}
-            addAction={addUnit as unknown as (fd: FormData) => Promise<void>}
-            updateAction={updateUnit as unknown as (fd: FormData) => Promise<void>}
-            deleteAction={deleteUnit as unknown as (fd: FormData) => Promise<void>}
+            addAction={addUnit}
+            updateAction={updateUnit}
+            deleteAction={deleteUnit}
             addLabel={isRO ? "+ Adaugă unitate" : "+ Add unit"}
             emptyLabel={isRO ? "Nicio unitate personalizată încă." : "No custom units yet."}
             locale={locale}
@@ -948,6 +949,8 @@ export default async function SettingsPage({
       <SettingsSectionNav sections={sectionNav} />
 
       <ScrollToAnchor targetId={scrollTarget} />
+      {/* ?save_error= from a plain <form action> whose write was refused. */}
+      <SaveErrorToast code={params?.save_error} />
 
       <div className="space-y-12">
 

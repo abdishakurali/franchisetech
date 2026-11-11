@@ -9,6 +9,8 @@ import { Trash2, Loader2, ChevronRight } from "lucide-react";
 import { canCancelPurchase, purchaseStatusBadge } from "@/lib/nir/purchase";
 import type { PurchaseStatus } from "@/lib/nir/purchase";
 import { useAppI18n } from "@/lib/app-i18n-context";
+import { toast } from "sonner";
+import type { SaveActionResult } from "@/app/actions/kitchenops";
 
 type SupplierRef = { name: string } | null;
 type PurchaseRow = {
@@ -36,7 +38,7 @@ export function PurchasesBulkTable({
   currency = "EUR",
 }: {
   purchases: PurchaseRow[];
-  deleteAction: (ids: string[]) => Promise<void>;
+  deleteAction: (ids: string[]) => Promise<SaveActionResult | void>;
   currency?: string;
 }) {
   const { t } = useAppI18n();
@@ -67,7 +69,12 @@ export function PurchasesBulkTable({
     if (!confirm(t.purchases.cancelDraftConfirm(draftSelected.length))) return;
     setDeleting(true);
     try {
-      await deleteAction(draftSelected);
+      const result = await deleteAction(draftSelected);
+      // Before 2026-11-12 a refused cancel looked identical to one that worked.
+      if (result && !result.ok) {
+        toast.error(t.purchases.detail.errors.cancelFailed);
+        return;
+      }
       setSelected(new Set());
     } finally {
       setDeleting(false);

@@ -53,6 +53,14 @@ describe("SettingsListSection save results", () => {
     expect((container.querySelector("input") as HTMLInputElement).value).toBe("Tichete");
   });
 
+  it("a duplicate unit name says so instead of silently doing nothing", async () => {
+    const add = vi.fn().mockResolvedValue({ ok: false, error: "duplicate" });
+    const { getByText, getByRole, findByRole } = renderWith({ add });
+    fireEvent.click(getByText("+ Adăugați metodă de plată"));
+    fireEvent.click(getByRole("button", { name: "Adăugați" }));
+    expect((await findByRole("alert")).textContent).toContain("Există deja un element cu acest nume");
+  });
+
   it("a failed edit keeps the edit row open", async () => {
     const update = vi.fn().mockResolvedValue({ ok: false, error: "failed" });
     const { getByText, getByRole, findByRole } = renderWith({ update });

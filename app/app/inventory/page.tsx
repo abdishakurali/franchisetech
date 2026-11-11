@@ -5,8 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { startInventoryCount } from "@/app/actions/kitchenops";
+import { SaveErrorToast } from "@/components/app/SaveErrorToast";
 
-export default async function InventoryCountsPage() {
+export default async function InventoryCountsPage({ searchParams }: { searchParams?: Promise<{ save_error?: string }> }) {
+  const query = await searchParams;
   await requireBusinessModule("inventory");
   const { supabase, orgId } = await getKitchenOpsContext();
 
@@ -21,6 +23,7 @@ export default async function InventoryCountsPage() {
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
+      <SaveErrorToast code={query?.save_error} />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Inventar</h1>

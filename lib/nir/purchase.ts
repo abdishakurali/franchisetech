@@ -207,6 +207,7 @@ export const NIR_POST_ERROR_CODES = [
 export const PURCHASE_ERROR_CODES = [
   ...NIR_POST_ERROR_CODES,
   "cannot_cancel",
+  "cancel_failed",
   "nir_number",
   "entitlement_denied",
   "save_failed",
@@ -223,6 +224,7 @@ const PURCHASE_ERROR_KEYS: Record<PurchaseErrorCode, keyof AppT["purchases"]["de
   no_items: "noItems",
   post_failed: "postFailed",
   cannot_cancel: "cannotCancel",
+  cancel_failed: "cancelFailed",
   nir_number: "nirNumber",
   entitlement_denied: "entitlementDenied",
   save_failed: "saveFailed",

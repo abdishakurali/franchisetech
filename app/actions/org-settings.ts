@@ -81,10 +81,16 @@ export async function updateNotificationPreference(
     .single();
 
   const current = (org?.notification_preferences ?? {}) as Record<string, boolean>;
-  await supabase
+  const { error } = await supabase
     .from("organisations")
     .update({ notification_preferences: { ...current, [key]: enabled } })
     .eq("id", orgId);
+  // NotificationPreferences catches the throw, flips the toggle back and shows
+  // a message. Before 2026-11-12 the toggle flipped back only on reload.
+  if (error) {
+    console.error("[settings] updateNotificationPreference failed", error.code, error.message);
+    throw new Error("notification_preference_not_saved");
+  }
 
   revalidatePath("/app/settings");
 }
@@ -201,10 +207,15 @@ export async function setBusinessModuleInstalled(formData: FormData): Promise<vo
 export async function completeOnboarding(): Promise<never> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (canManage(membership.role)) {
-    await supabase
+    const { error } = await supabase
       .from("organisations")
       .update({ onboarding_completed: true })
       .eq("id", orgId);
+    // No UI caller today. Throwing beats redirecting into an onboarding loop.
+    if (error) {
+      console.error("[settings] completeOnboarding failed", error.code, error.message);
+      throw new Error("onboarding_completion_not_saved");
+    }
   }
   redirect("/app");
 }

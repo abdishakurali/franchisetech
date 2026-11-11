@@ -39,7 +39,7 @@ interface Props {
   editFields: ListFieldDef[];
   hiddenAddValues?: Record<string, string>;
   addDefaults: FieldValues;
-  // Actions that still return void are treated as success (units, for now).
+  // An action that returns void is treated as success.
   addAction: (fd: FormData) => Promise<SettingsListActionResult | void>;
   updateAction: (fd: FormData) => Promise<SettingsListActionResult | void>;
   deleteAction: (fd: FormData) => Promise<SettingsListActionResult | void>;
@@ -53,11 +53,13 @@ const UI_STRINGS = {
     active: "Active", inactive: "Inactive", save: "Save", cancel: "Cancel", deleteConfirm: "Delete?", yes: "Yes", no: "No", edit: "Edit", add: "Add",
     errInUse: "This item is already used on sales, so it cannot be deleted. Edit it and set it to Inactive instead.",
     errFailed: "The change was not saved. Try again; if it repeats, write to us on WhatsApp.",
+    errDuplicate: "An item with this name already exists. Choose another name.",
   },
   ro: {
     active: "Activă", inactive: "Inactivă", save: "Salvați", cancel: "Anulați", deleteConfirm: "Ștergeți?", yes: "Da", no: "Nu", edit: "Editați", add: "Adăugați",
     errInUse: "Elementul este deja folosit în vânzări, deci nu poate fi șters. Editați-l și setați-l ca inactiv.",
     errFailed: "Modificarea nu s-a salvat. Încercați din nou; dacă se repetă, scrieți-ne pe WhatsApp.",
+    errDuplicate: "Există deja un element cu acest nume. Alegeți alt nume.",
   },
 } as const;
 
@@ -100,7 +102,7 @@ export function SettingsListSection({
   // Keep the edit/add form open on failure so nothing the owner typed is lost.
   function showResult(res: SettingsListActionResult | void): boolean {
     if (!res || res.ok) { setError(null); return true; }
-    setError(res.error === "in_use" ? ui.errInUse : ui.errFailed);
+    setError(res.error === "in_use" ? ui.errInUse : res.error === "duplicate" ? ui.errDuplicate : ui.errFailed);
     return false;
   }
 

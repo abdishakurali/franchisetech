@@ -61,6 +61,8 @@ export function StockLowStockPanel({ items }: { items: LowStockRow[] }) {
       const result = await bulkUpdateProductStock(fd);
       if (!result.ok) {
         toast.error(result.error ?? t.stock.savingStock);
+        // Some rows may have saved; show their new stock.
+        if (result.updated) router.refresh();
         return;
       }
       toast.success(t.stock.stockUpdated(result.updated ?? payload.length));
