@@ -8,6 +8,7 @@ import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketing
 import { BlogTopicHeader } from "@/components/marketing/BlogTopicHeader";
 import { BlogCtaLink } from "@/components/marketing/BlogCtaLink";
 import { BlogAuthorBox } from "@/components/marketing/BlogAuthorBox";
+import { BLOG_SCREENSHOT_CAPTION, blogScreenshotFor } from "@/lib/marketing/blog-screenshot";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { blogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
@@ -91,6 +92,23 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </time>
 
           <BlogTopicHeader post={post} size="hero" className="mt-8" />
+
+          {(() => {
+            const shot = blogScreenshotFor(post);
+            return (
+              <figure className="mt-6">
+                <Image
+                  src={shot.src}
+                  alt={shot.alt}
+                  width={1440}
+                  height={900}
+                  sizes="(min-width: 768px) 768px, 100vw"
+                  className="rounded-lg border border-slate-200"
+                />
+                <figcaption className="mt-2 text-xs text-slate-500">{BLOG_SCREENSHOT_CAPTION}</figcaption>
+              </figure>
+            );
+          })()}
 
           <div className="mt-10 space-y-10">
             {post.sections.map((section, sectionIndex) => (
