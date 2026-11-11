@@ -182,6 +182,7 @@ export const designFaq = [
   { q: "Bonul fiscal se emite și offline?", a: "Înregistrarea vânzării și emiterea bonului sunt etape separate. Vânzarea intră în coada locală; emiterea bonului depinde de driverul fiscal și de echipamentul local. În POS vedeți ce a rămas de emis." },
   { q: "Ce se întâmplă dacă cade internetul?", a: "Cu POS-ul deja deschis, vindeți mai departe: maximum 200 de vânzări în coada locală, sincronizate automat când revine conexiunea." },
   { q: "Cât costă configurarea?", a: `Nimic. Vă ajutăm gratuit să importați meniul, să verificați casa de marcat și licența FiscalNet și să faceți prima vânzare. Sunați sau scrieți-ne pe WhatsApp la ${SUPPORT_PHONE_DISPLAY}.` },
+  { q: "Cum funcționează „primul bon fiscal în 2 zile, sau nu plătești nimic”?", a: "Cele 2 zile încep când ne dați meniul și acces la calculatorul la care este conectată casa de marcat. Promisiunea acoperă casele de marcat compatibile cu driverul FiscalNet, cu licența FiscalNet activă. Primul bon fiscal înseamnă un bon real, emis pe casa dvs. de marcat din FranchiseTech. Dacă nu ajungem acolo din vina noastră, nu plătiți nimic. Dacă întârzierea ține de casa de marcat, licența sau internet, termenul se oprește până se rezolvă." },
   { q: "Am două locații. Merge?", a: "Da — planul Multi include prima locație; fiecare locație în plus costă 29 €/lună și se adaugă la cerere, cu raportare centrală și comutare între locații." },
 ];
 
