@@ -12,7 +12,6 @@ const SCREENS: Record<string, BlogScreenshot> = {
   pos: { src: "/marketing/live/pos.png", alt: "Ecranul de vânzare (POS) din franchisetech" },
   stock: { src: "/marketing/live/stock.png", alt: "Pagina de stoc din franchisetech" },
   recipes: { src: "/marketing/live/recipes.png", alt: "Rețetă cu cost și marjă în franchisetech" },
-  reports: { src: "/marketing/live/reports.png", alt: "Raport de vânzări în franchisetech" },
   dashboard: { src: "/marketing/live/dashboard.png", alt: "Panoul proprietarului în franchisetech" },
 };
 
@@ -20,7 +19,9 @@ const SCREENS: Record<string, BlogScreenshot> = {
 const TAG_SCREEN: Array<[RegExp, keyof typeof SCREENS]> = [
   [/stoc|nir|inventar|receptie|transfer|perisabil|materii/, "stock"],
   [/retet|marj|cost|pret|food/, "recipes"],
-  [/raport|inchidere|numerar|casierie|kpi|contabil|saga|export|registru/, "reports"],
+  // Report-type articles use the dashboard until the reports screen is re-shot:
+  // its "Date reale" label is wrong on test data (fix in progress, 2026-11-11).
+  [/raport|inchidere|numerar|casierie|kpi|contabil|saga|export|registru/, "dashboard"],
   [/bon|casa|pos|storno|fiscalnet|tva|bacsis|anulare|qr/, "pos"],
 ];
 
