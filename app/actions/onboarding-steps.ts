@@ -8,6 +8,16 @@ function canManage(role: string): boolean {
   return ["owner", "manager"].includes(role);
 }
 
+// Before 2026-11-12 every onboarding_step update below was unchecked and the
+// action redirected anyway. If the update failed, the onboarding resume guard
+// sent the owner back to the previous step: a loop with no message.
+const STEP_SAVE_FAILED = "Pasul nu s-a salvat. Încercați din nou; dacă se repetă, scrieți-ne pe WhatsApp.";
+
+function stepFailed(where: string, error: { code?: string; message?: string }): { error: string } {
+  console.error(`[onboarding] ${where} failed`, error.code, error.message);
+  return { error: STEP_SAVE_FAILED };
+}
+
 // ── Step: Funcționalități (modules) ─────────────────────────────────────
 // Replaces the old implicit two-question profile inference with an
 // explicit choice (docs/onboarding-redesign-audit-2026-09-19.md Section R).
@@ -38,7 +48,8 @@ export async function saveOnboardingModules(input: {
   });
   if (!result.ok) return { error: result.error };
 
-  await supabase.from("organisations").update({ onboarding_step: "menu" }).eq("id", orgId);
+  const { error } = await supabase.from("organisations").update({ onboarding_step: "menu" }).eq("id", orgId);
+  if (error) return stepFailed("saveOnboardingModules", error);
   redirect("/onboarding/menu");
 }
 
@@ -68,7 +79,8 @@ export async function advanceFromMenu(): Promise<{ error: string } | void> {
   const isRO = org?.country_code === "RO";
   const nextStep = isRO ? "fiscal" : "first_sale";
 
-  await supabase.from("organisations").update({ onboarding_step: nextStep }).eq("id", orgId);
+  const { error } = await supabase.from("organisations").update({ onboarding_step: nextStep }).eq("id", orgId);
+  if (error) return stepFailed("advanceFromMenu", error);
   redirect(isRO ? "/onboarding/fiscal" : "/app/pos?onboarding=1&welcome=1");
 }
 
@@ -82,7 +94,8 @@ export async function advanceFromMenu(): Promise<{ error: string } | void> {
 export async function advanceFromFiscal(): Promise<{ error: string } | void> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { error: "Permission denied." };
-  await supabase.from("organisations").update({ onboarding_step: "first_sale" }).eq("id", orgId);
+  const { error } = await supabase.from("organisations").update({ onboarding_step: "first_sale" }).eq("id", orgId);
+  if (error) return stepFailed("advanceFromFiscal", error);
   redirect("/app/pos?onboarding=1&welcome=1");
 }
 
@@ -97,11 +110,12 @@ export async function advanceFromFiscal(): Promise<{ error: string } | void> {
 export async function markFirstSaleDoneForOnboarding(): Promise<{ error: string } | void> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { error: "Permission denied." };
-  await supabase
+  const { error } = await supabase
     .from("organisations")
     .update({ onboarding_step: "result" })
     .eq("id", orgId)
     .not("onboarding_step", "in", "(complete)");
+  if (error) return stepFailed("markFirstSaleDoneForOnboarding", error);
 }
 
 // ── Step: Gata (result -> operational dashboard) ────────────────────────
@@ -112,7 +126,7 @@ export async function markFirstSaleDoneForOnboarding(): Promise<{ error: string 
 export async function completeOnboardingJourney(): Promise<{ error: string } | void> {
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { error: "Permission denied." };
-  await supabase
+  const { error } = await supabase
     .from("organisations")
     .update({
       onboarding_step: "complete",
@@ -120,5 +134,6 @@ export async function completeOnboardingJourney(): Promise<{ error: string } | v
       onboarding_completed_at: new Date().toISOString(),
     })
     .eq("id", orgId);
+  if (error) return stepFailed("completeOnboardingJourney", error);
   redirect("/app");
 }

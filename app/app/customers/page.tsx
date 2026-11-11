@@ -9,8 +9,10 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { addCustomer, importCustomersCsv } from "@/app/actions/kitchenops";
 import { getRegularsAtRisk } from "@/app/actions/loyalty";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { SaveErrorToast } from "@/components/app/SaveErrorToast";
 
-export default async function CustomersPage() {
+export default async function CustomersPage({ searchParams }: { searchParams?: Promise<{ save_error?: string }> }) {
+  const query = await searchParams;
   const { countryCode, profileLocale, supabase, orgId } = await getKitchenOpsContext();
   const { t } = await getAppLocaleAndText(countryCode, profileLocale);
 
@@ -37,6 +39,7 @@ export default async function CustomersPage() {
 
   return (
     <div className="space-y-6 p-6">
+      <SaveErrorToast code={query?.save_error} />
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{t.customers.title}</h1>

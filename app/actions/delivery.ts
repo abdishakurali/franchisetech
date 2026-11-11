@@ -13,11 +13,19 @@ function canManage(role: string | null | undefined) {
   return ["owner", "manager"].includes(role ?? "");
 }
 
+// No UI caller today (checked 2026-11-12). Writes used to ignore the Supabase
+// error; now a refused write throws so any future caller cannot miss it.
+function throwIfError(where: string, error: { code?: string; message?: string } | null) {
+  if (!error) return;
+  console.error(`[delivery] ${where} failed`, error.code, error.message);
+  throw new Error(`delivery_${where}_failed`);
+}
+
 export async function saveDeliveryIntegration(update: DeliveryIntegrationUpdate): Promise<void> {
   const { supabase, orgId, membership } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return;
 
-  await supabase
+  const { error } = await supabase
     .from("delivery_integrations")
     .upsert(
       {
@@ -29,6 +37,7 @@ export async function saveDeliveryIntegration(update: DeliveryIntegrationUpdate)
       },
       { onConflict: "organisation_id,provider" },
     );
+  throwIfError("save_integration", error);
 
   revalidatePath("/app/settings");
 }
@@ -41,7 +50,7 @@ export async function saveProductMapping(
   const { supabase, orgId, membership } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return;
 
-  await supabase
+  const { error } = await supabase
     .from("delivery_product_mappings")
     .upsert(
       {
@@ -52,6 +61,7 @@ export async function saveProductMapping(
       },
       { onConflict: "organisation_id,provider,external_sku" },
     );
+  throwIfError("save_mapping", error);
 
   revalidatePath("/app/settings");
 }
@@ -63,12 +73,13 @@ export async function deleteProductMapping(
   const { supabase, orgId, membership } = await getKitchenOpsContext();
   if (!canManage(membership.role)) return;
 
-  await supabase
+  const { error } = await supabase
     .from("delivery_product_mappings")
     .delete()
     .eq("organisation_id", orgId)
     .eq("provider", provider)
     .eq("external_sku", externalSku);
+  throwIfError("delete_mapping", error);
 
   revalidatePath("/app/settings");
 }

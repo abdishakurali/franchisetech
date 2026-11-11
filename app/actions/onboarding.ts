@@ -72,11 +72,14 @@ export async function completePosOnboarding(input: {
   }
 
   if (input.userName?.trim()) {
-    await supabase
+    // Non-blocking: the name can be set later in Profile. Supabase returns a
+    // DB error rather than throwing, so the old .then(..., () => null) never
+    // saw it; log it instead of swallowing it.
+    const { error: profileError } = await supabase
       .from("profiles")
       .update({ full_name: input.userName.trim() })
-      .eq("id", user.id)
-      .then(() => null, () => null);
+      .eq("id", user.id);
+    if (profileError) console.error("onboarding_profile_name_failed", profileError.code, profileError.message);
   }
 
   const { data: existingMembership } = await supabase
@@ -358,10 +361,10 @@ export async function completePosOnboarding(input: {
   // guided journey (modules → menu → fiscal → first sale → result), not
   // the whole thing. onboarding_completed only flips true at the end, in
   // completeOnboardingJourney (app/actions/onboarding-steps.ts).
-  await supabase.from("organisations").update({ onboarding_step: "modules" }).eq("id", orgId).then(
-    () => null,
-    (e: unknown) => console.error("onboarding_step_update_failed", e),
-  );
+  // Non-blocking: a null onboarding_step resumes at the same first step. The
+  // old .then(..., onRejected) never saw DB errors (Supabase returns them).
+  const { error: stepError } = await supabase.from("organisations").update({ onboarding_step: "modules" }).eq("id", orgId);
+  if (stepError) console.error("onboarding_step_update_failed", stepError.code, stepError.message);
 
   // ── Preferred plan cookie ──────────────────────────────────────────────
   if (input.preferredPlan) {

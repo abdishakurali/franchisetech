@@ -79,6 +79,9 @@ export function ProductAddForm({
         return;
       }
       toast.success(pf.saved);
+      if (result.imageFailed) {
+        toast.warning("Produsul s-a salvat fără imagine. Adăugați imaginea din pagina de editare.");
+      }
       router.push(returnTo || "/app/products");
       router.refresh();
     } finally {

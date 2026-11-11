@@ -15,6 +15,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { toStockQuantity } from "@/lib/invoice-stock-units";
 import { DRAFT_NUMBER_PREFIX } from "@/lib/invoice-numbering";
 import { buildStornoLines } from "@/lib/invoice-storno";
+import { withSaveError } from "@/lib/save-error";
 
 export type EfacturaLineInput = {
   name: string;
@@ -516,10 +517,16 @@ export async function saveAnafSettings(formData: FormData): Promise<void> {
     update.invoice_next_number = Number.isInteger(nextNumber) && nextNumber > 0 ? nextNumber : null;
   }
 
-  await supabase
+  const { error } = await supabase
     .from("organisations")
     .update(update)
     .eq("id", orgId);
+  // Before 2026-11-12 this was unchecked: seller details, IBANs, series and the
+  // next invoice number could silently revert. Settings now shows a message.
+  if (error) {
+    console.error("[efactura] saveAnafSettings failed", error.code, error.message);
+    redirect(withSaveError("/app/settings?tab=fiscal"));
+  }
 
   revalidatePath("/app/settings");
 }

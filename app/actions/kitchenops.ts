@@ -33,6 +33,8 @@ import {
 } from "@/lib/nir/purchase";
 import { replacePurchaseItems } from "@/lib/nir/purchase-items-write";
 import { replaceRecipeItems } from "@/lib/recipe-items-write";
+import { recordOpeningStock, setProductStockWithMovement } from "@/lib/stock-adjust-write";
+import { logWriteError, withSaveError, type SaveErrorCode } from "@/lib/save-error";
 import { createServiceClient } from "@/lib/supabase/server";
 import { listActiveVatRates, listAllVatRates } from "@/lib/vat-rates-server";
 import { formCheckboxEnabled } from "@/lib/form-checkbox";
@@ -283,7 +285,7 @@ async function createKitchenOrderIfEnabled({
 /** Result for the add/edit/delete actions behind SettingsListSection
  * (categories, payment methods). Before 2026-11-12 these returned nothing and
  * ignored the Supabase error, so a refused save looked like it worked. */
-export type SettingsListActionResult = { ok: true } | { ok: false; error: "in_use" | "failed" };
+export type SettingsListActionResult = { ok: true } | { ok: false; error: "in_use" | "duplicate" | "failed" };
 
 function settingsListResult(error: { code?: string; message?: string } | null, where: string): SettingsListActionResult {
   if (!error) return { ok: true };
@@ -411,7 +413,7 @@ export async function approveProductVat(formData: FormData) {
   if (!before) return;
 
   const service = await createServiceClient();
-  const { data: batch } = await service.from("repair_batches").insert({
+  const { data: batch, error: batchError } = await service.from("repair_batches").insert({
     organisation_id: orgId,
     repair_type: "vat",
     status: "running",
@@ -420,7 +422,11 @@ export async function approveProductVat(formData: FormData) {
     approved_at: new Date().toISOString(),
     created_by: user.id,
   }).select("id").single();
-  if (!batch) return;
+  // Before 2026-11-12 a refused batch insert returned with no message.
+  if (!batch) {
+    logWriteError("approveProductVat repair_batches", batchError ?? { message: "no row" });
+    redirect(withSaveError("/app/settings?tab=data-repair"));
+  }
 
   const after = {
     vat_rate: vat.rate,
@@ -432,7 +438,8 @@ export async function approveProductVat(formData: FormData) {
   };
   const { error } = await service.from("products").update(after)
     .eq("id", productId).eq("organisation_id", orgId);
-  await service.from("repair_actions").insert({
+  logWriteError("approveProductVat products", error);
+  const { error: actionLogError } = await service.from("repair_actions").insert({
     organisation_id: orgId,
     batch_id: batch.id,
     entity_type: "product",
@@ -444,76 +451,100 @@ export async function approveProductVat(formData: FormData) {
     error_message: error?.message ?? null,
     applied_at: error ? null : new Date().toISOString(),
   });
-  await service.from("repair_batches").update({
+  logWriteError("approveProductVat repair_actions", actionLogError);
+  const { error: batchUpdateError } = await service.from("repair_batches").update({
     status: error ? "failed" : "completed",
     completed_at: new Date().toISOString(),
   }).eq("id", batch.id);
+  logWriteError("approveProductVat repair_batches update", batchUpdateError);
 
   revalidatePath("/app/settings");
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
+  if (error) redirect(withSaveError("/app/settings?tab=data-repair"));
 }
 
-export async function updateSgrPolicy(formData: FormData) {
+/** Generic result for settings writes with no more specific failure. */
+export type SaveActionResult = { ok: true } | { ok: false; error: "failed" };
+
+export async function updateSgrPolicy(formData: FormData): Promise<SaveActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   const policy = stringValue(formData, "sgr_policy");
-  if (!["accountant_approval_required", "outside_vat_scope", "included_in_taxable_base"].includes(policy)) return;
-  await supabase.from("organisations").update({
+  if (!["accountant_approval_required", "outside_vat_scope", "included_in_taxable_base"].includes(policy)) return { ok: false, error: "failed" };
+  const { error } = await supabase.from("organisations").update({
     sgr_policy: policy,
     sgr_deposit_amount: numberValue(formData, "sgr_deposit_amount", 0.5),
     sgr_vat_rate: numberValue(formData, "sgr_vat_rate", 0),
   }).eq("id", orgId);
+  if (error) { logWriteError("updateSgrPolicy", error); return { ok: false, error: "failed" }; }
   revalidatePath("/app/settings");
+  return { ok: true };
 }
 
-export async function addUnit(formData: FormData) {
+export async function addUnit(formData: FormData): Promise<SettingsListActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "products.enabled");
   const name = stringValue(formData, "name").trim();
-  if (!name || isReservedUnitName(name)) return;
+  if (!name) return { ok: false, error: "failed" };
+  // A name that duplicates a standard or existing unit used to return silently.
+  if (isReservedUnitName(name)) return { ok: false, error: "duplicate" };
   const existing = await listOperationalUnitNames(supabase, orgId);
-  if (existing.some((u) => u.toLowerCase() === name.toLowerCase())) return;
-  await supabase.from("units_of_measure").insert({
+  if (existing.some((u) => u.toLowerCase() === name.toLowerCase())) return { ok: false, error: "duplicate" };
+  const { error } = await supabase.from("units_of_measure").insert({
     organisation_id: orgId, name,
     abbreviation: stringValue(formData, "abbreviation") || null,
-  }).then(() => null, () => null);
+  });
+  if (error) return settingsListResult(error, "addUnit");
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
+  return { ok: true };
 }
 
-export async function updateUnit(formData: FormData) {
+export async function updateUnit(formData: FormData): Promise<SettingsListActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
   const name = stringValue(formData, "name").trim();
-  if (!id || !name || isReservedUnitName(name)) return;
+  if (!id || !name) return { ok: false, error: "failed" };
+  if (isReservedUnitName(name)) return { ok: false, error: "duplicate" };
+  const { data: current } = await supabase
+    .from("units_of_measure").select("name").eq("id", id).eq("organisation_id", orgId).maybeSingle();
+  const currentName = String((current as { name?: string } | null)?.name ?? "").toLowerCase();
   const existing = await listOperationalUnitNames(supabase, orgId);
-  if (existing.some((u) => u.toLowerCase() === name.toLowerCase())) return;
-  await supabase.from("units_of_measure").update({
+  // Saving a unit under its own name (e.g. only the abbreviation changed) is
+  // not a duplicate; before 2026-11-12 that edit silently did nothing.
+  if (existing.some((u) => u.toLowerCase() === name.toLowerCase() && u.toLowerCase() !== currentName)) {
+    return { ok: false, error: "duplicate" };
+  }
+  const { error } = await supabase.from("units_of_measure").update({
     name,
     abbreviation: stringValue(formData, "abbreviation") || null,
   }).eq("id", id).eq("organisation_id", orgId);
+  if (error) return settingsListResult(error, "updateUnit");
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
+  return { ok: true };
 }
 
-export async function deleteUnit(formData: FormData) {
+export async function deleteUnit(formData: FormData): Promise<SettingsListActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "products.enabled");
   const id = stringValue(formData, "id");
-  if (!id) return;
-  await supabase.from("units_of_measure").delete().eq("id", id).eq("organisation_id", orgId);
+  if (!id) return { ok: false, error: "failed" };
+  const { error } = await supabase.from("units_of_measure").delete().eq("id", id).eq("organisation_id", orgId);
+  if (error) return settingsListResult(error, "deleteUnit");
   revalidatePath("/app/products");
   revalidatePath("/app/settings");
+  return { ok: true };
 }
 
 export async function addProduct(
   formData: FormData,
-): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
+): Promise<{ ok: true; id: string; imageFailed?: true } | { ok: false; error: string }> {
   const { supabase, membership, user, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
   try {
@@ -570,44 +601,61 @@ export async function addProduct(
 
   if (insertError || !inserted) return { ok: false, error: insertError?.message ?? "Could not save product." };
 
+  // Opening stock movement, before the image so a rollback leaves nothing
+  // behind. Before 2026-11-12 this insert was swallowed: the product kept
+  // current_stock_qty = opening stock with no movement, so gestiune/balanță
+  // disagreed with stock on hand.
+  if (visibility.inventory && openingStock && openingStock > 0) {
+    const opening = await recordOpeningStock(supabase, {
+      orgId, productId: inserted.id, qty: openingStock, unit: unit.unit,
+    });
+    if (!opening.ok) {
+      console.error("[addProduct] opening stock movement failed", opening.message);
+      revalidatePath("/app/products");
+      return {
+        ok: false,
+        error: opening.productRemoved
+          ? "Produsul nu s-a salvat: stocul inițial nu a putut fi înregistrat. Încercați din nou."
+          : "Produsul s-a salvat fără stoc inițial. Introduceți stocul din pagina Stoc.",
+      };
+    }
+  }
+
   // Handle image upload after insert so we can use the product ID in the path
   const imageFile = formData.get("image_file") as File | null;
+  let imageFailed = false;
   if (inserted && imageFile && imageFile.size > 0) {
     try {
       const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
       if (ALLOWED_TYPES.includes(imageFile.type)) {
         const ext = imageFile.type === "image/webp" ? "webp" : imageFile.type === "image/png" ? "png" : "jpg";
         const path = `${orgId}/products/${inserted.id}/${Date.now()}.${ext}`;
-        const { data: up } = await supabase.storage
+        const { data: up, error: upError } = await supabase.storage
           .from("product-images")
           .upload(path, imageFile, { contentType: imageFile.type, upsert: true });
         if (up?.path) {
           const { data: pub } = supabase.storage.from("product-images").getPublicUrl(up.path);
-          await supabase.from("products")
+          const { error: imgError } = await supabase.from("products")
             .update({ image_url: pub.publicUrl })
             .eq("id", inserted.id)
             .eq("organisation_id", orgId);
+          if (imgError) { logWriteError("addProduct image_url", imgError); imageFailed = true; }
+        } else {
+          logWriteError("addProduct image upload", upError ?? { message: "no path" });
+          imageFailed = true;
         }
       }
-    } catch { /* non-fatal — product saved without image */ }
-  }
-
-  // Record opening stock movement if opening_stock was given
-  if (visibility.inventory && inserted && openingStock && openingStock > 0) {
-    await supabase.from("stock_movements").insert({
-      organisation_id: orgId,
-      product_id: inserted.id,
-      movement_type: "opening",
-      quantity_change: openingStock,
-      unit_of_measure: unit.unit,
-      reason: "Opening stock",
-    }).then(() => null, () => null);
+    } catch (e) {
+      // non-fatal — product saved without image; the form says so
+      console.error("[addProduct] image upload threw", e);
+      imageFailed = true;
+    }
   }
 
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
   revalidatePath("/app/stock");
-  return { ok: true, id: inserted.id };
+  return imageFailed ? { ok: true, id: inserted.id, imageFailed: true } : { ok: true, id: inserted.id };
 }
 
 /** Minimal POS quick-add — no redirect; returns result for in-till dialog. */
@@ -1107,7 +1155,7 @@ export async function addSupplier(formData: FormData) {
   await assertEntitlement(orgId, "purchases.suppliers");
   const name = stringValue(formData, "name");
   if (!name) return;
-  await supabase.from("suppliers").insert({
+  const { error } = await supabase.from("suppliers").insert({
     organisation_id: orgId, name,
     tax_id: stringValue(formData, "tax_id") || null,
     vat_registered: formData.get("vat_registered") === "on",
@@ -1118,6 +1166,8 @@ export async function addSupplier(formData: FormData) {
     address: stringValue(formData, "address") || null,
     notes: stringValue(formData, "notes") || null,
   });
+  // Before 2026-11-12 a refused insert still redirected to the list.
+  if (error) { logWriteError("addSupplier", error); redirect(withSaveError("/app/suppliers/new")); }
   revalidatePath("/app/suppliers");
   redirect("/app/suppliers");
 }
@@ -1157,7 +1207,7 @@ export async function updateSupplier(formData: FormData) {
   await assertEntitlement(orgId, "purchases.suppliers");
   const id = stringValue(formData, "id");
   if (!id) return;
-  await supabase.from("suppliers").update({
+  const { error } = await supabase.from("suppliers").update({
     name: stringValue(formData, "name"),
     tax_id: stringValue(formData, "tax_id") || null,
     vat_registered: formData.get("vat_registered") === "on",
@@ -1169,6 +1219,7 @@ export async function updateSupplier(formData: FormData) {
     notes: stringValue(formData, "notes") || null,
     updated_at: new Date().toISOString(),
   }).eq("id", id).eq("organisation_id", orgId);
+  if (error) { logWriteError("updateSupplier", error); redirect(withSaveError(`/app/suppliers/${id}/edit`)); }
   revalidatePath("/app/suppliers");
   redirect("/app/suppliers");
 }
@@ -1179,7 +1230,8 @@ export async function deleteSupplier(formData: FormData) {
   await assertEntitlement(orgId, "purchases.suppliers");
   const id = stringValue(formData, "id");
   if (!id) return;
-  await supabase.from("suppliers").update({ active: false }).eq("id", id).eq("organisation_id", orgId);
+  const { error } = await supabase.from("suppliers").update({ active: false }).eq("id", id).eq("organisation_id", orgId);
+  if (error) { logWriteError("deleteSupplier", error); redirect(withSaveError(`/app/suppliers/${id}/edit`)); }
   revalidatePath("/app/suppliers");
   redirect("/app/suppliers");
 }
@@ -1473,34 +1525,6 @@ export async function addPurchase(formData: FormData) {
   return postNirPurchase(formData);
 }
 
-export async function addRecipe(formData: FormData) {
-  const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
-  await assertEntitlement(orgId, "recipes.enabled");
-  const productId = stringValue(formData, "product_id");
-  const ingredientNames = formData.getAll("ingredient_name").map((v) => String(v).trim());
-  if (!productId || !ingredientNames.some(Boolean)) return;
-  const recipeName = stringValue(formData, "name") || "Recipe";
-  const quantities = formData.getAll("quantity").map((v) => Number(v || 0));
-  const units = formData.getAll("unit_of_measure").map((v) => String(v || "each"));
-  const unitCosts = formData.getAll("unit_cost").map((v) => Number(v || 0));
-  const { data: recipe } = await supabase.from("recipes").insert({
-    organisation_id: orgId, product_id: productId, name: recipeName,
-    yield_qty: numberValue(formData, "yield_qty", 1),
-  }).select("id").single();
-  if (!recipe) return;
-  await supabase.from("recipe_items").insert(
-    ingredientNames.flatMap((ingredientName, index) => {
-      if (!ingredientName) return [];
-      const quantity = quantities[index] ?? 0;
-      const unitCost = unitCosts[index] ?? 0;
-      const totalCost = quantity * unitCost;
-      return [{ organisation_id: orgId, recipe_id: recipe.id, ingredient_name: ingredientName, quantity, unit_of_measure: units[index] || "each", unit_cost: unitCost, total_cost: totalCost, unit: units[index] || "each", cost: totalCost }];
-    })
-  );
-  revalidatePath("/app/recipes");
-}
-
 /** Returned only on failure; success redirects. "empty": no ingredient with a
  * quantity > 0 was submitted. "failed": nothing (or, for a header-only
  * failure, only the ingredient lines) was saved; the owner sees a message. */
@@ -1655,31 +1679,34 @@ export async function addCustomer(formData: FormData) {
   if (!canManage(membership.role)) return;
   const name = stringValue(formData, "name");
   if (!name) return;
-  await supabase.from("customers").insert({
+  const { error } = await supabase.from("customers").insert({
     organisation_id: orgId,
     name,
     email: stringValue(formData, "email") || null,
     phone: stringValue(formData, "phone") || null,
     notes: stringValue(formData, "notes") || null,
   });
+  if (error) { logWriteError("addCustomer", error); redirect(withSaveError("/app/customers")); }
   revalidatePath("/app/customers");
   redirect("/app/customers");
 }
 
-export async function addCustomerFromPos(formData: FormData) {
+export async function addCustomerFromPos(formData: FormData): Promise<SaveActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canTransact(membership.role)) return;
+  if (!canTransact(membership.role)) return { ok: false, error: "failed" };
   const name = stringValue(formData, "name");
-  if (!name) return;
-  await supabase.from("customers").insert({
+  if (!name) return { ok: false, error: "failed" };
+  const { error } = await supabase.from("customers").insert({
     organisation_id: orgId,
     name,
     email: stringValue(formData, "email") || null,
     phone: stringValue(formData, "phone") || null,
     notes: stringValue(formData, "notes") || null,
   });
+  if (error) { logWriteError("addCustomerFromPos", error); return { ok: false, error: "failed" }; }
   revalidatePath("/app/pos");
   revalidatePath("/app/customers");
+  return { ok: true };
 }
 
 function parseCsv(text: string) {
@@ -1871,11 +1898,16 @@ export async function cancelPurchase(formData: FormData) {
   if (!purchase || !canCancelPurchase(purchase.status)) {
     redirect(`/app/purchases/${purchaseId}?error=cannot_cancel`);
   }
-  await supabase
+  const { error: cancelError } = await supabase
     .from("purchases")
     .update({ status: "cancelled" })
     .eq("id", purchaseId)
     .eq("organisation_id", orgId);
+  // Before 2026-11-12 a refused cancel still redirected as if it worked.
+  if (cancelError) {
+    logWriteError("cancelPurchase", cancelError);
+    redirect(purchaseErrorRedirect(purchaseId, "cancel_failed"));
+  }
   revalidatePath("/app/purchases");
   redirect("/app/purchases");
 }
@@ -1937,12 +1969,20 @@ export async function deleteProducts(ids: string[]): Promise<DeleteProductsResul
   const toArchive = (rows ?? []).filter((r) => r.active !== false).map((r) => r.id);
   const archivedRows = (rows ?? []).filter((r) => r.active === false);
 
+  // Before 2026-11-12 this update was unchecked, so the toast counted products
+  // as archived even when the update was refused.
+  let archived = toArchive.length;
+  let blocked = 0;
   if (toArchive.length) {
-    await supabase.from("products").update({ active: false }).in("id", toArchive).eq("organisation_id", orgId);
+    const { error: archiveError } = await supabase.from("products").update({ active: false }).in("id", toArchive).eq("organisation_id", orgId);
+    if (archiveError) {
+      logWriteError("deleteProducts archive", archiveError);
+      archived = 0;
+      blocked += toArchive.length;
+    }
   }
 
   let deleted = 0;
-  let blocked = 0;
   for (const row of archivedRows) {
     if (await productHasHistory(supabase, row.id)) {
       blocked++;
@@ -1960,32 +2000,36 @@ export async function deleteProducts(ids: string[]): Promise<DeleteProductsResul
   revalidatePath("/app/products");
   revalidatePath("/app/pos");
   revalidatePath("/app/stock");
-  return { archived: toArchive.length, deleted, blocked };
+  return { archived, deleted, blocked };
 }
 
-export async function deletePurchases(ids: string[]) {
+export async function deletePurchases(ids: string[]): Promise<SaveActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "purchases.nir");
-  if (!ids.length) return;
+  if (!ids.length) return { ok: true };
   const { data: rows } = await supabase
     .from("purchases")
     .select("id,status")
     .in("id", ids)
     .eq("organisation_id", orgId);
   const draftIds = (rows ?? []).filter((r) => canCancelPurchase(r.status)).map((r) => r.id);
-  if (!draftIds.length) return;
-  await supabase.from("purchases").update({ status: "cancelled" }).in("id", draftIds).eq("organisation_id", orgId);
+  if (!draftIds.length) return { ok: true };
+  const { error } = await supabase.from("purchases").update({ status: "cancelled" }).in("id", draftIds).eq("organisation_id", orgId);
+  if (error) { logWriteError("deletePurchases", error); return { ok: false, error: "failed" }; }
   revalidatePath("/app/purchases");
+  return { ok: true };
 }
 
-export async function deleteSuppliers(ids: string[]) {
+export async function deleteSuppliers(ids: string[]): Promise<SaveActionResult> {
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
   await assertEntitlement(orgId, "purchases.suppliers");
-  if (!ids.length) return;
-  await supabase.from("suppliers").update({ active: false }).in("id", ids).eq("organisation_id", orgId);
+  if (!ids.length) return { ok: true };
+  const { error } = await supabase.from("suppliers").update({ active: false }).in("id", ids).eq("organisation_id", orgId);
+  if (error) { logWriteError("deleteSuppliers", error); return { ok: false, error: "failed" }; }
   revalidatePath("/app/suppliers");
+  return { ok: true };
 }
 
 export async function createIngredientInline(formData: FormData): Promise<{ id: string; name: string; unit_of_measure: string | null; cost_price: number | null; current_stock_qty: number | null } | { error: string }> {
@@ -2040,28 +2084,21 @@ export async function updateProductStock(formData: FormData): Promise<void> {
     .single();
   if (readError) throw new Error(readError.message);
 
-  const oldQty = Number(before?.current_stock_qty ?? 0);
-  const delta = qty - oldQty;
-
-  if (delta !== 0) {
-    const { error: movementError } = await supabase.from("stock_movements").insert({
-      organisation_id: orgId,
-      product_id: productId,
-      movement_type: "manual_adjustment",
-      quantity_change: delta,
-      unit_of_measure: before?.unit_of_measure ?? "each",
-      reason: "Manual stock adjustment",
-      performed_by: user.id,
-    });
-    if (movementError) throw new Error(movementError.message);
+  // Stock first, then the movement, with a rollback of the stock if the
+  // movement fails (lib/stock-adjust-write.ts). The old order could leave a
+  // movement for a stock change that never happened.
+  const write = await setProductStockWithMovement(supabase, {
+    orgId,
+    productId,
+    oldQty: Number(before?.current_stock_qty ?? 0),
+    newQty: qty,
+    unit: before?.unit_of_measure ?? "each",
+    userId: user.id,
+  });
+  if (!write.ok) {
+    console.error("[updateProductStock] failed", write.stage, write.message);
+    throw new Error("Stocul nu s-a salvat. Încercați din nou.");
   }
-
-  const { error } = await supabase
-    .from("products")
-    .update({ current_stock_qty: qty })
-    .eq("id", productId)
-    .eq("organisation_id", orgId);
-  if (error) throw new Error(error.message);
   revalidatePath("/app/products");
   revalidatePath("/app/stock");
   revalidatePath("/app/recipes");
@@ -2092,40 +2129,33 @@ export async function bulkUpdateProductStock(formData: FormData): Promise<{ ok: 
   if (!Array.isArray(items) || !items.length) return { ok: false, error: "No items to update" };
 
   let updated = 0;
+  let failed = 0;
   for (const item of items) {
     if (!item.product_id) continue;
     const qty = Number(item.quantity);
     if (!Number.isFinite(qty) || qty < 0) continue;
 
-    const { data: before } = await supabase
+    const { data: before, error: readError } = await supabase
       .from("products")
       .select("current_stock_qty, unit_of_measure")
       .eq("id", item.product_id)
       .eq("organisation_id", orgId)
       .single();
+    if (readError || !before) { failed += 1; continue; }
 
-    const oldQty = Number(before?.current_stock_qty ?? 0);
-    const delta = qty - oldQty;
-
-    if (delta !== 0) {
-      const { error: movementError } = await supabase.from("stock_movements").insert({
-        organisation_id: orgId,
-        product_id: item.product_id,
-        movement_type: "manual_adjustment",
-        quantity_change: delta,
-        unit_of_measure: before?.unit_of_measure ?? "each",
-        reason: "Manual stock adjustment",
-        performed_by: user.id,
-      });
-      if (movementError) continue;
-    }
-
-    const { error } = await supabase
-      .from("products")
-      .update({ current_stock_qty: qty })
-      .eq("id", item.product_id)
-      .eq("organisation_id", orgId);
-    if (!error) updated += 1;
+    // Stock first, movement second, stock rolled back if the movement fails
+    // (lib/stock-adjust-write.ts). Before 2026-11-12 a failed product update
+    // left an orphan movement and the action still returned ok: true.
+    const write = await setProductStockWithMovement(supabase, {
+      orgId,
+      productId: item.product_id,
+      oldQty: Number(before.current_stock_qty ?? 0),
+      newQty: qty,
+      unit: before.unit_of_measure ?? "each",
+      userId: user.id,
+    });
+    if (write.ok) updated += 1;
+    else { failed += 1; console.error("[bulkUpdateProductStock] failed", item.product_id, write.stage, write.message); }
   }
 
   revalidatePath("/app/products");
@@ -2133,6 +2163,15 @@ export async function bulkUpdateProductStock(formData: FormData): Promise<{ ok: 
   revalidatePath("/app/recipes");
   revalidatePath("/app/reports/balanta");
   revalidatePath("/app/reports/gestiune");
+  if (failed > 0) {
+    return {
+      ok: false,
+      updated,
+      error: updated > 0
+        ? `S-au salvat ${updated} produse; ${failed} nu s-au salvat. Verificați stocul și încercați din nou.`
+        : "Stocul nu s-a salvat. Încercați din nou.",
+    };
+  }
   return { ok: true, updated };
 }
 
@@ -2149,12 +2188,16 @@ export async function startInventoryCount(): Promise<void> {
   if (!canManage(membership.role)) return;
   await assertEntitlement(orgId, "inventory.enabled");
 
-  const { data: count } = await supabase
+  const { data: count, error } = await supabase
     .from("inventory_counts")
     .insert({ organisation_id: orgId, started_by: user.id })
     .select("id")
     .single();
-  if (!count) return;
+  // Before 2026-11-12 a refused insert left the button doing nothing.
+  if (error || !count) {
+    logWriteError("startInventoryCount", error ?? { message: "no row" });
+    redirect(withSaveError("/app/inventory"));
+  }
 
   revalidatePath("/app/inventory");
   redirect(`/app/inventory/${count.id}`);
@@ -2250,7 +2293,8 @@ export async function updateOrgCountry(formData: FormData): Promise<void> {
   const code: CountryCode = (ALLOWED_COUNTRY_CODES as readonly string[]).includes(raw)
     ? (raw as CountryCode)
     : "IE";
-  await supabase.from("organisations").update({ country_code: code }).eq("id", orgId);
+  const { error } = await supabase.from("organisations").update({ country_code: code }).eq("id", orgId);
+  if (error) { logWriteError("updateOrgCountry", error); redirect(withSaveError("/app/settings?tab=business")); }
   revalidatePath("/app/settings");
 }
 
@@ -2266,7 +2310,7 @@ export async function updateSite(formData: FormData): Promise<void> {
   const id = stringValue(formData, "id");
   const name = stringValue(formData, "name");
   if (!id || !name) return;
-  await supabase
+  const { error } = await supabase
     .from("sites")
     .update({
       name,
@@ -2275,6 +2319,7 @@ export async function updateSite(formData: FormData): Promise<void> {
     })
     .eq("id", id)
     .eq("organisation_id", orgId);
+  if (error) { logWriteError("updateSite", error); redirect(withSaveError("/app/settings?tab=location")); }
   revalidatePath("/app/settings");
 }
 
@@ -2340,10 +2385,11 @@ export async function updateOrgCurrency(formData: FormData): Promise<void> {
   if (!canManage(membership.role)) return;
   const raw = stringValue(formData, "currency_code");
   const entry = ALLOWED_CURRENCIES[raw] ?? ALLOWED_CURRENCIES["EUR"];
-  await supabase
+  const { error } = await supabase
     .from("organisations")
     .update({ currency_code: entry.code, currency_symbol: entry.symbol })
     .eq("id", orgId);
+  if (error) { logWriteError("updateOrgCurrency", error); redirect(withSaveError("/app/settings?tab=business")); }
   revalidatePath("/app", "layout");
 }
 
@@ -2351,18 +2397,19 @@ export async function updateOrganisationIndustry(formData: FormData): Promise<vo
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
   if (!canManage(membership.role)) return;
-  await supabase
+  const { error } = await supabase
     .from("organisations")
     .update({ business_type: normaliseIndustry(formData.get("business_type")) })
     .eq("id", orgId);
+  if (error) { logWriteError("updateOrganisationIndustry", error); redirect(withSaveError("/app/settings?tab=business")); }
   revalidatePath("/app/settings");
   revalidatePath("/app", "layout");
 }
 
-export async function updateRestaurantFeatureFlags(formData: FormData): Promise<void> {
+export async function updateRestaurantFeatureFlags(formData: FormData): Promise<SaveActionResult> {
   "use server";
   const { supabase, membership, user, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
 
   const { data: before } = await supabase
     .from("organisations")
@@ -2381,24 +2428,29 @@ export async function updateRestaurantFeatureFlags(formData: FormData): Promise<
   if (updates.kitchen_stations_enabled) await assertEntitlement(orgId, "kitchen.stations");
   if (updates.order_types_enabled) await assertEntitlement(orgId, "kitchen.order_types");
 
-  await supabase.from("organisations").update(updates).eq("id", orgId);
+  // Before 2026-11-12 this update was unchecked and the audit rows below were
+  // written anyway, so the audit could say "enabled" when nothing changed.
+  const { error } = await supabase.from("organisations").update(updates).eq("id", orgId);
+  if (error) { logWriteError("updateRestaurantFeatureFlags", error); return { ok: false, error: "failed" }; }
 
   for (const key of RESTAURANT_FEATURE_KEYS) {
     const oldValue = Boolean(beforeFlags[key]);
     const newValue = updates[key];
     if (oldValue === newValue) continue;
-    await supabase.from("pos_audit_events").insert({
+    const { error: auditError } = await supabase.from("pos_audit_events").insert({
       organisation_id: orgId,
       event_type: newValue ? "feature_enabled" : "feature_disabled",
       before_data: { feature: key, enabled: oldValue },
       after_data: { feature: key, enabled: newValue },
       performed_by: user.id,
-    }).then(() => null, () => null);
+    });
+    logWriteError("updateRestaurantFeatureFlags audit", auditError);
   }
 
   revalidatePath("/app/settings");
   revalidatePath("/app/kitchen");
   revalidatePath("/app", "layout");
+  return { ok: true };
 }
 
 export async function updateKitchenOrderStatus(formData: FormData): Promise<void> {
@@ -2872,7 +2924,16 @@ export async function addVatRate(formData: FormData): Promise<VatActionResult> {
   // Clear the old default only after the new one exists, so a failed save
   // never leaves the org without a default rate.
   if (isDefault) {
-    await supabase.from("vat_rates").update({ is_default: false }).eq("organisation_id", orgId).neq("id", inserted.id);
+    const { error: clearError } = await supabase.from("vat_rates").update({ is_default: false }).eq("organisation_id", orgId).neq("id", inserted.id);
+    if (clearError) {
+      // Two defaults would be ambiguous on every new product; undo the new rate
+      // so the org keeps exactly its old default.
+      logWriteError("addVatRate clear old default", clearError);
+      const { error: undoError } = await supabase.from("vat_rates").delete().eq("id", inserted.id).eq("organisation_id", orgId);
+      logWriteError("addVatRate undo", undoError);
+      revalidatePath("/app/settings");
+      return { ok: false, error: "failed" };
+    }
   }
   revalidatePath("/app/settings");
   revalidatePath("/app/products");
@@ -2893,6 +2954,12 @@ export async function updateVatRate(formData: FormData): Promise<VatActionResult
   const isDefault = formData.get("is_default") === "true";
   const active = formData.get("active") !== "false";
   if (!isSaneVatRate(rate)) return { ok: false, error: "failed" };
+  let wasDefault = false;
+  if (isDefault) {
+    const { data: prev } = await supabase
+      .from("vat_rates").select("is_default").eq("id", id).eq("organisation_id", orgId).maybeSingle();
+    wasDefault = Boolean((prev as { is_default?: boolean | null } | null)?.is_default);
+  }
   const { error } = await supabase
     .from("vat_rates")
     .update({ name, rate, fiscalnet_vat_group: fiscalnetVatGroup, is_default: isDefault, active })
@@ -2900,7 +2967,17 @@ export async function updateVatRate(formData: FormData): Promise<VatActionResult
     .eq("organisation_id", orgId);
   if (error) return vatError(error);
   if (isDefault) {
-    await supabase.from("vat_rates").update({ is_default: false }).eq("organisation_id", orgId).neq("id", id);
+    const { error: clearError } = await supabase.from("vat_rates").update({ is_default: false }).eq("organisation_id", orgId).neq("id", id);
+    if (clearError) {
+      // Put this rate's default flag back so the org never has two defaults.
+      logWriteError("updateVatRate clear old default", clearError);
+      if (!wasDefault) {
+        const { error: undoError } = await supabase.from("vat_rates").update({ is_default: false }).eq("id", id).eq("organisation_id", orgId);
+        logWriteError("updateVatRate undo", undoError);
+      }
+      revalidatePath("/app/settings");
+      return { ok: false, error: "failed" };
+    }
   }
   revalidatePath("/app/settings");
   return { ok: true };
@@ -2944,7 +3021,16 @@ export async function seedDefaultVatRates(formData: FormData): Promise<void> {
     active: true,
     sort_order: (existingRates.size + i + 1),
   }));
-  await supabase.from("vat_rates").insert(rows);
+  // Before 2026-11-12 this insert was unchecked. For a RO org ANAF lists as
+  // not VAT-registered, the trigger refuses the 21% default row, the whole
+  // batch fails and the button did nothing.
+  const { error } = await supabase.from("vat_rates").insert(rows);
+  if (error) {
+    logWriteError("seedDefaultVatRates", error);
+    const result = vatError(error);
+    const code: SaveErrorCode = !result.ok && result.error === "not_vat_registered" ? "vat_not_registered" : "failed";
+    redirect(withSaveError("/app/settings?tab=business", code));
+  }
   revalidatePath("/app/settings");
 }
 
@@ -2999,13 +3085,15 @@ export async function updateBusinessCapabilities(formData: FormData): Promise<{ 
     const oldValue = Boolean(beforeFlags[key]);
     const newValue = featureUpdates[key];
     if (oldValue === newValue) continue;
-    await supabase.from("pos_audit_events").insert({
+    const { error: auditError } = await supabase.from("pos_audit_events").insert({
       organisation_id: orgId,
       event_type: newValue ? "feature_enabled" : "feature_disabled",
       before_data: { feature: key, enabled: oldValue },
       after_data: { feature: key, enabled: newValue },
       performed_by: user.id,
-    }).then(() => null, () => null);
+    });
+    // Audit only: the setting itself is saved; log so a gap is visible.
+    logWriteError("updateBusinessCapabilities audit", auditError);
   }
 
   revalidatePath("/app");
@@ -3044,7 +3132,9 @@ export async function updateBusinessProfileAndModules(formData: FormData): Promi
   updates.multi_site_ops_enabled = multiSite;
 
   if (Object.keys(updates).length) {
-    await supabase.from("organisations").update(updates).eq("id", orgId);
+    const { error } = await supabase.from("organisations").update(updates).eq("id", orgId);
+    // Before 2026-11-12 a refused update left the modules off with no message.
+    if (error) { logWriteError("updateBusinessProfileAndModules", error); redirect(withSaveError("/app/settings?tab=modules")); }
   }
 
   revalidatePath("/app");
@@ -3052,10 +3142,10 @@ export async function updateBusinessProfileAndModules(formData: FormData): Promi
   revalidatePath("/app/setup-checklist");
 }
 
-export async function enableBusinessModule(module: "inventory" | "recipe_costing" | "team_advanced" | "multi_site"): Promise<void> {
+export async function enableBusinessModule(module: "inventory" | "recipe_costing" | "team_advanced" | "multi_site"): Promise<SaveActionResult> {
   "use server";
   const { supabase, membership, orgId } = await getActiveOrg();
-  if (!canManage(membership.role)) return;
+  if (!canManage(membership.role)) return { ok: false, error: "failed" };
 
   const columnMap = {
     inventory: "inventory_enabled",
@@ -3064,13 +3154,15 @@ export async function enableBusinessModule(module: "inventory" | "recipe_costing
     multi_site: "multi_site_ops_enabled",
   } as const;
 
-  await supabase.from("organisations").update({ [columnMap[module]]: true }).eq("id", orgId);
+  const { error } = await supabase.from("organisations").update({ [columnMap[module]]: true }).eq("id", orgId);
+  if (error) { logWriteError("enableBusinessModule", error); return { ok: false, error: "failed" }; }
   revalidatePath("/app");
   revalidatePath("/app/settings");
   revalidatePath("/app/setup-checklist");
+  return { ok: true };
 }
 
-export async function enableInventoryFromSetup(): Promise<void> {
+export async function enableInventoryFromSetup(): Promise<SaveActionResult> {
   return enableBusinessModule("inventory");
 }
 

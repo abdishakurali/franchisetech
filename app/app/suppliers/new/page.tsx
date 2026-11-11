@@ -5,12 +5,15 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { addSupplier } from "@/app/actions/kitchenops";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { SupplierFormFields } from "@/components/app/SupplierForm";
+import { SaveErrorToast } from "@/components/app/SaveErrorToast";
 
-export default async function SuppliersNewPage() {
+export default async function SuppliersNewPage({ searchParams }: { searchParams?: Promise<{ save_error?: string }> }) {
   await requireBusinessModule("purchases");
   await getKitchenOpsContext();
+  const query = await searchParams;
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-6">
+      <SaveErrorToast code={query?.save_error} />
       <div className="flex items-center gap-3">
         <Link href="/app/suppliers" className="text-sm text-muted-foreground hover:text-foreground">← Suppliers</Link>
         <h1 className="text-2xl font-semibold text-foreground">Add supplier</h1>

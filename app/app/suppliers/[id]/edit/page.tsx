@@ -4,9 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { updateSupplier, deleteSupplier } from "@/app/actions/kitchenops";
 import { SupplierFormFields } from "@/components/app/SupplierForm";
+import { SaveErrorToast } from "@/components/app/SaveErrorToast";
 
-export default async function SupplierEditPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function SupplierEditPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ save_error?: string }>;
+}) {
   const { id } = await params;
+  const query = await searchParams;
   const { supabase, orgId } = await getKitchenOpsContext();
 
   const { data: supplier } = await supabase
@@ -20,6 +28,7 @@ export default async function SupplierEditPage({ params }: { params: Promise<{ i
 
   return (
     <div className="mx-auto max-w-[720px] space-y-6 p-6">
+      <SaveErrorToast code={query?.save_error} />
       <div className="flex items-center gap-3">
         <Link href="/app/suppliers" className="text-sm text-muted-foreground hover:text-foreground">← Suppliers</Link>
         <h1 className="text-2xl font-semibold text-foreground">Edit supplier</h1>
