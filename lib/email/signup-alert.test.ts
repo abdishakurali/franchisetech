@@ -13,6 +13,7 @@ const alert = {
   countryCode: "RO",
   locationBand: "1",
   utm: ["facebook", undefined, "fiscal-fear"],
+  signupAt: "2026-11-11T12:05:00.000Z",
 };
 
 afterEach(() => {
@@ -29,6 +30,8 @@ describe("signup alert email", () => {
     expect(html).toContain("ana@example.ro");
     expect(html).toContain("facebook / fiscal-fear");
     expect(html).toContain("în 24 de ore");
+    // 12:05 UTC is 14:05 in Bucharest (EET, UTC+2, in November).
+    expect(html).toMatch(/<strong>Ora înscrierii:<\/strong> 11\.11\.2026,? 14:05/);
   });
 
   it("shows a dash for missing optional fields", () => {
