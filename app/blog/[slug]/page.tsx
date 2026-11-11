@@ -7,6 +7,7 @@ import { CTASection } from "@/components/marketing/MarketingShell";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 import { BlogTopicHeader } from "@/components/marketing/BlogTopicHeader";
 import { BlogCtaLink } from "@/components/marketing/BlogCtaLink";
+import { BlogAuthorBox } from "@/components/marketing/BlogAuthorBox";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { blogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
@@ -53,7 +54,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           headline: post.title,
           description: post.description,
           datePublished: post.publishedAt,
-          author: { "@type": "Organization", name: "franchisetech" },
+          author: { "@type": "Person", name: "Abdishakur Ali", jobTitle: "Fondator", worksFor: { "@type": "Organization", name: "franchisetech" } },
           publisher: { "@type": "Organization", name: "franchisetech", url: SITE_URL },
         }}
       />
@@ -153,6 +154,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
             ))}
           </div>
+
+          <BlogAuthorBox />
 
           {(() => {
             if (fearCta) {
