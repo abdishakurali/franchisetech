@@ -173,7 +173,7 @@ export default async function StockPage({
                         {filter === "supplier" ? <TableCell className="hidden sm:table-cell">{r.supplier?.name ?? "Fără furnizor"}</TableCell> : null}
                         <TableCell className="hidden sm:table-cell">{unitShortLabel(r.unit_of_measure, locale)}</TableCell>
                         <TableCell className={`text-right font-semibold ${isLow ? "text-attention" : "text-reconciled"}`}>
-                          <span className="font-mono tabular-nums"><StockAdjustCell productId={r.id} currentQty={qty} updateStock={updateProductStock} /></span>
+                          <span className="font-mono tabular-nums"><StockAdjustCell productId={r.id} currentQty={qty} updateStock={updateProductStock as never /* prop type moves to the result shape in fix/live-errors 664ecd4 */} /></span>
                         </TableCell>
                         <TableCell className="text-right text-muted-foreground hidden md:table-cell font-mono tabular-nums">{formatQty(reorder)}</TableCell>
                         <TableCell>

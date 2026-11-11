@@ -55,8 +55,6 @@ function StockCell({ product, updateStock, clickHint }: { product: Product; upda
       fd.set("quantity", val);
       await updateStock(fd);
       setEditing(false);
-    } catch {
-      toast.error("Stocul nu s-a salvat. Încercați din nou.");
     } finally {
       setSaving(false);
     }

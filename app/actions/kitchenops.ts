@@ -2068,21 +2068,35 @@ export async function createIngredientInline(formData: FormData): Promise<{ id: 
   return data as { id: string; name: string; unit_of_measure: string | null; cost_price: number | null; current_stock_qty: number | null };
 }
 
-export async function updateProductStock(formData: FormData): Promise<void> {
+export type UpdateProductStockResult = { ok: true } | { ok: false; error: string };
+
+// Returns a result instead of throwing (same shape as fix/live-errors 664ecd4).
+// A thrown server-action error reaches the browser with its message stripped.
+export async function updateProductStock(formData: FormData): Promise<UpdateProductStockResult> {
   const { supabase, membership, orgId, user } = await getActiveOrg();
-  if (!canManage(membership.role)) throw new Error("Permission denied");
-  await assertEntitlement(orgId, "inventory.enabled");
+  if (!canManage(membership.role)) {
+    return { ok: false, error: "Doar proprietarul sau managerul poate modifica stocul." };
+  }
+  try {
+    await assertEntitlement(orgId, "inventory.enabled");
+  } catch (error) {
+    if (error instanceof EntitlementDeniedError) return { ok: false, error: error.body.error };
+    throw error;
+  }
   const productId = stringValue(formData, "product_id");
-  if (!productId) throw new Error("Product ID required");
-  const qty = numberValue(formData, "quantity", 0);
+  if (!productId) return { ok: false, error: "Produs lipsă." };
+  const rawQty = stringValue(formData, "quantity");
+  const qty = Number(rawQty);
+  if (!rawQty || !Number.isFinite(qty)) return { ok: false, error: "Cantitate invalidă." };
 
   const { data: before, error: readError } = await supabase
     .from("products")
     .select("current_stock_qty, unit_of_measure")
     .eq("id", productId)
     .eq("organisation_id", orgId)
-    .single();
-  if (readError) throw new Error(readError.message);
+    .maybeSingle();
+  if (readError) return { ok: false, error: readError.message };
+  if (!before) return { ok: false, error: "Produsul nu a fost găsit." };
 
   // Stock first, then the movement, with a rollback of the stock if the
   // movement fails (lib/stock-adjust-write.ts). The old order could leave a
@@ -2090,20 +2104,21 @@ export async function updateProductStock(formData: FormData): Promise<void> {
   const write = await setProductStockWithMovement(supabase, {
     orgId,
     productId,
-    oldQty: Number(before?.current_stock_qty ?? 0),
+    oldQty: Number(before.current_stock_qty ?? 0),
     newQty: qty,
-    unit: before?.unit_of_measure ?? "each",
+    unit: before.unit_of_measure ?? "each",
     userId: user.id,
   });
   if (!write.ok) {
     console.error("[updateProductStock] failed", write.stage, write.message);
-    throw new Error("Stocul nu s-a salvat. Încercați din nou.");
+    return { ok: false, error: "Stocul nu s-a salvat. Încercați din nou." };
   }
   revalidatePath("/app/products");
   revalidatePath("/app/stock");
   revalidatePath("/app/recipes");
   revalidatePath("/app/reports/balanta");
   revalidatePath("/app/reports/gestiune");
+  return { ok: true };
 }
 
 export async function bulkUpdateProductStock(formData: FormData): Promise<{ ok: boolean; error?: string; updated?: number }> {

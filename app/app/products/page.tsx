@@ -228,7 +228,9 @@ export default async function ProductsPage({ searchParams }: { searchParams?: Pr
             <ProductsBulkTable
               products={products as never}
               deleteAction={deleteProducts}
-              updateStockAction={inventoryVisible ? updateProductStock : undefined}
+              // `as never`: the cell's prop type moves to the result shape in
+              // fix/live-errors (664ecd4); drop the cast once both are on main.
+              updateStockAction={inventoryVisible ? (updateProductStock as never) : undefined}
               inventoryVisible={inventoryVisible}
               recipeVisible={recipeVisible}
               currency={currency}
