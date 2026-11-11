@@ -5,11 +5,11 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { captureClientEvent } from "@/lib/analytics/client-events";
 import { useMarketingMessages } from "@/lib/marketing/use-marketing-locale";
 
-export function MobileStickyCta() {
+export function MobileStickyCta({ label, defaultPlan }: { label?: string; defaultPlan?: string } = {}) {
   const t = useMarketingMessages();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const plan = searchParams.get("plan");
+  const plan = searchParams.get("plan") ?? defaultPlan ?? null;
   // Most of this site's traffic is mobile, so this is the CTA most visitors actually
   // tap. Building the href from `plan` alone dropped every utm_*/click ID on the way
   // to /signup, which left the conversion upload with nothing to attribute against.
@@ -28,7 +28,13 @@ export function MobileStickyCta() {
     pathname?.startsWith("/login") ||
     pathname?.startsWith("/signup") ||
     pathname?.startsWith("/app") ||
-    pathname?.startsWith("/compare")
+    pathname?.startsWith("/compare") ||
+    // Accountant, Odoo and ANAF pages speak to a different reader than the cafe trial.
+    pathname?.startsWith("/pentru-contabili") ||
+    pathname?.startsWith("/partners") ||
+    pathname?.startsWith("/accountant-partners") ||
+    pathname?.startsWith("/odoo") ||
+    pathname?.startsWith("/anaf")
   ) {
     return null;
   }
@@ -46,13 +52,13 @@ export function MobileStickyCta() {
             captureClientEvent("marketing_cta_clicked", {
               cta_type: "primary",
               cta_location: "mobile_sticky",
-              cta_text: t.cta.getStarted,
+              cta_text: label ?? t.cta.getStarted,
               href: signupHref,
-              plan: plan ?? null,
+              plan,
             })
           }
         >
-          {t.cta.getStarted}
+          {label ?? t.cta.getStarted}
         </Link>
       </div>
     </div>

@@ -49,7 +49,7 @@ const STEPS = [
   {
     n: "2",
     title: "Primiți acces la portal",
-    body: "Odată ce clientul devine abonat plătitor, contul dvs. de contabil primește automat acces gratuit, doar pentru citire, la firma lui — fără cerere separată către proprietar.",
+    body: "Proprietarul vă poate invita din aplicație din prima zi, inclusiv în perioada de probă: acces gratuit, doar pentru citire. Dacă clientul s-a înscris prin linkul dvs. de recomandare, primiți accesul și automat, odată ce devine abonat plătitor, fără cerere separată către proprietar.",
   },
   {
     n: "3",

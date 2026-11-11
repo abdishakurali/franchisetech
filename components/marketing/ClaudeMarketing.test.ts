@@ -11,7 +11,7 @@ describe("Romanian homepage positioning", () => {
   });
 
   it("presents the free accountant handoff as a primary workflow", () => {
-    expect(source).toContain("Conectează contabilul gratuit");
+    expect(source).toContain("Conectați contabilul gratuit");
     expect(source).toContain("fără rapoarte trimise lunar pe WhatsApp");
     expect(source).toContain("Portal gratuit pentru contabil");
   });
