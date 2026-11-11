@@ -797,6 +797,7 @@ export const blogPosts: BlogPost[] = [
     publishedAt: "2026-06-14",
     locale: "ro",
     tags: ["stoc","inventar"],
+    relatedFeature: "/features/stock-management",
     image: "/marketing/live/stock.png",
     sections: [
       {
@@ -2756,3 +2757,18 @@ export const blogPosts: BlogPost[] = [
     ],
   },
 ];
+
+/**
+ * Related posts for the "Mai multe articole" footer: most shared tags first,
+ * newest first on ties. It used to be the first four posts in this array for
+ * every article, so 75 of the posts never got a footer link from anywhere.
+ */
+export function relatedBlogPosts(post: BlogPost, limit = 4, posts: BlogPost[] = blogPosts): BlogPost[] {
+  const tags = new Set(post.tags);
+  return posts
+    .filter((p) => p.slug !== post.slug)
+    .map((p) => ({ p, shared: p.tags.filter((t) => tags.has(t)).length }))
+    .sort((a, b) => b.shared - a.shared || b.p.publishedAt.localeCompare(a.p.publishedAt) || a.p.slug.localeCompare(b.p.slug))
+    .slice(0, limit)
+    .map(({ p }) => p);
+}

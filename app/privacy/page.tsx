@@ -7,7 +7,7 @@ import { DATA_CONTROLLER, DEMO_LEAD_PROCESSORS, DEMO_LEAD_RETENTION_MONTHS } fro
 const updated = "4 noiembrie 2026";
 
 export const metadata: Metadata = {
-  title: "Politica de confidențialitate franchisetech",
+  title: { absolute: "Politica de confidențialitate franchisetech" },
   description: "Ce date prelucrează franchisetech, de ce, cât timp și ce drepturi aveți.",
   alternates: { canonical: "/privacy" },
 };

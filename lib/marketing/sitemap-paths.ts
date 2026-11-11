@@ -13,6 +13,8 @@ export type SitemapPathEntry = {
   path: string;
   priority: number;
   changeFrequency: "weekly" | "monthly" | "yearly";
+  /** Known publish date (blog posts); other pages have no reliable date. */
+  lastModified?: string;
 };
 
 const PRIORITY: Record<string, number> = {
@@ -51,7 +53,6 @@ export function allSitemapPaths(): SitemapPathEntry[] {
     ...publicPaths,
     COMPARE_HUB_PATH,
     "/help",
-    "/login",
     "/signup",
     "/blog",
     "/odoo",
@@ -65,12 +66,15 @@ export function allSitemapPaths(): SitemapPathEntry[] {
     ...blogPosts.map((post) => `/blog/${post.slug}`),
   ]);
 
+  const blogDates = new Map(blogPosts.map((post) => [`/blog/${post.slug}`, post.publishedAt]));
+
   return [...paths]
     .sort((a, b) => a.localeCompare(b))
     .map((path) => ({
       path,
       priority: priorityFor(path),
       changeFrequency: frequencyFor(path),
+      ...(blogDates.has(path) ? { lastModified: blogDates.get(path) } : {}),
     }));
 }
 

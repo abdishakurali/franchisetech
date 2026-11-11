@@ -5,7 +5,7 @@ import { CTASection } from "@/components/marketing/MarketingShell";
 import { ClaudeMarketingShellAuth } from "@/components/marketing/ClaudeMarketingShellAuth";
 
 export const metadata: Metadata = {
-  title: "Romania e-Factura Setup Guide — franchisetech",
+  title: { absolute: "Romania e-Factura Setup Guide — franchisetech" },
   description: "How to connect franchisetech to ANAF/SPV e-Factura: OAuth setup, drafting invoices, XML validation, and submission status tracking.",
   alternates: { canonical: "/help/romania-efactura" },
 };

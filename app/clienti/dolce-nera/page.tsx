@@ -6,7 +6,7 @@ import { SupportContactLink } from "@/components/marketing/SupportContactLink";
 import { YouTubeFacade } from "@/components/marketing/YouTubeFacade";
 import { TRIAL_DAYS } from "@/lib/billing/trial";
 import { SUPPORT_PHONE_DISPLAY } from "@/lib/marketing/contact-info";
-import { SITE_URL } from "@/lib/marketing/seo";
+import { DEFAULT_OG_IMAGE, SITE_URL } from "@/lib/marketing/seo";
 import s from "@/components/marketing/ClaudeMarketing.module.css";
 
 // Every number below is dated and was read from production (SELECT only) on
@@ -21,10 +21,10 @@ const DESCRIPTION =
   "Cum lucrează Dolce Nera, o cafenea de pe Moșilor din București, cu franchisetech din iunie 2026: vânzare la casă, bon fiscal prin FiscalNet, stoc și închiderea casei. Cifre datate, verificate în aplicație.";
 
 export const metadata: Metadata = {
-  title: TITLE,
+  title: { absolute: TITLE },
   description: DESCRIPTION,
   alternates: { canonical: CASE_STUDY_PATH },
-  openGraph: { title: TITLE, description: DESCRIPTION, url: `${SITE_URL}${CASE_STUDY_PATH}`, locale: "ro_RO" },
+  openGraph: { title: TITLE, description: DESCRIPTION, url: `${SITE_URL}${CASE_STUDY_PATH}`, locale: "ro_RO", siteName: "franchisetech", type: "article", images: [DEFAULT_OG_IMAGE] },
 };
 
 const USES = [

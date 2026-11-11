@@ -31,7 +31,7 @@ export async function generateMetadata({
   const page = findSkagPage((await params).slug);
   if (!page) return {};
   return {
-    title: `${page.h1} — franchisetech`,
+    title: { absolute: `${page.h1} — franchisetech` },
     description: page.metaDescription,
     alternates: { canonical: `/lp/${page.slug}` },
     robots: { index: false, follow: false },

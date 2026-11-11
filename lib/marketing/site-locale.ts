@@ -1,16 +1,7 @@
 import type { Metadata } from "next";
 import type { MarketingLocale } from "@/lib/marketing/locale";
-import { SITE_URL } from "@/lib/marketing/seo";
 
 export const MARKETING_LANG = "en" as const;
-
-function localizedUrl(path: string, lang: MarketingLocale | "x-default"): string {
-  const normalized = path === "/" ? "" : path.startsWith("/") ? path : `/${path}`;
-  const base = normalized === "" ? SITE_URL : `${SITE_URL}${normalized}`;
-  if (lang === "en" || lang === "x-default") return base;
-  if (normalized === "") return `${SITE_URL}/?lang=${lang}`;
-  return `${base}?lang=${lang}`;
-}
 
 export function localeAlternates(
   path: string,
@@ -19,18 +10,17 @@ export function localeAlternates(
   // Canonical always points at the clean URL, regardless of which locale
   // rendered the page — a ?lang=ro canonical on the majority-locale traffic
   // was splitting ranking signal between the bare path and its own query
-  // variant. Locale variants still live in `languages` below for hreflang.
+  // variant.
+  //
+  // No hreflang: the clean URL renders Romanian for anyone without a locale
+  // cookie (getMarketingLocale defaults to "ro", and crawlers send no cookies),
+  // but the old hreflang map labelled it "en" and pointed "ro" at the ?lang=ro
+  // duplicate, whose canonical is the clean URL again. English only exists as a
+  // cookie/?lang=en variant that canonicalises to the Romanian page, so there
+  // is no indexable English URL to declare. Re-add hreflang only once English
+  // has its own self-canonical URLs (e.g. /en/...).
   const normalized = path === "/" ? "/" : path.startsWith("/") ? path : `/${path}`;
-  const canonical = normalized;
-
-  return {
-    canonical,
-    languages: {
-      en: localizedUrl(path, "en"),
-      ro: localizedUrl(path, "ro"),
-      "x-default": localizedUrl(path, "x-default"),
-    },
-  };
+  return { canonical: normalized };
 }
 
 export const MARKETING_KEYWORDS_EN = [

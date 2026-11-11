@@ -8,7 +8,7 @@ import { ODOO_WARRANTY_DAYS } from "@/lib/marketing/odoo-services";
 const updated = "3 noiembrie 2026";
 
 export const metadata: Metadata = {
-  title: "Termeni și condiții franchisetech",
+  title: { absolute: "Termeni și condiții franchisetech" },
   description: "Termenii de utilizare ai serviciului franchisetech, operat de SALUT TECH SRL.",
   alternates: { canonical: "/terms" },
 };

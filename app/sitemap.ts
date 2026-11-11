@@ -15,9 +15,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // (lib/marketing/site-locale.ts) always points at the clean URL, so
   // listing the query-param duplicate here just split ranking signal and
   // doubled the sitemap (441 entries for 227 real pages).
-  return paths.map(({ path, priority, changeFrequency }) => ({
+  // Blog posts carry their publish date. Everything else still reports the
+  // build time, which Google learns to ignore; a real per-page date needs a
+  // source of truth (e.g. git commit time) and is left for later.
+  return paths.map(({ path, priority, changeFrequency, lastModified }) => ({
     url: path === "/" ? SITE_URL : `${SITE_URL}${path}`,
-    lastModified: new Date(),
+    lastModified: lastModified ? new Date(lastModified) : new Date(),
     changeFrequency,
     priority,
   }));
