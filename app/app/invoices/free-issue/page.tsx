@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { mapUnitOfMeasureToAnafCode } from "@/lib/anaf/unit-codes";
 import { FreeIssueForm } from "@/components/app/FreeIssueForm";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 export const metadata: Metadata = {
   title: "Transfer gratuit | franchisetech",
@@ -81,7 +82,7 @@ export default async function FreeIssuePage() {
                   {rows.map((r) => (
                     <tr key={r.id}>
                       <td className="px-4 py-2 font-mono text-xs">{r.document_number}</td>
-                      <td className="px-4 py-2">{new Date(r.issue_date).toLocaleDateString("ro-RO")}</td>
+                      <td className="px-4 py-2">{formatRoDate(r.issue_date)}</td>
                       <td className="px-4 py-2">{(r.line_items ?? []).map((l) => `${l.name} × ${l.quantity}`).join(", ")}</td>
                       <td className="px-4 py-2 text-muted-foreground">{r.reason}{r.recipient_name ? ` · ${r.recipient_name}` : ""}</td>
                       <td className="px-4 py-2 text-right">{Number(r.total_cost ?? 0).toFixed(2)} RON</td>

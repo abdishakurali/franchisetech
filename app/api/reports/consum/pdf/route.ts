@@ -10,6 +10,7 @@ import {
   stockMovementUnitCost,
   stockMovementUnit,
 } from "@/lib/ro-accounting/stock-movements";
+import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -98,7 +99,7 @@ export async function GET(req: Request) {
     subtitle: `Document nr. ${documentNumber}`,
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
-    generatedAt: new Date().toLocaleString("ro-RO"),
+    generatedAt: formatRoDateTime(new Date()),
     summary: [
       { label: copy.itemCount, value: String(items.length) },
       { label: copy.totalValue, value: money(totalValue) },

@@ -3,6 +3,7 @@ import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { computeLoyaltyRoiReport } from "@/lib/reports/loyalty-roi-data";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
 const rewardLabel = (code: string) =>
   code === "discount" ? "Reducere" : code === "free_item" ? "Produs gratuit" : code;
@@ -41,7 +42,7 @@ export async function GET(req: Request) {
     subtitle: "Cheltuială medie, retenție și recompense răscumpărate",
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
-    generatedAt: new Date().toLocaleString("ro-RO"),
+    generatedAt: formatRoDateTime(new Date()),
     summary: [
       { label: "Cheltuială medie (fideli)", value: money(report.avgSpendLoyalty) },
       { label: "Cheltuială medie (non-fideli)", value: money(report.avgSpendNonLoyalty) },

@@ -4,6 +4,7 @@ import { computeSalesReport } from "@/lib/reports/sales-data";
 import { listAccessibleSites } from "@/lib/site-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -52,7 +53,7 @@ export async function GET(req: Request) {
     subtitle: "Rezumat vânzări, TVA, plăți și top produse",
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
-    generatedAt: new Date().toLocaleString("ro-RO"),
+    generatedAt: formatRoDateTime(new Date()),
     summary: [
       { label: "Vânzări nete", value: money(totalNet || grossExTips - totalVat) },
       { label: "TVA colectat", value: money(totalVat) },

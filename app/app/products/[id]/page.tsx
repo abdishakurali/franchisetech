@@ -9,6 +9,7 @@ import { isModuleEnabled } from "@/lib/business-modules";
 import { PRODUCT_DETAIL_SELECT } from "@/lib/supabase/product-selects";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { formatCostAsOf } from "@/lib/recipe-costing";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -382,7 +383,7 @@ export default async function ProductDetailPage({
                           {m.reason && <span className="ml-1 text-muted-foreground">— {m.reason}</span>}
                         </div>
                         <span className="text-xs text-muted-foreground">
-                          {new Date(m.performed_at).toLocaleDateString("en-IE", { day: "2-digit", month: "short" })}
+                          {formatRoDate(m.performed_at, { locale: "en-IE", day: "2-digit", month: "short" })}
                         </span>
                       </div>
                     );
@@ -432,7 +433,7 @@ export default async function ProductDetailPage({
                   {salesHistory.map((s, i) => (
                     <TableRow key={i}>
                       <TableCell className="text-sm text-muted-foreground">
-                        {new Date(s.sold_at).toLocaleDateString("en-IE", { day: "2-digit", month: "short" })}
+                        {formatRoDate(s.sold_at, { locale: "en-IE", day: "2-digit", month: "short" })}
                       </TableCell>
                       <TableCell className="text-right">{s.quantity}</TableCell>
                       <TableCell className="text-right font-medium">{money(Number(s.gross_amount ?? s.line_total ?? 0), currency)}</TableCell>

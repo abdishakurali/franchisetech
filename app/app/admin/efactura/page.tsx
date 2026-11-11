@@ -4,6 +4,7 @@ import { isLeadAdmin } from "@/lib/leads/admin";
 import { getAuthorizationUrl } from "@/lib/anaf/auth";
 import { authLinkSecret, signAuthState } from "@/lib/anaf/auth-link";
 import { AnafTokenImportForm } from "@/components/app/AnafTokenImportForm";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 export const metadata = { title: "e-Factura SALUT TECH", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -71,10 +72,10 @@ export default async function PlatformEfacturaPage() {
             {!token
               ? "lipsă"
               : token.expiresAt <= new Date()
-                ? `expirată la ${token.expiresAt.toLocaleDateString("ro-RO")}`
+                ? `expirată la ${formatRoDate(token.expiresAt)}`
                 : token.fromAccountant
-                  ? `token de la contabil, valabil până la ${token.expiresAt.toLocaleDateString("ro-RO")} (nu se reînnoiește automat)`
-                  : `activă, se reînnoiește automat (salvată la ${new Date(token.updatedAt).toLocaleDateString("ro-RO")})`}
+                  ? `token de la contabil, valabil până la ${formatRoDate(token.expiresAt)} (nu se reînnoiește automat)`
+                  : `activă, se reînnoiește automat (salvată la ${formatRoDate(token.updatedAt)})`}
           </li>
           <li>Facturi la plată: {process.env.PLATFORM_INVOICING === "1" ? "se creează automat" : "oprite (PLATFORM_INVOICING, după ce contabilul alege seria)"}</li>
           <li>Trimitere: {process.env.PLATFORM_EFACTURA_UPLOAD === "1" ? "automată" : "oprită (doar validare)"}</li>

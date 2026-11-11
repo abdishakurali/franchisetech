@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { AlertTriangle, Gift } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { CopyReferralButton } from "@/components/app/CopyReferralButton";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 const money = (value: number) => new Intl.NumberFormat("ro-RO", { style: "currency", currency: "EUR" }).format(value);
 
@@ -102,7 +103,7 @@ export default async function PartnerDashboardPage() {
                 <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 p-4 text-sm">
                   <div>
                     <p className="font-medium">{org?.company_legal_name || org?.name || "Client"}</p>
-                    <p className="text-xs text-muted-foreground">Recomandat {new Date(r.referred_at).toLocaleDateString("ro-RO")}</p>
+                    <p className="text-xs text-muted-foreground">Recomandat {formatRoDate(r.referred_at)}</p>
                   </div>
                   <div className="flex items-center gap-4">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${r.status === "active" ? "bg-reconciled/10 text-reconciled" : r.status === "churned" ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}`}>

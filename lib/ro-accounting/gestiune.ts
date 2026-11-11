@@ -1,3 +1,4 @@
+import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 /**
  * Raport de Gestiune (Stock Management Report) generator for Romanian accounting.
  *
@@ -40,6 +41,7 @@ function formatRoDate(date: string | Date): string {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
+    timeZone: RO_TIME_ZONE,
   });
 }
 
@@ -135,7 +137,7 @@ export function gestiuneHtml(data: GestiuneData): string {
       ${gestiune ? `<div class="header-item"><label>Gestiune:</label><span>${gestiune}</span></div>` : ""}
       <div class="header-item">
         <label>Generat la:</label>
-        <span>${new Date().toLocaleString("ro-RO")}</span>
+        <span>${new Date().toLocaleString("ro-RO", { timeZone: RO_TIME_ZONE })}</span>
       </div>
     </div>
   </div>

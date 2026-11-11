@@ -11,6 +11,7 @@ import { requireBusinessModule } from "@/lib/module-guard";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 import { computeGestiuneReport } from "@/lib/ro-accounting/gestiune-data";
 import { isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 const DOCUMENT_TYPE_COLORS: Record<string, string> = {
   stoc_initial: "bg-accent text-foreground",
@@ -134,7 +135,7 @@ export default async function GestiuneReportPage({
                 {movements.map((m, idx) => (
                   <TableRow key={`${m.documentType}-${idx}`} className={m.documentType === "stoc_initial" ? "bg-accent" : ""}>
                     <TableCell className="text-right tabular-nums text-muted-foreground">{idx + 1}</TableCell>
-                    <TableCell className="tabular-nums">{new Date(m.date).toLocaleDateString("ro-RO")}</TableCell>
+                    <TableCell className="tabular-nums">{formatRoDate(m.date)}</TableCell>
                     <TableCell>
                       <Badge className={DOCUMENT_TYPE_COLORS[m.documentType] ?? "bg-secondary text-foreground"}>
                         {labels.docTypes[m.documentType as keyof typeof labels.docTypes] ?? m.documentType}

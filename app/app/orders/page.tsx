@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
+import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 
 function firstJoined<T>(v: T | T[] | null | undefined): T | null {
   return Array.isArray(v) ? v[0] ?? null : v ?? null;
@@ -58,7 +59,7 @@ export default async function OrdersPage() {
                   const items = tx.pos_transaction_items ?? [];
                   const discountTotal = Number(tx.discount_total ?? 0);
                   const hasLineDiscount = items.some((i: { discount_pct?: number | null }) => Number(i.discount_pct ?? 0) > 0);
-                  const time = tx.sold_at ? new Intl.DateTimeFormat("en-IE", { timeStyle: "short", dateStyle: "short" }).format(new Date(tx.sold_at)) : "—";
+                  const time = tx.sold_at ? new Intl.DateTimeFormat("en-IE", { timeStyle: "short", dateStyle: "short", timeZone: RO_TIME_ZONE }).format(new Date(tx.sold_at)) : "—";
                   return (
                     <TableRow key={tx.id}>
                       <TableCell className="font-mono text-sm">{tx.transaction_number}</TableCell>

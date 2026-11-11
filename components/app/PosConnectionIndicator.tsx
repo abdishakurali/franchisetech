@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { PosT } from "@/lib/pos-i18n-context";
 import type { PosLocale } from "@/lib/pos-i18n";
 import type { PosConnectionState } from "@/lib/pos-connection-status";
+import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 
 type Props = {
   t: PosT;
@@ -27,6 +28,7 @@ function formatLastSync(iso: string | null, locale: PosLocale): string {
   return d.toLocaleTimeString(locale === "ro" ? "ro-RO" : "en-IE", {
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: RO_TIME_ZONE,
   });
 }
 

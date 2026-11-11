@@ -3,6 +3,7 @@ import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
 import { fetchAll, fetchAllIn } from "@/lib/supabase/fetch-all";
+import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
 function firstJoined<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
@@ -85,7 +86,7 @@ export async function GET(req: Request) {
     subtitle: "Raport închidere casă de sfârșit de zi",
     periodLabel: `Data: ${date}`,
     generatedBy,
-    generatedAt: new Date().toLocaleString("ro-RO"),
+    generatedAt: formatRoDateTime(new Date()),
     summary: [
       { label: "Tranzacții", value: String(completedTx.length) },
       { label: "Net", value: money(totalNet || totalGross - totalVat) },

@@ -4,6 +4,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { isLeadAdmin } from "@/lib/leads/admin";
 import { DEFAULT_NEXT_ACTION, LEAD_STATUS_LABELS, PIPELINE_STATUSES, type LeadStatus } from "@/lib/leads/demo-lead";
 import { LeadRowForm } from "@/components/app/LeadRowForm";
+import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
 export const metadata = { title: "Cereri demo", robots: { index: false, follow: false } };
 
@@ -113,7 +114,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                     {l.phone ? <> · <a className="underline" href={`tel:${l.phone.replace(/[^\d+]/g, "")}`}>{l.phone}</a></> : null}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {l.business_type} · {l.locations} loc. · {new Date(l.created_at).toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" })}
+                    {l.business_type} · {l.locations} loc. · {formatRoDateTime(l.created_at, { dateStyle: "medium", timeStyle: "short" })}
                     {earlier > 0 ? ` · încă ${earlier} cerere(i) de la același email` : ""}
                     {l.email_status !== "sent" ? ` · email: ${l.email_status}` : ""}
                     {l.organisation_id ? " · are cont franchisetech" : ""}

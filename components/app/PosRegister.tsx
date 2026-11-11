@@ -82,6 +82,7 @@ import { indexCartQuantities, indexProducts } from "@/lib/pos-indexes";
 import { resolveSaleAttempt, saleAttemptFingerprint, type SaleAttempt } from "@/lib/pos-sale-attempt";
 import { claimFiscalPrint } from "@/lib/fiscalnet/print-guard";
 import { reconcileCashSummary, type CashSummaryOperation } from "@/lib/pos/cash-summary";
+import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 
 type Product = {
   id: string; name: string; sale_price: number | string; vat_rate?: number | string | null;
@@ -611,7 +612,7 @@ function CloseTillFormBody({
                   <p className="font-semibold tabular-nums text-foreground">{money(op.amount, currency)}</p>
                   {op.performedAt && (
                     <p className="text-[10px] text-muted-foreground">
-                      {new Intl.DateTimeFormat(intlLocale, { timeStyle: "short" }).format(new Date(op.performedAt))}
+                      {new Intl.DateTimeFormat(intlLocale, { timeStyle: "short", timeZone: RO_TIME_ZONE }).format(new Date(op.performedAt))}
                     </p>
                   )}
                 </div>

@@ -16,6 +16,7 @@ import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendC
 import { AccountantAccessCard } from "@/components/app/AccountantAccessCard";
 import { ACCOUNTING_REPORT_PATHS, isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
 import { fetchAll, SALES_LINE_KEYS } from "@/lib/supabase/fetch-all";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 type Preview = { metrics: Array<[string, string]>; rows: Array<[string, string]>; error?: boolean };
 
@@ -86,7 +87,7 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
       ["Numerar numărat", latest ? formatMoney(latest.counted_cash, currency) : "—"],
       ["Numerar așteptat", latest ? formatMoney(latest.expected_cash, currency) : "—"],
       ["Diferență", latest ? formatMoney(latest.cash_difference, currency) : "—"],
-    ], rows: (data ?? []).map((row) => [row.closed_at ? new Intl.DateTimeFormat("ro-RO", { dateStyle: "medium" }).format(new Date(row.closed_at)) : "—", formatMoney(row.counted_cash, currency)]) };
+    ], rows: (data ?? []).map((row) => [row.closed_at ? formatRoDate(row.closed_at, { dateStyle: "medium" }) : "—", formatMoney(row.counted_cash, currency)]) };
   } else if (active && selected === "stock") {
     // Same live source /app/stock and /app/reports/stock read
     // (products.current_stock_qty) — not the unrelated stock_items table.

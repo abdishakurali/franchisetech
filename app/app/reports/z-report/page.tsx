@@ -12,6 +12,7 @@ import { ensureReferralCode } from "@/lib/referrals";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { formatAppDate, intlLocaleForApp } from "@/lib/app-locale";
 import { fetchAll, fetchAllIn } from "@/lib/supabase/fetch-all";
+import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 
 function firstJoined<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
@@ -281,7 +282,7 @@ export default async function ZReportPage({ searchParams }: { searchParams?: Pro
                     </TableCell>
                     <TableCell className='text-mid'>{m.reason ?? '—'}</TableCell>
                     <TableCell className='text-xs text-muted-foreground'>
-                      {m.performed_at ? new Intl.DateTimeFormat(intlLocaleForApp(locale), { timeStyle: "short" }).format(new Date(m.performed_at)) : "—"}
+                      {m.performed_at ? new Intl.DateTimeFormat(intlLocaleForApp(locale), { timeStyle: "short", timeZone: RO_TIME_ZONE }).format(new Date(m.performed_at)) : "—"}
                     </TableCell>
                     <TableCell className='text-right font-medium tabular-nums'>
                       {formatMoney(Math.abs(Number(m.amount ?? 0)), currency)}

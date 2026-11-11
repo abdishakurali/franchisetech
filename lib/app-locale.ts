@@ -1,5 +1,6 @@
 import type { AppLocale } from "@/lib/app-i18n";
 import { defaultPosLocale } from "@/lib/pos-i18n";
+import { withRoTimeZone } from "@/lib/format/ro-datetime";
 
 export type AppLocaleSource = {
   profileLocale?: string | null;
@@ -19,7 +20,7 @@ export function formatAppDate(
   if (!value) return "-";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "-";
-  return new Intl.DateTimeFormat(intlLocaleForApp(locale), options).format(d);
+  return new Intl.DateTimeFormat(intlLocaleForApp(locale), withRoTimeZone(options)).format(d);
 }
 
 /** Romanian businesses always use Romanian UI (reports are legally significant). */

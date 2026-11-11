@@ -1,4 +1,5 @@
 import { formatCurrency, getActiveOrg } from "@/lib/kitchenops/data";
+import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 export { formatCurrency };
 
 export async function getKitchenOpsContext() {
@@ -27,7 +28,7 @@ export function formatOrgMoney(value: number | string | null | undefined, member
 
 export function formatDate(value: string | null | undefined) {
   if (!value) return "-";
-  return new Intl.DateTimeFormat("ro-RO", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  return new Intl.DateTimeFormat("ro-RO", { dateStyle: "medium", timeStyle: "short", timeZone: RO_TIME_ZONE }).format(new Date(value));
 }
 
 export function marginPercent(salePrice: number, cost: number) {

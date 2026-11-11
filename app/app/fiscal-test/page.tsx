@@ -29,6 +29,7 @@ import {
 } from "@/app/actions/fiscalnet-test";
 import { RECEIPT_EXAMPLES } from "@/lib/fiscalnet/receipt-examples";
 import { downloadFiscalNetTxt } from "@/lib/fiscalnet/browser";
+import { formatRoDate, formatRoTime } from "@/lib/format/ro-datetime";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -124,7 +125,7 @@ function ZReportModal({ onClose, onConfirm, busy }: {
         </div>
 
         <div className="mb-4 rounded-lg bg-attention/10 border border-attention/25 p-3 text-sm text-attention">
-          <strong>Date:</strong> {new Date().toLocaleDateString("ro-RO", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          <strong>Date:</strong> {formatRoDate(new Date(), { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
         </div>
 
         <label className="block text-sm font-medium text-foreground mb-1">
@@ -234,7 +235,7 @@ export default function FiscalTestPage() {
   const addLog = useCallback((label: string, r: TestActionResult) => {
     const entry: LogEntry = {
       id:       ++_id,
-      ts:       new Date().toLocaleTimeString("ro-RO"),
+      ts:       formatRoTime(new Date()),
       label,
       ok:       r.ok,
       message:  r.message,

@@ -5,6 +5,7 @@ import { computeBalantaReport } from "@/lib/ro-accounting/balanta-data";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
 import { canAccessAccountingReport } from "@/lib/accounting-report-access";
+import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -59,7 +60,7 @@ export async function GET(req: Request) {
     subtitle: "Stoc inițial, intrări, ieșiri și stoc final pe produs",
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
-    generatedAt: new Date().toLocaleString("ro-RO"),
+    generatedAt: formatRoDateTime(new Date()),
     orientation: "landscape",
     summary: [
       { label: "Stoc inițial", value: money(totals.openingValue) },

@@ -82,12 +82,14 @@ function formatPeriodLabel(
   frequency: "daily" | "weekly",
   rangeStart: Date,
   rangeEnd: Date,
-  locale: AppLocale
+  locale: AppLocale,
+  timeZone: string
 ): string {
   const fmt = new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone,
   });
   if (frequency === "daily") {
     const end = new Date(rangeEnd.getTime() - 1);
@@ -403,9 +405,9 @@ export async function fetchOwnerDigestData(
   const locale = resolveAppLocale({ orgCountryCode: countryCode });
   const { rangeStart, rangeEnd } = getSalesRange(frequency, timeZone, businessDayCutoffTime, referenceNow);
   const { priorStart, priorEnd } = getPriorRange(frequency, rangeStart, rangeEnd, businessDayCutoffTime, timeZone);
-  const periodLabel = formatPeriodLabel(frequency, rangeStart, rangeEnd, locale);
+  const periodLabel = formatPeriodLabel(frequency, rangeStart, rangeEnd, locale, timeZone);
   const periodDetailLabel = formatPeriodDetailLabel(rangeStart, rangeEnd, locale, timeZone);
-  const priorPeriodLabel = formatPeriodLabel(frequency, priorStart, priorEnd, locale);
+  const priorPeriodLabel = formatPeriodLabel(frequency, priorStart, priorEnd, locale, timeZone);
 
   const rangeIso = { start: rangeStart.toISOString(), end: rangeEnd.toISOString() };
   const priorIso = { start: priorStart.toISOString(), end: priorEnd.toISOString() };

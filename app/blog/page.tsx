@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/marketing/JsonLd";
 import { marketingCard, marketingHeading, marketingSubtext } from "@/lib/marketing/tokens";
 import { blogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 export const metadata: Metadata = {
   title: "Blog — Resurse pentru cafenele și restaurante",
@@ -66,7 +67,7 @@ export default function BlogPage() {
                   <p className="flex-1 text-sm leading-6 text-muted-foreground">{post.description}</p>
                   <div className="flex items-center justify-between pt-2">
                     <time className="text-xs text-muted-foreground" dateTime={post.publishedAt}>
-                      {new Date(post.publishedAt).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })}
+                      {formatRoDate(post.publishedAt, { day: "numeric", month: "long", year: "numeric" })}
                     </time>
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-brass">
                       Citește <ArrowRight className="h-3 w-3" />

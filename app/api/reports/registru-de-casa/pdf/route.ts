@@ -6,6 +6,7 @@ import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
 import { canAccessAccountingReport } from "@/lib/accounting-report-access";
 import { fetchAll } from "@/lib/supabase/fetch-all";
+import { formatRoDate, formatRoDateTime } from "@/lib/format/ro-datetime";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -105,7 +106,7 @@ export async function GET(req: Request) {
       chiCount++;
       entries.push({
         sortKey: m.performed_at,
-        date: new Date(m.performed_at).toLocaleDateString("ro-RO"),
+        date: formatRoDate(m.performed_at),
         docNo: `CHI${String(chiCount).padStart(4, "0")}`,
         description: m.reason ?? "Încasare",
         cashIn: amount,
@@ -115,7 +116,7 @@ export async function GET(req: Request) {
       choCount++;
       entries.push({
         sortKey: m.performed_at,
-        date: new Date(m.performed_at).toLocaleDateString("ro-RO"),
+        date: formatRoDate(m.performed_at),
         docNo: `CHO${String(choCount).padStart(4, "0")}`,
         description: m.reason ?? "Plată",
         cashIn: 0,
@@ -129,7 +130,7 @@ export async function GET(req: Request) {
     chiCount++;
     entries.push({
       sortKey: `${day}T23:59:58`,
-      date: new Date(day).toLocaleDateString("ro-RO"),
+      date: formatRoDate(day),
       docNo: `CHI${String(chiCount).padStart(4, "0")}`,
       description: "Vânzări POS (numerar)",
       cashIn: total,
@@ -144,7 +145,7 @@ export async function GET(req: Request) {
     difCount++;
     entries.push({
       sortKey: s.closed_at,
-      date: new Date(s.closed_at).toLocaleDateString("ro-RO"),
+      date: formatRoDate(s.closed_at),
       docNo: `DIF${String(difCount).padStart(4, "0")}`,
       description: diff < 0 ? "Diferență casă la închidere (lipsă)" : "Diferență casă la închidere (plus)",
       cashIn: diff > 0 ? diff : 0,
@@ -158,7 +159,7 @@ export async function GET(req: Request) {
   const pdfRows: PdfRow[] = [
     {
       nr: "",
-      date: new Date(from).toLocaleDateString("ro-RO"),
+      date: formatRoDate(from),
       docNo: "SOLD INI",
       description: "Sold la începutul perioadei",
       cashIn: formatMoney(openingCash, currency),
@@ -203,7 +204,7 @@ export async function GET(req: Request) {
     subtitle: "Jurnal de casă cu sold curent",
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
-    generatedAt: new Date().toLocaleString("ro-RO"),
+    generatedAt: formatRoDateTime(new Date()),
     summary: [
       { label: "Sold inițial", value: formatMoney(openingCash, currency) },
       { label: "Total încasări", value: formatMoney(totalIn, currency) },

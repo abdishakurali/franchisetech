@@ -1,3 +1,4 @@
+import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 // recipe_items.unit_cost/total_cost are a snapshot of products.cost_price
 // (rolling weighted-average cost, not FIFO) taken when the recipe was
 // created or last edited -- not recomputed on every view. A cost that moves
@@ -18,6 +19,7 @@ export function formatCostAsOf(
     day: "2-digit",
     month: "short",
     year: "numeric",
+    timeZone: RO_TIME_ZONE,
   });
   return labels.asOf(date);
 }

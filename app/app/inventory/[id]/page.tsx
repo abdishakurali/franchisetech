@@ -8,6 +8,7 @@ import { InventoryCountCell } from "@/components/app/InventoryCountCell";
 import { getKitchenOpsContext, formatMoney } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { recordInventoryCountItem, finalizeInventoryCount } from "@/app/actions/kitchenops";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 export default async function InventoryCountDetailPage({
   params,
@@ -74,7 +75,7 @@ export default async function InventoryCountDetailPage({
             ← Toate numărătorile
           </Link>
           <h1 className="mt-2 text-2xl font-semibold text-foreground">
-            Numărătoare din {new Date(count.started_at).toLocaleDateString("ro-RO")}
+            Numărătoare din {formatRoDate(count.started_at)}
           </h1>
           <Badge
             variant="secondary"

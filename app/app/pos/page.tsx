@@ -26,6 +26,7 @@ import { requireActiveSite, listAccessibleSites } from "@/lib/site-context";
 import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendChart";
 import { createServiceClient } from "@/lib/supabase/server";
 import { fetchAll, SALES_LINE_KEYS } from "@/lib/supabase/fetch-all";
+import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -38,7 +39,7 @@ function canManagePos(role: string | null | undefined) {
 
 function formatTime(ts: string | null | undefined, locale: "en" | "ro") {
   if (!ts) return "—";
-  return new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", { timeStyle: "short", dateStyle: "short" }).format(new Date(ts));
+  return new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", { timeStyle: "short", dateStyle: "short", timeZone: RO_TIME_ZONE }).format(new Date(ts));
 }
 
 export default async function PosPage({ searchParams }: { searchParams?: Promise<{ welcome?: string; tabId?: string; quick?: string; onboarding?: string; fiscal?: string }> }) {

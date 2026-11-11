@@ -3,6 +3,7 @@ import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
 import { fetchAll } from "@/lib/supabase/fetch-all";
+import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
 type LineItem = {
   product_id: string | null;
@@ -119,7 +120,7 @@ export async function GET(req: Request) {
     subtitle: "Vânzări itemizate pe categorie și produs",
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
-    generatedAt: new Date().toLocaleString("ro-RO"),
+    generatedAt: formatRoDateTime(new Date()),
     orientation: "landscape",
     summary: [
       { label: "Vânzări nete", value: money(totNet) },

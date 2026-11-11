@@ -3,6 +3,7 @@ import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
 import { fetchAll } from "@/lib/supabase/fetch-all";
+import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -65,7 +66,7 @@ export async function GET(req: Request) {
     subtitle: "Defalcare TVA pe cote",
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
-    generatedAt: new Date().toLocaleString("ro-RO"),
+    generatedAt: formatRoDateTime(new Date()),
     summary: [
       { label: "Vânzări nete", value: money(totNet) },
       { label: "TVA colectat", value: money(totVat) },

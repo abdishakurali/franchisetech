@@ -6,6 +6,7 @@ import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { startInventoryCount } from "@/app/actions/kitchenops";
 import { SaveErrorToast } from "@/components/app/SaveErrorToast";
+import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
 export default async function InventoryCountsPage({ searchParams }: { searchParams?: Promise<{ save_error?: string }> }) {
   const query = await searchParams;
@@ -61,11 +62,11 @@ export default async function InventoryCountsPage({ searchParams }: { searchPara
                 >
                   <div>
                     <p className="text-sm font-medium text-foreground">
-                      {new Date(c.started_at).toLocaleString("ro-RO")}
+                      {formatRoDateTime(c.started_at)}
                     </p>
                     {c.completed_at ? (
                       <p className="text-xs text-muted-foreground">
-                        Finalizat {new Date(c.completed_at).toLocaleString("ro-RO")}
+                        Finalizat {formatRoDateTime(c.completed_at)}
                       </p>
                     ) : null}
                   </div>

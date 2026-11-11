@@ -33,6 +33,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { withTiming } from "@/lib/perf/timing";
 import { fetchAll } from "@/lib/supabase/fetch-all";
+import { withRoTimeZone } from "@/lib/format/ro-datetime";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -137,7 +138,7 @@ export default async function DashboardPage() {
     { label: "Online / altele", value: (paymentTotals.get("online") ?? 0) + (paymentTotals.get("other") ?? 0), color: "bg-violet-500" },
   ];
   const salesDays = [...last7ByDay.entries()].map(([date, value]) => ({
-    label: new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", { weekday: "short" }).format(new Date(`${date}T12:00:00`)).replace(".", ""),
+    label: new Intl.DateTimeFormat(locale === "ro" ? "ro-RO" : "en-IE", withRoTimeZone({ weekday: "short" })).format(new Date(`${date}T12:00:00`)).replace(".", ""),
     value,
   }));
 

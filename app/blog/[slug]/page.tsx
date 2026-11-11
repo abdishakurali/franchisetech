@@ -13,6 +13,7 @@ import { JsonLd } from "@/components/marketing/JsonLd";
 import { blogPosts, relatedBlogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
 import { REGULATION_FEAR_CTAS, demoHref } from "@/lib/marketing/blog-ctas";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
@@ -104,7 +105,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <p className="mt-3 text-lg leading-7 text-slate-600">{post.description}</p>
 
           <time className="mt-3 block text-sm text-slate-400" dateTime={post.publishedAt}>
-            {new Date(post.publishedAt).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })}
+            {formatRoDate(post.publishedAt, { day: "numeric", month: "long", year: "numeric" })}
           </time>
 
           <BlogTopicHeader post={post} size="hero" className="mt-8" />

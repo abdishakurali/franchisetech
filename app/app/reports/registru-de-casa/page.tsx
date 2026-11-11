@@ -8,6 +8,7 @@ import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import Link from "next/link";
 import { isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
 import { fetchAll } from "@/lib/supabase/fetch-all";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 type LedgerEntry = {
   date: string;
@@ -108,7 +109,7 @@ export default async function RegistruDeCasaReportPage({
       entries.push({
         sortKey: m.performed_at,
         entry: {
-          date: new Date(m.performed_at).toLocaleDateString("ro-RO"),
+          date: formatRoDate(m.performed_at),
           docNo: `CHI${String(chiCount).padStart(4, "0")}`,
           description: m.reason ?? "Încasare",
           cashIn: amount,
@@ -120,7 +121,7 @@ export default async function RegistruDeCasaReportPage({
       entries.push({
         sortKey: m.performed_at,
         entry: {
-          date: new Date(m.performed_at).toLocaleDateString("ro-RO"),
+          date: formatRoDate(m.performed_at),
           docNo: `CHO${String(choCount).padStart(4, "0")}`,
           description: m.reason ?? "Plată",
           cashIn: 0,
@@ -136,7 +137,7 @@ export default async function RegistruDeCasaReportPage({
     entries.push({
       sortKey: `${day}T23:59:58`,
       entry: {
-        date: new Date(day).toLocaleDateString("ro-RO"),
+        date: formatRoDate(day),
         docNo: `CHI${String(chiCount).padStart(4, "0")}`,
         description: "Vânzări POS (numerar)",
         cashIn: total,
@@ -153,7 +154,7 @@ export default async function RegistruDeCasaReportPage({
     entries.push({
       sortKey: s.closed_at,
       entry: {
-        date: new Date(s.closed_at).toLocaleDateString("ro-RO"),
+        date: formatRoDate(s.closed_at),
         docNo: `DIF${String(difCount).padStart(4, "0")}`,
         description: diff < 0 ? "Diferență casă la închidere (lipsă)" : "Diferență casă la închidere (plus)",
         cashIn: diff > 0 ? diff : 0,
@@ -233,7 +234,7 @@ export default async function RegistruDeCasaReportPage({
               <TableBody>
                 <TableRow className="bg-accent">
                   <TableCell />
-                  <TableCell className="tabular-nums">{new Date(fromDate).toLocaleDateString("ro-RO")}</TableCell>
+                  <TableCell className="tabular-nums">{formatRoDate(fromDate)}</TableCell>
                   <TableCell>SOLD INI</TableCell>
                   <TableCell>Sold la începutul perioadei</TableCell>
                   <TableCell className="text-right tabular-nums">{formatMoney(openingCash, currency)}</TableCell>

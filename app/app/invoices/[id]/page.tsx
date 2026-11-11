@@ -9,6 +9,7 @@ import { ChevronLeft } from "lucide-react";
 import InvoiceActions from "./InvoiceActions";
 import { displayInvoiceNumber } from "@/lib/invoice-numbering";
 import { invoiceLineAmounts, invoiceTotalsByRate } from "@/lib/invoice-totals";
+import { formatRoDate, formatRoDateTime } from "@/lib/format/ro-datetime";
 
 export const metadata: Metadata = {
   title: "Detalii factură | franchisetech",
@@ -116,8 +117,8 @@ export default async function InvoiceDetailPage({
         <div>
           <h1 className="text-2xl font-semibold text-foreground">{displayInvoiceNumber(inv.invoice_number)}</h1>
           <p className="text-sm text-muted-foreground">
-            {inv.issued_at ? "Emisă" : "Ciornă, datată"} la {new Date(inv.issue_date).toLocaleDateString("ro-RO")}
-            {inv.due_date && ` · Scadentă la ${new Date(inv.due_date).toLocaleDateString("ro-RO")}`}
+            {inv.issued_at ? "Emisă" : "Ciornă, datată"} la {formatRoDate(inv.issue_date)}
+            {inv.due_date && ` · Scadentă la ${formatRoDate(inv.due_date)}`}
           </p>
         </div>
         <StatusBadge status={inv.upload_status} processingStatus={inv.processing_status} issued={Boolean(inv.issued_at)} />
@@ -170,7 +171,7 @@ export default async function InvoiceDetailPage({
 
       {inv.issued_at && (
         <div className="rounded-lg border border-reconciled/25 bg-reconciled/10 p-3 text-sm text-reconciled">
-          Factură emisă la {new Date(inv.issued_at).toLocaleString("ro-RO")}. {inv.storno_of ? "Cantitățile au revenit în stoc o singură dată." : "Cantitățile au fost scăzute din stoc o singură dată."}
+          Factură emisă la {formatRoDateTime(inv.issued_at)}. {inv.storno_of ? "Cantitățile au revenit în stoc o singură dată." : "Cantitățile au fost scăzute din stoc o singură dată."}
         </div>
       )}
 

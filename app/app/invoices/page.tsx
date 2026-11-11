@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { FileText, Plus } from "lucide-react";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 export const metadata: Metadata = {
   title: "Facturi B2B | franchisetech",
@@ -152,7 +153,7 @@ export default async function InvoicesPage() {
                   <td className="px-4 py-3 text-foreground">{inv.buyer_name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{inv.buyer_cif}</td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {new Date(inv.issue_date).toLocaleDateString("ro-RO")}
+                    {formatRoDate(inv.issue_date)}
                   </td>
                   <td className="px-4 py-3 text-right font-medium">
                     {Number(inv.total_incl_vat ?? 0).toLocaleString("ro-RO", { minimumFractionDigits: 2 })} {inv.currency ?? "RON"}

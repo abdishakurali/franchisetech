@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { format } from "date-fns";
 import { Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { canManageTeam } from "@/lib/access-control";
+import { formatRoDate } from "@/lib/format/ro-datetime";
 
 export default async function StaffPage() {
   const supabase = await createClient();
@@ -121,7 +121,7 @@ export default async function StaffPage() {
                     </div>
                     <div className="flex items-center gap-3 pl-12 sm:pl-0">
                       <p className="text-xs text-muted-foreground hidden sm:block">
-                        Joined {profile?.created_at ? format(new Date(profile.created_at), "d MMM yyyy") : "—"}
+                        Joined {profile?.created_at ? formatRoDate(profile.created_at, { locale: "en-IE", day: "numeric", month: "short", year: "numeric" }) : "—"}
                       </p>
                       <Badge
                         variant="outline"

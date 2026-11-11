@@ -6,6 +6,7 @@ import { computeGestiuneReport } from "@/lib/ro-accounting/gestiune-data";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
 import { canAccessAccountingReport } from "@/lib/accounting-report-access";
+import { formatRoDate, formatRoDateTime } from "@/lib/format/ro-datetime";
 
 const DOC_TYPE_LABELS: Record<string, string> = {
   stoc_initial: "Stoc inițial",
@@ -97,7 +98,7 @@ export async function GET(req: Request) {
 
   const pdfRows: PdfRow[] = movements.map((m, idx) => ({
     nr: idx + 1,
-    date: new Date(m.date).toLocaleDateString("ro-RO"),
+    date: formatRoDate(m.date),
     docType: DOC_TYPE_LABELS[m.documentType] ?? m.documentType,
     docNo: m.documentNumber ?? "—",
     description: m.description,
@@ -132,7 +133,7 @@ export async function GET(req: Request) {
     subtitle: "Raport complet mișcări stoc cu defalcare TVA",
     periodLabel: `Perioada: ${from} — ${to}`,
     generatedBy,
-    generatedAt: new Date().toLocaleString("ro-RO"),
+    generatedAt: formatRoDateTime(new Date()),
     orientation: "landscape",
     summary: [
       { label: "Stoc inițial", value: money(openingStock.total) },

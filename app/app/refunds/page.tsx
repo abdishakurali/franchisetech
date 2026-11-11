@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatMoney, getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 
 function safeDate(value: string | null | undefined): string {
   if (!value) return "—";
   try {
     const d = new Date(value);
     if (!Number.isFinite(d.getTime())) return "—";
-    return new Intl.DateTimeFormat("en-IE", { dateStyle: "medium" }).format(d);
+    return new Intl.DateTimeFormat("en-IE", { dateStyle: "medium", timeZone: RO_TIME_ZONE }).format(d);
   } catch {
     return "—";
   }
