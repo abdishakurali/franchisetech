@@ -305,7 +305,7 @@ export const blogPosts: BlogPost[] = [
     sections: [
       {
         heading: "Ce afișează Ebriza și ce plătiți de fapt",
-        body: "Ebriza are trei planuri afișate pe web.ebriza.com/ro/preturi (citit la 11 noiembrie 2026, prețuri fără TVA): Pro €49, Premium €99 și Titanium €179 pe locație pe lună. Problema nu este prețul de bază, ci ce nu este inclus în el.\n\n- **Ebriza Pro** (POS + rapoarte de bază): €49/lună\n- **Stoc + NIR + rețete**: incluse doar din planul Premium (€99/lună)\n- **Ecran bucătărie (KDS)**: modul separat, +€29/lună\n- **Export Saga pentru contabil**: modul separat, +€39/lună\n\n**O cafenea care vrea POS + stoc + export Saga** ajunge pe Ebriza la Premium + Saga: **€138/lună**, iar cu KDS la **€167/lună**. Prețurile se pot schimba: verificați pagina lor înainte de decizie."",
+        body: "Ebriza are trei planuri afișate pe web.ebriza.com/ro/preturi (citit la 11 noiembrie 2026, prețuri fără TVA): Pro €49, Premium €99 și Titanium €179 pe locație pe lună. Problema nu este prețul de bază, ci ce nu este inclus în el.\n\n- **Ebriza Pro** (POS + rapoarte de bază): €49/lună\n- **Stoc + NIR + rețete**: incluse doar din planul Premium (€99/lună)\n- **Ecran bucătărie (KDS)**: modul separat, +€29/lună\n- **Export Saga pentru contabil**: modul separat, +€39/lună\n\n**O cafenea care vrea POS + stoc + export Saga** ajunge pe Ebriza la Premium + Saga: **€138/lună**, iar cu KDS la **€167/lună**. Prețurile se pot schimba: verificați pagina lor înainte de decizie.",
       },
       {
         heading: "Ce include Franchisetech Pro la €49/lună",
@@ -313,7 +313,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Comparație directă — cost lunar real pentru o cafenea medie",
-        body: "Scenariul concret: o cafenea cu 2 casieri, gestiune stoc lunară și export lunar Saga pentru contabil.\n\n**Ebriza** (stocul cere Premium): Premium €99 + export Saga €39 = **€138/lună**\n\n**Franchisetech Pro**: **€49/lună**, cu stoc, rețete și export pentru contabil incluse\n\n**Diferența: €89/lună, adică €1.068/an.**\n\nPrețurile Ebriza sunt cele afișate pe web.ebriza.com/ro/preturi la 11 noiembrie 2026, fără TVA. Dacă aveți nevoie de ecran de bucătărie (KDS), Ebriza îl vinde separat (+€29/lună); întrebați-ne ce putem oferi pentru cazul dumneavoastră."",
+        body: "Scenariul concret: o cafenea cu 2 casieri, gestiune stoc lunară și export lunar Saga pentru contabil.\n\n**Ebriza** (stocul cere Premium): Premium €99 + export Saga €39 = **€138/lună**\n\n**Franchisetech Pro**: **€49/lună**, cu stoc, rețete și export pentru contabil incluse\n\n**Diferența: €89/lună, adică €1.068/an.**\n\nPrețurile Ebriza sunt cele afișate pe web.ebriza.com/ro/preturi la 11 noiembrie 2026, fără TVA. Dacă aveți nevoie de ecran de bucătărie (KDS), Ebriza îl vinde separat (+€29/lună); întrebați-ne ce putem oferi pentru cazul dumneavoastră.",
       },
       {
         heading: "Ce oferă Ebriza în plus față de Franchisetech",
