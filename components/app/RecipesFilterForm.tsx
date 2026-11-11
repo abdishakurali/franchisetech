@@ -18,6 +18,7 @@ export function RecipesFilterForm({ defaultQuery = "", defaultStatus = "all" }: 
     { value: "low-margin", label: r.filterLowMargin },
     { value: "good-margin", label: r.filterGoodMargin },
     { value: "missing-cost", label: r.filterMissingCost },
+    { value: "archived", label: r.filterArchived },
   ];
 
   return (
