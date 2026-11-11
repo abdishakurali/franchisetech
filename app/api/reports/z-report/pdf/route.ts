@@ -2,6 +2,7 @@ import { formatMoney } from "@/lib/kitchenops/metrics";
 import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { fetchAll, fetchAllIn } from "@/lib/supabase/fetch-all";
 
 function firstJoined<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? value[0] ?? null : value ?? null;
@@ -18,21 +19,20 @@ export async function GET(req: Request) {
   if ("error" in ctx) return ctx.error;
   const { supabase, orgId, org, currency, generatedBy } = ctx;
 
-  const { data: transactions } = await supabase
+  const { data: transactions } = await fetchAll(() => supabase
     .from("pos_transactions")
     .select("*,payment_methods(name,type)")
     .eq("organisation_id", orgId)
     .gte("sold_at", dayStart)
-    .lte("sold_at", dayEnd)
-    .order("sold_at");
+    .lte("sold_at", dayEnd), { keys: ["sold_at", "id"] });
 
   const transactionIds = (transactions ?? []).map((tx) => tx.id);
   const { data: items } = transactionIds.length
-    ? await supabase
+    ? await fetchAllIn(transactionIds, (chunk) => supabase
         .from("pos_transaction_items")
-        .select("product_name,quantity,line_total,vat_rate,net_amount,vat_amount,gross_amount,transaction_id")
+        .select("id,product_name,quantity,line_total,vat_rate,net_amount,vat_amount,gross_amount,transaction_id")
         .eq("organisation_id", orgId)
-        .in("transaction_id", transactionIds)
+        .in("transaction_id", chunk))
     : { data: [] as Array<{ product_name: string; quantity: number | null; line_total: number | null; vat_rate: number | null; net_amount: number | null; vat_amount: number | null; gross_amount: number | null; transaction_id: string }> };
 
   const completedTx = (transactions ?? []).filter((tx) => tx.status !== "voided");

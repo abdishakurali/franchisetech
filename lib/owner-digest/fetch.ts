@@ -3,6 +3,7 @@ import type { AppLocale } from "@/lib/app-i18n";
 import { resolveAppLocale } from "@/lib/app-locale";
 import type { OwnerDigestAttention, OwnerDigestData, OwnerDigestVatBreakdown } from "@/lib/owner-digest/build";
 import { addCalendarDays, zonedParts } from "@/lib/owner-digest/schedule";
+import { fetchAll, fetchAllIn } from "@/lib/supabase/fetch-all";
 
 type FetchParams = {
   orgId: string;
@@ -424,27 +425,29 @@ export async function fetchOwnerDigestData(
     vatReviewResult,
     orgComplianceResult,
   ] = await Promise.all([
-    supabase
+    // Paged: a weekly or monthly digest covers more receipts than
+    // PostgREST's 1000-row cap, which silently lowered every total.
+    fetchAll(() => supabase
       .from("pos_transactions")
       .select("id,total,tax_total,tip_amount,sold_at,created_at,status")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
       .gte("sold_at", rangeIso.start)
-      .lt("sold_at", rangeIso.end),
-    supabase
+      .lt("sold_at", rangeIso.end), { keys: ["sold_at", "id"] }),
+    fetchAll(() => supabase
       .from("pos_transactions")
-      .select("total,sold_at,created_at,status")
+      .select("id,total,sold_at,created_at,status")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
       .gte("sold_at", priorIso.start)
-      .lt("sold_at", priorIso.end),
-    supabase
+      .lt("sold_at", priorIso.end), { keys: ["sold_at", "id"] }),
+    fetchAll(() => supabase
       .from("pos_transactions")
-      .select("total,status")
+      .select("id,sold_at,total,status")
       .eq("organisation_id", orgId)
       .in("status", ["voided", "refunded"])
       .gte("sold_at", rangeIso.start)
-      .lt("sold_at", rangeIso.end),
+      .lt("sold_at", rangeIso.end), { keys: ["sold_at", "id"] }),
     supabase
       .from("pos_sessions")
       .select("expected_cash,status,opened_at")
@@ -542,17 +545,19 @@ export async function fetchOwnerDigestData(
   let vatBreakdown: OwnerDigestVatBreakdown[] = [];
   let paymentBreakdown = aggregatePayments([]);
   if (txIds.length > 0) {
+    // Chunked + paged: a week's receipt ids would overflow one URL and
+    // their lines pass the 1000-row cap.
     const [{ data: items }, { data: payments }] = await Promise.all([
-      supabase
+      fetchAllIn(txIds, (chunk) => supabase
         .from("pos_transaction_items")
-        .select("product_name,quantity,gross_amount,line_total,net_amount,vat_amount,vat_rate")
+        .select("id,product_name,quantity,gross_amount,line_total,net_amount,vat_amount,vat_rate")
         .eq("organisation_id", orgId)
-        .in("transaction_id", txIds),
-      supabase
+        .in("transaction_id", chunk)),
+      fetchAllIn(txIds, (chunk) => supabase
         .from("sale_payments")
-        .select("method,amount")
+        .select("id,method,amount")
         .eq("organisation_id", orgId)
-        .in("sale_id", txIds),
+        .in("sale_id", chunk)),
     ]);
 
     paymentBreakdown = aggregatePayments((payments ?? []) as PaymentRow[]);

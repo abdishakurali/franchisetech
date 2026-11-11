@@ -32,6 +32,7 @@ import type { OnboardingStep } from "@/lib/onboarding/steps";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { withTiming } from "@/lib/perf/timing";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -81,12 +82,13 @@ export default async function DashboardPage() {
       .gte("sold_at", todayStart),
     supabase.from("pos_sessions").select("expected_cash,status").eq("organisation_id", orgId).eq("status", "open").limit(1).maybeSingle(),
     supabase.from("pos_transactions").select("id").eq("organisation_id", orgId).eq("status", "completed").limit(1),
-    supabase
+    // Paged: seven busy days pass PostgREST's 1000-row cap.
+    fetchAll<{ total: number | null; sold_at: string | null }>(() => supabase
       .from("pos_transactions")
-      .select("total,sold_at")
+      .select("id,total,sold_at")
       .eq("organisation_id", orgId)
       .eq("status", "completed")
-      .gte("sold_at", last7Start),
+      .gte("sold_at", last7Start), { keys: ["sold_at", "id"] }),
   ]));
 
   const showActivationBanner = (anyHistoricalSaleResult.data?.length ?? 0) === 0;

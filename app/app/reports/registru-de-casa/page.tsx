@@ -7,6 +7,7 @@ import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import Link from "next/link";
 import { isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 type LedgerEntry = {
   date: string;
@@ -53,13 +54,12 @@ export default async function RegistruDeCasaReportPage({
     .limit(1);
   const openingCash = Number(sessions?.[0]?.opening_cash ?? 0);
 
-  const { data: cashMovements } = await supabase
+  const { data: cashMovements } = await fetchAll(() => supabase
     .from("pos_cash_movements")
     .select("id,movement_type,amount,reason,performed_at")
     .eq("organisation_id", orgId)
     .gte("performed_at", periodStart)
-    .lte("performed_at", periodEnd)
-    .order("performed_at");
+    .lte("performed_at", periodEnd), { keys: ["performed_at", "id"] });
 
   // A till close records what was actually counted vs. what the system
   // expected (pos_sessions.counted_cash / expected_cash / cash_difference).
@@ -69,24 +69,23 @@ export default async function RegistruDeCasaReportPage({
   // forward into every later balance in this ledger. Surface it as its own
   // entry rather than let the report's numbers quietly diverge from the
   // drawer.
-  const { data: closedSessions } = await supabase
+  const { data: closedSessions } = await fetchAll(() => supabase
     .from("pos_sessions")
-    .select("closed_at,cash_difference")
+    .select("id,closed_at,cash_difference")
     .eq("organisation_id", orgId)
     .gte("closed_at", periodStart)
     .lte("closed_at", periodEnd)
     .not("cash_difference", "is", null)
-    .neq("cash_difference", 0)
-    .order("closed_at");
+    .neq("cash_difference", 0), { keys: ["closed_at", "id"] });
 
   // Filtered on pos_transactions.sold_at (real sale date), not created_at --
   // same fix applied throughout this session's other reports.
-  const { data: transactions } = await supabase
+  const { data: transactions } = await fetchAll(() => supabase
     .from("pos_transactions")
-    .select("sold_at,status,total,payment_methods(type)")
+    .select("id,sold_at,status,total,payment_methods(type)")
     .eq("organisation_id", orgId)
     .gte("sold_at", periodStart)
-    .lte("sold_at", periodEnd);
+    .lte("sold_at", periodEnd), { keys: ["sold_at", "id"] });
 
   const cashByDay = new Map<string, number>();
   for (const tx of (transactions ?? []) as Array<{ sold_at: string; status: string; total: number | null; payment_methods: { type?: string } | { type?: string }[] | null }>) {

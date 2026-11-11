@@ -2,6 +2,7 @@ import { formatMoney } from "@/lib/kitchenops/metrics";
 import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -14,12 +15,12 @@ export async function GET(req: Request) {
   if ("error" in ctx) return ctx.error;
   const { supabase, orgId, org, currency, generatedBy } = ctx;
 
-  const { data: transactions } = await supabase
+  const { data: transactions } = await fetchAll(() => supabase
     .from("pos_transactions")
-    .select("status,pos_transaction_items(vat_rate,net_amount,vat_amount,gross_amount,line_total)")
+    .select("sold_at,id,status,pos_transaction_items(vat_rate,net_amount,vat_amount,gross_amount,line_total)")
     .eq("organisation_id", orgId)
     .gte("sold_at", `${from}T00:00:00Z`)
-    .lte("sold_at", `${to}T23:59:59Z`);
+    .lte("sold_at", `${to}T23:59:59Z`), { keys: ["sold_at", "id"] });
 
   const byRate = new Map<number, { net: number; vat: number; gross: number; count: number }>();
   for (const tx of (transactions ?? []) as Array<{

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 import { canAccessAccountingReport } from "@/lib/accounting-report-access";
 
@@ -47,12 +48,11 @@ export async function GET(req: Request) {
 
   try {
     if (type === "transactions") {
-      const { data } = await supabase
+      const { data } = await fetchAll<any>(() => supabase
         .from("pos_transactions")
-        .select("transaction_number,sold_at,status,subtotal,subtotal_net,tax_total,tip_amount,total,total_gross,payment_methods(name)")
+        .select("id,transaction_number,sold_at,status,subtotal,subtotal_net,tax_total,tip_amount,total,total_gross,payment_methods(name)")
         .eq("organisation_id", orgId)
-        .gte("sold_at", fromTs).lte("sold_at", toTs)
-        .order("sold_at");
+        .gte("sold_at", fromTs).lte("sold_at", toTs), { keys: ["sold_at", "id"] });
       const rows = (data ?? []).map((r: any) => ({
         transaction_number: r.transaction_number,
         sold_at: r.sold_at,
@@ -70,12 +70,11 @@ export async function GET(req: Request) {
       // Filtered on pos_transactions.sold_at (the real sale date), not
       // pos_transaction_items.created_at -- for migrated historical sales,
       // created_at is the bulk-import timestamp, not the real sale date.
-      const { data } = await supabase
+      const { data } = await fetchAll<any>(() => supabase
         .from("pos_transactions")
-        .select("transaction_number,sold_at,status,pos_transaction_items(product_name,quantity,unit_price,vat_rate,net_amount,vat_amount,gross_amount,line_total)")
+        .select("id,transaction_number,sold_at,status,pos_transaction_items(product_name,quantity,unit_price,vat_rate,net_amount,vat_amount,gross_amount,line_total)")
         .eq("organisation_id", orgId)
-        .gte("sold_at", fromTs).lte("sold_at", toTs)
-        .order("sold_at");
+        .gte("sold_at", fromTs).lte("sold_at", toTs), { keys: ["sold_at", "id"] });
       const rows = (data ?? []).flatMap((tx: any) =>
         (tx.pos_transaction_items ?? []).map((r: any) => ({
           transaction_number: tx.transaction_number ?? "",
@@ -95,11 +94,11 @@ export async function GET(req: Request) {
 
     } else if (type === "vat_summary") {
       // Same sold_at vs created_at fix as above.
-      const { data: vatTx } = await supabase
+      const { data: vatTx } = await fetchAll<any>(() => supabase
         .from("pos_transactions")
-        .select("pos_transaction_items(vat_rate,net_amount,vat_amount,gross_amount,line_total,transaction_id)")
+        .select("id,sold_at,pos_transaction_items(vat_rate,net_amount,vat_amount,gross_amount,line_total,transaction_id)")
         .eq("organisation_id", orgId)
-        .gte("sold_at", fromTs).lte("sold_at", toTs);
+        .gte("sold_at", fromTs).lte("sold_at", toTs), { keys: ["sold_at", "id"] });
       const data = (vatTx ?? []).flatMap((tx: any) => tx.pos_transaction_items ?? []);
       const byRate = new Map<number, { net: number; vat: number; gross: number; count: number }>();
       for (const item of (data ?? []) as any[]) {
@@ -123,13 +122,12 @@ export async function GET(req: Request) {
     } else if (type === "void_log") {
       let rows: Record<string, unknown>[] = [];
       try {
-        const { data } = await supabase
+        const { data } = await fetchAll<any>(() => supabase
           .from("pos_audit_events")
-          .select("performed_at,event_type,reason,transaction_id,profiles(full_name,email),pos_transactions(transaction_number,total,sold_at)")
+          .select("id,performed_at,event_type,reason,transaction_id,profiles(full_name,email),pos_transactions(transaction_number,total,sold_at)")
           .eq("organisation_id", orgId)
           .in("event_type", ["voided","refunded"])
-          .gte("performed_at", fromTs).lte("performed_at", toTs)
-          .order("performed_at");
+          .gte("performed_at", fromTs).lte("performed_at", toTs), { keys: ["performed_at", "id"] });
         rows = (data ?? []).map((e: any) => ({
           performed_at: e.performed_at,
           event_type: e.event_type,

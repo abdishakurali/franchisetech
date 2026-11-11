@@ -12,6 +12,7 @@ import { getAppLocaleAndText } from "@/lib/app-locale-server";
 import { unitShortLabel } from "@/lib/units-of-measure";
 import { STOCK_PRODUCT_SELECT } from "@/lib/supabase/product-selects";
 import { mergeStockPageProducts, postedPurchaseProductIds } from "@/lib/stock-page-products";
+import { fetchAllIn } from "@/lib/supabase/fetch-all";
 
 export default async function StockPage({
   searchParams,
@@ -60,26 +61,26 @@ export default async function StockPage({
       const candidates = (candData ?? []) as unknown as typeof products;
       const candIds = candidates.map((c) => c.id);
       if (candIds.length) {
+        // Paged and chunked: these can pass PostgREST's 1000-row cap, which
+        // silently dropped evidence for some products.
         const [movRes, lineRes] = await Promise.all([
-          supabase
+          fetchAllIn(candIds, (chunk) => supabase
             .from("stock_movements")
-            .select("product_id")
+            .select("id,product_id")
             .eq("organisation_id", orgId)
             .neq("movement_type", "sale_used")
-            .in("product_id", candIds),
-          supabase
+            .in("product_id", chunk)),
+          fetchAllIn(candIds, (chunk) => supabase
             .from("purchase_items")
-            .select("product_id,purchase_id")
+            .select("id,product_id,purchase_id")
             .eq("organisation_id", orgId)
-            .in("product_id", candIds),
+            .in("product_id", chunk)),
         ]);
         if (movRes.error) throw movRes.error;
         if (lineRes.error) throw lineRes.error;
         const lines = (lineRes.data ?? []) as Array<{ product_id: string | null; purchase_id: string | null }>;
         const purchaseIds = [...new Set(lines.map((l) => l.purchase_id).filter((v): v is string => !!v))];
-        const purRes = purchaseIds.length
-          ? await supabase.from("purchases").select("id,status").eq("organisation_id", orgId).in("id", purchaseIds)
-          : { data: [], error: null };
+        const purRes = await fetchAllIn(purchaseIds, (chunk) => supabase.from("purchases").select("id,status").eq("organisation_id", orgId).in("id", chunk));
         if (purRes.error) throw purRes.error;
         products = mergeStockPageProducts(products, candidates, {
           purchasedIds: postedPurchaseProductIds(lines, (purRes.data ?? []) as Array<{ id: string; status: string | null }>),

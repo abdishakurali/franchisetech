@@ -7,12 +7,23 @@ import { createXlsx } from "@/lib/accountant/xlsx";
 import { buildPackageFilePlan } from "@/lib/accountant/package-files";
 import { amountPerUnit } from "@/lib/accountant/export-rows";
 import { buildCashLedger } from "@/lib/accountant/cash-ledger";
+import { fetchAll, fetchAllIn, SALES_LINE_KEYS } from "@/lib/supabase/fetch-all";
 
 export const dynamic = "force-dynamic";
 const cell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
 const csv = (headers: string[], rows: unknown[][]) => `\uFEFF${[headers, ...rows].map((row) => row.map(cell).join(";")).join("\r\n")}`;
 const decimal = (value: unknown) => Number(value ?? 0).toFixed(2).replace(".", ",");
 type Dataset = { name: string; headers: string[]; rows: unknown[][] };
+type Num = number | null;
+type Embedded<T> = T | T[] | null;
+type SalesLine = { transaction_number: string; sold_at: string; product_name: string; quantity: Num; vat_rate: Num; net_amount: Num; vat_amount: Num; gross_amount: Num; direction: Num };
+type PaymentRow = { transaction_number: string; sold_at: string; total: Num; tip_amount: Num; status: string; payment_methods: Embedded<{ name: string | null; type: string | null }> };
+type SessionRow = { id: string; opened_at: string | null; closed_at: string | null; opening_cash: Num; expected_cash: Num; counted_cash: Num; cash_difference: Num; status: string | null; fiscal_z_report_done: boolean | null; fiscal_z_report_at: string | null };
+type CashMovementRow = { session_id: string | null; movement_type: string; amount: Num; reason: string | null; performed_at: string };
+type PurchaseRow = { id: string; purchase_date: string | null; supplier_invoice_date: string | null; invoice_number: string | null; supplier: string | null; subtotal_amount: Num; tax_total: Num; total_amount: Num; status: string | null; nir_number: string | null; nir_date: string | null; suppliers: Embedded<{ name: string | null; tax_id: string | null }> };
+type StockBalanceRow = { product_id: string; name: string; unit_of_measure: string | null; ledger_quantity: Num; recorded_quantity: Num; variance: Num; cost_price: Num; active: boolean | null };
+type ProductRow = { id: string; name: string; sku: string | null; unit_of_measure: string | null; sale_price: Num; cost_price: Num; vat_rate: Num; active: boolean | null };
+type PurchaseItemRow = { purchase_id: string; product_name: string | null; item_name: string | null; quantity: Num; received_quantity: Num; unit_cost: Num; total_cost: Num; tax_rate: Num; tax_amount: Num; unit_of_measure: string | null };
 
 export async function GET(request: Request) {
   const url = new URL(request.url); const orgId = url.searchParams.get("org");
@@ -31,18 +42,21 @@ export async function GET(request: Request) {
   const filePlan = new Set(buildPackageFilePlan(permissions));
   if (!sections.size) return new Response("Nu există categorii permise pentru export.", { status: 403 });
 
+  // Every list below can pass PostgREST's 1000-row cap for a busy cafe in a
+  // month (sales lines alone: ~150 receipts/day x ~2.5 lines), so each is
+  // read page by page; a capped read would ship a short but plausible file.
   const [orgResult, salesResult, paymentsResult, closesResult, cashMovementsResult, purchasesResult, stockResult, productsResult] = await Promise.all([
     supabase.from("organisations").select("name,company_legal_name,anaf_cif").eq("id", orgId).single(),
-    supabase.from("canonical_sales_lines").select("transaction_number,sold_at,product_name,quantity,vat_rate,net_amount,vat_amount,gross_amount,direction").eq("organisation_id", orgId).gte("sold_at", range.start).lte("sold_at", range.end).order("sold_at"),
-    supabase.from("pos_transactions").select("transaction_number,sold_at,total,tip_amount,status,payment_methods(name,type)").eq("organisation_id", orgId).eq("status", "completed").gte("sold_at", range.start).lte("sold_at", range.end).order("sold_at"),
-    supabase.from("pos_sessions").select("id,opened_at,closed_at,opening_cash,expected_cash,counted_cash,cash_difference,status,fiscal_z_report_done,fiscal_z_report_at").eq("organisation_id", orgId).not("closed_at", "is", null).gte("closed_at", range.start).lte("closed_at", range.end).order("closed_at"),
-    supabase.from("pos_cash_movements").select("session_id,movement_type,amount,reason,performed_at").eq("organisation_id", orgId).gte("performed_at", range.start).lte("performed_at", range.end).order("performed_at"),
-    supabase.from("purchases").select("id,purchase_date,supplier_invoice_date,invoice_number,supplier,subtotal_amount,tax_total,total_amount,status,nir_number,nir_date,suppliers!purchases_supplier_id_fkey(name,tax_id)").eq("organisation_id", orgId).in("status", ["posted", "received"]).gte("purchase_date", range.from).lte("purchase_date", range.to).order("purchase_date"),
-    supabase.from("canonical_stock_balances").select("product_id,name,unit_of_measure,ledger_quantity,recorded_quantity,variance,cost_price,active").eq("organisation_id", orgId).order("name"),
-    supabase.from("products").select("id,name,sku,unit_of_measure,sale_price,cost_price,vat_rate,active").eq("organisation_id", orgId).order("name"),
+    fetchAll<SalesLine>(() => supabase.from("canonical_sales_lines").select("transaction_number,transaction_item_id,sold_at,product_name,quantity,vat_rate,net_amount,vat_amount,gross_amount,direction").eq("organisation_id", orgId).gte("sold_at", range.start).lte("sold_at", range.end), { keys: SALES_LINE_KEYS }),
+    fetchAll<PaymentRow>(() => supabase.from("pos_transactions").select("id,transaction_number,sold_at,total,tip_amount,status,payment_methods(name,type)").eq("organisation_id", orgId).eq("status", "completed").gte("sold_at", range.start).lte("sold_at", range.end), { keys: ["sold_at", "id"] }),
+    fetchAll<SessionRow>(() => supabase.from("pos_sessions").select("id,opened_at,closed_at,opening_cash,expected_cash,counted_cash,cash_difference,status,fiscal_z_report_done,fiscal_z_report_at").eq("organisation_id", orgId).not("closed_at", "is", null).gte("closed_at", range.start).lte("closed_at", range.end), { keys: ["closed_at", "id"] }),
+    fetchAll<CashMovementRow>(() => supabase.from("pos_cash_movements").select("id,session_id,movement_type,amount,reason,performed_at").eq("organisation_id", orgId).gte("performed_at", range.start).lte("performed_at", range.end), { keys: ["performed_at", "id"] }),
+    fetchAll<PurchaseRow>(() => supabase.from("purchases").select("id,purchase_date,supplier_invoice_date,invoice_number,supplier,subtotal_amount,tax_total,total_amount,status,nir_number,nir_date,suppliers!purchases_supplier_id_fkey(name,tax_id)").eq("organisation_id", orgId).in("status", ["posted", "received"]).gte("purchase_date", range.from).lte("purchase_date", range.to), { keys: ["purchase_date", "id"] }),
+    fetchAll<StockBalanceRow>(() => supabase.from("canonical_stock_balances").select("product_id,name,unit_of_measure,ledger_quantity,recorded_quantity,variance,cost_price,active").eq("organisation_id", orgId), { keys: ["name", "product_id"] }),
+    fetchAll<ProductRow>(() => supabase.from("products").select("id,name,sku,unit_of_measure,sale_price,cost_price,vat_rate,active").eq("organisation_id", orgId), { keys: ["name", "id"] }),
   ]);
   const purchaseIds = (purchasesResult.data ?? []).map((purchase) => purchase.id);
-  const purchaseItemsResult = await supabase.from("purchase_items").select("purchase_id,product_name,item_name,quantity,received_quantity,unit_cost,total_cost,tax_rate,tax_amount,unit_of_measure").eq("organisation_id", orgId).in("purchase_id", purchaseIds.length ? purchaseIds : ["00000000-0000-0000-0000-000000000000"]);
+  const purchaseItemsResult = await fetchAllIn<PurchaseItemRow>(purchaseIds, (chunk) => supabase.from("purchase_items").select("id,purchase_id,product_name,item_name,quantity,received_quantity,unit_cost,total_cost,tax_rate,tax_amount,unit_of_measure").eq("organisation_id", orgId).in("purchase_id", chunk));
   const resultsBySection: Array<[PackageSection, { error: unknown }]> = [["sales", salesResult], ["payments", paymentsResult], ["cash", closesResult], ["cash", cashMovementsResult], ["purchases", purchasesResult], ["purchases", purchaseItemsResult], ["stock", stockResult], ["sales", productsResult]];
   if (resultsBySection.some(([section, result]) => sections.has(section) && result.error)) return new Response("Pachetul nu a putut fi generat în siguranță.", { status: 500 });
 

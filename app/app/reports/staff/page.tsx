@@ -6,6 +6,7 @@ import { ReportDateRangeFilter } from "@/components/app/ReportDateRangeFilter";
 import { startOfMonth } from "date-fns";
 import Link from "next/link";
 import { ArrowLeft, FileDown } from "lucide-react";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -24,12 +25,12 @@ export default async function StaffReportPage({ searchParams }: Props) {
   const from = params.from ?? defaultFrom;
   const to = params.to ?? now.toISOString().slice(0, 10);
 
-  const { data: transactions } = await supabase
+  const { data: transactions } = await fetchAll(() => supabase
     .from("pos_transactions")
-    .select("sold_by,total,tip_amount,discount_total,status,payment_methods(type,name)")
+    .select("sold_at,id,sold_by,total,tip_amount,discount_total,status,payment_methods(type,name)")
     .eq("organisation_id", orgId)
     .gte("sold_at", from)
-    .lte("sold_at", `${to}T23:59:59.999`);
+    .lte("sold_at", `${to}T23:59:59.999`), { keys: ["sold_at", "id"] });
 
   const tx = transactions ?? [];
 

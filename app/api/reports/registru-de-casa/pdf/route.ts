@@ -5,6 +5,7 @@ import { formatMoney } from "@/lib/kitchenops/metrics";
 import { ReportPdfDocument, type PdfRow } from "@/lib/pdf/ReportPdfDocument";
 import { renderReportPdfResponse } from "@/lib/pdf/renderReportPdf";
 import { canAccessAccountingReport } from "@/lib/accounting-report-access";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -58,34 +59,32 @@ export async function GET(req: Request) {
     .limit(1);
   const openingCash = Number(sessions?.[0]?.opening_cash ?? 0);
 
-  const { data: cashMovements } = await supabase
+  const { data: cashMovements } = await fetchAll(() => supabase
     .from("pos_cash_movements")
     .select("id,movement_type,amount,reason,performed_at")
     .eq("organisation_id", orgId)
     .gte("performed_at", periodStart)
-    .lte("performed_at", periodEnd)
-    .order("performed_at");
+    .lte("performed_at", periodEnd), { keys: ["performed_at", "id"] });
 
   // See app/app/reports/registru-de-casa/page.tsx for why this is needed:
   // a till close's recorded cash_difference (counted vs expected) is real
   // and must not be left out, or every later balance in this ledger
   // silently diverges from what was actually in the drawer.
-  const { data: closedSessions } = await supabase
+  const { data: closedSessions } = await fetchAll(() => supabase
     .from("pos_sessions")
-    .select("closed_at,cash_difference")
+    .select("id,closed_at,cash_difference")
     .eq("organisation_id", orgId)
     .gte("closed_at", periodStart)
     .lte("closed_at", periodEnd)
     .not("cash_difference", "is", null)
-    .neq("cash_difference", 0)
-    .order("closed_at");
+    .neq("cash_difference", 0), { keys: ["closed_at", "id"] });
 
-  const { data: transactions } = await supabase
+  const { data: transactions } = await fetchAll(() => supabase
     .from("pos_transactions")
-    .select("sold_at,status,total,payment_methods(type)")
+    .select("id,sold_at,status,total,payment_methods(type)")
     .eq("organisation_id", orgId)
     .gte("sold_at", periodStart)
-    .lte("sold_at", periodEnd);
+    .lte("sold_at", periodEnd), { keys: ["sold_at", "id"] });
 
   const cashByDay = new Map<string, number>();
   for (const tx of (transactions ?? []) as Array<{ sold_at: string; status: string; total: number | null; payment_methods: { type?: string } | { type?: string }[] | null }>) {

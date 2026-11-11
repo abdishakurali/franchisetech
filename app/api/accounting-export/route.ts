@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { fetchAll, SALES_LINE_KEYS } from "@/lib/supabase/fetch-all";
+
+type Num = number | null;
 
 const csvCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
 const decimal = (value: unknown) => Number(value ?? 0).toFixed(2).replace(".", ",");
@@ -25,28 +28,29 @@ export async function GET(request: Request) {
   let body: string;
 
   if (type === "journal") {
-    const { data, error } = await supabase.from("canonical_sales_lines")
-      .select("transaction_number,sold_at,product_name,quantity,vat_rate,net_amount,vat_amount,gross_amount,direction")
-      .eq("organisation_id", orgId).gte("sold_at", start).lte("sold_at", end).order("sold_at");
+    // Paged: a month of sales lines passes PostgREST's 1000-row cap.
+    const { data, error } = await fetchAll<{ transaction_number: string; sold_at: string; product_name: string; quantity: Num; vat_rate: Num; net_amount: Num; vat_amount: Num; gross_amount: Num; direction: Num }>(() => supabase.from("canonical_sales_lines")
+      .select("transaction_number,transaction_item_id,sold_at,product_name,quantity,vat_rate,net_amount,vat_amount,gross_amount,direction")
+      .eq("organisation_id", orgId).gte("sold_at", start).lte("sold_at", end), { keys: SALES_LINE_KEYS });
     if (error) return new NextResponse(error.message, { status: 500 });
     body = csv(
       ["Document", "Data", "Produs", "Cantitate", "Cotă TVA", "Net", "TVA", "Brut", "Sens"],
       (data ?? []).map((row) => [row.transaction_number, row.sold_at, row.product_name, row.quantity, `${Number(row.vat_rate)}%`, decimal(row.net_amount), decimal(row.vat_amount), decimal(row.gross_amount), Number(row.direction) > 0 ? "Vânzare" : "Retur"]),
     );
   } else if (type === "inventory") {
-    const { data, error } = await supabase.from("canonical_stock_balances")
-      .select("name,unit_of_measure,ledger_quantity,recorded_quantity,variance,cost_price,reorder_level,active")
-      .eq("organisation_id", orgId).order("name");
+    const { data, error } = await fetchAll<{ name: string; unit_of_measure: string | null; ledger_quantity: Num; recorded_quantity: Num; variance: Num; cost_price: Num; reorder_level: Num; active: boolean | null }>(() => supabase.from("canonical_stock_balances")
+      .select("product_id,name,unit_of_measure,ledger_quantity,recorded_quantity,variance,cost_price,reorder_level,active")
+      .eq("organisation_id", orgId), { keys: ["name", "product_id"] });
     if (error) return new NextResponse(error.message, { status: 500 });
     body = csv(
       ["Produs", "UM", "Cantitate registru", "Cantitate catalog", "Diferență", "CMP", "Prag reaprovizionare", "Activ"],
       (data ?? []).map((row) => [row.name, row.unit_of_measure, row.ledger_quantity, row.recorded_quantity, row.variance, decimal(row.cost_price), row.reorder_level, row.active ? "Da" : "Nu"]),
     );
   } else if (type === "nir") {
-    const { data, error } = await supabase.from("purchases")
-      .select("nir_number,purchase_date,invoice_number,supplier,purchase_items(product_name,quantity,unit_of_measure,unit_cost,total_cost,tax_rate)")
+    const { data, error } = await fetchAll<{ nir_number: string | null; purchase_date: string; invoice_number: string | null; supplier: string | null; purchase_items: Array<{ product_name: string | null; quantity: Num; unit_of_measure: string | null; unit_cost: Num; total_cost: Num; tax_rate: Num }> | null }>(() => supabase.from("purchases")
+      .select("id,nir_number,purchase_date,invoice_number,supplier,purchase_items(product_name,quantity,unit_of_measure,unit_cost,total_cost,tax_rate)")
       .eq("organisation_id", orgId).in("status", ["posted", "received"])
-      .gte("purchase_date", from).lte("purchase_date", to).order("purchase_date");
+      .gte("purchase_date", from).lte("purchase_date", to), { keys: ["purchase_date", "id"] });
     if (error) return new NextResponse(error.message, { status: 500 });
     body = csv(
       ["NIR", "Data", "Factură", "Furnizor", "Produs", "Cantitate", "UM", "Cost unitar", "Valoare", "TVA"],

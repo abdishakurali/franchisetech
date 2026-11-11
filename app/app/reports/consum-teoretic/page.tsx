@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
+import { fetchAll } from "@/lib/supabase/fetch-all";
 
 type TxItem = { transaction_id: string; recipe_id: string; quantity: number };
 type RecipeRow = { id: string; yield_qty: number | null; created_at: string };
@@ -38,14 +39,14 @@ export default async function ConsumTeoreticPage({
   // for nearly every ingredient, org-wide -- not real over-consumption,
   // just older/untracked sales the theoretical side could never see.
   // Scoped correctly, the same data lines up within single-digit percent.
-  const { data: txItemsRaw } = await supabase
+  const { data: txItemsRaw } = await fetchAll(() => supabase
     .from("pos_transaction_items")
-    .select("transaction_id,recipe_id,quantity,pos_transactions!inner(status,sold_at,organisation_id)")
+    .select("id,transaction_id,recipe_id,quantity,pos_transactions!inner(status,sold_at,organisation_id)")
     .eq("pos_transactions.organisation_id", orgId)
     .neq("pos_transactions.status", "voided")
     .gte("pos_transactions.sold_at", periodStart)
     .lte("pos_transactions.sold_at", periodEnd)
-    .not("recipe_id", "is", null);
+    .not("recipe_id", "is", null), { keys: ["id"] });
 
   const txItems = (txItemsRaw ?? []) as unknown as TxItem[];
   const linkedTransactionIds = new Set(txItems.map((t) => t.transaction_id));
@@ -104,15 +105,15 @@ export default async function ConsumTeoreticPage({
   const ingredientIds = [...theoretical.keys()];
 
   const { data: movementsRaw } = ingredientIds.length
-    ? await supabase
+    ? await fetchAll(() => supabase
         .from("stock_movements")
-        .select("product_id,quantity_change,reference_id")
+        .select("performed_at,id,product_id,quantity_change,reference_id")
         .eq("organisation_id", orgId)
         .eq("movement_type", "sale_used")
         .eq("reference_type", "sale")
         .in("product_id", ingredientIds)
         .gte("performed_at", periodStart)
-        .lte("performed_at", periodEnd)
+        .lte("performed_at", periodEnd), { keys: ["performed_at", "id"] })
     : { data: [] };
   const movements = (movementsRaw ?? []) as MovementRow[];
 

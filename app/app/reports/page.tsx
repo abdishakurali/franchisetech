@@ -15,6 +15,7 @@ import { CORE_REPORTS, selectCoreReport } from "@/lib/reports/hub-selection";
 import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendChart";
 import { AccountantAccessCard } from "@/components/app/AccountantAccessCard";
 import { ACCOUNTING_REPORT_PATHS, isOwnerAccountingReportRole } from "@/lib/accounting-report-access";
+import { fetchAll, SALES_LINE_KEYS } from "@/lib/supabase/fetch-all";
 
 type Preview = { metrics: Array<[string, string]>; rows: Array<[string, string]>; error?: boolean };
 
@@ -61,8 +62,10 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
     const sites = await listAccessibleSites(supabase, orgId, membership.id, membership.role);
     const siteIds = sites.map((site) => site.id);
     const data = await computeSalesReport(supabase, orgId, siteIds, start, end, t.common.unknown);
-    const linesQuery = supabase.from("canonical_sales_lines").select("sold_at,gross_amount").eq("organisation_id", orgId).gte("sold_at", start).lte("sold_at", end);
-    const { data: chartLines, error: chartError } = await (siteIds.length ? linesQuery.in("site_id", siteIds) : linesQuery.eq("site_id", "00000000-0000-0000-0000-000000000000"));
+    const { data: chartLines, error: chartError } = await fetchAll<{ sold_at: string | null; gross_amount: number | null }>(() => {
+      const linesQuery = supabase.from("canonical_sales_lines").select("sold_at,transaction_item_id,direction,transaction_number,gross_amount").eq("organisation_id", orgId).gte("sold_at", start).lte("sold_at", end);
+      return siteIds.length ? linesQuery.in("site_id", siteIds) : linesQuery.eq("site_id", "00000000-0000-0000-0000-000000000000");
+    }, { keys: SALES_LINE_KEYS });
     const byDay = new Map<string, number>();
     for (const line of chartLines ?? []) {
       const day = String(line.sold_at ?? "").slice(0, 10);
