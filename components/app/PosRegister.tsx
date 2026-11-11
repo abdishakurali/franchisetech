@@ -671,6 +671,8 @@ function CloseTillFormBody({
             total: t.cashBreakdownTotal,
             confirm: t.confirm,
             cancel: t.cancel,
+            increaseDenom: t.increaseDenom,
+            decreaseDenom: t.decreaseDenom,
           }}
         />
       )}

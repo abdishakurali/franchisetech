@@ -26,6 +26,10 @@ export function CashCountModal({
     total: string;
     confirm: string;
     cancel: string;
+    /** Accessible name for a row's [+], given the denomination label. */
+    increaseDenom?: (denomination: string) => string;
+    /** Accessible name for a row's [-], given the denomination label. */
+    decreaseDenom?: (denomination: string) => string;
   };
 }) {
   const [qty, setQty] = useState<Record<number, number>>(() => initialBreakdown ?? {});
@@ -54,6 +58,8 @@ export function CashCountModal({
               label={d.label}
               value={qty[d.value] || 0}
               onChange={(next) => setDenomQty(d.value, next)}
+              increaseLabel={labels.increaseDenom?.(d.label)}
+              decreaseLabel={labels.decreaseDenom?.(d.label)}
             />
           ))}
         </div>
