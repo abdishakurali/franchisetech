@@ -6,6 +6,7 @@ import Link from "next/link";
 import { addCustomerFromPos, closePosSession, completeSaleReturn, posCashMovement, voidTransaction } from "@/app/actions/kitchenops";
 import { runZReport, recordFiscalReceiptAttempt } from "@/app/actions/fiscalnet";
 import { markFirstSaleDoneForOnboarding } from "@/app/actions/onboarding-steps";
+import { toast } from "sonner";
 import { getLoyaltyStampStatus, recordLoyaltyRedemption, type LoyaltyStampStatus } from "@/app/actions/loyalty";
 import { fiscalBrowserCashIn, fiscalBrowserCashOut, fiscalBrowserZReport, downloadFiscalNetTxt, type BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
 import { fiscalBrowserReceiptAndLog, type RecordFiscalAttemptInput } from "@/lib/fiscalnet/log-attempt";
@@ -1857,7 +1858,20 @@ function PosRegisterInner({
                   </button>
                 ))}
               </div>
-              <form action={addCustomerFromPos as unknown as (fd: FormData) => Promise<void>} className="space-y-3 rounded-lg border p-3">
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const result = await addCustomerFromPos(new FormData(form));
+                  if (!result.ok) {
+                    toast.error("Clientul nu a fost salvat. Încercați din nou.");
+                    return;
+                  }
+                  form.reset();
+                  router.refresh();
+                }}
+                className="space-y-3 rounded-lg border p-3"
+              >
                 <p className="text-sm font-medium">{t.quickAddCustomer}</p>
                 <Input name="name" required placeholder={t.searchCustomer} />
                 <Input name="phone" placeholder="Phone" />
@@ -2089,7 +2103,17 @@ function PosRegisterInner({
                       return;
                     }
                     if (redirectAfterSaleTo) {
-                      void markFirstSaleDoneForOnboarding().finally(() => router.push(redirectAfterSaleTo));
+                      void markFirstSaleDoneForOnboarding()
+                        .then((result) => {
+                          // A failed step save would bounce the owner back here from the next
+                          // screen, so stay and say so instead of redirecting into a loop.
+                          if (result && "error" in result) {
+                            toast.error(result.error);
+                            return;
+                          }
+                          router.push(redirectAfterSaleTo);
+                        })
+                        .catch(() => toast.error("Pasul nu s-a salvat. Încercați din nou."));
                       return;
                     }
                     setCheckoutStep("order");

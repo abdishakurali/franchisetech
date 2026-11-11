@@ -185,6 +185,12 @@ async function listPaidInvoices(customerId: string | null, locale: AppLocale): P
       pdfUrl: invoice.invoice_pdf ?? null,
     }));
   } catch (error) {
+    // A customer id from Stripe test mode (demo/test orgs) does not exist in
+    // live mode: there is simply no paid history to show, not a failure.
+    if ((error as { code?: string })?.code === "resource_missing") {
+      console.warn("[billing] invoice history: customer not found in this Stripe mode", customerId);
+      return [];
+    }
     console.error("[billing] invoice history fetch failed", error);
     return [];
   }

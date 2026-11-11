@@ -98,6 +98,8 @@ export async function GET(req: Request) {
         .from("pos_transactions")
         .select("id,sold_at,pos_transaction_items(vat_rate,net_amount,vat_amount,gross_amount,line_total,transaction_id)")
         .eq("organisation_id", orgId)
+        // Voided receipts carry no VAT; the sales and VAT reports exclude them too.
+        .neq("status", "voided")
         .gte("sold_at", fromTs).lte("sold_at", toTs), { keys: ["sold_at", "id"] });
       const data = (vatTx ?? []).flatMap((tx: any) => tx.pos_transaction_items ?? []);
       const byRate = new Map<number, { net: number; vat: number; gross: number; count: number }>();
