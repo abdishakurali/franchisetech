@@ -32,6 +32,15 @@ export function unitLabel(unit: string, locale: "en" | "ro"): string {
   return UNIT_LABELS_RO[unit as (typeof DEFAULT_OPERATIONAL_UNITS)[number]] ?? unit;
 }
 
+// Short U.M. label for dense table columns (stock page). Display only: the
+// stored code is unchanged. Romanian uses "buc" for pieces; every other code
+// (kg, g, ml, litre, custom units) renders as stored.
+export function unitShortLabel(unit: string | null | undefined, locale: "en" | "ro"): string {
+  const code = unit || "each";
+  if (locale === "ro" && code === "each") return "buc";
+  return code;
+}
+
 // A custom unit that collides (case-insensitively) with a standard unit's
 // code or Romanian label would be indistinguishable from it on the till and
 // in reports — this is the exact "Buc"/"Units" duplication that made the

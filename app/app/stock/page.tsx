@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { getKitchenOpsContext } from "@/lib/kitchenops/metrics";
 import { requireBusinessModule } from "@/lib/module-guard";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { unitShortLabel } from "@/lib/units-of-measure";
 import { STOCK_PRODUCT_SELECT } from "@/lib/supabase/product-selects";
 import { mergeStockPageProducts, postedPurchaseProductIds } from "@/lib/stock-page-products";
 
@@ -22,7 +23,7 @@ export default async function StockPage({
   const filter: StockView = params?.filter === "low" || params?.filter === "order" || params?.filter === "supplier" ? params.filter : "all";
   const showArchived = params?.archived === "1";
   const { countryCode, profileLocale, supabase, orgId } = await getKitchenOpsContext();
-  const { t } = await getAppLocaleAndText(countryCode, profileLocale);
+  const { t, locale } = await getAppLocaleAndText(countryCode, profileLocale);
   let products: Array<{id:string;name:string;current_stock_qty:number|null;reorder_level:number|null;unit_of_measure:string|null;active?:boolean|null;inventory_category?:{name:string}|null;supplier?:{name:string}|null;untracked?:boolean}> = [];
   let loadError = false;
   try {
@@ -166,11 +167,11 @@ export default async function StockPage({
                             </Badge>
                           )}
                           <p className="mt-0.5 text-xs text-muted-foreground sm:hidden">
-                            {t.stock.reorderAt}: {reorder} · {r.unit_of_measure ?? "each"}
+                            {t.stock.reorderAt}: {reorder} · {unitShortLabel(r.unit_of_measure, locale)}
                           </p>
                         </TableCell>
                         {filter === "supplier" ? <TableCell className="hidden sm:table-cell">{r.supplier?.name ?? "Fără furnizor"}</TableCell> : null}
-                        <TableCell className="hidden sm:table-cell">{r.unit_of_measure ?? "buc"}</TableCell>
+                        <TableCell className="hidden sm:table-cell">{unitShortLabel(r.unit_of_measure, locale)}</TableCell>
                         <TableCell className={`text-right font-semibold ${isLow ? "text-attention" : "text-reconciled"}`}>
                           <span className="font-mono tabular-nums"><StockAdjustCell productId={r.id} currentQty={qty} updateStock={updateProductStock} /></span>
                         </TableCell>

@@ -65,14 +65,17 @@ export default async function RecipesPage({ searchParams }: { searchParams?: Pro
         .join(" ")
         .toLowerCase();
       const matchesSearch = !q || searchBlob.includes(q);
-      const matchesStatus =
+      // Recipes of archived products are hidden unless the "archived" filter is
+      // picked, so the default list only shows what is still on the menu.
+      const isArchived = product?.active === false;
+      const matchesStatus = status === "archived" ? isArchived : !isArchived && (
         status === "all" ||
         (status === "low-margin" && metrics.marginPct < 30) ||
         (status === "good-margin" && metrics.marginPct >= 60) ||
         (status === "missing-cost" &&
           recipe.recipe_items.some(
             (item) => Number(item.total_cost ?? 0) <= 0 && Number(item.unit_cost ?? 0) <= 0
-          ));
+          )));
 
       return {
         recipe,

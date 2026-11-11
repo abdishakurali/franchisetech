@@ -5,6 +5,7 @@ import { isModuleNavVisible } from "@/lib/business-modules";
 import { fetchOrgModuleFlags } from "@/lib/org-module-flags";
 import { filterReportLinks } from "@/lib/app-report-links";
 import { getAppLocaleAndText } from "@/lib/app-locale-server";
+import { isFiscalNetActive } from "@/lib/fiscalnet/eligibility";
 import { getSubscriptionStatus } from "@/lib/billing/subscription";
 import { hasEntitlement } from "@/lib/billing/entitlement-resolver";
 import { listAccessibleSites } from "@/lib/site-context";
@@ -28,6 +29,8 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
   // saga_export_enabled/loyalty_enabled already came back on membership.organisations
   // via getKitchenOpsContext() above — no need for a second organisations query.
   const orgRow = Array.isArray(membership.organisations) ? membership.organisations[0] : membership.organisations;
+  // Same rule as the POS test card: FiscalNet on but still in mock mode means test sales.
+  const fiscalTestMode = isFiscalNetActive(countryCode, orgRow?.fiscalnet_enabled === true) && orgRow?.fiscalnet_mock_mode !== false;
   const [gestiuneVisible, loyaltyEntitled] = await Promise.all([
     hasEntitlement(orgId, "reports.gestiune").catch(() => false),
     hasEntitlement(orgId, "loyalty.enabled").catch(() => false),
@@ -123,7 +126,7 @@ export default async function ReportsHubPage({ searchParams }: { searchParams: P
         {active ? <>
           <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-foreground">{active.title}</h2><p className="mt-1 text-[13px] text-muted-foreground">{active.desc}</p></div>{selected === "sales" && <nav aria-label="Perioada raportului" className="flex gap-1.5">{([["today", "Azi"], ["week", "7 zile"], ["month", "Luna aceasta"]] as const).map(([value, label]) => <Link key={value} href={`/app/reports?report=${selected}&period=${value}`} aria-current={period === value ? "true" : undefined} className={`rounded-md border px-3 py-2 text-xs font-semibold ${period === value ? "border-brass bg-accent text-foreground" : "border-border text-muted-foreground"}`}>{label}</Link>)}</nav>}</div>
           {preview.error ? <p role="alert" className="py-8 text-sm text-attention">Datele raportului nu au putut fi încărcate. Deschide raportul pentru detalii.</p> : <>
-            <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">Date reale · {selected === "z-report" ? "ultimele 5 închideri" : selected === "stock" ? "stoc curent" : selected === "purchases" || selected === "margins" ? "ultimele 100 înregistrări" : `${from} – ${to}`}</p>
+            <p className="mt-4 text-xs font-medium uppercase tracking-wide text-muted-foreground">{fiscalTestMode ? "Date de test" : "Date reale"} · {selected === "z-report" ? "ultimele 5 închideri" : selected === "stock" ? "stoc curent" : selected === "purchases" || selected === "margins" ? "ultimele 100 înregistrări" : `${from} – ${to}`}</p>
             <div className="mt-5 grid grid-cols-2 gap-px border border-border bg-border xl:grid-cols-4">{preview.metrics.map(([label, value]) => <div key={label} className="bg-card p-4"><p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{label}</p><p className="mt-1 break-words font-[family-name:var(--font-display)] text-[23px] font-semibold tracking-tight tabular-nums text-foreground">{value}</p></div>)}</div>
             {selected === "sales" && <><h3 className="mt-6 text-sm font-semibold text-foreground">Vânzări pe zi</h3><ReportsTrendChart days={salesDays} currency={currency} /></>}
             <h3 className="mt-6 text-sm font-semibold text-foreground">{selected === "sales" ? "Top produse" : "Detalii recente"}</h3>
