@@ -1,8 +1,24 @@
 {
   "crons": [
-    { "path": "/api/cron/billing-reminders", "schedule": "0 8 * * *" },
-    { "path": "/api/cron/accountant-commissions", "schedule": "0 6 1 * *" },
-    { "path": "/api/cron/billing-reconcile", "schedule": "15 3 * * *" },
-    { "path": "/api/cron/analytics-health", "schedule": "30 3 * * *" }
+    {
+      "path": "/api/cron/billing-reminders",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/accountant-commissions",
+      "schedule": "0 6 1 * *"
+    },
+    {
+      "path": "/api/cron/billing-reconcile",
+      "schedule": "15 3 * * *"
+    },
+    {
+      "path": "/api/cron/analytics-health",
+      "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/first-receipt-watch",
+      "schedule": "0 7 * * *"
+    }
   ]
 }
