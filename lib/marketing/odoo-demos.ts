@@ -1,7 +1,7 @@
 // Demo videos for the /odoo/demos page. Files live in public/odoo/demos/<tech>/.
-// Recorded 2026-11-08 on a throwaway Odoo 19 Community database with demo data.
+// Recorded 2026-11-08 (pos_fiscal_printer_ro: 2026-11-11) on throwaway Odoo 19 Community databases with demo data.
 // The honesty notes come from each video's SCRIPT.md (what is real, what is not shown).
-// Names and EUR prices checked on apps.odoo.com (Odoo 19 listing) on 2026-11-08.
+// Names and EUR prices checked on apps.odoo.com (Odoo 19 listing) on 2026-11-08 (pos_fiscal_printer_ro: 2026-11-11).
 
 export const ODOO_DEMOS_CHECKED = "2026-11-08";
 
@@ -15,6 +15,15 @@ export type OdooDemo = {
 };
 
 export const ODOO_DEMOS: readonly OdooDemo[] = [
+  {
+    tech: "pos_fiscal_printer_ro",
+    name: "Romanian Fiscal Printer for POS",
+    priceEur: 149,
+    seconds: 71,
+    summary:
+      "Print the bon fiscal from Odoo Point of Sale on Romanian cash registers through the FiscalNet driver, with storno refunds, the customer's CUI, fiscal payment types and X and Z reports.",
+    note: "The FiscalNet driver is simulated and no cash register is attached; the requests shown are exactly what the module sends. The app works on Odoo.sh and on-premise Odoo, not on Odoo Online.",
+  },
   {
     tech: "shelf_price_label",
     name: "Price Labels & Shelf Labels",
