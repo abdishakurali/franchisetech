@@ -52,7 +52,7 @@ const UI_STRINGS = {
     add: "Add",
     addRate: "+ Add tax rate",
     groups: ["1 — Standard (21%)", "2 — Reduced (11%)", "3 — Super-reduced (5%)", "4 — Zero (0%)", "5 — Exempt"],
-    errNotVatRegistered: "Your company is not VAT-registered (ANAF), so only the 0% rate can be active. If it became VAT-registered, re-check the CUI with ANAF in Settings → Business.",
+    errNotVatRegistered: "Your company is not VAT-registered (ANAF), so only the 0% rate can be the default for sales. If it became VAT-registered, re-check the CUI with ANAF in Settings → Business.",
     errFailed: "The change was not saved. Try again; if it repeats, write to us on WhatsApp.",
   },
   ro: {
@@ -79,7 +79,7 @@ const UI_STRINGS = {
     add: "Adăugați",
     addRate: "+ Adăugați cotă TVA",
     groups: ["1 — Standard (21%)", "2 — Redusă (11%)", "3 — Redusă (5%)", "4 — Zero (0%)", "5 — Scutit"],
-    errNotVatRegistered: "Firma nu este plătitoare de TVA (conform ANAF), deci doar cota 0% poate fi activă. Dacă firma a devenit plătitoare, verificați din nou CUI-ul la ANAF în Setări → Business.",
+    errNotVatRegistered: "Firma nu este plătitoare de TVA (conform ANAF), deci doar cota 0% poate fi implicită la vânzare. Dacă firma a devenit plătitoare, verificați din nou CUI-ul la ANAF în Setări → Business.",
     errFailed: "Modificarea nu s-a salvat. Încercați din nou; dacă se repetă, scrieți-ne pe WhatsApp.",
   },
 } as const;

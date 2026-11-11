@@ -2771,13 +2771,14 @@ function isSaneVatRate(rate: number): boolean {
 
 export type VatActionResult = { ok: true } | { ok: false; error: "not_vat_registered" | "failed" };
 
-// The DB trigger enforce_vat_registration_on_vat_rates (errcode 23514) blocks
-// non-zero active/default rates for RO orgs that ANAF lists as not VAT-registered.
+// The DB trigger enforce_vat_registration_on_vat_rates (errcode 23514) blocks a
+// non-zero selling-default rate for RO orgs that ANAF lists as not VAT-registered
+// (message changed in 20260916095804: "...selling default before ANAF registration").
 // That rule is correct; before 2026-11-11 the error was swallowed and the owner saw
 // a save that silently did nothing.
 function vatError(error: { code?: string; message?: string } | null): VatActionResult {
   if (!error) return { ok: true };
-  if (error.code === "23514" && /not VAT-registered/i.test(error.message ?? "")) {
+  if (error.code === "23514" && /not VAT-registered|before ANAF registration/i.test(error.message ?? "")) {
     return { ok: false, error: "not_vat_registered" };
   }
   return { ok: false, error: "failed" };
