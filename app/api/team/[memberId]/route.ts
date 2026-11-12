@@ -4,6 +4,7 @@ import { getActiveOrg } from "@/lib/kitchenops/data";
 import { canManageTeam, isDbRole } from "@/lib/access-control";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 import { normalizeAccountantPermissions } from "@/lib/accountant/permissions";
+import { canChangeMemberCredentials } from "@/lib/team/credential-guard";
 
 const ADVANCED_ROLES = new Set(["manager", "auditor", "kitchen"]);
 
@@ -75,6 +76,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ me
     }
 
     if (email || password) {
+      const guard = await canChangeMemberCredentials(admin, {
+        orgId, actorRole: membership.role, actorUserId: user.id, targetUserId: member.user_id, targetRole: member.role,
+      });
+      if (!guard.ok) return NextResponse.json({ error: guard.error }, { status: guard.status });
       const authUpdates: { email?: string; password?: string } = {};
       if (email) authUpdates.email = email.trim().toLowerCase();
       if (password) {

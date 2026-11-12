@@ -31,6 +31,9 @@ export async function POST(_req: Request, { params }: { params: Promise<{ member
     if (member.user_id === user.id) {
       return NextResponse.json({ error: "Cannot disable yourself" }, { status: 400 });
     }
+    if (member.role === "owner" && membership.role !== "owner") {
+      return NextResponse.json({ error: "Doar proprietarul poate dezactiva un proprietar." }, { status: 403 });
+    }
 
     const disable = member.status !== "disabled";
     await admin.from("organisation_members").update({

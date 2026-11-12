@@ -130,21 +130,12 @@ export async function POST(req: NextRequest) {
       authUserId = existingAuthUser.id;
       resultStatus = "added_existing";
 
-      if (temporaryPassword) {
-        // Set a temporary password (user must change after login)
-        await admin.auth.admin.updateUserById(authUserId, {
-          password: temporaryPassword,
-          email_confirm: true,
-        });
-      } else if (sendInvite) {
-        // Generate a password reset link so the existing user can set a new password
-        const { data: linkData } = await admin.auth.admin.generateLink({
-          type: "recovery",
-          email,
-          options: { redirectTo },
-        });
-        resetLink = linkData?.properties?.action_link ?? null;
-      }
+      // Never touch an existing account's credentials from here: a login is
+      // global, so setting its password or handing back a recovery link would
+      // let any org take over a stranger's account (2026-11-12 audit). The
+      // person signs in with their own password, or resets it themselves.
+      void temporaryPassword;
+      void sendInvite;
     } else {
       // ── NEW USER ────────────────────────────────────────────────────────
       if (temporaryPassword) {

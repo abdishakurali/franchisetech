@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { canManageTeam } from "@/lib/access-control";
+import { canChangeMemberCredentials } from "@/lib/team/credential-guard";
 
 function makeAdminClient() {
   return createClient(
@@ -26,12 +27,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ mem
 
     const { data: member } = await admin
       .from("organisation_members")
-      .select("id,user_id")
+      .select("id,user_id,role")
       .eq("id", memberId)
       .eq("organisation_id", orgId)
       .maybeSingle();
 
     if (!member) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const guard = await canChangeMemberCredentials(admin, {
+      orgId, actorRole: membership.role, actorUserId: user.id, targetUserId: member.user_id, targetRole: member.role,
+    });
+    if (!guard.ok) return NextResponse.json({ error: guard.error }, { status: guard.status });
 
     const { data: profile } = await admin
       .from("profiles")
