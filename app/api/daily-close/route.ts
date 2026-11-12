@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 
+const SAVE_FAILED_MESSAGE = "Numărarea casei nu a fost salvată. Încercați din nou.";
+const DENIED_MESSAGE = "Planul curent nu permite salvarea închiderii de casă.";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -22,7 +25,13 @@ export async function POST(req: Request) {
       await assertEntitlement(effectiveOrgId, "reports.till_close", { write: false });
     } catch (error) {
       const response = entitlementDeniedResponse(error);
-      if (response) return response;
+      if (response) {
+        const body = await response.json().catch(() => ({}));
+        return NextResponse.json(
+          { ...body, ok: false, message: DENIED_MESSAGE },
+          { status: response.status },
+        );
+      }
       throw error;
     }
     const { error } = await supabase.from("pos_daily_close").insert({
@@ -35,11 +44,12 @@ export async function POST(req: Request) {
       closed_by: user.id,
     });
     if (error) {
-      // Table may not exist yet — return success anyway for UX
-      console.warn("pos_daily_close insert failed:", error.message);
+      // Never report "saved" when the cash count was not stored.
+      console.error("pos_daily_close insert failed:", error.message);
+      return NextResponse.json({ ok: false, error: "save_failed", message: SAVE_FAILED_MESSAGE }, { status: 500 });
     }
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: e.message, message: SAVE_FAILED_MESSAGE }, { status: 500 });
   }
 }

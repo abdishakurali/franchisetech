@@ -23,11 +23,13 @@ export function ZReportCashForm({
   orgId: string;
   currency?: string;
 }) {
-  const { t } = useAppI18n();
+  const { t, locale } = useAppI18n();
   const cc = t.reportPages.zReport.cashClose;
   const [counted, setCounted] = useState("");
   const [notes, setNotes] = useState("");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const countedNum = parseFloat(counted) || 0;
   const difference = countedNum - expectedCash;
@@ -81,10 +83,17 @@ export function ZReportCashForm({
                 className="mt-1"
               />
             </div>
+            {error && (
+              <div role="alert" className="rounded-lg bg-attention/10 border border-attention/25 px-4 py-3 text-sm text-attention">
+                {error}
+              </div>
+            )}
             <Button
               onClick={async () => {
+                setError(null);
+                setSaving(true);
                 try {
-                  await fetch("/api/daily-close", {
+                  const res = await fetch("/api/daily-close", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -96,12 +105,19 @@ export function ZReportCashForm({
                       notes: notes || null,
                     }),
                   });
-                  setSaved(true);
+                  if (res.ok) {
+                    setSaved(true);
+                  } else {
+                    const body = await res.json().catch(() => null) as { message?: string } | null;
+                    setError(locale === "ro" && body?.message ? body.message : cc.saveFailed);
+                  }
                 } catch {
-                  setSaved(true);
+                  setError(cc.saveFailed);
+                } finally {
+                  setSaving(false);
                 }
               }}
-              disabled={!counted}
+              disabled={!counted || saving}
               variant="outline"
             >
               {cc.save}

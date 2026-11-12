@@ -31,7 +31,7 @@ export default async function ProductsNewPage({ searchParams }: { searchParams?:
 
   const [{ data: inventoryCategories }, { data: posCategories }, units, { data: suppliers }, vatRates] = await Promise.all([
     supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "inventory").order("name"),
-    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).eq("category_type", "pos").order("name"),
+    supabase.from("product_categories").select("id,name").eq("organisation_id", orgId).in("category_type", ["pos", "both"]).order("name"),
     listOperationalUnitNames(supabase, orgId),
     supabase.from("suppliers").select("id,name").eq("organisation_id", orgId).order("name"),
     listActiveVatRates(supabase, orgId),

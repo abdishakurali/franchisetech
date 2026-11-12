@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Download } from "lucide-react";
+import { parseCsvRecords } from "@/lib/format/csv";
+import { parseLocaleNumber } from "@/lib/format/ro-number";
 
 // Simplified ingredients template — name, unit, cost, stock, reorder_level
 const HEADERS = ["name","unit","cost_price","current_stock_qty","reorder_level"];
@@ -20,6 +22,17 @@ const TEMPLATE = [
   "Parmezan,g,0.025,600,100",
 ].join("\n");
 
+// Decimal comma ("0,012") -> "0.012" so it survives the comma-joined CSV below.
+function csvNum(v: string | undefined, fallback: string) {
+  if (!v) return fallback;
+  const n = parseLocaleNumber(v);
+  return n === null ? v : String(n);
+}
+
+function csvCell(v: string) {
+  return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+}
+
 // Maps simplified headers to the full product CSV expected by importProductsCsv
 function mapToProductCsv(rows: Record<string, string>[]) {
   const fullHeaders = ["name","category","sku","barcode","unit","sale_price_gross","cost_price","vat_rate","available_in_pos","is_ingredient","is_stock_tracked","current_stock_qty","reorder_level","image_url"];
@@ -30,26 +43,21 @@ function mapToProductCsv(rows: Record<string, string>[]) {
     "",             // barcode
     r.unit ?? "each",
     "0",            // sale_price_gross (ingredients don't have sale price)
-    r.cost_price ?? "0",
+    csvNum(r.cost_price, "0"),
     "0",            // vat_rate
     "false",        // available_in_pos
     "true",         // is_ingredient
     "true",         // is_stock_tracked
-    r.current_stock_qty ?? "0",
-    r.reorder_level ?? "0",
+    csvNum(r.current_stock_qty, "0"),
+    csvNum(r.reorder_level, "0"),
     "",             // image_url
-  ].join(","));
+  ].map(csvCell).join(","));
   return [fullHeaders.join(","), ...mapped].join("\n");
 }
 
 function parseRows(text: string) {
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(",").map((h) => h.trim());
-  return lines.slice(1).filter(Boolean).map((line) => {
-    const cols = line.split(",").map((c) => c.trim());
-    return Object.fromEntries(headers.map((h, i) => [h, cols[i] ?? ""]));
-  });
+  // Auto-detects ";" (Romanian Excel) vs "," from the header line.
+  return parseCsvRecords(text);
 }
 
 function downloadCsv(content: string, filename: string) {
@@ -66,7 +74,7 @@ function IngredientsImportContent() {
   const rows = useMemo(() => parseRows(csv), [csv]);
   const errors = rows.flatMap((r, i) =>
     !r.name ? [`Rândul ${i + 1}: numele este obligatoriu`] :
-    r.cost_price && isNaN(Number(r.cost_price)) ? [`Rândul ${i + 1}: cost_price trebuie să fie un număr`] : []
+    r.cost_price && parseLocaleNumber(r.cost_price) === null ? [`Rândul ${i + 1}: cost_price trebuie să fie un număr`] : []
   );
   const imported = searchParams.get("imported");
   const summary = imported ? `✓ ${imported} importate, ${searchParams.get("skipped") ?? "0"} omise` : null;

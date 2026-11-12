@@ -9,12 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/client";
 import { useAppI18n } from "@/lib/app-i18n-context";
+import { mapSupabaseAuthError } from "@/lib/auth-error-messages";
 import { toast } from "sonner";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
   const supabase = createClient();
-  const { t } = useAppI18n();
+  const { t, locale } = useAppI18n();
   const a = t.auth.resetPassword;
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const [password, setPassword] = useState("");
@@ -39,15 +40,20 @@ export default function ResetPasswordPage() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        toast.error(mapSupabaseAuthError(error.message, locale));
+        return;
+      }
+      toast.success(a.success);
+      router.push("/app");
+      router.refresh();
+    } catch {
+      toast.error(mapSupabaseAuthError("network_error", locale));
+    } finally {
+      setLoading(false);
     }
-    toast.success(a.success);
-    router.push("/app");
-    router.refresh();
   };
 
   return (

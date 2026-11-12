@@ -196,7 +196,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
       .eq("active", true)
       .order("pos_sort_order", { ascending: true })
       .order("name", { ascending: true }),
-    supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).eq("category_type", "pos").order("sort_order", { ascending: true }).order("name", { ascending: true }),
+    supabase.from("product_categories").select("id,name,color").eq("organisation_id", orgId).eq("active", true).in("category_type", ["pos", "both"]).order("sort_order", { ascending: true }).order("name", { ascending: true }),
     supabase.from("payment_methods").select("id,name,type,fiscalnet_code").eq("organisation_id", orgId).eq("active", true).order("created_at"),
   ]) : null;
   const earlyRegisterQueries = shouldPrefetchRegister ? Promise.all([

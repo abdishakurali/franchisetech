@@ -8,6 +8,7 @@ import { Mail, ArrowLeft, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { mapSupabaseAuthError } from "@/lib/auth-error-messages";
 
 const COOLDOWN_SECONDS = 60;
 
@@ -47,14 +48,19 @@ function CheckEmailContent() {
   const handleResend = async () => {
     if (!email || cooldown > 0 || loading) return;
     setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.resend({ type: "signup", email });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Emailul de confirmare a fost retrimis.");
-      setCooldown(COOLDOWN_SECONDS);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resend({ type: "signup", email });
+      if (error) {
+        toast.error(mapSupabaseAuthError(error.message, "ro"));
+      } else {
+        toast.success("Emailul de confirmare a fost retrimis.");
+        setCooldown(COOLDOWN_SECONDS);
+      }
+    } catch {
+      toast.error(mapSupabaseAuthError("network_error", "ro"));
+    } finally {
+      setLoading(false);
     }
   };
 

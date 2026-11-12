@@ -264,6 +264,8 @@ const en = {
     rowNameRequired: (n: number) => `Row ${n}: name is required`,
     rowPriceNumber: (n: number) => `Row ${n}: sale_price_gross must be a number`,
     importedSummary: (imported: string, skipped: string) => `✓ ${imported} imported, ${skipped} skipped`,
+    noneImportedHint: "No product was imported. Check that there is a name column and that prices are numbers (e.g. 14.50 or 14,50).",
+    noRowsRead: "No rows were read from the file. Check that the first line holds the column names (name, sale_price_gross, ...) and that columns are separated by a comma or a semicolon.",
     loading: "Loading…",
     name: "Name",
     category: "Category",
@@ -972,6 +974,7 @@ const en = {
         notes: "Notes (optional)",
         notesPlaceholder: "Any notes about the close…",
         save: "Save cash close",
+        saveFailed: "The cash count was not saved. Please try again.",
       },
     },
     vat: {
@@ -1675,6 +1678,8 @@ const ro: typeof en = {
     rowNameRequired: (n: number) => `Rândul ${n}: numele este obligatoriu`,
     rowPriceNumber: (n: number) => `Rândul ${n}: sale_price_gross trebuie să fie un număr`,
     importedSummary: (imported: string, skipped: string) => `✓ ${imported} importate, ${skipped} omise`,
+    noneImportedHint: "Niciun produs nu a fost importat. Verificați că există coloana name și că prețurile sunt numere (ex: 14,50 sau 14.50).",
+    noRowsRead: "Nu s-a citit niciun rând din fișier. Verificați că prima linie conține numele coloanelor (name, sale_price_gross, ...) și că valorile sunt separate prin virgulă sau punct și virgulă.",
     loading: "Se încarcă…",
     name: "Nume",
     category: "Categorie",
@@ -2385,6 +2390,7 @@ const ro: typeof en = {
         notes: "Note (opțional)",
         notesPlaceholder: "Note despre închidere…",
         save: "Salvează închiderea",
+        saveFailed: "Numărarea casei nu a fost salvată. Încercați din nou.",
       },
     },
     vat: {

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { addCategoryInline, addProductFromPos } from "@/app/actions/kitchenops";
 import { advanceFromMenu } from "@/app/actions/onboarding-steps";
+import { parseLocaleNumber } from "@/lib/format/ro-number";
 import { formatRatePercent, formatVatRateLabel, ratesMatch, type OrgVatRate } from "@/lib/vat-rates";
 
 type Category = { id: string; name: string };
@@ -211,7 +212,7 @@ export function MenuBuilder({
             );
             continue;
           }
-          created.push({ id: crypto.randomUUID(), name: row.name.trim(), sale_price: Number(row.price), category_id: categoryId });
+          created.push({ id: crypto.randomUUID(), name: row.name.trim(), sale_price: parseLocaleNumber(row.price) ?? 0, category_id: categoryId });
           totalCreated += 1;
         }
         if (created.length) createdByCategory[categoryId] = created;

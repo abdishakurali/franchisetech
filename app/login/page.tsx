@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { GoogleIcon } from "@/components/ui/google-icon";
 import { createClient } from "@/lib/supabase/client";
 import { useAppI18n } from "@/lib/app-i18n-context";
+import { mapSupabaseAuthError } from "@/lib/auth-error-messages";
 import { toast } from "sonner";
 
 const googleAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_AUTH === "true";
@@ -21,7 +22,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
-  const { t } = useAppI18n();
+  const { t, locale } = useAppI18n();
   const a = t.auth.login;
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ email: "", password: "" });
@@ -30,17 +31,23 @@ function LoginForm() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email: form.email,
-      password: form.password,
-    });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success(a.success);
-      router.push("/app");
-      router.refresh();
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      });
+      if (error) {
+        toast.error(mapSupabaseAuthError(error.message, locale));
+      } else {
+        toast.success(a.success);
+        router.push("/app");
+        router.refresh();
+      }
+    } catch {
+      // Network failure etc. Without this the button kept spinning forever.
+      toast.error(mapSupabaseAuthError("network_error", locale));
+    } finally {
+      setLoading(false);
     }
   };
 

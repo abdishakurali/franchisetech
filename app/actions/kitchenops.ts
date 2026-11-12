@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getActiveOrg, numberValue, stringValue } from "@/lib/kitchenops/data";
+import { parseCsvRecords } from "@/lib/format/csv";
+import { parseLocaleNumber } from "@/lib/format/ro-number";
 import { computeSaleTotals, resolveSalePayments } from "@/lib/pos-sale-math";
 import type { SaleErrorCode } from "@/lib/pos-i18n";
 import { requireActiveSite } from "@/lib/site-context";
@@ -1709,30 +1711,16 @@ export async function addCustomerFromPos(formData: FormData): Promise<SaveAction
   return { ok: true };
 }
 
+// Shared reader: auto-detects ";" (Romanian Excel) vs "," from the header
+// line, handles quotes and a BOM. Headers are lower-cased as before.
 function parseCsv(text: string) {
-  const rows: string[][] = [];
-  let cell = "";
-  let row: string[] = [];
-  let quoted = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    const next = text[i + 1];
-    if (ch === '"' && quoted && next === '"') { cell += '"'; i++; continue; }
-    if (ch === '"') { quoted = !quoted; continue; }
-    if (ch === "," && !quoted) { row.push(cell.trim()); cell = ""; continue; }
-    if ((ch === "\n" || ch === "\r") && !quoted) {
-      if (ch === "\r" && next === "\n") i++;
-      row.push(cell.trim());
-      if (row.some(Boolean)) rows.push(row);
-      row = []; cell = "";
-      continue;
-    }
-    cell += ch;
-  }
-  row.push(cell.trim());
-  if (row.some(Boolean)) rows.push(row);
-  const headers = (rows.shift() ?? []).map((h) => h.toLowerCase().trim());
-  return rows.map((cols) => Object.fromEntries(headers.map((h, i) => [h, cols[i] ?? ""])));
+  return parseCsvRecords(text);
+}
+
+// "14,50" / "1.234,50" / "14.50" -> number; anything else keeps the old
+// Number() result so invalid cells behave exactly as before.
+function csvNumber(v: string) {
+  return parseLocaleNumber(v) ?? Number(v);
 }
 
 function csvBool(v: string) {
@@ -1750,6 +1738,7 @@ export async function importProductsCsv(formData: FormData) {
   if (!canManage(membership.role)) return;
   await assertEntitlement(orgId, "products.enabled");
   const rows = parseCsv(await csvText(formData));
+  if (rows.length === 0) redirect("/app/products/import?empty=1");
   let imported = 0, skipped = 0;
   // Plan product cap: count rows against remaining headroom rather than
   // hard-failing the whole import — rows past the limit are skipped, same as
@@ -1761,7 +1750,7 @@ export async function importProductsCsv(formData: FormData) {
   );
   const { data: existingCats } = await supabase.from("product_categories").select("id,name,category_type").eq("organisation_id", orgId);
   const categories = new Map((existingCats ?? []).map((c) => [String(c.name).toLowerCase(), c.id]));
-  const posCategories = new Map((existingCats ?? []).filter((c) => c.category_type === "pos").map((c) => [String(c.name).toLowerCase(), c.id]));
+  const posCategories = new Map((existingCats ?? []).filter((c) => c.category_type === "pos" || c.category_type === "both").map((c) => [String(c.name).toLowerCase(), c.id]));
 
   async function ensureCategory(name: string, categoryType: "inventory" | "pos") {
     const key = name.toLowerCase();
@@ -1824,7 +1813,7 @@ export async function importProductsCsv(formData: FormData) {
     // for every row a source file simply didn't have a VAT column for. Only an
     // explicit numeric value in the file goes through nearest-rate snapping;
     // a missing one falls back to the org's own default rate instead.
-    const rawVat = row.vat_rate !== "" && row.vat_rate != null ? Number(row.vat_rate) : null;
+    const rawVat = row.vat_rate !== "" && row.vat_rate != null ? csvNumber(row.vat_rate) : null;
     const vatRate = resolveCsvVatRate(rawVat, catalogRates, {
       countryCode: orgRowForVat?.country_code ?? null,
       vatRegistered: Boolean(orgRowForVat?.anaf_vat_registered),
@@ -1833,8 +1822,8 @@ export async function importProductsCsv(formData: FormData) {
       organisation_id: orgId, name, category_id: categoryId, pos_category_id: posCategoryId,
       sku: row.sku || row.barcode || null,
       unit_of_measure: row.unit || "each",
-      sale_price: Number(row.sale_price_gross || 0),
-      cost_price: row.cost_price ? Number(row.cost_price) : null,
+      sale_price: csvNumber(row.sale_price_gross || "0"),
+      cost_price: row.cost_price ? csvNumber(row.cost_price) : null,
       vat_rate: vatRate,
       vat_status: rawVat == null ? "ambiguous" : "approved",
       vat_source: rawVat == null ? "csv_missing_vat" : "csv_explicit_vat",
@@ -1844,8 +1833,8 @@ export async function importProductsCsv(formData: FormData) {
       is_ingredient: csvBool(row.is_ingredient),
       is_stock_tracked: csvBool(row.is_stock_tracked),
       is_sellable: !csvBool(row.is_ingredient),
-      current_stock_qty: row.current_stock_qty ? Number(row.current_stock_qty) : 0,
-      reorder_level: row.reorder_level ? Number(row.reorder_level) : 0,
+      current_stock_qty: row.current_stock_qty ? csvNumber(row.current_stock_qty) : 0,
+      reorder_level: row.reorder_level ? csvNumber(row.reorder_level) : 0,
       image_url: row.image_url || null, active: true,
     });
     if (error) skipped++; else { imported++; activeProductCount++; }

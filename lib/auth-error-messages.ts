@@ -29,6 +29,17 @@ export function mapSupabaseAuthError(message: string, locale: "en" | "ro"): stri
       ? "Parola trebuie să aibă cel puțin 6 caractere."
       : "Password must be at least 6 characters.";
   }
+  if (m.includes("for security purposes") || m.includes("only request this after")) {
+    const secs = /after (\d+) second/.exec(m)?.[1];
+    return locale === "ro"
+      ? `Din motive de securitate, puteți cere din nou ${secs ? `peste ${secs} secunde` : "peste câteva secunde"}.`
+      : `For security reasons, you can request this again ${secs ? `in ${secs} seconds` : "in a few seconds"}.`;
+  }
+  if (m.includes("should be different from the old password")) {
+    return locale === "ro"
+      ? "Parola nouă trebuie să fie diferită de cea veche."
+      : "The new password must be different from the old one.";
+  }
   if (m.includes("failed to fetch") || m.includes("network")) {
     return locale === "ro"
       ? "Nu s-a putut contacta serverul. Verifică conexiunea la internet și încearcă din nou."

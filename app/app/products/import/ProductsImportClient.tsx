@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Download } from "lucide-react";
 import { useAppI18n } from "@/lib/app-i18n-context";
 import { recipeCurrencyLabel } from "@/lib/recipe-costing";
+import { parseCsvRecords } from "@/lib/format/csv";
+import { parseLocaleNumber } from "@/lib/format/ro-number";
 
 const HEADERS = ["name","category","sku","barcode","unit","sale_price_gross","cost_price","vat_rate","available_in_pos","is_ingredient","is_stock_tracked","current_stock_qty","reorder_level","image_url"];
 const TEMPLATE = [
@@ -18,13 +20,8 @@ const TEMPLATE = [
 ].join("\n");
 
 function parseRows(text: string) {
-  const lines = text.trim().split(/\r?\n/);
-  if (lines.length < 2) return [];
-  const headers = lines[0].split(",").map((h) => h.trim());
-  return lines.slice(1).filter(Boolean).map((line) => {
-    const cols = line.split(",").map((c) => c.trim());
-    return Object.fromEntries(headers.map((h, i) => [h, cols[i] ?? ""]));
-  });
+  // Auto-detects ";" (Romanian Excel) vs "," from the header line.
+  return parseCsvRecords(text);
 }
 
 function downloadCsv(content: string, filename: string) {
@@ -45,11 +42,14 @@ function ProductsImportContent({ currency }: { currency: string }) {
   const rows = useMemo(() => parseRows(csv), [csv]);
   const errors = rows.flatMap((r, i) =>
     !r.name ? [t.rowNameRequired(i + 1)] :
-    Number.isNaN(Number(r.sale_price_gross || 0)) ? [t.rowPriceNumber(i + 1)] : []
+    parseLocaleNumber(r.sale_price_gross || "0") === null ? [t.rowPriceNumber(i + 1)] : []
   );
   const imported = searchParams.get("imported");
   const skipped = searchParams.get("skipped") ?? "0";
   const summary = imported ? t.importedSummary(imported, skipped) : null;
+  const noneImported = imported === "0";
+  const serverEmpty = searchParams.get("empty") === "1";
+  const pastedButEmpty = csv.trim().length > 0 && rows.length === 0;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
@@ -68,8 +68,13 @@ function ProductsImportContent({ currency }: { currency: string }) {
         </Button>
       </div>
 
-      {summary && (
+      {summary && !noneImported && (
         <div className="rounded-lg border border-reconciled/25 bg-reconciled/10 p-3 text-sm text-reconciled">{summary}</div>
+      )}
+      {(serverEmpty || noneImported) && (
+        <div className="rounded-lg border border-attention/25 bg-attention/10 p-3 text-sm text-attention">
+          {noneImported && summary ? `${summary}. ${t.noneImportedHint}` : t.noRowsRead}
+        </div>
       )}
 
       <Card>
@@ -84,6 +89,9 @@ function ProductsImportContent({ currency }: { currency: string }) {
               onChange={(e) => setCsv(e.target.value)}
               className="min-h-44 w-full rounded-md border border-border p-3 font-mono text-xs"
             />
+            {pastedButEmpty && (
+              <div className="rounded-lg border border-attention/25 bg-attention/10 p-3 text-sm text-attention">{t.noRowsRead}</div>
+            )}
             {errors.length > 0 && (
               <div className="rounded-lg border border-attention/25 bg-attention/10 p-3 text-sm text-attention">
                 {errors.slice(0, 5).join(" · ")}
