@@ -44,3 +44,14 @@ describe("fiscal print guard", () => {
     expect(claimFiscalPrint("tx-1", broken)).toBe(false);
   });
 });
+
+describe("fiscalPrintClaimAgeMs", () => {
+  it("returns the age of a stored claim and null when there is none", async () => {
+    const { fiscalPrintClaimAgeMs } = await import("./print-guard");
+    const store = new Map<string, string>();
+    const s = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v), removeItem: (k: string) => void store.delete(k) };
+    expect(fiscalPrintClaimAgeMs("tx-1", s, 10_000)).toBeNull();
+    store.set("fiscal_print_claim:tx-1", new Date(1_000).toISOString());
+    expect(fiscalPrintClaimAgeMs("tx-1", s, 181_000)).toBe(180_000);
+  });
+});

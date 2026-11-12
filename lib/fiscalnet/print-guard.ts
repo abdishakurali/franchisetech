@@ -44,6 +44,25 @@ export function releaseFiscalPrint(transactionId: string, store: StorageLike | n
   }
 }
 
+/**
+ * Age of this browser's stored claim in ms, or null when there is none.
+ * Used only by the missing-receipt recovery screen.
+ */
+export function fiscalPrintClaimAgeMs(
+  transactionId: string,
+  store: StorageLike | null = storage(),
+  now: number = Date.now(),
+): number | null {
+  try {
+    const raw = store?.getItem(PREFIX + transactionId);
+    if (!raw) return null;
+    const t = Date.parse(raw);
+    return Number.isFinite(t) ? Math.max(0, now - t) : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Test helper. */
 export function __resetFiscalPrintClaimsForTests() {
   memoryClaims.clear();

@@ -11,7 +11,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getFiscalRetryPayload, listSalesMissingFiscalReceipt, type SaleMissingFiscalReceipt } from "@/app/actions/fiscal-recovery";
 import { fiscalBrowserReceiptAndLog, type RecordFiscalAttempt } from "@/lib/fiscalnet/log-attempt";
 import type { BrowserFiscalConfig } from "@/lib/fiscalnet/browser";
-import { claimFiscalPrint, releaseFiscalPrint } from "@/lib/fiscalnet/print-guard";
+import { claimFiscalPrint, fiscalPrintClaimAgeMs, releaseFiscalPrint } from "@/lib/fiscalnet/print-guard";
 import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
 
 type RowResult = { ok: boolean; msg: string; sale: SaleMissingFiscalReceipt };
@@ -61,6 +61,8 @@ export function PosMissingReceipts({
   const setResult = (sale: SaleMissingFiscalReceipt, r: { ok: boolean; msg: string }) =>
     setResults((cur) => ({ ...cur, [sale.id]: { ...r, sale } }));
 
+  const STALE_FAILED_CLAIM_MS = 2 * 60 * 1000;
+
   async function issue(sale: SaleMissingFiscalReceipt) {
     if (busyRef.current) return;
     const label = sale.transaction_number || sale.id.slice(0, 8);
@@ -71,6 +73,14 @@ export function PosMissingReceipts({
     busyRef.current = true;
     setBusyId(sale.id);
     try {
+      // A sale the server reports as "failed" was refused by the cash register
+      // (nothing printed). The live path keeps its claim forever, so on the
+      // same browser take over a claim older than 2 minutes; the owner has
+      // just confirmed the paper roll. Never for pending sales (may be in flight).
+      const claimAge = fiscalPrintClaimAgeMs(sale.id);
+      if (sale.status === "failed" && claimAge !== null && claimAge > STALE_FAILED_CLAIM_MS) {
+        releaseFiscalPrint(sale.id);
+      }
       if (!claimFiscalPrint(sale.id)) {
         setResult(sale, { ok: false, msg: "Bonul pentru această vânzare se trimite deja din acest browser." });
         return;

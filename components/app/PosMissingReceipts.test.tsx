@@ -17,10 +17,12 @@ vi.mock("@/lib/fiscalnet/log-attempt", () => ({
   fiscalBrowserReceiptAndLog: (...a: unknown[]) => { calls.push("send"); return sendAndLog(...a); },
 }));
 const claim = vi.fn();
+const claimAge = vi.fn((_id: string): number | null => null);
 const release = vi.fn();
 vi.mock("@/lib/fiscalnet/print-guard", () => ({
   claimFiscalPrint: (id: string) => { calls.push("claim"); return claim(id); },
   releaseFiscalPrint: (id: string) => { calls.push("release"); return release(id); },
+  fiscalPrintClaimAgeMs: (id: string) => claimAge(id),
 }));
 
 const { PosMissingReceipts } = await import("./PosMissingReceipts");
@@ -61,6 +63,7 @@ beforeEach(() => {
   sendAndLog.mockReset();
   claim.mockReset().mockReturnValue(true);
   release.mockReset();
+  claimAge.mockReset().mockReturnValue(null);
   vi.spyOn(window, "confirm").mockReturnValue(true);
 });
 afterEach(() => {
@@ -125,6 +128,23 @@ describe("PosMissingReceipts", () => {
     expect(await screen.findByText("Bonul pentru această vânzare se trimite deja din acest browser.")).toBeTruthy();
     expect(getPayload).not.toHaveBeenCalled();
     expect(sendAndLog).not.toHaveBeenCalled();
+  });
+
+  it("takes over a stale claim only for a sale the register refused (status failed)", async () => {
+    sendAndLog.mockResolvedValue({ ok: true, message: "Bon fiscal emis. Nr: 9", receiptNumber: "9", confirmation: "confirmed" });
+    listSales.mockResolvedValue({ ok: true, sales: [{ ...sale, status: "failed" }] });
+    claimAge.mockReturnValue(3 * 60 * 1000);
+    fireEvent.click(await openBanner());
+    await waitFor(() => expect(sendAndLog).toHaveBeenCalledTimes(1));
+    expect(calls.slice(0, 2)).toEqual(["release", "claim"]);
+  });
+
+  it("does not take over a claim for a pending sale, however old", async () => {
+    claimAge.mockReturnValue(60 * 60 * 1000);
+    claim.mockReturnValue(false);
+    fireEvent.click(await openBanner());
+    expect(await screen.findByText("Bonul pentru această vânzare se trimite deja din acest browser.")).toBeTruthy();
+    expect(release).not.toHaveBeenCalled();
   });
 
   it("releases the claim when the server refuses or the device fails, so it can be retried", async () => {
