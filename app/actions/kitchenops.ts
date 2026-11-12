@@ -2,6 +2,7 @@
 
 // FiscalNet — Romania-only fiscal receipt integration
 import { isFiscalNetActive } from "@/lib/fiscalnet/eligibility";
+import { fiscalItemsFromSaleLines } from "@/lib/fiscalnet/missing-receipt";
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -2807,14 +2808,8 @@ export async function completeSaleReturn(formData: FormData): Promise<CompleteSa
     total: saleTotal,
     paymentType,
     cashSale: hasCashPayment,
-    items: itemCalcs.map((i) => ({
-      productName: i.product_name,
-      quantity: i.quantity,
-      unitPrice: i.unit_price,
-      vatRate: i.vat_rate,
-      fiscalNetGroup: (i as CartItem).fiscalnet_vat_group ?? null,
-      ...(i.applied_discount_pct > 0 ? { discountPercent: i.applied_discount_pct } : {}),
-    })),
+    // Shared with the missing-receipt recovery (lib/fiscalnet/missing-receipt.ts).
+    items: fiscalItemsFromSaleLines(itemCalcs),
     fiscalApiPending,
     changeDue: cashOverpay,
     idempotent: idempotentReplay,

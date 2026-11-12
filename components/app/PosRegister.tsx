@@ -32,6 +32,7 @@ import { PosTableContextBar, type PosActiveTable } from "@/components/app/PosTab
 import { sendTabOrder, getTabPendingItems, type TabPendingItem } from "@/app/actions/table-service";
 import { PreBillPrintButton } from "@/components/app/PreBillPrintButton";
 import { PosOfflineBar } from "@/components/app/PosOfflineBar";
+import { PosMissingReceipts } from "@/components/app/PosMissingReceipts";
 import { CashCountModal } from "@/components/app/CashCountModal";
 import { friendlySaleErrorFromCode, paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
 import { classifySaleFailure } from "@/lib/pos-sale-failure";
@@ -2040,6 +2041,9 @@ function PosRegisterInner({
               Am verificat
             </button>
           </div>
+        )}
+        {!focusedCheckout && canManage && fiscalActive && fiscalNet?.enabled && (
+          <PosMissingReceipts fiscalNet={fiscalNet} recordAttempt={recordFiscalAttempt} />
         )}
         <div className={cn(
           "flex min-h-0 flex-1 flex-col overflow-hidden",
