@@ -1,3 +1,4 @@
+import { resolveOrgCui } from "@/lib/org-cui";
 import { formatMoney } from "@/lib/kitchenops/metrics";
 import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
 import { computeSalesReport } from "@/lib/reports/sales-data";
@@ -48,7 +49,7 @@ export async function GET(req: Request) {
 
   const doc = ReportPdfDocument({
     companyName: org?.name ?? "franchisetech",
-    companyCui: org?.fiscalnet_cif ?? undefined,
+    companyCui: resolveOrgCui(org) ?? undefined,
     title: "Raport Vânzări",
     subtitle: "Rezumat vânzări, TVA, plăți și top produse",
     periodLabel: `Perioada: ${from} — ${to}`,

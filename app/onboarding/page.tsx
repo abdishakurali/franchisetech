@@ -168,7 +168,9 @@ export default function OnboardingPage() {
 
   const handleContinue = () => {
     if (!form.name.trim()) return toast.error(t.nameRequired);
-    captureClientEvent("onboarding_completed", { country_code: form.countryCode });
+    // No client "completed" event here: the server sends
+    // onboarding_step_completed {step: "business_cui"} once the org is saved,
+    // and onboarding_completed only at the end of the journey.
     startTransition(async () => {
       const acquisition = readAcquisitionClient();
       const preferredPlan = readPreferredPlanClient();

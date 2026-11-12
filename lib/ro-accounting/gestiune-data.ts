@@ -29,7 +29,7 @@ export type GestiuneLabels = {
 };
 
 export type GestiuneReportData = {
-  org: { name: string | null; fiscalnet_cif: string | null } | null;
+  org: { name: string | null; fiscalnet_cif: string | null; anaf_cif?: string | null } | null;
   movements: GestiuneMovement[];
   totals: {
     intrari19: number; intrari9: number; intrari5: number; intrari0: number; intrariTotal: number;
@@ -320,7 +320,7 @@ export async function computeGestiuneReport(
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("name,fiscalnet_cif")
+    .select("name,fiscalnet_cif,anaf_cif")
     .eq("id", orgId)
     .maybeSingle();
 

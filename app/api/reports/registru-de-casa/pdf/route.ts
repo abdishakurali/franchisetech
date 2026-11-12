@@ -1,3 +1,4 @@
+import { resolveOrgCui } from "@/lib/org-cui";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
@@ -42,7 +43,7 @@ export async function GET(req: Request) {
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("name,fiscalnet_cif,currency_code")
+    .select("name,fiscalnet_cif,anaf_cif,currency_code")
     .eq("id", orgId)
     .single();
   const currency = org?.currency_code ?? "EUR";
@@ -199,7 +200,7 @@ export async function GET(req: Request) {
 
   const doc = ReportPdfDocument({
     companyName: org?.name ?? "franchisetech",
-    companyCui: org?.fiscalnet_cif ?? undefined,
+    companyCui: resolveOrgCui(org) ?? undefined,
     title: "Registru de Casă",
     subtitle: "Jurnal de casă cu sold curent",
     periodLabel: `Perioada: ${from} — ${to}`,

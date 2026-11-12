@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 let updateError: { code: string; message: string } | null = null;
 const updates: Record<string, unknown>[] = [];
 const redirects: string[] = [];
+const tracked: { step: string; input: Record<string, unknown> }[] = [];
 
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => {
@@ -10,13 +11,21 @@ vi.mock("next/navigation", () => ({
     throw new Error(`NEXT_REDIRECT ${url}`);
   },
 }));
+vi.mock("@/lib/onboarding/step-events", () => ({
+  trackOnboardingStepCompleted: (step: string, input: Record<string, unknown>) => tracked.push({ step, input }),
+}));
 vi.mock("@/lib/org-module-flags", () => ({ saveOrgModuleFlags: async () => ({ ok: true }) }));
 vi.mock("@/lib/kitchenops/data", () => ({
   getActiveOrg: async () => ({
     orgId: "org-1",
+    user: { id: "user-1", email: "owner@cafe.ro" },
     membership: { role: "owner" },
     supabase: {
       from: () => ({
+        select: () => {
+          const chain = { eq: () => chain, maybeSingle: async () => ({ data: { name: "Cafe Test SRL" } }) };
+          return chain;
+        },
         update: (row: Record<string, unknown>) => {
           updates.push(row);
           const chain = {
@@ -37,6 +46,7 @@ beforeEach(() => {
   updateError = null;
   updates.length = 0;
   redirects.length = 0;
+  tracked.length = 0;
 });
 
 describe("onboarding step writes", () => {
@@ -64,5 +74,28 @@ describe("onboarding step writes", () => {
     expect(await markFirstSaleDoneForOnboarding()).toEqual({ error: expect.any(String) });
     updateError = null;
     expect(await markFirstSaleDoneForOnboarding()).toBeUndefined();
+  });
+
+  it("sends one step event after a saved step, none after a failed one", async () => {
+    updateError = { code: "42501", message: "permission denied" };
+    await advanceFromFiscal();
+    expect(tracked).toEqual([]);
+    updateError = null;
+    await expect(advanceFromFiscal()).rejects.toThrow("NEXT_REDIRECT");
+    expect(tracked).toEqual([
+      { step: "fiscal", input: { userId: "user-1", orgId: "org-1", email: "owner@cafe.ro", orgName: "Cafe Test SRL" } },
+    ]);
+  });
+
+  it("first sale and the final step are tracked as their own steps", async () => {
+    await markFirstSaleDoneForOnboarding();
+    await expect(completeOnboardingJourney()).rejects.toThrow("NEXT_REDIRECT");
+    expect(tracked.map((t) => t.step)).toEqual(["first_sale", "result"]);
+  });
+
+  it("a failed completion is not tracked as completed", async () => {
+    updateError = { code: "23514", message: "check violation" };
+    await completeOnboardingJourney();
+    expect(tracked).toEqual([]);
   });
 });

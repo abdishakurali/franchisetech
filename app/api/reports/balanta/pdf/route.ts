@@ -1,3 +1,4 @@
+import { resolveOrgCui } from "@/lib/org-cui";
 import { formatMoney } from "@/lib/kitchenops/metrics";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
 import { getReportPdfContext } from "@/lib/pdf/pdf-route-context";
@@ -55,7 +56,7 @@ export async function GET(req: Request) {
 
   const doc = ReportPdfDocument({
     companyName: org?.name ?? "franchisetech",
-    companyCui: org?.fiscalnet_cif ?? undefined,
+    companyCui: resolveOrgCui(org) ?? undefined,
     title: "Balanță Cantitativ-Valorică",
     subtitle: "Stoc inițial, intrări, ieșiri și stoc final pe produs",
     periodLabel: `Perioada: ${from} — ${to}`,

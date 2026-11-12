@@ -53,6 +53,7 @@ import { BusinessModulesCard } from "@/components/app/BusinessModulesCard";
 import { TeamClient } from "@/app/app/settings/team/TeamClient";
 import { AccountantSettingsSection, type AccountingOrg } from "@/components/app/AccountantSettingsSection";
 import { AccountantAccessCard } from "@/components/app/AccountantAccessCard";
+import { resolveOrgCui, type OrgCuiColumns } from "@/lib/org-cui";
 
 const TablesSettingsClient = dynamic(() =>
   import("@/components/app/TablesSettingsClient").then((m) => m.TablesSettingsClient)
@@ -250,7 +251,9 @@ export default async function SettingsPage({
   }));
 
   // CUI / fiscal identity
-  const fiscalnetCif     = (orgRow?.fiscalnet_cif as string | null) ?? "";
+  // Read path only (audit O6): onboarding saves the CUI to anaf_cif, so show
+  // that when fiscalnet_cif is empty instead of an empty "CUI" field.
+  const fiscalnetCif     = resolveOrgCui(orgRow as OrgCuiColumns | null) ?? "";
   const taxIdVerified    = Boolean(orgRow?.tax_id_verified ?? false);
   const companyLegalName = (orgRow?.company_legal_name as string | null) ?? "";
   const companyAddress   = (orgRow?.company_address as string | null) ?? "";

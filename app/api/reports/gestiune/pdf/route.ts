@@ -1,3 +1,4 @@
+import { resolveOrgCui } from "@/lib/org-cui";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { assertEntitlement, entitlementDeniedResponse } from "@/lib/billing/entitlement-resolver";
@@ -128,7 +129,7 @@ export async function GET(req: Request) {
 
   const doc = ReportPdfDocument({
     companyName: org?.name ?? "franchisetech",
-    companyCui: org?.fiscalnet_cif ?? undefined,
+    companyCui: resolveOrgCui(org) ?? undefined,
     title: "Raport de Gestiune",
     subtitle: "Raport complet mișcări stoc cu defalcare TVA",
     periodLabel: `Perioada: ${from} — ${to}`,
