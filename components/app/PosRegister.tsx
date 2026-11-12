@@ -1288,7 +1288,24 @@ function PosRegisterInner({
       const errMsg = err instanceof Error ? err.message : t.saleSaveFailed;
       const action = classifySaleFailure(err);
       if (action === "reload") {
-        const reloadMsg = "Programul a fost actualizat. Reîncărcăm POS-ul și păstrăm vânzarea.";
+        // A new version was deployed while this till was open. The sale may
+        // already be saved on the server (2026-11-12: two Dolce Nera sales
+        // were, and their receipts were never sent because the page reloaded).
+        // Keep it in the persisted offline queue: after the reload the queue
+        // re-sends the same payload and idempotency key, the server returns
+        // the existing sale, and the receipt is sent once if still pending.
+        let kept = false;
+        try {
+          enqueueOfflineSale(payload, t.offlineQueueLabel(cartSnapshot.length, amountLabel));
+          kept = true;
+          // The queue owns this sale now; don't also restore it as an open cart.
+          clearCartBackupFromStorage();
+        } catch {
+          kept = false;
+        }
+        const reloadMsg = kept
+          ? "Programul a fost actualizat. Reîncărcăm POS-ul; vânzarea și bonul fiscal se trimit automat după reîncărcare."
+          : "Programul a fost actualizat. Reîncărcăm POS-ul și păstrăm vânzarea.";
         setSaleStatus({ ok: false, msg: reloadMsg });
         setSalePending(false);
         setLastCompletedSale((prev) =>
