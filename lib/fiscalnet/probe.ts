@@ -10,16 +10,35 @@ export type FiscalNetProbeResult =
   | { reachable: true; message: string }
   | { reachable: false; message: string };
 
+import {
+  localNetworkPermission,
+  LNA_DENIED_MESSAGE,
+  LNA_PROMPT_MESSAGE,
+  LNA_PROMPT_TIMEOUT_MS,
+  type LocalNetworkPermission,
+} from "./local-network-permission";
+
 const DEFAULT_TIMEOUT_MS = 4000;
 
 export async function probeFiscalNet(
   apiHost: string,
-  { timeoutMs = DEFAULT_TIMEOUT_MS, fetchImpl = fetch }: { timeoutMs?: number; fetchImpl?: typeof fetch } = {},
+  {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    fetchImpl = fetch,
+    permission = localNetworkPermission,
+  }: { timeoutMs?: number; fetchImpl?: typeof fetch; permission?: () => Promise<LocalNetworkPermission> } = {},
 ): Promise<FiscalNetProbeResult> {
   const host = apiHost.trim().replace(/\/$/, "");
   if (!/^https?:\/\/[^\s/]+/i.test(host)) {
     return { reachable: false, message: "Adresa nu este validă. Exemplu: http://localhost:65400" };
   }
+
+  // Local Network Access: the browser holds the request until the owner clicks
+  // Allow, so give them time, and never report a blocked permission as
+  // "FiscalNet is not running".
+  const before = await permission();
+  if (before === "denied") return { reachable: false, message: LNA_DENIED_MESSAGE };
+  if (before === "prompt") timeoutMs = Math.max(timeoutMs, LNA_PROMPT_TIMEOUT_MS);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -32,6 +51,9 @@ export async function probeFiscalNet(
       message: "FiscalNet răspunde pe acest calculator. Bonul real se confirmă la prima vânzare în mod Live.",
     };
   } catch (e) {
+    const after = await permission();
+    if (after === "denied") return { reachable: false, message: LNA_DENIED_MESSAGE };
+    if (after === "prompt") return { reachable: false, message: LNA_PROMPT_MESSAGE };
     const aborted = e instanceof Error && (e.name === "AbortError" || e.message.toLowerCase().includes("abort"));
     return {
       reachable: false,

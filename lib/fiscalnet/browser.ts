@@ -10,6 +10,12 @@
 
 import type { VatGroup, FiscalPaymentCode } from "./types";
 import { DEFAULT_VAT_GROUPS, DEFAULT_PAYMENT_TYPE_MAP, resolveVatGroup } from "./types";
+import {
+  localNetworkPermission,
+  LNA_DENIED_MESSAGE,
+  LNA_PROMPT_MESSAGE,
+  LNA_PROMPT_TIMEOUT_MS,
+} from "./local-network-permission";
 
 // ── encoding helpers ─────────────────────────────────────────────────────────
 
@@ -161,6 +167,13 @@ async function callApi(
   command: FiscalCommand,
   timeoutMs = 15000
 ): Promise<BrowserFiscalResult> {
+  // Local Network Access: a blocked permission means the request can never
+  // leave the browser, so say why instead of blaming the cash register. While
+  // the prompt is pending the request is held unsent, so a longer wait cannot
+  // print twice; it gives the owner time to click Allow.
+  const permission = await localNetworkPermission();
+  if (permission === "denied") return { ok: false, message: LNA_DENIED_MESSAGE };
+  if (permission === "prompt") timeoutMs = Math.max(timeoutMs, LNA_PROMPT_TIMEOUT_MS);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -207,8 +220,11 @@ async function callApi(
   } catch (e) {
     clearTimeout(timer);
     const msg = e instanceof Error ? e.message : "Eroare";
+    const after = await localNetworkPermission();
+    if (after === "denied") return { ok: false, message: LNA_DENIED_MESSAGE };
+    if (after === "prompt") return { ok: false, message: LNA_PROMPT_MESSAGE };
     if (msg.includes("abort") || msg.toLowerCase().includes("aborterror"))
-      return { ok: false, message: "Timeout — casa fiscală nu răspunde (>15s)." };
+      return { ok: false, message: `Timeout — casa fiscală nu răspunde (>${Math.round(timeoutMs / 1000)}s).` };
     if (msg.includes("Failed to fetch") || msg.includes("NetworkError"))
       return { ok: false, message: "Nu se poate contacta casa fiscală. Verifică că FiscalNet rulează." };
     return { ok: false, message: `Eroare: ${msg}` };
