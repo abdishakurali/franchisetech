@@ -21,6 +21,7 @@ import { upsertLoopsContact } from "@/lib/loops";
 import { recordGrowthMilestone } from "@/lib/growth/activation";
 import { captureServerEvent, flushPostHog } from "@/lib/posthog-server";
 import { deriveAccountType } from "@/lib/analytics/account-type";
+import { ONBOARDING_STEP_COMPLETED, onboardingStepEventProps } from "@/lib/onboarding/step-events";
 import { sendSignupAlertEmail } from "@/lib/email/signup-alert";
 
 const COUNTRY_LABELS: Record<string, string> = {
@@ -411,16 +412,21 @@ export async function completePosOnboarding(input: {
       if (!sent.success) console.error("onboarding_signup_alert_failed", sent.error);
     });
   }
+  // Step 1 of the funnel (business_cui). Not onboarding_completed: that fires
+  // only at the end of the journey (completeOnboardingJourney).
   captureServerEvent(
     user.id,
-    "onboarding_completed",
-    {
-      organisation_id: orgId,
-      country_code: input.countryCode,
-      plan: input.preferredPlan ?? "growth",
-      business_type: input.businessType ?? null,
-      account_type: accountType,
-    },
+    ONBOARDING_STEP_COMPLETED,
+    onboardingStepEventProps("business_cui", {
+      orgId,
+      email: user.email,
+      orgName: input.orgName,
+      extra: {
+        country_code: input.countryCode,
+        plan: input.preferredPlan ?? "growth",
+        business_type: input.businessType ?? null,
+      },
+    }),
     { organisation: orgId },
   );
   captureServerEvent(

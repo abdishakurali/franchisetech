@@ -7,7 +7,7 @@ type PdfRouteContext = {
   userId: string;
   orgId: string;
   role: string | null;
-  org: { name: string | null; fiscalnet_cif: string | null; currency_code: string | null } | null;
+  org: { name: string | null; fiscalnet_cif: string | null; anaf_cif: string | null; currency_code: string | null } | null;
   currency: string;
   generatedBy: string;
 };
@@ -37,7 +37,7 @@ export async function getReportPdfContext(): Promise<PdfRouteContext | { error: 
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("name,fiscalnet_cif,currency_code")
+    .select("name,fiscalnet_cif,anaf_cif,currency_code")
     .eq("id", orgId)
     .single();
 

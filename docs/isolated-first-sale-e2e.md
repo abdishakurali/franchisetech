@@ -7,7 +7,11 @@ Dolcenera or production credentials.
 
 Set `E2E_SUPABASE_URL`, `E2E_SUPABASE_SERVICE_ROLE_KEY`, and
 `E2E_BASE_URL` in the shell (do not commit them). The database must have the
-`20260917` isolated migrations applied. The service-role key is required for
+`20260917` isolated migrations applied. They live in `supabase/e2e-migrations/`,
+not `supabase/migrations/`, so a plain `supabase db push` to production can
+never apply them (they redefine `post_pos_document` with a test stub). Apply
+them to an empty disposable project only, in filename order (they are a
+standalone schema, not an add-on to `supabase/migrations/`). The service-role key is required for
 the atomic posting RPCs; browser auth still uses a disposable test account.
 
 ## Sequence

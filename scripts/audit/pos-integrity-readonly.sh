@@ -4,7 +4,7 @@
 #
 # 1. Confirms the live post_pos_document is the production body
 #    (stock deduction + org lock), not the isolated-E2E redefinition in
-#    20260917160000_e2e_post_pos_document.sql.
+#    supabase/e2e-migrations/20260917160000_e2e_post_pos_document.sql.
 # 2. Baseline counts of likely duplicate business records, used to measure
 #    the duplicate-order fix before/after deploy.
 #

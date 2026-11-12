@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { getActiveOrg } from "@/lib/kitchenops/data";
 import { saveOrgModuleFlags } from "@/lib/org-module-flags";
+import { trackOnboardingStepCompleted, type OnboardingFunnelStep } from "@/lib/onboarding/step-events";
 
 function canManage(role: string): boolean {
   return ["owner", "manager"].includes(role);
@@ -12,6 +13,23 @@ function canManage(role: string): boolean {
 // action redirected anyway. If the update failed, the onboarding resume guard
 // sent the owner back to the previous step: a loop with no message.
 const STEP_SAVE_FAILED = "Pasul nu s-a salvat. Încercați din nou; dacă se repetă, scrieți-ne pe WhatsApp.";
+
+type ActiveOrg = Awaited<ReturnType<typeof getActiveOrg>>;
+
+// Analytics only: reads the org name for the test-account classification.
+// Never throws and never blocks the step.
+async function trackStep(ctx: ActiveOrg, step: OnboardingFunnelStep, orgName?: string | null): Promise<void> {
+  try {
+    let name = orgName;
+    if (name === undefined) {
+      const { data } = await ctx.supabase.from("organisations").select("name").eq("id", ctx.orgId).maybeSingle();
+      name = (data?.name as string | undefined) ?? null;
+    }
+    trackOnboardingStepCompleted(step, { userId: ctx.user.id, orgId: ctx.orgId, email: ctx.user.email, orgName: name });
+  } catch {
+    // analytics must not block onboarding
+  }
+}
 
 function stepFailed(where: string, error: { code?: string; message?: string }): { error: string } {
   console.error(`[onboarding] ${where} failed`, error.code, error.message);
@@ -29,12 +47,13 @@ export async function saveOnboardingModules(input: {
   purchases_enabled: boolean;
   recipe_costing_enabled: boolean;
 }): Promise<{ error: string } | void> {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const ctx = await getActiveOrg();
+  const { supabase, membership, orgId } = ctx;
   if (!canManage(membership.role)) return { error: "Permission denied." };
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("business_profile, team_advanced_enabled, multi_site_ops_enabled")
+    .select("name, business_profile, team_advanced_enabled, multi_site_ops_enabled")
     .eq("id", orgId)
     .maybeSingle();
 
@@ -50,6 +69,7 @@ export async function saveOnboardingModules(input: {
 
   const { error } = await supabase.from("organisations").update({ onboarding_step: "menu" }).eq("id", orgId);
   if (error) return stepFailed("saveOnboardingModules", error);
+  await trackStep(ctx, "modules", org?.name ?? null);
   redirect("/onboarding/menu");
 }
 
@@ -59,7 +79,8 @@ export async function saveOnboardingModules(input: {
 // only the "Continuă" transition, gated on having at least one sellable
 // product so first sale is never reached with nothing to sell.
 export async function advanceFromMenu(): Promise<{ error: string } | void> {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const ctx = await getActiveOrg();
+  const { supabase, membership, orgId } = ctx;
   if (!canManage(membership.role)) return { error: "Permission denied." };
 
   const { count } = await supabase
@@ -73,7 +94,7 @@ export async function advanceFromMenu(): Promise<{ error: string } | void> {
 
   const { data: org } = await supabase
     .from("organisations")
-    .select("country_code")
+    .select("name, country_code")
     .eq("id", orgId)
     .maybeSingle();
   const isRO = org?.country_code === "RO";
@@ -81,6 +102,7 @@ export async function advanceFromMenu(): Promise<{ error: string } | void> {
 
   const { error } = await supabase.from("organisations").update({ onboarding_step: nextStep }).eq("id", orgId);
   if (error) return stepFailed("advanceFromMenu", error);
+  await trackStep(ctx, "menu", org?.name ?? null);
   redirect(isRO ? "/onboarding/fiscal" : "/app/pos?onboarding=1&welcome=1");
 }
 
@@ -92,10 +114,12 @@ export async function advanceFromMenu(): Promise<{ error: string } | void> {
 // is "conditional, not an activation blocker"). Goes straight to POS — no
 // "everything is ready, click here" interstitial in between.
 export async function advanceFromFiscal(): Promise<{ error: string } | void> {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const ctx = await getActiveOrg();
+  const { supabase, membership, orgId } = ctx;
   if (!canManage(membership.role)) return { error: "Permission denied." };
   const { error } = await supabase.from("organisations").update({ onboarding_step: "first_sale" }).eq("id", orgId);
   if (error) return stepFailed("advanceFromFiscal", error);
+  await trackStep(ctx, "fiscal");
   redirect("/app/pos?onboarding=1&welcome=1");
 }
 
@@ -108,7 +132,8 @@ export async function advanceFromFiscal(): Promise<{ error: string } | void> {
 // page is reachable. No redirect() here: the caller is already client-side
 // navigating.
 export async function markFirstSaleDoneForOnboarding(): Promise<{ error: string } | void> {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const ctx = await getActiveOrg();
+  const { supabase, membership, orgId } = ctx;
   if (!canManage(membership.role)) return { error: "Permission denied." };
   const { error } = await supabase
     .from("organisations")
@@ -116,6 +141,7 @@ export async function markFirstSaleDoneForOnboarding(): Promise<{ error: string 
     .eq("id", orgId)
     .not("onboarding_step", "in", "(complete)");
   if (error) return stepFailed("markFirstSaleDoneForOnboarding", error);
+  await trackStep(ctx, "first_sale");
 }
 
 // ── Step: Gata (result -> operational dashboard) ────────────────────────
@@ -124,7 +150,8 @@ export async function markFirstSaleDoneForOnboarding(): Promise<{ error: string 
 // posts — this only flips the onboarding gate so app/onboarding/layout.tsx
 // and app/app/layout.tsx stop routing this org through the guided flow.
 export async function completeOnboardingJourney(): Promise<{ error: string } | void> {
-  const { supabase, membership, orgId } = await getActiveOrg();
+  const ctx = await getActiveOrg();
+  const { supabase, membership, orgId } = ctx;
   if (!canManage(membership.role)) return { error: "Permission denied." };
   const { error } = await supabase
     .from("organisations")
@@ -135,5 +162,7 @@ export async function completeOnboardingJourney(): Promise<{ error: string } | v
     })
     .eq("id", orgId);
   if (error) return stepFailed("completeOnboardingJourney", error);
+  // The only place onboarding_completed is sent: the org row now says complete.
+  await trackStep(ctx, "result");
   redirect("/app");
 }
