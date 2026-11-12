@@ -40,7 +40,8 @@ export default function OdooDemosPage() {
             <p>
               Each video is a real session in the Odoo web client: real clicks and typing on a throwaway Odoo 19 Community database with
               demo data and no personal data. Waiting time while the server loaded was cut, and the title cards and captions were added.
-              Under each video we say what was simulated and what is not shown.
+              The MCP video is the exception: it is built from real screenshots of Odoo and Claude.ai, with pan and zoom. Under each
+              video we say what was simulated and what is not shown.
             </p>
             <p className="mt-2">
               <strong className="text-[#0D0F0E]">Only Odoo 19 was recorded.</strong> The apps support Odoo {versionRange}; each Apps Store page has a

@@ -1,5 +1,6 @@
 // Demo videos for the /odoo/demos page. Files live in public/odoo/demos/<tech>/.
 // Recorded 2026-11-08 (pos_fiscal_printer_ro: 2026-11-11) on throwaway Odoo 19 Community databases with demo data.
+// remote_mcp_oauth_server: rebuilt 2026-11-12 from real screenshots of Odoo 19 and Claude.ai (pan, zoom, captions; not a recording).
 // The honesty notes come from each video's SCRIPT.md (what is real, what is not shown).
 // Names and EUR prices checked on apps.odoo.com (Odoo 19 listing) on 2026-11-08 (pos_fiscal_printer_ro: 2026-11-11).
 
@@ -66,8 +67,8 @@ export const ODOO_DEMOS: readonly OdooDemo[] = [
     priceEur: 79,
     seconds: 61,
     summary:
-      "Let AI clients connect to Odoo over MCP with an OAuth login, the user's own access rights, a list of allowed models and an audit log.",
-    note: "The client is the official MCP Inspector command-line tool; its real output is shown on a rendered terminal page. Claude.ai, ChatGPT and Cursor themselves are not shown (they need a public HTTPS address), and only read-only tools are used.",
+      "Connect Claude.ai to Odoo as a custom connector: each user signs in and approves with their own Odoo login, Claude answers with that user's access rights, and every call goes to an audit log.",
+    note: "Built on 2026-11-12 from real screenshots, with pan, zoom and captions added, not a screen recording: Odoo 19 Community with a free Community theme (an Enterprise-like look, not Odoo Enterprise), and two answers from Claude.ai connected as Marc Demo, a sales user limited to his own orders. The Claude.ai screen where the URL is pasted is not shown. Only read-only tools were used; ChatGPT, Claude Desktop and Cursor are not shown.",
   },
   {
     tech: "powerbi_data_feed",
