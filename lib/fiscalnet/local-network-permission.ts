@@ -38,7 +38,7 @@ export const LNA_PROMPT_MESSAGE =
 /** Shown when the user (or a policy) blocked it (state "denied"). */
 export const LNA_DENIED_MESSAGE =
   "Browserul a blocat conexiunea la casa fiscală. Apăsați iconița din stânga adresei site-ului → " +
-  "Setări site → „Rețea locală” (Local network access) → Permite, apoi reîncărcați pagina.";
+  "Setări site → „Loopback network” (rețea locală) → Permite, apoi reîncărcați pagina.";
 
 /** While the prompt is pending nothing has been sent, so waiting longer cannot
  *  print twice; it only gives the owner time to click Allow. */
