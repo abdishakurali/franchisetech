@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     }
     const { error } = await supabase.from("pos_daily_close").insert({
       organisation_id: effectiveOrgId,
-      close_date: closeDate,
+      report_date: closeDate, // the column is report_date; "close_date" never existed, so every save failed
       expected_cash: expectedCash,
       counted_cash: countedCash,
       cash_difference: cashDifference,
