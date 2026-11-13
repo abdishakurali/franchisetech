@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/marketing/seo";
 
-const DISALLOW = ["/app/", "/api/"];
+const DISALLOW = ["/app/", "/api/", "/admin"];
 
 const crawlRules: MetadataRoute.Robots["rules"] = [
   { userAgent: "*", allow: "/", disallow: DISALLOW },
