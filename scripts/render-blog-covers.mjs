@@ -10,8 +10,17 @@
 //
 // Usage: node scripts/render-blog-covers.mjs [extra blog.ts files...]
 import fs from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
-import sharp from "sharp";
+
+// The site's own faces (app/layout.tsx: Fraunces, Public Sans, Space Mono), OFL,
+// from github.com/google/fonts, kept in scripts/fonts/. Fontconfig must see them
+// before sharp loads, so sharp is imported after FONTCONFIG_FILE is set.
+const FONT_DIR = path.join(process.cwd(), "scripts/fonts");
+const FC = path.join(os.tmpdir(), "ft-blog-covers-fonts.conf");
+await fs.writeFile(FC, `<?xml version="1.0"?><!DOCTYPE fontconfig SYSTEM "fonts.dtd"><fontconfig><dir>${FONT_DIR}</dir><dir>/System/Library/Fonts</dir><dir>/Library/Fonts</dir><cachedir>${os.tmpdir()}/ft-fc-cache</cachedir></fontconfig>`);
+process.env.FONTCONFIG_FILE = FC;
+const { default: sharp } = await import("sharp");
 
 const W = 1600;
 const H = 900;
@@ -27,9 +36,9 @@ const BRASS = "#b4903f";
 const PAPER = "#f2efe7";
 const CARD = "#fbf9f4";
 const MID = "#8a7f70";
-const SERIF = "Charter, Georgia, serif"; // closest local face to the site's Fraunces
-const SANS = "Helvetica Neue, Helvetica, Arial, sans-serif";
-const MONO = "Menlo, monospace";
+const SERIF = "Fraunces, Charter, Georgia, serif";
+const SANS = "Public Sans, Helvetica Neue, Arial, sans-serif";
+const MONO = "Space Mono, Menlo, monospace";
 
 const SCREEN_INFO = {
   stock: { alt: "Pagina de stoc din franchisetech", note: "Stoc pe articol, cu minim și status" },
