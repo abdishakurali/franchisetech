@@ -77,6 +77,42 @@ export type BlogPost = {
  */
 export const blogPosts: BlogPost[] = [
   {
+    slug: "vanzare-in-coada-pos-cum-verificati-sincronizarea-fara-dublu-bon",
+    title: "Vânzare în coadă în POS: cum verificați sincronizarea fără un bon dublu",
+    description:
+      "Mesajul «vânzare în coadă» nu confirmă încă salvarea pe server sau emiterea bonului fiscal. Iată ordinea sigură de verificare, ca să păstrați vânzarea fără să o dublați.",
+    publishedAt: "2026-11-13",
+    locale: "ro",
+    tags: ["pos", "offline", "bon-fiscal"],
+    relatedFeature: "/features/pos",
+    sections: [
+      {
+        heading: "Ce înseamnă, exact, «vânzare în coadă»",
+        body: "Înseamnă că POS-ul a păstrat local datele vânzării pe dispozitivul de la casă, pentru a le trimite când revine conexiunea. **Nu înseamnă încă** că tranzacția există în baza de date centrală și nici că aparatul fiscal a confirmat bonul. Clientul poate fi plătit, coșul poate fi golit, iar vânzarea să fie încă în așteptare.\n\nPână când apare confirmarea sincronizării, păstrați browserul deschis pe același dispozitiv și nu ștergeți datele site-ului. Coada este locală: schimbarea calculatorului sau curățarea datelor browserului poate elimina singura copie încă nesincronizată.",
+      },
+      {
+        heading: "Cele trei stări pe care trebuie să le deosebiți",
+        body: "- **Așteaptă conexiunea**: vânzarea există doar în coada locală și nu a fost încă acceptată de server\n- **Respinsă — necesită verificare**: serverul a răspuns, dar nu a putut salva vânzarea; corectați cauza înainte de retrimitere\n- **Salvată — bon fiscal încă necesar**: tranzacția există pe server, însă emiterea fiscală nu este confirmată\n\nNumai o stare confirmată de sistem și un bon fiscal efectiv emis pot închide ambele părți ale operațiunii. O bifă de interfață sau un coș gol nu țin loc de aceste două dovezi.",
+      },
+      {
+        heading: "Ordinea sigură de verificare după ce revine internetul",
+        body: "1. Lăsați POS-ul să sincronizeze automat și urmăriți indicatorul de conexiune.\n2. Verificați dacă vânzarea apare în istoricul tranzacțiilor, cu aceeași oră aproximativă, sumă și metodă de plată.\n3. Verificați separat aparatul fiscal: bon tipărit sau confirmare reală în jurnalul aparatului.\n4. Dacă tranzacția e salvată, dar bonul lipsește, tratați problema ca fiscalizare restantă — nu retrimiteți vânzarea ca una nouă.\n5. Dacă vânzarea rămâne respinsă, notați mesajul exact și cereți verificarea administratorului sau suportului înainte de o retrimitere manuală.\n\nNu încasați clientul a doua oară doar pentru că sincronizarea a întârziat. Plata, salvarea în baza de date și fiscalizarea sunt trei confirmări diferite.",
+      },
+      {
+        heading: "Cum evitați două tranzacții sau două bonuri",
+        body: "FranchiseTech păstrează aceeași cheie unică a încercării de vânzare atunci când sincronizează coada; serverul o folosește pentru a nu înregistra de două ori aceeași trimitere. Pentru tipărirea fiscală există, separat, o protecție care împiedică aceeași tranzacție să fie trimisă de două ori din același browser.\n\nAceste protecții reduc riscul tehnic, dar nu justifică apăsarea repetată a butonului sau refacerea manuală a comenzii. Înainte de orice retrimitere, comparați suma, ora, metoda de plată și identificatorul tranzacției cu istoricul POS și jurnalul fiscal.",
+      },
+      {
+        heading: "Dacă aparatul fiscal nu poate emite bonul",
+        body: "O întrerupere a aplicației nu este automat același lucru cu defectarea aparatului de marcat. Dacă AMEF-ul chiar nu poate emite, [OUG nr. 28/1999, art. 1 alin. (8) și (8¹)](https://legislatie.just.ro/Public/DetaliiDocument/17431) cere notificarea imediată a distribuitorului sau unității de service acreditate, păstrarea dovezii și înregistrarea operațiunilor în registrul special, cu chitanțe și factură la cererea clientului. [Normele metodologice, art. 6–7](https://legislatie.just.ro/Public/DetaliiDocument/43675) descriu completarea registrului și reluarea activității.\n\nNu marcați «bon emis» doar ca să dispară avertizarea. Folosiți acea acțiune numai după ce aveți dovada fiscală reală. Pentru pașii tehnici, vedeți și [ghidul pentru driverul fiscal offline](/blog/fiscalnet-offline-ce-faceti-cand-vreti-sa-emiteti-bonul).",
+      },
+      {
+        heading: "Checklist pentru următoarea întrerupere",
+        body: "- Păstrați datele de contact și metoda oficială de notificare a service-ului fiscal lângă casă\n- Pregătiți registrul special vizat și chitanțierul înainte să aveți nevoie de ele\n- Instruiți fiecare casier să distingă «în coadă», «salvat» și «bon emis»\n- Nu ștergeți datele browserului cât există vânzări nesincronizate\n- La finalul incidentului, reconciliați trei surse: plățile, istoricul POS și jurnalul fiscal\n- Documentați orice diferență înainte de raportul Z și discutați cazurile neclare cu unitatea de service și contabilul",
+      },
+    ],
+  },
+  {
     slug: "cum-gestionezi-stocul-intr-o-cafenea-de-la-1-kg-de-cafea-la-profit",
     title: "Gestiunea stocului într-o cafenea: de la 1 kg de cafea la profit",
     description:
@@ -1904,7 +1940,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Cât timp durează reparația: registrul special",
-        body: "Până la repunerea în funcțiune, toate operațiunile se înregistrează într-un registru special, ținut fizic la punctul de lucru:\n\n- Fiecare vânzare se notează **cronologic**, fără ștersături și fără spații libere lăsate necompletate\n- Pentru fiecare operațiune se emite o **chitanță** (nu bon fiscal) către client\n- Dacă clientul cere factură, i-o eliberați conform legii\n\nRegistrul special și raportul fiscal de închidere zilnică sunt documentele pe care organele fiscale le au în vedere la verificarea veniturilor care stau la baza impozitelor datorate — nu sunt o formalitate secundară. Registrul special se arhivează și se păstrează **10 ani**, aceeași perioadă ca memoria fiscală a aparatului.",
+        body: "Până la repunerea în funcțiune, toate operațiunile se înregistrează într-un registru special, ținut fizic la punctul de lucru:\n\n- Fiecare vânzare se notează **cronologic**, fără ștersături și fără spații libere lăsate necompletate\n- Pentru fiecare operațiune se emite o **chitanță** (nu bon fiscal) către client\n- Dacă clientul cere factură, i-o eliberați conform legii\n\nRegistrul special și raportul fiscal de închidere zilnică sunt documentele pe care organele fiscale le au în vedere la verificarea veniturilor care stau la baza impozitelor datorate — nu sunt o formalitate secundară. Conform art. 4 alin. (8) din OUG nr. 28/1999, în forma actualizată prin Legea nr. 36/2023, registrul special și rapoartele fiscale de închidere zilnică se arhivează și se păstrează **5 ani**, calculați de la 1 iulie a anului următor exercițiului financiar în care au fost emise.",
       },
       {
         heading: "Ce nu înlocuiește chitanța — și de ce nu vă opriți din vânzare",
