@@ -49,3 +49,7 @@ next-env.d.ts
 
 # Local agent worktrees
 .worktrees/
+
+# Never ship browser session or cookie dumps from public/ (2026-11-13: two were served live)
+public/**/*cookie*
+public/**/*.har
