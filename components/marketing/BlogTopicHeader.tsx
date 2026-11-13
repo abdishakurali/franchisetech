@@ -25,15 +25,17 @@ import {
   Wifi,
   type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
 import type { BlogPost } from "@/lib/marketing/blog";
+import { blogCoverFor } from "@/lib/marketing/blog-cover";
 import { marketingBorder, marketingPrimary, marketingTint } from "@/lib/marketing/tokens";
 
-// One icon per post, chosen from its tags — not a screenshot. Real app
-// screenshots (public/marketing + public/design-marketing) turned out to
-// carry stale pre-pivot demo data (EUR pricing, 9%/13.5% Irish VAT bands,
-// a "Chicken Caesar Image QA" product label) that's wrong for a Romanian
-// audience — see MEMORY.md. Rather than pick another screenshot on faith,
-// every blog post gets this same consistent, data-free header treatment.
+// Every post shows its generated cover (lib/marketing/blog-cover.ts): a real
+// screen from the Romanian demo café for product topics, a branded card for the
+// rest. The old screenshot set carried stale pre-pivot demo data (EUR, Irish
+// VAT bands), which is why the screens were re-captured on 2026-11-13 from a
+// lei-priced Romanian demo account. The topic icon below is only the fallback
+// for a post whose cover has not been generated yet.
 
 // A few posts need more precision than their tags give (e.g. the QR-code
 // post is tagged the same as several others). Keyed by slug, checked first.
@@ -113,9 +115,28 @@ export function BlogTopicHeader({
   variant?: "standalone" | "embedded";
   className?: string;
 }) {
-  const Icon = resolveBlogTopicIcon(post);
   const { wrap, icon } = sizeClasses[size];
   const shape = variant === "standalone" ? "overflow-hidden rounded-2xl border" : "border-b";
+  const cover = blogCoverFor(post.slug);
+  if (cover) {
+    return (
+      <div
+        className={`relative ${shape} ${wrap} ${className}`}
+        style={{ background: marketingTint, borderColor: marketingBorder }}
+      >
+        <Image
+          src={cover.src}
+          alt={cover.alt}
+          aria-hidden={cover.alt ? undefined : true}
+          fill
+          priority={size === "hero"}
+          sizes={size === "hero" ? "(min-width: 768px) 768px, 100vw" : "(min-width: 1024px) 384px, (min-width: 768px) 50vw, 100vw"}
+          className="object-cover"
+        />
+      </div>
+    );
+  }
+  const Icon = resolveBlogTopicIcon(post);
   return (
     <div
       className={`relative flex items-center justify-center ${shape} ${wrap} ${className}`}

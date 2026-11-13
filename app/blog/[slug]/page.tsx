@@ -9,6 +9,7 @@ import { BlogTopicHeader } from "@/components/marketing/BlogTopicHeader";
 import { BlogCtaLink } from "@/components/marketing/BlogCtaLink";
 import { BlogAuthorBox } from "@/components/marketing/BlogAuthorBox";
 import { BLOG_SCREENSHOT_CAPTION, blogScreenshotFor } from "@/lib/marketing/blog-screenshot";
+import { blogCoverFor } from "@/lib/marketing/blog-cover";
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { blogPosts, relatedBlogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
@@ -110,7 +111,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
           <BlogTopicHeader post={post} size="hero" className="mt-8" />
 
-          {(() => {
+          {/* A screenshot cover already shows the app; repeat a screen only under a branded card. */}
+          {blogCoverFor(post.slug)?.kind !== "screen" && (() => {
             const shot = blogScreenshotFor(post);
             return (
               <figure className="mt-6">
