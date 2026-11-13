@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { requirePlatformAdmin } from "@/lib/admin/access";
+import { adminAccessFor, requirePlatformAdmin } from "@/lib/admin/access";
+import { getAuthUser } from "@/lib/supabase/server";
 import { AdminNav } from "@/components/admin/AdminNav";
 
-export const metadata: Metadata = {
-  title: "Admin franchisetech",
-  robots: { index: false, follow: false },
-};
+/**
+ * The admin title only for admins: everyone else gets the site's default
+ * 404 title, so the <title> of the 404 page doesn't reveal the panel exists.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const { data: { user } } = await getAuthUser();
+  const robots = { index: false, follow: false };
+  return adminAccessFor(user) === "allow" ? { title: "Admin franchisetech", robots } : { robots };
+}
 export const dynamic = "force-dynamic";
 
 /**
