@@ -6,10 +6,13 @@ import type { OrgVatRate } from "@/lib/vat-rates";
 const addProductFromPos = vi.fn();
 const addCategoryInline = vi.fn();
 const advanceFromMenu = vi.fn();
+const setOnboardingVatRegistered = vi.fn();
+const refresh = vi.fn();
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
 
 vi.mock("@/app/actions/kitchenops", () => ({ addProductFromPos, addCategoryInline }));
-vi.mock("@/app/actions/onboarding-steps", () => ({ advanceFromMenu }));
-vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
+vi.mock("@/app/actions/onboarding-steps", () => ({ advanceFromMenu, setOnboardingVatRegistered }));
+vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn(), message: vi.fn() } }));
 
 const { MenuBuilder } = await import("@/components/onboarding/MenuBuilder");
 const { toast } = await import("sonner");
@@ -143,7 +146,7 @@ describe("MenuBuilder VAT choice", () => {
     const radios = categoryRadios("cat-coffee");
     expect(radios.map((radio) => radio.value)).toEqual(["0"]);
     expect(radios[0].checked).toBe(false);
-    expect(screen.getByText(/neplătitoare de TVA/)).toBeTruthy();
+    expect(screen.getByText(/nu este plătitoare de TVA/)).toBeTruthy();
 
     fillRow(0, "Espresso", "9");
     fireEvent.click(screen.getByRole("button", { name: /Adăugați produsele și continuați/ }));
@@ -163,5 +166,31 @@ describe("MenuBuilder VAT choice", () => {
 
     expect(toast.error).toHaveBeenCalledWith("Nu există cote TVA active. Adăugați-le în Setări înainte de a adăuga produse.");
     expect(addProductFromPos).not.toHaveBeenCalled();
+  });
+});
+
+describe("switching to VAT payer inside onboarding", () => {
+  it("offers the switch only when the org is restricted to 0%", () => {
+    renderBuilder({ initialCategories: [categories[0]] });
+    expect(screen.queryByRole("button", { name: /plătitoare de TVA — schimbați/ })).toBeNull();
+    cleanup();
+    renderBuilder({ vatRates: [roRates[2]], vatRestrictedToZero: true, initialCategories: [categories[0]] });
+    expect(screen.getByRole("button", { name: /plătitoare de TVA — schimbați/ })).toBeTruthy();
+  });
+
+  it("flips the flag and refreshes the page so the full rates load", async () => {
+    setOnboardingVatRegistered.mockResolvedValue({ ok: true });
+    renderBuilder({ vatRates: [roRates[2]], vatRestrictedToZero: true, initialCategories: [categories[0]] });
+    fireEvent.click(screen.getByRole("button", { name: /plătitoare de TVA — schimbați/ }));
+    await waitFor(() => expect(refresh).toHaveBeenCalled());
+    expect(setOnboardingVatRegistered).toHaveBeenCalledWith(true);
+  });
+
+  it("shows the error and does not refresh when the save fails", async () => {
+    setOnboardingVatRegistered.mockResolvedValue({ ok: false, error: "Pasul nu s-a salvat." });
+    renderBuilder({ vatRates: [roRates[2]], vatRestrictedToZero: true, initialCategories: [categories[0]] });
+    fireEvent.click(screen.getByRole("button", { name: /plătitoare de TVA — schimbați/ }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith("Pasul nu s-a salvat."));
+    expect(refresh).not.toHaveBeenCalled();
   });
 });

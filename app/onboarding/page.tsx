@@ -35,7 +35,12 @@ const UI_STRINGS = {
     cuiLabel: "CUI firmă",
     cuiPlaceholder: "ex: 12345678",
     cuiButton: "ANAF",
-    vatRegisteredLabel: "Plătitor de TVA",
+    vatQuestion: "Firma este plătitoare de TVA?",
+    vatYes: "Da",
+    vatNo: "Nu",
+    vatHelp: "Decide ce cote TVA puteți folosi pe bonuri. Dacă nu știți, întrebați contabilul; puteți schimba oricând din Setări.",
+    vatFromAnaf: "Preluat din ANAF — verificați.",
+    vatRequired: "Alegeți dacă firma este plătitoare de TVA.",
     addressLabel: "Adresă",
     registrationCodeLabel: "Nr. Reg. Com.",
     anafResolvedNote: (name: string) => `✓ ${name} — date preluate din ANAF`,
@@ -57,7 +62,12 @@ const UI_STRINGS = {
     cuiLabel: "Company tax ID (CUI)",
     cuiPlaceholder: "e.g. 12345678",
     cuiButton: "ANAF",
-    vatRegisteredLabel: "VAT registered",
+    vatQuestion: "Is the business VAT-registered?",
+    vatYes: "Yes",
+    vatNo: "No",
+    vatHelp: "This decides which VAT rates you can use on receipts. If unsure, ask your accountant; you can change it in Settings.",
+    vatFromAnaf: "Taken from ANAF — please check.",
+    vatRequired: "Choose whether the business is VAT-registered.",
     addressLabel: "Address",
     registrationCodeLabel: "Trade registry no.",
     anafResolvedNote: (name: string) => `✓ ${name} — retrieved from ANAF`,
@@ -81,7 +91,9 @@ export default function OnboardingPage() {
   const [form, setForm] = useState({
     name: "",
     anafCif: "",
-    anafVatRegistered: false,
+    // No default: an unanswered question used to become "not a VAT payer"
+    // and lock the menu to 0% (docs/onboarding-vat-lock-finding-2026-11-13.md).
+    vatAnswer: "" as "" | "yes" | "no",
     anafAddress: "",
     businessType: "",
     userName: "",
@@ -157,7 +169,7 @@ export default function OnboardingPage() {
       update({
         name: result.name,
         anafCif: result.cui,
-        anafVatRegistered: result.vatRegistered,
+        vatAnswer: result.vatRegistered ? "yes" : "no",
         anafAddress: result.address,
       });
       setAnafRegistrationCode(result.registrationCode);
@@ -168,6 +180,7 @@ export default function OnboardingPage() {
 
   const handleContinue = () => {
     if (!form.name.trim()) return toast.error(t.nameRequired);
+    if (isRO && !form.vatAnswer) return toast.error(t.vatRequired);
     captureClientEvent("onboarding_completed", { country_code: form.countryCode });
     startTransition(async () => {
       const acquisition = readAcquisitionClient();
@@ -179,7 +192,7 @@ export default function OnboardingPage() {
       const result = await completePosOnboarding({
         orgName: form.name,
         anafCif: form.anafCif,
-        anafVatRegistered: form.anafVatRegistered,
+        anafVatRegistered: form.vatAnswer === "yes",
         anafAddress: form.anafAddress,
         businessType: form.businessType || undefined,
         userName: form.userName,
@@ -274,15 +287,6 @@ export default function OnboardingPage() {
                   {t.cuiButton}
                 </Button>
               </div>
-              <label className="mt-2 flex items-center gap-2 text-sm text-mid">
-                <input
-                  type="checkbox"
-                  checked={form.anafVatRegistered}
-                  onChange={(e) => update({ anafVatRegistered: e.target.checked })}
-                  className="h-4 w-4 rounded border-border"
-                />
-                {t.vatRegisteredLabel}
-              </label>
               {cifResolved && (
                 <div className="mt-2 space-y-0.5 rounded-md bg-reconciled/10 px-3 py-2 text-xs text-reconciled">
                   <p className="font-medium">{t.anafResolvedNote(form.name)}</p>
@@ -291,6 +295,38 @@ export default function OnboardingPage() {
                 </div>
               )}
             </div>
+          )}
+          {isRO && (
+            <fieldset>
+              <legend className="text-sm font-medium text-foreground">{t.vatQuestion}</legend>
+              <div className="mt-2 flex gap-2" role="radiogroup" aria-label={t.vatQuestion}>
+                {(["yes", "no"] as const).map((value) => {
+                  const checked = form.vatAnswer === value;
+                  return (
+                    <label
+                      key={value}
+                      className={`inline-flex min-h-11 min-w-24 cursor-pointer items-center justify-center gap-2 rounded-md border px-4 text-sm ${
+                        checked ? "border-primary bg-accent font-medium text-foreground" : "border-border bg-card text-foreground"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="vatAnswer"
+                        value={value}
+                        checked={checked}
+                        onChange={() => update({ vatAnswer: value })}
+                        className="h-4 w-4 accent-primary"
+                      />
+                      {value === "yes" ? t.vatYes : t.vatNo}
+                    </label>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {cifResolved && form.vatAnswer ? `${t.vatFromAnaf} ` : ""}
+                {t.vatHelp}
+              </p>
+            </fieldset>
           )}
           <div>
             <Label htmlFor="name">{t.brandName}</Label>
