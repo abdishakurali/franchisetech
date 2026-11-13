@@ -3,6 +3,7 @@ import {
   bucharestDayKey,
   dailySeries,
   lastDayKeys,
+  isLiveTradingRow,
   onboardingStepLabel,
   signupStage,
   subscriptionMrrCents,
@@ -61,6 +62,7 @@ describe("signups", () => {
   it("labels a null step as the first screen", () => {
     expect(onboardingStepLabel(null)).toMatch(/^1/);
     expect(onboardingStepLabel("fiscal")).toMatch(/FiscalNet/);
+    expect(onboardingStepLabel(null, true)).toBe("Finalizat");
   });
 });
 
@@ -128,5 +130,24 @@ describe("summarizeTrading", () => {
       now,
     });
     expect(rows.map((r) => r.organisationId)).toEqual(["dn", "t"]);
+  });
+});
+
+describe("isLiveTradingRow", () => {
+  const now = new Date("2026-11-13T12:00:00Z");
+  const orgs = [{ id: "dn", name: "Dolce Nera" }, { id: "old", name: "Old test" }, { id: "new", name: "New trial" }];
+  it("hides dormant orgs with a forgotten open till, keeps paying, trading and fresh tills", () => {
+    const rows = summarizeTrading({
+      orgs,
+      payingOrgIds: new Set(["dn"]),
+      tx: [],
+      openSessions: [
+        { organisation_id: "old", opened_at: "2026-09-01T10:00:00Z" },
+        { organisation_id: "new", opened_at: "2026-11-13T09:00:00Z" },
+      ],
+      attempts: [],
+      now,
+    });
+    expect(rows.filter((r) => isLiveTradingRow(r, now)).map((r) => r.organisationId).sort()).toEqual(["dn", "new"]);
   });
 });

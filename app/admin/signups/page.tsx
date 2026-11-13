@@ -51,7 +51,7 @@ export default async function AdminSignupsPage({ searchParams }: { searchParams:
               <tr key={o.id}>
                 <td className="whitespace-nowrap">{formatRoDateTime(o.created_at)}</td>
                 <td className="font-medium">{o.name ?? "—"}</td>
-                <td className="whitespace-nowrap">{onboardingStepLabel(o.onboarding_step)}</td>
+                <td className="whitespace-nowrap">{onboardingStepLabel(o.onboarding_step, o.onboarding_completed)}</td>
                 <td>
                   {stage === "complete" ? <Pill tone="good">finalizat</Pill> : stage === "stalled" ? <Pill tone="bad">blocat</Pill> : <Pill tone="warn">în curs</Pill>}
                 </td>

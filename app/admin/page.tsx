@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requirePlatformAdmin } from "@/lib/admin/access";
 import { createServiceClient } from "@/lib/supabase/server";
 import { loadFiscalAttempts, loadOpenSessions, loadOrganisations, loadSales, loadSubscriptions, payingOrgIds } from "@/lib/admin/queries";
-import { dailySeries, signupStage, summarizeTrading, totalMrrCents, windowDelta } from "@/lib/admin/metrics";
+import { dailySeries, isLiveTradingRow, signupStage, summarizeTrading, totalMrrCents, windowDelta } from "@/lib/admin/metrics";
 import { DailyBars, KpiCard, PageHeader, eur, lei } from "@/components/admin/AdminUi";
 import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
@@ -23,7 +23,9 @@ export default async function AdminDashboardPage() {
   const paying = payingOrgIds(subs);
   const signups = windowDelta(orgs, (o) => o.created_at, () => 1, 90, now);
   const revenue = windowDelta(sales, (t) => t.sold_at, (t) => Number(t.total ?? 0), 90, now);
-  const trading = summarizeTrading({ orgs, payingOrgIds: paying, tx: sales, openSessions: sessions, attempts, now });
+  const allTrading = summarizeTrading({ orgs, payingOrgIds: paying, tx: sales, openSessions: sessions, attempts, now });
+  const trading = allTrading.filter((r) => isLiveTradingRow(r, now));
+  const dormantOpenTills = allTrading.filter((r) => !isLiveTradingRow(r, now) && r.openSessions > 0).length;
   const stalled = orgs.filter((o) => signupStage(o, now) === "stalled" && now.getTime() - new Date(o.created_at).getTime() < 14 * 86_400_000);
   const fiscalFailed = trading.reduce((s, r) => s + r.fiscalFailed7d + r.receiptsFailed7d, 0);
   const alerts = trading.filter((r) => r.alerts.length > 0);
@@ -53,7 +55,7 @@ export default async function AdminDashboardPage() {
         <KpiCard label="Înscrieri 90 zile" value={String(signups.current)} pct={signups.pct} hint={`${stalled.length} blocate (14 zile)`} tone={stalled.length > 0 ? "bad" : "neutral"} />
         <KpiCard label="MRR (preț de listă)" value={eur(totalMrrCents(subs))} hint={`${paying.size} abonamente active`} />
         <KpiCard label="Bonuri fiscale eșuate 7z" value={String(fiscalFailed)} tone={fiscalFailed > 0 ? "bad" : "good"} hint="fără mod test" />
-        <KpiCard label="Case deschise acum" value={String(sessions.length)} />
+        <KpiCard label="Case deschise acum" value={String(trading.reduce((s, r) => s + r.openSessions, 0))} hint={dormantOpenTills ? `+${dormantOpenTills} org. inactive cu casă uitată deschisă` : undefined} />
         <KpiCard label="Organizații total" value={String(orgs.length)} />
         <KpiCard label="Abonamente (orice stare)" value={String(subs.length)} />
       </div>

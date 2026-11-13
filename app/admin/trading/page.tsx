@@ -10,7 +10,7 @@ import {
   loadSubscriptions,
   payingOrgIds,
 } from "@/lib/admin/queries";
-import { summarizeTrading } from "@/lib/admin/metrics";
+import { isLiveTradingRow, summarizeTrading } from "@/lib/admin/metrics";
 import { PageHeader, Pill, Section, TableWrap, lei } from "@/components/admin/AdminUi";
 import { formatRoDateTime } from "@/lib/format/ro-datetime";
 
@@ -29,7 +29,9 @@ export default async function AdminTradingPage() {
     loadRecentFiscalFailures(service, 20),
   ]);
   const paying = payingOrgIds(subs);
-  const rows = summarizeTrading({ orgs, payingOrgIds: paying, tx: sales, openSessions: sessions, attempts, now });
+  const allRows = summarizeTrading({ orgs, payingOrgIds: paying, tx: sales, openSessions: sessions, attempts, now });
+  const rows = allRows.filter((r) => isLiveTradingRow(r, now));
+  const dormant = allRows.filter((r) => !isLiveTradingRow(r, now));
   // Paying cafés with no sale this week: look up their real last sale (one row each).
   const missing = rows.filter((r) => !r.lastSaleAt).map((r) => r.organisationId);
   const lastSale = await loadLastSaleAt(service, missing);
@@ -79,6 +81,13 @@ export default async function AdminTradingPage() {
           )}
         </tbody>
       </TableWrap>
+
+      {dormant.length > 0 ? (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Ascunse: {dormant.length} organizații fără vânzări în 7 zile, care nu plătesc, cu o casă rămasă deschisă de peste 24h
+          ({dormant.map((r) => r.name).join(", ")}).
+        </p>
+      ) : null}
 
       <Section title="Ultimele erori fiscale reale" note="fiscal_receipt_attempts și fiscal_command_log, status failed, fără mod test. Cele mai recente 20.">
         <TableWrap>

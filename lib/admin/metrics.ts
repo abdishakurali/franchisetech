@@ -109,7 +109,8 @@ export function signupStage(org: Pick<OrgRow, "created_at" | "onboarding_complet
 }
 
 /** Readable onboarding step. A null step means the org row exists but step 2 was never saved. */
-export function onboardingStepLabel(step: string | null): string {
+export function onboardingStepLabel(step: string | null, completed?: boolean | null): string {
+  if (completed) return "Finalizat";
   const labels: Record<string, string> = {
     modules: "2 · Funcționalități",
     menu: "3 · Meniu",
@@ -277,4 +278,15 @@ export function summarizeTrading(input: {
   }
 
   return [...rows.values()].sort((a, b) => Number(b.paying) - Number(a.paying) || b.sales7d - a.sales7d);
+}
+
+/**
+ * Rows worth a founder's attention: paying cafés, cafés that sold in the
+ * last 7 days, and tills opened in the last 24h. Old test or abandoned orgs
+ * whose till was simply never closed are left out (counted separately), so
+ * they can't bury a real alert.
+ */
+export function isLiveTradingRow(r: TradingRow, now: Date = new Date()): boolean {
+  if (r.paying || r.count7d > 0) return true;
+  return Boolean(r.oldestOpenSessionAt && now.getTime() - new Date(r.oldestOpenSessionAt).getTime() <= 24 * 3_600_000);
 }
