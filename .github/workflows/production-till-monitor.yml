@@ -1,0 +1,152 @@
+name: Production Till Monitor
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-till-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    env:
+      APP_URL: https://www.franchisetech.ro
+      MONITOR_EMAIL: ${{ secrets.SYNTHETIC_MONITOR_EMAIL }}
+      MONITOR_PASSWORD: ${{ secrets.SYNTHETIC_MONITOR_PASSWORD }}
+      SUPABASE_URL: ${{ secrets.SYNTHETIC_SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SYNTHETIC_SUPABASE_ANON_KEY }}
+    steps:
+      - name: Check public health and authenticated till
+        id: check
+        continue-on-error: true
+        shell: bash
+        run: |
+          node <<'NODE'
+          const required = [
+            "APP_URL",
+            "MONITOR_EMAIL",
+            "MONITOR_PASSWORD",
+            "SUPABASE_URL",
+            "SUPABASE_ANON_KEY",
+          ];
+          for (const key of required) {
+            if (!process.env[key]) throw new Error(`Missing ${key}`);
+          }
+
+          const timeout = () => AbortSignal.timeout(15_000);
+          const appUrl = process.env.APP_URL.replace(/\/$/, "");
+
+          const health = await fetch(`${appUrl}/api/health`, {
+            headers: { "user-agent": "FranchiseTech-Synthetic-Monitor/1.0" },
+            signal: timeout(),
+          });
+          if (!health.ok) throw new Error(`Health returned HTTP ${health.status}`);
+          const healthBody = await health.json();
+          if (healthBody.ok !== true) throw new Error("Health payload was not ok");
+          if (!health.headers.get("x-vercel-id")) {
+            throw new Error("Health response did not come from Vercel");
+          }
+
+          const auth = await fetch(
+            `${process.env.SUPABASE_URL}/auth/v1/token?grant_type=password`,
+            {
+              method: "POST",
+              headers: {
+                apikey: process.env.SUPABASE_ANON_KEY,
+                authorization: `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                email: process.env.MONITOR_EMAIL,
+                password: process.env.MONITOR_PASSWORD,
+              }),
+              signal: timeout(),
+            },
+          );
+          if (!auth.ok) throw new Error(`Synthetic login returned HTTP ${auth.status}`);
+          const session = await auth.json();
+          if (!session.access_token || !session.refresh_token) {
+            throw new Error("Synthetic login returned no session");
+          }
+
+          const ref = new URL(process.env.SUPABASE_URL).hostname.split(".")[0];
+          const cookieName = `sb-${ref}-auth-token`;
+          const cookieValue =
+            "base64-" +
+            Buffer.from(JSON.stringify(session), "utf8").toString("base64url");
+          const chunks = [];
+          for (let offset = 0; offset < cookieValue.length; offset += 3180) {
+            chunks.push(cookieValue.slice(offset, offset + 3180));
+          }
+          const cookieHeader =
+            chunks.length === 1
+              ? `${cookieName}=${chunks[0]}`
+              : chunks.map((value, index) => `${cookieName}.${index}=${value}`).join("; ");
+
+          const till = await fetch(`${appUrl}/app/pos`, {
+            headers: {
+              cookie: cookieHeader,
+              "user-agent": "FranchiseTech-Synthetic-Monitor/1.0",
+            },
+            redirect: "manual",
+            signal: timeout(),
+          });
+          if (till.status >= 300 && till.status < 400) {
+            throw new Error(
+              `Authenticated till redirected to ${till.headers.get("location") ?? "unknown"}`,
+            );
+          }
+          if (!till.ok) throw new Error(`Authenticated till returned HTTP ${till.status}`);
+          if (!till.headers.get("x-vercel-id")) {
+            throw new Error("Till response did not come from Vercel");
+          }
+          const html = await till.text();
+          if (!html.includes("POS") && !html.includes("Vânzare")) {
+            throw new Error("Till response did not contain expected POS content");
+          }
+
+          console.log("Public health, Vercel origin, login, and /app/pos passed");
+          NODE
+
+      - name: Email incident alert
+        if: steps.check.outcome == 'failure'
+        env:
+          RESEND_API_KEY: ${{ secrets.SYNTHETIC_RESEND_API_KEY }}
+          ALERT_EMAIL: ${{ secrets.SYNTHETIC_ALERT_EMAIL }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          node <<'NODE'
+          if (!process.env.RESEND_API_KEY || !process.env.ALERT_EMAIL) {
+            throw new Error("Alert delivery secrets are missing");
+          }
+          const response = await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: {
+              authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              from: "FranchiseTech Monitor <alerts@franchisetech.ro>",
+              to: [process.env.ALERT_EMAIL],
+              subject: "URGENT: verificarea POS FranchiseTech a eșuat",
+              text:
+                "Monitorizarea externă nu a putut confirma health + autentificare + încărcarea POS. Verifică imediat: " +
+                process.env.RUN_URL,
+            }),
+          });
+          if (!response.ok) {
+            throw new Error(`Resend alert returned HTTP ${response.status}`);
+          }
+          console.log("Failure alert delivered");
+          NODE
+
+      - name: Fail workflow after alert
+        if: steps.check.outcome == 'failure'
+        run: exit 1
