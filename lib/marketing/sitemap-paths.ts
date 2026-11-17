@@ -7,6 +7,7 @@ import {
   resourcePages,
 } from "@/lib/marketing/seo";
 import { blogPosts } from "@/lib/marketing/blog";
+import { ODOO_GUIDES } from "@/lib/marketing/odoo-guides";
 import { PRIMARY_INDUSTRY_SLUGS } from "@/lib/marketing/industry-verticals";
 
 export type SitemapPathEntry = {
@@ -58,6 +59,7 @@ export function allSitemapPaths(): SitemapPathEntry[] {
     "/odoo",
     "/odoo/ro",
     "/odoo/demos",
+    ...ODOO_GUIDES.map((guide) => `/odoo/guides/${guide.slug}`),
     "/cookies",
     "/imprint",
     ...HELP_ARTICLES.map((a) => `/help/${a.slug}`),

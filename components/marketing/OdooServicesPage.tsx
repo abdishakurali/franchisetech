@@ -5,6 +5,7 @@ import { DATA_CONTROLLER } from "@/lib/legal/controller";
 import { SUPPORT_PHONE_DISPLAY, SUPPORT_PHONE_TEL } from "@/lib/marketing/contact-info";
 import { ODOO_APPS, ODOO_APP_COUNT, ODOO_LISTING_COUNT, ODOO_TOTAL_TESTS, ODOO_VERSIONS, odooStoreUrl, type OdooApp, type OdooAppGroup } from "@/lib/marketing/odoo-apps";
 import { ODOO_DEMOS } from "@/lib/marketing/odoo-demos";
+import { ODOO_GUIDES } from "@/lib/marketing/odoo-guides";
 import { ODOO_PACKAGES, ODOO_HOURLY_EUR, ODOO_REPLY_HOURS } from "@/lib/marketing/odoo-services";
 
 type Locale = "en" | "ro";
@@ -77,6 +78,7 @@ const copy = {
     perMonth: "/ month",
     hourly: `Small changes outside a package: €${ODOO_HOURLY_EUR} per hour, always quoted before we start. App licences are bought separately on the Odoo Apps Store.`,
     popular: "Most requested",
+    guidesTitle: "Odoo guides",
     faqTitle: "Questions",
     faq: [
       ["Which Odoo editions do you work with?", "Community and Enterprise, self-hosted or on Odoo.sh, versions 16 to 20. Odoo Online (the standard SaaS plan) does not allow custom modules, so integrations there need Odoo.sh or a self-hosted server."],
@@ -156,6 +158,7 @@ const copy = {
     perMonth: "/ lună",
     hourly: `Modificări mici în afara pachetelor: €${ODOO_HOURLY_EUR} pe oră, cu estimare înainte de începere. Licențele aplicațiilor se cumpără separat din Odoo Apps Store.`,
     popular: "Cel mai cerut",
+    guidesTitle: "Ghiduri Odoo (în engleză)",
     faqTitle: "Întrebări",
     faq: [
       ["Cu ce ediții Odoo lucrați?", "Community și Enterprise, pe server propriu sau pe Odoo.sh, versiunile 16–20. Odoo Online (planul SaaS standard) nu permite module proprii, așa că integrările acolo cer Odoo.sh sau un server propriu."],
@@ -309,6 +312,19 @@ export function OdooServicesPage({ locale }: { locale: Locale }) {
             </table>
           </div>
           <p className="mt-3 text-xs leading-5 text-[#8F8F86]">{t.proofNote}</p>
+        </section>
+
+        <section id="guides" className="mt-16 scroll-mt-24">
+          <h2 className={h2}>{t.guidesTitle}</h2>
+          <ul className="mt-6 space-y-2">
+            {ODOO_GUIDES.map((guide) => (
+              <li key={guide.slug}>
+                <Link href={`/odoo/guides/${guide.slug}`} hrefLang="en" className="font-medium text-[#165DFC] underline-offset-2 hover:underline">
+                  {guide.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section className="mt-16">
