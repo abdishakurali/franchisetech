@@ -116,7 +116,7 @@ export default function OdooDemosPage() {
             <h2 className={h2}>Need one of these set up for you?</h2>
             <p className="mt-3 max-w-3xl text-base leading-7 text-[#5B5D57]">
               We install and configure our apps, connect Odoo to your other systems and quote a fixed price before we start. Prices above
-              are the Apps Store licence prices in EUR, checked on 8 and 11 November 2026.
+              are the Apps Store licence prices in EUR, checked on 8, 11 and 17 November 2026.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Link href="/odoo#contact" className="inline-flex min-h-12 items-center rounded-md bg-[#0D0F0E] px-5 text-sm font-semibold text-white">
