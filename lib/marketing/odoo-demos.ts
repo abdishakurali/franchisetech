@@ -2,7 +2,8 @@
 // Recorded 2026-11-08 (pos_fiscal_printer_ro: 2026-11-11) on throwaway Odoo 19 Community databases with demo data.
 // remote_mcp_oauth_server: rebuilt 2026-11-12 from real screenshots of Odoo 19 and Claude.ai (pan, zoom, captions; not a recording).
 // The honesty notes come from each video's SCRIPT.md (what is real, what is not shown).
-// Names and EUR prices checked on apps.odoo.com (Odoo 19 listing) on 2026-11-08 (pos_fiscal_printer_ro: 2026-11-11).
+// Names and EUR prices checked on apps.odoo.com (Odoo 19 listing) on 2026-11-08 (pos_fiscal_printer_ro: 2026-11-11;
+// remote_mcp_oauth_server: 2026-11-17, 129 EUR).
 
 export const ODOO_DEMOS_CHECKED = "2026-11-08";
 
@@ -64,7 +65,7 @@ export const ODOO_DEMOS: readonly OdooDemo[] = [
   {
     tech: "remote_mcp_oauth_server",
     name: "MCP OAuth Server for Claude",
-    priceEur: 79,
+    priceEur: 129,
     seconds: 61,
     summary:
       "Connect Claude.ai to Odoo as a custom connector: each user signs in and approves with their own Odoo login, Claude answers with that user's access rights, and every call goes to an audit log.",

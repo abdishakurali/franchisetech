@@ -5,8 +5,8 @@
 // odoo-upgrade-gap, odoo-pos-fiscal-ro).
 // EUR prices of the first 31 rows come from each module's __manifest__.py (2026-11-08);
 // the 10 apps added on 2026-11-17 use their own price on their Odoo 19 store page.
-// Known gap, left for the owner: remote_mcp_oauth_server is 129 on the store since
-// 2026-11-12, still 79 here.
+// remote_mcp_oauth_server: 129, its Odoo 19 store price and manifest price since
+// 2026-11-12 (checked on the store 2026-11-17).
 // `priceEur: null` means the app has no price of its own: `free` apps download for free;
 // `bundle` apps only install other apps and the store charges for those apps.
 // Checked 2026-11-17: every app below answers HTTP 200 on its store page for
@@ -75,7 +75,7 @@ export const ODOO_APPS: readonly OdooApp[] = [
   { tech: "hide_cost_price_margin", name: "Hide Cost Price and Margin", group: "access", priceEur: null, pricing: "free", tests: 19 },
   { tech: "website_ip_block_country", name: "IP Block & Country Block", group: "access", priceEur: 39, pricing: "paid", tests: 29 },
   { tech: "attachment_s3_object_storage", name: "S3 Attachment Object Storage", group: "technical", priceEur: 89, pricing: "paid", tests: 43 },
-  { tech: "remote_mcp_oauth_server", name: "MCP OAuth Server for Claude", group: "technical", priceEur: 79, pricing: "paid", tests: 45 },
+  { tech: "remote_mcp_oauth_server", name: "MCP OAuth Server for Claude", group: "technical", priceEur: 129, pricing: "paid", tests: 45 },
   { tech: "customization_export_module", name: "Customization Export to Module (Studio-style)", group: "technical", priceEur: 49, pricing: "paid", tests: 9 },
 ];
 
