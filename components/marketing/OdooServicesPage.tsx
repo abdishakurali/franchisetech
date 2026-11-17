@@ -62,7 +62,7 @@ const copy = {
         run on 31 October 2026 passed 424 tests with 0 failures on Odoo 20.
       </>
     ),
-    proofNote: "Links open the Odoo 19 listing; each page has a version selector for 16 to 20. Prices are the Odoo Apps Store prices in EUR. A bundle has no price of its own: it installs other apps from the list, and the store charges for those apps. Test counts are the test cases in each module, counted on 8 November 2026.",
+    proofNote: "Links open the Odoo 19 listing; each page has a version selector for 16 to 20. Prices are the Odoo Apps Store prices in EUR. A bundle has no price of its own: it installs other apps from the list, and the store charges for those apps. Test counts are the test cases in each module, counted on 17 November 2026.",
     colApp: "App",
     colArea: "Area",
     colPrice: "Price",
@@ -141,7 +141,7 @@ const copy = {
         rulare completă, din 31 octombrie 2026, a trecut 424 de teste fără nicio eroare pe Odoo 20.
       </>
     ),
-    proofNote: "Linkurile deschid pagina pentru Odoo 19; fiecare pagină are un selector pentru versiunile 16–20. Prețurile sunt cele din Odoo Apps Store, în EUR. Un pachet nu are preț propriu: instalează alte aplicații din listă, iar magazinul taxează acele aplicații. Testele sunt numărate în fiecare modul la 8 noiembrie 2026.",
+    proofNote: "Linkurile deschid pagina pentru Odoo 19; fiecare pagină are un selector pentru versiunile 16–20. Prețurile sunt cele din Odoo Apps Store, în EUR. Un pachet nu are preț propriu: instalează alte aplicații din listă, iar magazinul taxează acele aplicații. Testele sunt numărate în fiecare modul la 17 noiembrie 2026.",
     colApp: "Aplicație",
     colArea: "Domeniu",
     colPrice: "Preț",
