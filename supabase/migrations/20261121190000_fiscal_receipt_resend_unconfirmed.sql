@@ -25,7 +25,7 @@
 -- Undo (run in this order; restores the exact previous state):
 --   update public.pos_transactions set fiscal_receipt_status = 'api_pending' where fiscal_receipt_status = 'unconfirmed';
 --   drop function if exists public.begin_fiscal_receipt_resend(uuid, uuid, uuid, uuid, integer);
---   drop function if exists public.finish_fiscal_receipt_resend(uuid, uuid, text, text, text, text, text);
+--   drop function if exists public.finish_fiscal_receipt_resend(uuid, uuid, text, text, text, text, text, uuid, uuid, integer);
 --   drop function if exists public.sweep_unconfirmed_fiscal_receipts(integer);
 --   alter table public.pos_transactions drop constraint pos_transactions_fiscal_receipt_status_check;
 --   alter table public.pos_transactions add constraint pos_transactions_fiscal_receipt_status_check
@@ -141,6 +141,17 @@ $$;
 -- that is no longer `pending` changes nothing. The sale status is only moved
 -- while this attempt is still the sale's current one and the sale is still
 -- `printing` (or was swept to `unconfirmed` while the answer was slow).
+--
+-- Who may finish (otherwise any org member could mark any pending attempt as
+-- `success` with an invented receipt number):
+--   * p_performed_by must be an active owner/manager/staff/cashier of the org
+--     (role read here, not trusted from the caller);
+--   * staff/cashier only finish attempts they began themselves
+--     (performed_by = p_performed_by), and only for a sale of the till session
+--     they are limited to (p_required_session_id, required for them);
+--   * nobody finishes a `pending` attempt older than p_max_age_minutes
+--     (default 30, the sweep threshold): by then the sweep has marked the sale
+--     `unconfirmed`, and a real FiscalNet answer never takes that long.
 
 create or replace function public.finish_fiscal_receipt_resend(
   p_org_id uuid,
@@ -149,7 +160,10 @@ create or replace function public.finish_fiscal_receipt_resend(
   p_response_content text,
   p_receipt_number text,
   p_error_code text,
-  p_error_info text
+  p_error_info text,
+  p_performed_by uuid,
+  p_required_session_id uuid,
+  p_max_age_minutes integer default 30
 ) returns jsonb
 language plpgsql
 security definer
@@ -158,13 +172,35 @@ as $$
 declare
   v_tx_id uuid;
   v_attempt_status text;
+  v_attempt_by uuid;
+  v_attempted_at timestamptz;
+  v_tx_session uuid;
+  v_role text;
+  v_is_manager boolean;
   v_tx_status text;
 begin
   if p_status not in ('success', 'failed', 'timeout', 'ambiguous', 'mock_success') then
     raise exception 'INVALID_FISCAL_ATTEMPT_STATUS: %', p_status;
   end if;
 
-  select transaction_id, status into v_tx_id, v_attempt_status
+  if p_performed_by is null then
+    raise exception 'RESEND_FORBIDDEN: no caller';
+  end if;
+
+  select role into v_role
+  from public.organisation_members
+  where organisation_id = p_org_id
+    and user_id = p_performed_by
+    and coalesce(status, 'active') = 'active'
+  limit 1;
+
+  if v_role is null or v_role not in ('owner', 'manager', 'staff', 'cashier') then
+    raise exception 'RESEND_FORBIDDEN: role %', coalesce(v_role, 'none');
+  end if;
+  v_is_manager := v_role in ('owner', 'manager');
+
+  select transaction_id, status, performed_by, attempted_at
+    into v_tx_id, v_attempt_status, v_attempt_by, v_attempted_at
   from public.fiscal_receipt_attempts
   where id = p_attempt_id and organisation_id = p_org_id;
 
@@ -172,12 +208,28 @@ begin
     raise exception 'RESEND_ATTEMPT_NOT_FOUND';
   end if;
 
-  perform 1 from public.pos_transactions
+  select session_id into v_tx_session
+  from public.pos_transactions
   where id = v_tx_id and organisation_id = p_org_id
   for update;
 
+  if not v_is_manager then
+    if v_attempt_by is distinct from p_performed_by then
+      raise exception 'RESEND_NOT_YOUR_ATTEMPT';
+    end if;
+    if p_required_session_id is null
+       or v_tx_session is distinct from p_required_session_id then
+      raise exception 'RESEND_NOT_SAME_SESSION';
+    end if;
+  end if;
+
   if v_attempt_status <> 'pending' then
     return jsonb_build_object('attempt_id', p_attempt_id, 'idempotent', true);
+  end if;
+
+  if v_attempted_at is null
+     or v_attempted_at < now() - make_interval(mins => greatest(coalesce(p_max_age_minutes, 30), 5)) then
+    raise exception 'RESEND_ATTEMPT_EXPIRED';
   end if;
 
   update public.fiscal_receipt_attempts
@@ -243,8 +295,8 @@ end;
 $$;
 
 revoke all on function public.begin_fiscal_receipt_resend(uuid, uuid, uuid, uuid, integer) from public, anon, authenticated;
-revoke all on function public.finish_fiscal_receipt_resend(uuid, uuid, text, text, text, text, text) from public, anon, authenticated;
+revoke all on function public.finish_fiscal_receipt_resend(uuid, uuid, text, text, text, text, text, uuid, uuid, integer) from public, anon, authenticated;
 revoke all on function public.sweep_unconfirmed_fiscal_receipts(integer) from public, anon, authenticated;
 grant execute on function public.begin_fiscal_receipt_resend(uuid, uuid, uuid, uuid, integer) to service_role;
-grant execute on function public.finish_fiscal_receipt_resend(uuid, uuid, text, text, text, text, text) to service_role;
+grant execute on function public.finish_fiscal_receipt_resend(uuid, uuid, text, text, text, text, text, uuid, uuid, integer) to service_role;
 grant execute on function public.sweep_unconfirmed_fiscal_receipts(integer) to service_role;

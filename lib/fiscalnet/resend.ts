@@ -77,13 +77,15 @@ export const RESEND_TEXT = {
   panelHint: "Verificați pe casa de marcat dacă bonul a ieșit. Trimiteți din nou doar dacă nu a ieșit.",
 } as const;
 
-/** Romanian message for an error thrown by begin_fiscal_receipt_resend. */
+/** Romanian message for an error thrown by begin/finish_fiscal_receipt_resend. */
 export function resendErrorMessage(raw: string | null | undefined): string {
   const m = raw ?? "";
   if (m.includes("RESEND_IN_PROGRESS")) return "Bonul pentru această vânzare se trimite deja. Așteptați răspunsul casei.";
   if (m.includes("RESEND_NOT_SAME_SESSION")) return "Doar un manager poate retrimite bonuri din altă tură de casă.";
   if (m.includes("RESEND_NOT_ELIGIBLE")) return "Bonul acestei vânzări nu mai poate fi retrimis (este deja confirmat sau în curs).";
   if (m.includes("RESEND_TRANSACTION_NOT_FOUND")) return "Vânzarea nu a fost găsită.";
+  if (m.includes("RESEND_NOT_YOUR_ATTEMPT") || m.includes("RESEND_FORBIDDEN")) return "Nu aveți drept să retrimiteți bonuri fiscale.";
+  if (m.includes("RESEND_ATTEMPT_EXPIRED")) return "Retrimiterea a expirat. Verificați casa de marcat și încercați din nou.";
   if (m.includes("Could not find the function") || m.includes("does not exist")) {
     return "Retrimiterea nu este încă activă pe server. Contactați suportul.";
   }

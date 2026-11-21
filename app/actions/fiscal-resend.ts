@@ -9,8 +9,11 @@
  *      then begin_fiscal_receipt_resend locks the sale, writes a `pending`
  *      attempt row and moves the sale to `printing`. Returns the receipt lines
  *      rebuilt from the saved sale.
- *   2. finishFiscalReceiptResend — records FiscalNet's answer on that attempt
- *      row and sets the sale's status.
+ *   2. finishFiscalReceiptResend — same permission check as begin, then
+ *      finish_fiscal_receipt_resend records FiscalNet's answer on that attempt
+ *      row and sets the sale's status. The database only lets staff/cashiers
+ *      finish their own attempt for their till session, and nobody finish an
+ *      attempt older than the sweep window.
  * Rules and texts: lib/fiscalnet/resend.ts.
  */
 
@@ -21,6 +24,7 @@ import { isFiscalNetActive } from "@/lib/fiscalnet/eligibility";
 import {
   PRINTER_CHECKED_VALUE,
   RESEND_STUCK_PENDING_MS,
+  UNCONFIRMED_AFTER_MINUTES,
   buildResendItems,
   resendErrorMessage,
   resendPermission,
@@ -121,6 +125,9 @@ export async function beginFiscalReceiptResend(formData: FormData): Promise<Begi
       p_receipt_number: null,
       p_error_code: "RESEND_NO_LINES",
       p_error_info: "resend: sale lines could not be read; nothing sent",
+      p_performed_by: user.id,
+      p_required_session_id: permission.requiredSessionId,
+      p_max_age_minutes: UNCONFIRMED_AFTER_MINUTES,
     });
     return { ok: false, message: "Liniile vânzării nu au putut fi citite. Nu s-a trimis nimic." };
   }
@@ -147,7 +154,11 @@ export async function finishFiscalReceiptResend(
   if (!attemptId) return { ok: false, error: "Missing attempt id." };
   if (!(FINISH_STATUSES as readonly string[]).includes(status)) return { ok: false, error: `Invalid status: ${status}` };
 
-  const { orgId } = await getActiveOrg();
+  const { supabase, orgId, membership, user } = await getActiveOrg();
+  const isManager = membership.role === "owner" || membership.role === "manager";
+  const permission = resendPermission(membership.role, isManager ? null : await openSessionIdFor(supabase, orgId));
+  if (!permission.allowed) return { ok: false, error: "RESEND_FORBIDDEN" };
+
   const service = await createServiceClient();
   const { error } = await service.rpc("finish_fiscal_receipt_resend", {
     p_org_id: orgId,
@@ -157,6 +168,9 @@ export async function finishFiscalReceiptResend(
     p_receipt_number: stringValue(formData, "receipt_number") || null,
     p_error_code: stringValue(formData, "error_code") || null,
     p_error_info: stringValue(formData, "error_info") || null,
+    p_performed_by: user.id,
+    p_required_session_id: permission.requiredSessionId,
+    p_max_age_minutes: UNCONFIRMED_AFTER_MINUTES,
   });
   if (error) {
     console.error("[FiscalNet] finish_fiscal_receipt_resend failed", error.message);
