@@ -20,6 +20,24 @@ export type RecordFiscalAttempt = (
   input: RecordFiscalAttemptInput
 ) => Promise<{ ok: boolean; attemptId?: string; error?: string }>;
 
+/**
+ * The attempt status to record for a FiscalNet answer. "success" only when the
+ * device confirmed the receipt. A request that went through without
+ * confirmation is "ambiguous": recorded honestly, never as success.
+ */
+export function fiscalAttemptStatus(
+  config: Pick<BrowserFiscalConfig, "mockMode">,
+  result: Pick<BrowserFiscalResult, "ok" | "confirmation">,
+): RecordFiscalAttemptInput["status"] {
+  return config.mockMode
+    ? "mock_success"
+    : result.confirmation === "unconfirmed"
+      ? "ambiguous"
+      : result.ok
+        ? "success"
+        : "failed";
+}
+
 // The FiscalNet agent call itself is time-bounded (callApi's AbortController,
 // browser.ts, default 15s) — recordAttempt has no such bound of its own, and
 // one call site (the offline-sync loop) awaits this whole function per queued
@@ -28,7 +46,7 @@ export type RecordFiscalAttempt = (
 // from before this fix existed, not just "attempts now get logged". Capped
 // shorter than completeSaleReturn's own 25s race in syncQueuedEntry, since
 // this is a single lightweight write, not a full sale-recording transaction.
-const RECORD_ATTEMPT_TIMEOUT_MS = 10_000;
+export const RECORD_ATTEMPT_TIMEOUT_MS = 10_000;
 
 async function recordAttemptWithTimeout(
   recordAttempt: RecordFiscalAttempt,
@@ -77,15 +95,7 @@ export async function fiscalBrowserReceiptAndLog(
 
   if (!config.enabled) return result;
 
-  // "success" only when the device confirmed the receipt. A request that went
-  // through without confirmation is "ambiguous": recorded honestly, never as success.
-  const status: RecordFiscalAttemptInput["status"] = config.mockMode
-    ? "mock_success"
-    : result.confirmation === "unconfirmed"
-      ? "ambiguous"
-      : result.ok
-        ? "success"
-        : "failed";
+  const status = fiscalAttemptStatus(config, result);
 
   const logResult = await recordAttemptWithTimeout(ctx.recordAttempt, {
     transactionId: ctx.transactionId,

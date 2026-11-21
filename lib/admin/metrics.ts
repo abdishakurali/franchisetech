@@ -246,7 +246,7 @@ export function summarizeTrading(input: {
       r.countToday += 1;
     }
     if (t.fiscal_receipt_status === "failed") r.receiptsFailed7d += 1;
-    if (t.fiscal_receipt_status === "pending" || t.fiscal_receipt_status === "api_pending") r.receiptsPending7d += 1;
+    if (t.fiscal_receipt_status === "pending" || t.fiscal_receipt_status === "api_pending" || t.fiscal_receipt_status === "unconfirmed") r.receiptsPending7d += 1;
   }
 
   for (const s of input.openSessions) {

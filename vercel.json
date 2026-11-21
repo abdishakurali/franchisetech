@@ -19,6 +19,10 @@
     {
       "path": "/api/cron/first-receipt-watch",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/fiscal-unconfirmed",
+      "schedule": "*/10 * * * *"
     }
   ]
 }

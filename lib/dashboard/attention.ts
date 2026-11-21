@@ -16,6 +16,25 @@ type Params = {
   fiscalnetEnabled: boolean;
 };
 
+/** A receipt still "api_pending" this long after the sale never got an answer. */
+export const FISCAL_STUCK_PENDING_MS = 5 * 60_000;
+
+/** How far back the dashboard looks for unconfirmed receipts (same as the till panel). */
+export const FISCAL_ATTENTION_DAYS = 14;
+
+/**
+ * PostgREST `or` filter for sales whose fiscal receipt is not confirmed:
+ * failed/timeout/ambiguous/unconfirmed (the scheduled sweep's state for a
+ * receipt that never got an answer), plus "api_pending" older than a few minutes. The
+ * browser sends the receipt after the sale is saved; if the page closes or
+ * reloads first, nothing ever moves the status off api_pending (production,
+ * 2026-11-12: two Dolce Nera sales stuck there and the owner saw nothing).
+ */
+export function fiscalNotConfirmedFilter(now: Date = new Date()): string {
+  const stuckBefore = new Date(now.getTime() - FISCAL_STUCK_PENDING_MS).toISOString();
+  return `fiscal_receipt_status.in.(failed,timeout,ambiguous,unconfirmed),and(fiscal_receipt_status.eq.api_pending,sold_at.lt.${stuckBefore})`;
+}
+
 function money(v: number, currency: string): string {
   return currency === "RON" ? `${Math.abs(v).toFixed(2)} lei` : `${Math.abs(v).toFixed(2)} ${currency}`;
 }
@@ -32,8 +51,7 @@ export async function getDashboardAttention(
 ): Promise<DashboardAttentionItem[]> {
   const ro = locale === "ro";
   const items: DashboardAttentionItem[] = [];
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const fiscalSince = new Date(Date.now() - FISCAL_ATTENTION_DAYS * 86_400_000);
 
   const [vatReviewResult, complianceResult, lastClosedResult, lowStockResult, recipeCostedProductsResult, existingRecipesResult, fiscalErrorResult] =
     await Promise.all([
@@ -78,8 +96,9 @@ export async function getDashboardAttention(
             .from("pos_transactions")
             .select("id", { count: "exact", head: true })
             .eq("organisation_id", orgId)
-            .in("fiscal_receipt_status", ["failed", "timeout", "ambiguous"])
-            .gte("sold_at", todayStart.toISOString())
+            .eq("status", "completed")
+            .or(fiscalNotConfirmedFilter())
+            .gte("sold_at", fiscalSince.toISOString())
         : Promise.resolve({ count: 0 }),
     ]);
 
@@ -141,15 +160,17 @@ export async function getDashboardAttention(
     }
   }
 
-  // 5. Fiscal / sync errors today
+  // 5. Sales without a confirmed fiscal receipt (last FISCAL_ATTENTION_DAYS days).
+  // The till lists them with "Trimite bonul din nou"; the resend has to run on
+  // the till PC, where the FiscalNet agent is.
   const fiscalErrorCount = fiscalErrorResult.count ?? 0;
   if (fiscalnetEnabled && fiscalErrorCount > 0) {
     items.push({
       severity: "critical",
-      href: "/app/settings",
+      href: "/app/pos",
       message: ro
-        ? `${fiscalErrorCount} bon(uri) fiscal(e) netrimis(e) azi — verifică FiscalNet.`
-        : `${fiscalErrorCount} fiscal receipt(s) failed to send today — check FiscalNet.`,
+        ? `${fiscalErrorCount} vânzare(i) fără bon fiscal confirmat — verifică casa de marcat și retrimite din Casă.`
+        : `${fiscalErrorCount} sale(s) without a confirmed fiscal receipt — check the printer and resend from the till.`,
     });
   }
 

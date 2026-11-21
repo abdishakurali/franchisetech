@@ -27,6 +27,8 @@ import { ReportsTrendChart, type SalesDay } from "@/components/app/ReportsTrendC
 import { createServiceClient } from "@/lib/supabase/server";
 import { fetchAll, SALES_LINE_KEYS } from "@/lib/supabase/fetch-all";
 import { RO_TIME_ZONE } from "@/lib/format/ro-datetime";
+import { resendEligibleFilter } from "@/lib/fiscalnet/resend";
+import type { UnconfirmedReceipt } from "@/components/app/FiscalResendPanel";
 
 function money(v: number, cur = "EUR") {
   if (cur === "RON") return `${Number(v).toFixed(2)} lei`;
@@ -204,6 +206,24 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
     supabase.from("pos_transactions").select("id,transaction_number,customer_name,sold_at,total,discount_total,status,payment_methods(name,type)").eq("organisation_id", orgId).order("sold_at", { ascending: false }).limit(30),
     supabase.from("pos_transactions").select("id").eq("organisation_id", orgId).eq("status", "completed").limit(1),
   ]) : null;
+  // Sales whose fiscal receipt was never confirmed and may be sent again.
+  // Owners/managers see the last 14 days; staff only the open till's sales
+  // (the same rule begin_fiscal_receipt_resend enforces).
+  const unconfirmedQuery = shouldPrefetchRegister && fiscalNet && openSession
+    ? (() => {
+        let q = supabase
+          .from("pos_transactions")
+          .select("id,transaction_number,total,sold_at,fiscal_receipt_status")
+          .eq("organisation_id", orgId)
+          .eq("status", "completed")
+          .or(resendEligibleFilter())
+          .gte("sold_at", new Date(Date.now() - 14 * 86_400_000).toISOString())
+          .order("sold_at", { ascending: false })
+          .limit(20);
+        if (!canManage) q = q.eq("session_id", openSession.id);
+        return q.then((r) => r);
+      })()
+    : null;
 
   // Everything below depends only on the two session rows (or on nothing), so
   // start every query now and await each one where its result is used. This
@@ -514,6 +534,13 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
   let { data: methods } = methodResult;
   const [{ data: customers }, { data: recentTransactions }, completedSaleResult] = registerResults;
   const hasCompletedSales = (completedSaleResult.data?.length ?? 0) > 0;
+  const unconfirmedReceipts: UnconfirmedReceipt[] = ((unconfirmedQuery ? (await unconfirmedQuery).data : null) ?? []).map((r) => ({
+    id: r.id as string,
+    transactionNumber: String(r.transaction_number ?? ""),
+    total: Number(r.total ?? 0),
+    soldAt: (r.sold_at as string | null) ?? null,
+    status: String(r.fiscal_receipt_status ?? ""),
+  }));
 
   // The catalogue reads double as setup checks. Only brand-new organisations
   // pay for inserts; established registers no longer perform two extra
@@ -579,6 +606,7 @@ export default async function PosPage({ searchParams }: { searchParams?: Promise
         activeTab={activeTab}
         canManage={canManage}
         defaultVatRate={defaultVatRate}
+        unconfirmedReceipts={unconfirmedReceipts}
         summary={{
           openingCash: Number(openSession.opening_cash ?? 0),
           cashSales,
