@@ -32,6 +32,7 @@ import { PosTableContextBar, type PosActiveTable } from "@/components/app/PosTab
 import { sendTabOrder, getTabPendingItems, type TabPendingItem } from "@/app/actions/table-service";
 import { PreBillPrintButton } from "@/components/app/PreBillPrintButton";
 import { PosOfflineBar } from "@/components/app/PosOfflineBar";
+import { FiscalResendPanel, type UnconfirmedReceipt } from "@/components/app/FiscalResendPanel";
 import { CashCountModal } from "@/components/app/CashCountModal";
 import { friendlySaleErrorFromCode, paymentTypeLabel, type PosLocale } from "@/lib/pos-i18n";
 import { classifySaleFailure } from "@/lib/pos-sale-failure";
@@ -780,6 +781,7 @@ function PosRegisterInner({
   browserOffline = false,
   trackActivationSale = false,
   redirectAfterSaleTo = null,
+  unconfirmedReceipts = [],
 }: {
   products: Product[];
   categories: Category[];
@@ -825,6 +827,8 @@ function PosRegisterInner({
    *  step to continue into /onboarding/result. Table-service flows are
    *  unaffected (a tab may need more sales before payment completes). */
   redirectAfterSaleTo?: string | null;
+  /** Sales whose fiscal receipt is not confirmed and may be sent again (lib/fiscalnet/resend.ts). */
+  unconfirmedReceipts?: UnconfirmedReceipt[];
 }) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [search, setSearch] = useState("");
@@ -2052,6 +2056,16 @@ function PosRegisterInner({
               Am verificat
             </button>
           </div>
+        )}
+        {/* Always mounted while FiscalNet is on: a resend revalidates the page and the
+            sale leaves the list, but the panel must keep showing the result. */}
+        {fiscalActive && fiscalNet?.enabled && (
+          <FiscalResendPanel
+            receipts={unconfirmedReceipts}
+            fiscalNet={fiscalNet}
+            money={money}
+            trackPrint={trackFiscalPrint}
+          />
         )}
         <div className={cn(
           "flex min-h-0 flex-1 flex-col overflow-hidden",

@@ -5,7 +5,7 @@ describe("fiscalNotConfirmedFilter", () => {
   const now = new Date("2026-11-12T12:50:00.000Z");
 
   it("keeps the explicit failure statuses", () => {
-    expect(fiscalNotConfirmedFilter(now)).toContain("fiscal_receipt_status.in.(failed,timeout,ambiguous)");
+    expect(fiscalNotConfirmedFilter(now)).toContain("fiscal_receipt_status.in.(failed,timeout,ambiguous,unconfirmed)");
   });
 
   it("counts api_pending only once it is older than the grace period", () => {
