@@ -18,20 +18,25 @@ export type BlogCta = {
   /** Secondary destination: the feature page that answers the article's problem. */
   href: string;
   label: string;
-  /** One-line question shown after the opening answer, linking to /demo. Omit to skip the demo for off-topic posts. */
+  /**
+   * One-line question shown mid-article and in the end box, answered by a
+   * WhatsApp link (the reader writes first; we never message them uninvited).
+   * Omit for off-topic posts. Until 2026-11-21 this line led to /demo, which
+   * got 0 real requests in 90 days.
+   */
   context?: string;
 };
 
 export const REGULATION_FEAR_CTAS: Record<string, BlogCta> = {
   "bon-fiscal-obligatoriu-cand-si-cum": {
-    context: "Descoperiți cum gestionați vânzările și integrarea fiscală într-un singur sistem.",
+    context: "Aveți o întrebare despre legarea POS-ului de casa de marcat?",
     eyebrow: "Din regula fiscală în fluxul de lucru",
     body: "În franchisetech, bonul fiscal nu este o promisiune generică: vânzarea din POS păstrează produsele, TVA-ul, metoda de plată, statusul FiscalNet și datele pentru raportul Z într-un singur loc.",
     href: "/features/qr-code-receipts",
     label: "Vezi fluxul de bon fiscal",
   },
   "cum-anulezi-un-bon-fiscal-emis-gresit": {
-    context: "Vreți ca fiecare anulare să rămână înregistrată, cu ora și casierul? Vedeți cum arată în FranchiseTech.",
+    context: "Aveți o întrebare despre anulări și retururi în POS?",
     eyebrow: "Anulările rămân în evidență, nu în memorie",
     body: "O anulare sau un retur greșit gestionat e exact genul de neconcordanță pe care un control fiscal o caută. În franchisetech, fiecare anulare trece prin POS și rămâne înregistrată cu utilizatorul și ora, nu doar notată verbal.",
     href: "/features/pos",
@@ -48,69 +53,84 @@ export const REGULATION_FEAR_CTAS: Record<string, BlogCta> = {
   // to the generic "feature included" CTA, which implied franchisetech
   // generates the QR code — the certified fiscal device does.
   "e-obligatoriu-qr-code-pe-bonul-fiscal": {
-    context: "Folosiți o casă de marcat într-o cafenea? Verificați dacă sistemul dumneavoastră este compatibil cu integrarea POS.",
+    context: "Folosiți o casă de marcat într-o cafenea? Întrebați-ne dacă se poate lega de POS.",
     eyebrow: "Codul QR îl pune casa de marcat, nu programul POS",
     body: "franchisetech nu generează codul QR. Trimite vânzarea, cu produsele, TVA-ul și metoda de plată, către casa de marcat certificată prin driverul fiscal configurat și vă arată dacă bonul a fost emis sau a eșuat.",
     href: "/features/qr-code-receipts",
     label: "Vezi cum funcționează integrarea fiscală",
   },
   "ce-este-raportul-z-si-cum-il-faci": {
-    context: "Vreți să verificați mai ușor încasările zilnice? Vedeți cum funcționează FranchiseTech.",
+    context: "Aveți o întrebare despre raportul Z sau despre închiderea zilei?",
     eyebrow: "Închiderea zilei, cu cifrele deja calculate",
     body: "În franchisetech, închiderea sesiunii POS arată numerarul așteptat, încasările pe card și TVA-ul zilei, ca să comparați sertarul cu o cifră exactă înainte de raportul Z de pe casa de marcat.",
     href: "/features/z-report",
     label: "Vezi închiderea zilei",
   },
   "raport-x-vs-raport-z-diferenta": {
-    context: "Vreți să vedeți încasările din timpul zilei fără să închideți casa? Vă arătăm în demonstrație.",
+    context: "Aveți o întrebare despre raportul X sau raportul Z?",
     eyebrow: "Verificați tura fără să închideți ziua",
     body: "franchisetech arată în timpul zilei vânzările pe numerar și card din sesiunea deschisă, iar la închidere compară numerarul numărat cu cel așteptat.",
     href: "/features/z-report",
     label: "Vezi închiderea zilei",
   },
   "export-saga-din-program-gestiune-restaurant": {
-    context: "Trimiteți încă datele contabilului în Excel? Vedeți exportul pentru contabil pe un exemplu real.",
+    context: "Trimiteți încă datele contabilului în Excel? Întrebați-ne cum arată exportul pentru contabil.",
     eyebrow: "Exportul pentru contabil, fără retastare",
     body: "Planul Pro include exporturile pentru contabil: vânzări, NIR și documente de stoc, generate din ce s-a înregistrat deja în POS și la recepție.",
     href: "/pricing",
     label: "Vezi ce include planul Pro",
   },
   "cum-faci-nir-in-romania-fara-excel": {
-    context: "Țineți NIR-urile în Excel? Vedeți cum intră recepția direct în stoc.",
+    context: "Țineți NIR-urile în Excel? Întrebați-ne cum intră recepția direct în stoc.",
     eyebrow: "NIR-ul actualizează stocul direct",
     body: "În planul Pro, recepția de la furnizor se înregistrează ca NIR și stocul se actualizează imediat, fără un tabel Excel separat de ținut la zi.",
     href: "/features/stock-management",
     label: "Vezi gestiunea stocului și NIR",
   },
   "cum-alegi-un-soft-pos-pentru-cafenea-mica": {
-    context: "Alegeți un POS pentru cafenea? Vedeți-l pe produsele dumneavoastră înainte să decideți.",
+    context: "Alegeți un POS pentru cafenea? Întrebați-ne orice înainte să decideți.",
     eyebrow: "Testați pe produsele dumneavoastră reale",
     body: "Pro costă €49/lună pentru o locație (€39/lună la plata anuală) și include POS, stoc, rețete și export pentru contabil. Multi adaugă mai multe locații. Fără contract pe termen lung, anulare oricând.",
     href: "/pricing",
     label: "Vezi planurile și prețurile",
   },
   "cum-calculezi-costul-unei-retete-cafenea": {
-    context: "Calculați costul rețetelor de mână? Vedeți cum îl calculează FranchiseTech din prețurile de achiziție.",
+    context: "Calculați costul rețetelor de mână? Întrebați-ne cum îl calculează FranchiseTech din prețurile de achiziție.",
     eyebrow: "Costul pe porție, din prețurile reale de achiziție",
     body: "În planul Pro, rețeta fiecărui produs leagă ingredientele de prețurile din NIR, iar costul pe porție și marja se actualizează când se schimbă prețul de la furnizor.",
     href: "/features/stock-management",
     label: "Vezi stocul și rețetele",
   },
   "cum-gestionezi-stocul-intr-o-cafenea-de-la-1-kg-de-cafea-la-profit": {
-    context: "Vreți să vedeți exemplul cu 1 kg de cafea pe datele dumneavoastră? Vă arătăm în demonstrație.",
+    context: "Aveți o întrebare despre stoc și rețete în cafeneaua dumneavoastră?",
     eyebrow: "Stoc, rețete și NIR, legate între ele",
     body: "În planul Pro, recepția intră în stoc, fiecare vânzare scade ingredientele din rețetă, iar inventarul arată diferența față de stocul scriptic.",
     href: "/features/stock-management",
     label: "Vezi gestiunea stocului",
   },
   "conectare-casa-marcat-anaf-erori-frecvente": {
-    context: "Aveți o casă de marcat Datecs și vreți să o legați de POS? Verificăm împreună configurația în demonstrație.",
+    context: "Aveți o casă de marcat Datecs și vreți să o legați de POS? Întrebați-ne.",
     eyebrow: "Starea fiecărui bon, vizibilă înainte să devină problemă",
     body: "franchisetech arată starea fiecărui bon trimis prin FiscalNet — trimis, în așteptare sau eșuat — cu reîncercare directă din POS, nu abia descoperită la o reconciliere de sfârșit de lună.",
     href: "/features/qr-code-receipts",
     label: "Vezi statusul bonurilor fiscale",
   },
 };
+
+/** Which WhatsApp offer a link carries; sent as cta_id on marketing_cta_clicked. */
+export type BlogWhatsAppCta = "blog_whatsapp_question" | "blog_whatsapp_menu";
+
+/**
+ * WhatsApp link with a pre-filled first line naming the article, so a reply
+ * shows which guide it came from. No personal data goes in the URL.
+ */
+export function blogWhatsAppHref(baseUrl: string, articleTitle: string, kind: BlogWhatsAppCta): string {
+  const text =
+    kind === "blog_whatsapp_menu"
+      ? `Bună ziua, vreau să vă trimit meniul pentru import (am citit articolul „${articleTitle}”).`
+      : `Bună ziua, am citit articolul „${articleTitle}” și am o întrebare:`;
+  return `${baseUrl}?text=${encodeURIComponent(text)}`;
+}
 
 // Feature pages are partly hidden by lib/product-scope.ts (LEAN_PUBLIC_FEATURE_SLUGS);
 // CTA hrefs here must stay on public routes — app/blog/blog-ctas.test.ts checks it.

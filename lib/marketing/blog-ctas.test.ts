@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { REGULATION_FEAR_CTAS, demoHref } from "./blog-ctas";
+import { REGULATION_FEAR_CTAS, blogWhatsAppHref, demoHref } from "./blog-ctas";
 import { blogPosts } from "./blog";
 import { featurePages } from "./seo";
 import { isLeanPublicFeature } from "@/lib/product-scope";
@@ -27,7 +27,7 @@ describe("article CTAs", () => {
     }
   });
 
-  it("the five highest-traffic fiscal articles route readers to /demo", () => {
+  it("the five highest-traffic fiscal articles offer a WhatsApp question", () => {
     for (const slug of [
       "e-obligatoriu-qr-code-pe-bonul-fiscal",
       "bon-fiscal-obligatoriu-cand-si-cum",
@@ -41,6 +41,21 @@ describe("article CTAs", () => {
 
   it("demo links carry source article and CTA position", () => {
     expect(demoHref("ce-este-raportul-z-si-cum-il-faci", "blog_mid")).toBe("/demo?from=ce-este-raportul-z-si-cum-il-faci&cta=blog_mid");
+  });
+
+  // 2026-11-21: 0 real demo requests in 90 days from guides; the ask is now a WhatsApp question the reader sends first.
+  it("question lines no longer promise a demo", () => {
+    for (const [slug, cta] of Object.entries(REGULATION_FEAR_CTAS)) {
+      expect(cta.context ?? "", slug).not.toMatch(/demonstra/i);
+    }
+  });
+
+  it("WhatsApp links pre-fill the article title and carry no personal data", () => {
+    const href = blogWhatsAppHref("https://wa.me/40756491710", "Raport X vs raport Z", "blog_whatsapp_question");
+    expect(href.startsWith("https://wa.me/40756491710?text=")).toBe(true);
+    expect(decodeURIComponent(href.split("?text=")[1])).toBe("Bună ziua, am citit articolul „Raport X vs raport Z” și am o întrebare:");
+    const menu = decodeURIComponent(blogWhatsAppHref("https://wa.me/40756491710", "T", "blog_whatsapp_menu").split("?text=")[1]);
+    expect(menu).toMatch(/meniul/);
   });
 
   it("CTA copy never claims franchisetech issues the receipt or the QR code", () => {

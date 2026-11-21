@@ -10,7 +10,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       "Casă de marcat pentru cafenele: vânzare rapidă la tejghea, marje pe rețete, bon fiscal prin driver fiscal, personal nelimitat și raport Z în câteva minute.",
     h1: "Cafeneaua dumneavoastră vinde rapid. Știți cifrele la închidere.",
     heroBefore: "Cafeneaua dumneavoastră vinde rapid. ",
-    heroHighlight: "știți cifrele la închidere",
+    heroHighlight: "Știți cifrele la închidere",
     heroAfter: ".",
     heroSubheadline: "POS la tejghea, stoc ingrediente și închidere casă — un singur loc, fără taxă per angajat.",
     intro:
@@ -69,7 +69,7 @@ export const seoRoIndustryOverrides: Record<string, SeoRoOverrides> = {
       },
       {
         question: "Cât durează închiderea zilnică?",
-        answer: "Majoritatea cafenelelor înregistrează numerarul numărat și revizuiesc raportul Z în câteva minute după deschiderea sesiunii.",
+        answer: "Câteva minute: numărați numerarul din sertar, iar aplicația calculează diferența față de suma așteptată. Apoi scoateți raportul Z de pe casa de marcat.",
       },
     ],
     ctaTitle: "Deschide casa cu franchisetech Pro",
