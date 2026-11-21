@@ -842,13 +842,26 @@ function PosRegisterInner({
   // made every sale wait for the full POS loader). Refresh the till summary and
   // recent transactions in the background instead, debounced across quick sales.
   const tillRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // FiscalNet requests still waiting for the cash register's answer. The till
+  // refresh must not run while one is in flight: router.refresh() turns into a
+  // full page reload whenever the server answers with a new build, a redirect or
+  // an error (Next's doMpaNavigation), and that reload cancels the receipt
+  // request. Production 2026-10-27..2026-11-12: all 8 Dolce Nera sales left
+  // without a confirmed receipt had a page leave about 1s after the sale; none
+  // of the confirmed ones did.
+  const fiscalPrintsInFlightRef = useRef<Set<Promise<unknown>>>(new Set());
   const [confirmedCashOperations, setConfirmedCashOperations] = useState<CashSummaryOperation[]>([]);
   const liveSummary = useMemo(
     () => reconcileCashSummary(summary, confirmedCashOperations),
     [summary, confirmedCashOperations],
   );
-  useEffect(() => () => {
-    if (tillRefreshTimerRef.current) clearTimeout(tillRefreshTimerRef.current);
+  const unmountedRef = useRef(false);
+  useEffect(() => {
+    unmountedRef.current = false;
+    return () => {
+      unmountedRef.current = true;
+      if (tillRefreshTimerRef.current) clearTimeout(tillRefreshTimerRef.current);
+    };
   }, []);
   const [paymentMethodId, setPaymentMethodId] = useState(() => pickDefaultPaymentId(paymentMethods));
   const { locale, t } = usePosI18n();
@@ -1053,8 +1066,24 @@ function PosRegisterInner({
   function scheduleTillRefresh() {
     if (tillRefreshTimerRef.current) clearTimeout(tillRefreshTimerRef.current);
     tillRefreshTimerRef.current = setTimeout(() => {
+      tillRefreshTimerRef.current = null;
+      const inFlight = [...fiscalPrintsInFlightRef.current];
+      if (inFlight.length) {
+        // Try again once every receipt in flight has its answer (and its log row).
+        void Promise.allSettled(inFlight).then(() => {
+          if (!unmountedRef.current) scheduleTillRefresh();
+        });
+        return;
+      }
       startTransition(() => router.refresh());
     }, 1500);
+  }
+
+  function trackFiscalPrint<T>(print: Promise<T>): Promise<T> {
+    fiscalPrintsInFlightRef.current.add(print);
+    const done = () => { fiscalPrintsInFlightRef.current.delete(print); };
+    print.then(done, done);
+    return print;
   }
 
   function resetCartAfterSale() {
@@ -1260,11 +1289,11 @@ function PosRegisterInner({
       }
       setCheckoutStep("complete");
       if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled && claimFiscalPrint(res.transactionId)) {
-        void fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
+        void trackFiscalPrint(fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
           transactionId: res.transactionId,
           recordAttempt: recordFiscalAttempt,
           paymentCode: fiscalPaymentCodeFor(payload.payment_method_id),
-        }).then((fnRes) => {
+        })).then((fnRes) => {
           if (fiscalActive && fnRes.filename && fnRes.content) {
             setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
           }
@@ -1502,11 +1531,11 @@ function PosRegisterInner({
         fiscalDone = true;
       } else if (res.fiscalApiPending && fiscalActive && fiscalNet?.enabled) {
         try {
-          const fnRes = await fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
+          const fnRes = await trackFiscalPrint(fiscalBrowserReceiptAndLog(fiscalNet, res.items, res.total, res.paymentType, {
             transactionId: res.transactionId,
             recordAttempt: recordFiscalAttempt,
             paymentCode: fiscalPaymentCodeFor(entry.payload.payment_method_id),
-          });
+          }));
           if (fiscalActive && fnRes.filename && fnRes.content) {
             setLastFiscalTxt({ filename: fnRes.filename, content: fnRes.content });
           }
