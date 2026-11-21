@@ -16,6 +16,21 @@ type Params = {
   fiscalnetEnabled: boolean;
 };
 
+/** A receipt still "api_pending" this long after the sale never got an answer. */
+export const FISCAL_STUCK_PENDING_MS = 5 * 60_000;
+
+/**
+ * PostgREST `or` filter for sales whose fiscal receipt is not confirmed:
+ * failed/timeout/ambiguous, plus "api_pending" older than a few minutes. The
+ * browser sends the receipt after the sale is saved; if the page closes or
+ * reloads first, nothing ever moves the status off api_pending (production,
+ * 2026-11-12: two Dolce Nera sales stuck there and the owner saw nothing).
+ */
+export function fiscalNotConfirmedFilter(now: Date = new Date()): string {
+  const stuckBefore = new Date(now.getTime() - FISCAL_STUCK_PENDING_MS).toISOString();
+  return `fiscal_receipt_status.in.(failed,timeout,ambiguous),and(fiscal_receipt_status.eq.api_pending,sold_at.lt.${stuckBefore})`;
+}
+
 function money(v: number, currency: string): string {
   return currency === "RON" ? `${Math.abs(v).toFixed(2)} lei` : `${Math.abs(v).toFixed(2)} ${currency}`;
 }
@@ -78,7 +93,7 @@ export async function getDashboardAttention(
             .from("pos_transactions")
             .select("id", { count: "exact", head: true })
             .eq("organisation_id", orgId)
-            .in("fiscal_receipt_status", ["failed", "timeout", "ambiguous"])
+            .or(fiscalNotConfirmedFilter())
             .gte("sold_at", todayStart.toISOString())
         : Promise.resolve({ count: 0 }),
     ]);
