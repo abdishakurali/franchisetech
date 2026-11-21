@@ -2771,7 +2771,7 @@ const ro: typeof en = {
       invalidLink: "Acest link de resetare este invalid sau a expirat. Solicitați unul nou.",
     },
     signup: {
-      title: "Casa se potrivește cu sertarul — creează cont",
+      title: "Casa se potrivește cu sertarul — creați un cont",
       descDefault: "Deschideți casa azi. Prima vânzare ghidată. Pro sau Multi, cu plată lunară sau anuală, anulare oricând.",
       descPlan: (plan: string) => `${plan} · plată lunară sau anuală · anulare oricând`,
       businessName: "Nume brand/magazin",
@@ -2779,7 +2779,7 @@ const ro: typeof en = {
       email: "Adresă email",
       password: "Parolă",
       passwordPlaceholder: "Minim 6 caractere",
-      submit: "Creează cont",
+      submit: "Creați contul",
       submitting: "Se creează contul…",
       hasAccount: "Aveți deja cont?",
       signInLink: "Conectare",
@@ -2790,7 +2790,7 @@ const ro: typeof en = {
       successSession: "Cont creat! Să configurăm casa.",
       successEmail: "Cont creat! Verificați emailul pentru confirmare.",
       existingAccount: "Este posibil să existe deja un cont cu acest email. Încercați să vă conectați sau resetați parola dacă ați uitat-o.",
-      google: "Continuă cu Google",
+      google: "Continuați cu Google",
       or: "sau",
       errors: {
         passwordLength: "Parola trebuie să aibă cel puțin 6 caractere",

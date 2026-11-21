@@ -341,7 +341,7 @@ export const en = {
     heroText: "Products, POS, fiscal driver, VAT, and Z-report in one simple flow. No per-seat pricing.",
     compareCallout: {
       title: "Evaluating other tools?",
-      text: "Honest comparisons vs Ebriza, SmartBill, Expressoft, and more — including when rivals charge extra for reporting.",
+      text: "Comparisons with Ebriza and Boogit — including when rivals charge extra for reporting.",
       cta: "Compare POS software",
       href: "/compare",
     },
@@ -503,16 +503,6 @@ export const en = {
           name: "Ebriza Pro + Insights",
           summary: "Ebriza lists Pro at €49/location. Public pricing shows Insights (custom reports) as +€19/month — about €68/month before Saga or delivery fees. franchisetech Core: €49 with Z-style till close included.",
           href: "/compare/ebriza",
-        },
-        {
-          name: "SmartBill vs operations",
-          summary: "SmartBill Silver from ~€5.84/month covers invoicing; Gestiune adds stock from ~€16/month. Strong for documents — franchisetech targets HORECA till + margins in one browser workspace.",
-          href: "/compare/smartbill",
-        },
-        {
-          name: "Expressoft enterprise",
-          summary: "Expressoft serves large HoReCa/retail chains with dedicated, weeks-long rollouts. franchisetech lists €49–€109/month with a self-serve trial for independent 1–3 location venues.",
-          href: "/compare/expressoft",
         },
         {
           name: "Boogit (delivery vs POS)",

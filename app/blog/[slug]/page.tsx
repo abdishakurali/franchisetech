@@ -12,8 +12,11 @@ import { BLOG_SCREENSHOT_CAPTION, blogScreenshotFor } from "@/lib/marketing/blog
 import { JsonLd } from "@/components/marketing/JsonLd";
 import { blogPosts, relatedBlogPosts } from "@/lib/marketing/blog";
 import { SITE_URL } from "@/lib/marketing/seo";
-import { REGULATION_FEAR_CTAS, demoHref } from "@/lib/marketing/blog-ctas";
+import { REGULATION_FEAR_CTAS, blogWhatsAppHref, demoHref } from "@/lib/marketing/blog-ctas";
+import { SUPPORT_PHONE_DISPLAY, SUPPORT_WHATSAPP_URL } from "@/lib/marketing/contact-info";
 import { formatRoDate } from "@/lib/format/ro-datetime";
+
+const WHATSAPP_CTA_TEXT = "Scrieți-ne pe WhatsApp";
 
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
@@ -135,14 +138,15 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   <div className="mb-10 rounded-lg border border-blue-100 bg-blue-50/70 p-4">
                     <p className="text-sm font-semibold text-slate-900">{fearCta.context ?? fearCta.eyebrow}</p>
                     <BlogCtaLink
-                      href={fearCta.context ? demoHref(post.slug, "blog_mid") : fearCta.href}
+                      href={fearCta.context ? blogWhatsAppHref(SUPPORT_WHATSAPP_URL, post.title, "blog_whatsapp_question") : fearCta.href}
                       className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:underline"
                       ctaType="primary"
                       ctaLocation="blog_mid"
-                      ctaText={fearCta.context ? "Solicitați o demonstrație" : fearCta.label}
+                      ctaText={fearCta.context ? WHATSAPP_CTA_TEXT : fearCta.label}
+                      ctaId={fearCta.context ? "blog_whatsapp_question" : undefined}
                       blogSlug={post.slug}
                     >
-                      {fearCta.context ? "Solicitați o demonstrație" : fearCta.label} <ArrowRight className="h-4 w-4" />
+                      {fearCta.context ? WHATSAPP_CTA_TEXT : fearCta.label} <ArrowRight className="h-4 w-4" />
                     </BlogCtaLink>
                   </div>
                 )}
@@ -198,17 +202,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <div className="mt-12 rounded-lg border border-blue-100 bg-blue-50/70 p-5 sm:p-6">
                   <p className="text-sm font-semibold text-slate-900">{fearCta.eyebrow}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-700">{fearCta.body}</p>
+                  {fearCta.context ? (
+                    <p className="mt-3 text-sm font-semibold text-slate-900">{fearCta.context}</p>
+                  ) : null}
                   <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                     {fearCta.context ? (
                       <BlogCtaLink
-                        href={demoHref(post.slug, "blog_end")}
+                        href={blogWhatsAppHref(SUPPORT_WHATSAPP_URL, post.title, "blog_whatsapp_question")}
                         className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
                         ctaType="primary"
                         ctaLocation="blog_end"
-                        ctaText="Solicitați o demonstrație gratuită"
+                        ctaText={WHATSAPP_CTA_TEXT}
+                        ctaId="blog_whatsapp_question"
                         blogSlug={post.slug}
                       >
-                        Solicitați o demonstrație gratuită <ArrowRight className="h-4 w-4" />
+                        {WHATSAPP_CTA_TEXT} <ArrowRight className="h-4 w-4" />
                       </BlogCtaLink>
                     ) : null}
                     <BlogCtaLink
@@ -224,6 +232,35 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                       {fearCta.label}
                     </BlogCtaLink>
                   </div>
+                  {fearCta.context ? (
+                    <p className="mt-3 text-xs leading-5 text-slate-600">
+                      Sau{" "}
+                      <BlogCtaLink
+                        href={blogWhatsAppHref(SUPPORT_WHATSAPP_URL, post.title, "blog_whatsapp_menu")}
+                        className="font-semibold text-blue-700 underline hover:text-blue-800"
+                        ctaType="secondary"
+                        ctaLocation="blog_end"
+                        ctaText="trimiteți-ne meniul pe WhatsApp"
+                        ctaId="blog_whatsapp_menu"
+                        blogSlug={post.slug}
+                      >
+                        trimiteți-ne meniul pe WhatsApp
+                      </BlogCtaLink>{" "}
+                      și vi-l importăm gratuit. Numărul: {SUPPORT_PHONE_DISPLAY}. Preferați o{" "}
+                      <BlogCtaLink
+                        href={demoHref(post.slug, "blog_end")}
+                        className="underline hover:text-slate-800"
+                        ctaType="secondary"
+                        ctaLocation="blog_end"
+                        ctaText="demonstrație"
+                        ctaId="blog_demo"
+                        blogSlug={post.slug}
+                      >
+                        demonstrație
+                      </BlogCtaLink>
+                      ?
+                    </p>
+                  ) : null}
                 </div>
               );
             }
