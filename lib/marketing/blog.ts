@@ -164,7 +164,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         heading: "Pe scurt",
-        body: "- Dintr-un kilogram de cafea ies, în exemplu, 53 de cappuccino vândute, nu 55\n- Costul real al unui cappuccino include și cafeaua pierdută la calibrare\n- Consumul așteptat se calculează din vânzări × rețetă; consumul real, din stoc inițial + NIR − stoc numărat\n- O diferență de 0,5 kg pe săptămână costă între aproximativ 265 și 1.800 de lei pe lună, după cauză\n- Comparația are sens doar dacă recepțiile și rețetele sunt corecte\n\nDacă vreți să vedeți exemplul acesta pe produsele și rețetele dumneavoastră, [solicitați o demonstrație gratuită](/demo?from=cum-gestionezi-stocul-intr-o-cafenea-de-la-1-kg-de-cafea-la-profit&cta=blog_body).",
+        body: "- Dintr-un kilogram de cafea ies, în exemplu, 53 de cappuccino vândute, nu 55\n- Costul real al unui cappuccino include și cafeaua pierdută la calibrare\n- Consumul așteptat se calculează din vânzări × rețetă; consumul real, din stoc inițial + NIR − stoc numărat\n- O diferență de 0,5 kg pe săptămână costă între aproximativ 265 și 1.800 de lei pe lună, după cauză\n- Comparația are sens doar dacă recepțiile și rețetele sunt corecte\n\nDacă vreți să vedeți exemplul acesta pe produsele și rețetele dumneavoastră, scrieți-ne pe WhatsApp la [+40 756 491 710](https://wa.me/40756491710).",
       },
     ],
   },

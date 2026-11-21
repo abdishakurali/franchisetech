@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { comparisonPages } from "./comparisons";
-import { compareSignupHref } from "./compare-locale";
+import { compareHubFaqs, compareSignupHref } from "./compare-locale";
 import { LEGACY_REDIRECTS } from "./legacy-redirects";
 import { getHomepageContent } from "./homepage-content";
 import { localizeSeoPage, ro } from "./i18n";
@@ -75,6 +75,17 @@ describe("public trust copy", () => {
     for (const page of comparisonPages) {
       const text = JSON.stringify(page);
       expect(text, page.slug).not.toMatch(/\/compare\/(smartbill|expressoft|posnet|rkeeper)/);
+    }
+  });
+
+  // 2026-11-21 content audit: the hub FAQ still sent readers to four retired comparison pages.
+  it("compare copy names only the live comparison pages", () => {
+    const retired = /SmartBill, Boogit|Expressoft|POSnet|rKeeper|\/compare\/(smartbill|expressoft|posnet|rkeeper)/;
+    for (const locale of ["ro", "en"] as const) {
+      expect(JSON.stringify(compareHubFaqs(locale)), locale).not.toMatch(retired);
+    }
+    for (const file of ["lib/marketing/i18n/ro.ts", "lib/marketing/i18n/en.ts"]) {
+      expect(readFileSync(file, "utf8"), file).not.toMatch(/\/compare\/(smartbill|expressoft|posnet|rkeeper)/);
     }
   });
 

@@ -318,7 +318,7 @@ export const ro: MarketingMessages = {
     compare: {
       label: "Compară POS",
       title: "Cum se compară franchisetech",
-      subtitle: "Ghiduri oneste față de Ebriza, SmartBill, Saga și altele — inclusiv cost real când raportarea este modul separat.",
+      subtitle: "Comparații cu Ebriza și Boogit — inclusiv costul real când rapoartele se plătesc separat.",
       viewAll: "Toate comparațiile",
       cardCta: "Citește comparația",
     },
@@ -344,7 +344,7 @@ export const ro: MarketingMessages = {
     heroText: "Produse, POS, driver fiscal, TVA și raport Z într-un singur flux simplu. Fără preț per utilizator.",
     compareCallout: {
       title: "Evaluați alte soluții?",
-      text: "Comparații oneste vs Ebriza, SmartBill, Expressoft și altele — inclusiv când raportarea este modul separat.",
+      text: "Comparații cu Ebriza și Boogit — inclusiv când rapoartele se plătesc separat.",
       cta: "Compară software POS",
       href: "/compare",
     },
@@ -506,16 +506,6 @@ export const ro: MarketingMessages = {
           name: "Ebriza Pro + Insights",
           summary: "Ebriza listează Pro la 49€/locație. Prețurile publice arată Insights (rapoarte) ca +19€/lună — circa 68€/lună înainte de Saga sau delivery. franchisetech Core: 49€ cu raport Z inclus.",
           href: "/compare/ebriza",
-        },
-        {
-          name: "SmartBill vs operațiuni",
-          summary: "SmartBill Silver de la ~5,84€/lună acoperă facturare; Gestiune adaugă stoc de la ~16€/lună. Puternic la documente — franchisetech țintește casă HoReCa + marje într-un singur browser.",
-          href: "/compare/smartbill",
-        },
-        {
-          name: "Expressoft enterprise",
-          summary: "Expressoft servește lanțuri mari HoReCa/retail cu implementări dedicate de săptămâni. franchisetech publică 49–109€/lună cu trial self-serve pentru locații independente 1–3.",
-          href: "/compare/expressoft",
         },
         {
           name: "Boogit (livrare vs POS)",

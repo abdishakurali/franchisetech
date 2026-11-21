@@ -194,7 +194,7 @@ export default function SignupPage() {
       <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
         <span>{locale === "ro" ? "✓ 15 zile gratuit, fără card" : "✓ 15 days free, no card"}</span>
         <span>{locale === "ro" ? "✓ Configurare gratuită" : "✓ Free setup"}</span>
-        {locale === "ro" ? <span>✓ Primul bon fiscal în 2 zile, sau nu plătești nimic</span> : null}
+        {locale === "ro" ? <span>✓ Primul bon fiscal în 2 zile, sau nu plătiți nimic</span> : null}
       </div>
       </div>
     </main>
