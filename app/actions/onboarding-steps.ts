@@ -137,3 +137,36 @@ export async function completeOnboardingJourney(): Promise<{ error: string } | v
   if (error) return stepFailed("completeOnboardingJourney", error);
   redirect("/app");
 }
+
+// ── VAT-payer status, changed from inside onboarding ────────────────────
+// Before 2026-11-13 the only way out of "only 0% is available" in the menu
+// step was Settings, mid-onboarding. This lets the owner correct the answer
+// they gave in step 1 without leaving. It only flips the flag the existing
+// VAT gate reads (validateVatRateForOrg); no rate, product or receipt is
+// touched, and it is refused once onboarding is complete (Settings owns it
+// from then on).
+export async function setOnboardingVatRegistered(
+  registered: boolean,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { supabase, membership, orgId } = await getActiveOrg();
+  if (!canManage(membership.role)) return { ok: false, error: "Permission denied." };
+
+  const { data: org, error: readError } = await supabase
+    .from("organisations")
+    .select("onboarding_completed, country_code")
+    .eq("id", orgId)
+    .maybeSingle();
+  if (readError || !org) return { ok: false, error: STEP_SAVE_FAILED };
+  if (org.onboarding_completed) return { ok: false, error: "Onboarding finalizat: modificați din Setări." };
+  if (org.country_code !== "RO") return { ok: false, error: "Doar pentru firme din România." };
+
+  const { error } = await supabase
+    .from("organisations")
+    .update({ anaf_vat_registered: registered })
+    .eq("id", orgId);
+  if (error) {
+    console.error("[onboarding] setOnboardingVatRegistered failed", error.code, error.message);
+    return { ok: false, error: STEP_SAVE_FAILED };
+  }
+  return { ok: true };
+}

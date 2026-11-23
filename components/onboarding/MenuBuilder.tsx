@@ -2,12 +2,13 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { addCategoryInline, addProductFromPos } from "@/app/actions/kitchenops";
-import { advanceFromMenu } from "@/app/actions/onboarding-steps";
+import { advanceFromMenu, setOnboardingVatRegistered } from "@/app/actions/onboarding-steps";
 import { parseLocaleNumber } from "@/lib/format/ro-number";
 import { formatRatePercent, formatVatRateLabel, ratesMatch, type OrgVatRate } from "@/lib/vat-rates";
 
@@ -34,7 +35,10 @@ const STRINGS = {
     vatMissingToast: (name: string) => `Alegeți cota TVA pentru categoria „${name}” înainte de a continua.`,
     noVatRates: "Nu există cote TVA active. Adăugați-le în Setări înainte de a adăuga produse.",
     noVatRatesLink: "Deschideți Setări",
-    unregisteredNote: "Firma este setată ca neplătitoare de TVA, așa că este disponibilă doar cota 0%. Puteți schimba această setare în Setări.",
+    unregisteredNote: "La pasul 1 ați ales că firma nu este plătitoare de TVA, așa că este disponibilă doar cota 0%.",
+    switchToVat: "Firma este plătitoare de TVA — schimbați",
+    switchingToVat: "Se schimbă…",
+    switchedNote: "Produsele deja adăugate rămân la 0%; le puteți modifica din Produse.",
   },
   en: {
     addCategory: "+ Category",
@@ -54,7 +58,10 @@ const STRINGS = {
     vatMissingToast: (name: string) => `Choose the VAT rate for the "${name}" category before continuing.`,
     noVatRates: "No active VAT rates. Add them in Settings before adding products.",
     noVatRatesLink: "Open Settings",
-    unregisteredNote: "This business is set as not VAT-registered, so only the 0% rate is available. You can change this in Settings.",
+    unregisteredNote: "In step 1 you said the business is not VAT-registered, so only the 0% rate is available.",
+    switchToVat: "The business is VAT-registered — change",
+    switchingToVat: "Changing…",
+    switchedNote: "Products already added stay at 0%; you can edit them in Products.",
   },
 };
 
@@ -103,6 +110,22 @@ export function MenuBuilder({
   const [newCategoryName, setNewCategoryName] = useState("");
   const [creatingCategory, startCreatingCategory] = useTransition();
   const [continuing, startContinuing] = useTransition();
+  const [switchingVat, startSwitchingVat] = useTransition();
+  const router = useRouter();
+  const hasSavedProducts = Object.values(productsByCategory).some((list) => list.length > 0);
+
+  function switchToVatRegistered() {
+    startSwitchingVat(async () => {
+      const result = await setOnboardingVatRegistered(true);
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      if (hasSavedProducts) toast.message(t.switchedNote);
+      // The page recomputes the selectable rates from the org's new status.
+      router.refresh();
+    });
+  }
 
   function createCategory() {
     if (!newCategoryName.trim()) return;
@@ -312,6 +335,18 @@ export function MenuBuilder({
               {t.vatHelp}
               {vatRestrictedToZero ? ` ${t.unregisteredNote}` : ""}
             </p>
+            {vatRestrictedToZero ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="min-h-11"
+                disabled={switchingVat}
+                onClick={switchToVatRegistered}
+              >
+                {switchingVat ? t.switchingToVat : t.switchToVat}
+              </Button>
+            ) : null}
             {vatMissing[category.id] && (
               <p role="alert" className="text-xs font-medium text-attention">{t.vatMissingInline}</p>
             )}
